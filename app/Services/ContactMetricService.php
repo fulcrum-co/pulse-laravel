@@ -105,7 +105,8 @@ class ContactMetricService
     }
 
     /**
-     * Get chart data formatted for Chart.js.
+     * Get chart data formatted for the Livewire component.
+     * Returns data keyed by metric with array of {period, value} objects.
      */
     public function getChartData(
         string $contactType,
@@ -124,33 +125,19 @@ class ContactMetricService
             $groupBy
         );
 
-        $labels = $data->keys()->toArray();
-        $datasets = [];
-
-        $colors = [
-            'gpa' => '#f97316',              // orange
-            'wellness_score' => '#8b5cf6',   // purple
-            'emotional_wellbeing' => '#3b82f6', // blue
-            'engagement_score' => '#22c55e', // green
-            'plan_progress' => '#ef4444',    // red
-            'attendance_rate' => '#06b6d4',  // cyan
-        ];
+        $result = [];
 
         foreach ($metricKeys as $metric) {
-            $datasets[] = [
-                'label' => $this->getMetricLabel($metric),
-                'data' => $data->map(fn ($group) => $group->firstWhere('metric_key', $metric)?->numeric_value)->values()->toArray(),
-                'borderColor' => $colors[$metric] ?? '#6b7280',
-                'backgroundColor' => ($colors[$metric] ?? '#6b7280') . '20',
-                'tension' => 0.3,
-                'fill' => false,
-            ];
+            $result[$metric] = $data->map(function ($group, $period) use ($metric) {
+                $metricData = $group->firstWhere('metric_key', $metric);
+                return [
+                    'period' => $period,
+                    'value' => $metricData?->numeric_value,
+                ];
+            })->values()->toArray();
         }
 
-        return [
-            'labels' => $labels,
-            'datasets' => $datasets,
-        ];
+        return $result;
     }
 
     /**

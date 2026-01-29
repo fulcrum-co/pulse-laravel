@@ -68,9 +68,10 @@
         const chartData = @json($chartData);
         const availableMetrics = @json($availableMetrics);
 
+        const selectedMetrics = @json($selectedMetrics);
         const datasets = [];
         availableMetrics.forEach(metric => {
-            if (chartData[metric.key]) {
+            if (chartData[metric.key] && selectedMetrics.includes(metric.key)) {
                 datasets.push({
                     label: metric.label,
                     data: chartData[metric.key].map(d => d.value),
