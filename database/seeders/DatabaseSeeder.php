@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             StudentSeeder::class,
             SurveySeeder::class,
             ResourceSeeder::class,
+            StrategySeeder::class,
         ]);
     }
 }

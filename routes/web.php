@@ -5,6 +5,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\SurveyController;
+use App\Http\Controllers\StrategyController;
+use App\Http\Controllers\FocusAreaController;
+use App\Http\Controllers\ObjectiveController;
+use App\Http\Controllers\ActivityController;
 
 // Public routes
 Route::get('/', function () {
@@ -30,6 +34,35 @@ Route::middleware('auth')->group(function () {
 
     // Surveys
     Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');
+
+    // Strategies
+    Route::get('/strategies', [StrategyController::class, 'index'])->name('strategies.index');
+    Route::get('/strategies/create', [StrategyController::class, 'create'])->name('strategies.create');
+    Route::post('/strategies', [StrategyController::class, 'store'])->name('strategies.store');
+    Route::get('/strategies/{strategy}', [StrategyController::class, 'show'])->name('strategies.show');
+    Route::get('/strategies/{strategy}/edit', [StrategyController::class, 'edit'])->name('strategies.edit');
+    Route::put('/strategies/{strategy}', [StrategyController::class, 'update'])->name('strategies.update');
+    Route::delete('/strategies/{strategy}', [StrategyController::class, 'destroy'])->name('strategies.destroy');
+    Route::post('/strategies/{strategy}/duplicate', [StrategyController::class, 'duplicate'])->name('strategies.duplicate');
+    Route::post('/strategies/{strategy}/push', [StrategyController::class, 'push'])->name('strategies.push');
+
+    // Focus Areas
+    Route::post('/strategies/{strategy}/focus-areas', [FocusAreaController::class, 'store'])->name('focus-areas.store');
+    Route::put('/focus-areas/{focusArea}', [FocusAreaController::class, 'update'])->name('focus-areas.update');
+    Route::delete('/focus-areas/{focusArea}', [FocusAreaController::class, 'destroy'])->name('focus-areas.destroy');
+    Route::put('/focus-areas/reorder', [FocusAreaController::class, 'reorder'])->name('focus-areas.reorder');
+
+    // Objectives
+    Route::post('/focus-areas/{focusArea}/objectives', [ObjectiveController::class, 'store'])->name('objectives.store');
+    Route::put('/objectives/{objective}', [ObjectiveController::class, 'update'])->name('objectives.update');
+    Route::delete('/objectives/{objective}', [ObjectiveController::class, 'destroy'])->name('objectives.destroy');
+    Route::put('/objectives/reorder', [ObjectiveController::class, 'reorder'])->name('objectives.reorder');
+
+    // Activities
+    Route::post('/objectives/{objective}/activities', [ActivityController::class, 'store'])->name('activities.store');
+    Route::put('/activities/{activity}', [ActivityController::class, 'update'])->name('activities.update');
+    Route::delete('/activities/{activity}', [ActivityController::class, 'destroy'])->name('activities.destroy');
+    Route::put('/activities/reorder', [ActivityController::class, 'reorder'])->name('activities.reorder');
 
     // Resources (placeholder)
     Route::get('/resources', function () {

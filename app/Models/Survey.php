@@ -69,6 +69,22 @@ class Survey extends Model
     }
 
     /**
+     * Get all strategy survey assignments for this survey.
+     */
+    public function strategySurveyAssignments(): HasMany
+    {
+        return $this->hasMany(StrategySurveyAssignment::class);
+    }
+
+    /**
+     * Get all strategic items (focus areas, objectives, activities) this survey is assigned to.
+     */
+    public function getAssignedStrategyItems(): \Illuminate\Support\Collection
+    {
+        return $this->strategySurveyAssignments()->with('assignable')->get()->pluck('assignable');
+    }
+
+    /**
      * Get question count.
      */
     public function getQuestionCountAttribute(): int

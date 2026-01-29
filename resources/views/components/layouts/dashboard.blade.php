@@ -44,72 +44,99 @@
 <body class="bg-gray-50">
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <aside class="w-60 bg-white border-r border-gray-200 flex flex-col">
-            <!-- Logo -->
-            <div class="px-6 py-5 border-b border-gray-200">
-                <a href="/dashboard" class="flex items-center">
+        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+            <!-- Logo & User Profile -->
+            <div class="px-4 py-4 border-b border-gray-200">
+                <a href="/dashboard" class="flex items-center mb-4">
                     <span class="text-2xl font-bold text-pulse-orange-500">Pulse</span>
                 </a>
+                <!-- User Profile Dropdown -->
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div class="w-8 h-8 bg-pulse-orange-100 rounded-full flex items-center justify-center">
+                            <span class="text-pulse-orange-600 font-medium text-sm">
+                                {{ substr(auth()->user()->first_name ?? 'U', 0, 1) }}{{ substr(auth()->user()->last_name ?? '', 0, 1) }}
+                            </span>
+                        </div>
+                        <span class="flex-1 text-left text-sm font-medium text-gray-900 truncate">
+                            {{ auth()->user()->first_name ?? 'User' }} {{ auth()->user()->last_name ?? '' }}
+                        </span>
+                        <x-icon name="chevron-down" class="w-4 h-4 text-gray-400" />
+                    </button>
+                    <div x-show="open" @click.away="open = false" class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+                        <a href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Settings</a>
+                        <form method="POST" action="/logout">
+                            @csrf
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Logout</button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
-            <!-- Navigation -->
-            <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-                <x-nav-item href="/dashboard" :active="request()->is('dashboard')">
-                    <x-icon name="home" class="w-5 h-5" />
-                    Dashboard
+            <!-- Quick Access Grid -->
+            <div class="px-3 py-3 border-b border-gray-200">
+                <div class="grid grid-cols-2 gap-2">
+                    <a href="/dashboard" class="flex flex-col items-center p-3 rounded-lg border {{ request()->is('dashboard') ? 'border-pulse-orange-200 bg-pulse-orange-50' : 'border-gray-200 hover:bg-gray-50' }}">
+                        <x-icon name="home" class="w-5 h-5 {{ request()->is('dashboard') ? 'text-pulse-orange-500' : 'text-gray-500' }}" />
+                        <span class="text-xs mt-1 {{ request()->is('dashboard') ? 'text-pulse-orange-600' : 'text-gray-600' }}">Home</span>
+                    </a>
+                    <a href="/contacts" class="flex flex-col items-center p-3 rounded-lg border {{ request()->is('contacts*') ? 'border-pulse-orange-200 bg-pulse-orange-50' : 'border-gray-200 hover:bg-gray-50' }}">
+                        <x-icon name="users" class="w-5 h-5 {{ request()->is('contacts*') ? 'text-pulse-orange-500' : 'text-gray-500' }}" />
+                        <span class="text-xs mt-1 {{ request()->is('contacts*') ? 'text-pulse-orange-600' : 'text-gray-600' }}">Contacts</span>
+                    </a>
+                    <a href="/surveys" class="flex flex-col items-center p-3 rounded-lg border {{ request()->is('surveys*') ? 'border-pulse-orange-200 bg-pulse-orange-50' : 'border-gray-200 hover:bg-gray-50' }}">
+                        <x-icon name="clipboard-list" class="w-5 h-5 {{ request()->is('surveys*') ? 'text-pulse-orange-500' : 'text-gray-500' }}" />
+                        <span class="text-xs mt-1 {{ request()->is('surveys*') ? 'text-pulse-orange-600' : 'text-gray-600' }}">Surveys</span>
+                    </a>
+                    <a href="/reports" class="flex flex-col items-center p-3 rounded-lg border {{ request()->is('reports*') ? 'border-pulse-orange-200 bg-pulse-orange-50' : 'border-gray-200 hover:bg-gray-50' }}">
+                        <x-icon name="chart-pie" class="w-5 h-5 {{ request()->is('reports*') ? 'text-pulse-orange-500' : 'text-gray-500' }}" />
+                        <span class="text-xs mt-1 {{ request()->is('reports*') ? 'text-pulse-orange-600' : 'text-gray-600' }}">Dashboards</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Workspace Navigation -->
+            <nav class="flex-1 py-3 px-3 overflow-y-auto">
+                <p class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Workspace</p>
+
+                <x-nav-item href="/strategies" :active="request()->is('strategies*')">
+                    <x-icon name="flag" class="w-5 h-5" />
+                    Strategy
                 </x-nav-item>
 
-                <x-nav-item href="/contacts" :active="request()->is('contacts*')">
-                    <x-icon name="users" class="w-5 h-5" />
-                    Contacts
-                </x-nav-item>
-
-                <x-nav-item href="/surveys" :active="request()->is('surveys*')">
-                    <x-icon name="clipboard-list" class="w-5 h-5" />
-                    Surveys
-                </x-nav-item>
-
-                <x-nav-item href="/resources" :active="request()->is('resources*')">
-                    <x-icon name="book-open" class="w-5 h-5" />
-                    Resources
-                </x-nav-item>
-
-                <x-nav-item href="/reports" :active="request()->is('reports*')">
+                <x-nav-item href="/reports" :active="request()->is('reports*') && !request()->is('dashboard')">
                     <x-icon name="chart-bar" class="w-5 h-5" />
                     Reports
                 </x-nav-item>
 
-                <div class="pt-4 mt-4 border-t border-gray-200">
-                    <x-nav-item href="/settings" :active="request()->is('settings*')">
-                        <x-icon name="cog" class="w-5 h-5" />
-                        Settings
-                    </x-nav-item>
-                </div>
+                <x-nav-item href="/surveys" :active="false">
+                    <x-icon name="collection" class="w-5 h-5" />
+                    Collect
+                </x-nav-item>
+
+                <x-nav-item href="/resources" :active="request()->is('resources*')">
+                    <x-icon name="share" class="w-5 h-5" />
+                    Distribute
+                </x-nav-item>
+
+                <x-nav-item href="/resources" :active="false">
+                    <x-icon name="book-open" class="w-5 h-5" />
+                    Resource
+                </x-nav-item>
+
+                <x-nav-item href="/alerts" :active="request()->is('alerts*')">
+                    <x-icon name="bell" class="w-5 h-5" />
+                    Alerts
+                    <span class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full">4</span>
+                </x-nav-item>
             </nav>
 
-            <!-- User Menu -->
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-pulse-orange-100 rounded-full flex items-center justify-center">
-                        <span class="text-pulse-orange-600 font-medium text-sm">
-                            {{ substr(auth()->user()->first_name ?? 'U', 0, 1) }}{{ substr(auth()->user()->last_name ?? '', 0, 1) }}
-                        </span>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900 truncate">
-                            {{ auth()->user()->first_name ?? 'User' }} {{ auth()->user()->last_name ?? '' }}
-                        </p>
-                        <p class="text-xs text-gray-500 truncate">
-                            {{ auth()->user()->email ?? '' }}
-                        </p>
-                    </div>
-                    <form method="POST" action="/logout">
-                        @csrf
-                        <button type="submit" class="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Logout">
-                            <x-icon name="logout" class="w-5 h-5 text-gray-500" />
-                        </button>
-                    </form>
-                </div>
+            <!-- Settings -->
+            <div class="p-3 border-t border-gray-200">
+                <x-nav-item href="/settings" :active="request()->is('settings*')">
+                    <x-icon name="cog" class="w-5 h-5" />
+                    Settings
+                </x-nav-item>
             </div>
         </aside>
 
