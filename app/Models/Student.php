@@ -2,62 +2,46 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
-use MongoDB\Laravel\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Student extends Model
 {
     use SoftDeletes;
 
-    protected $connection = 'mongodb';
-    protected $collection = 'students';
-
     protected $fillable = [
         'user_id',
         'org_id',
-        'district_id',
-        'consultant_id',
         'student_number',
         'grade_level',
-        'graduation_year',
-        'current_classrooms',
         'date_of_birth',
         'gender',
         'ethnicity',
-        'primary_language',
         'iep_status',
-        'section_504_status',
         'ell_status',
         'free_reduced_lunch',
-        'emergency_contacts',
-        'parent_ids',
-        'teacher_ids',
-        'mentor_ids',
-        'counselor_id',
+        'enrollment_status',
+        'enrollment_date',
+        'risk_level',
+        'risk_score',
         'tags',
         'custom_fields',
-        'enrollment_date',
-        'withdrawal_date',
-        'status',
+        'counselor_user_id',
+        'homeroom_classroom_id',
     ];
 
     protected $casts = [
-        'current_classrooms' => 'array',
         'date_of_birth' => 'date',
-        'emergency_contacts' => 'array',
-        'parent_ids' => 'array',
-        'teacher_ids' => 'array',
-        'mentor_ids' => 'array',
-        'tags' => 'array',
-        'custom_fields' => 'array',
         'enrollment_date' => 'date',
-        'withdrawal_date' => 'date',
         'iep_status' => 'boolean',
-        'section_504_status' => 'boolean',
         'ell_status' => 'boolean',
         'free_reduced_lunch' => 'boolean',
+        'tags' => 'array',
+        'custom_fields' => 'array',
+        'risk_score' => 'decimal:2',
     ];
 
     /**
@@ -69,27 +53,43 @@ class Student extends Model
     }
 
     /**
-     * Get the student's school (organization).
+     * Get the student's organization (school).
      */
-    public function school(): BelongsTo
+    public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class, 'org_id');
     }
 
     /**
-     * Get the student's district.
+     * Get the student's counselor.
      */
-    public function district(): BelongsTo
+    public function counselor(): BelongsTo
     {
-        return $this->belongsTo(Organization::class, 'district_id');
+        return $this->belongsTo(User::class, 'counselor_user_id');
     }
 
     /**
-     * Get survey attempts about this student.
+     * Get the student's homeroom classroom.
+     */
+    public function homeroomClassroom(): BelongsTo
+    {
+        return $this->belongsTo(Classroom::class, 'homeroom_classroom_id');
+    }
+
+    /**
+     * Get the classrooms the student is enrolled in.
+     */
+    public function classrooms(): BelongsToMany
+    {
+        return $this->belongsToMany(Classroom::class)->withTimestamps();
+    }
+
+    /**
+     * Get survey attempts for this student.
      */
     public function surveyAttempts(): HasMany
     {
-        return $this->hasMany(SurveyAttempt::class, 'surveyee_id');
+        return $this->hasMany(SurveyAttempt::class);
     }
 
     /**
@@ -97,7 +97,15 @@ class Student extends Model
      */
     public function resourceAssignments(): HasMany
     {
-        return $this->hasMany(ResourceAssignment::class, 'assigned_to_user_id', 'user_id');
+        return $this->hasMany(ResourceAssignment::class);
+    }
+
+    /**
+     * Get conversations for this student.
+     */
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(Conversation::class);
     }
 
     /**
@@ -109,7 +117,7 @@ class Student extends Model
     }
 
     /**
-     * Get the latest survey attempt.
+     * Get the latest completed survey attempt.
      */
     public function getLatestSurveyAttemptAttribute()
     {
@@ -120,17 +128,11 @@ class Student extends Model
     }
 
     /**
-     * Get the current risk level based on latest survey.
+     * Scope to filter by risk level.
      */
-    public function getCurrentRiskLevelAttribute(): string
+    public function scopeRiskLevel($query, string $level)
     {
-        $latest = $this->latest_survey_attempt;
-
-        if (!$latest) {
-            return 'unknown';
-        }
-
-        return $latest->survey_attempt_result['overall_risk_level'] ?? 'unknown';
+        return $query->where('risk_level', $level);
     }
 
     /**
@@ -138,13 +140,13 @@ class Student extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->where('enrollment_status', 'active');
     }
 
     /**
      * Scope to filter by grade level.
      */
-    public function scopeGradeLevel($query, int $grade)
+    public function scopeGradeLevel($query, string $grade)
     {
         return $query->where('grade_level', $grade);
     }
@@ -158,18 +160,10 @@ class Student extends Model
     }
 
     /**
-     * Scope to filter by teacher.
+     * Scope to filter by organization.
      */
-    public function scopeForTeacher($query, string $teacherId)
+    public function scopeForOrganization($query, int $orgId)
     {
-        return $query->where('teacher_ids', $teacherId);
-    }
-
-    /**
-     * Scope to filter by parent.
-     */
-    public function scopeForParent($query, string $parentId)
-    {
-        return $query->where('parent_ids', $parentId);
+        return $query->where('org_id', $orgId);
     }
 }

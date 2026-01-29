@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
-use MongoDB\Laravel\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -11,45 +11,30 @@ class Resource extends Model
 {
     use SoftDeletes;
 
-    protected $connection = 'mongodb';
-    protected $collection = 'resources';
-
     protected $fillable = [
         'org_id',
-        'created_by_org_type',
-        'cascaded_from_org_id',
-        'accessible_to_org_ids',
         'title',
         'description',
         'resource_type',
-        'file_url',
-        'external_url',
-        'embedded_content',
+        'category',
         'tags',
-        'course_lessons',
-        'approval_status',
-        'approved_by',
-        'approval_date',
-        'view_count',
-        'assignment_count',
-        'completion_count',
-        'avg_rating',
+        'url',
+        'file_path',
+        'thumbnail_url',
+        'estimated_duration_minutes',
+        'target_grades',
+        'target_risk_levels',
+        'is_public',
         'active',
-        'featured',
         'created_by',
     ];
 
     protected $casts = [
-        'accessible_to_org_ids' => 'array',
         'tags' => 'array',
-        'course_lessons' => 'array',
-        'approval_date' => 'datetime',
-        'view_count' => 'integer',
-        'assignment_count' => 'integer',
-        'completion_count' => 'integer',
-        'avg_rating' => 'float',
+        'target_grades' => 'array',
+        'target_risk_levels' => 'array',
+        'is_public' => 'boolean',
         'active' => 'boolean',
-        'featured' => 'boolean',
     ];
 
     /**
@@ -69,35 +54,11 @@ class Resource extends Model
     }
 
     /**
-     * Get the user who approved this resource.
-     */
-    public function approver(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-
-    /**
      * Get all assignments for this resource.
      */
     public function assignments(): HasMany
     {
-        return $this->hasMany(ResourceAssignment::class, 'resource_id');
-    }
-
-    /**
-     * Increment view count.
-     */
-    public function recordView(): void
-    {
-        $this->increment('view_count');
-    }
-
-    /**
-     * Scope to filter approved resources.
-     */
-    public function scopeApproved($query)
-    {
-        return $query->where('approval_status', 'approved');
+        return $this->hasMany(ResourceAssignment::class);
     }
 
     /**
@@ -109,14 +70,6 @@ class Resource extends Model
     }
 
     /**
-     * Scope to filter featured resources.
-     */
-    public function scopeFeatured($query)
-    {
-        return $query->where('featured', true);
-    }
-
-    /**
      * Scope to filter by resource type.
      */
     public function scopeOfType($query, string $type)
@@ -125,37 +78,18 @@ class Resource extends Model
     }
 
     /**
-     * Scope to filter by subject domain.
+     * Scope to filter by category.
      */
-    public function scopeForSubject($query, string $subject)
+    public function scopeCategory($query, string $category)
     {
-        return $query->where('tags.subject_domain', $subject);
+        return $query->where('category', $category);
     }
 
     /**
-     * Scope to filter by grade level.
+     * Scope to filter by organization.
      */
-    public function scopeForGradeLevel($query, string $grade)
+    public function scopeForOrganization($query, int $orgId)
     {
-        return $query->where('tags.grade_level', $grade);
-    }
-
-    /**
-     * Scope to filter by performance trigger.
-     */
-    public function scopeForTrigger($query, string $trigger)
-    {
-        return $query->where('tags.performance_trigger', $trigger);
-    }
-
-    /**
-     * Scope to filter resources accessible to an org.
-     */
-    public function scopeAccessibleTo($query, string $orgId)
-    {
-        return $query->where(function ($q) use ($orgId) {
-            $q->where('org_id', $orgId)
-              ->orWhere('accessible_to_org_ids', $orgId);
-        });
+        return $query->where('org_id', $orgId);
     }
 }

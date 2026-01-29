@@ -2,47 +2,39 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
-use MongoDB\Laravel\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Classroom extends Model
 {
     use SoftDeletes;
 
-    protected $connection = 'mongodb';
-    protected $collection = 'classrooms';
-
     protected $fillable = [
         'org_id',
         'department_id',
         'name',
-        'subject',
+        'code',
+        'description',
+        'teacher_user_id',
         'grade_level',
+        'subject',
+        'period',
         'room_number',
-        'primary_teacher_id',
-        'co_teacher_ids',
-        'student_ids',
-        'max_capacity',
-        'meeting_schedule',
-        'strategy_ids',
+        'school_year',
+        'term',
         'active',
     ];
 
     protected $casts = [
-        'co_teacher_ids' => 'array',
-        'student_ids' => 'array',
-        'meeting_schedule' => 'array',
-        'strategy_ids' => 'array',
-        'grade_level' => 'integer',
-        'max_capacity' => 'integer',
         'active' => 'boolean',
     ];
 
     /**
-     * Get the school (organization).
+     * Get the organization (school).
      */
-    public function school(): BelongsTo
+    public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class, 'org_id');
     }
@@ -52,15 +44,23 @@ class Classroom extends Model
      */
     public function department(): BelongsTo
     {
-        return $this->belongsTo(Department::class, 'department_id');
+        return $this->belongsTo(Department::class);
     }
 
     /**
-     * Get the primary teacher.
+     * Get the teacher.
      */
-    public function primaryTeacher(): BelongsTo
+    public function teacher(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'primary_teacher_id');
+        return $this->belongsTo(User::class, 'teacher_user_id');
+    }
+
+    /**
+     * Get the students in this classroom.
+     */
+    public function students(): BelongsToMany
+    {
+        return $this->belongsToMany(Student::class)->withTimestamps();
     }
 
     /**
@@ -68,43 +68,7 @@ class Classroom extends Model
      */
     public function getStudentCountAttribute(): int
     {
-        return count($this->student_ids ?? []);
-    }
-
-    /**
-     * Check if classroom is at capacity.
-     */
-    public function isAtCapacity(): bool
-    {
-        return $this->student_count >= $this->max_capacity;
-    }
-
-    /**
-     * Add a student to the classroom.
-     */
-    public function addStudent(string $studentId): bool
-    {
-        if ($this->isAtCapacity()) {
-            return false;
-        }
-
-        $studentIds = $this->student_ids ?? [];
-        if (!in_array($studentId, $studentIds)) {
-            $studentIds[] = $studentId;
-            $this->update(['student_ids' => $studentIds]);
-        }
-
-        return true;
-    }
-
-    /**
-     * Remove a student from the classroom.
-     */
-    public function removeStudent(string $studentId): void
-    {
-        $studentIds = $this->student_ids ?? [];
-        $studentIds = array_filter($studentIds, fn($id) => $id !== $studentId);
-        $this->update(['student_ids' => array_values($studentIds)]);
+        return $this->students()->count();
     }
 
     /**
@@ -124,13 +88,10 @@ class Classroom extends Model
     }
 
     /**
-     * Scope to filter by teacher.
+     * Scope to filter by organization.
      */
-    public function scopeForTeacher($query, string $teacherId)
+    public function scopeForOrganization($query, int $orgId)
     {
-        return $query->where(function ($q) use ($teacherId) {
-            $q->where('primary_teacher_id', $teacherId)
-              ->orWhere('co_teacher_ids', $teacherId);
-        });
+        return $query->where('org_id', $orgId);
     }
 }

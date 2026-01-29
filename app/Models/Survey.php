@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
-use MongoDB\Laravel\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -11,46 +11,29 @@ class Survey extends Model
 {
     use SoftDeletes;
 
-    protected $connection = 'mongodb';
-    protected $collection = 'surveys';
-
     protected $fillable = [
         'org_id',
-        'created_by_org_type',
-        'cascaded_from_org_id',
-        'accessible_to_org_ids',
-        'name',
+        'title',
         'description',
         'survey_type',
         'questions',
-        'segments',
-        'use_conversational_mode',
-        'llm_system_prompt',
-        'llm_follow_up_enabled',
-        'llm_extraction_schema',
-        'delivery_methods',
-        'default_delivery_method',
-        'frequency',
-        'trigger_day_of_week',
-        'trigger_time',
-        'assign_to_roles',
-        'assign_to_specific_users',
         'status',
-        'active',
+        'is_anonymous',
+        'estimated_duration_minutes',
+        'start_date',
+        'end_date',
+        'target_grades',
+        'target_classrooms',
         'created_by',
     ];
 
     protected $casts = [
-        'accessible_to_org_ids' => 'array',
         'questions' => 'array',
-        'segments' => 'array',
-        'llm_extraction_schema' => 'array',
-        'delivery_methods' => 'array',
-        'assign_to_roles' => 'array',
-        'assign_to_specific_users' => 'array',
-        'use_conversational_mode' => 'boolean',
-        'llm_follow_up_enabled' => 'boolean',
-        'active' => 'boolean',
+        'target_grades' => 'array',
+        'target_classrooms' => 'array',
+        'is_anonymous' => 'boolean',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
     ];
 
     /**
@@ -74,7 +57,7 @@ class Survey extends Model
      */
     public function attempts(): HasMany
     {
-        return $this->hasMany(SurveyAttempt::class, 'survey_id');
+        return $this->hasMany(SurveyAttempt::class);
     }
 
     /**
@@ -83,18 +66,6 @@ class Survey extends Model
     public function completedAttempts(): HasMany
     {
         return $this->attempts()->where('status', 'completed');
-    }
-
-    /**
-     * Check if this survey is accessible to an organization.
-     */
-    public function isAccessibleTo(string $orgId): bool
-    {
-        if ($this->org_id === $orgId) {
-            return true;
-        }
-
-        return in_array($orgId, $this->accessible_to_org_ids ?? []);
     }
 
     /**
@@ -110,7 +81,7 @@ class Survey extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('status', 'active')->where('active', true);
+        return $query->where('status', 'active');
     }
 
     /**
@@ -122,21 +93,10 @@ class Survey extends Model
     }
 
     /**
-     * Scope to filter conversational surveys.
+     * Scope to filter by organization.
      */
-    public function scopeConversational($query)
+    public function scopeForOrganization($query, int $orgId)
     {
-        return $query->where('use_conversational_mode', true);
-    }
-
-    /**
-     * Scope to filter surveys accessible to an org.
-     */
-    public function scopeAccessibleTo($query, string $orgId)
-    {
-        return $query->where(function ($q) use ($orgId) {
-            $q->where('org_id', $orgId)
-              ->orWhere('accessible_to_org_ids', $orgId);
-        });
+        return $query->where('org_id', $orgId);
     }
 }
