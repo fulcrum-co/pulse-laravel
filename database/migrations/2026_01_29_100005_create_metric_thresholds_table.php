@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('metric_thresholds')) {
+            return;
+        }
+
         Schema::create('metric_thresholds', function (Blueprint $table) {
             $table->id();
             $table->foreignId('org_id')->constrained('organizations')->cascadeOnDelete();

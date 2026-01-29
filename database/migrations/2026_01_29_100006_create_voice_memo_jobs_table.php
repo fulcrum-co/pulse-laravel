@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('voice_memo_jobs')) {
+            return;
+        }
+
         Schema::create('voice_memo_jobs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('contact_note_id')->constrained('contact_notes')->cascadeOnDelete();
