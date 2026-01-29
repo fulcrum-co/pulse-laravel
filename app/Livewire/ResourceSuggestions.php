@@ -121,7 +121,7 @@ class ResourceSuggestions extends Component
 
         return Resource::forOrganization($user->org_id)
             ->active()
-            ->orderBy('name')
+            ->orderBy('title')
             ->get();
     }
 
