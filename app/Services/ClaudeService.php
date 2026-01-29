@@ -9,7 +9,7 @@ use App\Models\Survey;
 
 class ClaudeService
 {
-    protected string $apiKey;
+    protected ?string $apiKey;
     protected string $model;
     protected int $maxTokens;
     protected float $temperature;
@@ -18,10 +18,10 @@ class ClaudeService
     public function __construct()
     {
         $this->apiKey = config('services.anthropic.api_key');
-        $this->model = config('services.anthropic.model');
-        $this->maxTokens = config('services.anthropic.max_tokens');
-        $this->temperature = config('services.anthropic.temperature');
-        $this->baseUrl = config('services.anthropic.base_url');
+        $this->model = config('services.anthropic.model', 'claude-sonnet-4-20250514');
+        $this->maxTokens = config('services.anthropic.max_tokens', 4096);
+        $this->temperature = config('services.anthropic.temperature', 0.7);
+        $this->baseUrl = config('services.anthropic.base_url', 'https://api.anthropic.com/v1');
     }
 
     /**
