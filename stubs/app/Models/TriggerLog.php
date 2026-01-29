@@ -1,0 +1,72 @@
+<?php
+
+namespace App\Models;
+
+use MongoDB\Laravel\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class TriggerLog extends Model
+{
+    protected $connection = 'mongodb';
+    protected $collection = 'trigger_logs';
+
+    protected $fillable = [
+        'trigger_id',
+        'student_id',
+        'org_id',
+        'triggering_event',
+        'actions_executed',
+    ];
+
+    protected $casts = [
+        'triggering_event' => 'array',
+        'actions_executed' => 'array',
+    ];
+
+    /**
+     * Get the trigger.
+     */
+    public function trigger(): BelongsTo
+    {
+        return $this->belongsTo(Trigger::class, 'trigger_id');
+    }
+
+    /**
+     * Get the student.
+     */
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
+    /**
+     * Get the organization.
+     */
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'org_id');
+    }
+
+    /**
+     * Check if all actions succeeded.
+     */
+    public function allActionsSucceeded(): bool
+    {
+        foreach ($this->actions_executed ?? [] as $action) {
+            if ($action['status'] !== 'success') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Get failed actions.
+     */
+    public function getFailedActionsAttribute(): array
+    {
+        return array_filter($this->actions_executed ?? [], function ($action) {
+            return $action['status'] === 'failed';
+        });
+    }
+}
