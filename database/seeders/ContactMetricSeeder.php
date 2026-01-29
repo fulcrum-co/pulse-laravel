@@ -290,6 +290,16 @@ class ContactMetricSeeder extends Seeder
         $selectedResources = $resources->random(min($numSuggestions, $resources->count()));
 
         foreach ($selectedResources as $resource) {
+            // Skip if suggestion already exists for this contact/resource combo
+            $exists = ContactResourceSuggestion::where('contact_type', Student::class)
+                ->where('contact_id', $student->id)
+                ->where('resource_id', $resource->id)
+                ->exists();
+
+            if ($exists) {
+                continue;
+            }
+
             $source = ['manual', 'rule_based', 'ai_recommendation'][rand(0, 2)];
             $status = ['pending', 'pending', 'pending', 'accepted', 'declined'][rand(0, 4)];
 
