@@ -13,12 +13,23 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->foreignId('org_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->string('first_name');
+            $table->string('last_name')->nullable();
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('phone')->nullable();
             $table->string('password');
+            $table->string('primary_role')->default('admin'); // consultant, admin, teacher, parent, student, volunteer
+            $table->string('preferred_contact_method')->nullable();
+            $table->string('avatar_url')->nullable();
+            $table->text('bio')->nullable();
+            $table->timestamp('last_login')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->boolean('active')->default(true);
+            $table->boolean('suspended')->default(false);
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -42,8 +53,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };

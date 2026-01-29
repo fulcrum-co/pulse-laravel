@@ -67,7 +67,7 @@ class AuthController extends Controller
             'last_name' => $lastName,
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'org_id' => $org->_id,
+            'org_id' => $org->id,
             'primary_role' => 'admin',
             'active' => true,
             'suspended' => false,
