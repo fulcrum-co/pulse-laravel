@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             SurveySeeder::class,
             ResourceSeeder::class,
             StrategySeeder::class,
+            ContactMetricSeeder::class,
         ]);
     }
 }

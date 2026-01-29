@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Student extends Model
 {
@@ -106,6 +107,58 @@ class Student extends Model
     public function conversations(): HasMany
     {
         return $this->hasMany(Conversation::class);
+    }
+
+    /**
+     * Get metrics for this student (contact view).
+     */
+    public function metrics(): MorphMany
+    {
+        return $this->morphMany(ContactMetric::class, 'contact');
+    }
+
+    /**
+     * Get notes for this student (contact view).
+     */
+    public function notes(): MorphMany
+    {
+        return $this->morphMany(ContactNote::class, 'contact');
+    }
+
+    /**
+     * Get resource suggestions for this student.
+     */
+    public function resourceSuggestions(): MorphMany
+    {
+        return $this->morphMany(ContactResourceSuggestion::class, 'contact');
+    }
+
+    /**
+     * Get strategic plans targeting this student.
+     */
+    public function strategicPlans(): HasMany
+    {
+        return $this->hasMany(StrategicPlan::class, 'target_id')
+            ->where('target_type', self::class);
+    }
+
+    /**
+     * Get heat map data for student plan progress.
+     */
+    public function getHeatMapData(string $schoolYear): array
+    {
+        $metrics = $this->metrics()
+            ->forSchoolYear($schoolYear)
+            ->whereIn('metric_category', [
+                ContactMetric::CATEGORY_ACADEMICS,
+                ContactMetric::CATEGORY_ATTENDANCE,
+                ContactMetric::CATEGORY_BEHAVIOR,
+                ContactMetric::CATEGORY_LIFE_SKILLS,
+            ])
+            ->get()
+            ->groupBy(['metric_category', 'quarter']);
+
+        return $metrics->toArray();
     }
 
     /**

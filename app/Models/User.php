@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class User extends Authenticatable
 {
@@ -72,6 +73,46 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->hasRole('admin') || $this->hasRole('consultant');
+    }
+
+    /**
+     * Get metrics for this user (contact view for teachers/staff).
+     */
+    public function metrics(): MorphMany
+    {
+        return $this->morphMany(ContactMetric::class, 'contact');
+    }
+
+    /**
+     * Get notes for this user (contact view).
+     */
+    public function notes(): MorphMany
+    {
+        return $this->morphMany(ContactNote::class, 'contact');
+    }
+
+    /**
+     * Get notes authored by this user.
+     */
+    public function authoredNotes(): HasMany
+    {
+        return $this->hasMany(ContactNote::class, 'created_by');
+    }
+
+    /**
+     * Get classroom metrics for teachers.
+     */
+    public function classroomMetrics(): MorphMany
+    {
+        return $this->metrics()->where('metric_category', ContactMetric::CATEGORY_CLASSROOM);
+    }
+
+    /**
+     * Get professional development metrics for teachers.
+     */
+    public function pdMetrics(): MorphMany
+    {
+        return $this->metrics()->where('metric_category', ContactMetric::CATEGORY_PD);
     }
 
     /**

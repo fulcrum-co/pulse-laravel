@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ContactNoteController;
+use App\Http\Controllers\ContactMetricController;
+use App\Http\Controllers\ResourceSuggestionController;
 use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\StrategyController;
 use App\Http\Controllers\FocusAreaController;
@@ -28,9 +31,30 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Contacts (Students)
+    // Contacts (Students, Teachers, Parents)
     Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
-    Route::get('/contacts/{student}', [ContactController::class, 'show'])->name('contacts.show');
+    Route::get('/contacts/students/{student}', [ContactController::class, 'show'])->name('contacts.show');
+    Route::get('/contacts/teachers/{teacher}', [ContactController::class, 'showTeacher'])->name('contacts.teacher');
+    Route::get('/contacts/parents/{parent}', [ContactController::class, 'showParent'])->name('contacts.parent');
+
+    // Contact Notes API
+    Route::get('/api/contacts/{contactType}/{contactId}/notes', [ContactNoteController::class, 'index'])->name('api.notes.index');
+    Route::post('/api/contacts/notes', [ContactNoteController::class, 'store'])->name('api.notes.store');
+    Route::put('/api/contacts/notes/{note}', [ContactNoteController::class, 'update'])->name('api.notes.update');
+    Route::delete('/api/contacts/notes/{note}', [ContactNoteController::class, 'destroy'])->name('api.notes.destroy');
+    Route::get('/api/contacts/notes/{note}/audio', [ContactNoteController::class, 'audio'])->name('api.notes.audio');
+
+    // Contact Metrics API
+    Route::post('/api/metrics/time-series', [ContactMetricController::class, 'timeSeries'])->name('api.metrics.timeSeries');
+    Route::post('/api/metrics', [ContactMetricController::class, 'store'])->name('api.metrics.store');
+    Route::get('/api/metrics/heat-map/{student}', [ContactMetricController::class, 'heatMap'])->name('api.metrics.heatMap');
+    Route::get('/api/metrics/available', [ContactMetricController::class, 'available'])->name('api.metrics.available');
+
+    // Resource Suggestions API
+    Route::get('/api/suggestions/{contactType}/{contactId}', [ResourceSuggestionController::class, 'index'])->name('api.suggestions.index');
+    Route::post('/api/suggestions', [ResourceSuggestionController::class, 'store'])->name('api.suggestions.store');
+    Route::put('/api/suggestions/{suggestion}/review', [ResourceSuggestionController::class, 'review'])->name('api.suggestions.review');
+    Route::post('/api/suggestions/generate/{student}', [ResourceSuggestionController::class, 'generate'])->name('api.suggestions.generate');
 
     // Surveys
     Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');

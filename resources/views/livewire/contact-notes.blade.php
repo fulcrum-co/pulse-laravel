@@ -1,0 +1,200 @@
+<div>
+    <!-- New Note Form -->
+    <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+        <form wire:submit.prevent="saveNote">
+            <!-- Note Type Selector -->
+            <div class="flex flex-wrap gap-2 mb-3">
+                @foreach(['general' => 'General', 'follow_up' => 'Follow-up', 'concern' => 'Concern', 'milestone' => 'Milestone'] as $type => $label)
+                <button
+                    type="button"
+                    wire:click="$set('newNoteType', '{{ $type }}')"
+                    class="px-3 py-1 text-sm rounded-full transition-colors {{ $newNoteType === $type ? 'bg-blue-600 text-white' : 'bg-white border border-gray-300 text-gray-600 hover:border-gray-400' }}"
+                >
+                    {{ $label }}
+                </button>
+                @endforeach
+            </div>
+
+            <!-- Content Input -->
+            <textarea
+                wire:model="newNoteContent"
+                rows="3"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                placeholder="Add a note..."
+            ></textarea>
+
+            <!-- Voice Memo Upload -->
+            <div class="mt-3">
+                <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer hover:text-gray-900">
+                    <input type="file" wire:model="voiceMemo" accept="audio/*" class="hidden">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                    </svg>
+                    <span>{{ $voiceMemo ? $voiceMemo->getClientOriginalName() : 'Upload voice memo' }}</span>
+                </label>
+                @if($voiceMemo)
+                <div wire:loading wire:target="voiceMemo" class="mt-2 text-sm text-blue-600">
+                    Uploading...
+                </div>
+                @endif
+            </div>
+
+            <!-- Options Row -->
+            <div class="flex items-center justify-between mt-4">
+                <div class="flex items-center gap-4">
+                    <!-- Visibility -->
+                    <select wire:model="visibility" class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500">
+                        <option value="organization">Visible to Organization</option>
+                        <option value="team">Visible to Team</option>
+                        <option value="private">Private</option>
+                    </select>
+
+                    <!-- Private Toggle -->
+                    <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                        <input type="checkbox" wire:model="isPrivate" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        Private note
+                    </label>
+                </div>
+
+                <x-button type="submit" variant="primary" size="small">
+                    Save Note
+                </x-button>
+            </div>
+
+            @error('newNoteContent') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+        </form>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+        @foreach(['all' => 'All', 'general' => 'General', 'follow_up' => 'Follow-up', 'concern' => 'Concerns', 'milestone' => 'Milestones', 'voice_memo' => 'Voice Memos'] as $type => $label)
+        <button
+            wire:click="setFilterType('{{ $type }}')"
+            class="px-3 py-1 text-sm font-medium rounded-lg whitespace-nowrap transition-colors {{ $filterType === $type ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
+        >
+            {{ $label }}
+        </button>
+        @endforeach
+    </div>
+
+    <!-- Notes List -->
+    <div class="space-y-4">
+        @forelse($notes as $note)
+        <div class="p-4 border border-gray-200 rounded-lg {{ $note->is_private ? 'bg-yellow-50 border-yellow-200' : '' }}">
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-2">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">
+                        {{ substr($note->author->name ?? 'U', 0, 1) }}
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">{{ $note->author->name ?? 'Unknown' }}</div>
+                        <div class="text-xs text-gray-500">{{ $note->created_at->diffForHumans() }}</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    @php
+                        $typeColor = match($note->note_type) {
+                            'concern' => 'red',
+                            'follow_up' => 'yellow',
+                            'milestone' => 'green',
+                            'voice_memo' => 'purple',
+                            default => 'gray',
+                        };
+                    @endphp
+                    <x-badge :color="$typeColor">{{ ucfirst(str_replace('_', ' ', $note->note_type)) }}</x-badge>
+
+                    @if($note->is_private)
+                    <x-badge color="yellow">Private</x-badge>
+                    @endif
+
+                    <!-- Actions -->
+                    @can('update', $note)
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="p-1 text-gray-400 hover:text-gray-600 rounded">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                            </svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false" class="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                            <button wire:click="startEdit({{ $note->id }})" class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">Edit</button>
+                            <button wire:click="deleteNote({{ $note->id }})" wire:confirm="Are you sure you want to delete this note?" class="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50">Delete</button>
+                        </div>
+                    </div>
+                    @endcan
+                </div>
+            </div>
+
+            <!-- Content -->
+            @if($editingNoteId === $note->id)
+            <div class="mt-3">
+                <textarea wire:model="editContent" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                <div class="flex gap-2 mt-2">
+                    <x-button wire:click="updateNote" variant="primary" size="small">Save</x-button>
+                    <x-button wire:click="cancelEdit" variant="secondary" size="small">Cancel</x-button>
+                </div>
+            </div>
+            @else
+            <div class="text-sm text-gray-700 whitespace-pre-wrap">{{ $note->content }}</div>
+            @endif
+
+            <!-- Voice Memo Player -->
+            @if($note->is_voice_memo && $note->audio_file_path)
+            <div class="mt-3 p-3 bg-gray-100 rounded-lg">
+                <div class="flex items-center gap-3">
+                    <button class="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                    <div class="flex-1">
+                        <div class="text-xs text-gray-500">Voice Memo</div>
+                        <audio controls class="w-full h-8">
+                            <source src="{{ route('api.notes.audio', $note) }}" type="audio/mpeg">
+                        </audio>
+                    </div>
+                </div>
+
+                @if($note->transcription_status === 'completed' && $note->transcription)
+                <div class="mt-2 pt-2 border-t border-gray-200">
+                    <div class="text-xs text-gray-500 mb-1">Transcription</div>
+                    <div class="text-sm text-gray-700">{{ $note->transcription }}</div>
+                </div>
+                @elseif($note->transcription_status === 'processing')
+                <div class="mt-2 text-xs text-blue-600">Transcription in progress...</div>
+                @elseif($note->transcription_status === 'failed')
+                <div class="mt-2 text-xs text-red-600">Transcription failed</div>
+                @endif
+            </div>
+            @endif
+
+            <!-- Structured Data -->
+            @if($note->structured_data)
+            <div class="mt-3 p-3 bg-blue-50 rounded-lg">
+                <div class="text-xs text-blue-600 font-medium mb-1">Extracted Information</div>
+                <div class="text-sm text-gray-700">
+                    @foreach($note->structured_data as $key => $value)
+                    <div><span class="font-medium">{{ ucfirst(str_replace('_', ' ', $key)) }}:</span> {{ is_array($value) ? implode(', ', $value) : $value }}</div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+        </div>
+        @empty
+        <div class="text-center py-8 text-gray-500">
+            <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p>No notes yet. Add a note above to get started.</p>
+        </div>
+        @endforelse
+    </div>
+
+    <!-- Pagination -->
+    @if($notes->hasPages())
+    <div class="mt-4">
+        {{ $notes->links() }}
+    </div>
+    @endif
+</div>
