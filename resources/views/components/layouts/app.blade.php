@@ -5,7 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Pulse' }} - Student Wellness Platform</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pulse: {
+                            orange: {
+                                50: '#FFF7ED',
+                                100: '#FFEDD5',
+                                200: '#FED7AA',
+                                300: '#FDBA74',
+                                400: '#FB923C',
+                                500: '#F97316',
+                                600: '#EA580C',
+                                700: '#C2410C',
+                            },
+                            purple: {
+                                50: '#FAF5FF',
+                                100: '#F3E8FF',
+                                500: '#8B5CF6',
+                                600: '#7C3AED',
+                                700: '#6D28D9',
+                            }
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     @livewireStyles
 </head>
 <body class="bg-gray-50 min-h-screen font-sans">
