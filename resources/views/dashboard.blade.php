@@ -10,8 +10,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
                 <div class="flex items-center">
-                    <div class="w-12 h-12 bg-pulse-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-pulse-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 bg-pulse-orange-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-pulse-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                         </svg>
                     </div>
@@ -93,8 +93,8 @@
                     </div>
                     <div class="p-6 space-y-4">
                         <a href="#" class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                            <div class="w-10 h-10 bg-pulse-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-pulse-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 bg-pulse-orange-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-pulse-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                 </svg>
                             </div>
@@ -117,8 +117,8 @@
                         </a>
 
                         <a href="#" class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 bg-pulse-purple-600/10 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-pulse-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </svg>
                             </div>
