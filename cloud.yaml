@@ -7,6 +7,7 @@ environments:
       - npm ci && npm run build
 
     php: 8.3
+    node: 20
 
     scheduler: true
     queue:
@@ -32,6 +33,7 @@ environments:
       - npm ci && npm run build
 
     php: 8.3
+    node: 20
 
     scheduler: true
     queue:

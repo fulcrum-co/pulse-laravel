@@ -9,8 +9,8 @@ use Illuminate\Support\Str;
 
 class AlertWizard extends Component
 {
-    // Current step (1-5)
-    public int $currentStep = 1;
+    // Current step (0=mode selection, 1-5=wizard steps)
+    public int $currentStep = 0;
 
     // Workflow being edited (null for new)
     public ?string $workflowId = null;
@@ -67,9 +67,41 @@ class AlertWizard extends Component
         $this->workflowId = $workflowId;
 
         if ($workflowId) {
+            // Editing existing workflow - skip mode selection
+            $this->currentStep = 1;
             $workflow = Workflow::forOrg(auth()->user()->org_id)->findOrFail($workflowId);
             $this->loadWorkflow($workflow);
         }
+    }
+
+    /**
+     * Select wizard mode and continue to step 1.
+     */
+    public function selectWizardMode(): void
+    {
+        $this->currentStep = 1;
+    }
+
+    /**
+     * Select visual editor mode - create workflow and redirect to canvas.
+     */
+    public function selectCanvasMode()
+    {
+        $user = auth()->user();
+
+        $workflow = Workflow::create([
+            'org_id' => $user->org_id,
+            'created_by' => $user->id,
+            'name' => 'Untitled Workflow',
+            'description' => null,
+            'mode' => Workflow::MODE_ADVANCED,
+            'status' => Workflow::STATUS_DRAFT,
+            'trigger_type' => Workflow::TRIGGER_MANUAL,
+            'nodes' => [],
+            'edges' => [],
+        ]);
+
+        return redirect()->route('alerts.canvas', $workflow);
     }
 
     protected function loadWorkflow(Workflow $workflow): void

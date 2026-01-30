@@ -1,5 +1,86 @@
 <div class="max-w-4xl mx-auto">
-    <!-- Header -->
+    {{-- Step 0: Mode Selection --}}
+    @if($currentStep === 0)
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-gray-900">Create Alert</h1>
+            <p class="text-gray-500 mt-1">Choose how you want to build your alert workflow</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            <!-- Step-by-Step Wizard -->
+            <button
+                wire:click="selectWizardMode"
+                class="group relative bg-white rounded-xl border-2 border-gray-200 p-8 text-left hover:border-pulse-orange-400 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-pulse-orange-500 focus:ring-offset-2"
+            >
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-pulse-orange-100 flex items-center justify-center group-hover:bg-pulse-orange-200 transition-colors">
+                        <x-icon name="list-bullet" class="w-6 h-6 text-pulse-orange-600" />
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Step-by-Step Wizard</h3>
+                        <p class="text-sm text-gray-500 mt-1">Guided setup with simple forms. Best for straightforward alerts.</p>
+                        <ul class="mt-3 space-y-1 text-xs text-gray-500">
+                            <li class="flex items-center gap-1.5">
+                                <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
+                                Easy to use
+                            </li>
+                            <li class="flex items-center gap-1.5">
+                                <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
+                                Quick setup
+                            </li>
+                            <li class="flex items-center gap-1.5">
+                                <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
+                                Linear workflows
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="absolute top-3 right-3 text-xs font-medium text-pulse-orange-600 bg-pulse-orange-50 px-2 py-1 rounded-full">
+                    Recommended
+                </div>
+            </button>
+
+            <!-- Visual Canvas -->
+            <button
+                wire:click="selectCanvasMode"
+                class="group relative bg-white rounded-xl border-2 border-gray-200 p-8 text-left hover:border-indigo-400 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                        <x-icon name="squares-2x2" class="w-6 h-6 text-indigo-600" />
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">Visual Canvas</h3>
+                        <p class="text-sm text-gray-500 mt-1">Drag-and-drop workflow builder. Best for complex logic.</p>
+                        <ul class="mt-3 space-y-1 text-xs text-gray-500">
+                            <li class="flex items-center gap-1.5">
+                                <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
+                                Branching logic
+                            </li>
+                            <li class="flex items-center gap-1.5">
+                                <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
+                                Parallel actions
+                            </li>
+                            <li class="flex items-center gap-1.5">
+                                <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
+                                Visual overview
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="absolute top-3 right-3 text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
+                    Advanced
+                </div>
+            </button>
+        </div>
+
+        <div class="text-center mt-8">
+            <a href="{{ route('alerts.index') }}" class="text-sm text-gray-500 hover:text-gray-700">
+                Cancel
+            </a>
+        </div>
+    @else
+    <!-- Header (shown for steps 1-5) -->
     <div class="mb-8">
         <a href="{{ route('alerts.index') }}" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-4">
             <x-icon name="arrow-left" class="w-4 h-4 mr-1" />
@@ -557,4 +638,5 @@
         </div>
     </div>
     @endif
+    @endif {{-- End of step 0 else --}}
 </div>
