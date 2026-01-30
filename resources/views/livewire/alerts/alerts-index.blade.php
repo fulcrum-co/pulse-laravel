@@ -190,19 +190,19 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-1">
-                        <button wire:click="toggleStatus('{{ $workflow->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
+                        <button wire:click="toggleStatus('{{ $workflow->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded" title="{{ $workflow->status === 'active' ? 'Pause alert' : 'Activate alert' }}">
                             <x-icon name="{{ $workflow->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
                         </button>
-                        <button wire:click="testTrigger('{{ $workflow->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
+                        <button wire:click="testTrigger('{{ $workflow->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded" title="Test trigger">
                             <x-icon name="beaker" class="w-4 h-4" />
                         </button>
-                        <button wire:click="duplicate('{{ $workflow->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
+                        <button wire:click="duplicate('{{ $workflow->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded" title="Duplicate alert">
                             <x-icon name="document-duplicate" class="w-4 h-4" />
                         </button>
-                        <button wire:click="confirmDelete('{{ $workflow->id }}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded">
+                        <button wire:click="confirmDelete('{{ $workflow->id }}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded" title="Delete alert">
                             <x-icon name="trash" class="w-4 h-4" />
                         </button>
-                        <a href="{{ route('alerts.edit', $workflow) }}" class="ml-2 px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600">
+                        <a href="{{ route('alerts.edit', $workflow) }}" class="ml-2 px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600" title="Edit alert settings">
                             Edit
                         </a>
                     </div>
@@ -260,19 +260,19 @@
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap text-right">
                                 <div class="flex items-center justify-end gap-1">
-                                    <button wire:click="toggleStatus('{{ $workflow->id }}')" class="p-1 text-gray-400 hover:text-gray-600 rounded">
+                                    <button wire:click="toggleStatus('{{ $workflow->id }}')" class="p-1 text-gray-400 hover:text-gray-600 rounded" title="{{ $workflow->status === 'active' ? 'Pause alert' : 'Activate alert' }}">
                                         <x-icon name="{{ $workflow->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
                                     </button>
-                                    <button wire:click="testTrigger('{{ $workflow->id }}')" class="p-1 text-gray-400 hover:text-gray-600 rounded">
+                                    <button wire:click="testTrigger('{{ $workflow->id }}')" class="p-1 text-gray-400 hover:text-gray-600 rounded" title="Test trigger">
                                         <x-icon name="beaker" class="w-4 h-4" />
                                     </button>
-                                    <button wire:click="duplicate('{{ $workflow->id }}')" class="p-1 text-gray-400 hover:text-gray-600 rounded">
+                                    <button wire:click="duplicate('{{ $workflow->id }}')" class="p-1 text-gray-400 hover:text-gray-600 rounded" title="Duplicate alert">
                                         <x-icon name="document-duplicate" class="w-4 h-4" />
                                     </button>
-                                    <button wire:click="confirmDelete('{{ $workflow->id }}')" class="p-1 text-gray-400 hover:text-red-500 rounded">
+                                    <button wire:click="confirmDelete('{{ $workflow->id }}')" class="p-1 text-gray-400 hover:text-red-500 rounded" title="Delete alert">
                                         <x-icon name="trash" class="w-4 h-4" />
                                     </button>
-                                    <a href="{{ route('alerts.edit', $workflow) }}" class="ml-1 px-2 py-1 text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
+                                    <a href="{{ route('alerts.edit', $workflow) }}" class="ml-1 px-2 py-1 text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700" title="Edit alert settings">
                                         Edit
                                     </a>
                                 </div>

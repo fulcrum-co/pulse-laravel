@@ -139,6 +139,12 @@
                     Alerts
                     <span class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full">4</span>
                 </x-nav-item>
+
+                <x-nav-item href="/marketplace" :active="request()->is('marketplace*')">
+                    <x-icon name="shopping-bag" class="w-5 h-5" />
+                    Marketplace
+                    <span class="ml-auto bg-purple-100 text-purple-600 text-xs font-medium px-2 py-0.5 rounded-full">New</span>
+                </x-nav-item>
             </nav>
 
             <!-- Settings -->
