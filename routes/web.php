@@ -47,6 +47,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     // Dashboard (HubSpot-style customizable)
     Route::get('/dashboard', App\Livewire\Dashboard\DashboardIndex::class)->name('dashboard');
+    Route::get('/dashboards', App\Livewire\Dashboard\DashboardList::class)->name('dashboards.index');
 
     // Contacts (Students, Teachers, Parents)
     Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
