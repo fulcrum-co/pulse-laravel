@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client';
 import WorkflowCanvas from './WorkflowCanvas';
 import type { WorkflowNode, WorkflowEdge } from './types/workflow';
 
-// Find the mount point and initialize the React app
+// Workflow Builder - Visual Alert Editor
+// Mount React Flow canvas into the Blade template
 const mountElement = document.getElementById('workflow-canvas');
 
 if (mountElement) {
