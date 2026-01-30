@@ -13,12 +13,19 @@ class StrategyList extends Component
     public $search = '';
     public $typeFilter = 'all';
     public $statusFilter = '';
+    public string $viewMode = 'grid';
 
     protected $queryString = [
         'search' => ['except' => ''],
         'typeFilter' => ['except' => 'all'],
         'statusFilter' => ['except' => ''],
+        'viewMode' => ['except' => 'grid'],
     ];
+
+    public function setViewMode(string $mode): void
+    {
+        $this->viewMode = $mode;
+    }
 
     public function updatingSearch()
     {
