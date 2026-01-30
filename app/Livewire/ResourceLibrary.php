@@ -8,6 +8,7 @@ use App\Models\Provider;
 use App\Models\Resource;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\On;
 
 class ResourceLibrary extends Component
 {
@@ -25,6 +26,33 @@ class ResourceLibrary extends Component
 
     // View mode
     public string $viewMode = 'grid';
+
+    // Add Resource Modal
+    public bool $showAddModal = false;
+    public string $addResourceType = 'resource'; // resource, provider, program
+
+    // Resource form fields
+    public string $resourceTitle = '';
+    public string $resourceDescription = '';
+    public string $resourceTypeField = 'article';
+    public string $resourceCategory = '';
+    public string $resourceUrl = '';
+    public ?int $resourceDuration = null;
+
+    // Provider form fields
+    public string $providerName = '';
+    public string $providerBio = '';
+    public string $providerTypeField = 'therapist';
+    public string $providerEmail = '';
+    public string $providerPhone = '';
+    public bool $providerServesRemote = false;
+
+    // Program form fields
+    public string $programName = '';
+    public string $programDescription = '';
+    public string $programTypeField = 'therapy';
+    public ?int $programDurationWeeks = null;
+    public ?int $programCapacity = null;
 
     protected $queryString = [
         'activeTab' => ['except' => 'all'],
@@ -68,6 +96,124 @@ class ResourceLibrary extends Component
         $this->filterCategory = '';
         $this->filterGrades = [];
         $this->filterTags = [];
+    }
+
+    // ============================================
+    // ADD RESOURCE MODAL
+    // ============================================
+
+    #[On('openAddResourceModal')]
+    public function openAddModal(): void
+    {
+        $this->resetAddForm();
+        $this->showAddModal = true;
+    }
+
+    public function closeAddModal(): void
+    {
+        $this->showAddModal = false;
+        $this->resetAddForm();
+    }
+
+    public function setAddResourceType(string $type): void
+    {
+        $this->addResourceType = $type;
+    }
+
+    protected function resetAddForm(): void
+    {
+        $this->addResourceType = 'resource';
+        $this->resourceTitle = '';
+        $this->resourceDescription = '';
+        $this->resourceTypeField = 'article';
+        $this->resourceCategory = '';
+        $this->resourceUrl = '';
+        $this->resourceDuration = null;
+        $this->providerName = '';
+        $this->providerBio = '';
+        $this->providerTypeField = 'therapist';
+        $this->providerEmail = '';
+        $this->providerPhone = '';
+        $this->providerServesRemote = false;
+        $this->programName = '';
+        $this->programDescription = '';
+        $this->programTypeField = 'therapy';
+        $this->programDurationWeeks = null;
+        $this->programCapacity = null;
+    }
+
+    public function saveResource(): void
+    {
+        $user = auth()->user();
+
+        if ($this->addResourceType === 'resource') {
+            $this->validate([
+                'resourceTitle' => 'required|string|max:255',
+                'resourceTypeField' => 'required|string',
+            ]);
+
+            Resource::create([
+                'org_id' => $user->org_id,
+                'title' => $this->resourceTitle,
+                'description' => $this->resourceDescription,
+                'resource_type' => $this->resourceTypeField,
+                'category' => $this->resourceCategory ?: null,
+                'url' => $this->resourceUrl ?: null,
+                'estimated_duration_minutes' => $this->resourceDuration,
+                'active' => true,
+                'created_by' => $user->id,
+            ]);
+
+            $this->dispatch('notify', [
+                'type' => 'success',
+                'message' => 'Resource created successfully.',
+            ]);
+
+        } elseif ($this->addResourceType === 'provider') {
+            $this->validate([
+                'providerName' => 'required|string|max:255',
+                'providerTypeField' => 'required|string',
+            ]);
+
+            Provider::create([
+                'org_id' => $user->org_id,
+                'name' => $this->providerName,
+                'bio' => $this->providerBio ?: null,
+                'provider_type' => $this->providerTypeField,
+                'email' => $this->providerEmail ?: null,
+                'phone' => $this->providerPhone ?: null,
+                'serves_remote' => $this->providerServesRemote,
+                'is_active' => true,
+            ]);
+
+            $this->dispatch('notify', [
+                'type' => 'success',
+                'message' => 'Provider created successfully.',
+            ]);
+
+        } elseif ($this->addResourceType === 'program') {
+            $this->validate([
+                'programName' => 'required|string|max:255',
+                'programTypeField' => 'required|string',
+            ]);
+
+            Program::create([
+                'org_id' => $user->org_id,
+                'name' => $this->programName,
+                'description' => $this->programDescription ?: null,
+                'program_type' => $this->programTypeField,
+                'duration_weeks' => $this->programDurationWeeks,
+                'capacity' => $this->programCapacity,
+                'is_active' => true,
+            ]);
+
+            $this->dispatch('notify', [
+                'type' => 'success',
+                'message' => 'Program created successfully.',
+            ]);
+        }
+
+        $this->closeAddModal();
     }
 
     public function getContentResourcesProperty()
