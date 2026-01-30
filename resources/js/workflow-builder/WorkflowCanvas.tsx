@@ -183,10 +183,16 @@ function WorkflowCanvasInner({
 
     const addNode = useCallback(
         (type: string, position?: { x: number; y: number }) => {
+            // Default position: top-center of visible canvas area
+            // Stack nodes vertically if multiple are added via click
+            const defaultPosition = {
+                x: 350,
+                y: 50 + nodes.length * 150,
+            };
             const newNode: WorkflowNode = {
                 id: `${type}-${Date.now()}`,
                 type: type as WorkflowNode['type'],
-                position: position || { x: 250, y: nodes.length * 150 },
+                position: position || defaultPosition,
                 data: getDefaultNodeData(type),
             };
             setNodes((nds) => [...nds, newNode]);
@@ -262,7 +268,7 @@ function WorkflowCanvasInner({
                     onNodeClick={onNodeClick}
                     onPaneClick={onPaneClick}
                     nodeTypes={nodeTypes}
-                    fitView
+                    defaultViewport={{ x: 0, y: 0, zoom: 1 }}
                     snapToGrid
                     snapGrid={[15, 15]}
                     defaultEdgeOptions={{
