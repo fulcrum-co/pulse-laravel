@@ -163,7 +163,47 @@
                 <h1 class="text-2xl font-semibold text-gray-900">{{ $title ?? 'Dashboard' }}</h1>
 
                 <div class="flex items-center gap-3">
-                    {{ $actions ?? '' }}
+                    @if(isset($actions) && $actions->isNotEmpty())
+                        {{ $actions }}
+                    @elseif(request()->is('dashboard'))
+                        <!-- Create Dropdown for Dashboard -->
+                        <div x-data="{ open: false }" class="relative">
+                            <button
+                                @click="open = !open"
+                                class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors"
+                            >
+                                <x-icon name="plus" class="w-4 h-4 mr-2" />
+                                Create
+                                <x-icon name="chevron-down" class="w-4 h-4 ml-2" />
+                            </button>
+
+                            <div
+                                x-show="open"
+                                @click.outside="open = false"
+                                x-transition
+                                class="absolute right-0 z-50 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200"
+                            >
+                                <div class="py-1">
+                                    <a href="/surveys/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <x-icon name="clipboard-list" class="w-4 h-4 text-gray-400" />
+                                        Survey
+                                    </a>
+                                    <a href="/reports/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <x-icon name="chart-bar" class="w-4 h-4 text-gray-400" />
+                                        Report
+                                    </a>
+                                    <a href="/strategies/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <x-icon name="flag" class="w-4 h-4 text-gray-400" />
+                                        Strategy
+                                    </a>
+                                    <a href="/alerts/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <x-icon name="bell" class="w-4 h-4 text-gray-400" />
+                                        Alert
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </header>
 
