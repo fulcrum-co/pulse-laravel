@@ -10,7 +10,8 @@
             <!-- AI Chat Builder -->
             <button
                 wire:click="selectMode('chat')"
-                class="group relative bg-white rounded-xl border-2 border-gray-200 p-6 text-left hover:border-indigo-400 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                @if(!($serviceStatus['claude'] ?? false)) disabled @endif
+                class="group relative bg-white rounded-xl border-2 border-gray-200 p-6 text-left hover:border-indigo-400 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ !($serviceStatus['claude'] ?? false) ? 'opacity-60 cursor-not-allowed' : '' }}"
             >
                 <div class="flex flex-col items-center text-center">
                     <div class="w-14 h-14 rounded-xl bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors mb-4">
@@ -33,15 +34,22 @@
                         </li>
                     </ul>
                 </div>
-                <div class="absolute top-3 right-3 text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
-                    AI-Powered
-                </div>
+                @if($serviceStatus['claude'] ?? false)
+                    <div class="absolute top-3 right-3 text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
+                        AI-Powered
+                    </div>
+                @else
+                    <div class="absolute top-3 right-3 text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-full">
+                        Not Configured
+                    </div>
+                @endif
             </button>
 
             <!-- Voice Builder -->
             <button
                 wire:click="selectMode('voice')"
-                class="group relative bg-white rounded-xl border-2 border-gray-200 p-6 text-left hover:border-purple-400 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                @if(!($serviceStatus['transcription'] ?? false)) disabled @endif
+                class="group relative bg-white rounded-xl border-2 border-gray-200 p-6 text-left hover:border-purple-400 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 {{ !($serviceStatus['transcription'] ?? false) ? 'opacity-60 cursor-not-allowed' : '' }}"
             >
                 <div class="flex flex-col items-center text-center">
                     <div class="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors mb-4">
@@ -64,6 +72,11 @@
                         </li>
                     </ul>
                 </div>
+                @if(!($serviceStatus['transcription'] ?? false))
+                    <div class="absolute top-3 right-3 text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-full">
+                        Not Configured
+                    </div>
+                @endif
             </button>
 
             <!-- Form Builder -->
@@ -1002,18 +1015,14 @@ function voiceRecorder() {
                 if (result.success && result.transcription) {
                     @this.processVoiceTranscription(result.transcription);
                 } else {
-                    // Fallback for demo if transcription service is not configured
-                    console.warn('Transcription failed, using demo text:', result.error);
-                    const demoTranscription = "How are you feeling today? How well did you sleep last night? Do you need any support?";
-                    @this.processVoiceTranscription(demoTranscription);
-                    alert('Note: Using demo transcription. Configure OpenAI API key for real transcription.');
+                    // Show actual error instead of silent fallback
+                    const errorMsg = result.error || 'Transcription failed';
+                    console.error('Transcription failed:', result);
+                    alert('Transcription Error: ' + errorMsg + '\n\nPlease check that ASSEMBLY_AI_API_KEY is configured in your .env file.');
                 }
             } catch (error) {
                 console.error('Transcription error:', error);
-                // Fallback for demo
-                const demoTranscription = "How are you feeling today? How well did you sleep last night? Do you need any support?";
-                @this.processVoiceTranscription(demoTranscription);
-                alert('Transcription service unavailable. Using demo text.');
+                alert('Transcription service error: ' + error.message + '\n\nPlease check your API configuration.');
             } finally {
                 this.isTranscribing = false;
             }

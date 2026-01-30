@@ -61,6 +61,9 @@ class SurveyCreator extends Component
     public bool $showDeliveryConfig = false;
     public bool $showPreview = false;
 
+    // Service configuration status
+    public array $serviceStatus = [];
+
     // Question form
     public array $questionForm = [
         'id' => '',
@@ -81,6 +84,13 @@ class SurveyCreator extends Component
     public function mount(?string $surveyId = null): void
     {
         $this->surveyId = $surveyId;
+
+        // Check service configuration status
+        $this->serviceStatus = [
+            'claude' => !empty(config('services.anthropic.api_key')),
+            'transcription' => !empty(config('services.openai.api_key')) ||
+                              !empty(config('services.assembly_ai.api_key')),
+        ];
 
         if ($surveyId) {
             $survey = Survey::forOrganization(auth()->user()->org_id)->findOrFail($surveyId);
@@ -214,13 +224,24 @@ class SurveyCreator extends Component
                     }, $draftQuestions);
                 }
             } catch (\Exception $e) {
-                // Fallback to simple pattern matching if AI fails
-                $response = $this->generateAIResponse($message, $session);
-                $session->addMessage('assistant', $response);
-                $this->chatMessages[] = [
-                    'role' => 'assistant',
-                    'content' => $response,
-                ];
+                \Log::error('Claude AI chat failed', ['error' => $e->getMessage()]);
+
+                $isConfigError = empty(config('services.anthropic.api_key'));
+
+                if ($isConfigError) {
+                    $this->chatMessages[] = [
+                        'role' => 'system',
+                        'content' => 'AI service not configured. Please contact your administrator to set up the ANTHROPIC_API_KEY.',
+                    ];
+                } else {
+                    // Fallback with explicit notice to user
+                    $response = $this->generateAIResponse($message, $session);
+                    $session->addMessage('assistant', $response);
+                    $this->chatMessages[] = [
+                        'role' => 'assistant',
+                        'content' => "[Simplified mode - AI temporarily unavailable]\n\n" . $response,
+                    ];
+                }
                 $this->questions = $session->fresh()->draft_questions ?? $this->questions;
             }
         }
