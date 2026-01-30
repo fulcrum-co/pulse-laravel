@@ -114,8 +114,8 @@ class AlertController extends Controller
         $workflowModel = Workflow::forOrg(auth()->user()->org_id)->findOrFail($workflow);
 
         $validated = $request->validate([
-            'nodes' => 'required|array',
-            'edges' => 'required|array',
+            'nodes' => 'present|array',
+            'edges' => 'present|array',
             'name' => 'sometimes|string|max:255',
             'description' => 'sometimes|nullable|string|max:1000',
         ]);
