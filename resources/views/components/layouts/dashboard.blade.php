@@ -49,20 +49,6 @@
         }
     </script>
     <style>
-        /* Tooltip styles for collapsed sidebar */
-        .sidebar-tooltip {
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.2s, visibility 0.2s;
-            pointer-events: none;
-        }
-        .sidebar-collapsed .nav-item:hover > .sidebar-tooltip,
-        .sidebar-collapsed .group:hover > .sidebar-tooltip,
-        .sidebar-collapsed .nav-item:hover .sidebar-tooltip,
-        .sidebar-collapsed .group:hover .sidebar-tooltip {
-            visibility: visible;
-            opacity: 1;
-        }
         /* Smooth sidebar transition */
         .sidebar-transition {
             transition: width 0.2s ease-in-out;
@@ -110,8 +96,8 @@
             </div>
             <!-- Collapsed User Avatar -->
             <div x-show="sidebarCollapsed" class="px-3 py-3 border-b border-gray-200 flex justify-center">
-                <div class="nav-item relative group">
-                    <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-pulse-orange-200">
+                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                    <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-pulse-orange-200 cursor-pointer">
                         @if(auth()->user()->avatar_url)
                         <img src="{{ auth()->user()->avatar_url }}" alt="" class="w-full h-full object-cover">
                         @else
@@ -123,7 +109,7 @@
                         @endif
                     </div>
                     <!-- Tooltip -->
-                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">
+                    <div x-show="hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">
                         {{ auth()->user()->first_name }} {{ auth()->user()->last_name }}
                     </div>
                 </div>
@@ -163,28 +149,28 @@
                 <!-- Collapsed: Vertical List -->
                 <div x-show="sidebarCollapsed" class="px-2 space-y-1">
                     <!-- Home -->
-                    <a href="/dashboard"
-                       class="nav-item relative group flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboard') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    <a href="/dashboard" x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false"
+                       class="relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboard') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="home" class="w-5 h-5 flex-shrink-0 {{ request()->is('dashboard') ? 'text-pulse-orange-500' : '' }}" />
-                        <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Home</div>
+                        <div x-show="hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Home</div>
                     </a>
                     <!-- Contacts -->
-                    <a href="/contacts"
-                       class="nav-item relative group flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('contacts*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    <a href="/contacts" x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false"
+                       class="relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('contacts*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="users" class="w-5 h-5 flex-shrink-0 {{ request()->is('contacts*') ? 'text-pulse-orange-500' : '' }}" />
-                        <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Contacts</div>
+                        <div x-show="hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Contacts</div>
                     </a>
                     <!-- Surveys -->
-                    <a href="/surveys"
-                       class="nav-item relative group flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('surveys*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    <a href="/surveys" x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false"
+                       class="relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('surveys*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="clipboard-list" class="w-5 h-5 flex-shrink-0 {{ request()->is('surveys*') ? 'text-pulse-orange-500' : '' }}" />
-                        <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Surveys</div>
+                        <div x-show="hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Surveys</div>
                     </a>
                     <!-- Dashboards -->
-                    <a href="/dashboards"
-                       class="nav-item relative group flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboards*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    <a href="/dashboards" x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false"
+                       class="relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboards*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="chart-pie" class="w-5 h-5 flex-shrink-0 {{ request()->is('dashboards*') ? 'text-pulse-orange-500' : '' }}" />
-                        <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Dashboards</div>
+                        <div x-show="hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Dashboards</div>
                     </a>
                 </div>
             </div>
@@ -195,71 +181,85 @@
                 <div x-show="sidebarCollapsed" class="mb-2 border-t border-gray-200"></div>
 
                 <!-- Strategy -->
-                <a href="/strategies"
-                   :class="sidebarCollapsed ? 'justify-center' : ''"
-                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('strategies*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                    <x-icon name="flag" class="w-5 h-5 flex-shrink-0" />
-                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Strategy</span>
-                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Strategy</div>
-                </a>
+                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                    <a href="/strategies"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('strategies*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <x-icon name="flag" class="w-5 h-5 flex-shrink-0" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Strategy</span>
+                    </a>
+                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Strategy</div>
+                </div>
 
                 <!-- Reports -->
-                <a href="/reports"
-                   :class="sidebarCollapsed ? 'justify-center' : ''"
-                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('reports*') && !request()->is('dashboard') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                    <x-icon name="chart-bar" class="w-5 h-5 flex-shrink-0" />
-                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Reports</span>
-                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Reports</div>
-                </a>
+                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                    <a href="/reports"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('reports*') && !request()->is('dashboard') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <x-icon name="chart-bar" class="w-5 h-5 flex-shrink-0" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Reports</span>
+                    </a>
+                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Reports</div>
+                </div>
 
                 <!-- Collect -->
-                <a href="/collect"
-                   :class="sidebarCollapsed ? 'justify-center' : ''"
-                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <x-icon name="collection" class="w-5 h-5 flex-shrink-0" />
-                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Collect</span>
-                    <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
-                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Collect</div>
-                </a>
+                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                    <a href="/collect"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                        <x-icon name="collection" class="w-5 h-5 flex-shrink-0" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Collect</span>
+                        <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
+                    </a>
+                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Collect</div>
+                </div>
 
                 <!-- Distribute -->
-                <a href="/distribute"
-                   :class="sidebarCollapsed ? 'justify-center' : ''"
-                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <x-icon name="share" class="w-5 h-5 flex-shrink-0" />
-                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Distribute</span>
-                    <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
-                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute</div>
-                </a>
+                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                    <a href="/distribute"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                        <x-icon name="share" class="w-5 h-5 flex-shrink-0" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Distribute</span>
+                        <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
+                    </a>
+                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute</div>
+                </div>
 
                 <!-- Resource -->
-                <a href="/resources"
-                   :class="sidebarCollapsed ? 'justify-center' : ''"
-                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <x-icon name="book-open" class="w-5 h-5 flex-shrink-0" />
-                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Resource</span>
-                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Resource</div>
-                </a>
+                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                    <a href="/resources"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                        <x-icon name="book-open" class="w-5 h-5 flex-shrink-0" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Resource</span>
+                    </a>
+                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Resource</div>
+                </div>
 
                 <!-- Alerts -->
-                <a href="/alerts"
-                   :class="sidebarCollapsed ? 'justify-center' : ''"
-                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('alerts*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                    <x-icon name="bell" class="w-5 h-5 flex-shrink-0" />
-                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Alerts</span>
-                    <span x-show="!sidebarCollapsed" class="ml-auto bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded-full">4</span>
-                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Alerts (4)</div>
-                </a>
+                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                    <a href="/alerts"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('alerts*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <x-icon name="bell" class="w-5 h-5 flex-shrink-0" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Alerts</span>
+                        <span x-show="!sidebarCollapsed" class="ml-auto bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded-full">4</span>
+                    </a>
+                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Alerts (4)</div>
+                </div>
 
                 <!-- Marketplace -->
-                <a href="/marketplace"
-                   :class="sidebarCollapsed ? 'justify-center' : ''"
-                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                    <x-icon name="shopping-bag" class="w-5 h-5 flex-shrink-0" />
-                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition whitespace-nowrap">Marketplace</span>
-                    <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
-                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace</div>
-                </a>
+                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                    <a href="/marketplace"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                        <x-icon name="shopping-bag" class="w-5 h-5 flex-shrink-0" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition whitespace-nowrap">Marketplace</span>
+                        <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
+                    </a>
+                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace</div>
+                </div>
 
                 @php
                     $user = auth()->user();
@@ -294,24 +294,28 @@
                 </div>
                 <!-- Collapsed Sub-Orgs Icon -->
                 <div x-show="sidebarCollapsed" class="mt-4 pt-4 border-t border-gray-100">
-                    <a href="/organizations"
-                       class="nav-item relative group flex items-center justify-center px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                        <x-icon name="office-building" class="w-5 h-5 flex-shrink-0" />
-                        <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Sub-Organizations ({{ $childOrgs->count() }})</div>
-                    </a>
+                    <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                        <a href="/organizations"
+                           class="flex items-center justify-center px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                            <x-icon name="office-building" class="w-5 h-5 flex-shrink-0" />
+                        </a>
+                        <div x-show="hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Sub-Organizations ({{ $childOrgs->count() }})</div>
+                    </div>
                 </div>
                 @endif
             </nav>
 
             <!-- Settings -->
             <div class="p-3 border-t border-gray-200" :class="sidebarCollapsed ? 'px-2' : ''">
-                <a href="/settings"
-                   :class="sidebarCollapsed ? 'justify-center' : ''"
-                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('settings*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                    <x-icon name="cog" class="w-5 h-5 flex-shrink-0" />
-                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Settings</span>
-                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Settings</div>
-                </a>
+                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                    <a href="/settings"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('settings*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <x-icon name="cog" class="w-5 h-5 flex-shrink-0" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Settings</span>
+                    </a>
+                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Settings</div>
+                </div>
             </div>
         </aside>
 
