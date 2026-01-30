@@ -42,7 +42,7 @@
                     wire:click="openSendModal"
                     class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
                 >
-                    <x-icon name="paper-airplane" class="w-4 h-4 mr-1" />
+                    <x-icon name="paper-airplane" class="w-4 h-4 mr-1 transform -rotate-45" />
                     Send Now
                 </button>
                 <button
@@ -210,7 +210,7 @@
 
                 @if($deliveries->isEmpty())
                     <div class="p-8 text-center">
-                        <x-icon name="paper-airplane" class="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                        <x-icon name="paper-airplane" class="w-12 h-12 text-gray-300 mx-auto mb-3 transform -rotate-45" />
                         <p class="text-sm text-gray-500">No deliveries yet</p>
                         <p class="text-xs text-gray-400 mt-1">Deliveries will appear here once the distribution is sent.</p>
                     </div>
@@ -274,7 +274,7 @@
             <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm sm:w-full sm:p-6">
                 <div class="sm:flex sm:items-start">
                     <div class="mx-auto flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-pulse-orange-100 sm:mx-0">
-                        <x-icon name="paper-airplane" class="h-5 w-5 text-pulse-orange-600" />
+                        <x-icon name="paper-airplane" class="h-5 w-5 text-pulse-orange-600 transform -rotate-45" />
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                         <h3 class="text-base font-medium text-gray-900">Send Distribution</h3>

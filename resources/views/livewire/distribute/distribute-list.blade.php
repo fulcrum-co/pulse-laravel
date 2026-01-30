@@ -73,7 +73,7 @@
         <x-card>
             <div class="text-center py-12">
                 <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <x-icon name="paper-airplane" class="w-8 h-8 text-pulse-orange-500" />
+                    <x-icon name="paper-airplane" class="w-8 h-8 text-pulse-orange-500 transform -rotate-45" />
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-1">Create your first distribution</h3>
                 <p class="text-gray-500 mb-4 max-w-sm mx-auto text-sm">

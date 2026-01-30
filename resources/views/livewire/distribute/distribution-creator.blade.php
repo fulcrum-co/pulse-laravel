@@ -78,7 +78,7 @@
                         <div class="flex gap-3">
                             <label class="flex items-center p-3 border rounded-lg cursor-pointer transition-colors {{ $distributionType === 'one_time' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}">
                                 <input type="radio" wire:model.live="distributionType" value="one_time" class="sr-only" />
-                                <x-icon name="paper-airplane" class="w-5 h-5 mr-2 {{ $distributionType === 'one_time' ? 'text-pulse-orange-500' : 'text-gray-400' }}" />
+                                <x-icon name="bolt" class="w-5 h-5 mr-2 {{ $distributionType === 'one_time' ? 'text-pulse-orange-500' : 'text-gray-400' }}" />
                                 <span class="text-sm font-medium {{ $distributionType === 'one_time' ? 'text-pulse-orange-700' : 'text-gray-700' }}">One-time</span>
                             </label>
                             <label class="flex items-center p-3 border rounded-lg cursor-pointer transition-colors {{ $distributionType === 'recurring' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}">
@@ -170,19 +170,19 @@
                     </div>
                     @endif
 
-                    <div>
+                    <div x-data="{ messageBody: @entangle('messageBody') }">
                         <label for="messageBody" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
                         <textarea
                             id="messageBody"
-                            wire:model="messageBody"
+                            x-model="messageBody"
                             rows="6"
-                            placeholder="Type your message here. Use merge fields like @{{first_name}} for personalization..."
+                            placeholder="Type your message here. Click merge fields below to insert them..."
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 font-mono text-sm"
                         ></textarea>
                         @error('messageBody') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
 
                         <div class="mt-2">
-                            <p class="text-xs text-gray-500 mb-2">Available merge fields:</p>
+                            <p class="text-xs text-gray-500 mb-2">Click to insert merge fields:</p>
                             <div class="flex flex-wrap gap-1">
                                 @php
                                     $mergeFields = [
@@ -196,8 +196,8 @@
                                 @foreach($mergeFields as $field)
                                     <button
                                         type="button"
-                                        onclick="navigator.clipboard.writeText('{{ $field }}')"
-                                        class="px-2 py-0.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded font-mono"
+                                        x-on:click="messageBody = (messageBody || '') + '{{ $field }} '"
+                                        class="px-2 py-0.5 text-xs bg-pulse-orange-100 hover:bg-pulse-orange-200 text-pulse-orange-700 rounded font-mono border border-pulse-orange-200 transition-colors"
                                     >
                                         {{ $field }}
                                     </button>
