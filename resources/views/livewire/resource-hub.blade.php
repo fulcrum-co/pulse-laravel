@@ -1,14 +1,21 @@
 <div class="min-h-screen bg-gray-50">
     <!-- Header Banner -->
     <div class="bg-white border-b border-gray-200">
-        <div class="px-6 py-4">
+        <div class="px-6 py-4 flex items-center justify-between">
             <h1 class="text-2xl font-semibold text-gray-900">Resources</h1>
+            <button
+                wire:click="$dispatch('openAddResourceModal')"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
+            >
+                <x-icon name="plus" class="w-4 h-4" />
+                Add Resource
+            </button>
         </div>
     </div>
 
-    <div class="px-6 py-6 max-w-6xl mx-auto">
+    <div class="px-6 py-8">
         <!-- Unified Search -->
-        <div class="mb-8">
+        <div class="mb-10">
             <div class="relative max-w-2xl mx-auto">
                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <x-icon name="magnifying-glass" class="h-5 w-5 text-gray-400" />
@@ -17,7 +24,7 @@
                     type="text"
                     wire:model.live.debounce.300ms="search"
                     placeholder="Search all resources..."
-                    class="block w-full pl-11 pr-10 py-3 border border-gray-300 rounded-xl bg-white shadow-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-gray-900 placeholder-gray-500"
+                    class="block w-full pl-11 pr-10 py-4 border border-gray-300 rounded-xl bg-white shadow-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-gray-900 placeholder-gray-500 text-lg"
                 >
                 @if($search)
                     <button
@@ -32,7 +39,7 @@
 
         @if($isSearching && count($searchResults) > 0)
             <!-- Search Results -->
-            <div class="space-y-8">
+            <div class="space-y-10 max-w-6xl mx-auto">
                 <!-- Content Results -->
                 @if($searchResults['content']['total'] > 0)
                     <div>
@@ -181,65 +188,65 @@
                 @endif
             </div>
         @else
-            <!-- Section Cards (when not searching) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <!-- Section Cards (when not searching) - Larger cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 <!-- Content Card -->
-                <a href="{{ route('resources.content.index') }}" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:border-pulse-orange-300 transition-all">
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                            <x-icon name="document-text" class="w-7 h-7 text-blue-600" />
+                <a href="{{ route('resources.content.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-8 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
+                    <div class="flex items-start gap-5">
+                        <div class="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <x-icon name="document-text" class="w-8 h-8 text-blue-600" />
                         </div>
                         <div class="flex-1">
-                            <h2 class="text-lg font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Content</h2>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($counts['content']) }}</p>
-                            <p class="text-sm text-gray-500 mt-1">Articles, videos, worksheets, activities, and more</p>
+                            <h2 class="text-xl font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Content</h2>
+                            <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($counts['content']) }}</p>
+                            <p class="text-sm text-gray-500 mt-2">Articles, videos, worksheets, activities, and more</p>
                         </div>
-                        <x-icon name="chevron-right" class="w-5 h-5 text-gray-400 group-hover:text-pulse-orange-500 group-hover:translate-x-1 transition-all" />
+                        <x-icon name="chevron-right" class="w-6 h-6 text-gray-400 group-hover:text-pulse-orange-500 group-hover:translate-x-1 transition-all" />
                     </div>
                 </a>
 
                 <!-- Providers Card -->
-                <a href="{{ route('resources.providers.index') }}" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:border-pulse-orange-300 transition-all">
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                            <x-icon name="users" class="w-7 h-7 text-purple-600" />
+                <a href="{{ route('resources.providers.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-8 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
+                    <div class="flex items-start gap-5">
+                        <div class="w-16 h-16 rounded-2xl bg-purple-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <x-icon name="users" class="w-8 h-8 text-purple-600" />
                         </div>
                         <div class="flex-1">
-                            <h2 class="text-lg font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Providers</h2>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($counts['providers']) }}</p>
-                            <p class="text-sm text-gray-500 mt-1">Therapists, tutors, coaches, and specialists</p>
+                            <h2 class="text-xl font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Providers</h2>
+                            <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($counts['providers']) }}</p>
+                            <p class="text-sm text-gray-500 mt-2">Therapists, tutors, coaches, and specialists</p>
                         </div>
-                        <x-icon name="chevron-right" class="w-5 h-5 text-gray-400 group-hover:text-pulse-orange-500 group-hover:translate-x-1 transition-all" />
+                        <x-icon name="chevron-right" class="w-6 h-6 text-gray-400 group-hover:text-pulse-orange-500 group-hover:translate-x-1 transition-all" />
                     </div>
                 </a>
 
                 <!-- Programs Card -->
-                <a href="{{ route('resources.programs.index') }}" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:border-pulse-orange-300 transition-all">
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                            <x-icon name="building-office" class="w-7 h-7 text-green-600" />
+                <a href="{{ route('resources.programs.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-8 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
+                    <div class="flex items-start gap-5">
+                        <div class="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <x-icon name="building-office" class="w-8 h-8 text-green-600" />
                         </div>
                         <div class="flex-1">
-                            <h2 class="text-lg font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Programs</h2>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($counts['programs']) }}</p>
-                            <p class="text-sm text-gray-500 mt-1">Interventions, support groups, and services</p>
+                            <h2 class="text-xl font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Programs</h2>
+                            <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($counts['programs']) }}</p>
+                            <p class="text-sm text-gray-500 mt-2">Interventions, support groups, and services</p>
                         </div>
-                        <x-icon name="chevron-right" class="w-5 h-5 text-gray-400 group-hover:text-pulse-orange-500 group-hover:translate-x-1 transition-all" />
+                        <x-icon name="chevron-right" class="w-6 h-6 text-gray-400 group-hover:text-pulse-orange-500 group-hover:translate-x-1 transition-all" />
                     </div>
                 </a>
 
                 <!-- Courses Card -->
-                <a href="{{ route('resources.courses.index') }}" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:border-pulse-orange-300 transition-all">
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                            <x-icon name="academic-cap" class="w-7 h-7 text-orange-600" />
+                <a href="{{ route('resources.courses.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-8 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
+                    <div class="flex items-start gap-5">
+                        <div class="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <x-icon name="academic-cap" class="w-8 h-8 text-orange-600" />
                         </div>
                         <div class="flex-1">
-                            <h2 class="text-lg font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Courses</h2>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($counts['courses']) }}</p>
-                            <p class="text-sm text-gray-500 mt-1">Mini-courses and learning paths</p>
+                            <h2 class="text-xl font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Courses</h2>
+                            <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($counts['courses']) }}</p>
+                            <p class="text-sm text-gray-500 mt-2">Mini-courses and learning paths</p>
                         </div>
-                        <x-icon name="chevron-right" class="w-5 h-5 text-gray-400 group-hover:text-pulse-orange-500 group-hover:translate-x-1 transition-all" />
+                        <x-icon name="chevron-right" class="w-6 h-6 text-gray-400 group-hover:text-pulse-orange-500 group-hover:translate-x-1 transition-all" />
                     </div>
                 </a>
             </div>

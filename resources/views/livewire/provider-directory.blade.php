@@ -75,7 +75,7 @@
                         <option value="in_person">In-Person Only</option>
                     </select>
 
-                    @if($this->hasActiveFiltersProperty)
+                    @if($this->hasActiveFilters)
                         <button
                             wire:click="clearFilters"
                             class="px-3 py-2 text-sm text-gray-600 hover:text-gray-900"
@@ -182,7 +182,7 @@
                 <div class="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
                     <x-icon name="users" class="w-8 h-8 text-purple-400" />
                 </div>
-                @if($this->hasActiveFiltersProperty)
+                @if($this->hasActiveFilters)
                     <h3 class="text-lg font-medium text-gray-900 mb-1">No providers match your filters</h3>
                     <p class="text-gray-500 mb-4">Try adjusting your search or filter criteria.</p>
                     <button

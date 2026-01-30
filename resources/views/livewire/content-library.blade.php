@@ -118,7 +118,7 @@
             </div>
 
             <!-- Clear Filters -->
-            @if($this->hasActiveFiltersProperty)
+            @if($this->hasActiveFilters)
                 <button
                     wire:click="clearFilters"
                     class="w-full text-sm text-pulse-orange-600 hover:text-pulse-orange-700 font-medium"
@@ -230,7 +230,7 @@
                     <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
                         <x-icon name="document-text" class="w-8 h-8 text-gray-400" />
                     </div>
-                    @if($this->hasActiveFiltersProperty)
+                    @if($this->hasActiveFilters)
                         <h3 class="text-lg font-medium text-gray-900 mb-1">No resources match your filters</h3>
                         <p class="text-gray-500 mb-4">Try adjusting your filter criteria or clear all filters.</p>
                         <button
