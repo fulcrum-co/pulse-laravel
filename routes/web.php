@@ -15,9 +15,9 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AlertController;
 
-// Public routes
+// Root redirect to dashboard
 Route::get('/', function () {
-    return view('home');
+    return redirect('/dashboard');
 })->name('home');
 
 // Temporary route to fix avatars - visit once then remove
