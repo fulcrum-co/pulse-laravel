@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('survey_deliveries')) {
+            return; // Table already exists from partial migration
+        }
+
         Schema::create('survey_deliveries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('survey_id')->constrained()->cascadeOnDelete();
@@ -26,7 +30,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['survey_id', 'channel', 'status']);
-            $table->index(['recipient_type', 'recipient_id']);
+            // Note: nullableMorphs already creates index on recipient_type, recipient_id
             $table->index(['phone_number', 'status']);
             $table->index('external_id');
         });
