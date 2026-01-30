@@ -1,8 +1,32 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ConditionNodeData } from '../types/workflow';
 
-function ConditionNode({ data, selected }: NodeProps<ConditionNodeData>) {
+const nodeTypeOptions = [
+    { type: 'condition', label: 'Condition', color: 'purple' },
+    { type: 'delay', label: 'Delay', color: 'indigo' },
+    { type: 'action', label: 'Action', color: 'emerald' },
+    { type: 'branch', label: 'Split', color: 'orange' },
+];
+
+function ConditionNode({ id, data, selected }: NodeProps<ConditionNodeData>) {
+    const [showMenuYes, setShowMenuYes] = useState(false);
+    const [showMenuNo, setShowMenuNo] = useState(false);
+
+    const handleAddNode = (nodeType: string, branchId: string) => {
+        const event = new CustomEvent('addNodeFromBranch', {
+            detail: {
+                sourceNodeId: id,
+                branchIndex: branchId === 'true' ? 0 : 1,
+                branchId,
+                nodeType,
+            },
+        });
+        window.dispatchEvent(event);
+        setShowMenuYes(false);
+        setShowMenuNo(false);
+    };
+
     return (
         <div
             className={`
@@ -55,10 +79,74 @@ function ConditionNode({ data, selected }: NodeProps<ConditionNodeData>) {
                 className="!w-3 !h-3 !bg-red-500 !border-2 !border-white"
             />
 
-            {/* Labels */}
-            <div className="flex justify-between mt-2 text-xs text-gray-400">
-                <span className="text-green-600">Yes</span>
-                <span className="text-red-600">No</span>
+            {/* Labels with Add Buttons */}
+            <div className="flex justify-between mt-2 text-xs">
+                <div className="relative flex flex-col items-center">
+                    <span className="text-green-600 mb-1">Yes</span>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowMenuYes(!showMenuYes);
+                            setShowMenuNo(false);
+                        }}
+                        className="w-4 h-4 rounded-full bg-green-100 hover:bg-green-200 flex items-center justify-center text-green-600 transition-colors"
+                        title="Add node to Yes path"
+                    >
+                        <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
+                    {showMenuYes && (
+                        <div className="absolute top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 min-w-[100px]">
+                            {nodeTypeOptions.map((option) => (
+                                <button
+                                    key={option.type}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleAddNode(option.type, 'true');
+                                    }}
+                                    className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-50 flex items-center gap-2"
+                                >
+                                    <span className={`w-2 h-2 rounded-full bg-${option.color}-500`} />
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <div className="relative flex flex-col items-center">
+                    <span className="text-red-600 mb-1">No</span>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowMenuNo(!showMenuNo);
+                            setShowMenuYes(false);
+                        }}
+                        className="w-4 h-4 rounded-full bg-red-100 hover:bg-red-200 flex items-center justify-center text-red-600 transition-colors"
+                        title="Add node to No path"
+                    >
+                        <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
+                    {showMenuNo && (
+                        <div className="absolute top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 min-w-[100px]">
+                            {nodeTypeOptions.map((option) => (
+                                <button
+                                    key={option.type}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleAddNode(option.type, 'false');
+                                    }}
+                                    className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-50 flex items-center gap-2"
+                                >
+                                    <span className={`w-2 h-2 rounded-full bg-${option.color}-500`} />
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

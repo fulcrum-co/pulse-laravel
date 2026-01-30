@@ -119,28 +119,31 @@ export default function NodePalette({ className = '', onAddNode }: NodePalettePr
         event.dataTransfer.setData('application/reactflow', item.type);
         event.dataTransfer.effectAllowed = 'move';
 
-        // Create custom drag image - a small pill-shaped label
+        // Create custom drag image - a tiny compact pill
         const dragImage = document.createElement('div');
         dragImage.textContent = item.label;
         dragImage.style.cssText = `
             position: fixed;
-            top: -100px;
-            left: -100px;
-            padding: 4px 10px;
+            top: -1000px;
+            left: -1000px;
+            display: inline-block;
+            padding: 2px 8px;
             background: white;
-            border: 2px solid ${item.borderColor};
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
+            border: 1px solid ${item.borderColor};
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 500;
+            font-family: system-ui, -apple-system, sans-serif;
             color: ${item.borderColor};
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            pointer-events: none;
-            z-index: 10000;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            white-space: nowrap;
+            transform: scale(1);
+            transform-origin: top left;
         `;
         document.body.appendChild(dragImage);
 
-        // Set as drag image with small offset
-        event.dataTransfer.setDragImage(dragImage, 30, 12);
+        // Set as drag image - offset to center on cursor
+        event.dataTransfer.setDragImage(dragImage, 25, 10);
 
         // Clean up after drag starts
         requestAnimationFrame(() => {

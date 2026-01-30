@@ -1,6 +1,13 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ActionNodeData } from '../types/workflow';
+
+const nodeTypeOptions = [
+    { type: 'condition', label: 'Condition', color: 'purple' },
+    { type: 'delay', label: 'Delay', color: 'indigo' },
+    { type: 'action', label: 'Action', color: 'emerald' },
+    { type: 'branch', label: 'Split', color: 'orange' },
+];
 
 const actionIcons: Record<string, JSX.Element> = {
     send_email: (
@@ -62,11 +69,26 @@ const actionLabels: Record<string, string> = {
     trigger_workflow: 'Sub-workflow',
 };
 
-function ActionNode({ data, selected }: NodeProps<ActionNodeData>) {
+function ActionNode({ id, data, selected }: NodeProps<ActionNodeData>) {
+    const [showMenu, setShowMenu] = useState(false);
+
     // Safely get action type - ensure it's a string
     const actionType = (typeof data?.action_type === 'string' ? data.action_type : 'send_sms') as string;
     const icon = actionIcons[actionType] || actionIcons.send_sms;
     const label = typeof actionLabels[actionType] === 'string' ? actionLabels[actionType] : 'Action';
+
+    const handleAddNode = (nodeType: string) => {
+        const event = new CustomEvent('addNodeFromBranch', {
+            detail: {
+                sourceNodeId: id,
+                branchIndex: 0,
+                branchId: 'default',
+                nodeType,
+            },
+        });
+        window.dispatchEvent(event);
+        setShowMenu(false);
+    };
 
     const getSubtitle = () => {
         if (!data?.config) return 'Not configured';
@@ -128,6 +150,40 @@ function ActionNode({ data, selected }: NodeProps<ActionNodeData>) {
                 position={Position.Bottom}
                 className="!w-3 !h-3 !bg-emerald-500 !border-2 !border-white"
             />
+
+            {/* Add Node Button */}
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowMenu(!showMenu);
+                    }}
+                    className="w-5 h-5 rounded-full bg-emerald-100 hover:bg-emerald-200 flex items-center justify-center text-emerald-600 transition-colors shadow-sm border border-emerald-200"
+                    title="Add next node"
+                >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
+
+                {showMenu && (
+                    <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 min-w-[100px]">
+                        {nodeTypeOptions.map((option) => (
+                            <button
+                                key={option.type}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAddNode(option.type);
+                                }}
+                                className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-50 flex items-center gap-2"
+                            >
+                                <span className={`w-2 h-2 rounded-full bg-${option.color}-500`} />
+                                {option.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

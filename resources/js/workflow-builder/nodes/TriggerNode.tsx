@@ -1,9 +1,17 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { TriggerNodeData } from '../types/workflow';
 import { TRIGGER_TYPES } from '../types/workflow';
 
-function TriggerNode({ data, selected }: NodeProps<TriggerNodeData>) {
+const nodeTypeOptions = [
+    { type: 'condition', label: 'Condition', color: 'purple' },
+    { type: 'delay', label: 'Delay', color: 'indigo' },
+    { type: 'action', label: 'Action', color: 'emerald' },
+    { type: 'branch', label: 'Split', color: 'orange' },
+];
+
+function TriggerNode({ id, data, selected }: NodeProps<TriggerNodeData>) {
+    const [showMenu, setShowMenu] = useState(false);
     // Safely get trigger type label - ensure we always render a string
     const getTriggerLabel = (): string => {
         if (!data?.trigger_type) return 'Unknown Trigger';
@@ -14,6 +22,19 @@ function TriggerNode({ data, selected }: NodeProps<TriggerNodeData>) {
     };
 
     const triggerLabel = getTriggerLabel();
+
+    const handleAddNode = (nodeType: string) => {
+        const event = new CustomEvent('addNodeFromBranch', {
+            detail: {
+                sourceNodeId: id,
+                branchIndex: 0,
+                branchId: 'default',
+                nodeType,
+            },
+        });
+        window.dispatchEvent(event);
+        setShowMenu(false);
+    };
 
     return (
         <div
@@ -50,6 +71,40 @@ function TriggerNode({ data, selected }: NodeProps<TriggerNodeData>) {
                 position={Position.Bottom}
                 className="!w-3 !h-3 !bg-amber-500 !border-2 !border-white"
             />
+
+            {/* Add Node Button */}
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowMenu(!showMenu);
+                    }}
+                    className="w-5 h-5 rounded-full bg-amber-100 hover:bg-amber-200 flex items-center justify-center text-amber-600 transition-colors shadow-sm border border-amber-200"
+                    title="Add next node"
+                >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
+
+                {showMenu && (
+                    <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 min-w-[100px]">
+                        {nodeTypeOptions.map((option) => (
+                            <button
+                                key={option.type}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAddNode(option.type);
+                                }}
+                                className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-50 flex items-center gap-2"
+                            >
+                                <span className={`w-2 h-2 rounded-full bg-${option.color}-500`} />
+                                {option.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
