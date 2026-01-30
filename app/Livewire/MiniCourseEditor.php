@@ -319,6 +319,6 @@ class MiniCourseEditor extends Component
             'availableResources' => $this->availableResources,
             'availableProviders' => $this->availableProviders,
             'availablePrograms' => $this->availablePrograms,
-        ])->layout('layouts.app');
+        ])->layout('layouts.dashboard', ['title' => 'Mini-Course Editor']);
     }
 }

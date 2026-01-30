@@ -355,6 +355,6 @@ class ResourceLibrary extends Component
             'miniCourses' => $this->activeTab === 'courses' ? $this->miniCourses : null,
             'allItems' => $this->activeTab === 'all' ? $this->allItems : null,
             'counts' => $this->counts,
-        ])->layout('layouts.app');
+        ])->layout('layouts.dashboard', ['title' => 'Resource Library']);
     }
 }

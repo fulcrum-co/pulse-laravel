@@ -133,6 +133,6 @@ class MiniCourseViewer extends Component
     {
         return view('livewire.mini-course-viewer', [
             'stepProgress' => $this->stepProgress,
-        ])->layout('layouts.app');
+        ])->layout('layouts.dashboard', ['title' => 'Course Viewer']);
     }
 }

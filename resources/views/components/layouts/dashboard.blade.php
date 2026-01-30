@@ -230,7 +230,7 @@
                 <div @mouseenter="hoveredItem = 'resource'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/resources"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
-                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('resources*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="book-open" class="w-5 h-5 flex-shrink-0" />
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Resource</span>
                     </a>

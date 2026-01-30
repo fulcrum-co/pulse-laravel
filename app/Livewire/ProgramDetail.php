@@ -17,6 +17,6 @@ class ProgramDetail extends Component
     public function render()
     {
         return view('livewire.program-detail')
-            ->layout('layouts.app');
+            ->layout('layouts.dashboard', ['title' => 'Program Details']);
     }
 }

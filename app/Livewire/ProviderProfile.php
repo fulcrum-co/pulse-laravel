@@ -17,6 +17,6 @@ class ProviderProfile extends Component
     public function render()
     {
         return view('livewire.provider-profile')
-            ->layout('layouts.app');
+            ->layout('layouts.dashboard', ['title' => 'Provider Profile']);
     }
 }
