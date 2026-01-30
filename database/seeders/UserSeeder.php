@@ -11,9 +11,26 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        $district = Organization::where('org_type', 'district')->first();
         $school = Organization::where('org_type', 'school')->first();
 
-        // Create admin user
+        // Create superintendent at district level - Dr. Margaret Chen
+        // An experienced educator in her late 50s who oversees the entire district
+        User::create([
+            'org_id' => $district->id,
+            'first_name' => 'Margaret',
+            'last_name' => 'Chen',
+            'email' => 'mchen@lincolnschools.edu',
+            'password' => Hash::make('password'),
+            'primary_role' => 'consultant', // Consultant role to see sub-organizations
+            'phone' => '(555) 123-4567',
+            'bio' => 'Superintendent of Lincoln County School District. 30+ years in education. Passionate about data-driven student success.',
+            'avatar_url' => 'https://randomuser.me/api/portraits/women/79.jpg',
+            'active' => true,
+            'suspended' => false,
+        ]);
+
+        // Create admin user at school level
         User::create([
             'org_id' => $school->id,
             'first_name' => 'Admin',

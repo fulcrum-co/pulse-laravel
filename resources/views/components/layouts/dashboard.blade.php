@@ -48,111 +48,242 @@
             }
         }
     </script>
+    <style>
+        /* Tooltip styles for collapsed sidebar */
+        .sidebar-tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+        .sidebar-collapsed .nav-item:hover .sidebar-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        /* Smooth sidebar transition */
+        .sidebar-transition {
+            transition: width 0.2s ease-in-out;
+        }
+        .sidebar-content-transition {
+            transition: opacity 0.15s ease-in-out;
+        }
+    </style>
     @livewireStyles
     @stack('styles')
 </head>
 <body class="bg-gray-50">
-    <div class="flex h-screen">
+    <div x-data="{ sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true' }"
+         x-init="$watch('sidebarCollapsed', val => localStorage.setItem('sidebarCollapsed', val))"
+         class="flex h-screen">
+
         <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
-            <!-- Logo & User Profile -->
-            <div class="px-4 py-4 border-b border-gray-200">
-                <a href="/dashboard" class="flex items-center mb-4">
-                    <span class="text-2xl font-bold text-pulse-orange-500">Pulse</span>
-                </a>
-                <!-- User Profile Dropdown -->
-                <div x-data="{ open: false }" class="relative">
-                    <button @click="open = !open" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div class="w-8 h-8 bg-pulse-orange-100 rounded-full flex items-center justify-center">
+        <aside :class="sidebarCollapsed ? 'w-16 sidebar-collapsed' : 'w-64'"
+               class="sidebar-transition bg-white border-r border-gray-200 flex flex-col">
+
+            <!-- Logo & Toggle -->
+            <div class="px-3 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <a href="/dashboard" class="flex items-center">
+                        <span class="text-2xl font-bold text-pulse-orange-500">
+                            <span x-show="!sidebarCollapsed">Pulse</span>
+                            <span x-show="sidebarCollapsed" class="text-xl">P</span>
+                        </span>
+                    </a>
+                    <button @click="sidebarCollapsed = !sidebarCollapsed"
+                            class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg x-show="!sidebarCollapsed" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+                        </svg>
+                        <svg x-show="sidebarCollapsed" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- User Profile & Organization Switcher -->
+            <div x-show="!sidebarCollapsed" class="px-3 py-3 border-b border-gray-200 sidebar-content-transition">
+                <livewire:organization-switcher />
+            </div>
+            <!-- Collapsed User Avatar -->
+            <div x-show="sidebarCollapsed" class="px-3 py-3 border-b border-gray-200 flex justify-center">
+                <div class="relative group">
+                    <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-pulse-orange-200">
+                        @if(auth()->user()->avatar_url)
+                        <img src="{{ auth()->user()->avatar_url }}" alt="" class="w-full h-full object-cover">
+                        @else
+                        <div class="w-full h-full bg-pulse-orange-100 flex items-center justify-center">
                             <span class="text-pulse-orange-600 font-medium text-sm">
                                 {{ substr(auth()->user()->first_name ?? 'U', 0, 1) }}{{ substr(auth()->user()->last_name ?? '', 0, 1) }}
                             </span>
                         </div>
-                        <span class="flex-1 text-left text-sm font-medium text-gray-900 truncate">
-                            {{ auth()->user()->first_name ?? 'User' }} {{ auth()->user()->last_name ?? '' }}
-                        </span>
-                        <x-icon name="chevron-down" class="w-4 h-4 text-gray-400" />
-                    </button>
-                    <div x-show="open" @click.away="open = false" class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
-                        <a href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Settings</a>
-                        <form method="POST" action="/logout">
-                            @csrf
-                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Logout</button>
-                        </form>
+                        @endif
+                    </div>
+                    <!-- Tooltip -->
+                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">
+                        {{ auth()->user()->first_name }} {{ auth()->user()->last_name }}
                     </div>
                 </div>
             </div>
 
-            <!-- Quick Access Grid -->
-            <div class="px-3 py-3 border-b border-gray-200">
-                <div class="grid grid-cols-2 gap-2">
-                    <a href="/dashboard" class="flex flex-col items-center p-3 rounded-lg border {{ request()->is('dashboard') ? 'border-pulse-orange-200 bg-pulse-orange-50' : 'border-gray-200 hover:bg-gray-50' }}">
-                        <x-icon name="home" class="w-5 h-5 {{ request()->is('dashboard') ? 'text-pulse-orange-500' : 'text-gray-500' }}" />
-                        <span class="text-xs mt-1 {{ request()->is('dashboard') ? 'text-pulse-orange-600' : 'text-gray-600' }}">Home</span>
+            <!-- Quick Access (Vertical) -->
+            <div class="py-3 border-b border-gray-200">
+                <div :class="sidebarCollapsed ? 'px-2 space-y-1' : 'px-3 space-y-1'">
+                    <!-- Home -->
+                    <a href="/dashboard"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboard') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <x-icon name="home" class="w-5 h-5 flex-shrink-0 {{ request()->is('dashboard') ? 'text-pulse-orange-500' : '' }}" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Home</span>
+                        <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Home</div>
                     </a>
-                    <a href="/contacts" class="flex flex-col items-center p-3 rounded-lg border {{ request()->is('contacts*') ? 'border-pulse-orange-200 bg-pulse-orange-50' : 'border-gray-200 hover:bg-gray-50' }}">
-                        <x-icon name="users" class="w-5 h-5 {{ request()->is('contacts*') ? 'text-pulse-orange-500' : 'text-gray-500' }}" />
-                        <span class="text-xs mt-1 {{ request()->is('contacts*') ? 'text-pulse-orange-600' : 'text-gray-600' }}">Contacts</span>
+                    <!-- Contacts -->
+                    <a href="/contacts"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('contacts*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <x-icon name="users" class="w-5 h-5 flex-shrink-0 {{ request()->is('contacts*') ? 'text-pulse-orange-500' : '' }}" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Contacts</span>
+                        <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Contacts</div>
                     </a>
-                    <a href="/surveys" class="flex flex-col items-center p-3 rounded-lg border {{ request()->is('surveys*') ? 'border-pulse-orange-200 bg-pulse-orange-50' : 'border-gray-200 hover:bg-gray-50' }}">
-                        <x-icon name="clipboard-list" class="w-5 h-5 {{ request()->is('surveys*') ? 'text-pulse-orange-500' : 'text-gray-500' }}" />
-                        <span class="text-xs mt-1 {{ request()->is('surveys*') ? 'text-pulse-orange-600' : 'text-gray-600' }}">Surveys</span>
+                    <!-- Surveys -->
+                    <a href="/surveys"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('surveys*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <x-icon name="clipboard-list" class="w-5 h-5 flex-shrink-0 {{ request()->is('surveys*') ? 'text-pulse-orange-500' : '' }}" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Surveys</span>
+                        <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Surveys</div>
                     </a>
-                    <a href="/dashboards" class="flex flex-col items-center p-3 rounded-lg border {{ request()->is('dashboards*') ? 'border-pulse-orange-200 bg-pulse-orange-50' : 'border-gray-200 hover:bg-gray-50' }}">
-                        <x-icon name="chart-pie" class="w-5 h-5 {{ request()->is('dashboards*') ? 'text-pulse-orange-500' : 'text-gray-500' }}" />
-                        <span class="text-xs mt-1 {{ request()->is('dashboards*') ? 'text-pulse-orange-600' : 'text-gray-600' }}">Dashboards</span>
+                    <!-- Dashboards -->
+                    <a href="/dashboards"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboards*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <x-icon name="chart-pie" class="w-5 h-5 flex-shrink-0 {{ request()->is('dashboards*') ? 'text-pulse-orange-500' : '' }}" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Dashboards</span>
+                        <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Dashboards</div>
                     </a>
                 </div>
             </div>
 
             <!-- Workspace Navigation -->
-            <nav class="flex-1 py-3 px-3 overflow-y-auto">
-                <p class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Workspace</p>
+            <nav class="flex-1 py-3 overflow-y-auto" :class="sidebarCollapsed ? 'px-2' : 'px-3'">
+                <p x-show="!sidebarCollapsed" class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-content-transition">Workspace</p>
+                <div x-show="sidebarCollapsed" class="mb-2 border-t border-gray-200"></div>
 
-                <x-nav-item href="/strategies" :active="request()->is('strategies*')">
-                    <x-icon name="flag" class="w-5 h-5" />
-                    Strategy
-                </x-nav-item>
+                <!-- Strategy -->
+                <a href="/strategies"
+                   :class="sidebarCollapsed ? 'justify-center' : ''"
+                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('strategies*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    <x-icon name="flag" class="w-5 h-5 flex-shrink-0" />
+                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Strategy</span>
+                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Strategy</div>
+                </a>
 
-                <x-nav-item href="/reports" :active="request()->is('reports*') && !request()->is('dashboard')">
-                    <x-icon name="chart-bar" class="w-5 h-5" />
-                    Reports
-                </x-nav-item>
+                <!-- Reports -->
+                <a href="/reports"
+                   :class="sidebarCollapsed ? 'justify-center' : ''"
+                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('reports*') && !request()->is('dashboard') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    <x-icon name="chart-bar" class="w-5 h-5 flex-shrink-0" />
+                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Reports</span>
+                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Reports</div>
+                </a>
 
-                <x-nav-item href="/surveys" :active="false">
-                    <x-icon name="collection" class="w-5 h-5" />
-                    Collect
-                </x-nav-item>
+                <!-- Collect -->
+                <a href="/surveys"
+                   :class="sidebarCollapsed ? 'justify-center' : ''"
+                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                    <x-icon name="collection" class="w-5 h-5 flex-shrink-0" />
+                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Collect</span>
+                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Collect</div>
+                </a>
 
-                <x-nav-item href="/resources" :active="request()->is('resources*')">
-                    <x-icon name="share" class="w-5 h-5" />
-                    Distribute
-                </x-nav-item>
+                <!-- Distribute -->
+                <a href="/resources"
+                   :class="sidebarCollapsed ? 'justify-center' : ''"
+                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('resources*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    <x-icon name="share" class="w-5 h-5 flex-shrink-0" />
+                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Distribute</span>
+                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute</div>
+                </a>
 
-                <x-nav-item href="/resources" :active="false">
-                    <x-icon name="book-open" class="w-5 h-5" />
-                    Resource
-                </x-nav-item>
+                <!-- Resource -->
+                <a href="/resources"
+                   :class="sidebarCollapsed ? 'justify-center' : ''"
+                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                    <x-icon name="book-open" class="w-5 h-5 flex-shrink-0" />
+                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Resource</span>
+                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Resource</div>
+                </a>
 
-                <x-nav-item href="/alerts" :active="request()->is('alerts*')">
-                    <x-icon name="bell" class="w-5 h-5" />
-                    Alerts
-                    <span class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full">4</span>
-                </x-nav-item>
+                <!-- Alerts -->
+                <a href="/alerts"
+                   :class="sidebarCollapsed ? 'justify-center' : ''"
+                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('alerts*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    <x-icon name="bell" class="w-5 h-5 flex-shrink-0" />
+                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Alerts</span>
+                    <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full">4</span>
+                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Alerts (4)</div>
+                </a>
 
-                <x-nav-item href="/marketplace" :active="request()->is('marketplace*')">
-                    <x-icon name="shopping-bag" class="w-5 h-5" />
-                    Marketplace
-                    <span class="ml-auto bg-purple-100 text-purple-600 text-xs font-medium px-2 py-0.5 rounded-full">New</span>
-                </x-nav-item>
+                <!-- Marketplace -->
+                <a href="/marketplace"
+                   :class="sidebarCollapsed ? 'justify-center' : ''"
+                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('marketplace*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    <x-icon name="shopping-bag" class="w-5 h-5 flex-shrink-0" />
+                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Marketplace</span>
+                    <span x-show="!sidebarCollapsed" class="ml-auto bg-purple-100 text-purple-600 text-xs font-medium px-2 py-0.5 rounded-full">New</span>
+                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace</div>
+                </a>
+
+                @php
+                    $user = auth()->user();
+                    $childOrgs = $user->getManagedChildOrganizations();
+                @endphp
+
+                @if($user->isAdmin() && $childOrgs->count() > 0)
+                <!-- Sub-Organizations (for Consultants/Superintendents) -->
+                <div class="mt-4 pt-4 border-t border-gray-100" x-show="!sidebarCollapsed">
+                    <p class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Sub-Organizations</p>
+
+                    <div class="space-y-1 max-h-48 overflow-y-auto">
+                        @foreach($childOrgs as $childOrg)
+                        <a
+                            href="/organizations/{{ $childOrg->id }}"
+                            class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors
+                                {{ request()->is('organizations/' . $childOrg->id . '*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                        >
+                            <div class="w-6 h-6 rounded bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-500 flex-shrink-0">
+                                {{ substr($childOrg->org_name ?? 'O', 0, 1) }}
+                            </div>
+                            <span class="truncate">{{ $childOrg->org_name }}</span>
+                        </a>
+                        @endforeach
+                    </div>
+
+                    @if($childOrgs->count() > 5)
+                    <a href="/organizations" class="block px-3 py-2 text-xs text-center text-pulse-orange-600 hover:text-pulse-orange-700">
+                        View All Organizations
+                    </a>
+                    @endif
+                </div>
+                <!-- Collapsed Sub-Orgs Icon -->
+                <div x-show="sidebarCollapsed" class="mt-4 pt-4 border-t border-gray-100">
+                    <a href="/organizations"
+                       class="nav-item relative group flex items-center justify-center px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                        <x-icon name="office-building" class="w-5 h-5 flex-shrink-0" />
+                        <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Sub-Organizations ({{ $childOrgs->count() }})</div>
+                    </a>
+                </div>
+                @endif
             </nav>
 
             <!-- Settings -->
-            <div class="p-3 border-t border-gray-200">
-                <x-nav-item href="/settings" :active="request()->is('settings*')">
-                    <x-icon name="cog" class="w-5 h-5" />
-                    Settings
-                </x-nav-item>
+            <div class="p-3 border-t border-gray-200" :class="sidebarCollapsed ? 'px-2' : ''">
+                <a href="/settings"
+                   :class="sidebarCollapsed ? 'justify-center' : ''"
+                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('settings*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                    <x-icon name="cog" class="w-5 h-5 flex-shrink-0" />
+                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Settings</span>
+                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Settings</div>
+                </a>
             </div>
         </aside>
 

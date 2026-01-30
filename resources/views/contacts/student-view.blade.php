@@ -240,7 +240,7 @@
                 <!-- Tab Content -->
                 <div class="p-4">
                     <!-- Timeline Tab -->
-                    <div x-show="activeTab === 'timeline'" x-cloak>
+                    <div x-show="activeTab === 'timeline'" x-cloak x-data="{ expandedItem: null }">
                         @php
                             // Combine all activities into a timeline
                             $timelineItems = collect();
@@ -248,6 +248,8 @@
                             // Add notes
                             foreach($student->notes ?? [] as $note) {
                                 $timelineItems->push([
+                                    'id' => 'note-' . $note->id,
+                                    'model_id' => $note->id,
                                     'type' => 'note',
                                     'icon' => 'pencil',
                                     'color' => 'blue',
@@ -255,12 +257,16 @@
                                     'content' => $note->content,
                                     'date' => $note->created_at,
                                     'author' => $note->createdBy?->full_name ?? 'Unknown',
+                                    'note_type' => $note->note_type,
+                                    'is_private' => $note->is_private ?? false,
                                 ]);
                             }
 
                             // Add survey attempts
                             foreach($student->surveyAttempts ?? [] as $attempt) {
                                 $timelineItems->push([
+                                    'id' => 'survey-' . $attempt->id,
+                                    'model_id' => $attempt->id,
                                     'type' => 'survey',
                                     'icon' => 'clipboard',
                                     'color' => $attempt->status === 'completed' ? 'green' : 'yellow',
@@ -268,19 +274,33 @@
                                     'content' => $attempt->overall_score ? "Score: {$attempt->overall_score}" : null,
                                     'date' => $attempt->completed_at ?? $attempt->created_at,
                                     'author' => null,
+                                    'status' => $attempt->status,
+                                    'overall_score' => $attempt->overall_score,
+                                    'risk_level' => $attempt->risk_level,
+                                    'survey_title' => $attempt->survey->title ?? 'Unknown Survey',
+                                    'responses' => $attempt->responses ?? [],
+                                    'questions' => $attempt->survey->questions ?? [],
                                 ]);
                             }
 
                             // Add resource assignments
                             foreach($student->resourceAssignments ?? [] as $assignment) {
                                 $timelineItems->push([
+                                    'id' => 'resource-' . $assignment->id,
+                                    'model_id' => $assignment->id,
                                     'type' => 'resource',
                                     'icon' => 'book',
                                     'color' => 'purple',
                                     'title' => 'Resource Assigned: ' . ($assignment->resource->title ?? 'Unknown'),
                                     'content' => "{$assignment->progress_percent}% complete",
                                     'date' => $assignment->assigned_at ?? $assignment->created_at,
-                                    'author' => null,
+                                    'author' => $assignment->assigner?->name ?? null,
+                                    'progress_percent' => $assignment->progress_percent ?? 0,
+                                    'status' => $assignment->status ?? 'pending',
+                                    'resource_title' => $assignment->resource->title ?? 'Unknown',
+                                    'resource_description' => $assignment->resource->description ?? null,
+                                    'resource_url' => $assignment->resource->url ?? null,
+                                    'notes' => $assignment->notes ?? null,
                                 ]);
                             }
 
@@ -293,11 +313,11 @@
                             <!-- Timeline line -->
                             <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
 
-                            <div class="space-y-6">
+                            <div class="space-y-4">
                                 @foreach($timelineItems as $item)
                                 <div class="relative flex gap-4">
                                     <!-- Timeline dot -->
-                                    <div class="relative z-10 flex items-center justify-center w-8 h-8 rounded-full
+                                    <div class="relative z-10 flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0
                                         @if($item['color'] === 'blue') bg-blue-100 text-blue-600
                                         @elseif($item['color'] === 'green') bg-green-100 text-green-600
                                         @elseif($item['color'] === 'yellow') bg-yellow-100 text-yellow-600
@@ -319,18 +339,150 @@
                                         @endif
                                     </div>
 
-                                    <!-- Content -->
-                                    <div class="flex-1 min-w-0 pb-6">
-                                        <div class="flex items-center justify-between gap-2">
-                                            <p class="text-sm font-medium text-gray-900">{{ $item['title'] }}</p>
-                                            <time class="text-xs text-gray-500 whitespace-nowrap">{{ $item['date']?->diffForHumans() ?? 'Unknown' }}</time>
+                                    <!-- Content (Clickable) -->
+                                    <div class="flex-1 min-w-0 pb-4">
+                                        <button
+                                            @click="expandedItem = expandedItem === '{{ $item['id'] }}' ? null : '{{ $item['id'] }}'"
+                                            class="w-full text-left p-3 -m-3 rounded-lg hover:bg-gray-50 transition-colors"
+                                        >
+                                            <div class="flex items-center justify-between gap-2">
+                                                <p class="text-sm font-medium text-gray-900">{{ $item['title'] }}</p>
+                                                <div class="flex items-center gap-2">
+                                                    <time class="text-xs text-gray-500 whitespace-nowrap">{{ $item['date']?->diffForHumans() ?? 'Unknown' }}</time>
+                                                    <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': expandedItem === '{{ $item['id'] }}' }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            @if($item['content'])
+                                            <p class="mt-1 text-sm text-gray-600" :class="{ 'line-clamp-2': expandedItem !== '{{ $item['id'] }}' }">{{ $item['content'] }}</p>
+                                            @endif
+                                            @if($item['author'])
+                                            <p class="mt-1 text-xs text-gray-400">by {{ $item['author'] }}</p>
+                                            @endif
+                                        </button>
+
+                                        <!-- Expanded Content -->
+                                        <div x-show="expandedItem === '{{ $item['id'] }}'" x-collapse class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                            @if($item['type'] === 'note')
+                                            <!-- Note Details -->
+                                            <div class="space-y-3">
+                                                <div class="flex items-center gap-2">
+                                                    @php
+                                                        $noteTypeColor = match($item['note_type'] ?? 'general') {
+                                                            'concern' => 'red',
+                                                            'follow_up' => 'yellow',
+                                                            'milestone' => 'green',
+                                                            default => 'gray',
+                                                        };
+                                                    @endphp
+                                                    <span class="px-2 py-0.5 text-xs rounded-full bg-{{ $noteTypeColor }}-100 text-{{ $noteTypeColor }}-700">
+                                                        {{ ucfirst(str_replace('_', ' ', $item['note_type'] ?? 'general')) }}
+                                                    </span>
+                                                    @if($item['is_private'])
+                                                    <span class="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-700">Private</span>
+                                                    @endif
+                                                </div>
+                                                <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $item['content'] }}</p>
+                                                <div class="flex items-center justify-between pt-2 border-t border-gray-200">
+                                                    <span class="text-xs text-gray-500">{{ $item['date']?->format('M d, Y h:i A') }}</span>
+                                                    <button
+                                                        onclick="document.querySelector('[data-tab=notes]').click()"
+                                                        class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700"
+                                                    >
+                                                        View in Notes Tab
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            @elseif($item['type'] === 'survey')
+                                            <!-- Survey Details -->
+                                            <div class="space-y-3">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="px-2 py-0.5 text-xs rounded-full {{ $item['status'] === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                                                        {{ ucfirst($item['status']) }}
+                                                    </span>
+                                                    @if($item['risk_level'])
+                                                    <span class="px-2 py-0.5 text-xs rounded-full {{ $item['risk_level'] === 'high' ? 'bg-red-100 text-red-700' : ($item['risk_level'] === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">
+                                                        {{ ucfirst($item['risk_level']) }} Risk
+                                                    </span>
+                                                    @endif
+                                                    @if($item['overall_score'])
+                                                    <span class="text-sm font-semibold text-gray-700">Score: {{ number_format($item['overall_score'], 1) }}</span>
+                                                    @endif
+                                                </div>
+                                                @if(count($item['questions']) > 0 && count($item['responses']) > 0)
+                                                <div class="space-y-2 max-h-48 overflow-y-auto">
+                                                    @foreach(array_slice($item['questions'], 0, 5) as $index => $question)
+                                                    @php
+                                                        $questionId = $question['id'] ?? "q{$index}";
+                                                        $response = $item['responses'][$questionId] ?? null;
+                                                    @endphp
+                                                    <div class="p-2 bg-white rounded border border-gray-100">
+                                                        <p class="text-xs font-medium text-gray-600">{{ Str::limit($question['text'] ?? $question['question'] ?? 'Question', 80) }}</p>
+                                                        <p class="text-sm text-gray-900 mt-1">
+                                                            @if($response !== null)
+                                                            {{ is_array($response) ? implode(', ', $response) : $response }}
+                                                            @else
+                                                            <span class="text-gray-400 italic">No response</span>
+                                                            @endif
+                                                        </p>
+                                                    </div>
+                                                    @endforeach
+                                                    @if(count($item['questions']) > 5)
+                                                    <p class="text-xs text-gray-500 text-center">+ {{ count($item['questions']) - 5 }} more questions</p>
+                                                    @endif
+                                                </div>
+                                                @endif
+                                                <div class="flex items-center justify-between pt-2 border-t border-gray-200">
+                                                    <span class="text-xs text-gray-500">{{ $item['date']?->format('M d, Y h:i A') }}</span>
+                                                    <button
+                                                        onclick="document.querySelector('[data-tab=surveys]').click()"
+                                                        class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700"
+                                                    >
+                                                        View in Surveys Tab
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            @elseif($item['type'] === 'resource')
+                                            <!-- Resource Details -->
+                                            <div class="space-y-3">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="px-2 py-0.5 text-xs rounded-full {{ $item['status'] === 'completed' ? 'bg-green-100 text-green-700' : ($item['status'] === 'in_progress' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600') }}">
+                                                        {{ ucfirst(str_replace('_', ' ', $item['status'])) }}
+                                                    </span>
+                                                    <div class="flex items-center gap-1 text-xs text-gray-500">
+                                                        <div class="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                                            <div class="h-full bg-pulse-orange-500" style="width: {{ $item['progress_percent'] }}%"></div>
+                                                        </div>
+                                                        {{ $item['progress_percent'] }}%
+                                                    </div>
+                                                </div>
+                                                @if($item['resource_description'])
+                                                <p class="text-sm text-gray-600">{{ Str::limit($item['resource_description'], 150) }}</p>
+                                                @endif
+                                                @if($item['notes'])
+                                                <div class="p-2 bg-white rounded border border-gray-100">
+                                                    <p class="text-xs font-medium text-gray-500 mb-1">Notes</p>
+                                                    <p class="text-sm text-gray-700">{{ $item['notes'] }}</p>
+                                                </div>
+                                                @endif
+                                                <div class="flex items-center justify-between pt-2 border-t border-gray-200">
+                                                    <span class="text-xs text-gray-500">{{ $item['date']?->format('M d, Y h:i A') }}</span>
+                                                    <div class="flex items-center gap-3">
+                                                        @if($item['resource_url'])
+                                                        <a href="{{ $item['resource_url'] }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-700">Open Resource</a>
+                                                        @endif
+                                                        <button
+                                                            onclick="document.querySelector('[data-tab=resources]').click()"
+                                                            class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700"
+                                                        >
+                                                            View in Resources Tab
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @endif
                                         </div>
-                                        @if($item['content'])
-                                        <p class="mt-1 text-sm text-gray-600 line-clamp-2">{{ $item['content'] }}</p>
-                                        @endif
-                                        @if($item['author'])
-                                        <p class="mt-1 text-xs text-gray-400">by {{ $item['author'] }}</p>
-                                        @endif
                                     </div>
                                 </div>
                                 @endforeach
@@ -356,60 +508,18 @@
 
                     <!-- Surveys Tab -->
                     <div x-show="activeTab === 'surveys'" x-cloak>
-                        @if($student->surveyAttempts && $student->surveyAttempts->count() > 0)
-                        <div class="space-y-3">
-                            @foreach($student->surveyAttempts as $attempt)
-                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="text-sm font-medium text-gray-900">{{ $attempt->survey->title ?? 'Unknown Survey' }}</div>
-                                    <div class="text-xs text-gray-500">{{ $attempt->completed_at?->format('M d, Y') ?? 'In Progress' }}</div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <span class="text-sm text-gray-600">{{ $attempt->overall_score ?? 'N/A' }}</span>
-                                    <span class="px-2 py-0.5 text-xs rounded-full {{ $attempt->status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
-                                        {{ ucfirst($attempt->status) }}
-                                    </span>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                        @else
-                        <div class="text-center py-8">
-                            <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                            </svg>
-                            <p class="text-sm text-gray-500">No surveys completed</p>
-                        </div>
-                        @endif
+                        <livewire:contact-surveys
+                            contact-type="student"
+                            :contact-id="$student->id"
+                        />
                     </div>
 
                     <!-- Resources Tab -->
                     <div x-show="activeTab === 'resources'" x-cloak>
-                        @if($student->resourceAssignments && $student->resourceAssignments->count() > 0)
-                        <div class="space-y-3">
-                            @foreach($student->resourceAssignments as $assignment)
-                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="text-sm font-medium text-gray-900">{{ $assignment->resource->title ?? 'Unknown Resource' }}</div>
-                                    <div class="text-xs text-gray-500">Assigned {{ $assignment->assigned_at?->format('M d, Y') ?? 'Unknown' }}</div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <span class="text-sm text-gray-600">{{ $assignment->progress_percent ?? 0 }}%</span>
-                                    <span class="px-2 py-0.5 text-xs rounded-full {{ $assignment->status === 'completed' ? 'bg-green-100 text-green-700' : ($assignment->status === 'in_progress' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600') }}">
-                                        {{ ucfirst($assignment->status ?? 'pending') }}
-                                    </span>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                        @else
-                        <div class="text-center py-8">
-                            <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                            </svg>
-                            <p class="text-sm text-gray-500">No resources assigned</p>
-                        </div>
-                        @endif
+                        <livewire:contact-resources
+                            contact-type="student"
+                            :contact-id="$student->id"
+                        />
                     </div>
                 </div>
             </div>
