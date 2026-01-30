@@ -211,6 +211,21 @@ Route::middleware('auth')->group(function () {
         return view('resources.index');
     })->name('resources.index');
 
+    // Collect (coming soon)
+    Route::get('/collect', function () {
+        return view('collect.index');
+    })->name('collect.index');
+
+    // Distribute (coming soon)
+    Route::get('/distribute', function () {
+        return view('distribute.index');
+    })->name('distribute.index');
+
+    // Marketplace (coming soon)
+    Route::get('/marketplace', function () {
+        return view('marketplace.index');
+    })->name('marketplace.index');
+
     // Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/create', [ReportController::class, 'create'])->name('reports.create');

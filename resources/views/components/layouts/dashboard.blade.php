@@ -106,7 +106,7 @@
             </div>
             <!-- Collapsed User Avatar -->
             <div x-show="sidebarCollapsed" class="px-3 py-3 border-b border-gray-200 flex justify-center">
-                <div class="relative group">
+                <div class="nav-item relative group">
                     <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-pulse-orange-200">
                         @if(auth()->user()->avatar_url)
                         <img src="{{ auth()->user()->avatar_url }}" alt="" class="w-full h-full object-cover">
@@ -196,7 +196,7 @@
                    class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('strategies*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                     <x-icon name="flag" class="w-5 h-5 flex-shrink-0" />
                     <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Strategy</span>
-                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Strategy</div>
+                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Strategy</div>
                 </a>
 
                 <!-- Reports -->
@@ -205,27 +205,27 @@
                    class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('reports*') && !request()->is('dashboard') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                     <x-icon name="chart-bar" class="w-5 h-5 flex-shrink-0" />
                     <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Reports</span>
-                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Reports</div>
+                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Reports</div>
                 </a>
 
                 <!-- Collect -->
-                <a href="/surveys"
+                <a href="/collect"
                    :class="sidebarCollapsed ? 'justify-center' : ''"
                    class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
                     <x-icon name="collection" class="w-5 h-5 flex-shrink-0" />
                     <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Collect</span>
-                    <span x-show="!sidebarCollapsed" class="ml-auto bg-gray-100 text-gray-500 text-xs font-medium px-2 py-0.5 rounded-full">Coming Soon</span>
-                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Collect (Coming Soon)</div>
+                    <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
+                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Collect</div>
                 </a>
 
                 <!-- Distribute -->
-                <a href="/resources"
+                <a href="/distribute"
                    :class="sidebarCollapsed ? 'justify-center' : ''"
                    class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
                     <x-icon name="share" class="w-5 h-5 flex-shrink-0" />
                     <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Distribute</span>
-                    <span x-show="!sidebarCollapsed" class="ml-auto bg-gray-100 text-gray-500 text-xs font-medium px-2 py-0.5 rounded-full">Coming Soon</span>
-                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute (Coming Soon)</div>
+                    <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
+                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute</div>
                 </a>
 
                 <!-- Resource -->
@@ -234,7 +234,7 @@
                    class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
                     <x-icon name="book-open" class="w-5 h-5 flex-shrink-0" />
                     <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Resource</span>
-                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Resource</div>
+                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Resource</div>
                 </a>
 
                 <!-- Alerts -->
@@ -244,7 +244,7 @@
                     <x-icon name="bell" class="w-5 h-5 flex-shrink-0" />
                     <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Alerts</span>
                     <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full">4</span>
-                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Alerts (4)</div>
+                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Alerts (4)</div>
                 </a>
 
                 <!-- Marketplace -->
@@ -252,9 +252,9 @@
                    :class="sidebarCollapsed ? 'justify-center' : ''"
                    class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
                     <x-icon name="shopping-bag" class="w-5 h-5 flex-shrink-0" />
-                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Marketplace</span>
-                    <span x-show="!sidebarCollapsed" class="ml-auto bg-gray-100 text-gray-500 text-xs font-medium px-2 py-0.5 rounded-full">Coming Soon</span>
-                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace (Coming Soon)</div>
+                    <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition whitespace-nowrap">Marketplace</span>
+                    <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
+                    <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace</div>
                 </a>
 
                 @php
