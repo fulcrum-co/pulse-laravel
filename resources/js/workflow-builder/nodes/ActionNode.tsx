@@ -63,9 +63,10 @@ const actionLabels: Record<string, string> = {
 };
 
 function ActionNode({ data, selected }: NodeProps<ActionNodeData>) {
-    const actionType = data.action_type || 'send_email';
-    const icon = actionIcons[actionType] || actionIcons.send_email;
-    const label = actionLabels[actionType] || 'Action';
+    // Safely get action type - ensure it's a string
+    const actionType = (typeof data?.action_type === 'string' ? data.action_type : 'send_sms') as string;
+    const icon = actionIcons[actionType] || actionIcons.send_sms;
+    const label = typeof actionLabels[actionType] === 'string' ? actionLabels[actionType] : 'Action';
 
     const getSubtitle = () => {
         if (!data?.config) return 'Not configured';

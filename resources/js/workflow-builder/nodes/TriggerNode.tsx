@@ -4,10 +4,16 @@ import type { TriggerNodeData } from '../types/workflow';
 import { TRIGGER_TYPES } from '../types/workflow';
 
 function TriggerNode({ data, selected }: NodeProps<TriggerNodeData>) {
-    const triggerType = TRIGGER_TYPES[data.trigger_type as keyof typeof TRIGGER_TYPES] || {
-        label: 'Unknown Trigger',
-        icon: 'bolt',
+    // Safely get trigger type label - ensure we always render a string
+    const getTriggerLabel = (): string => {
+        if (!data?.trigger_type) return 'Unknown Trigger';
+        if (typeof data.trigger_type !== 'string') return 'Unknown Trigger';
+        const triggerConfig = TRIGGER_TYPES[data.trigger_type as keyof typeof TRIGGER_TYPES];
+        if (!triggerConfig) return 'Unknown Trigger';
+        return typeof triggerConfig.label === 'string' ? triggerConfig.label : 'Unknown Trigger';
     };
+
+    const triggerLabel = getTriggerLabel();
 
     return (
         <div
@@ -25,7 +31,7 @@ function TriggerNode({ data, selected }: NodeProps<TriggerNodeData>) {
                 </div>
                 <div>
                     <div className="text-xs font-semibold uppercase text-amber-600 tracking-wide">Trigger</div>
-                    <div className="text-sm font-medium text-gray-900">{triggerType.label}</div>
+                    <div className="text-sm font-medium text-gray-900">{triggerLabel}</div>
                 </div>
             </div>
 
