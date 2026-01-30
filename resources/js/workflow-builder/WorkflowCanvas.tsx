@@ -59,6 +59,11 @@ function WorkflowCanvasInner({
     // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
+    // Debug: Log when component mounts
+    useEffect(() => {
+        console.log('[WorkflowCanvas] Component mounted - version 2026-01-30-v2');
+    }, []);
+
     // Handle adding nodes from branch buttons
     useEffect(() => {
         const handleAddFromBranch = (e: CustomEvent) => {
@@ -211,15 +216,22 @@ function WorkflowCanvasInner({
     const onDrop = useCallback(
         (event: React.DragEvent) => {
             event.preventDefault();
+            console.log('[WorkflowCanvas] Drop event received');
 
             const type = event.dataTransfer.getData('application/reactflow');
-            if (!type) return;
+            console.log('[WorkflowCanvas] Node type from drop:', type);
+
+            if (!type) {
+                console.log('[WorkflowCanvas] No type found, ignoring drop');
+                return;
+            }
 
             // Use screenToFlowPosition to get the correct position in the flow
             const position = screenToFlowPosition({
                 x: event.clientX,
                 y: event.clientY,
             });
+            console.log('[WorkflowCanvas] Adding node at position:', position);
 
             addNode(type, position);
         },

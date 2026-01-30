@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 
 interface NodePaletteProps {
     className?: string;
@@ -112,51 +112,40 @@ const colorClasses: Record<string, { bg: string; border: string; text: string; h
 };
 
 export default function NodePalette({ className = '', onAddNode }: NodePaletteProps) {
-    const dragPreviewRef = useRef<HTMLDivElement | null>(null);
-
-    // Create hidden drag preview container on mount
-    useEffect(() => {
-        const container = document.createElement('div');
-        container.id = 'drag-preview-container';
-        container.style.position = 'absolute';
-        container.style.top = '-1000px';
-        container.style.left = '-1000px';
-        document.body.appendChild(container);
-        dragPreviewRef.current = container;
-
-        return () => {
-            container.remove();
-        };
-    }, []);
-
     const onDragStart = (event: React.DragEvent, item: PaletteItem) => {
+        console.log('[NodePalette] Drag started for:', item.type);
+
         // Set the data transfer
         event.dataTransfer.setData('application/reactflow', item.type);
         event.dataTransfer.effectAllowed = 'move';
 
-        // Create a small, clean drag preview with fixed dimensions
-        if (dragPreviewRef.current) {
-            const preview = document.createElement('div');
-            preview.style.cssText = `
-                padding: 6px 12px;
-                border-radius: 6px;
-                font-size: 12px;
-                font-weight: 600;
-                font-family: system-ui, -apple-system, sans-serif;
-                background: white;
-                border: 2px solid ${item.borderColor};
-                color: ${item.borderColor};
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-                white-space: nowrap;
-                display: inline-block;
-            `;
-            preview.textContent = item.label;
-            dragPreviewRef.current.innerHTML = '';
-            dragPreviewRef.current.appendChild(preview);
+        // Create custom drag image - a small pill-shaped label
+        const dragImage = document.createElement('div');
+        dragImage.textContent = item.label;
+        dragImage.style.cssText = `
+            position: fixed;
+            top: -100px;
+            left: -100px;
+            padding: 4px 10px;
+            background: white;
+            border: 2px solid ${item.borderColor};
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: ${item.borderColor};
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            pointer-events: none;
+            z-index: 10000;
+        `;
+        document.body.appendChild(dragImage);
 
-            // Use fixed offset values since element isn't rendered yet (roughly center of small pill)
-            event.dataTransfer.setDragImage(preview, 40, 14);
-        }
+        // Set as drag image with small offset
+        event.dataTransfer.setDragImage(dragImage, 30, 12);
+
+        // Clean up after drag starts
+        requestAnimationFrame(() => {
+            document.body.removeChild(dragImage);
+        });
     };
 
     const handleClick = (nodeType: string) => {
