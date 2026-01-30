@@ -1,47 +1,54 @@
 <div class="space-y-4">
     <!-- Search & Filters -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div class="relative w-full sm:w-64">
-            <x-icon name="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-                type="text"
-                wire:model.live.debounce.300ms="search"
-                placeholder="Search contacts..."
-                class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-            />
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div class="relative w-full sm:w-64">
+                <x-icon name="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                    type="text"
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Search contacts..."
+                    class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                />
+            </div>
+
+            <div class="flex items-center gap-3">
+                <select
+                    wire:model.live="riskFilter"
+                    class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                >
+                    <option value="">All Risk Levels</option>
+                    <option value="good">Good Standing</option>
+                    <option value="low">Low Risk</option>
+                    <option value="high">High Risk</option>
+                </select>
+
+                <select
+                    wire:model.live="gradeFilter"
+                    class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                >
+                    <option value="">All Grades</option>
+                    <option value="9">Grade 9</option>
+                    <option value="10">Grade 10</option>
+                    <option value="11">Grade 11</option>
+                    <option value="12">Grade 12</option>
+                </select>
+
+                @if($search || $riskFilter || $gradeFilter)
+                <button
+                    wire:click="clearFilters"
+                    class="text-sm text-gray-500 hover:text-gray-700"
+                >
+                    Clear
+                </button>
+                @endif
+            </div>
         </div>
 
-        <div class="flex items-center gap-3">
-            <select
-                wire:model.live="riskFilter"
-                class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-            >
-                <option value="">All Risk Levels</option>
-                <option value="good">Good Standing</option>
-                <option value="low">Low Risk</option>
-                <option value="high">High Risk</option>
-            </select>
-
-            <select
-                wire:model.live="gradeFilter"
-                class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-            >
-                <option value="">All Grades</option>
-                <option value="9">Grade 9</option>
-                <option value="10">Grade 10</option>
-                <option value="11">Grade 11</option>
-                <option value="12">Grade 12</option>
-            </select>
-
-            @if($search || $riskFilter || $gradeFilter)
-            <button
-                wire:click="clearFilters"
-                class="text-sm text-gray-500 hover:text-gray-700"
-            >
-                Clear
-            </button>
-            @endif
-        </div>
+        <a href="{{ route('contacts.lists') }}" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors">
+            <x-icon name="user-group" class="w-4 h-4" />
+            Manage Lists
+        </a>
     </div>
 
     <!-- Contacts Table -->

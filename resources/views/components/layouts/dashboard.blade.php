@@ -217,10 +217,9 @@
                 <div @mouseenter="hoveredItem = 'distribute'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/distribute"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
-                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                        <x-icon name="share" class="w-5 h-5 flex-shrink-0" />
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('distribute*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <x-icon name="paper-airplane" class="w-5 h-5 flex-shrink-0" />
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Distribute</span>
-                        <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
                     </a>
                     <div x-show="sidebarCollapsed && hoveredItem === 'distribute'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute</div>
                 </div>
@@ -246,6 +245,17 @@
                         <span x-show="!sidebarCollapsed" class="ml-auto bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded-full">4</span>
                     </a>
                     <div x-show="sidebarCollapsed && hoveredItem === 'alerts'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Alerts (4)</div>
+                </div>
+
+                <!-- Contact Lists -->
+                <div @mouseenter="hoveredItem = 'contact-lists'" @mouseleave="hoveredItem = null" class="relative">
+                    <a href="/contacts/lists"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('contacts/lists*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <x-icon name="user-group" class="w-5 h-5 flex-shrink-0" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Contact Lists</span>
+                    </a>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'contact-lists'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Contact Lists</div>
                 </div>
 
                 <!-- Marketplace -->
@@ -386,6 +396,12 @@
                         <a href="{{ route('collect.create') }}" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
                             <x-icon name="plus" class="w-4 h-4 mr-2" />
                             Add Collection
+                        </a>
+                    @elseif(request()->is('distribute'))
+                        <!-- Create Distribution Button -->
+                        <a href="{{ route('distribute.create') }}" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                            <x-icon name="plus" class="w-4 h-4 mr-2" />
+                            Create Distribution
                         </a>
                     @endif
                 </div>

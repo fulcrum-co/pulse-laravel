@@ -311,10 +311,11 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('collect.index');
     })->name('collect.show');
 
-    // Distribute (coming soon)
-    Route::get('/distribute', function () {
-        return view('distribute.index');
-    })->name('distribute.index');
+    // Distribute
+    Route::get('/distribute', App\Livewire\Distribute\DistributeList::class)->name('distribute.index');
+    Route::get('/distribute/create', App\Livewire\Distribute\DistributionCreator::class)->name('distribute.create');
+    Route::get('/distribute/{distribution}', App\Livewire\Distribute\DistributionDetail::class)->name('distribute.show');
+    Route::get('/distribute/{distribution}/edit', App\Livewire\Distribute\DistributionCreator::class)->name('distribute.edit');
 
     // Marketplace (coming soon)
     Route::get('/marketplace', function () {
