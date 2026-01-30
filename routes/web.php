@@ -20,6 +20,37 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+// Temporary route to fix avatars - visit once then remove
+Route::get('/fix-avatars-temp', function () {
+    $femaleNames = ['Emma','Olivia','Ava','Sophia','Isabella','Mia','Charlotte','Amelia','Harper','Evelyn','Luna','Chloe'];
+    $maleImg = 1;
+    $femaleImg = 1;
+
+    $students = \App\Models\User::where('primary_role', 'student')->get();
+    foreach ($students as $user) {
+        if (in_array($user->first_name, $femaleNames)) {
+            $user->avatar_url = 'https://randomuser.me/api/portraits/women/' . $femaleImg . '.jpg';
+            $femaleImg++;
+        } else {
+            $user->avatar_url = 'https://randomuser.me/api/portraits/men/' . $maleImg . '.jpg';
+            $maleImg++;
+        }
+        $user->save();
+    }
+
+    // Fix teachers
+    \App\Models\User::where('email', 'jwilson@lincolnhigh.edu')->update(['avatar_url' => 'https://randomuser.me/api/portraits/men/32.jpg']);
+    \App\Models\User::where('email', 'mgarcia@lincolnhigh.edu')->update(['avatar_url' => 'https://randomuser.me/api/portraits/women/44.jpg']);
+    \App\Models\User::where('email', 'dlee@lincolnhigh.edu')->update(['avatar_url' => 'https://randomuser.me/api/portraits/men/45.jpg']);
+    \App\Models\User::where('email', 'sthompson@lincolnhigh.edu')->update(['avatar_url' => 'https://randomuser.me/api/portraits/women/28.jpg']);
+
+    // Fix admin/counselor
+    \App\Models\User::where('email', 'admin@lincolnhigh.edu')->update(['avatar_url' => 'https://randomuser.me/api/portraits/men/75.jpg']);
+    \App\Models\User::where('email', 'erodriguez@lincolnhigh.edu')->update(['avatar_url' => 'https://randomuser.me/api/portraits/women/65.jpg']);
+
+    return 'Avatars updated! You can remove this route now.';
+});
+
 // Public dashboard view (shareable reports, no auth required)
 Route::get('/dashboard/{token}', [ReportController::class, 'publicView'])->name('reports.public');
 
