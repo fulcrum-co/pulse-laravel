@@ -159,7 +159,7 @@ class AlertController extends Controller
         ]);
 
         if ($validated['mode'] === Workflow::MODE_ADVANCED) {
-            return redirect()->route('alerts.edit', $workflow);
+            return redirect()->route('alerts.canvas', $workflow);
         }
 
         return redirect()->route('alerts.edit', $workflow);
