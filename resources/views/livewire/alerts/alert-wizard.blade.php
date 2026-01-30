@@ -342,7 +342,7 @@
                         </div>
                         <div class="flex">
                             <dt class="w-32 text-gray-500">Trigger:</dt>
-                            <dd class="font-medium text-gray-900">{{ Workflow::getTriggerTypes()[$triggerType] ?? $triggerType }}</dd>
+                            <dd class="font-medium text-gray-900">{{ \App\Models\Workflow::getTriggerTypes()[$triggerType] ?? $triggerType }}</dd>
                         </div>
                         <div class="flex">
                             <dt class="w-32 text-gray-500">Conditions:</dt>
