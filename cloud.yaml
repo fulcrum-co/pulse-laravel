@@ -1,0 +1,52 @@
+name: pulse
+
+environments:
+  production:
+    build:
+      - composer install --no-dev --optimize-autoloader
+      - npm ci && npm run build
+
+    php: 8.3
+
+    scheduler: true
+    queue:
+      workers: 1
+
+    databases:
+      - pulse-db
+
+    caches:
+      - pulse-cache
+
+    environment:
+      APP_ENV: production
+      APP_DEBUG: false
+      LOG_CHANNEL: stack
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+
+  staging:
+    build:
+      - composer install --no-dev --optimize-autoloader
+      - npm ci && npm run build
+
+    php: 8.3
+
+    scheduler: true
+    queue:
+      workers: 1
+
+    databases:
+      - pulse-db-staging
+
+    caches:
+      - pulse-cache-staging
+
+    environment:
+      APP_ENV: staging
+      APP_DEBUG: true
+      LOG_CHANNEL: stack
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
