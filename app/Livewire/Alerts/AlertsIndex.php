@@ -13,6 +13,7 @@ class AlertsIndex extends Component
     public string $search = '';
     public string $statusFilter = '';
     public string $triggerTypeFilter = '';
+    public string $viewMode = 'grid';
     public ?string $workflowToDelete = null;
     public bool $showDeleteModal = false;
 
@@ -20,7 +21,13 @@ class AlertsIndex extends Component
         'search' => ['except' => ''],
         'statusFilter' => ['except' => ''],
         'triggerTypeFilter' => ['except' => ''],
+        'viewMode' => ['except' => 'grid'],
     ];
+
+    public function setViewMode(string $mode): void
+    {
+        $this->viewMode = $mode;
+    }
 
     public function updatingSearch(): void
     {
