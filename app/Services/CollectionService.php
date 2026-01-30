@@ -205,12 +205,12 @@ class CollectionService
 
             // Filter by grades
             if (!empty($scope['grades'])) {
-                $query->whereIn('grade', $scope['grades']);
+                $query->whereIn('grade_level', $scope['grades']);
             }
 
-            // Filter by classrooms
+            // Filter by classrooms (homeroom)
             if (!empty($scope['classrooms'])) {
-                $query->whereIn('classroom_id', $scope['classrooms']);
+                $query->whereIn('homeroom_classroom_id', $scope['classrooms']);
             }
 
             // Filter by tags

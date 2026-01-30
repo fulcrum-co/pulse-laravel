@@ -95,9 +95,9 @@ class CollectionCreator extends Component
 
         // Load available grades
         $this->availableGrades = Student::where('org_id', $user->org_id)
-            ->whereNotNull('grade')
+            ->whereNotNull('grade_level')
             ->distinct()
-            ->pluck('grade')
+            ->pluck('grade_level')
             ->sort()
             ->values()
             ->toArray();
