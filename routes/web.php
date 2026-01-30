@@ -345,6 +345,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/alerts/{workflow}/save', [AlertController::class, 'saveWorkflow'])->name('alerts.save');
     Route::delete('/alerts/{workflow}', [AlertController::class, 'destroy'])->name('alerts.destroy');
 
+    // Admin Settings
+    Route::prefix('admin')->group(function () {
+        Route::get('/settings/ai-courses', App\Livewire\Admin\AICourseSettings::class)->name('admin.settings.ai-courses');
+    });
+
     // Settings (placeholder)
     Route::get('/settings', function () {
         return view('settings.index');
