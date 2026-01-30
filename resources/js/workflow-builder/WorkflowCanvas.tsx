@@ -93,7 +93,8 @@ function WorkflowCanvasInner({
                     {
                         id: `e${sourceNodeId}-${newNode.id}`,
                         source: sourceNodeId,
-                        sourceHandle: branchId,
+                        // Only set sourceHandle for branch/condition nodes, not 'default'
+                        ...(branchId !== 'default' ? { sourceHandle: branchId } : {}),
                         target: newNode.id,
                         animated: true,
                     },
@@ -271,9 +272,13 @@ function WorkflowCanvasInner({
                     defaultViewport={{ x: 0, y: 0, zoom: 1 }}
                     snapToGrid
                     snapGrid={[15, 15]}
+                    deleteKeyCode={['Backspace', 'Delete']}
+                    selectionKeyCode={null}
+                    multiSelectionKeyCode={['Shift']}
                     defaultEdgeOptions={{
                         animated: true,
                         style: { strokeWidth: 2 },
+                        deletable: true,
                     }}
                     proOptions={{ hideAttribution: true }}
                 >
