@@ -176,7 +176,7 @@
                             id="messageBody"
                             wire:model="messageBody"
                             rows="6"
-                            placeholder="Type your message here. Use merge fields like {{first_name}} for personalization..."
+                            placeholder="Type your message here. Use merge fields like @{{first_name}} for personalization..."
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 font-mono text-sm"
                         ></textarea>
                         @error('messageBody') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -184,7 +184,16 @@
                         <div class="mt-2">
                             <p class="text-xs text-gray-500 mb-2">Available merge fields:</p>
                             <div class="flex flex-wrap gap-1">
-                                @foreach(['{{first_name}}', '{{last_name}}', '{{full_name}}', '{{email}}', '{{organization_name}}'] as $field)
+                                @php
+                                    $mergeFields = [
+                                        '{{first_name}}',
+                                        '{{last_name}}',
+                                        '{{full_name}}',
+                                        '{{email}}',
+                                        '{{organization_name}}'
+                                    ];
+                                @endphp
+                                @foreach($mergeFields as $field)
                                     <button
                                         type="button"
                                         onclick="navigator.clipboard.writeText('{{ $field }}')"

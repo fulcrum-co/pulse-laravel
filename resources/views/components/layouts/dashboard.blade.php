@@ -218,7 +218,7 @@
                     <a href="/distribute"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
                        class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('distribute*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                        <x-icon name="paper-airplane" class="w-5 h-5 flex-shrink-0" />
+                        <x-icon name="share" class="w-5 h-5 flex-shrink-0" />
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Distribute</span>
                     </a>
                     <div x-show="sidebarCollapsed && hoveredItem === 'distribute'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute</div>
