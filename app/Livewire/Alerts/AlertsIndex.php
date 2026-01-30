@@ -126,8 +126,10 @@ class AlertsIndex extends Component
         }
 
         $user = auth()->user();
+        // Cast string IDs to integers for proper PostgreSQL comparison
+        $ids = array_map('intval', $this->selected);
         $count = Workflow::forOrg($user->org_id)
-            ->whereIn('id', $this->selected)
+            ->whereIn('id', $ids)
             ->delete();
 
         $this->dispatch('notify', [

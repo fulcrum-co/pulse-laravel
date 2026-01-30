@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 
 interface NodePaletteProps {
     className?: string;
@@ -10,6 +10,7 @@ interface PaletteItem {
     label: string;
     description: string;
     color: string;
+    borderColor: string;
     icon: JSX.Element;
 }
 
@@ -19,6 +20,7 @@ const paletteItems: PaletteItem[] = [
         label: 'Trigger',
         description: 'Start the workflow',
         color: 'amber',
+        borderColor: '#F59E0B',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -30,6 +32,7 @@ const paletteItems: PaletteItem[] = [
         label: 'Condition',
         description: 'IF/ELSE logic',
         color: 'purple',
+        borderColor: '#8B5CF6',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -41,6 +44,7 @@ const paletteItems: PaletteItem[] = [
         label: 'Delay',
         description: 'Wait before continuing',
         color: 'indigo',
+        borderColor: '#6366F1',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -52,6 +56,7 @@ const paletteItems: PaletteItem[] = [
         label: 'Action',
         description: 'Send notification, call API',
         color: 'emerald',
+        borderColor: '#10B981',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -64,6 +69,7 @@ const paletteItems: PaletteItem[] = [
         label: 'Split',
         description: 'Parallel execution paths',
         color: 'orange',
+        borderColor: '#F97316',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -106,9 +112,53 @@ const colorClasses: Record<string, { bg: string; border: string; text: string; h
 };
 
 export default function NodePalette({ className = '', onAddNode }: NodePaletteProps) {
-    const onDragStart = (event: React.DragEvent, nodeType: string) => {
-        event.dataTransfer.setData('application/reactflow', nodeType);
+    const dragPreviewRef = useRef<HTMLDivElement | null>(null);
+
+    // Create hidden drag preview container on mount
+    useEffect(() => {
+        const container = document.createElement('div');
+        container.id = 'drag-preview-container';
+        container.style.position = 'absolute';
+        container.style.top = '-1000px';
+        container.style.left = '-1000px';
+        document.body.appendChild(container);
+        dragPreviewRef.current = container;
+
+        return () => {
+            container.remove();
+        };
+    }, []);
+
+    const onDragStart = (event: React.DragEvent, item: PaletteItem) => {
+        // Set the data transfer
+        event.dataTransfer.setData('application/reactflow', item.type);
         event.dataTransfer.effectAllowed = 'move';
+
+        // Create a small, clean drag preview
+        if (dragPreviewRef.current) {
+            const preview = document.createElement('div');
+            preview.style.cssText = `
+                padding: 8px 16px;
+                border-radius: 8px;
+                font-size: 13px;
+                font-weight: 600;
+                font-family: system-ui, -apple-system, sans-serif;
+                background: white;
+                border: 2px solid ${item.borderColor};
+                color: ${item.borderColor};
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                white-space: nowrap;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            `;
+            preview.innerHTML = `<span style="font-size: 14px;">+</span> ${item.label}`;
+            dragPreviewRef.current.innerHTML = '';
+            dragPreviewRef.current.appendChild(preview);
+
+            // Set custom drag image with offset to center it on cursor
+            event.dataTransfer.setDragImage(preview, preview.offsetWidth / 2, preview.offsetHeight / 2);
+        }
     };
 
     const handleClick = (nodeType: string) => {
@@ -129,13 +179,13 @@ export default function NodePalette({ className = '', onAddNode }: NodePalettePr
                         <div
                             key={item.type}
                             draggable
-                            onDragStart={(e) => onDragStart(e, item.type)}
+                            onDragStart={(e) => onDragStart(e, item)}
                             onClick={() => handleClick(item.type)}
                             className={`
-                                flex items-center gap-3 p-3 rounded-lg border cursor-pointer
+                                flex items-center gap-3 p-3 rounded-lg border cursor-grab
                                 transition-all duration-150
                                 ${colors.bg} ${colors.border} ${colors.hover}
-                                active:scale-95
+                                active:scale-95 active:cursor-grabbing
                             `}
                         >
                             <div className={`flex-shrink-0 ${colors.text}`}>
