@@ -1,0 +1,216 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
+
+class Provider extends Model
+{
+    use SoftDeletes;
+
+    // Provider types
+    public const TYPE_THERAPIST = 'therapist';
+    public const TYPE_TUTOR = 'tutor';
+    public const TYPE_COACH = 'coach';
+    public const TYPE_MENTOR = 'mentor';
+    public const TYPE_COUNSELOR = 'counselor';
+    public const TYPE_SPECIALIST = 'specialist';
+
+    protected $fillable = [
+        'org_id',
+        'name',
+        'provider_type',
+        'specialty_areas',
+        'credentials',
+        'bio',
+        'contact_email',
+        'contact_phone',
+        'availability_notes',
+        'hourly_rate',
+        'accepts_insurance',
+        'insurance_types',
+        'location_address',
+        'serves_remote',
+        'serves_in_person',
+        'service_radius_miles',
+        'ratings_average',
+        'ratings_count',
+        'external_profile_url',
+        'thumbnail_url',
+        'active',
+        'verified_at',
+        'created_by',
+    ];
+
+    protected $casts = [
+        'specialty_areas' => 'array',
+        'insurance_types' => 'array',
+        'hourly_rate' => 'decimal:2',
+        'accepts_insurance' => 'boolean',
+        'serves_remote' => 'boolean',
+        'serves_in_person' => 'boolean',
+        'ratings_average' => 'decimal:2',
+        'active' => 'boolean',
+        'verified_at' => 'datetime',
+    ];
+
+    protected $attributes = [
+        'active' => true,
+        'serves_remote' => false,
+        'serves_in_person' => true,
+        'accepts_insurance' => false,
+        'ratings_average' => 0,
+        'ratings_count' => 0,
+    ];
+
+    /**
+     * Get available provider types.
+     */
+    public static function getProviderTypes(): array
+    {
+        return [
+            self::TYPE_THERAPIST => 'Therapist',
+            self::TYPE_TUTOR => 'Tutor',
+            self::TYPE_COACH => 'Coach',
+            self::TYPE_MENTOR => 'Mentor',
+            self::TYPE_COUNSELOR => 'Counselor',
+            self::TYPE_SPECIALIST => 'Specialist',
+        ];
+    }
+
+    /**
+     * Organization relationship.
+     */
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'org_id');
+    }
+
+    /**
+     * Creator relationship.
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Mini-course steps that reference this provider.
+     */
+    public function courseSteps(): HasMany
+    {
+        return $this->hasMany(MiniCourseStep::class);
+    }
+
+    /**
+     * Scope to active providers.
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('active', true);
+    }
+
+    /**
+     * Scope to verified providers.
+     */
+    public function scopeVerified(Builder $query): Builder
+    {
+        return $query->whereNotNull('verified_at');
+    }
+
+    /**
+     * Scope by provider type.
+     */
+    public function scopeOfType(Builder $query, string $type): Builder
+    {
+        return $query->where('provider_type', $type);
+    }
+
+    /**
+     * Scope by specialty.
+     */
+    public function scopeWithSpecialty(Builder $query, string $specialty): Builder
+    {
+        return $query->whereJsonContains('specialty_areas', $specialty);
+    }
+
+    /**
+     * Scope to providers serving remotely.
+     */
+    public function scopeServesRemote(Builder $query): Builder
+    {
+        return $query->where('serves_remote', true);
+    }
+
+    /**
+     * Scope to providers serving in person.
+     */
+    public function scopeServesInPerson(Builder $query): Builder
+    {
+        return $query->where('serves_in_person', true);
+    }
+
+    /**
+     * Scope by organization.
+     */
+    public function scopeForOrganization(Builder $query, int $orgId): Builder
+    {
+        return $query->where('org_id', $orgId);
+    }
+
+    /**
+     * Check if provider is verified.
+     */
+    public function isVerified(): bool
+    {
+        return $this->verified_at !== null;
+    }
+
+    /**
+     * Mark provider as verified.
+     */
+    public function markVerified(): void
+    {
+        $this->update(['verified_at' => now()]);
+    }
+
+    /**
+     * Update rating based on new review.
+     */
+    public function addRating(float $rating): void
+    {
+        $totalRatings = ($this->ratings_average * $this->ratings_count) + $rating;
+        $newCount = $this->ratings_count + 1;
+
+        $this->update([
+            'ratings_average' => $totalRatings / $newCount,
+            'ratings_count' => $newCount,
+        ]);
+    }
+
+    /**
+     * Get display name with credentials.
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        if ($this->credentials) {
+            return "{$this->name}, {$this->credentials}";
+        }
+        return $this->name;
+    }
+
+    /**
+     * Get formatted hourly rate.
+     */
+    public function getFormattedRateAttribute(): ?string
+    {
+        if ($this->hourly_rate) {
+            return '$' . number_format($this->hourly_rate, 2) . '/hr';
+        }
+        return null;
+    }
+}

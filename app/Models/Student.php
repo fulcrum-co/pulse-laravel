@@ -134,6 +134,43 @@ class Student extends Model
     }
 
     /**
+     * Get mini-course enrollments for this student.
+     */
+    public function miniCourseEnrollments(): HasMany
+    {
+        return $this->hasMany(MiniCourseEnrollment::class);
+    }
+
+    /**
+     * Get active mini-course enrollments.
+     */
+    public function activeCourseEnrollments(): HasMany
+    {
+        return $this->hasMany(MiniCourseEnrollment::class)
+            ->whereIn('status', [
+                MiniCourseEnrollment::STATUS_ENROLLED,
+                MiniCourseEnrollment::STATUS_IN_PROGRESS,
+            ]);
+    }
+
+    /**
+     * Get mini-course suggestions for this student.
+     */
+    public function courseSuggestions(): MorphMany
+    {
+        return $this->morphMany(MiniCourseSuggestion::class, 'contact');
+    }
+
+    /**
+     * Get pending mini-course suggestions.
+     */
+    public function pendingCourseSuggestions(): MorphMany
+    {
+        return $this->morphMany(MiniCourseSuggestion::class, 'contact')
+            ->where('status', MiniCourseSuggestion::STATUS_PENDING);
+    }
+
+    /**
      * Get strategic plans targeting this student.
      */
     public function strategicPlans(): HasMany

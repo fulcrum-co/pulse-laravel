@@ -21,6 +21,11 @@ class DatabaseSeeder extends Seeder
             ResourceSeeder::class,
             StrategySeeder::class,
             ContactMetricSeeder::class,
+            // Adaptive LMS seeders
+            ProviderSeeder::class,
+            ProgramSeeder::class,
+            MiniCourseSeeder::class,
+            AdaptiveTriggerSeeder::class,
         ]);
     }
 }

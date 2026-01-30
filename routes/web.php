@@ -236,10 +236,69 @@ Route::middleware('auth')->group(function () {
     Route::delete('/activities/{activity}', [ActivityController::class, 'destroy'])->name('activities.destroy');
     Route::put('/activities/reorder', [ActivityController::class, 'reorder'])->name('activities.reorder');
 
-    // Resources (placeholder)
-    Route::get('/resources', function () {
-        return view('resources.index');
-    })->name('resources.index');
+    // Resource Library
+    Route::get('/resources', App\Livewire\ResourceLibrary::class)->name('resources.index');
+    Route::get('/resources/providers/{provider}', App\Livewire\ProviderProfile::class)->name('resources.providers.show');
+    Route::get('/resources/programs/{program}', App\Livewire\ProgramDetail::class)->name('resources.programs.show');
+    Route::get('/resources/courses/{course}', App\Livewire\MiniCourseViewer::class)->name('resources.courses.show');
+    Route::get('/resources/courses/{course}/edit', App\Livewire\MiniCourseEditor::class)->name('resources.courses.edit');
+    Route::get('/resources/courses/create', App\Livewire\MiniCourseEditor::class)->name('resources.courses.create');
+
+    // Mini-Courses API
+    Route::prefix('api/mini-courses')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\MiniCourseController::class, 'index'])->name('api.mini-courses.index');
+        Route::post('/', [App\Http\Controllers\Api\MiniCourseController::class, 'store'])->name('api.mini-courses.store');
+        Route::get('/templates', [App\Http\Controllers\Api\MiniCourseController::class, 'templates'])->name('api.mini-courses.templates');
+        Route::post('/generate', [App\Http\Controllers\Api\MiniCourseController::class, 'generate'])->name('api.mini-courses.generate');
+        Route::get('/{course}', [App\Http\Controllers\Api\MiniCourseController::class, 'show'])->name('api.mini-courses.show');
+        Route::put('/{course}', [App\Http\Controllers\Api\MiniCourseController::class, 'update'])->name('api.mini-courses.update');
+        Route::delete('/{course}', [App\Http\Controllers\Api\MiniCourseController::class, 'destroy'])->name('api.mini-courses.destroy');
+        Route::post('/{course}/duplicate', [App\Http\Controllers\Api\MiniCourseController::class, 'duplicate'])->name('api.mini-courses.duplicate');
+        Route::post('/{course}/publish', [App\Http\Controllers\Api\MiniCourseController::class, 'publish'])->name('api.mini-courses.publish');
+        Route::post('/{course}/archive', [App\Http\Controllers\Api\MiniCourseController::class, 'archive'])->name('api.mini-courses.archive');
+        Route::post('/{course}/suggest-edits', [App\Http\Controllers\Api\MiniCourseController::class, 'suggestEdits'])->name('api.mini-courses.suggest-edits');
+
+        // Versions
+        Route::get('/{course}/versions', [App\Http\Controllers\Api\MiniCourseController::class, 'versions'])->name('api.mini-courses.versions');
+        Route::post('/{course}/versions/{version}/restore', [App\Http\Controllers\Api\MiniCourseController::class, 'restoreVersion'])->name('api.mini-courses.versions.restore');
+
+        // Steps
+        Route::get('/{course}/steps', [App\Http\Controllers\Api\MiniCourseStepController::class, 'index'])->name('api.mini-course-steps.index');
+        Route::post('/{course}/steps', [App\Http\Controllers\Api\MiniCourseStepController::class, 'store'])->name('api.mini-course-steps.store');
+        Route::get('/{course}/steps/{step}', [App\Http\Controllers\Api\MiniCourseStepController::class, 'show'])->name('api.mini-course-steps.show');
+        Route::put('/{course}/steps/{step}', [App\Http\Controllers\Api\MiniCourseStepController::class, 'update'])->name('api.mini-course-steps.update');
+        Route::delete('/{course}/steps/{step}', [App\Http\Controllers\Api\MiniCourseStepController::class, 'destroy'])->name('api.mini-course-steps.destroy');
+        Route::put('/{course}/steps/reorder', [App\Http\Controllers\Api\MiniCourseStepController::class, 'reorder'])->name('api.mini-course-steps.reorder');
+        Route::post('/{course}/steps/{step}/generate-content', [App\Http\Controllers\Api\MiniCourseStepController::class, 'generateContent'])->name('api.mini-course-steps.generate-content');
+
+        // Enrollments
+        Route::post('/{course}/enroll/{student}', [App\Http\Controllers\Api\EnrollmentController::class, 'enroll'])->name('api.mini-courses.enroll');
+        Route::get('/{course}/enrollments', [App\Http\Controllers\Api\EnrollmentController::class, 'indexByCourse'])->name('api.mini-courses.enrollments');
+    });
+
+    // Enrollments API
+    Route::prefix('api/enrollments')->group(function () {
+        Route::get('/{enrollment}', [App\Http\Controllers\Api\EnrollmentController::class, 'show'])->name('api.enrollments.show');
+        Route::put('/{enrollment}/progress', [App\Http\Controllers\Api\EnrollmentController::class, 'updateProgress'])->name('api.enrollments.progress');
+        Route::post('/{enrollment}/step/{step}/complete', [App\Http\Controllers\Api\EnrollmentController::class, 'completeStep'])->name('api.enrollments.complete-step');
+        Route::post('/{enrollment}/step/{step}/skip', [App\Http\Controllers\Api\EnrollmentController::class, 'skipStep'])->name('api.enrollments.skip-step');
+        Route::post('/{enrollment}/withdraw', [App\Http\Controllers\Api\EnrollmentController::class, 'withdraw'])->name('api.enrollments.withdraw');
+        Route::get('/{enrollment}/step-progress', [App\Http\Controllers\Api\EnrollmentController::class, 'stepProgress'])->name('api.enrollments.step-progress');
+    });
+
+    // Course Suggestions API
+    Route::prefix('api/suggestions')->group(function () {
+        Route::get('/{contactType}/{contactId}/courses', [App\Http\Controllers\Api\CourseSuggestionController::class, 'index'])->name('api.suggestions.courses.index');
+        Route::post('/courses/generate/{student}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'generate'])->name('api.suggestions.courses.generate');
+        Route::post('/courses/{suggestion}/accept', [App\Http\Controllers\Api\CourseSuggestionController::class, 'accept'])->name('api.suggestions.courses.accept');
+        Route::post('/courses/{suggestion}/decline', [App\Http\Controllers\Api\CourseSuggestionController::class, 'decline'])->name('api.suggestions.courses.decline');
+        Route::post('/triggers/evaluate/{student}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'evaluateTriggers'])->name('api.suggestions.triggers.evaluate');
+        Route::get('/providers/{student}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'providerRecommendations'])->name('api.suggestions.providers');
+        Route::get('/signals/{student}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'signals'])->name('api.suggestions.signals');
+    });
+
+    // Student Enrollments API
+    Route::get('/api/students/{student}/enrollments', [App\Http\Controllers\Api\EnrollmentController::class, 'indexByStudent'])->name('api.students.enrollments');
 
     // Collect (coming soon)
     Route::get('/collect', function () {

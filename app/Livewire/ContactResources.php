@@ -2,9 +2,16 @@
 
 namespace App\Livewire;
 
+use App\Models\MiniCourse;
+use App\Models\MiniCourseEnrollment;
+use App\Models\MiniCourseSuggestion;
+use App\Models\Provider;
+use App\Models\Program;
 use App\Models\Resource;
 use App\Models\ResourceAssignment;
+use App\Models\Student;
 use App\Models\AuditLog;
+use App\Services\ProviderMatchingService;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -15,14 +22,23 @@ class ContactResources extends Component
     public string $contactType;
     public int $contactId;
 
+    // Active tab
+    public string $activeTab = 'assigned';
+
     // Assign resource modal
     public bool $showAssignModal = false;
     public ?int $selectedResourceId = null;
     public string $assignmentNotes = '';
     public string $searchResources = '';
 
+    // Enroll in course modal
+    public bool $showEnrollModal = false;
+    public ?int $selectedCourseId = null;
+    public string $searchCourses = '';
+
     // Expanded assignment tracking
     public ?int $expandedAssignmentId = null;
+    public ?int $expandedEnrollmentId = null;
 
     // Edit mode
     public ?int $editingAssignmentId = null;
@@ -32,11 +48,18 @@ class ContactResources extends Component
 
     // Filter
     public string $filterStatus = 'all';
+    public string $enrollmentFilterStatus = 'all';
 
     public function mount(string $contactType, int $contactId)
     {
         $this->contactType = $contactType;
         $this->contactId = $contactId;
+    }
+
+    public function setActiveTab(string $tab): void
+    {
+        $this->activeTab = $tab;
+        $this->resetPage();
     }
 
     public function openAssignModal(): void
@@ -195,11 +218,262 @@ class ContactResources extends Component
         return $query->get();
     }
 
+    // ========================================
+    // Course Enrollment Methods
+    // ========================================
+
+    public function openEnrollModal(): void
+    {
+        $this->showEnrollModal = true;
+        $this->selectedCourseId = null;
+        $this->searchCourses = '';
+    }
+
+    public function closeEnrollModal(): void
+    {
+        $this->showEnrollModal = false;
+        $this->selectedCourseId = null;
+        $this->searchCourses = '';
+    }
+
+    public function enrollInCourse(): void
+    {
+        $this->validate([
+            'selectedCourseId' => 'required|exists:mini_courses,id',
+        ]);
+
+        $user = auth()->user();
+        $course = MiniCourse::findOrFail($this->selectedCourseId);
+
+        // Check if already enrolled
+        $existingEnrollment = MiniCourseEnrollment::where('mini_course_id', $course->id)
+            ->where('student_id', $this->contactId)
+            ->whereIn('status', [
+                MiniCourseEnrollment::STATUS_ENROLLED,
+                MiniCourseEnrollment::STATUS_IN_PROGRESS,
+            ])
+            ->first();
+
+        if ($existingEnrollment) {
+            $this->dispatch('notify', [
+                'type' => 'error',
+                'message' => 'Student is already enrolled in this course.',
+            ]);
+            return;
+        }
+
+        $enrollment = MiniCourseEnrollment::create([
+            'mini_course_id' => $course->id,
+            'mini_course_version_id' => $course->current_version_id,
+            'student_id' => $this->contactId,
+            'enrolled_by' => $user->id,
+            'enrollment_source' => MiniCourseEnrollment::SOURCE_MANUAL,
+            'status' => MiniCourseEnrollment::STATUS_ENROLLED,
+        ]);
+
+        AuditLog::log('create', $enrollment);
+
+        $this->closeEnrollModal();
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => 'Student enrolled in course successfully.',
+        ]);
+    }
+
+    public function toggleEnrollmentExpand(int $enrollmentId): void
+    {
+        if ($this->expandedEnrollmentId === $enrollmentId) {
+            $this->expandedEnrollmentId = null;
+        } else {
+            $this->expandedEnrollmentId = $enrollmentId;
+        }
+    }
+
+    public function pauseEnrollment(int $enrollmentId): void
+    {
+        $enrollment = MiniCourseEnrollment::findOrFail($enrollmentId);
+        $oldStatus = $enrollment->status;
+
+        $enrollment->update(['status' => MiniCourseEnrollment::STATUS_PAUSED]);
+
+        AuditLog::log('update', $enrollment, ['status' => $oldStatus], ['status' => 'paused']);
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => 'Enrollment paused.',
+        ]);
+    }
+
+    public function resumeEnrollment(int $enrollmentId): void
+    {
+        $enrollment = MiniCourseEnrollment::findOrFail($enrollmentId);
+        $oldStatus = $enrollment->status;
+
+        $newStatus = $enrollment->started_at
+            ? MiniCourseEnrollment::STATUS_IN_PROGRESS
+            : MiniCourseEnrollment::STATUS_ENROLLED;
+
+        $enrollment->update(['status' => $newStatus]);
+
+        AuditLog::log('update', $enrollment, ['status' => $oldStatus], ['status' => $newStatus]);
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => 'Enrollment resumed.',
+        ]);
+    }
+
+    public function withdrawEnrollment(int $enrollmentId): void
+    {
+        $enrollment = MiniCourseEnrollment::findOrFail($enrollmentId);
+        $oldStatus = $enrollment->status;
+
+        $enrollment->update([
+            'status' => MiniCourseEnrollment::STATUS_WITHDRAWN,
+            'feedback' => array_merge($enrollment->feedback ?? [], [
+                'withdrawn_at' => now()->toISOString(),
+                'withdrawn_by' => auth()->id(),
+            ]),
+        ]);
+
+        AuditLog::log('update', $enrollment, ['status' => $oldStatus], ['status' => 'withdrawn']);
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => 'Student withdrawn from course.',
+        ]);
+    }
+
+    public function setEnrollmentFilterStatus(string $status): void
+    {
+        $this->enrollmentFilterStatus = $status;
+        $this->resetPage();
+    }
+
+    public function getEnrollmentsProperty()
+    {
+        $query = MiniCourseEnrollment::where('student_id', $this->contactId)
+            ->with(['miniCourse', 'currentStep', 'stepProgress'])
+            ->orderByDesc('created_at');
+
+        if ($this->enrollmentFilterStatus !== 'all') {
+            $query->where('status', $this->enrollmentFilterStatus);
+        }
+
+        return $query->paginate(10);
+    }
+
+    public function getAvailableCoursesProperty()
+    {
+        $user = auth()->user();
+
+        $query = MiniCourse::forOrganization($user->org_id)
+            ->active()
+            ->orderBy('title');
+
+        if ($this->searchCourses) {
+            $query->where(function ($q) {
+                $q->where('title', 'like', '%' . $this->searchCourses . '%')
+                  ->orWhere('description', 'like', '%' . $this->searchCourses . '%');
+            });
+        }
+
+        return $query->get();
+    }
+
+    // ========================================
+    // Course Suggestions Methods
+    // ========================================
+
+    public function acceptSuggestion(int $suggestionId): void
+    {
+        $suggestion = MiniCourseSuggestion::findOrFail($suggestionId);
+        $user = auth()->user();
+
+        $enrollment = $suggestion->accept($user->id);
+
+        AuditLog::log('update', $suggestion, ['status' => 'pending'], ['status' => 'accepted']);
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => 'Suggestion accepted and student enrolled.',
+        ]);
+    }
+
+    public function declineSuggestion(int $suggestionId, string $reason = ''): void
+    {
+        $suggestion = MiniCourseSuggestion::findOrFail($suggestionId);
+        $user = auth()->user();
+
+        $suggestion->decline($user->id, $reason);
+
+        AuditLog::log('update', $suggestion, ['status' => 'pending'], ['status' => 'declined']);
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => 'Suggestion declined.',
+        ]);
+    }
+
+    public function getCourseSuggestionsProperty()
+    {
+        return MiniCourseSuggestion::where('contact_type', Student::class)
+            ->where('contact_id', $this->contactId)
+            ->where('status', MiniCourseSuggestion::STATUS_PENDING)
+            ->with(['miniCourse'])
+            ->orderByDesc('relevance_score')
+            ->get();
+    }
+
+    // ========================================
+    // Provider Recommendations Methods
+    // ========================================
+
+    public function getProviderRecommendationsProperty()
+    {
+        if ($this->contactType !== 'student') {
+            return collect();
+        }
+
+        $student = Student::find($this->contactId);
+        if (!$student) {
+            return collect();
+        }
+
+        $service = app(ProviderMatchingService::class);
+        return $service->findMatchingProviders($student, [], 5);
+    }
+
+    // ========================================
+    // Program Recommendations Methods
+    // ========================================
+
+    public function getProgramRecommendationsProperty()
+    {
+        if ($this->contactType !== 'student') {
+            return collect();
+        }
+
+        $student = Student::find($this->contactId);
+        if (!$student) {
+            return collect();
+        }
+
+        $service = app(ProviderMatchingService::class);
+        return $service->findMatchingPrograms($student, [], 5);
+    }
+
     public function render()
     {
         return view('livewire.contact-resources', [
             'assignments' => $this->assignments,
             'availableResources' => $this->availableResources,
+            'enrollments' => $this->enrollments,
+            'availableCourses' => $this->availableCourses,
+            'courseSuggestions' => $this->courseSuggestions,
+            'providerRecommendations' => $this->providerRecommendations,
+            'programRecommendations' => $this->programRecommendations,
         ]);
     }
 }
