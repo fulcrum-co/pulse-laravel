@@ -13,6 +13,17 @@ class CustomReport extends Model
     protected $connection = 'mongodb';
     protected $collection = 'custom_reports';
 
+    // Report statuses
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_PUBLISHED = 'published';
+    public const STATUS_ARCHIVED = 'archived';
+
+    // Report types
+    public const TYPE_STUDENT_PROGRESS = 'student_progress';
+    public const TYPE_COHORT_SUMMARY = 'cohort_summary';
+    public const TYPE_SCHOOL_DASHBOARD = 'school_dashboard';
+    public const TYPE_CUSTOM = 'custom';
+
     protected $fillable = [
         'org_id',
         'team_id',
@@ -31,6 +42,18 @@ class CustomReport extends Model
         'auto_send',
         'report_layout',
         'anonymous_user_included',
+        // New fields for report builder
+        'page_settings',
+        'status',
+        'thumbnail_path',
+        'version',
+        'is_live',
+        'snapshot_data',
+        'public_token',
+        'branding',
+        'template_id',
+        'filters',
+        'last_edited_by',
     ];
 
     protected $casts = [
@@ -43,6 +66,13 @@ class CustomReport extends Model
         'generate_llm_narrative' => 'boolean',
         'auto_send' => 'boolean',
         'anonymous_user_included' => 'boolean',
+        // New casts
+        'page_settings' => 'array',
+        'snapshot_data' => 'array',
+        'branding' => 'array',
+        'filters' => 'array',
+        'is_live' => 'boolean',
+        'version' => 'integer',
     ];
 
     /**
@@ -114,5 +144,172 @@ class CustomReport extends Model
     public function scopeWithNarrative($query)
     {
         return $query->where('generate_llm_narrative', true);
+    }
+
+    /**
+     * Scope to filter by status.
+     */
+    public function scopeStatus($query, string $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    /**
+     * Scope to filter published reports.
+     */
+    public function scopePublished($query)
+    {
+        return $query->where('status', self::STATUS_PUBLISHED);
+    }
+
+    /**
+     * Scope to filter draft reports.
+     */
+    public function scopeDraft($query)
+    {
+        return $query->where('status', self::STATUS_DRAFT);
+    }
+
+    /**
+     * Generate a unique public token for shareable links.
+     */
+    public function generatePublicToken(): string
+    {
+        $this->public_token = bin2hex(random_bytes(16));
+        $this->save();
+
+        return $this->public_token;
+    }
+
+    /**
+     * Get the public URL for this report.
+     */
+    public function getPublicUrl(): ?string
+    {
+        if (!$this->public_token) {
+            return null;
+        }
+
+        return route('reports.public', ['token' => $this->public_token]);
+    }
+
+    /**
+     * Get embed code for this report.
+     */
+    public function getEmbedCode(): ?string
+    {
+        $url = $this->getPublicUrl();
+        if (!$url) {
+            return null;
+        }
+
+        return sprintf(
+            '<iframe src="%s" width="100%%" height="600" frameborder="0" allowfullscreen></iframe>',
+            $url
+        );
+    }
+
+    /**
+     * Get effective branding (report-specific or fall back to org).
+     */
+    public function getEffectiveBranding(): array
+    {
+        if ($this->branding) {
+            return $this->branding;
+        }
+
+        // Fall back to organization branding
+        $org = $this->organization;
+        if ($org && isset($org->settings['branding'])) {
+            return $org->settings['branding'];
+        }
+
+        // Default branding
+        return [
+            'logo_path' => null,
+            'primary_color' => '#3B82F6',
+            'secondary_color' => '#1E40AF',
+            'font_family' => 'Inter, sans-serif',
+        ];
+    }
+
+    /**
+     * Get default page settings.
+     */
+    public function getPageSettings(): array
+    {
+        return array_merge([
+            'size' => 'letter',
+            'orientation' => 'portrait',
+            'margins' => [
+                'top' => 40,
+                'right' => 40,
+                'bottom' => 40,
+                'left' => 40,
+            ],
+        ], $this->page_settings ?? []);
+    }
+
+    /**
+     * Check if report is published.
+     */
+    public function isPublished(): bool
+    {
+        return $this->status === self::STATUS_PUBLISHED;
+    }
+
+    /**
+     * Check if report is draft.
+     */
+    public function isDraft(): bool
+    {
+        return $this->status === self::STATUS_DRAFT || !$this->status;
+    }
+
+    /**
+     * Publish the report.
+     */
+    public function publish(): void
+    {
+        if (!$this->public_token) {
+            $this->generatePublicToken();
+        }
+
+        $this->status = self::STATUS_PUBLISHED;
+        $this->save();
+    }
+
+    /**
+     * Unpublish (make draft) the report.
+     */
+    public function unpublish(): void
+    {
+        $this->status = self::STATUS_DRAFT;
+        $this->save();
+    }
+
+    /**
+     * Increment version number.
+     */
+    public function incrementVersion(): void
+    {
+        $this->version = ($this->version ?? 0) + 1;
+        $this->save();
+    }
+
+    /**
+     * Duplicate this report.
+     */
+    public function duplicate(?int $userId = null): self
+    {
+        $newReport = $this->replicate();
+        $newReport->report_name = $this->report_name . ' (Copy)';
+        $newReport->status = self::STATUS_DRAFT;
+        $newReport->public_token = null;
+        $newReport->version = 1;
+        $newReport->created_by = $userId ?? $this->created_by;
+        $newReport->save();
+
+        return $newReport;
     }
 }

@@ -12,11 +12,15 @@ use App\Http\Controllers\StrategyController;
 use App\Http\Controllers\FocusAreaController;
 use App\Http\Controllers\ObjectiveController;
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\ReportController;
 
 // Public routes
 Route::get('/', function () {
     return view('home');
 })->name('home');
+
+// Public dashboard view (shareable reports, no auth required)
+Route::get('/dashboard/{token}', [ReportController::class, 'publicView'])->name('reports.public');
 
 // Guest routes (only accessible when not logged in)
 Route::middleware('guest')->group(function () {
@@ -93,10 +97,14 @@ Route::middleware('auth')->group(function () {
         return view('resources.index');
     })->name('resources.index');
 
-    // Reports (placeholder)
-    Route::get('/reports', function () {
-        return view('reports.index');
-    })->name('reports.index');
+    // Reports
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/create', [ReportController::class, 'create'])->name('reports.create');
+    Route::get('/reports/{report}/edit', [ReportController::class, 'edit'])->name('reports.edit');
+    Route::post('/reports/{report}/duplicate', [ReportController::class, 'duplicate'])->name('reports.duplicate');
+    Route::get('/reports/{report}/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
+    Route::post('/reports/{report}/publish', [ReportController::class, 'publish'])->name('reports.publish');
+    Route::delete('/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
 
     // Settings (placeholder)
     Route::get('/settings', function () {
