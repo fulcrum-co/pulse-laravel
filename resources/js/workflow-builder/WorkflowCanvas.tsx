@@ -1,12 +1,14 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import {
     ReactFlow,
+    ReactFlowProvider,
     Controls,
     Background,
     MiniMap,
     addEdge,
     useNodesState,
     useEdgesState,
+    useReactFlow,
     type Connection,
     type NodeTypes,
     Panel,
@@ -38,7 +40,8 @@ interface WorkflowCanvasProps {
     workflowName: string;
 }
 
-export default function WorkflowCanvas({
+// Inner component that uses useReactFlow hook
+function WorkflowCanvasInner({
     workflowId,
     initialNodes,
     initialEdges,
@@ -50,6 +53,8 @@ export default function WorkflowCanvas({
     const [isSaving, setIsSaving] = useState(false);
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
     const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const reactFlowWrapper = useRef<HTMLDivElement>(null);
+    const { screenToFlowPosition } = useReactFlow();
 
     // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -165,15 +170,15 @@ export default function WorkflowCanvas({
             const type = event.dataTransfer.getData('application/reactflow');
             if (!type) return;
 
-            const reactFlowBounds = event.currentTarget.getBoundingClientRect();
-            const position = {
-                x: event.clientX - reactFlowBounds.left,
-                y: event.clientY - reactFlowBounds.top,
-            };
+            // Use screenToFlowPosition to get the correct position in the flow
+            const position = screenToFlowPosition({
+                x: event.clientX,
+                y: event.clientY,
+            });
 
             addNode(type, position);
         },
-        [addNode]
+        [addNode, screenToFlowPosition]
     );
 
     return (
@@ -302,4 +307,13 @@ function getDefaultNodeData(type: string): Record<string, unknown> {
         default:
             return {};
     }
+}
+
+// Wrapper component that provides ReactFlowProvider
+export default function WorkflowCanvas(props: WorkflowCanvasProps) {
+    return (
+        <ReactFlowProvider>
+            <WorkflowCanvasInner {...props} />
+        </ReactFlowProvider>
+    );
 }
