@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-9yDcuYcE.css",
+    "file": "assets/app-CQQjgT64.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -15,7 +15,7 @@
     "isEntry": true
   },
   "resources/js/workflow-builder/app.tsx": {
-    "file": "assets/app-D25eN8PL.js",
+    "file": "assets/app-D-Yxx1NI.js",
     "name": "app",
     "src": "resources/js/workflow-builder/app.tsx",
     "isEntry": true,

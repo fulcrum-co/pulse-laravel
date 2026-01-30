@@ -59,6 +59,51 @@ function WorkflowCanvasInner({
     // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
+    // Handle adding nodes from branch buttons
+    useEffect(() => {
+        const handleAddFromBranch = (e: CustomEvent) => {
+            const { sourceNodeId, branchIndex, branchId, nodeType } = e.detail;
+            const sourceNode = nodes.find((n) => n.id === sourceNodeId);
+            if (!sourceNode) return;
+
+            // Calculate position below the source node, offset by branch
+            const offsetX = branchIndex === 0 ? -100 : branchIndex === 1 ? 100 : 0;
+            const newPosition = {
+                x: sourceNode.position.x + offsetX,
+                y: sourceNode.position.y + 200,
+            };
+
+            // Create the new node
+            const newNode: WorkflowNode = {
+                id: `${nodeType}-${Date.now()}`,
+                type: nodeType as WorkflowNode['type'],
+                position: newPosition,
+                data: getDefaultNodeData(nodeType),
+            };
+
+            // Add node and connect it
+            setNodes((nds) => [...nds, newNode]);
+            setEdges((eds) =>
+                addEdge(
+                    {
+                        id: `e${sourceNodeId}-${newNode.id}`,
+                        source: sourceNodeId,
+                        sourceHandle: branchId,
+                        target: newNode.id,
+                        animated: true,
+                    },
+                    eds
+                )
+            );
+            setSelectedNode(newNode);
+        };
+
+        window.addEventListener('addNodeFromBranch', handleAddFromBranch as EventListener);
+        return () => {
+            window.removeEventListener('addNodeFromBranch', handleAddFromBranch as EventListener);
+        };
+    }, [nodes, setNodes, setEdges]);
+
     // Auto-save on changes (debounced)
     useEffect(() => {
         if (saveTimeoutRef.current) {
@@ -185,7 +230,7 @@ function WorkflowCanvasInner({
         <div className="h-full w-full flex" style={{ minHeight: '500px' }}>
             {/* Node Palette */}
             <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto">
-                <NodePalette />
+                <NodePalette onAddNode={(type) => addNode(type)} />
             </div>
 
             {/* Canvas - wrapper div captures drop events */}

@@ -3,7 +3,7 @@
         <a href="{{ route('alerts.edit', $workflow) }}">
             <x-button variant="secondary">
                 <x-icon name="cog-6-tooth" class="w-4 h-4 mr-2" />
-                Simple Mode
+                Settings
             </x-button>
         </a>
         <a href="{{ route('alerts.index') }}">

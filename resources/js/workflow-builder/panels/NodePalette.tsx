@@ -2,6 +2,7 @@ import React from 'react';
 
 interface NodePaletteProps {
     className?: string;
+    onAddNode?: (type: string) => void;
 }
 
 interface PaletteItem {
@@ -104,16 +105,22 @@ const colorClasses: Record<string, { bg: string; border: string; text: string; h
     },
 };
 
-export default function NodePalette({ className = '' }: NodePaletteProps) {
+export default function NodePalette({ className = '', onAddNode }: NodePaletteProps) {
     const onDragStart = (event: React.DragEvent, nodeType: string) => {
         event.dataTransfer.setData('application/reactflow', nodeType);
         event.dataTransfer.effectAllowed = 'move';
     };
 
+    const handleClick = (nodeType: string) => {
+        if (onAddNode) {
+            onAddNode(nodeType);
+        }
+    };
+
     return (
-        <div className={`bg-white rounded-xl border border-gray-200 shadow-lg p-4 ${className}`}>
+        <div className={`bg-white p-4 ${className}`}>
             <h3 className="text-sm font-semibold text-gray-900 mb-3">Add Nodes</h3>
-            <p className="text-xs text-gray-500 mb-4">Drag and drop onto the canvas</p>
+            <p className="text-xs text-gray-500 mb-4">Click or drag onto canvas</p>
 
             <div className="space-y-2">
                 {paletteItems.map((item) => {
@@ -123,17 +130,18 @@ export default function NodePalette({ className = '' }: NodePaletteProps) {
                             key={item.type}
                             draggable
                             onDragStart={(e) => onDragStart(e, item.type)}
+                            onClick={() => handleClick(item.type)}
                             className={`
-                                flex items-center gap-3 p-3 rounded-lg border cursor-grab
+                                flex items-center gap-3 p-3 rounded-lg border cursor-pointer
                                 transition-all duration-150
                                 ${colors.bg} ${colors.border} ${colors.hover}
-                                active:cursor-grabbing active:scale-95
+                                active:scale-95
                             `}
                         >
                             <div className={`flex-shrink-0 ${colors.text}`}>
                                 {item.icon}
                             </div>
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                                 <div className={`text-sm font-medium ${colors.text}`}>
                                     {item.label}
                                 </div>
@@ -141,6 +149,9 @@ export default function NodePalette({ className = '' }: NodePaletteProps) {
                                     {item.description}
                                 </div>
                             </div>
+                            <svg className={`w-4 h-4 ${colors.text} opacity-50`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
                         </div>
                     );
                 })}
@@ -148,7 +159,7 @@ export default function NodePalette({ className = '' }: NodePaletteProps) {
 
             <div className="mt-4 pt-4 border-t border-gray-100">
                 <p className="text-xs text-gray-400">
-                    Tip: Connect nodes by dragging from the bottom handle to the top handle of another node.
+                    Tip: Connect nodes by dragging from handles.
                 </p>
             </div>
         </div>

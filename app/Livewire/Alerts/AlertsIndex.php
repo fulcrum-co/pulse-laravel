@@ -16,6 +16,8 @@ class AlertsIndex extends Component
     public string $viewMode = 'grid';
     public ?string $workflowToDelete = null;
     public bool $showDeleteModal = false;
+    public array $selected = [];
+    public bool $showBulkDeleteModal = false;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -50,6 +52,91 @@ class AlertsIndex extends Component
         $this->statusFilter = '';
         $this->triggerTypeFilter = '';
         $this->resetPage();
+    }
+
+    /**
+     * Toggle selection of a workflow.
+     */
+    public function toggleSelect(string $workflowId): void
+    {
+        if (in_array($workflowId, $this->selected)) {
+            $this->selected = array_values(array_diff($this->selected, [$workflowId]));
+        } else {
+            $this->selected[] = $workflowId;
+        }
+    }
+
+    /**
+     * Select all workflows on current page.
+     */
+    public function selectAll(): void
+    {
+        $user = auth()->user();
+        $this->selected = Workflow::forOrg($user->org_id)
+            ->when($this->search, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('description', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->when($this->statusFilter, function ($query) {
+                $query->where('status', $this->statusFilter);
+            })
+            ->when($this->triggerTypeFilter, function ($query) {
+                $query->where('trigger_type', $this->triggerTypeFilter);
+            })
+            ->pluck('id')
+            ->map(fn($id) => (string) $id)
+            ->toArray();
+    }
+
+    /**
+     * Clear selection.
+     */
+    public function deselectAll(): void
+    {
+        $this->selected = [];
+    }
+
+    /**
+     * Show bulk delete confirmation.
+     */
+    public function confirmBulkDelete(): void
+    {
+        if (count($this->selected) > 0) {
+            $this->showBulkDeleteModal = true;
+        }
+    }
+
+    /**
+     * Cancel bulk delete.
+     */
+    public function cancelBulkDelete(): void
+    {
+        $this->showBulkDeleteModal = false;
+    }
+
+    /**
+     * Delete selected workflows.
+     */
+    public function deleteSelected(): void
+    {
+        if (empty($this->selected)) {
+            return;
+        }
+
+        $user = auth()->user();
+        $count = Workflow::forOrg($user->org_id)
+            ->whereIn('id', $this->selected)
+            ->delete();
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => "{$count} alert(s) deleted successfully.",
+        ]);
+
+        $this->selected = [];
+        $this->showBulkDeleteModal = false;
     }
 
     /**

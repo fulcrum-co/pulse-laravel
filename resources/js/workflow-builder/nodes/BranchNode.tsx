@@ -1,14 +1,39 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { BranchNodeData } from '../types/workflow';
 
-function BranchNode({ data, selected }: NodeProps<BranchNodeData>) {
-    const branchCount = data.branches?.length || 2;
+const nodeTypeOptions = [
+    { type: 'condition', label: 'Condition', color: 'purple' },
+    { type: 'delay', label: 'Delay', color: 'indigo' },
+    { type: 'action', label: 'Action', color: 'emerald' },
+    { type: 'branch', label: 'Split', color: 'orange' },
+];
+
+function BranchNode({ id, data, selected }: NodeProps<BranchNodeData>) {
+    const [showMenu, setShowMenu] = useState<number | null>(null);
+    const branches = data.branches || [
+        { id: '1', name: 'Yes' },
+        { id: '2', name: 'No' },
+    ];
+
+    const handleAddNode = (branchIndex: number, nodeType: string) => {
+        // Dispatch custom event that WorkflowCanvas will handle
+        const event = new CustomEvent('addNodeFromBranch', {
+            detail: {
+                sourceNodeId: id,
+                branchIndex,
+                branchId: `branch-${branchIndex}`,
+                nodeType,
+            },
+        });
+        window.dispatchEvent(event);
+        setShowMenu(null);
+    };
 
     return (
         <div
             className={`
-                px-4 py-3 rounded-lg border-2 bg-white shadow-sm min-w-[180px]
+                px-4 py-3 rounded-lg border-2 bg-white shadow-sm min-w-[200px]
                 ${selected ? 'border-orange-500 ring-2 ring-orange-200' : 'border-orange-300'}
             `}
         >
@@ -28,27 +53,55 @@ function BranchNode({ data, selected }: NodeProps<BranchNodeData>) {
                 </div>
                 <div>
                     <div className="text-xs font-semibold uppercase text-orange-600 tracking-wide">Split</div>
-                    <div className="text-sm text-gray-500">{branchCount} branches</div>
+                    <div className="text-sm text-gray-500">{branches.length} paths</div>
                 </div>
             </div>
 
-            {/* Branch Labels */}
-            <div className="flex justify-between text-xs text-gray-400 px-2">
-                {data.branches?.map((branch, index) => (
-                    <span key={index} className="truncate max-w-[60px]">
-                        {branch.label || `Path ${index + 1}`}
-                    </span>
-                )) || (
-                    <>
-                        <span>Path 1</span>
-                        <span>Path 2</span>
-                    </>
-                )}
+            {/* Branch Labels with Add Buttons */}
+            <div className="flex justify-around gap-2 mt-2">
+                {branches.map((branch, index) => (
+                    <div key={index} className="relative flex flex-col items-center">
+                        <span className="text-xs font-medium text-gray-600 mb-1">
+                            {branch.name || branch.label || `Path ${index + 1}`}
+                        </span>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowMenu(showMenu === index ? null : index);
+                            }}
+                            className="w-5 h-5 rounded-full bg-orange-100 hover:bg-orange-200 flex items-center justify-center text-orange-600 transition-colors"
+                            title={`Add node to ${branch.name || `Path ${index + 1}`}`}
+                        >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {showMenu === index && (
+                            <div className="absolute top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 min-w-[120px]">
+                                {nodeTypeOptions.map((option) => (
+                                    <button
+                                        key={option.type}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleAddNode(index, option.type);
+                                        }}
+                                        className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-50 flex items-center gap-2"
+                                    >
+                                        <span className={`w-2 h-2 rounded-full bg-${option.color}-500`}></span>
+                                        {option.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                ))}
             </div>
 
-            {/* Output Handles - Dynamic based on branch count */}
-            {(data.branches || [{ id: '1' }, { id: '2' }]).map((branch, index) => {
-                const total = data.branches?.length || 2;
+            {/* Output Handles */}
+            {branches.map((branch, index) => {
+                const total = branches.length;
                 const spacing = 100 / (total + 1);
                 const position = spacing * (index + 1);
 
