@@ -61,7 +61,7 @@
     @stack('styles')
 </head>
 <body class="bg-gray-50">
-    <div x-data="{ sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true' }"
+    <div x-data="{ sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true', hoveredItem: null }"
          x-init="$watch('sidebarCollapsed', val => localStorage.setItem('sidebarCollapsed', val))"
          class="flex h-screen">
 
@@ -96,7 +96,7 @@
             </div>
             <!-- Collapsed User Avatar -->
             <div x-show="sidebarCollapsed" class="px-3 py-3 border-b border-gray-200 flex justify-center">
-                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                <div @mouseenter="hoveredItem = 'user'" @mouseleave="hoveredItem = null" class="relative">
                     <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-pulse-orange-200 cursor-pointer">
                         @if(auth()->user()->avatar_url)
                         <img src="{{ auth()->user()->avatar_url }}" alt="" class="w-full h-full object-cover">
@@ -109,7 +109,7 @@
                         @endif
                     </div>
                     <!-- Tooltip -->
-                    <div x-show="hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">
+                    <div x-show="hoveredItem === 'user'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">
                         {{ auth()->user()->first_name }} {{ auth()->user()->last_name }}
                     </div>
                 </div>
@@ -149,28 +149,28 @@
                 <!-- Collapsed: Vertical List -->
                 <div x-show="sidebarCollapsed" class="px-2 space-y-1">
                     <!-- Home -->
-                    <a href="/dashboard" x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false"
+                    <a href="/dashboard" @mouseenter="hoveredItem = 'home'" @mouseleave="hoveredItem = null"
                        class="relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboard') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="home" class="w-5 h-5 flex-shrink-0 {{ request()->is('dashboard') ? 'text-pulse-orange-500' : '' }}" />
-                        <div x-show="hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Home</div>
+                        <div x-show="hoveredItem === 'home'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Home</div>
                     </a>
                     <!-- Contacts -->
-                    <a href="/contacts" x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false"
+                    <a href="/contacts" @mouseenter="hoveredItem = 'contacts'" @mouseleave="hoveredItem = null"
                        class="relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('contacts*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="users" class="w-5 h-5 flex-shrink-0 {{ request()->is('contacts*') ? 'text-pulse-orange-500' : '' }}" />
-                        <div x-show="hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Contacts</div>
+                        <div x-show="hoveredItem === 'contacts'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Contacts</div>
                     </a>
                     <!-- Surveys -->
-                    <a href="/surveys" x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false"
+                    <a href="/surveys" @mouseenter="hoveredItem = 'surveys'" @mouseleave="hoveredItem = null"
                        class="relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('surveys*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="clipboard-list" class="w-5 h-5 flex-shrink-0 {{ request()->is('surveys*') ? 'text-pulse-orange-500' : '' }}" />
-                        <div x-show="hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Surveys</div>
+                        <div x-show="hoveredItem === 'surveys'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Surveys</div>
                     </a>
                     <!-- Dashboards -->
-                    <a href="/dashboards" x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false"
+                    <a href="/dashboards" @mouseenter="hoveredItem = 'dashboards'" @mouseleave="hoveredItem = null"
                        class="relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboards*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="chart-pie" class="w-5 h-5 flex-shrink-0 {{ request()->is('dashboards*') ? 'text-pulse-orange-500' : '' }}" />
-                        <div x-show="hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Dashboards</div>
+                        <div x-show="hoveredItem === 'dashboards'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Dashboards</div>
                     </a>
                 </div>
             </div>
@@ -181,29 +181,29 @@
                 <div x-show="sidebarCollapsed" class="mb-2 border-t border-gray-200"></div>
 
                 <!-- Strategy -->
-                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                <div @mouseenter="hoveredItem = 'strategy'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/strategies"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
                        class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('strategies*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="flag" class="w-5 h-5 flex-shrink-0" />
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Strategy</span>
                     </a>
-                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Strategy</div>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'strategy'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Strategy</div>
                 </div>
 
                 <!-- Reports -->
-                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                <div @mouseenter="hoveredItem = 'reports'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/reports"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
                        class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('reports*') && !request()->is('dashboard') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="chart-bar" class="w-5 h-5 flex-shrink-0" />
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Reports</span>
                     </a>
-                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Reports</div>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'reports'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Reports</div>
                 </div>
 
                 <!-- Collect -->
-                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                <div @mouseenter="hoveredItem = 'collect'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/collect"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
                        class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
@@ -211,11 +211,11 @@
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Collect</span>
                         <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
                     </a>
-                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Collect</div>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'collect'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Collect</div>
                 </div>
 
                 <!-- Distribute -->
-                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                <div @mouseenter="hoveredItem = 'distribute'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/distribute"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
                        class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
@@ -223,22 +223,22 @@
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Distribute</span>
                         <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
                     </a>
-                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute</div>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'distribute'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute</div>
                 </div>
 
                 <!-- Resource -->
-                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                <div @mouseenter="hoveredItem = 'resource'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/resources"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
                        class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
                         <x-icon name="book-open" class="w-5 h-5 flex-shrink-0" />
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Resource</span>
                     </a>
-                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Resource</div>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'resource'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Resource</div>
                 </div>
 
                 <!-- Alerts -->
-                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                <div @mouseenter="hoveredItem = 'alerts'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/alerts"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
                        class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('alerts*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
@@ -246,11 +246,11 @@
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Alerts</span>
                         <span x-show="!sidebarCollapsed" class="ml-auto bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded-full">4</span>
                     </a>
-                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Alerts (4)</div>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'alerts'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Alerts (4)</div>
                 </div>
 
                 <!-- Marketplace -->
-                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                <div @mouseenter="hoveredItem = 'marketplace'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/marketplace"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
                        class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
@@ -258,7 +258,7 @@
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition whitespace-nowrap">Marketplace</span>
                         <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
                     </a>
-                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace</div>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'marketplace'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace</div>
                 </div>
 
                 @php
@@ -294,12 +294,12 @@
                 </div>
                 <!-- Collapsed Sub-Orgs Icon -->
                 <div x-show="sidebarCollapsed" class="mt-4 pt-4 border-t border-gray-100">
-                    <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                    <div @mouseenter="hoveredItem = 'suborgs'" @mouseleave="hoveredItem = null" class="relative">
                         <a href="/organizations"
                            class="flex items-center justify-center px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
                             <x-icon name="office-building" class="w-5 h-5 flex-shrink-0" />
                         </a>
-                        <div x-show="hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Sub-Organizations ({{ $childOrgs->count() }})</div>
+                        <div x-show="hoveredItem === 'suborgs'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Sub-Organizations ({{ $childOrgs->count() }})</div>
                     </div>
                 </div>
                 @endif
@@ -307,14 +307,14 @@
 
             <!-- Settings -->
             <div class="p-3 border-t border-gray-200" :class="sidebarCollapsed ? 'px-2' : ''">
-                <div x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false" class="relative">
+                <div @mouseenter="hoveredItem = 'settings'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/settings"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
                        class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('settings*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="cog" class="w-5 h-5 flex-shrink-0" />
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Settings</span>
                     </a>
-                    <div x-show="sidebarCollapsed && hover" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Settings</div>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'settings'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Settings</div>
                 </div>
             </div>
         </aside>
