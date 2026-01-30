@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
-use MongoDB\Laravel\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CustomReport extends Model
 {
     use SoftDeletes;
 
-    protected $connection = 'mongodb';
-    protected $collection = 'custom_reports';
+    protected $table = 'custom_reports';
 
     // Report statuses
     public const STATUS_DRAFT = 'draft';
@@ -73,6 +72,7 @@ class CustomReport extends Model
         'filters' => 'array',
         'is_live' => 'boolean',
         'version' => 'integer',
+        'llm_narrative_last_generated' => 'datetime',
     ];
 
     /**
