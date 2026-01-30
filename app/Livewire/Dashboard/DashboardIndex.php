@@ -228,6 +228,9 @@ class DashboardIndex extends Component
             Dashboard::WIDGET_ALERT_FEED => [
                 'limit' => 10,
             ],
+            Dashboard::WIDGET_NOTIFICATION_FEED => [
+                'limit' => 10,
+            ],
             default => [],
         };
     }

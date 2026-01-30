@@ -34,6 +34,7 @@ class Dashboard extends Model
     public const WIDGET_STUDENT_LIST = 'student_list';
     public const WIDGET_SURVEY_SUMMARY = 'survey_summary';
     public const WIDGET_ALERT_FEED = 'alert_feed';
+    public const WIDGET_NOTIFICATION_FEED = 'notification_feed';
 
     /**
      * Get available widget types with labels.
@@ -70,6 +71,11 @@ class Dashboard extends Model
                 'label' => 'Alert Feed',
                 'description' => 'Recent workflow triggers',
                 'icon' => 'bell-alert',
+            ],
+            self::WIDGET_NOTIFICATION_FEED => [
+                'label' => 'Notification Feed',
+                'description' => 'Unified feed of alerts, actions & notifications',
+                'icon' => 'bell',
             ],
         ];
     }
@@ -190,7 +196,7 @@ class Dashboard extends Model
             'is_default' => true,
         ]);
 
-        // Add default widgets
+        // Row 1: 4 metric cards across
         $dashboard->addWidget(
             self::WIDGET_METRIC_CARD,
             'Total Students',
@@ -213,6 +219,14 @@ class Dashboard extends Model
         );
 
         $dashboard->addWidget(
+            self::WIDGET_METRIC_CARD,
+            'Need Attention',
+            ['data_source' => 'students_need_attention', 'color' => 'orange'],
+            ['x' => 9, 'y' => 0, 'w' => 3, 'h' => 2]
+        );
+
+        // Row 2: Bar chart + Notification feed
+        $dashboard->addWidget(
             self::WIDGET_BAR_CHART,
             'Survey Responses',
             ['data_source' => 'survey_responses_weekly', 'compare' => true],
@@ -220,9 +234,9 @@ class Dashboard extends Model
         );
 
         $dashboard->addWidget(
-            self::WIDGET_STUDENT_LIST,
-            'Students Needing Attention',
-            ['filter' => 'high_risk', 'limit' => 5],
+            self::WIDGET_NOTIFICATION_FEED,
+            'Notifications',
+            ['limit' => 10],
             ['x' => 6, 'y' => 2, 'w' => 6, 'h' => 4]
         );
 

@@ -46,6 +46,7 @@ class DashboardWidget extends Model
             Dashboard::WIDGET_STUDENT_LIST => $this->getStudentListData($orgId),
             Dashboard::WIDGET_SURVEY_SUMMARY => $this->getSurveySummaryData($orgId),
             Dashboard::WIDGET_ALERT_FEED => $this->getAlertFeedData($orgId),
+            Dashboard::WIDGET_NOTIFICATION_FEED => $this->getNotificationFeedData($orgId),
             default => [],
         };
     }
@@ -69,6 +70,10 @@ class DashboardWidget extends Model
                 ->whereDate('completed_at', today())->count(),
             'responses_week' => SurveyAttempt::whereHas('survey', fn($q) => $q->where('org_id', $orgId))
                 ->where('completed_at', '>=', now()->startOfWeek())->count(),
+            'students_need_attention' => Student::where('org_id', $orgId)
+                ->where(function($q) {
+                    $q->where('risk_level', 'high');
+                })->count(),
             default => 0,
         };
 
@@ -251,6 +256,77 @@ class DashboardWidget extends Model
                 'started_at' => $e->started_at?->diffForHumans(),
             ])->toArray(),
         ];
+    }
+
+    /**
+     * Get notification feed data (unified alerts, actions, notifications).
+     */
+    protected function getNotificationFeedData(int $orgId): array
+    {
+        $notifications = collect();
+
+        // 1. Workflow alerts (recent executions)
+        if (class_exists(WorkflowExecution::class)) {
+            $alerts = WorkflowExecution::whereHas('workflow', fn($q) => $q->where('org_id', $orgId))
+                ->with('workflow')
+                ->where('started_at', '>=', now()->subWeek())
+                ->orderBy('started_at', 'desc')
+                ->limit(5)
+                ->get()
+                ->map(fn($e) => [
+                    'type' => 'alert',
+                    'icon' => 'bell',
+                    'title' => $e->workflow->name ?? 'Alert triggered',
+                    'subtitle' => $e->started_at?->diffForHumans(),
+                    'url' => '/alerts/' . $e->workflow_id . '/executions/' . $e->id,
+                    'status' => $e->status,
+                    'timestamp' => $e->started_at,
+                ]);
+            $notifications = $notifications->concat($alerts);
+        }
+
+        // 2. Students needing attention (high risk)
+        $students = Student::with('user')
+            ->where('org_id', $orgId)
+            ->where('risk_level', 'high')
+            ->orderBy('updated_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(fn($s) => [
+                'type' => 'action',
+                'icon' => 'user',
+                'title' => ($s->user->full_name ?? 'Student') . ' needs check-in',
+                'subtitle' => 'High risk student',
+                'url' => '/contacts/students/' . $s->id,
+                'status' => 'warning',
+                'timestamp' => $s->updated_at,
+            ]);
+        $notifications = $notifications->concat($students);
+
+        // 3. Active surveys
+        $surveys = Survey::where('org_id', $orgId)
+            ->where('status', 'active')
+            ->orderBy('created_at', 'desc')
+            ->limit(3)
+            ->get()
+            ->map(fn($s) => [
+                'type' => 'info',
+                'icon' => 'clipboard',
+                'title' => 'Survey "' . $s->title . '" is active',
+                'subtitle' => 'Created ' . $s->created_at?->diffForHumans(),
+                'url' => '/surveys/' . $s->id,
+                'status' => 'info',
+                'timestamp' => $s->created_at,
+            ]);
+        $notifications = $notifications->concat($surveys);
+
+        // Sort by timestamp and limit
+        $notifications = $notifications
+            ->sortByDesc('timestamp')
+            ->take($this->config['limit'] ?? 10)
+            ->values();
+
+        return ['notifications' => $notifications->toArray()];
     }
 
     /**
