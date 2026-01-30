@@ -8,11 +8,14 @@ use App\Models\Provider;
 use App\Models\Resource;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Storage;
 
 class ResourceLibrary extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     // Active tab
     public string $activeTab = 'all';
@@ -38,6 +41,7 @@ class ResourceLibrary extends Component
     public string $resourceCategory = '';
     public string $resourceUrl = '';
     public ?int $resourceDuration = null;
+    public $resourceFile = null;
 
     // Provider form fields
     public string $providerName = '';
@@ -129,6 +133,7 @@ class ResourceLibrary extends Component
         $this->resourceCategory = '';
         $this->resourceUrl = '';
         $this->resourceDuration = null;
+        $this->resourceFile = null;
         $this->providerName = '';
         $this->providerBio = '';
         $this->providerTypeField = 'therapist';
@@ -150,7 +155,17 @@ class ResourceLibrary extends Component
             $this->validate([
                 'resourceTitle' => 'required|string|max:255',
                 'resourceTypeField' => 'required|string',
+                'resourceFile' => 'nullable|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,mp4,mp3,wav,jpg,jpeg,png,gif',
             ]);
+
+            // Handle file upload
+            $filePath = null;
+            if ($this->resourceFile) {
+                $filePath = $this->resourceFile->store(
+                    'resources/' . $user->org_id,
+                    'public'
+                );
+            }
 
             Resource::create([
                 'org_id' => $user->org_id,
@@ -159,6 +174,7 @@ class ResourceLibrary extends Component
                 'resource_type' => $this->resourceTypeField,
                 'category' => $this->resourceCategory ?: null,
                 'url' => $this->resourceUrl ?: null,
+                'file_path' => $filePath,
                 'estimated_duration_minutes' => $this->resourceDuration,
                 'active' => true,
                 'created_by' => $user->id,

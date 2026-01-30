@@ -360,6 +360,35 @@
                             placeholder="https://..."
                         />
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">File Upload (optional)</label>
+                        <div class="mt-1">
+                            <input
+                                type="file"
+                                wire:model="resourceFile"
+                                class="block w-full text-sm text-gray-500
+                                    file:mr-4 file:py-2 file:px-4
+                                    file:rounded-lg file:border-0
+                                    file:text-sm file:font-medium
+                                    file:bg-pulse-orange-50 file:text-pulse-orange-600
+                                    hover:file:bg-pulse-orange-100
+                                    cursor-pointer border border-gray-300 rounded-lg"
+                            />
+                            <div wire:loading wire:target="resourceFile" class="mt-2 text-sm text-pulse-orange-600">
+                                <x-icon name="arrow-path" class="w-4 h-4 inline animate-spin" /> Uploading...
+                            </div>
+                            @if($resourceFile)
+                            <p class="mt-2 text-sm text-green-600">
+                                <x-icon name="check-circle" class="w-4 h-4 inline" />
+                                {{ $resourceFile->getClientOriginalName() }}
+                            </p>
+                            @endif
+                            @error('resourceFile') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Max file size: 10MB. Accepted formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, MP4, MP3, WAV, JPG, PNG, GIF
+                        </p>
+                    </div>
                 </div>
                 @endif
 
