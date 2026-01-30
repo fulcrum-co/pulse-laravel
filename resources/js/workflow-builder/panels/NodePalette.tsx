@@ -134,30 +134,28 @@ export default function NodePalette({ className = '', onAddNode }: NodePalettePr
         event.dataTransfer.setData('application/reactflow', item.type);
         event.dataTransfer.effectAllowed = 'move';
 
-        // Create a small, clean drag preview
+        // Create a small, clean drag preview with fixed dimensions
         if (dragPreviewRef.current) {
             const preview = document.createElement('div');
             preview.style.cssText = `
-                padding: 8px 16px;
-                border-radius: 8px;
-                font-size: 13px;
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-size: 12px;
                 font-weight: 600;
                 font-family: system-ui, -apple-system, sans-serif;
                 background: white;
                 border: 2px solid ${item.borderColor};
                 color: ${item.borderColor};
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
                 white-space: nowrap;
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
+                display: inline-block;
             `;
-            preview.innerHTML = `<span style="font-size: 14px;">+</span> ${item.label}`;
+            preview.textContent = item.label;
             dragPreviewRef.current.innerHTML = '';
             dragPreviewRef.current.appendChild(preview);
 
-            // Set custom drag image with offset to center it on cursor
-            event.dataTransfer.setDragImage(preview, preview.offsetWidth / 2, preview.offsetHeight / 2);
+            // Use fixed offset values since element isn't rendered yet (roughly center of small pill)
+            event.dataTransfer.setDragImage(preview, 40, 14);
         }
     };
 

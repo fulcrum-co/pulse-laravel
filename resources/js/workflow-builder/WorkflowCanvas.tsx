@@ -238,6 +238,8 @@ function WorkflowCanvasInner({
                 ref={reactFlowWrapper}
                 className="flex-1"
                 style={{ height: '100%' }}
+                onDragOver={onDragOver}
+                onDrop={onDrop}
             >
                 <ReactFlow
                     nodes={nodes}
@@ -247,8 +249,6 @@ function WorkflowCanvasInner({
                     onConnect={onConnect}
                     onNodeClick={onNodeClick}
                     onPaneClick={onPaneClick}
-                    onDragOver={onDragOver}
-                    onDrop={onDrop}
                     nodeTypes={nodeTypes}
                     fitView
                     snapToGrid
