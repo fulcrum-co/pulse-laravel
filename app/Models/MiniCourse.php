@@ -314,7 +314,7 @@ class MiniCourse extends Model
     /**
      * Create a new version snapshot.
      */
-    public function createVersion(string $changeSummary = null): MiniCourseVersion
+    public function createVersion(string $changeSummary = null, int $userId = null): MiniCourseVersion
     {
         $latestVersion = $this->versions()->max('version_number') ?? 0;
 
@@ -327,7 +327,7 @@ class MiniCourse extends Model
             'expected_experience' => $this->expected_experience,
             'steps_snapshot' => $this->steps()->with(['resource', 'provider', 'program'])->get()->toArray(),
             'change_summary' => $changeSummary,
-            'created_by' => auth()->id(),
+            'created_by' => $userId ?? auth()->id() ?? $this->created_by,
         ]);
 
         $this->update(['current_version_id' => $version->id]);

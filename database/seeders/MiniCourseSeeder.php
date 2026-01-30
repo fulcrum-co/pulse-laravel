@@ -666,6 +666,11 @@ class MiniCourseSeeder extends Seeder
                 continue;
             }
 
+            // Skip if already enrolled (prevents duplicate key error)
+            if (MiniCourseEnrollment::where('mini_course_id', $course->id)->where('student_id', $student->id)->exists()) {
+                continue;
+            }
+
             $status = collect([
                 MiniCourseEnrollment::STATUS_IN_PROGRESS,
                 MiniCourseEnrollment::STATUS_COMPLETED,
@@ -700,6 +705,11 @@ class MiniCourseSeeder extends Seeder
                     : (int) ($steps->count() * ($enrollment->progress_percent / 100));
 
                 foreach ($steps->take($completedSteps) as $step) {
+                    // Skip if progress already exists (prevents duplicate key error)
+                    if (MiniCourseStepProgress::where('enrollment_id', $enrollment->id)->where('step_id', $step->id)->exists()) {
+                        continue;
+                    }
+
                     MiniCourseStepProgress::create([
                         'enrollment_id' => $enrollment->id,
                         'step_id' => $step->id,
@@ -732,6 +742,14 @@ class MiniCourseSeeder extends Seeder
         foreach ($highRiskStudents as $student) {
             $course = $courses[array_rand($courses)];
             if ($course->status !== MiniCourse::STATUS_ACTIVE) {
+                continue;
+            }
+
+            // Skip if suggestion already exists (prevents duplicate key error)
+            if (MiniCourseSuggestion::where('contact_type', Student::class)
+                ->where('contact_id', $student->id)
+                ->where('mini_course_id', $course->id)
+                ->exists()) {
                 continue;
             }
 
