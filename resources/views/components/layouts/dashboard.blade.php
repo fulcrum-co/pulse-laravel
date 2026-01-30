@@ -107,6 +107,44 @@
 
             <!-- Workspace Navigation -->
             <nav class="flex-1 py-3 px-3 overflow-y-auto">
+                <!-- My Dashboards Section -->
+                @php
+                    $userDashboards = \App\Models\Dashboard::accessibleBy(auth()->user())->orderBy('name')->get();
+                @endphp
+                <div x-data="{ open: true }" class="mb-4">
+                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600">
+                        <span>My Dashboards</span>
+                        <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-collapse class="mt-1 space-y-1">
+                        @forelse($userDashboards as $dashboard)
+                            <a
+                                href="/dashboard?id={{ $dashboard->id }}"
+                                class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg {{ request()->is('dashboard') && request()->get('id') == $dashboard->id ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-700 hover:bg-gray-50' }}"
+                            >
+                                <x-icon name="squares-2x2" class="w-4 h-4 flex-shrink-0" />
+                                <span class="flex-1 truncate">{{ $dashboard->name }}</span>
+                                <span class="flex items-center gap-1">
+                                    @if($dashboard->is_default)
+                                        <span class="text-xs bg-pulse-orange-100 text-pulse-orange-600 px-1.5 py-0.5 rounded">Default</span>
+                                    @endif
+                                    @if($dashboard->is_shared)
+                                        <x-icon name="users" class="w-3 h-3 text-gray-400" title="Shared" />
+                                    @endif
+                                </span>
+                            </a>
+                        @empty
+                            <p class="px-3 py-2 text-xs text-gray-400">No dashboards yet</p>
+                        @endforelse
+                        <a href="/dashboard" class="flex items-center gap-2 px-3 py-2 text-sm text-pulse-orange-600 hover:bg-pulse-orange-50 rounded-lg">
+                            <x-icon name="plus" class="w-4 h-4" />
+                            <span>New Dashboard</span>
+                        </a>
+                    </div>
+                </div>
+
                 <p class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Workspace</p>
 
                 <x-nav-item href="/strategies" :active="request()->is('strategies*')">

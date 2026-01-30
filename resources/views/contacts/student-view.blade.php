@@ -137,10 +137,10 @@
             <table class="w-full">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Survey</th>
-                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Score</th>
-                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Completed</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Survey</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">

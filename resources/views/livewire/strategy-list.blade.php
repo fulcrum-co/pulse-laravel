@@ -28,14 +28,15 @@
     </div>
 
     {{-- Search and Filters --}}
-    <div class="mb-6 flex gap-4">
-        <div class="flex-1">
+    <div class="mb-6 flex gap-3">
+        <div class="relative w-64">
+            <x-icon name="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input type="text" wire:model.live.debounce.300ms="search"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 placeholder="Search strategies...">
         </div>
         <select wire:model.live="statusFilter"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
+            class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
             <option value="">All Statuses</option>
             <option value="draft">Draft</option>
             <option value="active">Active</option>
@@ -43,7 +44,7 @@
             <option value="archived">Archived</option>
         </select>
         @if($search || $statusFilter || $typeFilter !== 'all')
-            <button wire:click="clearFilters" class="px-4 py-2 text-gray-600 hover:text-gray-900">
+            <button wire:click="clearFilters" class="text-sm text-gray-500 hover:text-gray-700">
                 Clear
             </button>
         @endif
