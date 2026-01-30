@@ -243,7 +243,7 @@
                    class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('alerts*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                     <x-icon name="bell" class="w-5 h-5 flex-shrink-0" />
                     <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Alerts</span>
-                    <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full">4</span>
+                    <span x-show="!sidebarCollapsed" class="ml-auto bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded-full">4</span>
                     <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Alerts (4)</div>
                 </a>
 

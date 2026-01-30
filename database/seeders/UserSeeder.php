@@ -30,15 +30,17 @@ class UserSeeder extends Seeder
             'suspended' => false,
         ]);
 
-        // Create admin user at school level
+        // Create admin user at school level - Principal Michael Torres
         User::create([
             'org_id' => $school->id,
-            'first_name' => 'Admin',
-            'last_name' => 'User',
-            'email' => 'admin@lincolnhigh.edu',
+            'first_name' => 'Michael',
+            'last_name' => 'Torres',
+            'email' => 'mtorres@lincolnhigh.edu',
             'password' => Hash::make('password'),
             'primary_role' => 'admin',
-            'avatar_url' => 'https://randomuser.me/api/portraits/men/75.jpg',
+            'phone' => '(555) 234-5678',
+            'bio' => 'Principal of Lincoln High School. Dedicated to fostering academic excellence and student well-being.',
+            'avatar_url' => 'https://randomuser.me/api/portraits/men/52.jpg',
             'active' => true,
             'suspended' => false,
         ]);
