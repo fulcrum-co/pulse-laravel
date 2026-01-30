@@ -10,20 +10,16 @@ use Livewire\Component;
 
 class DistributionCreator extends Component
 {
-    // Wizard state
-    public int $currentStep = 1;
-    public int $totalSteps = 5;
-
     // Distribution ID for editing
     public ?int $distributionId = null;
 
-    // Step 1: Basics
+    // Basics
     public string $title = '';
     public string $description = '';
     public string $channel = 'email';
     public string $distributionType = 'one_time';
 
-    // Step 2: Content
+    // Content
     public string $contentType = 'custom';
     public ?int $reportId = null;
     public string $reportMode = 'live';
@@ -31,12 +27,12 @@ class DistributionCreator extends Component
     public string $messageBody = '';
     public ?int $messageTemplateId = null;
 
-    // Step 3: Recipients
+    // Recipients
     public string $recipientType = 'contact_list';
     public ?int $contactListId = null;
     public array $recipientIds = [];
 
-    // Step 4: Schedule
+    // Schedule
     public bool $sendImmediately = true;
     public ?string $scheduledFor = null;
     public string $scheduleType = 'interval';
@@ -45,14 +41,6 @@ class DistributionCreator extends Component
     public array $customDays = [];
     public string $sendTime = '09:00';
     public string $timezone = 'America/New_York';
-
-    protected array $rules = [
-        'title' => 'required|string|max:255',
-        'channel' => 'required|in:email,sms',
-        'distributionType' => 'required|in:one_time,recurring',
-        'contentType' => 'required|in:report,custom',
-        'recipientType' => 'required|in:contact_list,individual,query',
-    ];
 
     public function mount(?int $distribution = null): void
     {
@@ -97,61 +85,38 @@ class DistributionCreator extends Component
         }
     }
 
-    public function nextStep(): void
+    protected function validateForm(): void
     {
-        $this->validateStep();
-        if ($this->currentStep < $this->totalSteps) {
-            $this->currentStep++;
-        }
-    }
+        $rules = [
+            'title' => 'required|string|max:255',
+            'channel' => 'required|in:email,sms',
+            'distributionType' => 'required|in:one_time,recurring',
+        ];
 
-    public function previousStep(): void
-    {
-        if ($this->currentStep > 1) {
-            $this->currentStep--;
-        }
-    }
-
-    public function goToStep(int $step): void
-    {
-        if ($step >= 1 && $step <= $this->totalSteps && $step <= $this->currentStep) {
-            $this->currentStep = $step;
-        }
-    }
-
-    protected function validateStep(): void
-    {
-        match ($this->currentStep) {
-            1 => $this->validate([
-                'title' => 'required|string|max:255',
-                'channel' => 'required|in:email,sms',
-                'distributionType' => 'required|in:one_time,recurring',
-            ]),
-            2 => $this->validateContentStep(),
-            3 => $this->validate([
-                'recipientType' => 'required|in:contact_list,individual,query',
-            ]),
-            default => null,
-        };
-    }
-
-    protected function validateContentStep(): void
-    {
+        // Content validation
         if ($this->contentType === 'report') {
-            $this->validate(['reportId' => 'required|exists:custom_reports,id']);
+            $rules['reportId'] = 'required|exists:custom_reports,id';
         } else {
-            $rules = [];
             if ($this->channel === 'email') {
                 $rules['subject'] = 'required|string|max:255';
             }
             $rules['messageBody'] = 'required|string';
-            $this->validate($rules);
         }
+
+        // Recipients validation
+        if ($this->recipientType === 'contact_list') {
+            $rules['contactListId'] = 'required|exists:contact_lists,id';
+        }
+
+        $this->validate($rules);
     }
 
     public function save(): void
     {
-        $this->validateStep();
+        // Only validate title for draft saves
+        $this->validate([
+            'title' => 'required|string|max:255',
+        ]);
 
         $data = [
             'org_id' => auth()->user()->org_id,
@@ -211,18 +176,19 @@ class DistributionCreator extends Component
 
     public function render()
     {
+        $contactLists = ContactList::where('org_id', auth()->user()->org_id)->get();
+
+        // Add member count using the model accessor
+        $contactLists->each(function ($list) {
+            $list->members_count = $list->member_count;
+        });
+
         return view('livewire.distribute.distribution-creator', [
-            'contactLists' => ContactList::where('org_id', auth()->user()->org_id)->get(),
+            'contactLists' => $contactLists,
             'reports' => CustomReport::where('org_id', auth()->user()->org_id)->get(),
             'templates' => MessageTemplate::where('org_id', auth()->user()->org_id)
                 ->where('channel', $this->channel)
                 ->get(),
-            'channels' => Distribution::getChannels(),
-            'distributionTypes' => Distribution::getDistributionTypes(),
-            'contentTypes' => Distribution::getContentTypes(),
-            'reportModes' => Distribution::getReportModes(),
-            'recipientTypes' => Distribution::getRecipientTypes(),
-            'mergeFields' => MessageTemplate::getMergeFields(),
         ])->layout('components.layouts.dashboard', [
             'title' => $this->distributionId ? 'Edit Distribution' : 'Create Distribution',
         ]);
