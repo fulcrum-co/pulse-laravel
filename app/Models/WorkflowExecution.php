@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WorkflowExecution extends Model
 {
-    protected $connection = 'mongodb';
-    protected $collection = 'workflow_executions';
+    protected $table = 'workflow_executions';
 
     // Status constants
     public const STATUS_PENDING = 'pending';
@@ -46,9 +45,24 @@ class WorkflowExecution extends Model
 
     protected $attributes = [
         'status' => self::STATUS_PENDING,
-        'node_results' => [],
-        'context' => [],
     ];
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (is_null($model->node_results)) {
+                $model->node_results = [];
+            }
+            if (is_null($model->context)) {
+                $model->context = [];
+            }
+        });
+    }
 
     /**
      * Get the workflow.
@@ -284,7 +298,7 @@ class WorkflowExecution extends Model
     /**
      * Scope to filter by workflow.
      */
-    public function scopeForWorkflow($query, string $workflowId)
+    public function scopeForWorkflow($query, $workflowId)
     {
         return $query->where('workflow_id', $workflowId);
     }
@@ -292,7 +306,7 @@ class WorkflowExecution extends Model
     /**
      * Scope to filter by organization.
      */
-    public function scopeForOrg($query, string $orgId)
+    public function scopeForOrg($query, $orgId)
     {
         return $query->where('org_id', $orgId);
     }

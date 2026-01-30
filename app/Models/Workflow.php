@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
-use MongoDB\Laravel\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
@@ -12,8 +12,7 @@ class Workflow extends Model
 {
     use SoftDeletes;
 
-    protected $connection = 'mongodb';
-    protected $collection = 'workflows';
+    protected $table = 'workflows';
 
     // Status constants
     public const STATUS_DRAFT = 'draft';
@@ -63,16 +62,33 @@ class Workflow extends Model
     protected $attributes = [
         'status' => self::STATUS_DRAFT,
         'mode' => self::MODE_SIMPLE,
-        'nodes' => [],
-        'edges' => [],
         'execution_count' => 0,
-        'settings' => [
-            'cooldown_minutes' => 60,
-            'max_executions_per_day' => 100,
-            'timezone' => 'UTC',
-            'active_hours' => null,
-        ],
     ];
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (is_null($model->nodes)) {
+                $model->nodes = [];
+            }
+            if (is_null($model->edges)) {
+                $model->edges = [];
+            }
+            if (is_null($model->settings)) {
+                $model->settings = [
+                    'cooldown_minutes' => 60,
+                    'max_executions_per_day' => 100,
+                    'timezone' => 'UTC',
+                    'active_hours' => null,
+                ];
+            }
+        });
+    }
 
     /**
      * Get the organization.
@@ -365,7 +381,7 @@ class Workflow extends Model
     /**
      * Scope to filter by organization.
      */
-    public function scopeForOrg($query, string $orgId)
+    public function scopeForOrg($query, $orgId)
     {
         return $query->where('org_id', $orgId);
     }
