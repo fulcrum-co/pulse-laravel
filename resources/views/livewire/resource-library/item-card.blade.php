@@ -11,10 +11,16 @@
         'program' => 'Program',
         'course' => 'Course',
     ];
+    $itemUrl = match($item['type']) {
+        'provider' => route('resources.providers.show', $item['id']),
+        'program' => route('resources.programs.show', $item['id']),
+        'course' => route('resources.courses.show', $item['id']),
+        'resource' => $item['model']->url ?? '#',
+    };
 @endphp
 
 @if($viewMode === 'grid')
-<div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all group">
+<a href="{{ $itemUrl }}" @if($item['type'] === 'resource' && $item['model']->url) target="_blank" @endif class="block bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all group">
     <div class="p-4">
         <!-- Type Badge & Icon -->
         <div class="flex items-start justify-between mb-3">
@@ -45,9 +51,9 @@
         </div>
         @endif
     </div>
-</div>
+</a>
 @else
-<div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-gray-300 transition-all flex items-center gap-4">
+<a href="{{ $itemUrl }}" @if($item['type'] === 'resource' && $item['model']->url) target="_blank" @endif class="block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-gray-300 transition-all flex items-center gap-4">
     <!-- Icon -->
     <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
         @include('livewire.resource-library.icons.' . $item['icon'])
@@ -75,5 +81,5 @@
     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
     </svg>
-</div>
+</a>
 @endif

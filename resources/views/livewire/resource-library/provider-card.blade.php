@@ -10,7 +10,7 @@
 @endphp
 
 @if($viewMode === 'grid')
-<div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all group cursor-pointer">
+<a href="{{ route('resources.providers.show', $provider) }}" class="block bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all group">
     <div class="p-4">
         <!-- Avatar & Type -->
         <div class="flex items-start justify-between mb-3">
@@ -76,9 +76,9 @@
             @endif
         </div>
     </div>
-</div>
+</a>
 @else
-<div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-gray-300 transition-all flex items-center gap-4 cursor-pointer">
+<a href="{{ route('resources.providers.show', $provider) }}" class="block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-gray-300 transition-all flex items-center gap-4">
     <!-- Avatar -->
     <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center text-purple-600 font-semibold flex-shrink-0">
         {{ substr($provider->name, 0, 1) }}
@@ -119,5 +119,5 @@
     <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
     </svg>
-</div>
+</a>
 @endif
