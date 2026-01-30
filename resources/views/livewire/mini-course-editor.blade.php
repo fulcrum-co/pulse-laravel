@@ -12,6 +12,17 @@
                 <h1 class="text-2xl font-bold text-gray-900">{{ $isNew ? 'Create Mini-Course' : 'Edit Course' }}</h1>
             </div>
             <div class="flex gap-3">
+                <!-- AI Assistant Toggle -->
+                <button
+                    wire:click="toggleAIPanel"
+                    class="inline-flex items-center px-4 py-2 border border-purple-300 rounded-lg text-sm font-medium {{ $showAIPanel ? 'bg-purple-100 text-purple-700' : 'text-purple-600 bg-white hover:bg-purple-50' }}"
+                >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                    AI Assistant
+                </button>
+
                 @if(!$isNew && $course)
                 <a href="{{ route('resources.courses.show', $course) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -333,6 +344,26 @@
                     <button wire:click="saveStep" class="w-full inline-flex justify-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg text-sm font-medium hover:bg-pulse-orange-600 sm:w-auto">
                         {{ $editingStepId ? 'Update Step' : 'Add Step' }}
                     </button>
+                    <button
+                        wire:click="generateStepContent"
+                        wire:loading.attr="disabled"
+                        wire:target="generateStepContent"
+                        class="mt-3 w-full inline-flex justify-center items-center px-4 py-2 border border-purple-300 text-purple-600 rounded-lg text-sm font-medium bg-white hover:bg-purple-50 sm:mt-0 sm:w-auto disabled:opacity-50"
+                    >
+                        <span wire:loading.remove wire:target="generateStepContent">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                            AI Generate
+                        </span>
+                        <span wire:loading wire:target="generateStepContent" class="flex items-center">
+                            <svg class="animate-spin mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Generating...
+                        </span>
+                    </button>
                     <button wire:click="closeStepModal" class="mt-3 w-full inline-flex justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 sm:mt-0 sm:w-auto">
                         Cancel
                     </button>
@@ -373,6 +404,311 @@
                     <button wire:click="$set('showPublishConfirm', false)" class="mt-3 w-full inline-flex justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 sm:mt-0 sm:w-auto">
                         Cancel
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- AI Assistant Slide-out Panel -->
+    @if($showAIPanel)
+    <div class="fixed inset-0 z-40 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute inset-0 bg-gray-500 bg-opacity-50 transition-opacity" wire:click="toggleAIPanel"></div>
+            <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+                <div class="pointer-events-auto w-screen max-w-md">
+                    <div class="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
+                        <!-- Header -->
+                        <div class="bg-gradient-to-r from-purple-600 to-purple-700 px-4 py-6 sm:px-6">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-lg font-medium text-white flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                    </svg>
+                                    AI Course Assistant
+                                </h2>
+                                <button wire:click="toggleAIPanel" class="rounded-md text-purple-200 hover:text-white focus:outline-none">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="mt-1 text-sm text-purple-200">Let AI help you create engaging course content</p>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="flex-1 px-4 py-6 sm:px-6 space-y-6">
+                            <!-- Error Display -->
+                            @if($aiError)
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                <div class="flex">
+                                    <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="ml-3 text-sm text-red-700">{{ $aiError }}</p>
+                                </div>
+                            </div>
+                            @endif
+
+                            <!-- Generate Full Course Section -->
+                            <div class="bg-purple-50 rounded-lg p-4 border border-purple-100">
+                                <h3 class="text-sm font-semibold text-purple-900 mb-3 flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                    Generate Complete Course
+                                </h3>
+
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Topic/Subject</label>
+                                        <input
+                                            type="text"
+                                            wire:model="aiTopic"
+                                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                            placeholder="e.g., Managing Test Anxiety"
+                                        >
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Audience</label>
+                                            <select wire:model="aiAudience" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                                <option value="students">Students</option>
+                                                <option value="teachers">Teachers</option>
+                                                <option value="parents">Parents</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Duration (min)</label>
+                                            <input
+                                                type="number"
+                                                wire:model="aiDurationMinutes"
+                                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                min="10"
+                                                max="120"
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Grade Level (optional)</label>
+                                        <select wire:model="aiGradeLevel" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                            <option value="">Any grade</option>
+                                            <option value="K-2">K-2</option>
+                                            <option value="3-5">3-5</option>
+                                            <option value="6-8">6-8</option>
+                                            <option value="9-12">9-12</option>
+                                        </select>
+                                    </div>
+
+                                    <button
+                                        wire:click="generateFullCourse"
+                                        wire:loading.attr="disabled"
+                                        wire:target="generateFullCourse"
+                                        class="w-full inline-flex justify-center items-center px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <span wire:loading.remove wire:target="generateFullCourse">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                            </svg>
+                                            Generate Course Draft
+                                        </span>
+                                        <span wire:loading wire:target="generateFullCourse" class="flex items-center">
+                                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Generating...
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Upload Document Section -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                    Create from Document
+                                </h3>
+
+                                <div class="space-y-3">
+                                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                        <input
+                                            type="file"
+                                            wire:model="uploadedDocument"
+                                            class="hidden"
+                                            id="document-upload"
+                                            accept=".txt,.pdf,.doc,.docx"
+                                        >
+                                        <label for="document-upload" class="cursor-pointer">
+                                            <svg class="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            <span class="mt-2 block text-xs text-gray-600">
+                                                Click to upload TXT, PDF, or DOC
+                                            </span>
+                                        </label>
+                                        @if($uploadedDocument)
+                                        <p class="mt-2 text-xs text-green-600">{{ $uploadedDocument->getClientOriginalName() }}</p>
+                                        @endif
+                                        <div wire:loading wire:target="uploadedDocument" class="mt-2 text-xs text-purple-600">
+                                            Uploading...
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        wire:click="processDocument"
+                                        wire:loading.attr="disabled"
+                                        wire:target="processDocument"
+                                        @if(!$uploadedDocument) disabled @endif
+                                        class="w-full inline-flex justify-center items-center px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <span wire:loading.remove wire:target="processDocument">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                            </svg>
+                                            Extract Course from Document
+                                        </span>
+                                        <span wire:loading wire:target="processDocument" class="flex items-center">
+                                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Processing...
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Generate Sections -->
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+                                    </svg>
+                                    Generate Sections
+                                </h3>
+
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button
+                                        wire:click="generateSection('introduction')"
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                                    >
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                        Introduction
+                                    </button>
+                                    <button
+                                        wire:click="generateSection('content')"
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                                    >
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        Content
+                                    </button>
+                                    <button
+                                        wire:click="generateSection('reflection')"
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                                    >
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                        </svg>
+                                        Reflection
+                                    </button>
+                                    <button
+                                        wire:click="generateSection('assessment')"
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                                    >
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                        </svg>
+                                        Assessment
+                                    </button>
+                                    <button
+                                        wire:click="generateSection('action')"
+                                        wire:loading.attr="disabled"
+                                        class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 col-span-2"
+                                    >
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                        Action Plan
+                                    </button>
+                                </div>
+
+                                <!-- Loading indicator -->
+                                <div wire:loading wire:target="generateSection" class="mt-3 text-center">
+                                    <div class="inline-flex items-center text-sm text-purple-600">
+                                        <svg class="animate-spin mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Generating section...
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI Suggestions Display -->
+                            @if(!empty($aiSuggestions))
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-sm font-semibold text-green-900">AI Suggestions</h3>
+                                    <button wire:click="clearAISuggestions" class="text-green-600 hover:text-green-800">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div class="space-y-2 text-sm">
+                                    @if(isset($aiSuggestions['title']))
+                                    <div class="flex items-center justify-between p-2 bg-white rounded">
+                                        <span class="text-gray-600">Title: {{ $aiSuggestions['title'] }}</span>
+                                        <button wire:click="applySuggestion('title', '{{ addslashes($aiSuggestions['title']) }}')" class="text-xs text-green-600 hover:underline">Apply</button>
+                                    </div>
+                                    @endif
+
+                                    @if(isset($aiSuggestions['suggestions']))
+                                    @foreach($aiSuggestions['suggestions'] as $suggestion)
+                                    <div class="p-2 bg-white rounded">
+                                        <span class="text-xs font-medium text-gray-500 uppercase">{{ $suggestion['type'] ?? 'Suggestion' }}</span>
+                                        <p class="text-gray-700">{{ $suggestion['text'] ?? $suggestion['description'] ?? '' }}</p>
+                                    </div>
+                                    @endforeach
+                                    @endif
+                                </div>
+                            </div>
+                            @endif
+
+                            <!-- Tips -->
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">Tips</h4>
+                                <ul class="text-xs text-gray-600 space-y-1">
+                                    <li class="flex items-start">
+                                        <span class="mr-2">•</span>
+                                        <span>Add objectives first for better AI content</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="mr-2">•</span>
+                                        <span>Upload existing documents to convert to courses</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="mr-2">•</span>
+                                        <span>Review and customize AI-generated content</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

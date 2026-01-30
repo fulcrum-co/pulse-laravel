@@ -7,10 +7,13 @@ use App\Models\MiniCourseStep;
 use App\Models\Provider;
 use App\Models\Program;
 use App\Models\Resource;
+use App\Services\CourseContentAIService;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class MiniCourseEditor extends Component
 {
+    use WithFileUploads;
     public ?MiniCourse $course = null;
     public bool $isNew = true;
 
@@ -39,6 +42,20 @@ class MiniCourseEditor extends Component
     public bool $showStepModal = false;
     public bool $showPreview = false;
     public bool $showPublishConfirm = false;
+
+    // AI Assistant
+    public bool $showAIPanel = false;
+    public bool $aiGenerating = false;
+    public string $aiTopic = '';
+    public string $aiAudience = 'students';
+    public ?string $aiGradeLevel = null;
+    public int $aiDurationMinutes = 30;
+    public array $aiSuggestions = [];
+    public ?string $aiError = null;
+
+    // Document upload for AI extraction
+    public $uploadedDocument = null;
+    public bool $processingDocument = false;
 
     protected $rules = [
         'title' => 'required|string|min:3|max:255',
@@ -308,6 +325,397 @@ class MiniCourseEditor extends Component
             MiniCourse::TYPE_ACADEMIC => 'Academic',
             MiniCourse::TYPE_BEHAVIORAL => 'Behavioral',
         ];
+    }
+
+    // ============================================
+    // AI ASSISTANT METHODS
+    // ============================================
+
+    public function toggleAIPanel(): void
+    {
+        $this->showAIPanel = !$this->showAIPanel;
+        $this->aiError = null;
+    }
+
+    /**
+     * Generate a complete course draft using AI.
+     */
+    public function generateFullCourse(): void
+    {
+        if (empty($this->aiTopic)) {
+            $this->aiError = 'Please enter a topic for the course.';
+            return;
+        }
+
+        $this->aiGenerating = true;
+        $this->aiError = null;
+
+        try {
+            $aiService = app(CourseContentAIService::class);
+
+            $result = $aiService->generateCompleteCourse([
+                'topic' => $this->aiTopic,
+                'audience' => $this->aiAudience,
+                'grade_level' => $this->aiGradeLevel,
+                'course_type' => $this->courseType,
+                'duration_minutes' => $this->aiDurationMinutes,
+                'objectives' => $this->objectives,
+            ]);
+
+            if ($result['success']) {
+                $this->applyAICourse($result['course']);
+                $this->dispatch('notify', [
+                    'type' => 'success',
+                    'message' => 'AI generated course draft! Review and customize.',
+                ]);
+            } else {
+                $this->aiError = $result['error'] ?? 'Failed to generate course.';
+            }
+        } catch (\Exception $e) {
+            $this->aiError = 'An error occurred while generating the course.';
+            \Log::error('AI course generation failed', ['error' => $e->getMessage()]);
+        } finally {
+            $this->aiGenerating = false;
+        }
+    }
+
+    /**
+     * Apply AI-generated course data to the form.
+     */
+    protected function applyAICourse(array $courseData): void
+    {
+        // Apply course metadata
+        $this->title = $courseData['title'] ?? $this->title;
+        $this->description = $courseData['description'] ?? $this->description;
+        $this->objectives = $courseData['objectives'] ?? $this->objectives;
+        $this->rationale = $courseData['rationale'] ?? '';
+        $this->expectedExperience = $courseData['expected_experience'] ?? '';
+        $this->courseType = $courseData['course_type'] ?? $this->courseType;
+        $this->targetNeeds = $courseData['target_needs'] ?? [];
+        $this->estimatedDuration = $courseData['estimated_duration_minutes'] ?? $this->aiDurationMinutes;
+
+        // Save the course first if it's new
+        if ($this->isNew) {
+            $this->saveCourse();
+        }
+
+        // Create steps if provided
+        if (!empty($courseData['steps']) && $this->course) {
+            // Clear existing steps if this is AI generation
+            $this->course->steps()->delete();
+
+            foreach ($courseData['steps'] as $index => $stepData) {
+                $this->course->steps()->create([
+                    'sort_order' => $index + 1,
+                    'step_type' => $stepData['step_type'] ?? MiniCourseStep::TYPE_CONTENT,
+                    'title' => $stepData['title'] ?? 'Step ' . ($index + 1),
+                    'description' => $stepData['description'] ?? null,
+                    'instructions' => $stepData['instructions'] ?? null,
+                    'content_type' => $stepData['content_type'] ?? MiniCourseStep::CONTENT_TEXT,
+                    'content_data' => $stepData['content_data'] ?? [],
+                    'estimated_duration_minutes' => $stepData['duration'] ?? 5,
+                    'is_required' => $stepData['is_required'] ?? true,
+                    'feedback_prompt' => $stepData['feedback_prompt'] ?? null,
+                ]);
+            }
+
+            // Refresh steps
+            $this->course->load(['steps' => fn ($q) => $q->orderBy('sort_order')]);
+        }
+
+        // Save course updates
+        if (!$this->isNew) {
+            $this->saveCourse();
+        }
+    }
+
+    /**
+     * Generate AI content for a specific section.
+     */
+    public function generateSection(string $sectionType): void
+    {
+        $this->aiGenerating = true;
+        $this->aiError = null;
+
+        try {
+            $aiService = app(CourseContentAIService::class);
+            $topic = $this->title ?: $this->aiTopic ?: 'the course topic';
+
+            $context = [
+                'course_type' => $this->courseType,
+                'audience' => $this->aiAudience,
+                'grade_level' => $this->aiGradeLevel,
+                'objectives' => $this->objectives,
+            ];
+
+            $result = match ($sectionType) {
+                'introduction' => $aiService->generateIntroduction($topic, $context),
+                'content' => $aiService->generateContentSection($topic, $this->objectives, $context),
+                'reflection' => $aiService->generateReflectionPrompts($topic, $context),
+                'assessment' => $aiService->generateAssessment($this->objectives, 'quiz', $context),
+                'action' => $aiService->generateActionPlan($topic, $context),
+                default => ['success' => false, 'error' => 'Unknown section type'],
+            };
+
+            if ($result['success']) {
+                $this->aiSuggestions = $result[$sectionType] ?? $result['data'] ?? $result;
+                $this->dispatch('notify', [
+                    'type' => 'success',
+                    'message' => ucfirst($sectionType) . ' content generated! Click to apply.',
+                ]);
+            } else {
+                $this->aiError = $result['error'] ?? 'Failed to generate content.';
+            }
+        } catch (\Exception $e) {
+            $this->aiError = 'An error occurred while generating content.';
+            \Log::error('AI section generation failed', ['error' => $e->getMessage()]);
+        } finally {
+            $this->aiGenerating = false;
+        }
+    }
+
+    /**
+     * Apply AI suggestions to the form.
+     */
+    public function applySuggestion(string $field, $value): void
+    {
+        match ($field) {
+            'title' => $this->title = $value,
+            'description' => $this->description = $value,
+            'rationale' => $this->rationale = $value,
+            'expectedExperience' => $this->expectedExperience = $value,
+            'objectives' => $this->objectives = is_array($value) ? $value : [$value],
+            default => null,
+        };
+
+        $this->aiSuggestions = [];
+    }
+
+    /**
+     * Add a step from AI suggestions.
+     */
+    public function addAIStep(array $stepData): void
+    {
+        if (!$this->course) {
+            $this->saveCourse();
+        }
+
+        if ($this->course) {
+            $maxSort = $this->course->steps()->max('sort_order') ?? 0;
+
+            $this->course->steps()->create([
+                'sort_order' => $maxSort + 1,
+                'step_type' => $stepData['step_type'] ?? MiniCourseStep::TYPE_CONTENT,
+                'title' => $stepData['title'] ?? 'New Step',
+                'description' => $stepData['description'] ?? null,
+                'instructions' => $stepData['instructions'] ?? null,
+                'content_type' => $stepData['content_type'] ?? MiniCourseStep::CONTENT_TEXT,
+                'content_data' => $stepData['content_data'] ?? [],
+                'estimated_duration_minutes' => $stepData['duration'] ?? 5,
+                'is_required' => $stepData['is_required'] ?? true,
+                'feedback_prompt' => $stepData['feedback_prompt'] ?? null,
+            ]);
+
+            $this->course->load(['steps' => fn ($q) => $q->orderBy('sort_order')]);
+
+            $this->dispatch('notify', [
+                'type' => 'success',
+                'message' => 'Step added from AI suggestion!',
+            ]);
+        }
+    }
+
+    /**
+     * Process uploaded document and extract course structure.
+     */
+    public function processDocument(): void
+    {
+        if (!$this->uploadedDocument) {
+            $this->aiError = 'Please upload a document first.';
+            return;
+        }
+
+        $this->validate([
+            'uploadedDocument' => 'required|file|mimes:txt,pdf,doc,docx|max:5120',
+        ]);
+
+        $this->processingDocument = true;
+        $this->aiError = null;
+
+        try {
+            // Extract text from document
+            $text = $this->extractTextFromDocument($this->uploadedDocument);
+
+            if (empty($text)) {
+                $this->aiError = 'Could not extract text from the document.';
+                return;
+            }
+
+            $aiService = app(CourseContentAIService::class);
+
+            $result = $aiService->extractCourseFromDocument($text, [
+                'course_type' => $this->courseType,
+                'audience' => $this->aiAudience,
+                'grade_level' => $this->aiGradeLevel,
+            ]);
+
+            if ($result['success']) {
+                $this->applyAICourse($result['course']);
+                $this->uploadedDocument = null;
+                $this->dispatch('notify', [
+                    'type' => 'success',
+                    'message' => 'Course extracted from document! Review and customize.',
+                ]);
+            } else {
+                $this->aiError = $result['error'] ?? 'Failed to extract course from document.';
+            }
+        } catch (\Exception $e) {
+            $this->aiError = 'An error occurred while processing the document.';
+            \Log::error('Document processing failed', ['error' => $e->getMessage()]);
+        } finally {
+            $this->processingDocument = false;
+        }
+    }
+
+    /**
+     * Extract text content from uploaded document.
+     */
+    protected function extractTextFromDocument($file): string
+    {
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        if ($extension === 'txt') {
+            return file_get_contents($file->getRealPath());
+        }
+
+        // For PDF and DOC files, we'll use a simple approach
+        // In production, you'd want to use proper libraries like Smalot\PdfParser or PhpWord
+        if ($extension === 'pdf') {
+            // Basic PDF text extraction - you may want to use a proper library
+            $content = file_get_contents($file->getRealPath());
+            // Strip binary content and try to get text
+            $text = preg_replace('/[^\x20-\x7E\n\r\t]/', '', $content);
+            return $text ?: '';
+        }
+
+        // For now, return empty for unsupported formats
+        // In production, implement proper document parsing
+        return '';
+    }
+
+    /**
+     * Generate AI content for the currently editing step.
+     */
+    public function generateStepContent(): void
+    {
+        if (empty($this->stepForm['title'])) {
+            $this->aiError = 'Please enter a step title first.';
+            return;
+        }
+
+        $this->aiGenerating = true;
+        $this->aiError = null;
+
+        try {
+            $aiService = app(CourseContentAIService::class);
+
+            $stepType = $this->stepForm['step_type'] ?? MiniCourseStep::TYPE_CONTENT;
+            $topic = $this->stepForm['title'];
+
+            $context = [
+                'course_title' => $this->title,
+                'course_type' => $this->courseType,
+                'objectives' => $this->objectives,
+                'grade_level' => $this->aiGradeLevel,
+            ];
+
+            // Generate content based on step type
+            $result = match ($stepType) {
+                MiniCourseStep::TYPE_REFLECTION => $aiService->generateReflectionPrompts($topic, $context),
+                MiniCourseStep::TYPE_ASSESSMENT => $aiService->generateAssessment($this->objectives, 'quiz', ['num_questions' => 3]),
+                MiniCourseStep::TYPE_ACTION => $aiService->generateActionPlan($topic, $context),
+                default => $aiService->generateContentSection($topic, $this->objectives, $context),
+            };
+
+            if ($result['success']) {
+                $data = $result['content'] ?? $result['reflection'] ?? $result['assessment'] ?? $result['action_plan'] ?? [];
+
+                // Apply to step form
+                if (isset($data['body'])) {
+                    $this->stepForm['content_data']['body'] = $data['body'];
+                }
+                if (isset($data['key_points'])) {
+                    $this->stepForm['content_data']['key_points'] = $data['key_points'];
+                }
+                if (isset($data['prompts'])) {
+                    $this->stepForm['content_data']['prompts'] = $data['prompts'];
+                }
+                if (isset($data['questions'])) {
+                    $this->stepForm['content_data']['questions'] = $data['questions'];
+                }
+                if (isset($data['introduction'])) {
+                    $this->stepForm['description'] = $data['introduction'];
+                }
+
+                $this->dispatch('notify', [
+                    'type' => 'success',
+                    'message' => 'Content generated for step!',
+                ]);
+            } else {
+                $this->aiError = $result['error'] ?? 'Failed to generate step content.';
+            }
+        } catch (\Exception $e) {
+            $this->aiError = 'An error occurred while generating content.';
+            \Log::error('AI step content generation failed', ['error' => $e->getMessage()]);
+        } finally {
+            $this->aiGenerating = false;
+        }
+    }
+
+    /**
+     * Get AI suggestions for improving current content.
+     */
+    public function getAISuggestions(string $field): void
+    {
+        $content = match ($field) {
+            'title' => $this->title,
+            'description' => $this->description,
+            'rationale' => $this->rationale,
+            'expectedExperience' => $this->expectedExperience,
+            default => '',
+        };
+
+        if (empty($content)) {
+            $this->aiError = 'Please enter some content first.';
+            return;
+        }
+
+        $this->aiGenerating = true;
+
+        try {
+            $aiService = app(CourseContentAIService::class);
+
+            $result = $aiService->getInlineSuggestions($content, $field, [
+                'course_title' => $this->title,
+                'course_type' => $this->courseType,
+            ]);
+
+            if ($result['success']) {
+                $this->aiSuggestions = $result['data'];
+            } else {
+                $this->aiError = $result['error'] ?? 'Failed to get suggestions.';
+            }
+        } catch (\Exception $e) {
+            $this->aiError = 'An error occurred.';
+        } finally {
+            $this->aiGenerating = false;
+        }
+    }
+
+    public function clearAISuggestions(): void
+    {
+        $this->aiSuggestions = [];
+        $this->aiError = null;
     }
 
     public function render()
