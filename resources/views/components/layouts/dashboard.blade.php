@@ -319,6 +319,7 @@
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
+            @if(!($hideHeader ?? false))
             <!-- Top Header -->
             <header class="h-16 bg-white border-b border-gray-200 px-8 flex items-center justify-between flex-shrink-0">
                 <h1 class="text-2xl font-semibold text-gray-900">{{ $title ?? 'Dashboard' }}</h1>
@@ -395,6 +396,7 @@
                     @endif
                 </div>
             </header>
+            @endif
 
             <!-- Page Content -->
             <main class="flex-1 overflow-auto p-8">

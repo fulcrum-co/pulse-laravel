@@ -1,19 +1,5 @@
 <div class="min-h-screen bg-gray-50">
-    <!-- Header Banner -->
-    <div class="bg-white border-b border-gray-200">
-        <div class="px-6 py-4 flex items-center justify-between">
-            <h1 class="text-2xl font-semibold text-gray-900">Resources</h1>
-            <button
-                wire:click="$dispatch('openAddResourceModal')"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
-            >
-                <x-icon name="plus" class="w-4 h-4" />
-                Add Resource
-            </button>
-        </div>
-    </div>
-
-    <div class="px-6 py-8">
+    <div class="py-2">
         <!-- Unified Search -->
         <div class="mb-10">
             <div class="relative max-w-2xl mx-auto">

@@ -94,7 +94,7 @@ class ProviderDirectory extends Component
         ];
     }
 
-    public function hasActiveFiltersProperty(): bool
+    public function getHasActiveFiltersProperty(): bool
     {
         return $this->search !== '' ||
             $this->filterType !== '' ||
@@ -106,6 +106,6 @@ class ProviderDirectory extends Component
     {
         return view('livewire.provider-directory', [
             'providers' => $this->providers,
-        ])->layout('layouts.dashboard', ['title' => 'Provider Directory']);
+        ])->layout('layouts.dashboard', ['title' => 'Provider Directory', 'hideHeader' => true]);
     }
 }

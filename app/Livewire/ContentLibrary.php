@@ -179,7 +179,7 @@ class ContentLibrary extends Component
         ];
     }
 
-    public function hasActiveFiltersProperty(): bool
+    public function getHasActiveFiltersProperty(): bool
     {
         return $this->search !== '' ||
             count($this->selectedTypes) > 0 ||
@@ -192,6 +192,6 @@ class ContentLibrary extends Component
     {
         return view('livewire.content-library', [
             'resources' => $this->resources,
-        ])->layout('layouts.dashboard', ['title' => 'Content Library']);
+        ])->layout('layouts.dashboard', ['title' => 'Content Library', 'hideHeader' => true]);
     }
 }

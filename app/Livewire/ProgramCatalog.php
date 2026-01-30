@@ -96,7 +96,7 @@ class ProgramCatalog extends Component
         ];
     }
 
-    public function hasActiveFiltersProperty(): bool
+    public function getHasActiveFiltersProperty(): bool
     {
         return $this->search !== '' ||
             $this->filterType !== '' ||
@@ -109,6 +109,6 @@ class ProgramCatalog extends Component
     {
         return view('livewire.program-catalog', [
             'programs' => $this->programs,
-        ])->layout('layouts.dashboard', ['title' => 'Program Catalog']);
+        ])->layout('layouts.dashboard', ['title' => 'Program Catalog', 'hideHeader' => true]);
     }
 }

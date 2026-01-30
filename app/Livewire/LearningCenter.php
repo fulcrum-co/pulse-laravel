@@ -94,6 +94,6 @@ class LearningCenter extends Component
     {
         return view('livewire.learning-center', [
             'courses' => $this->courses,
-        ])->layout('layouts.dashboard', ['title' => 'Learning Center']);
+        ])->layout('layouts.dashboard', ['title' => 'Learning Center', 'hideHeader' => true]);
     }
 }
