@@ -239,13 +239,27 @@ Route::middleware('auth')->group(function () {
     Route::delete('/activities/{activity}', [ActivityController::class, 'destroy'])->name('activities.destroy');
     Route::put('/activities/reorder', [ActivityController::class, 'reorder'])->name('activities.reorder');
 
-    // Resource Library
-    Route::get('/resources', App\Livewire\ResourceLibrary::class)->name('resources.index');
+    // Resource Library - Hub + Sub-pages
+    Route::get('/resources', App\Livewire\ResourceHub::class)->name('resources.index');
+
+    // Content Library (sub-page)
+    Route::get('/resources/content', App\Livewire\ContentLibrary::class)->name('resources.content.index');
+
+    // Providers Directory (sub-page)
+    Route::get('/resources/providers', App\Livewire\ProviderDirectory::class)->name('resources.providers.index');
     Route::get('/resources/providers/{provider}', App\Livewire\ProviderProfile::class)->name('resources.providers.show');
+
+    // Programs Catalog (sub-page)
+    Route::get('/resources/programs', App\Livewire\ProgramCatalog::class)->name('resources.programs.index');
     Route::get('/resources/programs/{program}', App\Livewire\ProgramDetail::class)->name('resources.programs.show');
+
+    // Courses / Learning Center (sub-page)
+    Route::get('/resources/courses', App\Livewire\LearningCenter::class)->name('resources.courses.index');
     Route::get('/resources/courses/create', App\Livewire\MiniCourseEditor::class)->name('resources.courses.create');
     Route::get('/resources/courses/{course}', App\Livewire\MiniCourseViewer::class)->name('resources.courses.show');
     Route::get('/resources/courses/{course}/edit', App\Livewire\MiniCourseEditor::class)->name('resources.courses.edit');
+
+    // Individual Resource Detail
     Route::get('/resources/{resource}', App\Livewire\ResourceDetail::class)->name('resources.show');
 
     // Mini-Courses API
