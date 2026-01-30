@@ -31,7 +31,7 @@
                         'provider' => route('resources.providers.show', $item['id']),
                         'program' => route('resources.programs.show', $item['id']),
                         'course' => route('resources.courses.show', $item['id']),
-                        'resource' => $item['model']->url ?? '#',
+                        'resource' => route('resources.show', $item['id']),
                     };
                 @endphp
                 <tr class="hover:bg-gray-50">
@@ -58,7 +58,7 @@
                         {{ $item['meta'] ?? '-' }}
                     </td>
                     <td class="px-4 py-3 whitespace-nowrap text-right">
-                        <a href="{{ $itemUrl }}" @if($item['type'] === 'resource' && $item['model']->url) target="_blank" @endif class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
+                        <a href="{{ $itemUrl }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
                             View
                         </a>
                     </td>

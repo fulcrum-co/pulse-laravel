@@ -15,7 +15,7 @@
         'provider' => route('resources.providers.show', $item['id']),
         'program' => route('resources.programs.show', $item['id']),
         'course' => route('resources.courses.show', $item['id']),
-        'resource' => $item['model']->url ?? '#',
+        'resource' => route('resources.show', $item['id']),
     };
 @endphp
 
@@ -50,7 +50,7 @@
     </div>
 
     <div class="px-4 py-2 bg-gray-50 border-t border-gray-100 flex items-center justify-end">
-        <a href="{{ $itemUrl }}" @if($item['type'] === 'resource' && $item['model']->url) target="_blank" @endif class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
+        <a href="{{ $itemUrl }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
             View
         </a>
     </div>
@@ -82,7 +82,7 @@
     </div>
 
     <!-- Action -->
-    <a href="{{ $itemUrl }}" @if($item['type'] === 'resource' && $item['model']->url) target="_blank" @endif class="ml-2 px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600">
+    <a href="{{ $itemUrl }}" class="ml-2 px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600">
         View
     </a>
 </div>

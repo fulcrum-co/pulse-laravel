@@ -246,6 +246,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/resources/courses/create', App\Livewire\MiniCourseEditor::class)->name('resources.courses.create');
     Route::get('/resources/courses/{course}', App\Livewire\MiniCourseViewer::class)->name('resources.courses.show');
     Route::get('/resources/courses/{course}/edit', App\Livewire\MiniCourseEditor::class)->name('resources.courses.edit');
+    Route::get('/resources/{resource}', App\Livewire\ResourceDetail::class)->name('resources.show');
 
     // Mini-Courses API
     Route::prefix('api/mini-courses')->group(function () {

@@ -66,12 +66,8 @@
                         @endif
                     </td>
                     <td class="px-4 py-3 whitespace-nowrap text-right">
-                        <a href="{{ $resource->url ?? '#' }}" target="{{ $resource->url ? '_blank' : '_self' }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                            @if($resource->url)
-                                Open
-                            @else
-                                View
-                            @endif
+                        <a href="{{ route('resources.show', $resource) }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
+                            View
                         </a>
                     </td>
                 </tr>
