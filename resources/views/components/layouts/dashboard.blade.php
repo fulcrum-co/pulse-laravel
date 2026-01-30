@@ -206,10 +206,9 @@
                 <div @mouseenter="hoveredItem = 'collect'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/collect"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
-                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('collect*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="collection" class="w-5 h-5 flex-shrink-0" />
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Collect</span>
-                        <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">Soon</span>
                     </a>
                     <div x-show="sidebarCollapsed && hoveredItem === 'collect'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Collect</div>
                 </div>
@@ -351,6 +350,10 @@
                                         <x-icon name="clipboard-list" class="w-4 h-4 text-gray-400" />
                                         Survey
                                     </a>
+                                    <a href="/collect/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <x-icon name="collection" class="w-4 h-4 text-gray-400" />
+                                        Collection
+                                    </a>
                                     <a href="/reports/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         <x-icon name="chart-bar" class="w-4 h-4 text-gray-400" />
                                         Report
@@ -377,6 +380,12 @@
                         <a href="#" onclick="event.preventDefault(); Livewire.dispatch('notify', [{type: 'info', message: 'Resource creation coming soon'}])" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
                             <x-icon name="plus" class="w-4 h-4 mr-2" />
                             Add Resource
+                        </a>
+                    @elseif(request()->is('collect'))
+                        <!-- Add Collection Button -->
+                        <a href="{{ route('collect.create') }}" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                            <x-icon name="plus" class="w-4 h-4 mr-2" />
+                            Add Collection
                         </a>
                     @endif
                 </div>

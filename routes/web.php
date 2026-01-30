@@ -300,10 +300,13 @@ Route::middleware('auth')->group(function () {
     // Student Enrollments API
     Route::get('/api/students/{student}/enrollments', [App\Http\Controllers\Api\EnrollmentController::class, 'indexByStudent'])->name('api.students.enrollments');
 
-    // Collect (coming soon)
-    Route::get('/collect', function () {
-        return view('collect.index');
-    })->name('collect.index');
+    // Collect
+    Route::get('/collect', App\Livewire\Collect\CollectionList::class)->name('collect.index');
+    Route::get('/collect/create', App\Livewire\Collect\CollectionCreator::class)->name('collect.create');
+    Route::get('/collect/{collection}', function (\App\Models\Collection $collection) {
+        // Placeholder for collection detail view (Phase 4)
+        return redirect()->route('collect.index');
+    })->name('collect.show');
 
     // Distribute (coming soon)
     Route::get('/distribute', function () {
