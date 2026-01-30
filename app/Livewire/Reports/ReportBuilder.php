@@ -511,6 +511,20 @@ class ReportBuilder extends Component
     }
 
     /**
+     * Preview the report (saves first if needed, then opens in new tab).
+     */
+    public function previewReport(): void
+    {
+        // Ensure report is saved first
+        if (!$this->reportId) {
+            $this->save();
+        }
+
+        // Dispatch event to open preview in new tab (handled by Alpine.js)
+        $this->dispatch('openPreview', url: route('reports.preview', ['report' => $this->reportId]));
+    }
+
+    /**
      * Start PDF export process - triggers chart image capture first.
      */
     public function exportPdf(): void

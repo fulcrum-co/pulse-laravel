@@ -131,6 +131,30 @@ class ReportController extends Controller
     }
 
     /**
+     * Preview a report (requires auth, works for drafts).
+     */
+    public function preview(Request $request, CustomReport $report)
+    {
+        $user = auth()->user();
+
+        if ($report->org_id !== $user->org_id) {
+            abort(403);
+        }
+
+        // Get data based on is_live setting
+        $data = $report->is_live
+            ? $this->resolveReportData($report)
+            : ($report->snapshot_data ?? []);
+
+        return view('reports.public', [
+            'report' => $report,
+            'data' => $data,
+            'branding' => $report->getEffectiveBranding(),
+            'isPreview' => true,
+        ]);
+    }
+
+    /**
      * Public view of a published report (no auth required).
      */
     public function publicView(string $token)
@@ -148,6 +172,7 @@ class ReportController extends Controller
             'report' => $report,
             'data' => $data,
             'branding' => $report->getEffectiveBranding(),
+            'isPreview' => false,
         ]);
     }
 

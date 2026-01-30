@@ -76,6 +76,7 @@
         </div>
 
         <!-- Render Elements -->
+        @php $chartIndex = 0; @endphp
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 relative" style="min-height: 800px;">
             @foreach($report->report_layout ?? [] as $element)
                 <div
@@ -106,9 +107,10 @@
                                     <h4 class="text-sm font-medium text-gray-700 mb-2">{{ $element['config']['title'] }}</h4>
                                 @endif
                                 <div class="flex-1">
-                                    <canvas id="chart-{{ $loop->index }}"></canvas>
+                                    <canvas id="chart-{{ $chartIndex }}"></canvas>
                                 </div>
                             </div>
+                            @php $chartIndex++; @endphp
                             @break
 
                         @case('metric_card')
@@ -201,69 +203,74 @@
         // Chart data from server
         const chartData = @json($data['charts'] ?? []);
 
+        // Chart configurations from server (prepared in PHP to avoid Blade parsing issues)
+        const chartConfigs = @json(collect($report->report_layout ?? [])->filter(fn($el) => ($el['type'] ?? '') === 'chart')->values()->map(fn($el, $idx) => [
+            'index' => $idx,
+            'metricKeys' => $el['config']['metric_keys'] ?? [],
+            'chartType' => $el['config']['chart_type'] ?? 'line',
+            'colors' => $el['config']['colors'] ?? ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
+            'title' => $el['config']['title'] ?? 'Chart',
+        ])->toArray());
+
         // Initialize charts
         document.addEventListener('DOMContentLoaded', function() {
-            @foreach($report->report_layout ?? [] as $element)
-                @if($element['type'] === 'chart')
-                    (function() {
-                        const ctx = document.getElementById('chart-{{ $loop->index }}');
-                        if (!ctx) return;
+            chartConfigs.forEach(function(config) {
+                const ctx = document.getElementById('chart-' + config.index);
+                if (!ctx) return;
 
-                        const metricKeys = @json($element['config']['metric_keys'] ?? []);
-                        const chartType = '{{ $element['config']['chart_type'] ?? 'line' }}';
-                        const colors = @json($element['config']['colors'] ?? ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']);
+                const metricKeys = config.metricKeys;
+                const chartType = config.chartType;
+                const colors = config.colors;
 
-                        // Build datasets from chart data
-                        const datasets = [];
-                        const labels = [];
+                // Build datasets from chart data
+                const datasets = [];
+                const labels = [];
 
-                        metricKeys.forEach((key, index) => {
-                            const data = chartData[key] || [];
-                            if (data.length > 0 && labels.length === 0) {
-                                data.forEach(d => labels.push(d.period));
+                metricKeys.forEach((key, index) => {
+                    const data = chartData[key] || [];
+                    if (data.length > 0 && labels.length === 0) {
+                        data.forEach(d => labels.push(d.period));
+                    }
+                    datasets.push({
+                        label: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                        data: data.map(d => d.value),
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '20',
+                        tension: 0.3,
+                        fill: chartType === 'line'
+                    });
+                });
+
+                // If no data, show placeholder
+                if (labels.length === 0) {
+                    labels.push('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun');
+                    datasets.push({
+                        label: config.title,
+                        data: [null, null, null, null, null, null],
+                        borderColor: '#CBD5E1',
+                        tension: 0.3
+                    });
+                }
+
+                new Chart(ctx, {
+                    type: chartType,
+                    data: { labels, datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: metricKeys.length > 1,
+                                position: 'bottom'
                             }
-                            datasets.push({
-                                label: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                                data: data.map(d => d.value),
-                                borderColor: colors[index % colors.length],
-                                backgroundColor: colors[index % colors.length] + '20',
-                                tension: 0.3,
-                                fill: chartType === 'line'
-                            });
-                        });
-
-                        // If no data, show placeholder
-                        if (labels.length === 0) {
-                            labels.push('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun');
-                            datasets.push({
-                                label: '{{ $element['config']['title'] ?? 'No Data' }}',
-                                data: [null, null, null, null, null, null],
-                                borderColor: '#CBD5E1',
-                                tension: 0.3
-                            });
+                        },
+                        scales: chartType === 'pie' || chartType === 'doughnut' ? {} : {
+                            y: { beginAtZero: false },
+                            x: { grid: { display: false } }
                         }
-
-                        new Chart(ctx, {
-                            type: chartType,
-                            data: { labels, datasets },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        display: metricKeys.length > 1,
-                                        position: 'bottom'
-                                    }
-                                },
-                                scales: chartType === 'pie' || chartType === 'doughnut' ? {} : {
-                                    y: { beginAtZero: false },
-                                    x: { grid: { display: false } }
-                                }
-                            }
-                        });
-                    })();
-                @endif
-            @endforeach
+                    }
+                });
+            });
         });
     </script>
 </body>

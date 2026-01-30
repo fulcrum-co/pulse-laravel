@@ -87,18 +87,19 @@
                                     Duplicate
                                 </button>
                             </form>
-                            <button
-                                type="button"
-                                x-data
-                                @click="if(confirm('Are you sure you want to delete this report?')) { $refs.deleteForm.submit() }"
-                                class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            >
-                                <x-icon name="trash" class="w-4 h-4" />
-                            </button>
-                            <form x-ref="deleteForm" action="{{ route('reports.destroy', $report) }}" method="POST" class="hidden">
-                                @csrf
-                                @method('DELETE')
-                            </form>
+                            <div x-data class="inline-block">
+                                <button
+                                    type="button"
+                                    @click="if(confirm('Are you sure you want to delete this report?')) { $refs.deleteForm.submit() }"
+                                    class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                >
+                                    <x-icon name="trash" class="w-4 h-4" />
+                                </button>
+                                <form x-ref="deleteForm" action="{{ route('reports.destroy', $report) }}" method="POST" class="hidden">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

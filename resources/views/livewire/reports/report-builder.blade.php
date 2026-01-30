@@ -1,4 +1,8 @@
-<div class="h-screen flex flex-col">
+<div
+    class="h-screen flex flex-col"
+    x-data
+    @open-preview.window="window.open($event.detail.url, '_blank')"
+>
     <!-- Header -->
     <header class="h-14 bg-white border-b border-gray-200 px-4 flex items-center justify-between flex-shrink-0 z-50">
         <div class="flex items-center gap-4">
@@ -78,8 +82,10 @@
 
             <!-- Preview button -->
             <button
-                @click="window.open('{{ $reportId ? route('reports.public', ['token' => 'preview']) : '#' }}', '_blank')"
-                class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                wire:click="previewReport"
+                wire:loading.attr="disabled"
+                wire:target="previewReport"
+                class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>

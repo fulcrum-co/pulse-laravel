@@ -101,6 +101,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/create', [ReportController::class, 'create'])->name('reports.create');
     Route::get('/reports/{report}/edit', [ReportController::class, 'edit'])->name('reports.edit');
+    Route::get('/reports/{report}/preview', [ReportController::class, 'preview'])->name('reports.preview');
     Route::post('/reports/{report}/duplicate', [ReportController::class, 'duplicate'])->name('reports.duplicate');
     Route::get('/reports/{report}/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
     Route::post('/reports/{report}/publish', [ReportController::class, 'publish'])->name('reports.publish');
