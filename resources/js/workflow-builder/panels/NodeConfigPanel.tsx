@@ -49,8 +49,8 @@ export default function NodeConfigPanel({ node, onUpdate, onClose, onDelete }: N
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                     >
                         <option value="">Select trigger...</option>
-                        {Object.entries(TRIGGER_TYPES).map(([key, label]) => (
-                            <option key={key} value={key}>{label}</option>
+                        {Object.entries(TRIGGER_TYPES).map(([key, config]) => (
+                            <option key={key} value={key}>{config.label}</option>
                         ))}
                     </select>
                 </div>
@@ -185,8 +185,8 @@ export default function NodeConfigPanel({ node, onUpdate, onClose, onDelete }: N
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     >
                         <option value="">Select action...</option>
-                        {Object.entries(ACTION_TYPES).map(([key, label]) => (
-                            <option key={key} value={key}>{label}</option>
+                        {Object.entries(ACTION_TYPES).map(([key, config]) => (
+                            <option key={key} value={key}>{config.label}</option>
                         ))}
                     </select>
                 </div>
