@@ -12,7 +12,22 @@ class AdaptiveTriggerSeeder extends Seeder
     public function run(): void
     {
         $school = Organization::where('org_type', 'school')->first();
-        $admin = User::where('primary_role', 'admin')->where('org_id', $school->id)->first();
+        if (!$school) {
+            $school = Organization::first();
+        }
+        if (!$school) {
+            $this->command->error('No organization found. Please seed organizations first.');
+            return;
+        }
+
+        $admin = User::where('org_id', $school->id)->first();
+        if (!$admin) {
+            $admin = User::first();
+        }
+        if (!$admin) {
+            $this->command->error('No user found. Please seed users first.');
+            return;
+        }
 
         $triggers = [
             [

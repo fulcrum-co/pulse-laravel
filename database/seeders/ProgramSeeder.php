@@ -12,7 +12,18 @@ class ProgramSeeder extends Seeder
     public function run(): void
     {
         $school = Organization::where('org_type', 'school')->first();
-        $admin = User::where('primary_role', 'admin')->where('org_id', $school->id)->first();
+        if (!$school) {
+            $school = Organization::first();
+        }
+        if (!$school) {
+            $this->command->error('No organization found. Please seed organizations first.');
+            return;
+        }
+
+        $admin = User::where('org_id', $school->id)->first();
+        if (!$admin) {
+            $admin = User::first();
+        }
 
         $programs = [
             [
