@@ -150,6 +150,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/contacts/teachers/{teacher}', [ContactController::class, 'showTeacher'])->name('contacts.teacher');
     Route::get('/contacts/parents/{parent}', [ContactController::class, 'showParent'])->name('contacts.parent');
 
+    // Contact Lists
+    Route::get('/contacts/lists', App\Livewire\ContactListManager::class)->name('contacts.lists');
+
     // Contact Notes API
     Route::get('/api/contacts/{contactType}/{contactId}/notes', [ContactNoteController::class, 'index'])->name('api.notes.index');
     Route::post('/api/contacts/notes', [ContactNoteController::class, 'store'])->name('api.notes.store');
