@@ -11,24 +11,28 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_organizations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->string('role')->nullable(); // Role within this specific organization
-            $table->boolean('is_primary')->default(false); // Is this the user's primary org
-            $table->boolean('can_manage')->default(false); // Can manage this org's settings
-            $table->timestamps();
+        if (!Schema::hasTable('user_organizations')) {
+            Schema::create('user_organizations', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+                $table->string('role')->nullable(); // Role within this specific organization
+                $table->boolean('is_primary')->default(false); // Is this the user's primary org
+                $table->boolean('can_manage')->default(false); // Can manage this org's settings
+                $table->timestamps();
 
-            $table->unique(['user_id', 'organization_id']);
-            $table->index(['user_id', 'is_primary']);
-            $table->index('organization_id');
-        });
+                $table->unique(['user_id', 'organization_id']);
+                $table->index(['user_id', 'is_primary']);
+                $table->index('organization_id');
+            });
+        }
 
         // Add current_org_id to users table for tracking which org they're currently viewing
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('current_org_id')->nullable()->after('org_id')->constrained('organizations')->nullOnDelete();
-        });
+        if (!Schema::hasColumn('users', 'current_org_id')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->foreignId('current_org_id')->nullable()->after('org_id')->constrained('organizations')->nullOnDelete();
+            });
+        }
     }
 
     /**
