@@ -22,32 +22,67 @@ Route::get('/', function () {
 
 // Temporary route to fix avatars - visit once then remove
 Route::get('/fix-avatars-temp', function () {
-    // Common female first names
-    $femaleNames = ['Emma','Olivia','Ava','Sophia','Isabella','Mia','Charlotte','Amelia','Harper','Evelyn','Luna','Chloe','Emily','Sarah','Maria','Jessica','Ashley','Jennifer','Amanda','Stephanie','Nicole','Michelle','Elizabeth','Heather','Melissa','Amy','Anna','Rebecca','Katherine','Christine','Rachel','Laura','Julia','Madison','Grace','Lily'];
+    // Set up error handling
+    set_time_limit(300); // 5 minutes
 
-    $updated = 0;
-    $maleImg = 1;
-    $femaleImg = 1;
+    $output = [];
+    $output[] = "Starting avatar fix...";
 
-    // Update ALL users
-    $users = \App\Models\User::all();
-    foreach ($users as $user) {
-        $isFemale = in_array($user->first_name, $femaleNames);
+    try {
+        // Common female first names
+        $femaleNames = ['Emma','Olivia','Ava','Sophia','Isabella','Mia','Charlotte','Amelia','Harper','Evelyn','Luna','Chloe','Emily','Sarah','Maria','Jessica','Ashley','Jennifer','Amanda','Stephanie','Nicole','Michelle','Elizabeth','Heather','Melissa','Amy','Anna','Rebecca','Katherine','Christine','Rachel','Laura','Julia','Madison','Grace','Lily'];
 
-        if ($isFemale) {
-            $imgNum = ($femaleImg % 99) + 1; // randomuser.me has portraits 1-99
-            $user->avatar_url = 'https://randomuser.me/api/portraits/women/' . $imgNum . '.jpg';
-            $femaleImg++;
-        } else {
-            $imgNum = ($maleImg % 99) + 1;
-            $user->avatar_url = 'https://randomuser.me/api/portraits/men/' . $imgNum . '.jpg';
-            $maleImg++;
+        $maleImg = 1;
+        $femaleImg = 1;
+        $updated = 0;
+        $errors = [];
+
+        // Use chunking to avoid memory issues
+        \App\Models\User::chunk(50, function ($users) use ($femaleNames, &$maleImg, &$femaleImg, &$updated, &$errors) {
+            foreach ($users as $user) {
+                try {
+                    $isFemale = in_array($user->first_name, $femaleNames);
+
+                    if ($isFemale) {
+                        $imgNum = (($femaleImg - 1) % 99) + 1;
+                        $user->avatar_url = 'https://randomuser.me/api/portraits/women/' . $imgNum . '.jpg';
+                        $femaleImg++;
+                    } else {
+                        $imgNum = (($maleImg - 1) % 99) + 1;
+                        $user->avatar_url = 'https://randomuser.me/api/portraits/men/' . $imgNum . '.jpg';
+                        $maleImg++;
+                    }
+
+                    $user->save();
+                    $updated++;
+                } catch (\Exception $e) {
+                    $errors[] = "User {$user->id}: " . $e->getMessage();
+                }
+            }
+        });
+
+        $output[] = "Updated {$updated} user avatars!";
+
+        if (count($errors) > 0) {
+            $output[] = "Errors encountered:";
+            foreach (array_slice($errors, 0, 10) as $error) {
+                $output[] = "- " . $error;
+            }
+            if (count($errors) > 10) {
+                $output[] = "... and " . (count($errors) - 10) . " more errors";
+            }
         }
-        $user->save();
-        $updated++;
+
+        $output[] = "";
+        $output[] = "You can now visit /contacts to see the avatars.";
+        $output[] = "After confirming, remove this route from routes/web.php";
+
+    } catch (\Exception $e) {
+        $output[] = "FATAL ERROR: " . $e->getMessage();
+        $output[] = "File: " . $e->getFile() . ":" . $e->getLine();
     }
 
-    return "Updated {$updated} user avatars! You can remove this route now.";
+    return "<pre>" . implode("\n", $output) . "</pre>";
 });
 
 // Public dashboard view (shareable reports, no auth required)
