@@ -329,7 +329,7 @@
                         >
                             <option value="">Choose a student...</option>
                             @foreach($this->students as $student)
-                                <option value="{{ $student->id }}">{{ $student->last_name }}, {{ $student->first_name }}</option>
+                                <option value="{{ $student->id }}">{{ $student->full_name }} ({{ $student->grade_level }})</option>
                             @endforeach
                         </select>
                         @error('selectedStudentId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror

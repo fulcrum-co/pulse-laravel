@@ -137,10 +137,10 @@ class ResourceDetail extends Component
     public function getStudentsProperty()
     {
         return Student::where('org_id', auth()->user()->org_id)
-            ->whereNull('deleted_at')
-            ->orderBy('last_name')
-            ->orderBy('first_name')
-            ->get();
+            ->with('user')
+            ->get()
+            ->sortBy(fn ($student) => $student->user?->name ?? '')
+            ->values();
     }
 
     public function getContactListsProperty()
