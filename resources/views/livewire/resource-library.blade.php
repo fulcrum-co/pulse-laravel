@@ -1,16 +1,4 @@
 <div class="space-y-4">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Resource Library</h1>
-            <p class="text-sm text-gray-500 mt-1">Browse content, providers, programs, and mini-courses</p>
-        </div>
-        <a href="#" wire:click.prevent="$dispatch('notify', {type: 'info', message: 'Resource creation coming soon'})" class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 transition-colors text-sm font-medium">
-            <x-icon name="plus" class="w-4 h-4" />
-            Add Resource
-        </a>
-    </div>
-
     <!-- Tabs -->
     <div class="border-b border-gray-200">
         <nav class="-mb-px flex gap-6 overflow-x-auto" aria-label="Tabs">
