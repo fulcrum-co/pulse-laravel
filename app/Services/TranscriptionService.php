@@ -14,9 +14,11 @@ class TranscriptionService
 
     public function __construct()
     {
-        $this->openaiApiKey = config('services.openai.api_key', '');
-        $this->assemblyAiApiKey = config('services.assembly_ai.api_key', '');
-        $this->defaultProvider = config('services.transcription.default', 'whisper');
+        // Use ?? operator because config() returns null when env var is not set,
+        // even if a default is provided (the default only applies if the key doesn't exist)
+        $this->openaiApiKey = config('services.openai.api_key') ?? '';
+        $this->assemblyAiApiKey = config('services.assembly_ai.api_key') ?? '';
+        $this->defaultProvider = config('services.transcription.default') ?? 'whisper';
     }
 
     /**
