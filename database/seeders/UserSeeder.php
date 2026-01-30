@@ -21,6 +21,7 @@ class UserSeeder extends Seeder
             'email' => 'admin@lincolnhigh.edu',
             'password' => Hash::make('password'),
             'primary_role' => 'admin',
+            'avatar_url' => 'https://i.pravatar.cc/150?u=admin@lincolnhigh.edu',
             'active' => true,
             'suspended' => false,
         ]);
@@ -34,6 +35,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'primary_role' => 'admin',
             'phone' => '(555) 345-6789',
+            'avatar_url' => 'https://i.pravatar.cc/150?u=erodriguez@lincolnhigh.edu',
             'active' => true,
             'suspended' => false,
         ]);
@@ -54,6 +56,7 @@ class UserSeeder extends Seeder
                 'email' => $teacher['email'],
                 'password' => Hash::make('password'),
                 'primary_role' => 'teacher',
+                'avatar_url' => 'https://i.pravatar.cc/150?u=' . $teacher['email'],
                 'active' => true,
                 'suspended' => false,
             ]);
@@ -89,13 +92,15 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($studentData as $index => $student) {
+            $email = strtolower($student['first_name'][0] . $student['last_name']) . '@student.lincolnhigh.edu';
             User::create([
                 'org_id' => $school->id,
                 'first_name' => $student['first_name'],
                 'last_name' => $student['last_name'],
-                'email' => strtolower($student['first_name'][0] . $student['last_name']) . '@student.lincolnhigh.edu',
+                'email' => $email,
                 'password' => Hash::make('password'),
                 'primary_role' => 'student',
+                'avatar_url' => 'https://i.pravatar.cc/150?u=' . $email,
                 'active' => true,
                 'suspended' => false,
             ]);

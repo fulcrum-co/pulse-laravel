@@ -45,8 +45,8 @@ Route::middleware('guest')->group(function () {
 
 // Protected routes (only accessible when logged in)
 Route::middleware('auth')->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Dashboard (HubSpot-style customizable)
+    Route::get('/dashboard', App\Livewire\Dashboard\DashboardIndex::class)->name('dashboard');
 
     // Contacts (Students, Teachers, Parents)
     Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
