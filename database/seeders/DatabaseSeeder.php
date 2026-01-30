@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
             OrganizationSeeder::class,
             UserSeeder::class,
             StudentSeeder::class,
+            QuestionBankSeeder::class,
+            SurveyTemplateSeeder::class,
             SurveySeeder::class,
             ResourceSeeder::class,
             StrategySeeder::class,

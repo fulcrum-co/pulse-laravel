@@ -23,6 +23,18 @@ Route::get('/', function () {
 // Public dashboard view (shareable reports, no auth required)
 Route::get('/dashboard/{token}', [ReportController::class, 'publicView'])->name('reports.public');
 
+// Public survey response route (for SMS/email links)
+Route::get('/surveys/{survey}/respond/{attempt}', function ($survey, $attempt) {
+    // This will be handled by a Livewire component
+    return view('surveys.respond', compact('survey', 'attempt'));
+})->name('surveys.respond');
+
+// Sinch Webhooks (no auth required)
+Route::prefix('webhooks/surveys')->group(function () {
+    Route::post('/sinch/voice', [App\Http\Controllers\SurveyWebhookController::class, 'handleVoice'])->name('webhooks.surveys.voice');
+    Route::post('/sinch/sms', [App\Http\Controllers\SurveyWebhookController::class, 'handleSms'])->name('webhooks.surveys.sms');
+});
+
 // Guest routes (only accessible when not logged in)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -63,6 +75,38 @@ Route::middleware('auth')->group(function () {
 
     // Surveys
     Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');
+    Route::get('/surveys/create', [SurveyController::class, 'create'])->name('surveys.create');
+    Route::post('/surveys', [SurveyController::class, 'store'])->name('surveys.store');
+    Route::get('/surveys/{survey}', [SurveyController::class, 'show'])->name('surveys.show');
+    Route::get('/surveys/{survey}/edit', [SurveyController::class, 'edit'])->name('surveys.edit');
+    Route::put('/surveys/{survey}', [SurveyController::class, 'update'])->name('surveys.update');
+    Route::delete('/surveys/{survey}', [SurveyController::class, 'destroy'])->name('surveys.destroy');
+    Route::post('/surveys/{survey}/toggle', [SurveyController::class, 'toggle'])->name('surveys.toggle');
+    Route::post('/surveys/{survey}/duplicate', [SurveyController::class, 'duplicate'])->name('surveys.duplicate');
+
+    // Survey Creation Sessions (AI-assisted)
+    Route::post('/api/surveys/sessions/start', [SurveyController::class, 'startCreationSession'])->name('api.surveys.sessions.start');
+    Route::post('/api/surveys/sessions/{session}/chat', [SurveyController::class, 'processCreationChat'])->name('api.surveys.sessions.chat');
+    Route::post('/api/surveys/sessions/{session}/voice', [SurveyController::class, 'processCreationVoice'])->name('api.surveys.sessions.voice');
+    Route::post('/api/surveys/sessions/{session}/finalize', [SurveyController::class, 'finalizeCreationSession'])->name('api.surveys.sessions.finalize');
+
+    // Survey AI Endpoints
+    Route::post('/api/surveys/ai/suggest-questions', [SurveyController::class, 'suggestQuestions'])->name('api.surveys.ai.suggest');
+    Route::post('/api/surveys/ai/refine-question', [SurveyController::class, 'refineQuestion'])->name('api.surveys.ai.refine');
+    Route::post('/api/surveys/ai/generate-interpretation', [SurveyController::class, 'generateInterpretation'])->name('api.surveys.ai.interpretation');
+
+    // Question Bank
+    Route::get('/api/question-bank', [SurveyController::class, 'questionBankIndex'])->name('api.question-bank.index');
+    Route::post('/api/question-bank', [SurveyController::class, 'questionBankStore'])->name('api.question-bank.store');
+
+    // Survey Templates
+    Route::get('/api/survey-templates', [SurveyController::class, 'templatesIndex'])->name('api.survey-templates.index');
+    Route::post('/api/survey-templates/{template}/create-survey', [SurveyController::class, 'createFromTemplate'])->name('api.survey-templates.create');
+
+    // Survey Delivery
+    Route::get('/surveys/{survey}/deliver', [SurveyController::class, 'deliverForm'])->name('surveys.deliver.form');
+    Route::post('/surveys/{survey}/deliver', [SurveyController::class, 'deliver'])->name('surveys.deliver');
+    Route::get('/surveys/{survey}/deliveries', [SurveyController::class, 'deliveryStatus'])->name('surveys.deliveries');
 
     // Strategies
     Route::get('/strategies', [StrategyController::class, 'index'])->name('strategies.index');

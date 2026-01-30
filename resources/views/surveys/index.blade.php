@@ -1,9 +1,9 @@
 <x-layouts.dashboard title="Surveys">
     <x-slot name="actions">
-        <x-button variant="primary">
+        <a href="{{ route('surveys.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
             <x-icon name="plus" class="w-4 h-4 mr-2" />
             Create Survey
-        </x-button>
+        </a>
     </x-slot>
 
     <x-card>
@@ -24,7 +24,7 @@
                     @foreach($surveys as $survey)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4">
-                            <div class="font-medium text-gray-900">{{ $survey->title }}</div>
+                            <a href="{{ route('surveys.show', $survey) }}" class="font-medium text-gray-900 hover:text-pulse-orange-600">{{ $survey->title }}</a>
                             <div class="text-sm text-gray-500">{{ Str::limit($survey->description, 50) }}</div>
                         </td>
                         <td class="px-6 py-4">
@@ -50,9 +50,12 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2">
-                                <button class="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Edit">
-                                    <x-icon name="edit" class="w-4 h-4 text-gray-600" />
-                                </button>
+                                <a href="{{ route('surveys.show', $survey) }}" class="p-1.5 hover:bg-gray-100 rounded transition-colors" title="View">
+                                    <x-icon name="eye" class="w-4 h-4 text-gray-600" />
+                                </a>
+                                <a href="{{ route('surveys.edit', $survey) }}" class="p-1.5 hover:bg-gray-100 rounded transition-colors" title="Edit">
+                                    <x-icon name="pencil" class="w-4 h-4 text-gray-600" />
+                                </a>
                             </div>
                         </td>
                     </tr>
