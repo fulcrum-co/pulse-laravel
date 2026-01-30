@@ -203,6 +203,12 @@
                                 </div>
                             </div>
                         </div>
+                    @elseif(request()->is('dashboards'))
+                        <!-- New Dashboard Button -->
+                        <a href="/dashboard" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                            <x-icon name="plus" class="w-4 h-4 mr-2" />
+                            New Dashboard
+                        </a>
                     @endif
                 </div>
             </header>

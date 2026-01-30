@@ -10,6 +10,12 @@ class DashboardList extends Component
 {
     public string $search = '';
     public string $filter = 'all'; // all, mine, shared
+    public string $viewMode = 'grid';
+
+    public function setViewMode(string $mode): void
+    {
+        $this->viewMode = $mode;
+    }
 
     public function getDashboardsProperty(): Collection
     {
