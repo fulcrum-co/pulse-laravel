@@ -13,6 +13,7 @@ use App\Http\Controllers\FocusAreaController;
 use App\Http\Controllers\ObjectiveController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\AlertController;
 
 // Public routes
 Route::get('/', function () {
@@ -106,6 +107,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/{report}/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
     Route::post('/reports/{report}/publish', [ReportController::class, 'publish'])->name('reports.publish');
     Route::delete('/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
+
+    // Alerts / Workflows
+    Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');
+    Route::get('/alerts/create', [AlertController::class, 'create'])->name('alerts.create');
+    Route::post('/alerts', [AlertController::class, 'store'])->name('alerts.store');
+    Route::get('/alerts/{workflow}', [AlertController::class, 'show'])->name('alerts.show');
+    Route::get('/alerts/{workflow}/edit', [AlertController::class, 'edit'])->name('alerts.edit');
+    Route::get('/alerts/{workflow}/canvas', [AlertController::class, 'canvas'])->name('alerts.canvas');
+    Route::get('/alerts/{workflow}/history', [AlertController::class, 'history'])->name('alerts.history');
+    Route::get('/alerts/{workflow}/executions/{execution}', [AlertController::class, 'executionDetails'])->name('alerts.execution');
+    Route::post('/alerts/{workflow}/toggle', [AlertController::class, 'toggle'])->name('alerts.toggle');
+    Route::post('/alerts/{workflow}/test', [AlertController::class, 'test'])->name('alerts.test');
+    Route::post('/alerts/{workflow}/save', [AlertController::class, 'saveWorkflow'])->name('alerts.save');
+    Route::delete('/alerts/{workflow}', [AlertController::class, 'destroy'])->name('alerts.destroy');
 
     // Settings (placeholder)
     Route::get('/settings', function () {

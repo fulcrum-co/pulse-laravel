@@ -1,0 +1,305 @@
+import React, { useCallback, useState, useEffect, useRef } from 'react';
+import {
+    ReactFlow,
+    Controls,
+    Background,
+    MiniMap,
+    addEdge,
+    useNodesState,
+    useEdgesState,
+    type Connection,
+    type NodeTypes,
+    Panel,
+    BackgroundVariant,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+
+import TriggerNode from './nodes/TriggerNode';
+import ConditionNode from './nodes/ConditionNode';
+import DelayNode from './nodes/DelayNode';
+import ActionNode from './nodes/ActionNode';
+import BranchNode from './nodes/BranchNode';
+import NodePalette from './panels/NodePalette';
+import NodeConfigPanel from './panels/NodeConfigPanel';
+import type { WorkflowNode, WorkflowEdge } from './types/workflow';
+
+const nodeTypes: NodeTypes = {
+    trigger: TriggerNode,
+    condition: ConditionNode,
+    delay: DelayNode,
+    action: ActionNode,
+    branch: BranchNode,
+};
+
+interface WorkflowCanvasProps {
+    workflowId: string;
+    initialNodes: WorkflowNode[];
+    initialEdges: WorkflowEdge[];
+    workflowName: string;
+}
+
+export default function WorkflowCanvas({
+    workflowId,
+    initialNodes,
+    initialEdges,
+    workflowName,
+}: WorkflowCanvasProps) {
+    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+    const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+    const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [lastSaved, setLastSaved] = useState<Date | null>(null);
+    const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    // Auto-save on changes (debounced)
+    useEffect(() => {
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+        }
+
+        saveTimeoutRef.current = setTimeout(() => {
+            saveWorkflow();
+        }, 2000); // 2 second debounce
+
+        return () => {
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+            }
+        };
+    }, [nodes, edges]);
+
+    const saveWorkflow = async () => {
+        if (!workflowId) return;
+
+        setIsSaving(true);
+        try {
+            const response = await fetch(`/alerts/${workflowId}/save`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ nodes, edges }),
+            });
+
+            if (response.ok) {
+                setLastSaved(new Date());
+            } else {
+                console.error('Failed to save workflow');
+            }
+        } catch (error) {
+            console.error('Error saving workflow:', error);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const onConnect = useCallback(
+        (params: Connection) => {
+            setEdges((eds) => addEdge({ ...params, animated: true }, eds));
+        },
+        [setEdges]
+    );
+
+    const onNodeClick = useCallback((_: React.MouseEvent, node: WorkflowNode) => {
+        setSelectedNode(node);
+    }, []);
+
+    const onPaneClick = useCallback(() => {
+        setSelectedNode(null);
+    }, []);
+
+    const updateNodeData = useCallback(
+        (nodeId: string, newData: Record<string, unknown>) => {
+            setNodes((nds) =>
+                nds.map((node) =>
+                    node.id === nodeId
+                        ? { ...node, data: { ...node.data, ...newData } }
+                        : node
+                )
+            );
+        },
+        [setNodes]
+    );
+
+    const addNode = useCallback(
+        (type: string, position?: { x: number; y: number }) => {
+            const newNode: WorkflowNode = {
+                id: `${type}-${Date.now()}`,
+                type: type as WorkflowNode['type'],
+                position: position || { x: 250, y: nodes.length * 150 },
+                data: getDefaultNodeData(type),
+            };
+            setNodes((nds) => [...nds, newNode]);
+            setSelectedNode(newNode);
+        },
+        [nodes.length, setNodes]
+    );
+
+    const deleteNode = useCallback(
+        (nodeId: string) => {
+            setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+            setEdges((eds) =>
+                eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId)
+            );
+            if (selectedNode?.id === nodeId) {
+                setSelectedNode(null);
+            }
+        },
+        [selectedNode, setNodes, setEdges]
+    );
+
+    const onDragOver = useCallback((event: React.DragEvent) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+    }, []);
+
+    const onDrop = useCallback(
+        (event: React.DragEvent) => {
+            event.preventDefault();
+
+            const type = event.dataTransfer.getData('application/reactflow');
+            if (!type) return;
+
+            const reactFlowBounds = event.currentTarget.getBoundingClientRect();
+            const position = {
+                x: event.clientX - reactFlowBounds.left,
+                y: event.clientY - reactFlowBounds.top,
+            };
+
+            addNode(type, position);
+        },
+        [addNode]
+    );
+
+    return (
+        <div className="h-full w-full flex">
+            {/* Node Palette */}
+            <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+                <NodePalette />
+            </div>
+
+            {/* Canvas */}
+            <div className="flex-1 relative">
+                <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    onNodeClick={onNodeClick}
+                    onPaneClick={onPaneClick}
+                    onDragOver={onDragOver}
+                    onDrop={onDrop}
+                    nodeTypes={nodeTypes}
+                    fitView
+                    snapToGrid
+                    snapGrid={[15, 15]}
+                    defaultEdgeOptions={{
+                        animated: true,
+                        style: { strokeWidth: 2 },
+                    }}
+                >
+                    <Controls />
+                    <MiniMap
+                        nodeColor={(node) => {
+                            switch (node.type) {
+                                case 'trigger':
+                                    return '#F59E0B';
+                                case 'condition':
+                                    return '#8B5CF6';
+                                case 'delay':
+                                    return '#6366F1';
+                                case 'action':
+                                    return '#10B981';
+                                case 'branch':
+                                    return '#EC4899';
+                                default:
+                                    return '#9CA3AF';
+                            }
+                        }}
+                    />
+                    <Background variant={BackgroundVariant.Dots} gap={15} size={1} />
+
+                    {/* Save Status Panel */}
+                    <Panel position="top-right" className="bg-white rounded-lg shadow-sm border border-gray-200 px-3 py-2">
+                        <div className="flex items-center gap-2 text-sm">
+                            {isSaving ? (
+                                <>
+                                    <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                                    <span className="text-gray-600">Saving...</span>
+                                </>
+                            ) : lastSaved ? (
+                                <>
+                                    <div className="w-2 h-2 bg-green-400 rounded-full" />
+                                    <span className="text-gray-600">
+                                        Saved {lastSaved.toLocaleTimeString()}
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="w-2 h-2 bg-gray-300 rounded-full" />
+                                    <span className="text-gray-400">Not saved</span>
+                                </>
+                            )}
+                        </div>
+                    </Panel>
+                </ReactFlow>
+            </div>
+
+            {/* Config Panel */}
+            {selectedNode && (
+                <div className="w-80 bg-white border-l border-gray-200 flex-shrink-0 overflow-y-auto">
+                    <NodeConfigPanel
+                        node={selectedNode}
+                        onUpdate={(data) => updateNodeData(selectedNode.id, data)}
+                        onDelete={() => deleteNode(selectedNode.id)}
+                        onClose={() => setSelectedNode(null)}
+                    />
+                </div>
+            )}
+        </div>
+    );
+}
+
+function getDefaultNodeData(type: string): Record<string, unknown> {
+    switch (type) {
+        case 'trigger':
+            return {
+                trigger_type: 'metric_threshold',
+                conditions: [],
+                logic: 'and',
+            };
+        case 'condition':
+            return {
+                conditions: [],
+                logic: 'and',
+            };
+        case 'delay':
+            return {
+                duration: 1,
+                unit: 'hours',
+            };
+        case 'action':
+            return {
+                action_type: 'send_sms',
+                config: {
+                    recipients: [],
+                    message: '',
+                },
+            };
+        case 'branch':
+            return {
+                branches: [
+                    { id: '1', name: 'Yes', conditions: [], logic: 'and' },
+                    { id: '2', name: 'No', conditions: [], logic: 'and', is_default: true },
+                ],
+            };
+        default:
+            return {};
+    }
+}
