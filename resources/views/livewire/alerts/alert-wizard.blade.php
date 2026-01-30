@@ -520,9 +520,9 @@
                                 wire:model="actionForm.config.message"
                                 rows="3"
                                 class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-pulse-orange-500 focus:ring-pulse-orange-500"
-                                placeholder="Alert: {{student_name}} requires attention. {{trigger_reason}}"
+                                placeholder="Alert: @{{student_name}} requires attention. @{{trigger_reason}}"
                             ></textarea>
-                            <p class="mt-1 text-xs text-gray-500">Use {{variable}} for dynamic values</p>
+                            <p class="mt-1 text-xs text-gray-500">Use @{{variable}} for dynamic values</p>
                         </div>
                     @endif
 
