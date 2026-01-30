@@ -85,6 +85,36 @@ Route::get('/fix-avatars-temp', function () {
     return "<pre>" . implode("\n", $output) . "</pre>";
 });
 
+// Temporary route to reset dashboard - visit once then remove
+Route::get('/reset-dashboard-temp', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+
+    $user = auth()->user();
+    $output = [];
+    $output[] = "Resetting dashboard for " . $user->first_name . " " . $user->last_name . "...";
+
+    try {
+        // Delete existing dashboards for this user
+        $deleted = \App\Models\Dashboard::where('user_id', $user->id)->delete();
+        $output[] = "Deleted {$deleted} existing dashboard(s).";
+
+        // Create new default dashboard with updated layout
+        $dashboard = \App\Models\Dashboard::createDefault($user);
+        $output[] = "Created new dashboard with " . $dashboard->widgets()->count() . " widgets.";
+
+        $output[] = "";
+        $output[] = "Done! Visit /dashboard to see the new layout.";
+        $output[] = "After confirming, remove this route from routes/web.php";
+
+    } catch (\Exception $e) {
+        $output[] = "ERROR: " . $e->getMessage();
+    }
+
+    return "<pre>" . implode("\n", $output) . "</pre>";
+})->middleware('auth');
+
 // Public dashboard view (shareable reports, no auth required)
 Route::get('/dashboard/{token}', [ReportController::class, 'publicView'])->name('reports.public');
 
