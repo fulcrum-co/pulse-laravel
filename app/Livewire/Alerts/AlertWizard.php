@@ -237,7 +237,7 @@ class AlertWizard extends Component
         $this->actions = array_values($this->actions);
     }
 
-    public function save(bool $activate = false): void
+    public function save(bool $activate = false)
     {
         $this->validate([
             'name' => 'required|string|max:255',
