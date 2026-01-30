@@ -28,6 +28,12 @@ class ContactHeader extends Component
 
     public function getAvatarUrlProperty()
     {
+        // For students, avatar is on the related User model
+        if ($this->contact instanceof Student && $this->contact->user?->avatar_url) {
+            return $this->contact->user->avatar_url;
+        }
+
+        // For users (teachers, parents), check directly
         if ($this->contact->avatar_url) {
             return $this->contact->avatar_url;
         }
@@ -63,20 +69,28 @@ class ContactHeader extends Component
         $info = [];
 
         if ($this->contact instanceof Student) {
-            if ($this->contact->grade) {
-                $info[] = ['label' => 'Grade', 'value' => $this->contact->grade];
+            if ($this->contact->grade_level) {
+                $info[] = ['label' => 'Grade', 'value' => $this->contact->grade_level];
             }
-            if ($this->contact->student_id) {
-                $info[] = ['label' => 'Student ID', 'value' => $this->contact->student_id];
+            if ($this->contact->student_number) {
+                $info[] = ['label' => 'ID', 'value' => $this->contact->student_number];
             }
-        }
-
-        if ($this->contact->email) {
-            $info[] = ['label' => 'Email', 'value' => $this->contact->email];
-        }
-
-        if ($this->contact->phone) {
-            $info[] = ['label' => 'Phone', 'value' => $this->contact->phone];
+            // For students, email/phone are on the User model
+            $user = $this->contact->user;
+            if ($user?->email) {
+                $info[] = ['label' => 'Email', 'value' => $user->email];
+            }
+            if ($user?->phone) {
+                $info[] = ['label' => 'Phone', 'value' => $user->phone];
+            }
+        } else {
+            // For users (teachers, parents), check directly
+            if ($this->contact->email) {
+                $info[] = ['label' => 'Email', 'value' => $this->contact->email];
+            }
+            if ($this->contact->phone) {
+                $info[] = ['label' => 'Phone', 'value' => $this->contact->phone];
+            }
         }
 
         return $info;
