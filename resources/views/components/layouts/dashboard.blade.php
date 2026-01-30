@@ -90,10 +90,10 @@
                     </a>
                     <button @click="sidebarCollapsed = !sidebarCollapsed"
                             class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg x-show="!sidebarCollapsed" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg x-show="!sidebarCollapsed" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
                         </svg>
-                        <svg x-show="sidebarCollapsed" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg x-show="sidebarCollapsed" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
                         </svg>
                     </button>
@@ -125,40 +125,62 @@
                 </div>
             </div>
 
-            <!-- Quick Access (Vertical) -->
+            <!-- Quick Access -->
             <div class="py-3 border-b border-gray-200">
-                <div :class="sidebarCollapsed ? 'px-2 space-y-1' : 'px-3 space-y-1'">
+                <!-- Expanded: 2x2 Grid -->
+                <div x-show="!sidebarCollapsed" class="px-3">
+                    <div class="grid grid-cols-2 gap-2">
+                        <!-- Home -->
+                        <a href="/dashboard"
+                           class="flex flex-col items-center justify-center p-3 rounded-lg border transition-colors {{ request()->is('dashboard') ? 'bg-pulse-orange-50 border-pulse-orange-200 text-pulse-orange-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300' }}">
+                            <x-icon name="home" class="w-5 h-5 mb-1 {{ request()->is('dashboard') ? 'text-pulse-orange-500' : '' }}" />
+                            <span class="text-xs font-medium">Home</span>
+                        </a>
+                        <!-- Contacts -->
+                        <a href="/contacts"
+                           class="flex flex-col items-center justify-center p-3 rounded-lg border transition-colors {{ request()->is('contacts*') ? 'bg-pulse-orange-50 border-pulse-orange-200 text-pulse-orange-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300' }}">
+                            <x-icon name="users" class="w-5 h-5 mb-1 {{ request()->is('contacts*') ? 'text-pulse-orange-500' : '' }}" />
+                            <span class="text-xs font-medium">Contacts</span>
+                        </a>
+                        <!-- Surveys -->
+                        <a href="/surveys"
+                           class="flex flex-col items-center justify-center p-3 rounded-lg border transition-colors {{ request()->is('surveys*') ? 'bg-pulse-orange-50 border-pulse-orange-200 text-pulse-orange-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300' }}">
+                            <x-icon name="clipboard-list" class="w-5 h-5 mb-1 {{ request()->is('surveys*') ? 'text-pulse-orange-500' : '' }}" />
+                            <span class="text-xs font-medium">Surveys</span>
+                        </a>
+                        <!-- Dashboards -->
+                        <a href="/dashboards"
+                           class="flex flex-col items-center justify-center p-3 rounded-lg border transition-colors {{ request()->is('dashboards*') ? 'bg-pulse-orange-50 border-pulse-orange-200 text-pulse-orange-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300' }}">
+                            <x-icon name="chart-pie" class="w-5 h-5 mb-1 {{ request()->is('dashboards*') ? 'text-pulse-orange-500' : '' }}" />
+                            <span class="text-xs font-medium">Dashboards</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Collapsed: Vertical List -->
+                <div x-show="sidebarCollapsed" class="px-2 space-y-1">
                     <!-- Home -->
                     <a href="/dashboard"
-                       :class="sidebarCollapsed ? 'justify-center' : ''"
-                       class="relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboard') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                       class="nav-item relative group flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboard') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="home" class="w-5 h-5 flex-shrink-0 {{ request()->is('dashboard') ? 'text-pulse-orange-500' : '' }}" />
-                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Home</span>
-                        <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Home</div>
+                        <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Home</div>
                     </a>
                     <!-- Contacts -->
                     <a href="/contacts"
-                       :class="sidebarCollapsed ? 'justify-center' : ''"
-                       class="relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('contacts*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                       class="nav-item relative group flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('contacts*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="users" class="w-5 h-5 flex-shrink-0 {{ request()->is('contacts*') ? 'text-pulse-orange-500' : '' }}" />
-                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Contacts</span>
-                        <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Contacts</div>
+                        <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Contacts</div>
                     </a>
                     <!-- Surveys -->
                     <a href="/surveys"
-                       :class="sidebarCollapsed ? 'justify-center' : ''"
-                       class="relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('surveys*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                       class="nav-item relative group flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('surveys*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="clipboard-list" class="w-5 h-5 flex-shrink-0 {{ request()->is('surveys*') ? 'text-pulse-orange-500' : '' }}" />
-                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Surveys</span>
-                        <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Surveys</div>
+                        <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Surveys</div>
                     </a>
                     <!-- Dashboards -->
                     <a href="/dashboards"
-                       :class="sidebarCollapsed ? 'justify-center' : ''"
-                       class="relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboards*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                       class="nav-item relative group flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboards*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="chart-pie" class="w-5 h-5 flex-shrink-0 {{ request()->is('dashboards*') ? 'text-pulse-orange-500' : '' }}" />
-                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Dashboards</span>
-                        <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Dashboards</div>
+                        <div class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Dashboards</div>
                     </a>
                 </div>
             </div>
@@ -192,16 +214,18 @@
                    class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
                     <x-icon name="collection" class="w-5 h-5 flex-shrink-0" />
                     <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Collect</span>
-                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Collect</div>
+                    <span x-show="!sidebarCollapsed" class="ml-auto bg-gray-100 text-gray-500 text-xs font-medium px-2 py-0.5 rounded-full">Coming Soon</span>
+                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Collect (Coming Soon)</div>
                 </a>
 
                 <!-- Distribute -->
                 <a href="/resources"
                    :class="sidebarCollapsed ? 'justify-center' : ''"
-                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('resources*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
                     <x-icon name="share" class="w-5 h-5 flex-shrink-0" />
                     <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Distribute</span>
-                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute</div>
+                    <span x-show="!sidebarCollapsed" class="ml-auto bg-gray-100 text-gray-500 text-xs font-medium px-2 py-0.5 rounded-full">Coming Soon</span>
+                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute (Coming Soon)</div>
                 </a>
 
                 <!-- Resource -->
@@ -226,11 +250,11 @@
                 <!-- Marketplace -->
                 <a href="/marketplace"
                    :class="sidebarCollapsed ? 'justify-center' : ''"
-                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('marketplace*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                   class="nav-item relative group flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
                     <x-icon name="shopping-bag" class="w-5 h-5 flex-shrink-0" />
                     <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Marketplace</span>
-                    <span x-show="!sidebarCollapsed" class="ml-auto bg-purple-100 text-purple-600 text-xs font-medium px-2 py-0.5 rounded-full">New</span>
-                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace</div>
+                    <span x-show="!sidebarCollapsed" class="ml-auto bg-gray-100 text-gray-500 text-xs font-medium px-2 py-0.5 rounded-full">Coming Soon</span>
+                    <div x-show="sidebarCollapsed" class="sidebar-tooltip absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace (Coming Soon)</div>
                 </a>
 
                 @php
