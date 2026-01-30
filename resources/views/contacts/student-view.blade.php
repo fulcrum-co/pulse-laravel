@@ -13,26 +13,47 @@
 
     <!-- Quick Stats Bar -->
     @php
-        $latestMetrics = $chartData ?? [];
+        // Get latest metrics from the student's metrics relationship
+        $gpaMetric = $student->metrics()->where('metric_key', 'gpa')->latest('recorded_at')->first();
+        $attendanceMetric = $student->metrics()->where('metric_key', 'attendance')->latest('recorded_at')->first();
+        $wellnessMetric = $student->metrics()->where('metric_key', 'wellness_score')->latest('recorded_at')->first();
         $latestSurvey = $student->surveyAttempts?->where('status', 'completed')->sortByDesc('completed_at')->first();
     @endphp
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-lg border border-gray-200 p-4">
             <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">GPA</div>
-            <div class="text-2xl font-bold text-gray-900">{{ number_format($latestMetrics['gpa'] ?? 0, 1) }}</div>
+            <div class="text-2xl font-bold text-gray-900">
+                @if($gpaMetric)
+                    {{ number_format($gpaMetric->value, 1) }}
+                @else
+                    <span class="text-gray-400">--</span>
+                @endif
+            </div>
         </div>
         <div class="bg-white rounded-lg border border-gray-200 p-4">
             <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Attendance</div>
-            <div class="text-2xl font-bold text-gray-900">{{ number_format($latestMetrics['attendance'] ?? 0, 0) }}%</div>
+            <div class="text-2xl font-bold text-gray-900">
+                @if($attendanceMetric)
+                    {{ number_format($attendanceMetric->value, 0) }}%
+                @else
+                    <span class="text-gray-400">--</span>
+                @endif
+            </div>
         </div>
         <div class="bg-white rounded-lg border border-gray-200 p-4">
             <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Wellness</div>
-            <div class="text-2xl font-bold text-gray-900">{{ number_format($latestMetrics['wellness_score'] ?? 0, 0) }}/10</div>
+            <div class="text-2xl font-bold text-gray-900">
+                @if($wellnessMetric)
+                    {{ number_format($wellnessMetric->value, 0) }}/10
+                @else
+                    <span class="text-gray-400">--</span>
+                @endif
+            </div>
         </div>
         <div class="bg-white rounded-lg border border-gray-200 p-4">
             <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Last Survey</div>
             <div class="text-lg font-semibold text-gray-900">
-                @if($latestSurvey)
+                @if($latestSurvey && $latestSurvey->completed_at)
                     {{ $latestSurvey->completed_at->diffForHumans() }}
                 @else
                     <span class="text-gray-400">None</span>
