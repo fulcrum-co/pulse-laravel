@@ -182,14 +182,20 @@ function WorkflowCanvasInner({
     );
 
     return (
-        <div className="h-full w-full flex">
+        <div className="h-full w-full flex" style={{ minHeight: '500px' }}>
             {/* Node Palette */}
-            <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+            <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto">
                 <NodePalette />
             </div>
 
-            {/* Canvas */}
-            <div className="flex-1 relative">
+            {/* Canvas - wrapper div captures drop events */}
+            <div
+                ref={reactFlowWrapper}
+                className="flex-1"
+                style={{ height: '100%' }}
+                onDragOver={onDragOver}
+                onDrop={onDrop}
+            >
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -198,8 +204,6 @@ function WorkflowCanvasInner({
                     onConnect={onConnect}
                     onNodeClick={onNodeClick}
                     onPaneClick={onPaneClick}
-                    onDragOver={onDragOver}
-                    onDrop={onDrop}
                     nodeTypes={nodeTypes}
                     fitView
                     snapToGrid
@@ -208,6 +212,7 @@ function WorkflowCanvasInner({
                         animated: true,
                         style: { strokeWidth: 2 },
                     }}
+                    proOptions={{ hideAttribution: true }}
                 >
                     <Controls />
                     <MiniMap
