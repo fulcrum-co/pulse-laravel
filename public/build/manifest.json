@@ -1,0 +1,26 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-CzSM-4Bp.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-DIuewKhF.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/workflow-builder/app.tsx": {
+    "file": "assets/app-Bh6Eeczc.js",
+    "name": "app",
+    "src": "resources/js/workflow-builder/app.tsx",
+    "isEntry": true,
+    "css": [
+      "assets/app-BZV40eAE.css"
+    ]
+  }
+}

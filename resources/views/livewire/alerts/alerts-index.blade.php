@@ -134,12 +134,12 @@
                         <div class="flex items-center gap-2">
                             @if($workflow->mode === 'advanced')
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">
-                                    <x-icon name="squares-plus" class="w-3 h-3 mr-1" />
+                                    <x-icon name="squares-2x2" class="w-3 h-3 mr-1" />
                                     Visual Canvas
                                 </span>
                             @else
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
-                                    <x-icon name="list-bullet" class="w-3 h-3 mr-1" />
+                                    <x-icon name="queue-list" class="w-3 h-3 mr-1" />
                                     Simple Wizard
                                 </span>
                             @endif
@@ -151,7 +151,7 @@
                         <div class="flex items-center gap-2">
                             <!-- Toggle Active/Pause -->
                             <button
-                                wire:click="toggleStatus('{{ $workflow->_id }}')"
+                                wire:click="toggleStatus('{{ $workflow->id }}')"
                                 class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                                 title="{{ $workflow->status === 'active' ? 'Pause' : 'Activate' }}"
                             >
@@ -164,7 +164,7 @@
 
                             <!-- Test Trigger -->
                             <button
-                                wire:click="testTrigger('{{ $workflow->_id }}')"
+                                wire:click="testTrigger('{{ $workflow->id }}')"
                                 class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                                 title="Test Trigger"
                             >
@@ -173,7 +173,7 @@
 
                             <!-- Duplicate -->
                             <button
-                                wire:click="duplicate('{{ $workflow->_id }}')"
+                                wire:click="duplicate('{{ $workflow->id }}')"
                                 class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                                 title="Duplicate"
                             >
@@ -182,7 +182,7 @@
 
                             <!-- Delete -->
                             <button
-                                wire:click="confirmDelete('{{ $workflow->_id }}')"
+                                wire:click="confirmDelete('{{ $workflow->id }}')"
                                 class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                 title="Delete"
                             >
