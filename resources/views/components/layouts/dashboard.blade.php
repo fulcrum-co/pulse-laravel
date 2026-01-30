@@ -66,7 +66,7 @@
          class="flex h-screen">
 
         <!-- Sidebar -->
-        <aside :class="sidebarCollapsed ? 'w-16 sidebar-collapsed' : 'w-64'"
+        <aside :class="sidebarCollapsed ? 'w-16 sidebar-collapsed overflow-visible' : 'w-64'"
                class="sidebar-transition bg-white border-r border-gray-200 flex flex-col">
 
             <!-- Logo & Toggle -->
@@ -176,7 +176,7 @@
             </div>
 
             <!-- Workspace Navigation -->
-            <nav class="flex-1 py-3 overflow-y-auto" :class="sidebarCollapsed ? 'px-2' : 'px-3'">
+            <nav class="flex-1 py-3" :class="sidebarCollapsed ? 'px-2 overflow-visible' : 'px-3 overflow-y-auto'">
                 <p x-show="!sidebarCollapsed" class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-content-transition">Workspace</p>
                 <div x-show="sidebarCollapsed" class="mb-2 border-t border-gray-200"></div>
 
