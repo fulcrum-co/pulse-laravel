@@ -15,6 +15,7 @@ class ProgramCatalog extends Component
     public string $filterLocation = '';
     public string $filterCost = '';
     public bool $showActiveOnly = true;
+    public string $viewMode = 'grid';
 
     protected $queryString = [
         'search' => ['except' => '', 'as' => 'q'],
@@ -22,6 +23,7 @@ class ProgramCatalog extends Component
         'filterLocation' => ['except' => '', 'as' => 'location'],
         'filterCost' => ['except' => '', 'as' => 'cost'],
         'showActiveOnly' => ['except' => true, 'as' => 'active'],
+        'viewMode' => ['except' => 'grid', 'as' => 'view'],
     ];
 
     public function updatingSearch(): void

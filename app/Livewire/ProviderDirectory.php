@@ -14,12 +14,14 @@ class ProviderDirectory extends Component
     public string $filterType = '';
     public string $filterAvailability = '';
     public string $filterLocation = '';
+    public string $viewMode = 'grid';
 
     protected $queryString = [
         'search' => ['except' => '', 'as' => 'q'],
         'filterType' => ['except' => '', 'as' => 'type'],
         'filterAvailability' => ['except' => '', 'as' => 'availability'],
         'filterLocation' => ['except' => '', 'as' => 'location'],
+        'viewMode' => ['except' => 'grid', 'as' => 'view'],
     ];
 
     public function updatingSearch(): void

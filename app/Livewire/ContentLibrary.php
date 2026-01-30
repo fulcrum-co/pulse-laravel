@@ -16,6 +16,7 @@ class ContentLibrary extends Component
     public array $selectedCategories = [];
     public array $selectedRiskLevels = [];
     public string $sortBy = 'recent';
+    public string $viewMode = 'grid';
 
     protected $queryString = [
         'search' => ['except' => '', 'as' => 'q'],
@@ -24,6 +25,7 @@ class ContentLibrary extends Component
         'selectedCategories' => ['except' => [], 'as' => 'category'],
         'selectedRiskLevels' => ['except' => [], 'as' => 'risk'],
         'sortBy' => ['except' => 'recent', 'as' => 'sort'],
+        'viewMode' => ['except' => 'grid', 'as' => 'view'],
     ];
 
     public function updatingSearch(): void

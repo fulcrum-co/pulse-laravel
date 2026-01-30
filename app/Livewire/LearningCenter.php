@@ -12,10 +12,12 @@ class LearningCenter extends Component
 
     public string $search = '';
     public string $activeCategory = 'all';
+    public string $viewMode = 'grid';
 
     protected $queryString = [
         'search' => ['except' => '', 'as' => 'q'],
         'activeCategory' => ['except' => 'all', 'as' => 'category'],
+        'viewMode' => ['except' => 'grid', 'as' => 'view'],
     ];
 
     public function updatingSearch(): void
