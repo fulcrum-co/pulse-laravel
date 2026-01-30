@@ -1,18 +1,14 @@
-<div class="space-y-6">
+<div class="space-y-4">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Resource Library</h1>
             <p class="text-sm text-gray-500 mt-1">Browse content, providers, programs, and mini-courses</p>
         </div>
-        <div class="flex gap-2">
-            <a href="#" wire:click.prevent="$dispatch('notify', {type: 'info', message: 'Resource creation coming soon'})" class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Add Resource
-            </a>
-        </div>
+        <a href="#" wire:click.prevent="$dispatch('notify', {type: 'info', message: 'Resource creation coming soon'})" class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 transition-colors text-sm font-medium">
+            <x-icon name="plus" class="w-4 h-4" />
+            Add Resource
+        </a>
     </div>
 
     <!-- Tabs -->
@@ -38,32 +34,29 @@
         </nav>
     </div>
 
-    <!-- Filters Bar -->
-    <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div class="flex flex-wrap gap-3 items-center">
-            <!-- Search -->
-            <div class="relative">
-                <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
+    <!-- Search, Filters & View Toggle -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-1">
+            <div class="relative w-full sm:w-64">
+                <x-icon name="magnifying-glass" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
                     placeholder="Search..."
-                    class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent w-64"
-                >
+                    class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                />
             </div>
 
             <!-- Type Filter (contextual based on tab) -->
             @if($activeTab === 'content')
-            <select wire:model.live="filterType" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent">
+            <select wire:model.live="filterType" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
                 <option value="">All Types</option>
                 @foreach($this->resourceTypes as $value => $label)
                 <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
             </select>
 
-            <select wire:model.live="filterCategory" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent">
+            <select wire:model.live="filterCategory" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
                 <option value="">All Categories</option>
                 @foreach($this->categories as $category)
                 <option value="{{ $category }}">{{ ucfirst($category) }}</option>
@@ -72,7 +65,7 @@
             @endif
 
             @if($activeTab === 'providers')
-            <select wire:model.live="filterType" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent">
+            <select wire:model.live="filterType" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
                 <option value="">All Types</option>
                 @foreach($this->providerTypes as $value => $label)
                 <option value="{{ $value }}">{{ $label }}</option>
@@ -81,7 +74,7 @@
             @endif
 
             @if($activeTab === 'programs')
-            <select wire:model.live="filterType" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent">
+            <select wire:model.live="filterType" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
                 <option value="">All Types</option>
                 @foreach($this->programTypes as $value => $label)
                 <option value="{{ $value }}">{{ $label }}</option>
@@ -90,7 +83,7 @@
             @endif
 
             @if($activeTab === 'courses')
-            <select wire:model.live="filterType" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent">
+            <select wire:model.live="filterType" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
                 <option value="">All Types</option>
                 @foreach($this->courseTypes as $value => $label)
                 <option value="{{ $value }}">{{ $label }}</option>
@@ -100,7 +93,7 @@
 
             @if($search || $filterType || $filterCategory)
             <button wire:click="resetFilters" class="text-sm text-gray-500 hover:text-gray-700">
-                Clear filters
+                Clear
             </button>
             @endif
         </div>
@@ -109,21 +102,24 @@
         <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
             <button
                 wire:click="setViewMode('grid')"
-                class="p-2 rounded {{ $viewMode === 'grid' ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-700' }}"
+                class="p-1.5 rounded {{ $viewMode === 'grid' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
                 title="Grid view"
             >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                </svg>
+                <x-icon name="squares-2x2" class="w-4 h-4" />
             </button>
             <button
                 wire:click="setViewMode('list')"
-                class="p-2 rounded {{ $viewMode === 'list' ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-700' }}"
+                class="p-1.5 rounded {{ $viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
                 title="List view"
             >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
+                <x-icon name="list-bullet" class="w-4 h-4" />
+            </button>
+            <button
+                wire:click="setViewMode('table')"
+                class="p-1.5 rounded {{ $viewMode === 'table' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
+                title="Table view"
+            >
+                <x-icon name="table-cells" class="w-4 h-4" />
             </button>
         </div>
     </div>
@@ -134,12 +130,20 @@
         @if($activeTab === 'all')
             @if($allItems->isEmpty())
                 @include('livewire.resource-library.empty-state', ['message' => 'No resources found. Start by adding content, providers, or programs.'])
-            @else
-                <div class="{{ $viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-3' }}">
+            @elseif($viewMode === 'grid')
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     @foreach($allItems as $item)
-                        @include('livewire.resource-library.item-card', ['item' => $item, 'viewMode' => $viewMode])
+                        @include('livewire.resource-library.item-card', ['item' => $item, 'viewMode' => 'grid'])
                     @endforeach
                 </div>
+            @elseif($viewMode === 'list')
+                <div class="space-y-2">
+                    @foreach($allItems as $item)
+                        @include('livewire.resource-library.item-card', ['item' => $item, 'viewMode' => 'list'])
+                    @endforeach
+                </div>
+            @else
+                @include('livewire.resource-library.all-table', ['items' => $allItems])
             @endif
         @endif
 
@@ -147,15 +151,26 @@
         @if($activeTab === 'content')
             @if($contentResources->isEmpty())
                 @include('livewire.resource-library.empty-state', ['message' => 'No content resources found.'])
-            @else
-                <div class="{{ $viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-3' }}">
+            @elseif($viewMode === 'grid')
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     @foreach($contentResources as $resource)
-                        @include('livewire.resource-library.resource-card', ['resource' => $resource, 'viewMode' => $viewMode])
+                        @include('livewire.resource-library.resource-card', ['resource' => $resource, 'viewMode' => 'grid'])
                     @endforeach
                 </div>
-                <div class="mt-6">
-                    {{ $contentResources->links() }}
+            @elseif($viewMode === 'list')
+                <div class="space-y-2">
+                    @foreach($contentResources as $resource)
+                        @include('livewire.resource-library.resource-card', ['resource' => $resource, 'viewMode' => 'list'])
+                    @endforeach
                 </div>
+            @else
+                @include('livewire.resource-library.content-table', ['resources' => $contentResources])
+            @endif
+
+            @if($contentResources->hasPages())
+            <div class="mt-4">
+                {{ $contentResources->links() }}
+            </div>
             @endif
         @endif
 
@@ -163,15 +178,26 @@
         @if($activeTab === 'providers')
             @if($providers->isEmpty())
                 @include('livewire.resource-library.empty-state', ['message' => 'No providers found.'])
-            @else
-                <div class="{{ $viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-3' }}">
+            @elseif($viewMode === 'grid')
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     @foreach($providers as $provider)
-                        @include('livewire.resource-library.provider-card', ['provider' => $provider, 'viewMode' => $viewMode])
+                        @include('livewire.resource-library.provider-card', ['provider' => $provider, 'viewMode' => 'grid'])
                     @endforeach
                 </div>
-                <div class="mt-6">
-                    {{ $providers->links() }}
+            @elseif($viewMode === 'list')
+                <div class="space-y-2">
+                    @foreach($providers as $provider)
+                        @include('livewire.resource-library.provider-card', ['provider' => $provider, 'viewMode' => 'list'])
+                    @endforeach
                 </div>
+            @else
+                @include('livewire.resource-library.providers-table', ['providers' => $providers])
+            @endif
+
+            @if($providers->hasPages())
+            <div class="mt-4">
+                {{ $providers->links() }}
+            </div>
             @endif
         @endif
 
@@ -179,15 +205,26 @@
         @if($activeTab === 'programs')
             @if($programs->isEmpty())
                 @include('livewire.resource-library.empty-state', ['message' => 'No programs found.'])
-            @else
-                <div class="{{ $viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-3' }}">
+            @elseif($viewMode === 'grid')
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     @foreach($programs as $program)
-                        @include('livewire.resource-library.program-card', ['program' => $program, 'viewMode' => $viewMode])
+                        @include('livewire.resource-library.program-card', ['program' => $program, 'viewMode' => 'grid'])
                     @endforeach
                 </div>
-                <div class="mt-6">
-                    {{ $programs->links() }}
+            @elseif($viewMode === 'list')
+                <div class="space-y-2">
+                    @foreach($programs as $program)
+                        @include('livewire.resource-library.program-card', ['program' => $program, 'viewMode' => 'list'])
+                    @endforeach
                 </div>
+            @else
+                @include('livewire.resource-library.programs-table', ['programs' => $programs])
+            @endif
+
+            @if($programs->hasPages())
+            <div class="mt-4">
+                {{ $programs->links() }}
+            </div>
             @endif
         @endif
 
@@ -195,15 +232,26 @@
         @if($activeTab === 'courses')
             @if($miniCourses->isEmpty())
                 @include('livewire.resource-library.empty-state', ['message' => 'No mini-courses found.'])
-            @else
-                <div class="{{ $viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-3' }}">
+            @elseif($viewMode === 'grid')
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     @foreach($miniCourses as $course)
-                        @include('livewire.resource-library.course-card', ['course' => $course, 'viewMode' => $viewMode])
+                        @include('livewire.resource-library.course-card', ['course' => $course, 'viewMode' => 'grid'])
                     @endforeach
                 </div>
-                <div class="mt-6">
-                    {{ $miniCourses->links() }}
+            @elseif($viewMode === 'list')
+                <div class="space-y-2">
+                    @foreach($miniCourses as $course)
+                        @include('livewire.resource-library.course-card', ['course' => $course, 'viewMode' => 'list'])
+                    @endforeach
                 </div>
+            @else
+                @include('livewire.resource-library.courses-table', ['courses' => $miniCourses])
+            @endif
+
+            @if($miniCourses->hasPages())
+            <div class="mt-4">
+                {{ $miniCourses->links() }}
+            </div>
             @endif
         @endif
     </div>

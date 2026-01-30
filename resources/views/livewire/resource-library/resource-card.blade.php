@@ -1,4 +1,12 @@
 @php
+    $typeColors = [
+        'article' => 'blue',
+        'video' => 'red',
+        'worksheet' => 'green',
+        'activity' => 'purple',
+        'link' => 'gray',
+        'document' => 'yellow',
+    ];
     $typeIcons = [
         'article' => 'document-text',
         'video' => 'play-circle',
@@ -8,94 +16,79 @@
         'document' => 'document',
     ];
     $icon = $typeIcons[$resource->resource_type] ?? 'document';
+    $color = $typeColors[$resource->resource_type] ?? 'gray';
 @endphp
 
 @if($viewMode === 'grid')
-<a href="{{ $resource->url ?? '#' }}" target="{{ $resource->url ? '_blank' : '_self' }}" class="block bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all group">
-    <!-- Thumbnail or Icon -->
-    <div class="aspect-video bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center relative">
-        @if($resource->thumbnail_url)
-        <img src="{{ $resource->thumbnail_url }}" alt="{{ $resource->title }}" class="w-full h-full object-cover">
-        @else
-        <div class="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center">
-            @include('livewire.resource-library.icons.' . $icon)
-        </div>
-        @endif
-
-        <!-- Type Badge -->
-        <span class="absolute top-3 right-3 px-2 py-1 text-xs font-medium rounded-full bg-white/90 text-gray-700 backdrop-blur-sm">
-            {{ ucfirst($resource->resource_type) }}
-        </span>
-    </div>
-
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
     <div class="p-4">
-        <!-- Title -->
-        <h3 class="font-semibold text-gray-900 mb-1 line-clamp-1 group-hover:text-pulse-orange-600 transition-colors">
-            {{ $resource->title }}
-        </h3>
-
-        <!-- Category -->
-        @if($resource->category)
-        <p class="text-sm text-gray-500 mb-2">{{ ucfirst($resource->category) }}</p>
-        @endif
-
-        <!-- Description -->
-        <p class="text-sm text-gray-600 line-clamp-2 mb-3">{{ Str::limit($resource->description, 100) }}</p>
-
-        <!-- Footer -->
-        <div class="flex items-center justify-between text-xs text-gray-500">
-            @if($resource->estimated_duration_minutes)
-            <div class="flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                {{ $resource->estimated_duration_minutes }} min
+        <div class="flex items-start justify-between gap-2 mb-3">
+            <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                @include('livewire.resource-library.icons.' . $icon)
             </div>
-            @else
-            <div></div>
-            @endif
-
-            @if($resource->target_risk_levels && count($resource->target_risk_levels) > 0)
-            <div class="flex gap-1">
-                @foreach($resource->target_risk_levels as $level)
-                <span class="w-2 h-2 rounded-full {{ $level === 'high' ? 'bg-red-400' : ($level === 'low' ? 'bg-yellow-400' : 'bg-green-400') }}"></span>
-                @endforeach
-            </div>
-            @endif
-        </div>
-    </div>
-</a>
-@else
-<a href="{{ $resource->url ?? '#' }}" target="{{ $resource->url ? '_blank' : '_self' }}" class="block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-gray-300 transition-all flex items-center gap-4">
-    <!-- Icon -->
-    <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-        @include('livewire.resource-library.icons.' . $icon)
-    </div>
-
-    <!-- Content -->
-    <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2 mb-1">
-            <h3 class="font-medium text-gray-900 truncate">{{ $resource->title }}</h3>
-            <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-800 flex-shrink-0">
                 {{ ucfirst($resource->resource_type) }}
             </span>
         </div>
-        <p class="text-sm text-gray-600 truncate">{{ $resource->description }}</p>
+
+        <h3 class="font-medium text-gray-900 text-sm truncate mb-1">{{ $resource->title }}</h3>
+
+        <div class="flex items-center gap-2 text-xs mb-2">
+            @if($resource->category)
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                {{ ucfirst($resource->category) }}
+            </span>
+            @endif
+            @if($resource->estimated_duration_minutes)
+            <span class="text-gray-500">{{ $resource->estimated_duration_minutes }} min</span>
+            @endif
+        </div>
+
+        <p class="text-xs text-gray-500 line-clamp-2 mb-3">{{ Str::limit($resource->description, 80) }}</p>
+
+        @if($resource->target_risk_levels && count($resource->target_risk_levels) > 0)
+        <div class="flex gap-1 mb-3">
+            @foreach($resource->target_risk_levels as $level)
+            <span class="w-2 h-2 rounded-full {{ $level === 'high' ? 'bg-red-400' : ($level === 'low' ? 'bg-yellow-400' : 'bg-green-400') }}" title="{{ ucfirst($level) }} risk"></span>
+            @endforeach
+        </div>
+        @endif
     </div>
 
-    <!-- Meta -->
-    <div class="text-sm text-gray-500 hidden sm:flex items-center gap-4">
-        @if($resource->category)
-        <span class="px-2 py-0.5 bg-gray-100 rounded text-xs">{{ ucfirst($resource->category) }}</span>
-        @endif
-        @if($resource->estimated_duration_minutes)
-        <span>{{ $resource->estimated_duration_minutes }} min</span>
-        @endif
+    <div class="px-4 py-2 bg-gray-50 border-t border-gray-100 flex items-center justify-end">
+        <a href="{{ $resource->url ?? '#' }}" target="{{ $resource->url ? '_blank' : '_self' }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
+            {{ $resource->url ? 'Open' : 'View' }}
+        </a>
+    </div>
+</div>
+@else
+<div class="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-sm transition-shadow flex items-center gap-4">
+    <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+        @include('livewire.resource-library.icons.' . $icon)
     </div>
 
-    <!-- Arrow -->
-    <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-    </svg>
-</a>
+    <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2">
+            <h3 class="font-medium text-gray-900 text-sm truncate">{{ $resource->title }}</h3>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-700">
+                {{ ucfirst($resource->resource_type) }}
+            </span>
+            @if($resource->category)
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                {{ ucfirst($resource->category) }}
+            </span>
+            @endif
+        </div>
+        <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
+            @if($resource->estimated_duration_minutes)
+            <span>{{ $resource->estimated_duration_minutes }} min</span>
+            @endif
+            <span class="truncate">{{ Str::limit($resource->description, 60) }}</span>
+        </div>
+    </div>
+
+    <a href="{{ $resource->url ?? '#' }}" target="{{ $resource->url ? '_blank' : '_self' }}" class="ml-2 px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600">
+        {{ $resource->url ? 'Open' : 'View' }}
+    </a>
+</div>
 @endif
