@@ -68,43 +68,59 @@
         <!-- Left Sidebar: Take Action -->
         <div class="lg:col-span-1 space-y-4">
 
-            <!-- Quick Actions -->
-            <div class="bg-white rounded-lg border border-gray-200 p-4">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Quick Actions</h3>
-                <div class="space-y-2">
-                    <button onclick="document.getElementById('notes-section').scrollIntoView({behavior: 'smooth'})"
-                            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                        <svg class="w-4 h-4 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                        Add Note
-                    </button>
-                    <button onclick="document.getElementById('resources-section').scrollIntoView({behavior: 'smooth'})"
-                            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                        <svg class="w-4 h-4 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                        </svg>
-                        Assign Resource
-                    </button>
-                    <a href="{{ route('surveys.index') }}" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-                        <svg class="w-4 h-4 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                        Send Survey
-                    </a>
+            <!-- Quick Actions (Collapsible, open by default) -->
+            <div x-data="{ open: true }" class="bg-white rounded-lg border border-gray-200">
+                <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left">
+                    <h3 class="text-sm font-semibold text-gray-900">Quick Actions</h3>
+                    <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div x-show="open" x-collapse class="px-4 pb-4 border-t border-gray-100">
+                    <div class="space-y-2 pt-3">
+                        <button onclick="document.getElementById('notes-section').scrollIntoView({behavior: 'smooth'})"
+                                class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                            <svg class="w-4 h-4 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Add Note
+                        </button>
+                        <button onclick="document.getElementById('resources-section').scrollIntoView({behavior: 'smooth'})"
+                                class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                            <svg class="w-4 h-4 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            Assign Resource
+                        </button>
+                        <a href="{{ route('surveys.index') }}" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                            <svg class="w-4 h-4 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            Send Survey
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- Suggested Resources -->
-            <div class="bg-white rounded-lg border border-gray-200 p-4" id="resources-section">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Suggested Resources</h3>
-                <livewire:resource-suggestions
-                    contact-type="student"
-                    :contact-id="$student->id"
-                />
+            <!-- Suggested Resources (Collapsible, open by default) -->
+            <div x-data="{ open: true }" class="bg-white rounded-lg border border-gray-200" id="resources-section">
+                <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left">
+                    <h3 class="text-sm font-semibold text-gray-900">Suggested Resources</h3>
+                    <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div x-show="open" x-collapse class="px-4 pb-4 border-t border-gray-100">
+                    <div class="pt-3">
+                        <livewire:resource-suggestions
+                            contact-type="student"
+                            :contact-id="$student->id"
+                        />
+                    </div>
+                </div>
             </div>
 
-            <!-- Student Details (Collapsible) -->
+            <!-- Student Details (Collapsible, closed by default) -->
             <div x-data="{ open: false }" class="bg-white rounded-lg border border-gray-200">
                 <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left">
                     <h3 class="text-sm font-semibold text-gray-900">Student Details</h3>
@@ -151,19 +167,10 @@
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
 
-            <!-- Notes & Voice Memos (Primary) -->
-            <div class="bg-white rounded-lg border border-gray-200 p-4" id="notes-section">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Notes & Activity</h3>
-                <livewire:contact-notes
-                    contact-type="student"
-                    :contact-id="$student->id"
-                />
-            </div>
-
-            <!-- Performance Charts (Collapsible) -->
-            <div x-data="{ open: false }" class="bg-white rounded-lg border border-gray-200">
+            <!-- Performance Charts (Visible by default) -->
+            <div x-data="{ open: true }" class="bg-white rounded-lg border border-gray-200">
                 <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left">
-                    <h3 class="text-sm font-semibold text-gray-900">Performance Charts</h3>
+                    <h3 class="text-sm font-semibold text-gray-900">Performance Trends</h3>
                     <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
@@ -172,6 +179,24 @@
                     <div class="pt-3">
                         <livewire:contact-overview-charts
                             :contact-type="\App\Models\Student::class"
+                            :contact-id="$student->id"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes & Activity -->
+            <div x-data="{ open: true }" class="bg-white rounded-lg border border-gray-200" id="notes-section">
+                <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left">
+                    <h3 class="text-sm font-semibold text-gray-900">Notes</h3>
+                    <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div x-show="open" x-collapse class="px-4 pb-4 border-t border-gray-100">
+                    <div class="pt-3">
+                        <livewire:contact-notes
+                            contact-type="student"
                             :contact-id="$student->id"
                         />
                     </div>
