@@ -54,8 +54,12 @@
             visibility: hidden;
             opacity: 0;
             transition: opacity 0.2s, visibility 0.2s;
+            pointer-events: none;
         }
-        .sidebar-collapsed .nav-item:hover .sidebar-tooltip {
+        .sidebar-collapsed .nav-item:hover > .sidebar-tooltip,
+        .sidebar-collapsed .group:hover > .sidebar-tooltip,
+        .sidebar-collapsed .nav-item:hover .sidebar-tooltip,
+        .sidebar-collapsed .group:hover .sidebar-tooltip {
             visibility: visible;
             opacity: 1;
         }
