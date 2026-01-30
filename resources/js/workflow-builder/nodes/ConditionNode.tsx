@@ -31,10 +31,10 @@ function ConditionNode({ data, selected }: NodeProps<ConditionNodeData>) {
             </div>
 
             {/* Conditions Preview */}
-            {data.conditions && data.conditions.length > 0 && (
+            {data?.conditions && data.conditions.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-gray-100">
                     <div className="text-xs text-gray-500">
-                        {data.conditions.length} condition{data.conditions.length !== 1 ? 's' : ''} ({data.logic.toUpperCase()})
+                        {data.conditions.length} condition{data.conditions.length !== 1 ? 's' : ''} ({(data.logic || 'and').toUpperCase()})
                     </div>
                 </div>
             )}

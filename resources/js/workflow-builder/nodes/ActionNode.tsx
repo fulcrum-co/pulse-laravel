@@ -68,22 +68,31 @@ function ActionNode({ data, selected }: NodeProps<ActionNodeData>) {
     const label = actionLabels[actionType] || 'Action';
 
     const getSubtitle = () => {
-        if (!data.config) return 'Not configured';
+        if (!data?.config) return 'Not configured';
 
-        switch (actionType) {
-            case 'send_email':
-            case 'send_sms':
-            case 'send_whatsapp':
-                const recipientCount = data.config.recipients?.length || 0;
-                return recipientCount > 0 ? `${recipientCount} recipient${recipientCount > 1 ? 's' : ''}` : 'No recipients';
-            case 'webhook':
-                return data.config.url ? new URL(data.config.url).hostname : 'No URL';
-            case 'create_task':
-                return data.config.title || 'Untitled task';
-            case 'trigger_workflow':
-                return data.config.workflow_name || 'Select workflow';
-            default:
-                return 'Configured';
+        try {
+            switch (actionType) {
+                case 'send_email':
+                case 'send_sms':
+                case 'send_whatsapp':
+                    const recipientCount = data.config.recipients?.length || 0;
+                    return recipientCount > 0 ? `${recipientCount} recipient${recipientCount > 1 ? 's' : ''}` : 'No recipients';
+                case 'webhook':
+                    if (!data.config.url) return 'No URL';
+                    try {
+                        return new URL(data.config.url as string).hostname;
+                    } catch {
+                        return 'Invalid URL';
+                    }
+                case 'create_task':
+                    return (data.config.title as string) || 'Untitled task';
+                case 'trigger_workflow':
+                    return (data.config.workflow_name as string) || 'Select workflow';
+                default:
+                    return 'Configured';
+            }
+        } catch {
+            return 'Not configured';
         }
     };
 
