@@ -82,7 +82,12 @@ class ReportBuilder extends Component
     public bool $showTemplateGallery = false;
     public bool $showBrandingPanel = false;
     public bool $showFilterBar = false;
+    public bool $showPublishModal = false;
     public string $activeTab = 'elements'; // elements, settings
+
+    // Publish state
+    public ?string $publicUrl = null;
+    public ?string $embedCode = null;
 
     // Available templates
     public array $templates = [];
@@ -103,7 +108,7 @@ class ReportBuilder extends Component
 
     public function loadReport(CustomReport $report): void
     {
-        $this->reportId = (string) $report->_id;
+        $this->reportId = (string) $report->id;
         $this->reportName = $report->report_name ?? 'Untitled Report';
         $this->reportDescription = $report->report_description ?? '';
         $this->reportType = $report->report_type ?? 'custom';
@@ -459,10 +464,11 @@ class ReportBuilder extends Component
             $data['version'] = 1;
             $data['status'] = CustomReport::STATUS_DRAFT;
             $report = CustomReport::create($data);
-            $this->reportId = (string) $report->_id;
+            $this->reportId = (string) $report->id;
         }
 
         $this->dispatch('report-saved', reportId: $this->reportId);
+        session()->flash('message', 'Report saved successfully!');
     }
 
     public function publish(): void
@@ -475,12 +481,33 @@ class ReportBuilder extends Component
         if ($report) {
             $report->publish();
             $this->status = CustomReport::STATUS_PUBLISHED;
+            $this->publicUrl = $report->getPublicUrl();
+            $this->embedCode = $report->getEmbedCode();
 
             $this->dispatch('report-published', [
-                'publicUrl' => $report->getPublicUrl(),
-                'embedCode' => $report->getEmbedCode(),
+                'publicUrl' => $this->publicUrl,
+                'embedCode' => $this->embedCode,
             ]);
         }
+    }
+
+    public function openPublishModal(): void
+    {
+        // Ensure report is saved first
+        if (!$this->reportId) {
+            $this->save();
+        }
+
+        // If already published, load the URLs
+        if ($this->status === CustomReport::STATUS_PUBLISHED && $this->reportId) {
+            $report = CustomReport::find($this->reportId);
+            if ($report) {
+                $this->publicUrl = $report->getPublicUrl();
+                $this->embedCode = $report->getEmbedCode();
+            }
+        }
+
+        $this->showPublishModal = true;
     }
 
     /**
