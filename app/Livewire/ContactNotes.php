@@ -5,13 +5,14 @@ namespace App\Livewire;
 use App\Models\AuditLog;
 use App\Models\ContactNote;
 use App\Services\VoiceMemoService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 class ContactNotes extends Component
 {
-    use WithFileUploads, WithPagination;
+    use AuthorizesRequests, WithFileUploads, WithPagination;
 
     public string $contactType;
     public int $contactId;

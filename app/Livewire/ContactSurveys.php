@@ -25,6 +25,13 @@ class ContactSurveys extends Component
     // Filter
     public string $filterStatus = 'all';
 
+    protected $listeners = ['edit-survey-attempt' => 'handleEditFromTimeline'];
+
+    public function handleEditFromTimeline(int $attemptId): void
+    {
+        $this->startEdit($attemptId);
+    }
+
     public function mount(string $contactType, int $contactId)
     {
         $this->contactType = $contactType;

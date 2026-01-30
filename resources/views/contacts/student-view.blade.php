@@ -240,7 +240,66 @@
                 <!-- Tab Content -->
                 <div class="p-4">
                     <!-- Timeline Tab -->
-                    <div x-show="activeTab === 'timeline'" x-cloak x-data="{ expandedItem: null }">
+                    <div x-show="activeTab === 'timeline'" x-cloak x-data="{
+                        expandedItem: null,
+                        editingNoteId: null,
+                        editNoteContent: '',
+                        editNoteType: 'general',
+                        isSaving: false,
+
+                        startEditNote(noteId, content, noteType) {
+                            this.editingNoteId = noteId;
+                            this.editNoteContent = content || '';
+                            this.editNoteType = noteType || 'general';
+                            this.expandedItem = 'note-' + noteId;
+                        },
+
+                        cancelEditNote() {
+                            this.editingNoteId = null;
+                            this.editNoteContent = '';
+                            this.editNoteType = 'general';
+                        },
+
+                        async saveNote(noteId) {
+                            this.isSaving = true;
+                            try {
+                                const response = await fetch('/api/contacts/notes/' + noteId, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content'),
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        content: this.editNoteContent,
+                                        note_type: this.editNoteType
+                                    })
+                                });
+
+                                if (response.ok) {
+                                    // Reload the page to show updated note
+                                    window.location.reload();
+                                } else {
+                                    const data = await response.json();
+                                    alert(data.message || 'Failed to save note');
+                                }
+                            } catch (error) {
+                                console.error('Error saving note:', error);
+                                alert('An error occurred while saving the note');
+                            } finally {
+                                this.isSaving = false;
+                            }
+                        },
+
+                        openSurveyEdit(attemptId) {
+                            // Click the surveys tab
+                            document.querySelector('[data-tab=surveys]').click();
+                            // After a short delay for the tab to render, dispatch the edit event
+                            setTimeout(() => {
+                                Livewire.dispatch('edit-survey-attempt', { attemptId: attemptId });
+                            }, 100);
+                        }
+                    }">
                         @php
                             // Combine all activities into a timeline
                             $timelineItems = collect();
@@ -366,7 +425,7 @@
                                         <div x-show="expandedItem === '{{ $item['id'] }}'" x-collapse class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                                             @if($item['type'] === 'note')
                                             <!-- Note Details -->
-                                            <div class="space-y-3">
+                                            <div class="space-y-3" x-show="editingNoteId !== {{ $item['model_id'] }}">
                                                 <div class="flex items-center gap-2">
                                                     @php
                                                         $noteTypeColor = match($item['note_type'] ?? 'general') {
@@ -386,11 +445,54 @@
                                                 <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $item['content'] }}</p>
                                                 <div class="flex items-center justify-between pt-2 border-t border-gray-200">
                                                     <span class="text-xs text-gray-500">{{ $item['date']?->format('M d, Y h:i A') }}</span>
+                                                    <div class="flex items-center gap-3">
+                                                        <button
+                                                            @click.stop="startEditNote({{ $item['model_id'] }}, {{ json_encode($item['content']) }}, '{{ $item['note_type'] ?? 'general' }}')"
+                                                            class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700 font-medium"
+                                                        >
+                                                            Edit Note
+                                                        </button>
+                                                        <button
+                                                            onclick="document.querySelector('[data-tab=notes]').click()"
+                                                            class="text-xs text-gray-500 hover:text-gray-700"
+                                                        >
+                                                            View in Notes Tab
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Inline Edit Form -->
+                                            <div x-show="editingNoteId === {{ $item['model_id'] }}" class="space-y-3">
+                                                <div class="flex items-center gap-2">
+                                                    <label class="text-xs font-medium text-gray-600">Note Type:</label>
+                                                    <select x-model="editNoteType" class="text-xs border-gray-300 rounded-md shadow-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
+                                                        <option value="general">General</option>
+                                                        <option value="follow_up">Follow Up</option>
+                                                        <option value="concern">Concern</option>
+                                                        <option value="milestone">Milestone</option>
+                                                    </select>
+                                                </div>
+                                                <textarea
+                                                    x-model="editNoteContent"
+                                                    rows="4"
+                                                    class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                                                    placeholder="Note content..."
+                                                ></textarea>
+                                                <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-200">
                                                     <button
-                                                        onclick="document.querySelector('[data-tab=notes]').click()"
-                                                        class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700"
+                                                        @click.stop="cancelEditNote()"
+                                                        class="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800"
+                                                        :disabled="isSaving"
                                                     >
-                                                        View in Notes Tab
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        @click.stop="saveNote({{ $item['model_id'] }})"
+                                                        class="px-3 py-1.5 text-xs bg-pulse-orange-500 text-white rounded-md hover:bg-pulse-orange-600 disabled:opacity-50"
+                                                        :disabled="isSaving"
+                                                    >
+                                                        <span x-show="!isSaving">Save Changes</span>
+                                                        <span x-show="isSaving">Saving...</span>
                                                     </button>
                                                 </div>
                                             </div>
@@ -435,12 +537,22 @@
                                                 @endif
                                                 <div class="flex items-center justify-between pt-2 border-t border-gray-200">
                                                     <span class="text-xs text-gray-500">{{ $item['date']?->format('M d, Y h:i A') }}</span>
-                                                    <button
-                                                        onclick="document.querySelector('[data-tab=surveys]').click()"
-                                                        class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700"
-                                                    >
-                                                        View in Surveys Tab
-                                                    </button>
+                                                    <div class="flex items-center gap-3">
+                                                        @if($item['status'] === 'completed')
+                                                        <button
+                                                            @click.stop="openSurveyEdit({{ $item['model_id'] }})"
+                                                            class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700 font-medium"
+                                                        >
+                                                            View & Edit Survey
+                                                        </button>
+                                                        @endif
+                                                        <button
+                                                            onclick="document.querySelector('[data-tab=surveys]').click()"
+                                                            class="text-xs text-gray-500 hover:text-gray-700"
+                                                        >
+                                                            View in Surveys Tab
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                             @elseif($item['type'] === 'resource')
