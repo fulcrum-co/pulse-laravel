@@ -24,6 +24,10 @@ class ProviderSeeder extends Seeder
         if (!$admin) {
             $admin = User::first();
         }
+        if (!$admin) {
+            $this->command->error('No user found. Please seed users first.');
+            return;
+        }
 
         $providers = [
             [

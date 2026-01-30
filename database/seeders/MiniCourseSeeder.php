@@ -655,6 +655,10 @@ class MiniCourseSeeder extends Seeder
     {
         $students = Student::where('org_id', $school->id)->take(10)->get();
 
+        if ($students->isEmpty()) {
+            return; // No students to enroll
+        }
+
         foreach ($students as $index => $student) {
             // Enroll some students in courses with varying progress
             $course = $courses[$index % count($courses)];
@@ -720,6 +724,10 @@ class MiniCourseSeeder extends Seeder
             ->where('risk_level', 'high')
             ->take(5)
             ->get();
+
+        if ($highRiskStudents->isEmpty()) {
+            return; // No high-risk students for suggestions
+        }
 
         foreach ($highRiskStudents as $student) {
             $course = $courses[array_rand($courses)];
