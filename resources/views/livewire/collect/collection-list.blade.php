@@ -75,13 +75,13 @@
                 <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                     <x-icon name="arrow-path" class="w-8 h-8 text-pulse-orange-500" />
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">Create your first collection</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Create your first data collection</h3>
                 <p class="text-gray-500 mb-4 max-w-sm mx-auto text-sm">
-                    Set up recurring data collection to gather insights from students, staff, or parents on a regular schedule.
+                    Set up recurring data collection to systematically gather progress monitoring data, check-ins, and insights from students, staff, or parents.
                 </p>
                 <a href="{{ route('collect.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
                     <x-icon name="plus" class="w-4 h-4 mr-1" />
-                    Create Collection
+                    Create Data Collection
                 </a>
             </div>
         </x-card>
