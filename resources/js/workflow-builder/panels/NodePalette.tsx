@@ -119,31 +119,43 @@ export default function NodePalette({ className = '', onAddNode }: NodePalettePr
         event.dataTransfer.setData('application/reactflow', item.type);
         event.dataTransfer.effectAllowed = 'move';
 
-        // Create custom drag image - a tiny compact pill
+        // Create custom drag image - tiny pill with explicit size to prevent browser scaling
         const dragImage = document.createElement('div');
         dragImage.textContent = item.label;
-        dragImage.style.cssText = `
-            position: fixed;
-            top: -1000px;
-            left: -1000px;
-            display: inline-block;
-            padding: 2px 8px;
-            background: white;
-            border: 1px solid ${item.borderColor};
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: 500;
-            font-family: system-ui, -apple-system, sans-serif;
-            color: ${item.borderColor};
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-            white-space: nowrap;
-            transform: scale(1);
-            transform-origin: top left;
-        `;
+
+        // Use inline styles with high specificity to prevent any CSS inheritance
+        Object.assign(dragImage.style, {
+            position: 'fixed',
+            top: '-9999px',
+            left: '-9999px',
+            display: 'block',
+            width: 'auto',
+            height: 'auto',
+            maxWidth: '80px',
+            padding: '3px 8px',
+            margin: '0',
+            background: '#ffffff',
+            border: `1px solid ${item.borderColor}`,
+            borderRadius: '4px',
+            fontSize: '11px',
+            fontWeight: '500',
+            fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+            color: item.borderColor,
+            boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+            whiteSpace: 'nowrap',
+            lineHeight: '1.2',
+            textAlign: 'center',
+            boxSizing: 'border-box',
+            transform: 'none',
+            zoom: '1',
+            opacity: '1',
+            pointerEvents: 'none',
+        });
+
         document.body.appendChild(dragImage);
 
-        // Set as drag image - offset to center on cursor
-        event.dataTransfer.setDragImage(dragImage, 25, 10);
+        // Set drag image with offset for cursor position
+        event.dataTransfer.setDragImage(dragImage, dragImage.offsetWidth / 2, dragImage.offsetHeight / 2);
 
         // Clean up after drag starts
         requestAnimationFrame(() => {
