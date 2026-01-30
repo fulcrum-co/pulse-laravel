@@ -271,15 +271,26 @@
                         >
                             <button
                                 @click="toggleRecording"
-                                :class="isRecording ? 'bg-red-600 hover:bg-red-700' : 'bg-purple-600 hover:bg-purple-700'"
-                                class="px-6 py-3 text-white rounded-lg font-medium transition-colors"
+                                :disabled="isTranscribing"
+                                :class="isRecording ? 'bg-red-600 hover:bg-red-700' : (isTranscribing ? 'bg-gray-400 cursor-wait' : 'bg-purple-600 hover:bg-purple-700')"
+                                class="px-6 py-3 text-white rounded-lg font-medium transition-colors disabled:opacity-75"
                             >
-                                <span x-show="!isRecording">Start Recording</span>
+                                <span x-show="!isRecording && !isTranscribing">Start Recording</span>
                                 <span x-show="isRecording">Stop Recording</span>
+                                <span x-show="isTranscribing" class="flex items-center gap-2">
+                                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Transcribing...
+                                </span>
                             </button>
 
                             <p x-show="isRecording" class="mt-4 text-sm text-gray-500 animate-pulse">
                                 Recording... Speak now
+                            </p>
+                            <p x-show="isTranscribing" class="mt-4 text-sm text-purple-600 animate-pulse">
+                                Processing your audio with AI...
                             </p>
                         </div>
                     </div>
@@ -425,21 +436,43 @@
                             </button>
                         </div>
                     @else
-                        <div class="space-y-3" x-data="{ dragging: null }">
+                        <div
+                            class="space-y-3"
+                            x-data="questionSortable()"
+                            x-init="initSortable()"
+                        >
                             @foreach($questions as $index => $question)
                                 <div
-                                    class="flex items-start gap-3 p-4 bg-gray-50 rounded-lg group hover:bg-gray-100 transition-colors"
-                                    draggable="true"
+                                    wire:key="question-{{ $question['id'] ?? $index }}"
+                                    data-index="{{ $index }}"
+                                    class="sortable-item flex items-start gap-3 p-4 bg-gray-50 rounded-lg group hover:bg-gray-100 transition-colors cursor-move"
                                 >
-                                    <div class="flex-shrink-0 w-8 h-8 bg-white rounded-lg flex items-center justify-center text-sm font-medium text-gray-500 border border-gray-200">
-                                        {{ $index + 1 }}
+                                    <div class="flex-shrink-0 w-8 h-8 bg-white rounded-lg flex items-center justify-center text-sm font-medium text-gray-500 border border-gray-200 drag-handle">
+                                        <x-icon name="bars-3" class="w-4 h-4 text-gray-400" />
+                                    </div>
+                                    <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center text-sm font-medium text-gray-400">
+                                        {{ $index + 1 }}.
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <p class="text-gray-900">{{ $question['question'] }}</p>
+                                        {{-- Show options for multiple choice --}}
+                                        @if(($question['type'] ?? 'scale') === 'multiple_choice' && !empty($question['options']))
+                                            <div class="flex flex-wrap gap-1 mt-2">
+                                                @foreach(array_slice($question['options'], 0, 4) as $opt)
+                                                    <span class="text-xs px-2 py-0.5 bg-gray-200 text-gray-600 rounded">{{ Str::limit($opt, 15) }}</span>
+                                                @endforeach
+                                                @if(count($question['options']) > 4)
+                                                    <span class="text-xs px-2 py-0.5 bg-gray-200 text-gray-500 rounded">+{{ count($question['options']) - 4 }} more</span>
+                                                @endif
+                                            </div>
+                                        @endif
                                         <div class="flex items-center gap-2 mt-2">
                                             <x-badge color="gray">{{ $this->questionTypes[$question['type']]['label'] ?? $question['type'] }}</x-badge>
                                             @if($question['required'] ?? true)
                                                 <x-badge color="red">Required</x-badge>
+                                            @endif
+                                            @if(($question['type'] ?? 'scale') === 'multiple_choice' && !empty($question['options']))
+                                                <span class="text-xs text-gray-400">{{ count($question['options']) }} options</span>
                                             @endif
                                         </div>
                                     </div>
@@ -630,8 +663,51 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="text-sm text-gray-500">
-                                    Multiple choice options can be configured after adding the question.
+                                {{-- Multiple Choice Options Editor --}}
+                                <div class="space-y-2">
+                                    @php
+                                        $options = $questionForm['options'] ?? [];
+                                        // Ensure options is an indexed array for multiple choice
+                                        if (!is_array($options) || (is_array($options) && isset($options['1']))) {
+                                            $options = ['Option 1', 'Option 2', 'Option 3'];
+                                        }
+                                    @endphp
+                                    @foreach($options as $index => $option)
+                                        <div class="flex items-center gap-2" wire:key="option-{{ $index }}">
+                                            <div class="flex items-center justify-center w-6 h-6 rounded-full border border-gray-300 text-xs text-gray-400">
+                                                {{ $index + 1 }}
+                                            </div>
+                                            <input
+                                                type="text"
+                                                wire:model.live="questionForm.options.{{ $index }}"
+                                                class="flex-1 rounded-lg border-gray-300 text-sm focus:border-pulse-orange-500 focus:ring-pulse-orange-500"
+                                                placeholder="Enter option..."
+                                            />
+                                            @if(count($options) > 2)
+                                                <button
+                                                    wire:click="removeOption({{ $index }})"
+                                                    type="button"
+                                                    class="p-1.5 text-gray-400 hover:text-red-500 rounded transition-colors"
+                                                    title="Remove option"
+                                                >
+                                                    <x-icon name="x-mark" class="w-4 h-4" />
+                                                </button>
+                                            @endif
+                                        </div>
+                                    @endforeach
+
+                                    <button
+                                        wire:click="addOption"
+                                        type="button"
+                                        class="flex items-center gap-1.5 text-sm text-pulse-orange-600 hover:text-pulse-orange-700 mt-2 transition-colors"
+                                    >
+                                        <x-icon name="plus-circle" class="w-4 h-4" />
+                                        Add Option
+                                    </button>
+
+                                    @error('questionForm.options')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             @endif
                         </div>
@@ -826,10 +902,37 @@
 </div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
+function questionSortable() {
+    return {
+        sortable: null,
+
+        initSortable() {
+            const el = this.$el;
+            if (!el) return;
+
+            this.sortable = new Sortable(el, {
+                animation: 150,
+                handle: '.drag-handle',
+                ghostClass: 'opacity-50',
+                dragClass: 'shadow-lg',
+                onEnd: (evt) => {
+                    const items = el.querySelectorAll('.sortable-item');
+                    const newOrder = Array.from(items).map(item => parseInt(item.dataset.index));
+
+                    // Call Livewire method to reorder
+                    @this.reorderQuestions(newOrder);
+                }
+            });
+        }
+    }
+}
+
 function voiceRecorder() {
     return {
         isRecording: false,
+        isTranscribing: false,
         mediaRecorder: null,
         audioChunks: [],
 
@@ -857,10 +960,7 @@ function voiceRecorder() {
 
                 this.mediaRecorder.onstop = async () => {
                     const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-                    // For demo, use a simulated transcription
-                    // In production, this would upload to transcription service
-                    const simulatedTranscription = "How are you feeling today? How well did you sleep last night? Do you need any support?";
-                    @this.processVoiceTranscription(simulatedTranscription);
+                    await this.transcribeAudio(audioBlob);
                 };
 
                 this.mediaRecorder.start();
@@ -878,6 +978,44 @@ function voiceRecorder() {
                 this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
                 this.isRecording = false;
                 @this.set('isRecording', false);
+            }
+        },
+
+        async transcribeAudio(audioBlob) {
+            this.isTranscribing = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+
+                const response = await fetch('{{ route("api.surveys.transcribe") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: formData,
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.transcription) {
+                    @this.processVoiceTranscription(result.transcription);
+                } else {
+                    // Fallback for demo if transcription service is not configured
+                    console.warn('Transcription failed, using demo text:', result.error);
+                    const demoTranscription = "How are you feeling today? How well did you sleep last night? Do you need any support?";
+                    @this.processVoiceTranscription(demoTranscription);
+                    alert('Note: Using demo transcription. Configure OpenAI API key for real transcription.');
+                }
+            } catch (error) {
+                console.error('Transcription error:', error);
+                // Fallback for demo
+                const demoTranscription = "How are you feeling today? How well did you sleep last night? Do you need any support?";
+                @this.processVoiceTranscription(demoTranscription);
+                alert('Transcription service unavailable. Using demo text.');
+            } finally {
+                this.isTranscribing = false;
             }
         }
     }

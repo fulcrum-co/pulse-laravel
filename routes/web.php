@@ -95,6 +95,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/surveys/ai/refine-question', [SurveyController::class, 'refineQuestion'])->name('api.surveys.ai.refine');
     Route::post('/api/surveys/ai/generate-interpretation', [SurveyController::class, 'generateInterpretation'])->name('api.surveys.ai.interpretation');
 
+    // Survey Voice Transcription
+    Route::post('/api/surveys/transcribe', [App\Http\Controllers\Api\SurveyTranscriptionController::class, 'transcribe'])->name('api.surveys.transcribe');
+
     // Question Bank
     Route::get('/api/question-bank', [SurveyController::class, 'questionBankIndex'])->name('api.question-bank.index');
     Route::post('/api/question-bank', [SurveyController::class, 'questionBankStore'])->name('api.question-bank.store');

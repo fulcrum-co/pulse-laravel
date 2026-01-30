@@ -12,6 +12,12 @@ use Illuminate\Support\Str;
 
 class SurveyCreator extends Component
 {
+    protected SurveyCreationService $surveyCreationService;
+
+    public function boot(SurveyCreationService $surveyCreationService): void
+    {
+        $this->surveyCreationService = $surveyCreationService;
+    }
     // Mode: select, form, chat, voice, template
     public string $mode = 'select';
 
@@ -182,20 +188,80 @@ class SurveyCreator extends Component
         if ($session) {
             $session->addMessage('user', $message);
 
-            // Simulate AI response based on message content
-            $response = $this->generateAIResponse($message, $session);
+            try {
+                // Use the SurveyCreationService to process the message with Claude
+                $result = $this->surveyCreationService->processChatMessage($session, $message);
 
-            $session->addMessage('assistant', $response);
-            $this->chatMessages[] = [
-                'role' => 'assistant',
-                'content' => $response,
-            ];
+                $this->chatMessages[] = [
+                    'role' => 'assistant',
+                    'content' => $result['response'],
+                ];
 
-            // Update draft questions if AI suggests any
-            $this->questions = $session->fresh()->draft_questions ?? $this->questions;
+                // Update draft questions if AI suggests any
+                $draftQuestions = $session->fresh()->draft_questions ?? [];
+
+                // Convert AI suggested format to our internal format
+                if (!empty($draftQuestions)) {
+                    $this->questions = array_map(function ($q) {
+                        return [
+                            'id' => $q['id'] ?? (string) Str::uuid(),
+                            'type' => $this->mapQuestionType($q['type'] ?? 'scale'),
+                            'question' => $q['question'],
+                            'options' => $this->formatOptions($q),
+                            'required' => $q['required'] ?? true,
+                            'interpretation_rules' => $q['interpretation_rules'] ?? [],
+                        ];
+                    }, $draftQuestions);
+                }
+            } catch (\Exception $e) {
+                // Fallback to simple pattern matching if AI fails
+                $response = $this->generateAIResponse($message, $session);
+                $session->addMessage('assistant', $response);
+                $this->chatMessages[] = [
+                    'role' => 'assistant',
+                    'content' => $response,
+                ];
+                $this->questions = $session->fresh()->draft_questions ?? $this->questions;
+            }
         }
 
         $this->isProcessing = false;
+    }
+
+    protected function mapQuestionType(string $type): string
+    {
+        return match ($type) {
+            'scale', 'rating', 'likert' => 'scale',
+            'multiple_choice', 'choice', 'select' => 'multiple_choice',
+            'text', 'open', 'free_text', 'open_ended' => 'text',
+            'voice', 'audio' => 'voice',
+            'matrix', 'grid' => 'matrix',
+            default => 'scale',
+        };
+    }
+
+    protected function formatOptions(array $question): array
+    {
+        $type = $question['type'] ?? 'scale';
+
+        if ($type === 'scale' || $type === 'rating' || $type === 'likert') {
+            // Scale type: format as label map
+            $labels = $question['labels'] ?? ['Very Low', 'Low', 'Medium', 'High', 'Very High'];
+            $min = $question['min'] ?? 1;
+            $max = $question['max'] ?? 5;
+
+            return [
+                (string)$min => $labels[0] ?? 'Very Low',
+                (string)$max => $labels[count($labels) - 1] ?? 'Very High',
+            ];
+        }
+
+        if ($type === 'multiple_choice' || $type === 'choice' || $type === 'select') {
+            // Multiple choice: return options array
+            return $question['options'] ?? ['Option 1', 'Option 2', 'Option 3'];
+        }
+
+        return [];
     }
 
     protected function generateAIResponse(string $message, SurveyCreationSession $session): string
@@ -363,6 +429,22 @@ class SurveyCreator extends Component
 
         if ($index !== null && isset($this->questions[$index])) {
             $this->questionForm = $this->questions[$index];
+
+            // Ensure options is properly formatted for the question type
+            $type = $this->questionForm['type'] ?? 'scale';
+            $options = $this->questionForm['options'] ?? [];
+
+            if ($type === 'multiple_choice') {
+                // Ensure options is an indexed array for multiple choice
+                if (empty($options) || (is_array($options) && isset($options['1']))) {
+                    $this->questionForm['options'] = ['Option 1', 'Option 2', 'Option 3'];
+                }
+            } elseif ($type === 'scale') {
+                // Ensure options has scale format
+                if (empty($options) || (is_array($options) && isset($options[0]))) {
+                    $this->questionForm['options'] = ['1' => 'Strongly Disagree', '5' => 'Strongly Agree'];
+                }
+            }
         } else {
             $this->questionForm = [
                 'id' => (string) Str::uuid(),
@@ -397,6 +479,21 @@ class SurveyCreator extends Component
             'questionForm.question' => 'required|string|max:500',
             'questionForm.type' => 'required|string|in:scale,multiple_choice,text,voice,matrix',
         ]);
+
+        // Additional validation for multiple choice
+        if ($this->questionForm['type'] === 'multiple_choice') {
+            $options = $this->questionForm['options'] ?? [];
+            // Filter out empty options
+            $validOptions = array_values(array_filter($options, fn($opt) => trim($opt) !== ''));
+
+            if (count($validOptions) < 2) {
+                $this->addError('questionForm.options', 'Multiple choice questions require at least 2 options.');
+                return;
+            }
+
+            // Save only valid options (re-indexed)
+            $this->questionForm['options'] = $validOptions;
+        }
 
         if ($this->editingQuestionIndex !== null) {
             $this->questions[$this->editingQuestionIndex] = $this->questionForm;
@@ -437,6 +534,62 @@ class SurveyCreator extends Component
         ];
 
         $this->showQuestionBank = false;
+    }
+
+    // ============================================
+    // MULTIPLE CHOICE OPTION MANAGEMENT
+    // ============================================
+
+    public function addOption(): void
+    {
+        $options = $this->questionForm['options'] ?? [];
+
+        // For multiple choice, options is a simple array of strings
+        if (!is_array($options)) {
+            $options = [];
+        }
+
+        // Add a new empty option
+        $options[] = '';
+        $this->questionForm['options'] = $options;
+    }
+
+    public function removeOption(int $index): void
+    {
+        $options = $this->questionForm['options'] ?? [];
+
+        if (isset($options[$index])) {
+            unset($options[$index]);
+            // Re-index the array
+            $this->questionForm['options'] = array_values($options);
+        }
+    }
+
+    public function updateOption(int $index, string $value): void
+    {
+        if (!isset($this->questionForm['options'])) {
+            $this->questionForm['options'] = [];
+        }
+
+        $this->questionForm['options'][$index] = $value;
+    }
+
+    public function updatedQuestionFormType($value): void
+    {
+        // Initialize default options when type changes
+        if ($value === 'multiple_choice') {
+            // Only set default options if currently empty or is scale format
+            $currentOptions = $this->questionForm['options'] ?? [];
+            if (empty($currentOptions) || (is_array($currentOptions) && isset($currentOptions['1']))) {
+                $this->questionForm['options'] = ['Option 1', 'Option 2', 'Option 3'];
+            }
+        } elseif ($value === 'scale') {
+            // Only set default scale labels if not already scale format
+            $currentOptions = $this->questionForm['options'] ?? [];
+            if (empty($currentOptions) || (is_array($currentOptions) && isset($currentOptions[0]))) {
+                $this->questionForm['options'] = ['1' => 'Strongly Disagree', '5' => 'Strongly Agree'];
+            }
+        }
     }
 
     // ============================================
