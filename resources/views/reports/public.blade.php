@@ -199,18 +199,30 @@
         </div>
     </footer>
 
+    @php
+        // Prepare chart configurations in PHP to avoid Blade parsing issues
+        $chartConfigs = [];
+        $chartIdx = 0;
+        foreach ($report->report_layout ?? [] as $element) {
+            if (($element['type'] ?? '') === 'chart') {
+                $chartConfigs[] = [
+                    'index' => $chartIdx,
+                    'metricKeys' => $element['config']['metric_keys'] ?? [],
+                    'chartType' => $element['config']['chart_type'] ?? 'line',
+                    'colors' => $element['config']['colors'] ?? ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
+                    'title' => $element['config']['title'] ?? 'Chart',
+                ];
+                $chartIdx++;
+            }
+        }
+    @endphp
+
     <script>
         // Chart data from server
         const chartData = @json($data['charts'] ?? []);
 
-        // Chart configurations from server (prepared in PHP to avoid Blade parsing issues)
-        const chartConfigs = @json(collect($report->report_layout ?? [])->filter(fn($el) => ($el['type'] ?? '') === 'chart')->values()->map(fn($el, $idx) => [
-            'index' => $idx,
-            'metricKeys' => $el['config']['metric_keys'] ?? [],
-            'chartType' => $el['config']['chart_type'] ?? 'line',
-            'colors' => $el['config']['colors'] ?? ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
-            'title' => $el['config']['title'] ?? 'Chart',
-        ])->toArray());
+        // Chart configurations from server
+        const chartConfigs = @json($chartConfigs);
 
         // Initialize charts
         document.addEventListener('DOMContentLoaded', function() {
