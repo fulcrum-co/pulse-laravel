@@ -60,20 +60,17 @@
     <!-- Empty State -->
     @if($reports->isEmpty())
         <x-card>
-            <div class="text-center py-16">
-                <div class="w-20 h-20 bg-gradient-to-br from-pulse-orange-100 to-pulse-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <x-icon name="chart-pie" class="w-10 h-10 text-pulse-orange-500" />
+            <div class="text-center py-12">
+                <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <x-icon name="chart-pie" class="w-8 h-8 text-pulse-orange-500" />
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Create your first report</h3>
-                <p class="text-gray-500 mb-6 max-w-md mx-auto">
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Create your first report</h3>
+                <p class="text-gray-500 mb-4 max-w-sm mx-auto text-sm">
                     Build beautiful, data-driven reports with our drag-and-drop editor.
-                    Choose from templates or start from scratch.
                 </p>
-                <a href="{{ route('reports.create') }}">
-                    <x-button variant="primary" size="lg">
-                        <x-icon name="plus" class="w-5 h-5 mr-2" />
-                        Create Report
-                    </x-button>
+                <a href="{{ route('reports.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
+                    <x-icon name="plus" class="w-4 h-4 mr-1" />
+                    Create Report
                 </a>
             </div>
         </x-card>
