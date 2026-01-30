@@ -2,12 +2,13 @@ name: pulse
 
 environments:
   production:
-    build:
-      - composer install --no-dev --optimize-autoloader
-      - npm ci && npm run build
-
     php: 8.3
     node: 20
+
+    build:
+      - composer install --no-dev --optimize-autoloader
+      - npm ci
+      - npm run build
 
     scheduler: true
     queue:
@@ -28,12 +29,13 @@ environments:
       QUEUE_CONNECTION: redis
 
   staging:
-    build:
-      - composer install --no-dev --optimize-autoloader
-      - npm ci && npm run build
-
     php: 8.3
     node: 20
+
+    build:
+      - composer install --no-dev --optimize-autoloader
+      - npm ci
+      - npm run build
 
     scheduler: true
     queue:
