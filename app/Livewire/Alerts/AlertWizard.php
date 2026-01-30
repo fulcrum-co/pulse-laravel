@@ -329,9 +329,9 @@ class AlertWizard extends Component
             $workflow = Workflow::forOrg($user->org_id)->findOrFail($this->workflowId);
             $workflow->update($data);
         } else {
-            $data['created_by'] = $user->_id;
+            $data['created_by'] = $user->id;
             $workflow = Workflow::create($data);
-            $this->workflowId = $workflow->_id;
+            $this->workflowId = $workflow->id;
         }
 
         $this->dispatch('notify', [

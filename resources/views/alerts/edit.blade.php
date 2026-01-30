@@ -6,6 +6,12 @@
                 Visual Editor
             </x-button>
         </a>
+        <a href="{{ route('alerts.index') }}">
+            <x-button variant="secondary">
+                <x-icon name="arrow-left" class="w-4 h-4 mr-2" />
+                Back to Alerts
+            </x-button>
+        </a>
     </x-slot>
 
     @livewire('alerts.alert-wizard', ['workflowId' => $workflowId])

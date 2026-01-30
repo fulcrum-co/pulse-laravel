@@ -25,18 +25,13 @@ class AlertController extends Controller
     }
 
     /**
-     * Show the form for editing an alert.
+     * Show the form for editing an alert (wizard mode).
      */
     public function edit(string $workflow)
     {
         $workflowModel = Workflow::forOrg(auth()->user()->org_id)->findOrFail($workflow);
 
-        // Determine which editor to show based on mode
-        if ($workflowModel->mode === Workflow::MODE_ADVANCED) {
-            return view('alerts.canvas', ['workflow' => $workflowModel]);
-        }
-
-        return view('alerts.edit', ['workflowId' => $workflow]);
+        return view('alerts.edit', ['workflowId' => $workflow, 'workflow' => $workflowModel]);
     }
 
     /**
