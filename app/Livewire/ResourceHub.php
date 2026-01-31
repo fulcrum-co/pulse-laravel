@@ -52,11 +52,11 @@ class ResourceHub extends Component
         $user = auth()->user();
         $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        // Get 2 recent items from each category
+        // Get recent items from each category (enough to fill the grid if one category dominates)
         $content = Resource::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->latest('created_at')
-            ->limit(2)
+            ->limit(8)
             ->get()
             ->map(fn ($r) => [
                 'id' => $r->id,
@@ -73,7 +73,7 @@ class ResourceHub extends Component
         $providers = Provider::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->latest('created_at')
-            ->limit(2)
+            ->limit(8)
             ->get()
             ->map(fn ($p) => [
                 'id' => $p->id,
@@ -90,7 +90,7 @@ class ResourceHub extends Component
         $programs = Program::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->latest('created_at')
-            ->limit(2)
+            ->limit(8)
             ->get()
             ->map(fn ($p) => [
                 'id' => $p->id,
@@ -108,7 +108,7 @@ class ResourceHub extends Component
             ->where('status', MiniCourse::STATUS_ACTIVE)
             ->withCount('steps')
             ->latest('created_at')
-            ->limit(2)
+            ->limit(8)
             ->get()
             ->map(fn ($c) => [
                 'id' => $c->id,
