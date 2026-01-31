@@ -44,8 +44,8 @@ class DemoRoleSwitcher extends Component
         $this->currentRole = $role;
         $this->isOpen = false;
 
-        // Use JavaScript to force a hard page reload
-        $this->js('window.location.reload()');
+        // Use Livewire redirect for proper page reload
+        return $this->redirect(request()->url());
     }
 
     public function clearDemoRole(): void
@@ -55,8 +55,8 @@ class DemoRoleSwitcher extends Component
 
         $this->currentRole = 'actual';
 
-        // Use JavaScript to force a hard page reload
-        $this->js('window.location.reload()');
+        // Use Livewire redirect for proper page reload
+        return $this->redirect(request()->url());
     }
 
     public function render()
