@@ -30,7 +30,7 @@ class DemoRoleSwitcher extends Component
         $this->isOpen = !$this->isOpen;
     }
 
-    public function selectRole(string $role): void
+    public function selectRole(string $role)
     {
         if ($role === 'actual') {
             session()->forget('demo_role_override');
@@ -48,7 +48,7 @@ class DemoRoleSwitcher extends Component
         return $this->redirect(request()->url());
     }
 
-    public function clearDemoRole(): void
+    public function clearDemoRole()
     {
         session()->forget('demo_role_override');
         session()->save();
