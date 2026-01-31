@@ -1,29 +1,29 @@
 <div class="flex flex-col h-full bg-gray-50" x-data="{ showAttachments: false }">
     @if($conversation)
     <!-- Chat Header -->
-    <div class="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
-        <div class="flex items-center gap-4">
+    <div class="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 bg-white border-b border-gray-200">
+        <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
             <!-- Provider Avatar -->
-            <div class="relative">
+            <div class="relative flex-shrink-0">
                 @if($conversation->provider->thumbnail_url)
-                <img src="{{ $conversation->provider->thumbnail_url }}" alt="" class="w-12 h-12 rounded-full object-cover">
+                <img src="{{ $conversation->provider->thumbnail_url }}" alt="" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover">
                 @else
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pulse-orange-400 to-pulse-orange-600 flex items-center justify-center">
-                    <span class="text-white font-semibold text-lg">{{ substr($conversation->provider->name, 0, 1) }}</span>
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-pulse-orange-400 to-pulse-orange-600 flex items-center justify-center">
+                    <span class="text-white font-semibold text-base sm:text-lg">{{ substr($conversation->provider->name, 0, 1) }}</span>
                 </div>
                 @endif
                 @if($conversation->provider->online ?? false)
-                <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 border-2 border-white rounded-full"></span>
                 @endif
             </div>
 
             <!-- Provider Info -->
-            <div>
-                <h2 class="text-lg font-semibold text-gray-900">{{ $conversation->provider->display_name }}</h2>
-                <div class="flex items-center gap-2 text-sm text-gray-500">
+            <div class="min-w-0 flex-1">
+                <h2 class="text-base sm:text-lg font-semibold text-gray-900 truncate">{{ $conversation->provider->display_name }}</h2>
+                <div class="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
                     <span>{{ ucfirst($conversation->provider->provider_type) }}</span>
                     @if($conversation->provider->verified ?? false)
-                    <span class="flex items-center gap-1 text-green-600">
+                    <span class="hidden sm:flex items-center gap-1 text-green-600">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                         </svg>
@@ -33,7 +33,7 @@
                     @if($conversation->provider->online ?? false)
                     <span class="flex items-center gap-1 text-green-600">
                         <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                        Online
+                        <span class="hidden sm:inline">Online</span>
                     </span>
                     @endif
                 </div>
@@ -41,23 +41,23 @@
         </div>
 
         <!-- Actions -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <!-- Video Call Button -->
             <button
                 wire:click="startVideoCall"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+                class="inline-flex items-center p-2 sm:px-4 sm:py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
                 title="Start video call"
             >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                 </svg>
-                Video Call
+                <span class="hidden sm:inline">Video Call</span>
             </button>
 
             <!-- Book Session Button -->
             <button
                 wire:click="openBookingModal"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                class="hidden sm:inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -79,6 +79,13 @@
                     x-transition
                     class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10"
                 >
+                    <!-- Book Session (shown on mobile) -->
+                    <button wire:click="openBookingModal" @click="open = false" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 sm:hidden">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Book Session
+                    </button>
                     <button @click="open = false" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -169,25 +176,25 @@
     </div>
 
     <!-- Message Input -->
-    <div class="px-6 py-4 bg-white border-t border-gray-200">
-        <form wire:submit="sendMessage" class="flex items-end gap-3">
+    <div class="px-3 sm:px-6 py-3 sm:py-4 bg-white border-t border-gray-200">
+        <form wire:submit="sendMessage" class="flex items-end gap-2 sm:gap-3">
             <!-- Attachment button -->
             <button
                 type="button"
                 @click="showAttachments = !showAttachments"
-                class="flex-shrink-0 p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                class="flex-shrink-0 p-2 sm:p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
                 </svg>
             </button>
 
-            <div class="flex-1">
+            <div class="flex-1 min-w-0">
                 <textarea
                     wire:model="messageText"
                     placeholder="Type your message..."
                     rows="1"
-                    class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
+                    class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
                     @keydown.enter.prevent="if (!event.shiftKey) { $wire.sendMessage(); }"
                     x-data
                     x-init="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
@@ -197,7 +204,7 @@
 
             <button
                 type="submit"
-                class="flex-shrink-0 px-6 py-3 bg-pulse-orange-500 text-white rounded-xl font-medium hover:bg-pulse-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                class="flex-shrink-0 px-4 sm:px-6 py-2.5 sm:py-3 bg-pulse-orange-500 text-white rounded-xl font-medium hover:bg-pulse-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 wire:loading.attr="disabled"
             >
                 <span wire:loading.remove>Send</span>
@@ -206,7 +213,6 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Sending
                 </span>
             </button>
         </form>
@@ -224,6 +230,135 @@
         <p class="text-gray-500 max-w-sm">
             Choose a conversation from the list or start a new one by selecting a provider.
         </p>
+    </div>
+    @endif
+
+    <!-- Booking Modal -->
+    @if($showBookingModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" x-data x-on:keydown.escape.window="$wire.closeBookingModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">Book a Session</h2>
+                    <p class="text-sm text-gray-500">with {{ $conversation->provider->name }}</p>
+                </div>
+                <button wire:click="closeBookingModal" class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="flex flex-col lg:flex-row">
+                <!-- Calendar Section -->
+                <div class="flex-1 p-6 border-b lg:border-b-0 lg:border-r border-gray-200">
+                    <!-- Month Navigation -->
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ $this->monthName }}</h3>
+                        <div class="flex items-center gap-2">
+                            <button wire:click="previousMonth" class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+                            <button wire:click="nextMonth" class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Grid -->
+                    <div class="grid grid-cols-7 gap-1 mb-2">
+                        @foreach(['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as $dayName)
+                        <div class="text-center text-xs font-medium text-gray-500 py-2">{{ $dayName }}</div>
+                        @endforeach
+                    </div>
+                    <div class="grid grid-cols-7 gap-1">
+                        @foreach($this->calendarDays as $day)
+                            @if($day === null)
+                                <div class="h-10"></div>
+                            @else
+                                <button
+                                    wire:click="selectDate('{{ $day['date'] }}')"
+                                    @if(!$day['isAvailable']) disabled @endif
+                                    class="h-10 w-full flex items-center justify-center rounded-lg text-sm font-medium transition-colors
+                                        {{ $selectedDate === $day['date'] ? 'bg-pulse-orange-500 text-white' : '' }}
+                                        {{ $day['isToday'] && $selectedDate !== $day['date'] ? 'ring-2 ring-pulse-orange-300' : '' }}
+                                        {{ $day['isAvailable'] && $selectedDate !== $day['date'] ? 'hover:bg-gray-100 text-gray-900' : '' }}
+                                        {{ !$day['isAvailable'] ? 'text-gray-300 cursor-not-allowed' : 'cursor-pointer' }}
+                                    "
+                                >
+                                    {{ $day['day'] }}
+                                </button>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Time Slots Section -->
+                <div class="w-full lg:w-72 p-6">
+                    @if($selectedDate)
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-gray-900">
+                            {{ \Carbon\Carbon::parse($selectedDate)->format('D, M j') }}
+                        </h3>
+                        <div class="flex items-center gap-1 text-xs">
+                            <button class="px-2 py-1 rounded bg-gray-100 text-gray-700">12h</button>
+                            <button class="px-2 py-1 rounded text-gray-400 hover:bg-gray-50">24h</button>
+                        </div>
+                    </div>
+                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                        @foreach($this->availableTimes as $time)
+                        <button
+                            wire:click="selectTime('{{ $time }}')"
+                            class="w-full flex items-center gap-3 px-4 py-3 border rounded-lg text-left transition-colors
+                                {{ $selectedTime === $time ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50' }}
+                            "
+                        >
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                            <span class="font-medium text-gray-900">{{ $time }}</span>
+                        </button>
+                        @endforeach
+                    </div>
+                    @else
+                    <div class="flex flex-col items-center justify-center h-full text-center py-8">
+                        <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <p class="text-gray-500 text-sm">Select a date to see<br>available times</p>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+                <div class="text-sm text-gray-500">
+                    @if($selectedDate && $selectedTime)
+                    <span class="font-medium text-gray-900">{{ \Carbon\Carbon::parse($selectedDate)->format('F j, Y') }}</span>
+                    at <span class="font-medium text-gray-900">{{ $selectedTime }}</span>
+                    @else
+                    Select a date and time
+                    @endif
+                </div>
+                <div class="flex items-center gap-3">
+                    <button wire:click="closeBookingModal" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">
+                        Cancel
+                    </button>
+                    <button
+                        wire:click="confirmBooking"
+                        @if(!$selectedDate || !$selectedTime) disabled @endif
+                        class="px-6 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Confirm Booking
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
     @endif
 
@@ -252,12 +387,6 @@
                             </svg>
                             Connecting...
                         </p>
-                        <button
-                            wire:click="connectCall"
-                            class="mt-6 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                            Simulate Connect
-                        </button>
                     </div>
                     @elseif($videoCallState === 'connected')
                     <div class="flex flex-col items-center justify-center h-full">
@@ -295,8 +424,11 @@
                 <!-- Local Video (Picture in Picture) -->
                 @if($videoCallState === 'connected')
                 <div class="absolute bottom-24 right-6 w-48 h-36 bg-gray-800 rounded-xl overflow-hidden shadow-lg border-2 border-gray-700">
-                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800">
-                        <span class="text-gray-400 text-sm">Your camera</span>
+                    <video id="local-video" autoplay muted playsinline class="w-full h-full object-cover" x-show="!cameraOff"></video>
+                    <div x-show="cameraOff" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800">
+                        <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                        </svg>
                     </div>
                 </div>
                 @endif
@@ -394,6 +526,21 @@
                 el.scrollTop = el.scrollHeight;
             }
         });
+
+        // Listen for video call started event to auto-connect in demo mode
+        Livewire.on('video-call-started', (data) => {
+            if (data && data.autoConnect) {
+                // Auto-connect after 2 seconds in demo mode
+                setTimeout(() => {
+                    Livewire.dispatch('connectCall');
+                    // Also trigger the component method directly
+                    const component = Livewire.find(document.querySelector('[wire\\:id]')?.getAttribute('wire:id'));
+                    if (component) {
+                        component.call('connectCall');
+                    }
+                }, 2000);
+            }
+        });
     });
 
     // Video call Alpine component
@@ -405,6 +552,7 @@
             callDuration: '0:00',
             callStart: null,
             interval: null,
+            localStream: null,
 
             init() {
                 this.callStart = new Date();
@@ -415,14 +563,42 @@
                     const seconds = diff % 60;
                     this.callDuration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
                 }, 1000);
+
+                // Request camera access for local preview
+                this.startLocalVideo();
+            },
+
+            async startLocalVideo() {
+                try {
+                    this.localStream = await navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: true
+                    });
+                    const localVideo = document.getElementById('local-video');
+                    if (localVideo) {
+                        localVideo.srcObject = this.localStream;
+                    }
+                } catch (err) {
+                    console.log('Camera access denied or not available:', err);
+                }
             },
 
             toggleMute() {
                 this.isMuted = !this.isMuted;
+                if (this.localStream) {
+                    this.localStream.getAudioTracks().forEach(track => {
+                        track.enabled = !this.isMuted;
+                    });
+                }
             },
 
             toggleCamera() {
                 this.cameraOff = !this.cameraOff;
+                if (this.localStream) {
+                    this.localStream.getVideoTracks().forEach(track => {
+                        track.enabled = !this.cameraOff;
+                    });
+                }
             },
 
             toggleScreenShare() {
@@ -432,6 +608,9 @@
             destroy() {
                 if (this.interval) {
                     clearInterval(this.interval);
+                }
+                if (this.localStream) {
+                    this.localStream.getTracks().forEach(track => track.stop());
                 }
             }
         }

@@ -19,17 +19,17 @@
     </div>
     @endif
 
-    <!-- Floating Toggle Button -->
+    <!-- Floating Toggle Button - positioned left side to avoid chat overlap -->
     <button
         @click="open = !open"
-        class="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+        class="fixed bottom-6 left-6 z-40 flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
         title="Demo Role Switcher"
     >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
         </svg>
-        <span class="font-medium">Switch Role</span>
-        <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <span class="font-medium hidden sm:inline">Switch Role</span>
+        <svg class="w-4 h-4 transition-transform hidden sm:block" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
         </svg>
     </button>
@@ -44,7 +44,7 @@
         x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 translate-y-4"
         @click.away="open = false"
-        class="fixed bottom-24 right-6 z-40 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
+        class="fixed bottom-20 left-6 z-40 w-72 sm:w-80 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
     >
         <!-- Header -->
         <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3">

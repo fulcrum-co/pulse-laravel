@@ -20,6 +20,15 @@ class ProviderChatWindow extends Component
     public bool $isDemo = false;
     public string $videoCallState = 'idle'; // idle, connecting, connected, ended
 
+    // Booking modal state
+    public ?string $selectedDate = null;
+    public ?string $selectedTime = null;
+    public string $bookingType = 'session';
+    public string $locationType = 'remote';
+    public string $bookingNotes = '';
+    public int $currentMonth;
+    public int $currentYear;
+
     protected StreamChatService $streamService;
 
     public function boot(StreamChatService $streamService): void
@@ -30,6 +39,9 @@ class ProviderChatWindow extends Component
     public function mount(?string $conversationId = null, bool $isDemo = true): void
     {
         $this->isDemo = $isDemo;
+        $this->currentMonth = (int) now()->format('n');
+        $this->currentYear = (int) now()->format('Y');
+
         if ($conversationId) {
             $this->loadConversation($conversationId, $isDemo);
         }
@@ -189,8 +201,8 @@ class ProviderChatWindow extends Component
         $this->showVideoModal = true;
         $this->videoCallState = 'connecting';
 
-        // Simulate connecting
-        $this->dispatch('video-call-started');
+        // For demo mode, auto-connect after a brief delay via JS
+        $this->dispatch('video-call-started', autoConnect: $this->isDemo);
     }
 
     /**
@@ -199,6 +211,7 @@ class ProviderChatWindow extends Component
     public function connectCall(): void
     {
         $this->videoCallState = 'connected';
+        $this->dispatch('video-call-connected');
     }
 
     /**
@@ -283,7 +296,13 @@ class ProviderChatWindow extends Component
     public function openBookingModal(): void
     {
         $this->showBookingModal = true;
-        $this->dispatch('open-booking-modal', providerId: $this->conversation->provider_id ?? $this->conversation->provider->id);
+        $this->selectedDate = null;
+        $this->selectedTime = null;
+        $this->bookingType = 'session';
+        $this->locationType = 'remote';
+        $this->bookingNotes = '';
+        $this->currentMonth = (int) now()->format('n');
+        $this->currentYear = (int) now()->format('Y');
     }
 
     /**
@@ -292,6 +311,138 @@ class ProviderChatWindow extends Component
     public function closeBookingModal(): void
     {
         $this->showBookingModal = false;
+    }
+
+    /**
+     * Navigate to previous month in calendar.
+     */
+    public function previousMonth(): void
+    {
+        $this->currentMonth--;
+        if ($this->currentMonth < 1) {
+            $this->currentMonth = 12;
+            $this->currentYear--;
+        }
+    }
+
+    /**
+     * Navigate to next month in calendar.
+     */
+    public function nextMonth(): void
+    {
+        $this->currentMonth++;
+        if ($this->currentMonth > 12) {
+            $this->currentMonth = 1;
+            $this->currentYear++;
+        }
+    }
+
+    /**
+     * Select a date in the booking calendar.
+     */
+    public function selectDate(string $date): void
+    {
+        $this->selectedDate = $date;
+        $this->selectedTime = null; // Reset time when date changes
+    }
+
+    /**
+     * Select a time slot.
+     */
+    public function selectTime(string $time): void
+    {
+        $this->selectedTime = $time;
+    }
+
+    /**
+     * Get calendar days for the current month.
+     */
+    public function getCalendarDaysProperty(): array
+    {
+        $firstDay = \Carbon\Carbon::create($this->currentYear, $this->currentMonth, 1);
+        $lastDay = $firstDay->copy()->endOfMonth();
+        $startPadding = $firstDay->dayOfWeek; // 0 = Sunday
+
+        $days = [];
+
+        // Add empty slots for days before the 1st
+        for ($i = 0; $i < $startPadding; $i++) {
+            $days[] = null;
+        }
+
+        // Add all days of the month
+        for ($day = 1; $day <= $lastDay->day; $day++) {
+            $date = \Carbon\Carbon::create($this->currentYear, $this->currentMonth, $day);
+            $days[] = [
+                'date' => $date->format('Y-m-d'),
+                'day' => $day,
+                'isToday' => $date->isToday(),
+                'isPast' => $date->isPast() && !$date->isToday(),
+                'isWeekend' => $date->isWeekend(),
+                'isAvailable' => !$date->isPast() && !$date->isWeekend(),
+            ];
+        }
+
+        return $days;
+    }
+
+    /**
+     * Get available time slots for the selected date.
+     */
+    public function getAvailableTimesProperty(): array
+    {
+        if (!$this->selectedDate) {
+            return [];
+        }
+
+        // Demo: Return fixed time slots (in production, this would query provider availability)
+        return [
+            '9:00am',
+            '10:00am',
+            '11:00am',
+            '12:30pm',
+            '2:00pm',
+            '2:30pm',
+            '3:00pm',
+            '3:30pm',
+            '4:00pm',
+            '4:30pm',
+        ];
+    }
+
+    /**
+     * Get formatted current month name.
+     */
+    public function getMonthNameProperty(): string
+    {
+        return \Carbon\Carbon::create($this->currentYear, $this->currentMonth, 1)->format('F Y');
+    }
+
+    /**
+     * Confirm booking.
+     */
+    public function confirmBooking(): void
+    {
+        if (!$this->selectedDate || !$this->selectedTime) {
+            return;
+        }
+
+        // In demo mode, just show success message
+        if ($this->isDemo) {
+            $this->messages[] = [
+                'id' => 'msg_booking_' . uniqid(),
+                'text' => "📅 Booking request sent for {$this->selectedDate} at {$this->selectedTime}",
+                'user' => ['id' => 'system', 'name' => 'System'],
+                'created_at' => now()->toIso8601String(),
+                'is_system' => true,
+            ];
+            $this->closeBookingModal();
+            session()->flash('message', 'Booking request sent successfully!');
+            return;
+        }
+
+        // TODO: Implement real booking logic
+        $this->closeBookingModal();
     }
 
     /**
