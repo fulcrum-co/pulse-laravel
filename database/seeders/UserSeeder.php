@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
 
         // Create superintendent at district level - Dr. Margaret Chen
         // An experienced educator in her late 50s who oversees the entire district
-        User::create([
+        $superintendent = User::create([
             'org_id' => $district->id,
             'first_name' => 'Margaret',
             'last_name' => 'Chen',
@@ -28,6 +28,13 @@ class UserSeeder extends Seeder
             'avatar_url' => 'https://randomuser.me/api/portraits/women/79.jpg',
             'active' => true,
             'suspended' => false,
+        ]);
+
+        // Assign consultant access to Lincoln High School (can view and push content)
+        $superintendent->organizations()->attach($school->id, [
+            'role' => 'consultant',
+            'is_primary' => false,
+            'can_manage' => true,
         ]);
 
         // Create admin user at school level - Principal Michael Torres

@@ -48,8 +48,11 @@ class ContactList extends Component
     {
         $user = auth()->user();
 
+        // Get all organization IDs this user can access (includes assigned orgs for consultants)
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
+
         $contacts = Student::with('user')
-            ->forOrganization($user->org_id)
+            ->whereIn('org_id', $accessibleOrgIds)
             ->when($this->search, function ($query) {
                 $query->whereHas('user', function ($q) {
                     $q->where('first_name', 'like', '%' . $this->search . '%')
