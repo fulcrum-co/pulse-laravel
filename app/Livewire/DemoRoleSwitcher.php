@@ -30,7 +30,7 @@ class DemoRoleSwitcher extends Component
         $this->isOpen = !$this->isOpen;
     }
 
-    public function selectRole(string $role)
+    public function selectRole(string $role): void
     {
         if ($role === 'actual') {
             session()->forget('demo_role_override');
@@ -44,19 +44,19 @@ class DemoRoleSwitcher extends Component
         $this->currentRole = $role;
         $this->isOpen = false;
 
-        // Use Livewire redirect for proper page reload
-        return $this->redirect(request()->url());
+        // Use Livewire redirect for proper page reload (no return - matches OrganizationSwitcher pattern)
+        $this->redirect(request()->url());
     }
 
-    public function clearDemoRole()
+    public function clearDemoRole(): void
     {
         session()->forget('demo_role_override');
         session()->save();
 
         $this->currentRole = 'actual';
 
-        // Use Livewire redirect for proper page reload
-        return $this->redirect(request()->url());
+        // Use Livewire redirect for proper page reload (no return - matches OrganizationSwitcher pattern)
+        $this->redirect(request()->url());
     }
 
     public function render()

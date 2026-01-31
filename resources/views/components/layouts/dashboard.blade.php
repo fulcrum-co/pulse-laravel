@@ -310,7 +310,7 @@
                        :class="sidebarCollapsed ? 'justify-center' : ''"
                        class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('messages*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <div class="relative flex-shrink-0">
-                            <x-icon name="chat-bubble-oval-left-ellipsis" class="w-5 h-5" />
+                            <x-icon name="chat-bubble-left-right" class="w-5 h-5" />
                             @if($unreadMessageCount > 0)
                             <span class="absolute -top-1 -right-1 w-2 h-2 bg-pulse-orange-500 rounded-full"></span>
                             @endif
