@@ -20,7 +20,7 @@ class MarketplaceSeeder extends Seeder
             $school = Organization::first();
         }
         if (!$school) {
-            $this->command->error('No organization found. Please seed organizations first.');
+            $this->log('No organization found. Please seed organizations first.', 'error');
             return;
         }
 
@@ -33,9 +33,16 @@ class MarketplaceSeeder extends Seeder
         // Create reviews for items
         $this->createReviews($items, $school);
 
-        $this->command->info('Marketplace seeded successfully!');
-        $this->command->info('- ' . count($sellers) . ' seller profiles created');
-        $this->command->info('- ' . count($items) . ' marketplace items created');
+        $this->log('Marketplace seeded successfully!');
+        $this->log('- ' . count($sellers) . ' seller profiles created');
+        $this->log('- ' . count($items) . ' marketplace items created');
+    }
+
+    private function log(string $message, string $type = 'info'): void
+    {
+        if ($this->command) {
+            $type === 'error' ? $this->command->error($message) : $this->command->info($message);
+        }
     }
 
     private function createSellerProfiles(Organization $school): array
