@@ -34,6 +34,8 @@ class Program extends Model
 
     protected $fillable = [
         'org_id',
+        'source_program_id',
+        'source_org_id',
         'name',
         'description',
         'program_type',
@@ -131,11 +133,76 @@ class Program extends Model
     }
 
     /**
+     * Get the source program this was pushed from.
+     */
+    public function sourceProgram(): BelongsTo
+    {
+        return $this->belongsTo(Program::class, 'source_program_id');
+    }
+
+    /**
+     * Get the source organization this was pushed from.
+     */
+    public function sourceOrganization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'source_org_id');
+    }
+
+    /**
+     * Get all programs pushed from this program.
+     */
+    public function pushedPrograms(): HasMany
+    {
+        return $this->hasMany(Program::class, 'source_program_id');
+    }
+
+    /**
+     * Push this program to another organization.
+     * Creates a copy for the target org.
+     */
+    public function pushToOrganization(Organization $targetOrg, ?int $pushedBy = null): self
+    {
+        $newProgram = $this->replicate([
+            'org_id',
+            'source_program_id',
+            'source_org_id',
+            'created_by',
+            'current_enrollment',
+        ]);
+
+        $newProgram->org_id = $targetOrg->id;
+        $newProgram->source_program_id = $this->id;
+        $newProgram->source_org_id = $this->org_id;
+        $newProgram->created_by = $pushedBy;
+        $newProgram->name = $this->name . ' (from ' . $this->organization->org_name . ')';
+        $newProgram->current_enrollment = 0;
+        $newProgram->save();
+
+        return $newProgram;
+    }
+
+    /**
+     * Check if this program was pushed from another organization.
+     */
+    public function wasPushed(): bool
+    {
+        return $this->source_program_id !== null;
+    }
+
+    /**
      * Mini-course steps that reference this program.
      */
     public function courseSteps(): HasMany
     {
         return $this->hasMany(MiniCourseStep::class);
+    }
+
+    /**
+     * Student enrollments for this program.
+     */
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(ProgramEnrollment::class);
     }
 
     /**

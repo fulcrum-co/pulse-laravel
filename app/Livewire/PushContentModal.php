@@ -6,6 +6,8 @@ use App\Models\Organization;
 use App\Models\Survey;
 use App\Models\CustomReport;
 use App\Models\Resource;
+use App\Models\Provider;
+use App\Models\Program;
 use Livewire\Component;
 
 class PushContentModal extends Component
@@ -20,6 +22,8 @@ class PushContentModal extends Component
         'openPushSurvey' => 'openSurvey',
         'openPushReport' => 'openReport',
         'openPushResource' => 'openResource',
+        'openPushProvider' => 'openProvider',
+        'openPushProgram' => 'openProgram',
     ];
 
     public function openSurvey(int $id): void
@@ -41,6 +45,22 @@ class PushContentModal extends Component
     public function openResource(int $id): void
     {
         $this->contentType = 'resource';
+        $this->contentId = $id;
+        $this->reset(['selectedOrgIds', 'selectAll']);
+        $this->show = true;
+    }
+
+    public function openProvider(int $id): void
+    {
+        $this->contentType = 'provider';
+        $this->contentId = $id;
+        $this->reset(['selectedOrgIds', 'selectAll']);
+        $this->show = true;
+    }
+
+    public function openProgram(int $id): void
+    {
+        $this->contentType = 'program';
         $this->contentId = $id;
         $this->reset(['selectedOrgIds', 'selectAll']);
         $this->show = true;
@@ -111,6 +131,8 @@ class PushContentModal extends Component
                 'survey' => 'Survey',
                 'report' => 'Report',
                 'resource' => 'Resource',
+                'provider' => 'Provider',
+                'program' => 'Program',
                 default => 'Content',
             };
             session()->flash('success', "{$typeLabel} pushed to: " . implode(', ', $pushed));
@@ -127,6 +149,8 @@ class PushContentModal extends Component
             'survey' => Survey::find($this->contentId),
             'report' => CustomReport::find($this->contentId),
             'resource' => Resource::find($this->contentId),
+            'provider' => Provider::find($this->contentId),
+            'program' => Program::find($this->contentId),
             default => null,
         };
     }
@@ -158,6 +182,8 @@ class PushContentModal extends Component
             'survey' => $content->title ?? 'Survey',
             'report' => $content->report_name ?? 'Report',
             'resource' => $content->title ?? 'Resource',
+            'provider' => $content->name ?? 'Provider',
+            'program' => $content->name ?? 'Program',
             default => 'Content',
         };
     }
@@ -168,6 +194,8 @@ class PushContentModal extends Component
             'survey' => 'Survey',
             'report' => 'Report',
             'resource' => 'Resource',
+            'provider' => 'Provider',
+            'program' => 'Program',
             default => 'Content',
         };
     }

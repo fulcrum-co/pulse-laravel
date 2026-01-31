@@ -23,6 +23,8 @@ class Provider extends Model
 
     protected $fillable = [
         'org_id',
+        'source_provider_id',
+        'source_org_id',
         'name',
         'provider_type',
         'specialty_areas',
@@ -100,6 +102,67 @@ class Provider extends Model
     }
 
     /**
+     * Get the source provider this was pushed from.
+     */
+    public function sourceProvider(): BelongsTo
+    {
+        return $this->belongsTo(Provider::class, 'source_provider_id');
+    }
+
+    /**
+     * Get the source organization this was pushed from.
+     */
+    public function sourceOrganization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'source_org_id');
+    }
+
+    /**
+     * Get all providers pushed from this provider.
+     */
+    public function pushedProviders(): HasMany
+    {
+        return $this->hasMany(Provider::class, 'source_provider_id');
+    }
+
+    /**
+     * Push this provider to another organization.
+     * Creates a copy for the target org.
+     */
+    public function pushToOrganization(Organization $targetOrg, ?int $pushedBy = null): self
+    {
+        $newProvider = $this->replicate([
+            'org_id',
+            'source_provider_id',
+            'source_org_id',
+            'created_by',
+            'verified_at',
+            'ratings_average',
+            'ratings_count',
+        ]);
+
+        $newProvider->org_id = $targetOrg->id;
+        $newProvider->source_provider_id = $this->id;
+        $newProvider->source_org_id = $this->org_id;
+        $newProvider->created_by = $pushedBy;
+        $newProvider->name = $this->name . ' (from ' . $this->organization->org_name . ')';
+        $newProvider->ratings_average = 0;
+        $newProvider->ratings_count = 0;
+        $newProvider->verified_at = null;
+        $newProvider->save();
+
+        return $newProvider;
+    }
+
+    /**
+     * Check if this provider was pushed from another organization.
+     */
+    public function wasPushed(): bool
+    {
+        return $this->source_provider_id !== null;
+    }
+
+    /**
      * Mini-course steps that reference this provider.
      */
     public function courseSteps(): HasMany
@@ -137,6 +200,14 @@ class Provider extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(ProviderPayment::class);
+    }
+
+    /**
+     * Student assignments for this provider.
+     */
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(ProviderAssignment::class);
     }
 
     /**

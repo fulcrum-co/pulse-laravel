@@ -196,10 +196,11 @@ class ResourceLibrary extends Component
                 'name' => $this->providerName,
                 'bio' => $this->providerBio ?: null,
                 'provider_type' => $this->providerTypeField,
-                'email' => $this->providerEmail ?: null,
-                'phone' => $this->providerPhone ?: null,
+                'contact_email' => $this->providerEmail ?: null,
+                'contact_phone' => $this->providerPhone ?: null,
                 'serves_remote' => $this->providerServesRemote,
-                'is_active' => true,
+                'active' => true,
+                'created_by' => $user->id,
             ]);
 
             $this->dispatch('notify', [
@@ -220,7 +221,8 @@ class ResourceLibrary extends Component
                 'program_type' => $this->programTypeField,
                 'duration_weeks' => $this->programDurationWeeks,
                 'capacity' => $this->programCapacity,
-                'is_active' => true,
+                'active' => true,
+                'created_by' => $user->id,
             ]);
 
             $this->dispatch('notify', [
