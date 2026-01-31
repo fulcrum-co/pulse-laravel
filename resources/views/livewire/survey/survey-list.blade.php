@@ -32,7 +32,19 @@
                 @endforeach
             </select>
 
-            @if($search || $statusFilter || $typeFilter)
+            @if($isAdmin && $accessibleOrgs->count() > 1)
+            <select
+                wire:model.live="orgFilter"
+                class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+            >
+                <option value="">All Organizations</option>
+                @foreach($accessibleOrgs as $org)
+                    <option value="{{ $org->id }}">{{ $org->org_name }}</option>
+                @endforeach
+            </select>
+            @endif
+
+            @if($search || $statusFilter || $typeFilter || $orgFilter)
             <button
                 wire:click="clearFilters"
                 class="text-sm text-gray-500 hover:text-gray-700"
@@ -183,6 +195,14 @@
                                 </button>
                                 <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
                             </div>
+                            @if($canPush)
+                            <div class="relative group">
+                                <button wire:click="openPushModal({{ $survey->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-500 rounded">
+                                    <x-icon name="arrow-up-on-square" class="w-3.5 h-3.5" />
+                                </button>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Push to Schools</span>
+                            </div>
+                            @endif
                             <div class="relative group">
                                 <button wire:click="confirmDelete('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded">
                                     <x-icon name="trash" class="w-3.5 h-3.5" />
@@ -265,6 +285,14 @@
                             </button>
                             <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
                         </div>
+                        @if($canPush)
+                        <div class="relative group">
+                            <button wire:click="openPushModal({{ $survey->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-500 rounded">
+                                <x-icon name="arrow-up-on-square" class="w-4 h-4" />
+                            </button>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Push to Schools</span>
+                        </div>
+                        @endif
                         <div class="relative group">
                             <button wire:click="confirmDelete('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded">
                                 <x-icon name="trash" class="w-4 h-4" />
@@ -378,6 +406,14 @@
                                         </button>
                                         <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Duplicate</span>
                                     </div>
+                                    @if($canPush)
+                                    <div class="relative group">
+                                        <button wire:click="openPushModal({{ $survey->id }})" class="p-1 text-gray-400 hover:text-pulse-orange-500 rounded">
+                                            <x-icon name="arrow-up-on-square" class="w-4 h-4" />
+                                        </button>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Push to Schools</span>
+                                    </div>
+                                    @endif
                                     <div class="relative group">
                                         <button wire:click="confirmDelete('{{ $survey->id }}')" class="p-1 text-gray-400 hover:text-red-500 rounded">
                                             <x-icon name="trash" class="w-4 h-4" />
@@ -459,5 +495,10 @@
             </div>
         </div>
     </div>
+    @endif
+
+    <!-- Push Content Modal -->
+    @if($canPush)
+        <livewire:push-content-modal />
     @endif
 </div>

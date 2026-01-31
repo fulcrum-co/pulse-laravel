@@ -13,6 +13,7 @@ class SurveyList extends Component
     public string $search = '';
     public string $statusFilter = '';
     public string $typeFilter = '';
+    public string $orgFilter = '';
     public string $viewMode = 'grid';
     public ?string $surveyToDelete = null;
     public bool $showDeleteModal = false;
@@ -23,6 +24,7 @@ class SurveyList extends Component
         'search' => ['except' => ''],
         'statusFilter' => ['except' => ''],
         'typeFilter' => ['except' => ''],
+        'orgFilter' => ['except' => ''],
         'viewMode' => ['except' => 'grid'],
     ];
 
@@ -46,12 +48,35 @@ class SurveyList extends Component
         $this->resetPage();
     }
 
+    public function updatingOrgFilter(): void
+    {
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
         $this->search = '';
         $this->statusFilter = '';
         $this->typeFilter = '';
+        $this->orgFilter = '';
         $this->resetPage();
+    }
+
+    /**
+     * Open push modal for a survey.
+     */
+    public function openPushModal(int $surveyId): void
+    {
+        $this->dispatch('openPushSurvey', $surveyId);
+    }
+
+    /**
+     * Check if the current user can push content.
+     */
+    public function getCanPushProperty(): bool
+    {
+        $user = auth()->user();
+        return $user->isAdmin() && $user->organization?->getDownstreamOrganizations()->count() > 0;
     }
 
     /**
@@ -232,12 +257,29 @@ class SurveyList extends Component
     public function render()
     {
         $user = auth()->user();
+        $isAdmin = $user->isAdmin();
 
-        $surveys = Survey::forOrganization($user->org_id)
+        // Build base query
+        $query = Survey::query();
+
+        // If user is admin/consultant, they can see surveys from all accessible orgs
+        if ($isAdmin && $user->organization) {
+            $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
+            $query->whereIn('org_id', $accessibleOrgIds);
+
+            // Filter by specific org if selected
+            if ($this->orgFilter && in_array((int)$this->orgFilter, $accessibleOrgIds)) {
+                $query->where('org_id', $this->orgFilter);
+            }
+        } else {
+            $query->where('org_id', $user->effective_org_id);
+        }
+
+        $surveys = $query
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('title', 'like', '%' . $this->search . '%')
-                      ->orWhere('description', 'like', '%' . $this->search . '%');
+                    $q->where('title', 'ilike', '%' . $this->search . '%')
+                      ->orWhere('description', 'ilike', '%' . $this->search . '%');
                 });
             })
             ->when($this->statusFilter, function ($query) {
@@ -246,9 +288,13 @@ class SurveyList extends Component
             ->when($this->typeFilter, function ($query) {
                 $query->where('survey_type', $this->typeFilter);
             })
+            ->with('organization')
             ->withCount(['attempts', 'completedAttempts'])
             ->orderBy('updated_at', 'desc')
             ->paginate(12);
+
+        // Get accessible orgs for filter dropdown (if admin)
+        $accessibleOrgs = $isAdmin ? $user->getAccessibleOrganizations() : collect();
 
         return view('livewire.survey.survey-list', [
             'surveys' => $surveys,
@@ -259,6 +305,9 @@ class SurveyList extends Component
                 'behavioral' => 'Behavioral',
                 'custom' => 'Custom',
             ],
+            'accessibleOrgs' => $accessibleOrgs,
+            'isAdmin' => $isAdmin,
+            'canPush' => $this->canPush,
         ]);
     }
 }
