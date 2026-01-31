@@ -86,8 +86,9 @@ class ContentLibrary extends Component
     public function getResourcesProperty()
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        $query = Resource::forOrganization($user->org_id)
+        $query = Resource::whereIn('org_id', $accessibleOrgIds)
             ->active();
 
         // Search
@@ -161,8 +162,9 @@ class ContentLibrary extends Component
     public function getCategoriesProperty(): array
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        return Resource::forOrganization($user->org_id)
+        return Resource::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->distinct()
             ->whereNotNull('category')

@@ -21,8 +21,8 @@ class ResourceDetail extends Component
 
     public function mount(Resource $resource): void
     {
-        // Ensure the resource belongs to the user's organization
-        if ($resource->org_id !== auth()->user()->org_id) {
+        // Ensure the user has access to this resource's organization
+        if (!auth()->user()->canAccessOrganization($resource->org_id)) {
             abort(403);
         }
 
@@ -112,7 +112,9 @@ class ResourceDetail extends Component
     public function getRelatedResourcesProperty()
     {
         // Get resources in the same category or with overlapping tags
-        return Resource::forOrganization(auth()->user()->org_id)
+        $accessibleOrgIds = auth()->user()->getAccessibleOrganizations()->pluck('id')->toArray();
+
+        return Resource::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->where('id', '!=', $this->resource->id)
             ->where(function ($query) {
@@ -136,7 +138,9 @@ class ResourceDetail extends Component
 
     public function getStudentsProperty()
     {
-        return Student::where('org_id', auth()->user()->org_id)
+        $accessibleOrgIds = auth()->user()->getAccessibleOrganizations()->pluck('id')->toArray();
+
+        return Student::whereIn('org_id', $accessibleOrgIds)
             ->with('user')
             ->get()
             ->sortBy(fn ($student) => $student->user?->name ?? '')
@@ -145,7 +149,9 @@ class ResourceDetail extends Component
 
     public function getContactListsProperty()
     {
-        return ContactList::where('org_id', auth()->user()->org_id)
+        $accessibleOrgIds = auth()->user()->getAccessibleOrganizations()->pluck('id')->toArray();
+
+        return ContactList::whereIn('org_id', $accessibleOrgIds)
             ->whereIn('list_type', ['student', 'mixed'])
             ->orderBy('name')
             ->get();
