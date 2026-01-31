@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\Log;
 
 class StreamChatService
 {
-    protected Client $client;
-    protected string $apiKey;
-    protected string $apiSecret;
+    protected ?Client $client = null;
+    protected ?string $apiKey = null;
+    protected ?string $apiSecret = null;
 
     public function __construct()
     {
