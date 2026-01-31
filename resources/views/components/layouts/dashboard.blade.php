@@ -1,3 +1,4 @@
+@use('App\Services\RolePermissions')
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -120,58 +121,74 @@
                 <!-- Expanded: 2x2 Grid -->
                 <div x-show="!sidebarCollapsed" class="px-3">
                     <div class="grid grid-cols-2 gap-2">
+                        @if(RolePermissions::currentUserCanAccess('home'))
                         <!-- Home -->
                         <a href="/dashboard"
                            class="flex flex-col items-center justify-center p-3 rounded-lg border transition-colors {{ request()->is('dashboard') ? 'bg-pulse-orange-50 border-pulse-orange-200 text-pulse-orange-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300' }}">
                             <x-icon name="home" class="w-5 h-5 mb-1 {{ request()->is('dashboard') ? 'text-pulse-orange-500' : '' }}" />
                             <span class="text-xs font-medium">Home</span>
                         </a>
+                        @endif
+                        @if(RolePermissions::currentUserCanAccess('contacts'))
                         <!-- Contacts -->
                         <a href="/contacts"
                            class="flex flex-col items-center justify-center p-3 rounded-lg border transition-colors {{ request()->is('contacts*') ? 'bg-pulse-orange-50 border-pulse-orange-200 text-pulse-orange-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300' }}">
                             <x-icon name="users" class="w-5 h-5 mb-1 {{ request()->is('contacts*') ? 'text-pulse-orange-500' : '' }}" />
                             <span class="text-xs font-medium">Contacts</span>
                         </a>
+                        @endif
+                        @if(RolePermissions::currentUserCanAccess('surveys'))
                         <!-- Surveys -->
                         <a href="/surveys"
                            class="flex flex-col items-center justify-center p-3 rounded-lg border transition-colors {{ request()->is('surveys*') ? 'bg-pulse-orange-50 border-pulse-orange-200 text-pulse-orange-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300' }}">
                             <x-icon name="clipboard-list" class="w-5 h-5 mb-1 {{ request()->is('surveys*') ? 'text-pulse-orange-500' : '' }}" />
                             <span class="text-xs font-medium">Surveys</span>
                         </a>
+                        @endif
+                        @if(RolePermissions::currentUserCanAccess('dashboards'))
                         <!-- Dashboards -->
                         <a href="/dashboards"
                            class="flex flex-col items-center justify-center p-3 rounded-lg border transition-colors {{ request()->is('dashboards*') ? 'bg-pulse-orange-50 border-pulse-orange-200 text-pulse-orange-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300' }}">
                             <x-icon name="chart-pie" class="w-5 h-5 mb-1 {{ request()->is('dashboards*') ? 'text-pulse-orange-500' : '' }}" />
                             <span class="text-xs font-medium">Dashboards</span>
                         </a>
+                        @endif
                     </div>
                 </div>
                 <!-- Collapsed: Vertical List -->
                 <div x-show="sidebarCollapsed" class="px-2 space-y-1">
+                    @if(RolePermissions::currentUserCanAccess('home'))
                     <!-- Home -->
                     <a href="/dashboard" @mouseenter="hoveredItem = 'home'" @mouseleave="hoveredItem = null"
                        class="relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboard') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="home" class="w-5 h-5 flex-shrink-0 {{ request()->is('dashboard') ? 'text-pulse-orange-500' : '' }}" />
                         <div x-show="hoveredItem === 'home'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Home</div>
                     </a>
+                    @endif
+                    @if(RolePermissions::currentUserCanAccess('contacts'))
                     <!-- Contacts -->
                     <a href="/contacts" @mouseenter="hoveredItem = 'contacts'" @mouseleave="hoveredItem = null"
                        class="relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('contacts*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="users" class="w-5 h-5 flex-shrink-0 {{ request()->is('contacts*') ? 'text-pulse-orange-500' : '' }}" />
                         <div x-show="hoveredItem === 'contacts'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Contacts</div>
                     </a>
+                    @endif
+                    @if(RolePermissions::currentUserCanAccess('surveys'))
                     <!-- Surveys -->
                     <a href="/surveys" @mouseenter="hoveredItem = 'surveys'" @mouseleave="hoveredItem = null"
                        class="relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('surveys*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="clipboard-list" class="w-5 h-5 flex-shrink-0 {{ request()->is('surveys*') ? 'text-pulse-orange-500' : '' }}" />
                         <div x-show="hoveredItem === 'surveys'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Surveys</div>
                     </a>
+                    @endif
+                    @if(RolePermissions::currentUserCanAccess('dashboards'))
                     <!-- Dashboards -->
                     <a href="/dashboards" @mouseenter="hoveredItem = 'dashboards'" @mouseleave="hoveredItem = null"
                        class="relative flex items-center justify-center px-3 py-2 rounded-lg transition-colors {{ request()->is('dashboards*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="chart-pie" class="w-5 h-5 flex-shrink-0 {{ request()->is('dashboards*') ? 'text-pulse-orange-500' : '' }}" />
                         <div x-show="hoveredItem === 'dashboards'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Dashboards</div>
                     </a>
+                    @endif
                 </div>
             </div>
 
@@ -180,6 +197,7 @@
                 <p x-show="!sidebarCollapsed" class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-content-transition">Workspace</p>
                 <div x-show="sidebarCollapsed" class="mb-2 border-t border-gray-200"></div>
 
+                @if(RolePermissions::currentUserCanAccess('strategy'))
                 <!-- Strategy -->
                 <div @mouseenter="hoveredItem = 'strategy'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/strategies"
@@ -190,7 +208,9 @@
                     </a>
                     <div x-show="sidebarCollapsed && hoveredItem === 'strategy'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Strategy</div>
                 </div>
+                @endif
 
+                @if(RolePermissions::currentUserCanAccess('reports'))
                 <!-- Reports -->
                 <div @mouseenter="hoveredItem = 'reports'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/reports"
@@ -201,7 +221,9 @@
                     </a>
                     <div x-show="sidebarCollapsed && hoveredItem === 'reports'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Reports</div>
                 </div>
+                @endif
 
+                @if(RolePermissions::currentUserCanAccess('collect'))
                 <!-- Collect -->
                 <div @mouseenter="hoveredItem = 'collect'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/collect"
@@ -212,7 +234,9 @@
                     </a>
                     <div x-show="sidebarCollapsed && hoveredItem === 'collect'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Collect</div>
                 </div>
+                @endif
 
+                @if(RolePermissions::currentUserCanAccess('distribute'))
                 <!-- Distribute -->
                 <div @mouseenter="hoveredItem = 'distribute'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/distribute"
@@ -223,7 +247,9 @@
                     </a>
                     <div x-show="sidebarCollapsed && hoveredItem === 'distribute'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute</div>
                 </div>
+                @endif
 
+                @if(RolePermissions::currentUserCanAccess('resources'))
                 <!-- Resource -->
                 <div @mouseenter="hoveredItem = 'resource'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/resources"
@@ -234,7 +260,9 @@
                     </a>
                     <div x-show="sidebarCollapsed && hoveredItem === 'resource'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Resource</div>
                 </div>
+                @endif
 
+                @if(RolePermissions::currentUserCanAccess('alerts'))
                 <!-- Alerts -->
                 <div @mouseenter="hoveredItem = 'alerts'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/alerts"
@@ -246,7 +274,9 @@
                     </a>
                     <div x-show="sidebarCollapsed && hoveredItem === 'alerts'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Alerts (4)</div>
                 </div>
+                @endif
 
+                @if(RolePermissions::currentUserCanAccess('marketplace'))
                 <!-- Marketplace -->
                 <div @mouseenter="hoveredItem = 'marketplace'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/marketplace"
@@ -257,13 +287,27 @@
                     </a>
                     <div x-show="sidebarCollapsed && hoveredItem === 'marketplace'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace</div>
                 </div>
+                @endif
+
+                @if(RolePermissions::currentUserCanAccess('messages'))
+                <!-- Messages -->
+                <div @mouseenter="hoveredItem = 'messages'" @mouseleave="hoveredItem = null" class="relative">
+                    <a href="/messages"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('messages*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <x-icon name="chat-bubble-left-right" class="w-5 h-5 flex-shrink-0" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Messages</span>
+                    </a>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'messages'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Messages</div>
+                </div>
+                @endif
 
                 @php
                     $user = auth()->user();
                     $childOrgs = $user->getManagedChildOrganizations();
                 @endphp
 
-                @if($user->isAdmin() && $childOrgs->count() > 0)
+                @if(RolePermissions::currentUserCanAccess('sub_organizations') && $childOrgs->count() > 0)
                 <!-- Sub-Organizations (for Consultants/Superintendents) -->
                 <div x-data="{ subOrgsOpen: false }" class="mt-4 pt-4 border-t border-gray-100" x-show="!sidebarCollapsed">
                     <!-- Accordion Header -->
@@ -327,6 +371,7 @@
                 @endif
             </nav>
 
+            @if(RolePermissions::currentUserCanAccess('settings'))
             <!-- Settings -->
             <div class="p-3 border-t border-gray-200" :class="sidebarCollapsed ? 'px-2' : ''">
                 <div @mouseenter="hoveredItem = 'settings'" @mouseleave="hoveredItem = null" class="relative">
@@ -339,6 +384,7 @@
                     <div x-show="sidebarCollapsed && hoveredItem === 'settings'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Settings</div>
                 </div>
             </div>
+            @endif
         </aside>
 
         <!-- Main Content -->
@@ -370,26 +416,36 @@
                                 class="absolute right-0 z-50 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200"
                             >
                                 <div class="py-1">
+                                    @if(RolePermissions::currentUserCanAccess('create_survey'))
                                     <a href="/surveys/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         <x-icon name="clipboard-list" class="w-4 h-4 text-gray-400" />
                                         Survey
                                     </a>
+                                    @endif
+                                    @if(RolePermissions::currentUserCanAccess('create_collection'))
                                     <a href="/collect/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         <x-icon name="collection" class="w-4 h-4 text-gray-400" />
                                         Collection
                                     </a>
+                                    @endif
+                                    @if(RolePermissions::currentUserCanAccess('create_report'))
                                     <a href="/reports/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         <x-icon name="chart-bar" class="w-4 h-4 text-gray-400" />
                                         Report
                                     </a>
+                                    @endif
+                                    @if(RolePermissions::currentUserCanAccess('create_strategy'))
                                     <a href="/strategies/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         <x-icon name="flag" class="w-4 h-4 text-gray-400" />
                                         Strategy
                                     </a>
+                                    @endif
+                                    @if(RolePermissions::currentUserCanAccess('create_alert'))
                                     <a href="/alerts/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         <x-icon name="bell" class="w-4 h-4 text-gray-400" />
                                         Alert
                                     </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
