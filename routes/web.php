@@ -332,10 +332,64 @@ Route::middleware('auth')->group(function () {
     Route::get('/distribute/{distribution}', App\Livewire\Distribute\DistributionDetail::class)->name('distribute.show');
     Route::get('/distribute/{distribution}/edit', App\Livewire\Distribute\DistributionCreator::class)->name('distribute.edit');
 
-    // Marketplace (coming soon)
-    Route::get('/marketplace', function () {
-        return view('marketplace.index');
-    })->name('marketplace.index');
+    // Marketplace
+    Route::prefix('marketplace')->group(function () {
+        // Hub
+        Route::get('/', App\Livewire\Marketplace\MarketplaceHub::class)->name('marketplace.index');
+
+        // Category pages (to be implemented in Phase 2)
+        Route::get('/surveys', App\Livewire\Marketplace\MarketplaceHub::class)->name('marketplace.surveys');
+        Route::get('/strategies', App\Livewire\Marketplace\MarketplaceHub::class)->name('marketplace.strategies');
+        Route::get('/content', App\Livewire\Marketplace\MarketplaceHub::class)->name('marketplace.content');
+        Route::get('/providers', App\Livewire\Marketplace\MarketplaceHub::class)->name('marketplace.providers');
+
+        // Item detail (to be implemented in Phase 3)
+        Route::get('/item/{uuid}', function ($uuid) {
+            return redirect()->route('marketplace.index');
+        })->name('marketplace.item');
+
+        // Seller public profile (to be implemented in Phase 3)
+        Route::get('/sellers/{slug}', function ($slug) {
+            return redirect()->route('marketplace.index');
+        })->name('marketplace.sellers.show');
+
+        // Buyer's purchases (to be implemented in Phase 5)
+        Route::get('/my-purchases', function () {
+            return redirect()->route('marketplace.index');
+        })->name('marketplace.purchases');
+
+        // Seller routes
+        Route::prefix('seller')->group(function () {
+            Route::get('/create', App\Livewire\Marketplace\SellerProfileCreate::class)->name('marketplace.seller.create');
+            Route::get('/dashboard', App\Livewire\Marketplace\SellerDashboard::class)->name('marketplace.seller.dashboard');
+
+            // Seller items management (to be implemented in Phase 4)
+            Route::get('/items', function () {
+                return redirect()->route('marketplace.seller.dashboard');
+            })->name('marketplace.seller.items');
+            Route::get('/items/create', function () {
+                return redirect()->route('marketplace.seller.dashboard');
+            })->name('marketplace.seller.items.create');
+            Route::get('/items/{item}/edit', function ($item) {
+                return redirect()->route('marketplace.seller.dashboard');
+            })->name('marketplace.seller.items.edit');
+
+            // Seller analytics (to be implemented in Phase 7)
+            Route::get('/analytics', function () {
+                return redirect()->route('marketplace.seller.dashboard');
+            })->name('marketplace.seller.analytics');
+
+            // Seller reviews (to be implemented in Phase 6)
+            Route::get('/reviews', function () {
+                return redirect()->route('marketplace.seller.dashboard');
+            })->name('marketplace.seller.reviews');
+
+            // Seller payouts (to be implemented in Phase 5)
+            Route::get('/payouts', function () {
+                return redirect()->route('marketplace.seller.dashboard');
+            })->name('marketplace.seller.payouts');
+        });
+    });
 
     // Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
