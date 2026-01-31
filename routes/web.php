@@ -123,6 +123,18 @@ Route::get('/seed-marketplace-temp', function () {
     $output[] = "";
 
     try {
+        // First, ensure listable columns are nullable
+        $output[] = "Checking database schema...";
+        try {
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE marketplace_items ALTER COLUMN listable_type DROP NOT NULL');
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE marketplace_items ALTER COLUMN listable_id DROP NOT NULL');
+            $output[] = "- Made listable columns nullable";
+        } catch (\Exception $e) {
+            // Columns might already be nullable, that's fine
+            $output[] = "- Schema already updated";
+        }
+        $output[] = "";
+
         $school = \App\Models\Organization::where('org_type', 'school')->first();
         if (!$school) {
             $school = \App\Models\Organization::first();
