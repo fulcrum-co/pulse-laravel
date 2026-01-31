@@ -34,12 +34,13 @@ class ResourceHub extends Component
     public function getCountsProperty(): array
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
         return [
-            'content' => Resource::forOrganization($user->org_id)->active()->count(),
-            'providers' => Provider::where('org_id', $user->org_id)->active()->count(),
-            'programs' => Program::where('org_id', $user->org_id)->active()->count(),
-            'courses' => MiniCourse::where('org_id', $user->org_id)->where('status', MiniCourse::STATUS_ACTIVE)->count(),
+            'content' => Resource::whereIn('org_id', $accessibleOrgIds)->active()->count(),
+            'providers' => Provider::whereIn('org_id', $accessibleOrgIds)->active()->count(),
+            'programs' => Program::whereIn('org_id', $accessibleOrgIds)->active()->count(),
+            'courses' => MiniCourse::whereIn('org_id', $accessibleOrgIds)->where('status', MiniCourse::STATUS_ACTIVE)->count(),
         ];
     }
 
@@ -49,9 +50,10 @@ class ResourceHub extends Component
     public function getRecentItemsProperty(): \Illuminate\Support\Collection
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
         // Get 2 recent items from each category
-        $content = Resource::forOrganization($user->org_id)
+        $content = Resource::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->latest('created_at')
             ->limit(2)
@@ -68,7 +70,7 @@ class ResourceHub extends Component
                 'created_at' => $r->created_at,
             ]);
 
-        $providers = Provider::where('org_id', $user->org_id)
+        $providers = Provider::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->latest('created_at')
             ->limit(2)
@@ -85,7 +87,7 @@ class ResourceHub extends Component
                 'created_at' => $p->created_at,
             ]);
 
-        $programs = Program::where('org_id', $user->org_id)
+        $programs = Program::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->latest('created_at')
             ->limit(2)
@@ -102,7 +104,7 @@ class ResourceHub extends Component
                 'created_at' => $p->created_at,
             ]);
 
-        $courses = MiniCourse::where('org_id', $user->org_id)
+        $courses = MiniCourse::whereIn('org_id', $accessibleOrgIds)
             ->where('status', MiniCourse::STATUS_ACTIVE)
             ->withCount('steps')
             ->latest('created_at')
@@ -136,10 +138,11 @@ class ResourceHub extends Component
         }
 
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
         $searchTerm = '%' . $this->search . '%';
 
         // Search content resources
-        $content = Resource::forOrganization($user->org_id)
+        $content = Resource::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->where(function ($q) use ($searchTerm) {
                 $q->where('title', 'ilike', $searchTerm)
@@ -158,7 +161,7 @@ class ResourceHub extends Component
             ]);
 
         // Search providers
-        $providers = Provider::where('org_id', $user->org_id)
+        $providers = Provider::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'ilike', $searchTerm)
@@ -178,7 +181,7 @@ class ResourceHub extends Component
             ]);
 
         // Search programs
-        $programs = Program::where('org_id', $user->org_id)
+        $programs = Program::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'ilike', $searchTerm)
@@ -197,7 +200,7 @@ class ResourceHub extends Component
             ]);
 
         // Search courses
-        $courses = MiniCourse::where('org_id', $user->org_id)
+        $courses = MiniCourse::whereIn('org_id', $accessibleOrgIds)
             ->where('status', MiniCourse::STATUS_ACTIVE)
             ->withCount('steps')
             ->where(function ($q) use ($searchTerm) {
@@ -220,7 +223,7 @@ class ResourceHub extends Component
             'content' => [
                 'items' => $content,
                 'count' => $content->count(),
-                'total' => Resource::forOrganization($user->org_id)
+                'total' => Resource::whereIn('org_id', $accessibleOrgIds)
                     ->active()
                     ->where(function ($q) use ($searchTerm) {
                         $q->where('title', 'ilike', $searchTerm)
@@ -231,7 +234,7 @@ class ResourceHub extends Component
             'providers' => [
                 'items' => $providers,
                 'count' => $providers->count(),
-                'total' => Provider::where('org_id', $user->org_id)
+                'total' => Provider::whereIn('org_id', $accessibleOrgIds)
                     ->active()
                     ->where(function ($q) use ($searchTerm) {
                         $q->where('name', 'ilike', $searchTerm)
@@ -242,7 +245,7 @@ class ResourceHub extends Component
             'programs' => [
                 'items' => $programs,
                 'count' => $programs->count(),
-                'total' => Program::where('org_id', $user->org_id)
+                'total' => Program::whereIn('org_id', $accessibleOrgIds)
                     ->active()
                     ->where(function ($q) use ($searchTerm) {
                         $q->where('name', 'ilike', $searchTerm)
@@ -253,7 +256,7 @@ class ResourceHub extends Component
             'courses' => [
                 'items' => $courses,
                 'count' => $courses->count(),
-                'total' => MiniCourse::where('org_id', $user->org_id)
+                'total' => MiniCourse::whereIn('org_id', $accessibleOrgIds)
                     ->where('status', MiniCourse::STATUS_ACTIVE)
                     ->where(function ($q) use ($searchTerm) {
                         $q->where('title', 'ilike', $searchTerm)

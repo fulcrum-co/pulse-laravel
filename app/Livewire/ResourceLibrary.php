@@ -235,8 +235,9 @@ class ResourceLibrary extends Component
     public function getContentResourcesProperty()
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        $query = Resource::forOrganization($user->org_id)
+        $query = Resource::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->orderBy('title');
 
@@ -261,8 +262,9 @@ class ResourceLibrary extends Component
     public function getProvidersProperty()
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        $query = Provider::where('org_id', $user->org_id)
+        $query = Provider::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->orderBy('name');
 
@@ -284,8 +286,9 @@ class ResourceLibrary extends Component
     public function getProgramsProperty()
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        $query = Program::where('org_id', $user->org_id)
+        $query = Program::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->orderBy('name');
 
@@ -306,8 +309,9 @@ class ResourceLibrary extends Component
     public function getMiniCoursesProperty()
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        $query = MiniCourse::where('org_id', $user->org_id)
+        $query = MiniCourse::whereIn('org_id', $accessibleOrgIds)
             ->where('status', MiniCourse::STATUS_ACTIVE)
             ->withCount('steps')
             ->withCount('enrollments')
@@ -332,10 +336,11 @@ class ResourceLibrary extends Component
         // For "All" tab, we'll collect items from each type
         // This is a simplified approach - could be optimized with a union query
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
         $items = collect();
 
         // Get content resources
-        $resources = Resource::forOrganization($user->org_id)
+        $resources = Resource::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->when($this->search, function ($q) {
                 $q->where('title', 'like', '%' . $this->search . '%')
@@ -355,7 +360,7 @@ class ResourceLibrary extends Component
             ]);
 
         // Get providers
-        $providers = Provider::where('org_id', $user->org_id)
+        $providers = Provider::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->when($this->search, function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%');
@@ -374,7 +379,7 @@ class ResourceLibrary extends Component
             ]);
 
         // Get programs
-        $programs = Program::where('org_id', $user->org_id)
+        $programs = Program::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->when($this->search, function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%');
@@ -393,7 +398,7 @@ class ResourceLibrary extends Component
             ]);
 
         // Get mini-courses
-        $courses = MiniCourse::where('org_id', $user->org_id)
+        $courses = MiniCourse::whereIn('org_id', $accessibleOrgIds)
             ->where('status', MiniCourse::STATUS_ACTIVE)
             ->withCount('steps')
             ->when($this->search, function ($q) {
@@ -472,8 +477,9 @@ class ResourceLibrary extends Component
     public function getCategoriesProperty(): array
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        return Resource::forOrganization($user->org_id)
+        return Resource::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->distinct()
             ->pluck('category')
@@ -486,12 +492,13 @@ class ResourceLibrary extends Component
     public function getCountsProperty(): array
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
         return [
-            'resources' => Resource::forOrganization($user->org_id)->active()->count(),
-            'providers' => Provider::where('org_id', $user->org_id)->active()->count(),
-            'programs' => Program::where('org_id', $user->org_id)->active()->count(),
-            'courses' => MiniCourse::where('org_id', $user->org_id)->where('status', MiniCourse::STATUS_ACTIVE)->count(),
+            'resources' => Resource::whereIn('org_id', $accessibleOrgIds)->active()->count(),
+            'providers' => Provider::whereIn('org_id', $accessibleOrgIds)->active()->count(),
+            'programs' => Program::whereIn('org_id', $accessibleOrgIds)->active()->count(),
+            'courses' => MiniCourse::whereIn('org_id', $accessibleOrgIds)->where('status', MiniCourse::STATUS_ACTIVE)->count(),
         ];
     }
 
