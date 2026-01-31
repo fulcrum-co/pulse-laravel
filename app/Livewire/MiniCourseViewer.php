@@ -129,10 +129,28 @@ class MiniCourseViewer extends Component
             ->toArray();
     }
 
+    /**
+     * Check if the current user can push content to downstream organizations.
+     */
+    public function getCanPushProperty(): bool
+    {
+        $user = auth()->user();
+        return $user->isAdmin() && $user->organization?->getDownstreamOrganizations()->count() > 0;
+    }
+
+    /**
+     * Open the push modal for this course.
+     */
+    public function openPushModal(): void
+    {
+        $this->dispatch('openPushResource', $this->course->id);
+    }
+
     public function render()
     {
         return view('livewire.mini-course-viewer', [
             'stepProgress' => $this->stepProgress,
+            'canPush' => $this->canPush,
         ])->layout('layouts.dashboard', ['title' => 'Course Viewer']);
     }
 }

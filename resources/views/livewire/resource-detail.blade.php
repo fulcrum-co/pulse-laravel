@@ -37,6 +37,16 @@
                     Open
                 </a>
             @endif
+            @if($canPush)
+                <button
+                    wire:click="openPushModal"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                    title="Push to Schools"
+                >
+                    <x-icon name="arrow-up-on-square" class="w-4 h-4 mr-2" />
+                    Push
+                </button>
+            @endif
             <button
                 wire:click="openAssignModal"
                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
@@ -381,4 +391,7 @@
         </div>
     </div>
     @endif
+
+    <!-- Push Content Modal -->
+    @livewire('push-content-modal')
 </div>

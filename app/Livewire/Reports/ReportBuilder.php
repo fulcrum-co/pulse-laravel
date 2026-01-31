@@ -824,6 +824,26 @@ class ReportBuilder extends Component
         $this->dispatch('chartsUpdated');
     }
 
+    /**
+     * Open push modal for this report.
+     */
+    public function openPushModal(): void
+    {
+        if ($this->reportId) {
+            $this->dispatch('openPushReport', (int) $this->reportId);
+        }
+    }
+
+    /**
+     * Check if the current user can push content.
+     */
+    #[Computed]
+    public function canPush(): bool
+    {
+        $user = auth()->user();
+        return $user->isAdmin() && $user->organization?->getDownstreamOrganizations()->count() > 0;
+    }
+
     public function render()
     {
         return view('livewire.reports.report-builder', [
@@ -831,6 +851,7 @@ class ReportBuilder extends Component
             'canUndo' => $this->canUndo(),
             'canRedo' => $this->canRedo(),
             'chartData' => $this->chartData,
+            'canPush' => $this->canPush,
         ]);
     }
 }

@@ -44,6 +44,89 @@ class ResourceHub extends Component
     }
 
     /**
+     * Get recently added items across all categories.
+     */
+    public function getRecentItemsProperty(): \Illuminate\Support\Collection
+    {
+        $user = auth()->user();
+
+        // Get 2 recent items from each category
+        $content = Resource::forOrganization($user->org_id)
+            ->active()
+            ->latest('created_at')
+            ->limit(2)
+            ->get()
+            ->map(fn ($r) => [
+                'id' => $r->id,
+                'type' => 'content',
+                'title' => $r->title,
+                'description' => $r->description,
+                'subtitle' => ucfirst($r->resource_type),
+                'icon' => $this->getResourceIcon($r->resource_type),
+                'icon_bg' => 'blue',
+                'url' => route('resources.show', $r),
+                'created_at' => $r->created_at,
+            ]);
+
+        $providers = Provider::where('org_id', $user->org_id)
+            ->active()
+            ->latest('created_at')
+            ->limit(2)
+            ->get()
+            ->map(fn ($p) => [
+                'id' => $p->id,
+                'type' => 'provider',
+                'title' => $p->name,
+                'description' => $p->bio,
+                'subtitle' => ucfirst($p->provider_type),
+                'icon' => 'user',
+                'icon_bg' => 'purple',
+                'url' => route('resources.providers.show', $p),
+                'created_at' => $p->created_at,
+            ]);
+
+        $programs = Program::where('org_id', $user->org_id)
+            ->active()
+            ->latest('created_at')
+            ->limit(2)
+            ->get()
+            ->map(fn ($p) => [
+                'id' => $p->id,
+                'type' => 'program',
+                'title' => $p->name,
+                'description' => $p->description,
+                'subtitle' => ucfirst(str_replace('_', ' ', $p->program_type)),
+                'icon' => 'building-office',
+                'icon_bg' => 'green',
+                'url' => route('resources.programs.show', $p),
+                'created_at' => $p->created_at,
+            ]);
+
+        $courses = MiniCourse::where('org_id', $user->org_id)
+            ->where('status', MiniCourse::STATUS_ACTIVE)
+            ->withCount('steps')
+            ->latest('created_at')
+            ->limit(2)
+            ->get()
+            ->map(fn ($c) => [
+                'id' => $c->id,
+                'type' => 'course',
+                'title' => $c->title,
+                'description' => $c->description,
+                'subtitle' => $c->steps_count . ' steps',
+                'icon' => 'academic-cap',
+                'icon_bg' => 'orange',
+                'url' => route('resources.courses.show', $c),
+                'created_at' => $c->created_at,
+            ]);
+
+        return $content->concat($providers)->concat($programs)->concat($courses)
+            ->sortByDesc('created_at')
+            ->take(8)
+            ->values();
+    }
+
+    /**
      * Get search results grouped by type.
      */
     public function getSearchResultsProperty(): array
@@ -199,6 +282,7 @@ class ResourceHub extends Component
         return view('livewire.resource-hub', [
             'counts' => $this->counts,
             'searchResults' => $this->searchResults,
+            'recentItems' => $this->recentItems,
         ])->layout('layouts.dashboard', ['title' => 'Resources']);
     }
 }

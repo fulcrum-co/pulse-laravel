@@ -70,22 +70,54 @@ class ReportList extends Component
         }
     }
 
+    /**
+     * Open push modal for a report.
+     */
+    public function openPushModal(int $reportId): void
+    {
+        $this->dispatch('openPushReport', $reportId);
+    }
+
+    /**
+     * Check if the current user can push content.
+     */
+    public function getCanPushProperty(): bool
+    {
+        $user = auth()->user();
+        return $user->isAdmin() && $user->organization?->getDownstreamOrganizations()->count() > 0;
+    }
+
     public function render()
     {
         $user = auth()->user();
+        $isAdmin = $user->isAdmin();
 
-        $reports = CustomReport::where('org_id', $user->org_id)
+        // Build base query
+        $query = CustomReport::query();
+
+        // If user is admin, they can see reports from all accessible orgs
+        if ($isAdmin && $user->organization) {
+            $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
+            $query->whereIn('org_id', $accessibleOrgIds);
+        } else {
+            $query->where('org_id', $user->effective_org_id);
+        }
+
+        $reports = $query
             ->when($this->search, function ($query) {
-                $query->where('report_name', 'like', '%' . $this->search . '%');
+                $query->where('report_name', 'ilike', '%' . $this->search . '%');
             })
             ->when($this->statusFilter, function ($query) {
                 $query->where('status', $this->statusFilter);
             })
+            ->with('organization')
             ->orderBy('updated_at', 'desc')
             ->paginate(12);
 
         return view('livewire.report-list', [
             'reports' => $reports,
+            'isAdmin' => $isAdmin,
+            'canPush' => $this->canPush,
         ]);
     }
 }

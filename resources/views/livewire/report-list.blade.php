@@ -133,6 +133,14 @@
                             <button wire:click="duplicate({{ $report->id }})" class="flex-1 text-center py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
                                 Duplicate
                             </button>
+                            @if($canPush)
+                            <div class="relative group">
+                                <button wire:click="openPushModal({{ $report->id }})" class="p-2 text-gray-400 hover:text-pulse-orange-500 hover:bg-pulse-orange-50 rounded-lg transition-colors">
+                                    <x-icon name="arrow-up-on-square" class="w-4 h-4" />
+                                </button>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none">Push to Schools</span>
+                            </div>
+                            @endif
                             <button
                                 wire:click="delete({{ $report->id }})"
                                 wire:confirm="Are you sure you want to delete this report?"
@@ -191,6 +199,14 @@
                             <button wire:click="duplicate({{ $report->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                 <x-icon name="document-duplicate" class="w-4 h-4" />
                             </button>
+                            @if($canPush)
+                            <div class="relative group">
+                                <button wire:click="openPushModal({{ $report->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-500 rounded">
+                                    <x-icon name="arrow-up-on-square" class="w-4 h-4" />
+                                </button>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none">Push to Schools</span>
+                            </div>
+                            @endif
                             @if($report->isPublished())
                                 <a href="{{ $report->getPublicUrl() }}" target="_blank" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                     <x-icon name="arrow-top-right-on-square" class="w-4 h-4" />
@@ -273,6 +289,14 @@
                                     <button wire:click="duplicate({{ $report->id }})" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                                         <x-icon name="document-duplicate" class="w-4 h-4" />
                                     </button>
+                                    @if($canPush)
+                                    <div class="relative group">
+                                        <button wire:click="openPushModal({{ $report->id }})" class="p-1 text-gray-400 hover:text-pulse-orange-500 rounded">
+                                            <x-icon name="arrow-up-on-square" class="w-3.5 h-3.5" />
+                                        </button>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-10">Push to Schools</span>
+                                    </div>
+                                    @endif
                                     @if($report->isPublished())
                                         <a href="{{ $report->getPublicUrl() }}" target="_blank" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                                             <x-icon name="arrow-top-right-on-square" class="w-4 h-4" />
@@ -303,4 +327,7 @@
             {{ $reports->links() }}
         </div>
     @endif
+
+    <!-- Push Content Modal -->
+    @livewire('push-content-modal')
 </div>

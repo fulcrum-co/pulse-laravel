@@ -233,11 +233,29 @@ class ResourceDetail extends Component
         return null;
     }
 
+    /**
+     * Check if the current user can push content to downstream organizations.
+     */
+    public function getCanPushProperty(): bool
+    {
+        $user = auth()->user();
+        return $user->isAdmin() && $user->organization?->getDownstreamOrganizations()->count() > 0;
+    }
+
+    /**
+     * Open the push modal for this resource.
+     */
+    public function openPushModal(): void
+    {
+        $this->dispatch('openPushResource', $this->resource->id);
+    }
+
     public function render()
     {
         return view('livewire.resource-detail', [
             'relatedResources' => $this->relatedResources,
             'assignmentCount' => $this->assignmentCount,
+            'canPush' => $this->canPush,
         ])->layout('components.layouts.dashboard', [
             'title' => $this->resource->title,
         ]);

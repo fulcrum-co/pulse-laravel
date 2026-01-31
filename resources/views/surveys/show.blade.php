@@ -259,6 +259,20 @@
             <!-- Actions Card -->
             <x-card class="bg-gray-50">
                 <div class="space-y-2">
+                    @php
+                        $user = auth()->user();
+                        $canPush = $user->isAdmin() && $user->organization?->getDownstreamOrganizations()->count() > 0;
+                    @endphp
+                    @if($canPush)
+                        <button
+                            type="button"
+                            onclick="Livewire.dispatch('openPushSurvey', [{{ $survey->id }}])"
+                            class="w-full px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 flex items-center justify-center gap-2"
+                        >
+                            <x-icon name="arrow-up-on-square" class="w-4 h-4" />
+                            Push to Schools
+                        </button>
+                    @endif
                     <form action="{{ route('surveys.duplicate', $survey) }}" method="POST">
                         @csrf
                         <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2">
@@ -333,4 +347,7 @@
             </div>
         </div>
     </div>
+
+    <!-- Push Content Modal -->
+    @livewire('push-content-modal')
 </x-layouts.dashboard>
