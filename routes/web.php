@@ -115,6 +115,22 @@ Route::get('/reset-dashboard-temp', function () {
     return "<pre>" . implode("\n", $output) . "</pre>";
 })->middleware('auth');
 
+// Temporary route to list users - visit once then remove
+Route::get('/list-users-temp', function () {
+    $users = \App\Models\User::with('organization')
+        ->whereIn('primary_role', ['admin', 'consultant', 'teacher'])
+        ->get(['id', 'email', 'first_name', 'last_name', 'primary_role', 'org_id']);
+
+    $output = ["Available Users (password for all: 'password')", ""];
+
+    foreach ($users as $user) {
+        $org = $user->organization ? $user->organization->name : 'No org';
+        $output[] = sprintf("%-35s | %-12s | %s", $user->email, $user->primary_role, $org);
+    }
+
+    return "<pre>" . implode("\n", $output) . "</pre>";
+});
+
 // Temporary route to seed marketplace - visit once then remove
 Route::get('/seed-marketplace-temp', function () {
     set_time_limit(300);
