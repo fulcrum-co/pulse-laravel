@@ -303,15 +303,15 @@
                         @if($item->seller->avatar_url)
                             <img src="{{ $item->seller->avatar_url }}" alt="{{ $item->seller->display_name }}" class="w-14 h-14 rounded-full object-cover">
                         @else
-                            <div class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center">
-                                <span class="text-lg font-medium text-gray-500">{{ substr($item->seller->display_name, 0, 1) }}</span>
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-pulse-orange-400 to-pulse-orange-600 flex items-center justify-center">
+                                <span class="text-lg font-medium text-white">{{ substr($item->seller->display_name, 0, 2) }}</span>
                             </div>
                         @endif
-                        <div>
+                        <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
-                                <h3 class="font-semibold text-gray-900">{{ $item->seller->display_name }}</h3>
+                                <h3 class="font-semibold text-gray-900 truncate">{{ $item->seller->display_name }}</h3>
                                 @if($item->seller->is_verified)
-                                    <x-icon name="check-badge" class="w-5 h-5 text-blue-500" />
+                                    <x-icon name="check-badge" class="w-5 h-5 text-blue-500 flex-shrink-0" />
                                 @endif
                             </div>
                             @if($item->seller->ratings_count > 0)
@@ -330,9 +330,18 @@
                         <span>{{ $item->seller->total_items }} {{ Str::plural('item', $item->seller->total_items) }}</span>
                         <span>{{ number_format($item->seller->total_sales) }} sales</span>
                     </div>
-                    <a href="{{ route('marketplace.sellers.show', $item->seller->slug) }}" class="block w-full py-2 px-4 bg-gray-100 text-gray-700 text-center text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
-                        View Profile
-                    </a>
+                    <div class="space-y-2">
+                        <!-- Primary CTA: Message Seller -->
+                        <a href="{{ route('messages.index') }}" class="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            Message Seller
+                        </a>
+                        <a href="{{ route('marketplace.sellers.show', $item->seller->slug) }}" class="block w-full py-2 px-4 bg-gray-100 text-gray-700 text-center text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                            View Profile
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
