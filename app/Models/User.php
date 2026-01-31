@@ -189,18 +189,15 @@ class User extends Authenticatable
 
     /**
      * Get the effective role, respecting demo mode override.
-     * Only admins can use demo mode.
+     * Any authenticated user can use demo mode for testing different views.
      */
     public function getEffectiveRoleAttribute(): string
     {
-        // Check if we're in demo mode and user is actually an admin
+        // Check if we're in demo mode
         $demoRole = session('demo_role_override');
 
-        if ($demoRole && $this->primary_role === 'admin') {
-            // Return the demo role if it's not 'actual'
-            if ($demoRole !== 'actual') {
-                return $demoRole;
-            }
+        if ($demoRole && $demoRole !== 'actual') {
+            return $demoRole;
         }
 
         return $this->primary_role;
@@ -212,7 +209,7 @@ class User extends Authenticatable
     public function isInDemoMode(): bool
     {
         $demoRole = session('demo_role_override');
-        return $this->primary_role === 'admin' && $demoRole && $demoRole !== 'actual';
+        return $demoRole && $demoRole !== 'actual';
     }
 
     /**

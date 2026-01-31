@@ -290,15 +290,31 @@
                 @endif
 
                 @if(RolePermissions::currentUserCanAccess('messages'))
+                @php
+                    // Get unread message count for current user
+                    $unreadMessageCount = \App\Models\ProviderConversation::where(function($q) use ($user) {
+                        $q->where('initiator_type', get_class($user))
+                          ->where('initiator_id', $user->id)
+                          ->where('unread_count_initiator', '>', 0);
+                    })->count();
+                @endphp
                 <!-- Messages -->
                 <div @mouseenter="hoveredItem = 'messages'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/messages"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
                        class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('messages*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                        <x-icon name="chat-bubble-left-right" class="w-5 h-5 flex-shrink-0" />
+                        <div class="relative flex-shrink-0">
+                            <x-icon name="chat-bubble-oval-left-ellipsis" class="w-5 h-5" />
+                            @if($unreadMessageCount > 0)
+                            <span class="absolute -top-1 -right-1 w-2 h-2 bg-pulse-orange-500 rounded-full"></span>
+                            @endif
+                        </div>
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Messages</span>
+                        @if($unreadMessageCount > 0)
+                        <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full">{{ $unreadMessageCount }}</span>
+                        @endif
                     </a>
-                    <div x-show="sidebarCollapsed && hoveredItem === 'messages'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Messages</div>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'messages'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Messages{{ $unreadMessageCount > 0 ? ' (' . $unreadMessageCount . ')' : '' }}</div>
                 </div>
                 @endif
 
