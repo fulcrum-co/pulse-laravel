@@ -337,16 +337,14 @@ Route::middleware('auth')->group(function () {
         // Hub
         Route::get('/', App\Livewire\Marketplace\MarketplaceHub::class)->name('marketplace.index');
 
-        // Category pages (to be implemented in Phase 2)
-        Route::get('/surveys', App\Livewire\Marketplace\MarketplaceHub::class)->name('marketplace.surveys');
-        Route::get('/strategies', App\Livewire\Marketplace\MarketplaceHub::class)->name('marketplace.strategies');
-        Route::get('/content', App\Livewire\Marketplace\MarketplaceHub::class)->name('marketplace.content');
-        Route::get('/providers', App\Livewire\Marketplace\MarketplaceHub::class)->name('marketplace.providers');
+        // Category pages
+        Route::get('/surveys', App\Livewire\Marketplace\MarketplaceSurveys::class)->name('marketplace.surveys');
+        Route::get('/strategies', App\Livewire\Marketplace\MarketplaceStrategies::class)->name('marketplace.strategies');
+        Route::get('/content', App\Livewire\Marketplace\MarketplaceContent::class)->name('marketplace.content');
+        Route::get('/providers', App\Livewire\Marketplace\MarketplaceProviders::class)->name('marketplace.providers');
 
-        // Item detail (to be implemented in Phase 3)
-        Route::get('/item/{uuid}', function ($uuid) {
-            return redirect()->route('marketplace.index');
-        })->name('marketplace.item');
+        // Item detail
+        Route::get('/item/{uuid}', App\Livewire\Marketplace\MarketplaceItemDetail::class)->name('marketplace.item');
 
         // Seller public profile (to be implemented in Phase 3)
         Route::get('/sellers/{slug}', function ($slug) {
