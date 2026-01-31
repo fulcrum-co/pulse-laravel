@@ -6,31 +6,47 @@ use App\Models\Provider;
 use App\Models\ProviderConversation;
 use App\Models\Student;
 use App\Models\User;
-use GetStream\StreamChat\Client;
 use Illuminate\Support\Facades\Log;
 
 class StreamChatService
 {
-    protected ?Client $client = null;
+    protected mixed $client = null;
     protected ?string $apiKey = null;
     protected ?string $apiSecret = null;
+    protected bool $sdkAvailable = false;
 
     public function __construct()
     {
         $this->apiKey = config('services.stream.api_key');
         $this->apiSecret = config('services.stream.api_secret');
 
-        if ($this->apiKey && $this->apiSecret) {
-            $this->client = new Client($this->apiKey, $this->apiSecret);
+        // Check if SDK is available
+        $this->sdkAvailable = class_exists(\GetStream\StreamChat\Client::class);
+
+        if ($this->sdkAvailable && $this->apiKey && $this->apiSecret) {
+            try {
+                $this->client = new \GetStream\StreamChat\Client($this->apiKey, $this->apiSecret);
+            } catch (\Throwable $e) {
+                Log::warning('StreamChatService: Failed to initialize client', ['error' => $e->getMessage()]);
+                $this->client = null;
+            }
         }
     }
 
     /**
-     * Check if the service is configured.
+     * Check if the service is configured and SDK is available.
      */
     public function isConfigured(): bool
     {
-        return !empty($this->apiKey) && !empty($this->apiSecret);
+        return $this->sdkAvailable && !empty($this->apiKey) && !empty($this->apiSecret) && $this->client !== null;
+    }
+
+    /**
+     * Check if SDK is available (for graceful degradation).
+     */
+    public function isSdkAvailable(): bool
+    {
+        return $this->sdkAvailable;
     }
 
     /**
@@ -298,7 +314,7 @@ class StreamChatService
      */
     public function verifyWebhookSignature(string $body, string $signature): bool
     {
-        if (!$this->isConfigured()) {
+        if (!$this->apiSecret) {
             return false;
         }
 
@@ -450,8 +466,8 @@ class StreamChatService
     /**
      * Get the underlying Stream client (for advanced use).
      */
-    public function getClient(): ?Client
+    public function getClient(): mixed
     {
-        return $this->client ?? null;
+        return $this->client;
     }
 }
