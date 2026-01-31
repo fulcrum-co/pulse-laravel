@@ -299,9 +299,9 @@
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">No resources yet</h3>
                     <p class="text-gray-500 mb-6 max-w-md mx-auto">Start building your resource library by adding content, providers, programs, or courses.</p>
-                    <a href="{{ route('resources.content.create') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-pulse-orange-500 text-white font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors">
+                    <a href="{{ route('resources.content.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-pulse-orange-500 text-white font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors">
                         <x-icon name="plus" class="w-5 h-5" />
-                        Add Resource
+                        Browse Resources
                     </a>
                 </div>
             @endif
