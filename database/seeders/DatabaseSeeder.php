@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             ProgramSeeder::class,
             MiniCourseSeeder::class,
             AdaptiveTriggerSeeder::class,
+            MarketplaceSeeder::class,
         ]);
     }
 }
