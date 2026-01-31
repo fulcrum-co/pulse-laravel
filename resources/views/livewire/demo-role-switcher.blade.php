@@ -1,5 +1,5 @@
 @if($canUseDemoSwitcher)
-<div class="relative">
+<div class="relative" x-data="{ open: false }">
     <!-- Demo Mode Indicator Bar (when in demo mode) -->
     @if($isInDemoMode)
     <div class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 text-center text-sm font-medium shadow-lg">
@@ -9,19 +9,17 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
             </svg>
             <span>Demo Mode: Viewing as <strong>{{ $availableRoles[$currentRole]['label'] }}</strong></span>
-            <button
-                wire:click="clearDemoRole"
-                class="ml-2 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded text-xs transition-colors"
-            >
+            <a href="{{ route('demo.role.switch', 'actual') }}"
+               class="ml-2 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded text-xs transition-colors">
                 Exit Demo
-            </button>
+            </a>
         </div>
     </div>
     @endif
 
-    <!-- Floating Toggle Button - positioned left side to avoid chat overlap -->
+    <!-- Floating Toggle Button -->
     <button
-        wire:click="toggle"
+        @click="open = !open"
         class="fixed bottom-6 left-6 z-40 flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
         title="Demo Role Switcher"
     >
@@ -29,14 +27,23 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
         </svg>
         <span class="font-medium hidden sm:inline">Switch Role</span>
-        <svg class="w-4 h-4 transition-transform hidden sm:block {{ $isOpen ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 transition-transform hidden sm:block" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
         </svg>
     </button>
 
     <!-- Role Selection Panel -->
-    @if($isOpen)
-    <div class="fixed bottom-20 left-6 z-40 w-72 sm:w-80 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+    <div
+        x-show="open"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 translate-y-4"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-4"
+        @click.away="open = false"
+        class="fixed bottom-20 left-6 z-40 w-72 sm:w-80 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
+    >
         <!-- Header -->
         <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3">
             <h3 class="text-white font-semibold">Demo Role Switcher</h3>
@@ -46,8 +53,8 @@
         <!-- Role List -->
         <div class="max-h-96 overflow-y-auto">
             @foreach($availableRoles as $roleKey => $role)
-            <button
-                wire:click="selectRole('{{ $roleKey }}')"
+            <a
+                href="{{ route('demo.role.switch', $roleKey) }}"
                 class="w-full flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 text-left {{ $currentRole === $roleKey ? 'bg-purple-50' : '' }}"
             >
                 <!-- Icon -->
@@ -114,7 +121,7 @@
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                 </svg>
                 @endif
-            </button>
+            </a>
             @endforeach
         </div>
 
@@ -125,6 +132,5 @@
             </p>
         </div>
     </div>
-    @endif
 </div>
 @endif

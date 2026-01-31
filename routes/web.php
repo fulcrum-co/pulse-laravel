@@ -377,6 +377,9 @@ Route::middleware('guest')->group(function () {
 
 // Protected routes (only accessible when logged in)
 Route::middleware('auth')->group(function () {
+    // Demo Role Switcher (simple URL-based, no Livewire)
+    Route::get('/demo-role/{role}', [App\Http\Controllers\DemoRoleController::class, 'switch'])->name('demo.role.switch');
+
     // Dashboard (HubSpot-style customizable)
     Route::get('/dashboard', App\Livewire\Dashboard\DashboardIndex::class)->name('dashboard');
     Route::get('/dashboards', App\Livewire\Dashboard\DashboardList::class)->name('dashboards.index');
