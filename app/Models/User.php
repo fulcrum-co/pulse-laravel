@@ -188,19 +188,87 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user has a specific role.
+     * Get the effective role, respecting demo mode override.
+     * Only admins can use demo mode.
+     */
+    public function getEffectiveRoleAttribute(): string
+    {
+        // Check if we're in demo mode and user is actually an admin
+        $demoRole = session('demo_role_override');
+
+        if ($demoRole && $this->primary_role === 'admin') {
+            // Return the demo role if it's not 'actual'
+            if ($demoRole !== 'actual') {
+                return $demoRole;
+            }
+        }
+
+        return $this->primary_role;
+    }
+
+    /**
+     * Check if user is currently in demo mode.
+     */
+    public function isInDemoMode(): bool
+    {
+        $demoRole = session('demo_role_override');
+        return $this->primary_role === 'admin' && $demoRole && $demoRole !== 'actual';
+    }
+
+    /**
+     * Get the demo role label for display.
+     */
+    public function getDemoRoleLabelAttribute(): ?string
+    {
+        if (!$this->isInDemoMode()) {
+            return null;
+        }
+
+        $labels = [
+            'consultant' => 'District Consultant',
+            'superintendent' => 'Superintendent',
+            'school_admin' => 'School Administrator',
+            'counselor' => 'School Counselor',
+            'teacher' => 'Teacher',
+            'student' => 'Student',
+            'parent' => 'Parent/Guardian',
+        ];
+
+        return $labels[session('demo_role_override')] ?? null;
+    }
+
+    /**
+     * Check if user has a specific role (respects demo mode).
      */
     public function hasRole(string $role): bool
+    {
+        return $this->effective_role === $role;
+    }
+
+    /**
+     * Check if user's actual (non-demo) role matches.
+     */
+    public function hasActualRole(string $role): bool
     {
         return $this->primary_role === $role;
     }
 
     /**
-     * Check if user is an admin.
+     * Check if user is an admin (respects demo mode).
      */
     public function isAdmin(): bool
     {
-        return $this->hasRole('admin') || $this->hasRole('consultant');
+        $role = $this->effective_role;
+        return in_array($role, ['admin', 'consultant', 'superintendent']);
+    }
+
+    /**
+     * Check if user is actually an admin (ignores demo mode).
+     * Use this for security-critical checks.
+     */
+    public function isActualAdmin(): bool
+    {
+        return $this->primary_role === 'admin' || $this->primary_role === 'consultant';
     }
 
     /**

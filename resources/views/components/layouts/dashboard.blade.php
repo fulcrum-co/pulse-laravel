@@ -60,7 +60,7 @@
     @livewireStyles
     @stack('styles')
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 {{ session('demo_role_override') && session('demo_role_override') !== 'actual' && auth()->user()?->isActualAdmin() ? 'pt-10' : '' }}">
     <div x-data="{ sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true', hoveredItem: null }"
          x-init="$watch('sidebarCollapsed', val => localStorage.setItem('sidebarCollapsed', val))"
          class="flex h-screen">
@@ -403,6 +403,9 @@
             </main>
         </div>
     </div>
+
+    <!-- Demo Role Switcher (for admins only) -->
+    @livewire('demo-role-switcher')
 
     @livewireScripts
     @stack('scripts')
