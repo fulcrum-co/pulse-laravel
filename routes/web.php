@@ -117,7 +117,8 @@ Route::get('/reset-dashboard-temp', function () {
 
 // Temporary route to list users - visit once then remove
 Route::get('/list-users-temp', function () {
-    $output = ["=== ORGANIZATIONS ({$count = \App\Models\Organization::count()}) ===", ""];
+    $orgCount = \App\Models\Organization::count();
+    $output = ["=== ORGANIZATIONS ({$orgCount}) ===", ""];
 
     $orgs = \App\Models\Organization::with('parent')->orderBy('parent_org_id')->orderBy('org_name')->get();
     if ($orgs->isEmpty()) {
@@ -167,6 +168,78 @@ Route::get('/reset-password-temp', function () {
     $user->save();
 
     return "<pre>Password reset for: {$email}\n\nNew password: password\n\nYou can now log in at /login</pre>";
+});
+
+// Temporary route to seed district/multi-tenancy data
+Route::get('/seed-district-temp', function () {
+    $output = [];
+    $output[] = "Setting up district and multi-tenancy demo...";
+    $output[] = "";
+
+    try {
+        // Find or create district
+        $district = \App\Models\Organization::where('org_type', 'district')->first();
+        if (!$district) {
+            $district = \App\Models\Organization::create([
+                'org_type' => 'district',
+                'org_name' => 'Lincoln County School District',
+                'primary_contact_email' => 'admin@lincolnschools.edu',
+                'timezone' => 'America/Los_Angeles',
+                'subscription_plan' => 'enterprise',
+                'subscription_status' => 'active',
+                'active' => true,
+            ]);
+            $output[] = "Created district: Lincoln County School District";
+        } else {
+            $output[] = "Found existing district: " . $district->org_name;
+        }
+
+        // Find existing schools and link them to district
+        $schools = \App\Models\Organization::where('org_type', 'school')
+            ->whereNull('parent_org_id')
+            ->get();
+
+        foreach ($schools as $school) {
+            $school->update(['parent_org_id' => $district->id]);
+            $output[] = "Linked school to district: " . $school->org_name;
+        }
+
+        // Create consultant user at district level
+        $consultant = \App\Models\User::where('primary_role', 'consultant')->first();
+        if (!$consultant) {
+            $consultant = \App\Models\User::create([
+                'org_id' => $district->id,
+                'first_name' => 'Margaret',
+                'last_name' => 'Chen',
+                'email' => 'superintendent@lincolnschools.edu',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'primary_role' => 'consultant',
+                'avatar_url' => 'https://randomuser.me/api/portraits/women/79.jpg',
+                'active' => true,
+                'suspended' => false,
+            ]);
+            $output[] = "Created consultant: superintendent@lincolnschools.edu";
+        } else {
+            // Move existing consultant to district level
+            $consultant->update(['org_id' => $district->id]);
+            $output[] = "Moved consultant to district: " . $consultant->email;
+        }
+
+        $output[] = "";
+        $output[] = "=== SUCCESS ===";
+        $output[] = "";
+        $output[] = "Login as consultant:";
+        $output[] = "  Email: " . $consultant->email;
+        $output[] = "  Password: password";
+        $output[] = "";
+        $output[] = "The consultant can switch between schools using the dropdown";
+        $output[] = "in the bottom-left of the sidebar after logging in.";
+
+    } catch (\Exception $e) {
+        $output[] = "ERROR: " . $e->getMessage();
+    }
+
+    return "<pre>" . implode("\n", $output) . "</pre>";
 });
 
 // Temporary route to seed marketplace - visit once then remove
