@@ -265,10 +265,35 @@
 
                 @if($user->isAdmin() && $childOrgs->count() > 0)
                 <!-- Sub-Organizations (for Consultants/Superintendents) -->
-                <div class="mt-4 pt-4 border-t border-gray-100" x-show="!sidebarCollapsed">
-                    <p class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Sub-Organizations</p>
+                <div x-data="{ subOrgsOpen: false }" class="mt-4 pt-4 border-t border-gray-100" x-show="!sidebarCollapsed">
+                    <!-- Accordion Header -->
+                    <button
+                        @click="subOrgsOpen = !subOrgsOpen"
+                        class="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors group"
+                    >
+                        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider group-hover:text-gray-600">
+                            Sub-Organizations ({{ $childOrgs->count() }})
+                        </span>
+                        <svg
+                            :class="{ 'rotate-180': subOrgsOpen }"
+                            class="w-4 h-4 text-gray-400 transition-transform duration-200"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        >
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
 
-                    <div class="space-y-1 max-h-48 overflow-y-auto">
+                    <!-- Accordion Content -->
+                    <div
+                        x-show="subOrgsOpen"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 -translate-y-2"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 -translate-y-2"
+                        class="space-y-1 max-h-48 overflow-y-auto mt-1"
+                    >
                         @foreach($childOrgs as $childOrg)
                         <a
                             href="/organizations/{{ $childOrg->id }}"
@@ -281,13 +306,13 @@
                             <span class="truncate">{{ $childOrg->org_name }}</span>
                         </a>
                         @endforeach
-                    </div>
 
-                    @if($childOrgs->count() > 5)
-                    <a href="/organizations" class="block px-3 py-2 text-xs text-center text-pulse-orange-600 hover:text-pulse-orange-700">
-                        View All Organizations
-                    </a>
-                    @endif
+                        @if($childOrgs->count() > 5)
+                        <a href="/organizations" class="block px-3 py-2 text-xs text-center text-pulse-orange-600 hover:text-pulse-orange-700">
+                            View All Organizations
+                        </a>
+                        @endif
+                    </div>
                 </div>
                 <!-- Collapsed Sub-Orgs Icon -->
                 <div x-show="sidebarCollapsed" class="mt-4 pt-4 border-t border-gray-100">

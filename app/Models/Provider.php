@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -104,6 +105,38 @@ class Provider extends Model
     public function courseSteps(): HasMany
     {
         return $this->hasMany(MiniCourseStep::class);
+    }
+
+    /**
+     * Provider account (for login/notifications).
+     */
+    public function account(): HasOne
+    {
+        return $this->hasOne(ProviderAccount::class);
+    }
+
+    /**
+     * Conversations with this provider.
+     */
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(ProviderConversation::class);
+    }
+
+    /**
+     * Bookings with this provider.
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(ProviderBooking::class);
+    }
+
+    /**
+     * Payments to this provider.
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(ProviderPayment::class);
     }
 
     /**

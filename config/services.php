@@ -114,4 +114,28 @@ return [
         'tenant' => env('MICROSOFT_TENANT_ID', 'common'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | GetStream Chat
+    |--------------------------------------------------------------------------
+    */
+    'stream' => [
+        'api_key' => env('STREAM_API_KEY'),
+        'api_secret' => env('STREAM_API_SECRET'),
+        'app_id' => env('STREAM_APP_ID'),
+        'timeout' => 30,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mailgun Email
+    |--------------------------------------------------------------------------
+    */
+    'mailgun' => [
+        'domain' => env('MAILGUN_DOMAIN'),
+        'secret' => env('MAILGUN_SECRET'),
+        'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+        'scheme' => 'https',
+    ],
+
 ];

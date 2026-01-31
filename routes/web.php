@@ -652,6 +652,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/alerts/{workflow}/save', [AlertController::class, 'saveWorkflow'])->name('alerts.save');
     Route::delete('/alerts/{workflow}', [AlertController::class, 'destroy'])->name('alerts.destroy');
 
+    // Provider Chat & Messaging
+    Route::prefix('messages')->group(function () {
+        Route::get('/', App\Livewire\Chat\ProviderChatList::class)->name('messages.index');
+        Route::get('/{conversation}', App\Livewire\Chat\ProviderChatList::class)->name('messages.show');
+    });
+
     // Admin Settings
     Route::prefix('admin')->group(function () {
         Route::get('/settings/ai-courses', App\Livewire\Admin\AICourseSettings::class)->name('admin.settings.ai-courses');
