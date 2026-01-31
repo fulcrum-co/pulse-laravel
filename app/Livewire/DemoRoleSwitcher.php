@@ -35,21 +35,28 @@ class DemoRoleSwitcher extends Component
         if ($role === 'actual') {
             session()->forget('demo_role_override');
         } else {
-            session(['demo_role_override' => $role]);
+            session()->put('demo_role_override', $role);
         }
+
+        // Explicitly save session before redirect
+        session()->save();
 
         $this->currentRole = $role;
         $this->isOpen = false;
 
-        // Refresh the page to apply the new role using Livewire's redirect
-        $this->redirect(request()->url(), navigate: false);
+        // Use JavaScript to force a hard page reload
+        $this->js('window.location.reload()');
     }
 
     public function clearDemoRole(): void
     {
         session()->forget('demo_role_override');
+        session()->save();
+
         $this->currentRole = 'actual';
-        $this->redirect(request()->url(), navigate: false);
+
+        // Use JavaScript to force a hard page reload
+        $this->js('window.location.reload()');
     }
 
     public function render()
