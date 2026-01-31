@@ -292,11 +292,11 @@
                 @if(RolePermissions::currentUserCanAccess('messages'))
                 @php
                     // Get unread message count for current user
-                    $unreadMessageCount = \App\Models\ProviderConversation::where(function($q) use ($user) {
-                        $q->where('initiator_type', get_class($user))
-                          ->where('initiator_id', $user->id)
-                          ->where('unread_count_initiator', '>', 0);
-                    })->count();
+                    $authUser = auth()->user();
+                    $unreadMessageCount = $authUser ? \App\Models\ProviderConversation::where('initiator_type', get_class($authUser))
+                        ->where('initiator_id', $authUser->id)
+                        ->where('unread_count_initiator', '>', 0)
+                        ->count() : 0;
                 @endphp
                 <!-- Messages -->
                 <div @mouseenter="hoveredItem = 'messages'" @mouseleave="hoveredItem = null" class="relative">
