@@ -3,33 +3,38 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * This migration force-seeds demo data for providers, programs, and mini-courses.
+ * It runs regardless of whether previous seeder migrations succeeded or failed.
+ * It only inserts data if the tables are empty for the given organization.
+ */
 return new class extends Migration
 {
     public function up(): void
     {
-        // First, ensure org hierarchy is correct
+        // Ensure org hierarchy is correct
         $this->ensureOrgHierarchy();
 
-        // Get the school org
+        // Get the school org - this is where demo data should live
         $school = DB::table('organizations')->where('org_type', 'school')->first();
+        if (!$school) {
+            // Try district if no school
+            $school = DB::table('organizations')->where('org_type', 'district')->first();
+        }
         if (!$school) {
             return;
         }
 
-        // Get an admin user for created_by
+        // Get a user for created_by
         $admin = DB::table('users')->where('org_id', $school->id)->first();
         if (!$admin) {
             $admin = DB::table('users')->first();
         }
         $createdBy = $admin?->id;
 
-        // Seed providers if none exist
+        // Force seed all data types
         $this->seedProviders($school->id, $createdBy);
-
-        // Seed programs if none exist
         $this->seedPrograms($school->id, $createdBy);
-
-        // Seed mini courses if none exist
         $this->seedMiniCourses($school->id, $createdBy);
     }
 
@@ -47,6 +52,7 @@ return new class extends Migration
 
     protected function seedProviders(int $orgId, ?int $createdBy): void
     {
+        // Skip if providers already exist for this org
         if (DB::table('providers')->where('org_id', $orgId)->exists()) {
             return;
         }
@@ -135,6 +141,7 @@ return new class extends Migration
 
     protected function seedPrograms(int $orgId, ?int $createdBy): void
     {
+        // Skip if programs already exist for this org
         if (DB::table('programs')->where('org_id', $orgId)->exists()) {
             return;
         }
@@ -223,6 +230,7 @@ return new class extends Migration
 
     protected function seedMiniCourses(int $orgId, ?int $createdBy): void
     {
+        // Skip if courses already exist for this org
         if (DB::table('mini_courses')->where('org_id', $orgId)->exists()) {
             return;
         }
@@ -277,7 +285,7 @@ return new class extends Migration
         foreach ($courses as $course) {
             $courseId = DB::table('mini_courses')->insertGetId($course);
 
-            // Add some steps for each course
+            // Add steps for each course
             $steps = [
                 ['mini_course_id' => $courseId, 'title' => 'Introduction', 'step_type' => 'video', 'sort_order' => 1, 'duration_minutes' => 5, 'created_at' => now(), 'updated_at' => now()],
                 ['mini_course_id' => $courseId, 'title' => 'Core Concepts', 'step_type' => 'reading', 'sort_order' => 2, 'duration_minutes' => 10, 'created_at' => now(), 'updated_at' => now()],
@@ -291,7 +299,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Note: This migration seeds data, so down() is intentionally minimal
-        // to avoid accidentally deleting user-created data
+        // Intentionally empty - don't delete user data on rollback
     }
 };
