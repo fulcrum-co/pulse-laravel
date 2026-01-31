@@ -73,14 +73,29 @@ class PushContentModal extends Component
             return;
         }
 
-        $userOrg = auth()->user()->organization;
+        $user = auth()->user();
+        $userOrg = $user->organization;
         $pushed = [];
         $errors = [];
+
+        // Get consultant's assigned org IDs for permission check
+        $assignedOrgIds = $user->primary_role === 'consultant'
+            ? $user->organizations()->pluck('organizations.id')->toArray()
+            : [];
 
         foreach ($this->selectedOrgIds as $orgId) {
             $targetOrg = Organization::find($orgId);
 
-            if (!$targetOrg || !$userOrg->canPushContentTo($targetOrg)) {
+            if (!$targetOrg) {
+                $errors[] = "Organization not found";
+                continue;
+            }
+
+            // Allow push if: user's org can push to target OR consultant is assigned to target
+            $canPush = ($userOrg && $userOrg->canPushContentTo($targetOrg))
+                || in_array($orgId, $assignedOrgIds);
+
+            if (!$canPush) {
                 $errors[] = "Cannot push to {$targetOrg->org_name}";
                 continue;
             }
@@ -118,8 +133,20 @@ class PushContentModal extends Component
 
     public function getDownstreamOrgsProperty()
     {
-        $userOrg = auth()->user()->organization;
-        return $userOrg ? $userOrg->getDownstreamOrganizations() : collect();
+        $user = auth()->user();
+        $orgs = collect();
+
+        // For admins: get downstream orgs from primary organization
+        if ($user->isAdmin() && $user->organization) {
+            $orgs = $orgs->merge($user->organization->getDownstreamOrganizations());
+        }
+
+        // For consultants: include their assigned organizations
+        if ($user->primary_role === 'consultant') {
+            $orgs = $orgs->merge($user->organizations);
+        }
+
+        return $orgs->unique('id')->sortBy('org_name')->values();
     }
 
     public function getContentTitleProperty(): string
