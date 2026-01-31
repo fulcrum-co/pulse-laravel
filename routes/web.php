@@ -117,31 +117,36 @@ Route::get('/reset-dashboard-temp', function () {
 
 // Temporary route to list users - visit once then remove
 Route::get('/list-users-temp', function () {
-    $output = ["=== ORGANIZATIONS ===", ""];
+    $output = ["=== ORGANIZATIONS ({$count = \App\Models\Organization::count()}) ===", ""];
 
     $orgs = \App\Models\Organization::with('parent')->orderBy('parent_org_id')->orderBy('org_name')->get();
+    if ($orgs->isEmpty()) {
+        $output[] = "(No organizations found - database may need seeding)";
+    }
     foreach ($orgs as $org) {
         $parent = $org->parent ? " (child of: {$org->parent->org_name})" : " [TOP LEVEL]";
         $output[] = sprintf("%-30s | %-10s%s", $org->org_name, $org->org_type, $parent);
     }
 
     $output[] = "";
-    $output[] = "=== USERS (password: 'password') ===";
+    $output[] = "=== ALL USERS (" . \App\Models\User::count() . " total) ===";
     $output[] = "";
 
-    $users = \App\Models\User::with('organization')
-        ->whereIn('primary_role', ['admin', 'consultant', 'teacher'])
-        ->get(['id', 'email', 'first_name', 'last_name', 'primary_role', 'org_id']);
+    $users = \App\Models\User::with('organization')->limit(50)->get();
+
+    if ($users->isEmpty()) {
+        $output[] = "(No users found - database may need seeding)";
+    }
 
     foreach ($users as $user) {
         $org = $user->organization ? $user->organization->org_name : 'No org';
-        $output[] = sprintf("%-35s | %-12s | %s", $user->email, $user->primary_role, $org);
+        $output[] = sprintf("%-40s | %-12s | %s", $user->email, $user->primary_role ?? 'no role', $org);
     }
 
     $output[] = "";
-    $output[] = "TIP: Consultant users at district level can switch to child schools via the dropdown in bottom-left of sidebar.";
-    $output[] = "";
-    $output[] = "To reset a password, visit: /reset-password-temp?email=USER_EMAIL";
+    $output[] = "=== RESET PASSWORD ===";
+    $output[] = "Visit: /reset-password-temp?email=USER_EMAIL_HERE";
+    $output[] = "This will set password to: password";
 
     return "<pre>" . implode("\n", $output) . "</pre>";
 });
