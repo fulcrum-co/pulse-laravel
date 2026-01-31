@@ -54,9 +54,10 @@ class DemoRoleSwitcher extends Component
 
     public function render()
     {
-        // Only show for actual admins (not demo admins)
+        // Show for all authenticated users in demo/pilot environment
+        // This allows everyone to experience different role perspectives
         $user = auth()->user();
-        $canUseDemoSwitcher = $user && $user->isActualAdmin();
+        $canUseDemoSwitcher = $user !== null;
 
         return view('livewire.demo-role-switcher', [
             'canUseDemoSwitcher' => $canUseDemoSwitcher,
