@@ -140,8 +140,28 @@ Route::get('/list-users-temp', function () {
 
     $output[] = "";
     $output[] = "TIP: Consultant users at district level can switch to child schools via the dropdown in bottom-left of sidebar.";
+    $output[] = "";
+    $output[] = "To reset a password, visit: /reset-password-temp?email=USER_EMAIL";
 
     return "<pre>" . implode("\n", $output) . "</pre>";
+});
+
+// Temporary route to reset a user's password - visit once then remove
+Route::get('/reset-password-temp', function () {
+    $email = request('email');
+    if (!$email) {
+        return "<pre>Usage: /reset-password-temp?email=user@example.com\n\nThis will reset the password to 'password'</pre>";
+    }
+
+    $user = \App\Models\User::where('email', $email)->first();
+    if (!$user) {
+        return "<pre>User not found: {$email}</pre>";
+    }
+
+    $user->password = \Illuminate\Support\Facades\Hash::make('password');
+    $user->save();
+
+    return "<pre>Password reset for: {$email}\n\nNew password: password\n\nYou can now log in at /login</pre>";
 });
 
 // Temporary route to seed marketplace - visit once then remove
