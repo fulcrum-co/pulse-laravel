@@ -841,7 +841,9 @@ class ReportBuilder extends Component
     public function canPush(): bool
     {
         $user = auth()->user();
-        return $user->isAdmin() && $user->organization?->getDownstreamOrganizations()->count() > 0;
+        $hasDownstream = $user->organization?->getDownstreamOrganizations()->count() > 0;
+        $hasAssignedOrgs = $user->organizations()->count() > 0;
+        return ($user->isAdmin() && $hasDownstream) || ($user->primary_role === 'consultant' && $hasAssignedOrgs);
     }
 
     public function render()

@@ -261,7 +261,9 @@
                 <div class="space-y-2">
                     @php
                         $user = auth()->user();
-                        $canPush = $user->isAdmin() && $user->organization?->getDownstreamOrganizations()->count() > 0;
+                        $hasDownstream = $user->organization?->getDownstreamOrganizations()->count() > 0;
+                        $hasAssignedOrgs = $user->organizations()->count() > 0;
+                        $canPush = ($user->isAdmin() && $hasDownstream) || ($user->primary_role === 'consultant' && $hasAssignedOrgs);
                     @endphp
                     @if($canPush)
                         <button
