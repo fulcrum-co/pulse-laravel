@@ -24,8 +24,8 @@ class MiniCoursePolicy
      */
     public function view(User $user, MiniCourse $course): bool
     {
-        // User can view courses in their organization
-        if ($course->org_id === $user->org_id) {
+        // User can view courses in accessible organizations
+        if ($user->canAccessOrganization($course->org_id)) {
             return true;
         }
 
@@ -39,13 +39,6 @@ class MiniCoursePolicy
             return true;
         }
 
-        // Check if user's org is a parent (consultant/district viewing downstream)
-        if ($user->organization && method_exists($user->organization, 'canPushContentTo')) {
-            if ($user->organization->canPushContentTo($course->organization)) {
-                return true;
-            }
-        }
-
         return false;
     }
 
@@ -55,7 +48,7 @@ class MiniCoursePolicy
     public function create(User $user): bool
     {
         // Admins, consultants, teachers, and counselors can create courses
-        return $user->isAdmin() || in_array($user->role, ['consultant', 'teacher', 'counselor']);
+        return $user->isAdmin() || in_array($user->primary_role, ['consultant', 'teacher', 'counselor']);
     }
 
     /**
@@ -63,13 +56,13 @@ class MiniCoursePolicy
      */
     public function update(User $user, MiniCourse $course): bool
     {
-        // Must be in same organization
-        if ($course->org_id !== $user->org_id) {
+        // Must have access to the organization
+        if (!$user->canAccessOrganization($course->org_id)) {
             return false;
         }
 
-        // Org admin can always update
-        if ($user->isAdmin()) {
+        // Org admin or consultant can always update
+        if ($user->isAdmin() || $user->primary_role === 'consultant') {
             return true;
         }
 
@@ -79,7 +72,7 @@ class MiniCoursePolicy
         }
 
         // Teachers and counselors can update courses in their org
-        return in_array($user->role, ['consultant', 'teacher', 'counselor']);
+        return in_array($user->primary_role, ['teacher', 'counselor']);
     }
 
     /**
@@ -87,13 +80,13 @@ class MiniCoursePolicy
      */
     public function delete(User $user, MiniCourse $course): bool
     {
-        // Must be in same organization
-        if ($course->org_id !== $user->org_id) {
+        // Must have access to the organization
+        if (!$user->canAccessOrganization($course->org_id)) {
             return false;
         }
 
-        // Org admin can delete
-        if ($user->isAdmin()) {
+        // Org admin or consultant can delete
+        if ($user->isAdmin() || $user->primary_role === 'consultant') {
             return true;
         }
 
@@ -110,8 +103,8 @@ class MiniCoursePolicy
      */
     public function publish(User $user, MiniCourse $course): bool
     {
-        // Must be in same organization
-        if ($course->org_id !== $user->org_id) {
+        // Must have access to the organization
+        if (!$user->canAccessOrganization($course->org_id)) {
             return false;
         }
 
@@ -120,13 +113,13 @@ class MiniCoursePolicy
             return false;
         }
 
-        // Org admin can always publish
-        if ($user->isAdmin()) {
+        // Org admin or consultant can always publish
+        if ($user->isAdmin() || $user->primary_role === 'consultant') {
             return true;
         }
 
-        // Creator or consultant/teacher can publish
-        if ($course->created_by === $user->id || in_array($user->role, ['consultant', 'teacher', 'counselor'])) {
+        // Creator or teacher/counselor can publish
+        if ($course->created_by === $user->id || in_array($user->primary_role, ['teacher', 'counselor'])) {
             return true;
         }
 
@@ -138,8 +131,8 @@ class MiniCoursePolicy
      */
     public function archive(User $user, MiniCourse $course): bool
     {
-        // Must be in same organization
-        if ($course->org_id !== $user->org_id) {
+        // Must have access to the organization
+        if (!$user->canAccessOrganization($course->org_id)) {
             return false;
         }
 
@@ -171,13 +164,13 @@ class MiniCoursePolicy
             return false;
         }
 
-        // Must be in same organization
-        if ($course->org_id !== $user->org_id) {
+        // Must have access to the organization
+        if (!$user->canAccessOrganization($course->org_id)) {
             return false;
         }
 
-        // Admins, teachers, counselors can enroll students
-        return $user->isAdmin() || in_array($user->role, ['consultant', 'teacher', 'counselor']);
+        // Admins, consultants, teachers, counselors can enroll students
+        return $user->isAdmin() || in_array($user->primary_role, ['consultant', 'teacher', 'counselor']);
     }
 
     /**
@@ -201,7 +194,7 @@ class MiniCoursePolicy
      */
     public function forceDelete(User $user, MiniCourse $course): bool
     {
-        // Only org admin can force delete
-        return $course->org_id === $user->org_id && $user->isAdmin();
+        // Admin or consultant with access can force delete
+        return $user->canAccessOrganization($course->org_id) && ($user->isAdmin() || $user->primary_role === 'consultant');
     }
 }

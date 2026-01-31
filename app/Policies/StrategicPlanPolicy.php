@@ -24,23 +24,17 @@ class StrategicPlanPolicy
      */
     public function view(User $user, StrategicPlan $strategicPlan): bool
     {
-        // Must be in same organization
-        if ($strategicPlan->org_id !== $user->org_id) {
-            // Check if user's org is a parent (consultant/district viewing downstream)
-            if (!$user->organization->canPushContentTo($strategicPlan->organization)) {
-                return false;
-            }
-            // Consultants can view if consultant_visible is true
-            if (!$strategicPlan->consultant_visible) {
-                return false;
-            }
+        // Check if user has access to the organization
+        if (!$user->canAccessOrganization($strategicPlan->org_id)) {
+            return false;
         }
 
-        // Owner, collaborator, or org admin can view
-        if ($user->isAdmin()) {
+        // Admin or consultant can view
+        if ($user->isAdmin() || $user->primary_role === 'consultant') {
             return true;
         }
 
+        // Check if user is a collaborator
         $collaborator = $strategicPlan->collaborators()->where('user_id', $user->id)->first();
         return $collaborator !== null;
     }
@@ -51,7 +45,7 @@ class StrategicPlanPolicy
     public function create(User $user): bool
     {
         // Admins, consultants, and teachers can create
-        return $user->isAdmin() || $user->role === 'consultant' || $user->role === 'teacher';
+        return $user->isAdmin() || in_array($user->primary_role, ['consultant', 'teacher']);
     }
 
     /**
@@ -59,13 +53,13 @@ class StrategicPlanPolicy
      */
     public function update(User $user, StrategicPlan $strategicPlan): bool
     {
-        // Must be in same organization
-        if ($strategicPlan->org_id !== $user->org_id) {
+        // Must have access to the organization
+        if (!$user->canAccessOrganization($strategicPlan->org_id)) {
             return false;
         }
 
-        // Org admin can always update
-        if ($user->isAdmin()) {
+        // Org admin or consultant can always update
+        if ($user->isAdmin() || $user->primary_role === 'consultant') {
             return true;
         }
 
@@ -79,13 +73,13 @@ class StrategicPlanPolicy
      */
     public function delete(User $user, StrategicPlan $strategicPlan): bool
     {
-        // Must be in same organization
-        if ($strategicPlan->org_id !== $user->org_id) {
+        // Must have access to the organization
+        if (!$user->canAccessOrganization($strategicPlan->org_id)) {
             return false;
         }
 
-        // Org admin can delete
-        if ($user->isAdmin()) {
+        // Org admin or consultant can delete
+        if ($user->isAdmin() || $user->primary_role === 'consultant') {
             return true;
         }
 
@@ -99,24 +93,17 @@ class StrategicPlanPolicy
      */
     public function push(User $user, StrategicPlan $strategicPlan): bool
     {
-        // Must be in same organization
-        if ($strategicPlan->org_id !== $user->org_id) {
+        // Must have access to the organization
+        if (!$user->canAccessOrganization($strategicPlan->org_id)) {
             return false;
         }
 
-        // Only if user's org can push content (consultants, districts)
-        $orgType = $user->organization->org_type ?? null;
-        if (!in_array($orgType, ['pulse_admin', 'consultant', 'district'])) {
+        // Only consultants, admins can push (they have cross-org capability)
+        if (!$user->isAdmin() && $user->primary_role !== 'consultant') {
             return false;
         }
 
-        // Must have edit rights
-        if ($user->isAdmin()) {
-            return true;
-        }
-
-        $collaborator = $strategicPlan->collaborators()->where('user_id', $user->id)->first();
-        return $collaborator && $collaborator->canEdit();
+        return true;
     }
 
     /**
@@ -141,7 +128,7 @@ class StrategicPlanPolicy
      */
     public function forceDelete(User $user, StrategicPlan $strategicPlan): bool
     {
-        // Only org admin can force delete
-        return $strategicPlan->org_id === $user->org_id && $user->isAdmin();
+        // Admin or consultant with access can force delete
+        return $user->canAccessOrganization($strategicPlan->org_id) && ($user->isAdmin() || $user->primary_role === 'consultant');
     }
 }

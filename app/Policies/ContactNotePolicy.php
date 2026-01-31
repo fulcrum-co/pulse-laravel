@@ -23,8 +23,8 @@ class ContactNotePolicy
      */
     public function view(User $user, ContactNote $note): bool
     {
-        // Must be in same organization
-        if ($note->org_id !== $user->org_id) {
+        // Must have access to the organization
+        if (!$user->canAccessOrganization($note->org_id)) {
             return false;
         }
 
@@ -49,13 +49,13 @@ class ContactNotePolicy
      */
     public function update(User $user, ContactNote $note): bool
     {
-        // Must be in same organization
-        if ($note->org_id !== $user->org_id) {
+        // Must have access to the organization
+        if (!$user->canAccessOrganization($note->org_id)) {
             return false;
         }
 
-        // Admin can always update
-        if ($user->isAdmin()) {
+        // Admin or consultant can always update
+        if ($user->isAdmin() || $user->primary_role === 'consultant') {
             return true;
         }
 
@@ -68,13 +68,13 @@ class ContactNotePolicy
      */
     public function delete(User $user, ContactNote $note): bool
     {
-        // Must be in same organization
-        if ($note->org_id !== $user->org_id) {
+        // Must have access to the organization
+        if (!$user->canAccessOrganization($note->org_id)) {
             return false;
         }
 
-        // Admin can delete
-        if ($user->isAdmin()) {
+        // Admin or consultant can delete
+        if ($user->isAdmin() || $user->primary_role === 'consultant') {
             return true;
         }
 
@@ -95,6 +95,6 @@ class ContactNotePolicy
      */
     public function forceDelete(User $user, ContactNote $note): bool
     {
-        return $note->org_id === $user->org_id && $user->isAdmin();
+        return $user->canAccessOrganization($note->org_id) && ($user->isAdmin() || $user->primary_role === 'consultant');
     }
 }

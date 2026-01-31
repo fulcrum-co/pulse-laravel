@@ -23,8 +23,8 @@ class SurveyPolicy
      */
     public function view(User $user, Survey $survey): bool
     {
-        // Must be in same organization
-        return $survey->org_id === $user->org_id;
+        // User can view if they have access to the survey's organization
+        return $user->canAccessOrganization($survey->org_id);
     }
 
     /**
@@ -41,13 +41,13 @@ class SurveyPolicy
      */
     public function update(User $user, Survey $survey): bool
     {
-        // Must be in same organization
-        if ($survey->org_id !== $user->org_id) {
+        // Must have access to the survey's organization
+        if (!$user->canAccessOrganization($survey->org_id)) {
             return false;
         }
 
-        // Admin can always update
-        if ($user->isAdmin()) {
+        // Admin or consultant can always update
+        if ($user->isAdmin() || $user->primary_role === 'consultant') {
             return true;
         }
 
@@ -60,13 +60,13 @@ class SurveyPolicy
      */
     public function delete(User $user, Survey $survey): bool
     {
-        // Must be in same organization
-        if ($survey->org_id !== $user->org_id) {
+        // Must have access to the survey's organization
+        if (!$user->canAccessOrganization($survey->org_id)) {
             return false;
         }
 
-        // Admin can delete
-        if ($user->isAdmin()) {
+        // Admin or consultant can delete
+        if ($user->isAdmin() || $user->primary_role === 'consultant') {
             return true;
         }
 
@@ -87,6 +87,6 @@ class SurveyPolicy
      */
     public function forceDelete(User $user, Survey $survey): bool
     {
-        return $survey->org_id === $user->org_id && $user->isAdmin();
+        return $user->canAccessOrganization($survey->org_id) && ($user->isAdmin() || $user->primary_role === 'consultant');
     }
 }
