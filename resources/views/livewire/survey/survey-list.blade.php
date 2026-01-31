@@ -131,17 +131,21 @@
                         default => 'purple',
                     };
                 @endphp
-                <div class="bg-white rounded-lg border {{ in_array((string)$survey->id, $selected) ? 'border-pulse-orange-300 ring-2 ring-pulse-orange-100' : 'border-gray-200' }} overflow-hidden hover:shadow-md transition-shadow">
-                    <div class="p-4">
+                <div class="bg-white rounded-lg border {{ in_array((string)$survey->id, $selected) ? 'border-pulse-orange-300 ring-2 ring-pulse-orange-100' : 'border-gray-200' }} overflow-hidden hover:shadow-md transition-shadow relative group">
+                    <!-- Clickable overlay for the card -->
+                    <a href="{{ route('surveys.show', $survey) }}" class="absolute inset-0 z-0" aria-label="View {{ $survey->title }}"></a>
+
+                    <div class="p-4 relative z-10 pointer-events-none">
                         <div class="flex items-start justify-between gap-2 mb-3">
                             <div class="flex items-center gap-2 min-w-0">
                                 <input
                                     type="checkbox"
                                     wire:click="toggleSelect('{{ $survey->id }}')"
                                     {{ in_array((string)$survey->id, $selected) ? 'checked' : '' }}
-                                    class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500 flex-shrink-0"
+                                    class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500 flex-shrink-0 pointer-events-auto"
+                                    onclick="event.stopPropagation()"
                                 />
-                                <h3 class="font-medium text-gray-900 text-sm truncate">{{ $survey->title }}</h3>
+                                <h3 class="font-medium text-gray-900 text-sm truncate group-hover:text-pulse-orange-600 transition-colors">{{ $survey->title }}</h3>
                             </div>
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $statusColor }}-100 text-{{ $statusColor }}-800 flex-shrink-0">
                                 {{ ucfirst($survey->status) }}
@@ -173,46 +177,46 @@
                         @endif
                     </div>
 
-                    <div class="px-4 py-2 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                        <div class="flex items-center gap-1">
-                            <div class="relative group">
-                                <button wire:click="toggleStatus('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
+                    <div class="px-4 py-2 bg-gray-50 border-t border-gray-100 flex items-center justify-between relative z-10">
+                        <div class="flex items-center gap-1 pointer-events-auto">
+                            <div class="relative group/btn">
+                                <button wire:click="toggleStatus('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded" onclick="event.stopPropagation()">
                                     <x-icon name="{{ $survey->status === 'active' ? 'pause' : 'play' }}" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $survey->status === 'active' ? 'Pause' : 'Activate' }}</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">{{ $survey->status === 'active' ? 'Pause' : 'Activate' }}</span>
                             </div>
                             @if($survey->status === 'active')
-                            <div class="relative group">
-                                <a href="{{ route('surveys.deliver.form', $survey) }}" class="p-1.5 text-gray-400 hover:text-gray-600 rounded inline-block">
+                            <div class="relative group/btn">
+                                <a href="{{ route('surveys.deliver.form', $survey) }}" class="p-1.5 text-gray-400 hover:text-gray-600 rounded inline-block" onclick="event.stopPropagation()">
                                     <x-icon name="paper-airplane" class="w-3.5 h-3.5" />
                                 </a>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Send</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Send</span>
                             </div>
                             @endif
-                            <div class="relative group">
-                                <button wire:click="duplicate('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
+                            <div class="relative group/btn">
+                                <button wire:click="duplicate('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded" onclick="event.stopPropagation()">
                                     <x-icon name="document-duplicate" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
                             </div>
                             @if($canPush)
-                            <div class="relative group">
-                                <button wire:click="openPushModal({{ $survey->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-500 rounded">
+                            <div class="relative group/btn">
+                                <button wire:click="openPushModal({{ $survey->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-500 rounded" onclick="event.stopPropagation()">
                                     <x-icon name="arrow-up-on-square" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Push to Schools</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Push to Schools</span>
                             </div>
                             @endif
-                            <div class="relative group">
-                                <button wire:click="confirmDelete('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded">
+                            <div class="relative group/btn">
+                                <button wire:click="confirmDelete('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded" onclick="event.stopPropagation()">
                                     <x-icon name="trash" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Delete</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Delete</span>
                             </div>
                         </div>
-                        <a href="{{ route('surveys.show', $survey) }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                            View
-                        </a>
+                        <span class="text-xs font-medium text-pulse-orange-600 pointer-events-none">
+                            View →
+                        </span>
                     </div>
                 </div>
             @endforeach
@@ -238,16 +242,18 @@
                         default => 'purple',
                     };
                 @endphp
-                <div class="bg-white rounded-lg border {{ in_array((string)$survey->id, $selected) ? 'border-pulse-orange-300 ring-2 ring-pulse-orange-100' : 'border-gray-200' }} p-3 hover:shadow-sm transition-shadow flex items-center gap-4">
+                <div class="bg-white rounded-lg border {{ in_array((string)$survey->id, $selected) ? 'border-pulse-orange-300 ring-2 ring-pulse-orange-100' : 'border-gray-200' }} p-3 hover:shadow-sm transition-shadow flex items-center gap-4 relative group cursor-pointer"
+                     onclick="window.location='{{ route('surveys.show', $survey) }}'">
                     <input
                         type="checkbox"
                         wire:click="toggleSelect('{{ $survey->id }}')"
                         {{ in_array((string)$survey->id, $selected) ? 'checked' : '' }}
-                        class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500 flex-shrink-0"
+                        class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500 flex-shrink-0 relative z-10"
+                        onclick="event.stopPropagation()"
                     />
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2">
-                            <h3 class="font-medium text-gray-900 text-sm truncate">{{ $survey->title }}</h3>
+                            <h3 class="font-medium text-gray-900 text-sm truncate group-hover:text-pulse-orange-600 transition-colors">{{ $survey->title }}</h3>
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $statusColor }}-100 text-{{ $statusColor }}-800">
                                 {{ ucfirst($survey->status) }}
                             </span>
@@ -264,44 +270,44 @@
                             <span>Created {{ $survey->created_at->diffForHumans() }}</span>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <div class="relative group">
+                    <div class="flex items-center gap-1 relative z-10" onclick="event.stopPropagation()">
+                        <div class="relative group/btn">
                             <button wire:click="toggleStatus('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                 <x-icon name="{{ $survey->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $survey->status === 'active' ? 'Pause' : 'Activate' }}</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">{{ $survey->status === 'active' ? 'Pause' : 'Activate' }}</span>
                         </div>
                         @if($survey->status === 'active')
-                        <div class="relative group">
+                        <div class="relative group/btn">
                             <a href="{{ route('surveys.deliver.form', $survey) }}" class="p-1.5 text-gray-400 hover:text-gray-600 rounded inline-block">
                                 <x-icon name="paper-airplane" class="w-4 h-4" />
                             </a>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Send</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Send</span>
                         </div>
                         @endif
-                        <div class="relative group">
+                        <div class="relative group/btn">
                             <button wire:click="duplicate('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                 <x-icon name="document-duplicate" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
                         </div>
                         @if($canPush)
-                        <div class="relative group">
+                        <div class="relative group/btn">
                             <button wire:click="openPushModal({{ $survey->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-500 rounded">
                                 <x-icon name="arrow-up-on-square" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Push to Schools</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Push to Schools</span>
                         </div>
                         @endif
-                        <div class="relative group">
+                        <div class="relative group/btn">
                             <button wire:click="confirmDelete('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded">
                                 <x-icon name="trash" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Delete</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Delete</span>
                         </div>
-                        <a href="{{ route('surveys.show', $survey) }}" class="ml-2 px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600">
-                            View
-                        </a>
+                        <span class="ml-2 px-3 py-1 text-xs font-medium text-pulse-orange-600">
+                            View →
+                        </span>
                     </div>
                 </div>
             @endforeach

@@ -187,59 +187,59 @@
             </div>
         @else
             <!-- Category Cards (4-column layout matching Marketplace) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-12">
                 <!-- Content Card -->
-                <a href="{{ route('resources.content.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                            <x-icon name="document-text" class="w-7 h-7 text-blue-600" />
+                <a href="{{ route('resources.content.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 lg:p-6 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
+                    <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left gap-3 lg:gap-4">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <x-icon name="document-text" class="w-5 h-5 lg:w-6 lg:h-6 text-blue-600" />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-lg font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Content</h2>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($counts['content']) }}</p>
-                            <p class="text-xs text-gray-500 mt-1">Articles, videos, worksheets</p>
+                            <h2 class="text-sm lg:text-lg font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Content</h2>
+                            <p class="text-xl lg:text-2xl font-bold text-gray-900">{{ number_format($counts['content']) }}</p>
+                            <p class="text-xs text-gray-500 mt-1 hidden sm:block">Articles, videos, worksheets</p>
                         </div>
                     </div>
                 </a>
 
                 <!-- Providers Card -->
-                <a href="{{ route('resources.providers.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                            <x-icon name="users" class="w-7 h-7 text-purple-600" />
+                <a href="{{ route('resources.providers.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 lg:p-6 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
+                    <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left gap-3 lg:gap-4">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <x-icon name="users" class="w-5 h-5 lg:w-6 lg:h-6 text-purple-600" />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-lg font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Providers</h2>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($counts['providers']) }}</p>
-                            <p class="text-xs text-gray-500 mt-1">Therapists, tutors, coaches</p>
+                            <h2 class="text-sm lg:text-lg font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Providers</h2>
+                            <p class="text-xl lg:text-2xl font-bold text-gray-900">{{ number_format($counts['providers']) }}</p>
+                            <p class="text-xs text-gray-500 mt-1 hidden sm:block">Therapists, tutors, coaches</p>
                         </div>
                     </div>
                 </a>
 
                 <!-- Programs Card -->
-                <a href="{{ route('resources.programs.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                            <x-icon name="building-office" class="w-7 h-7 text-green-600" />
+                <a href="{{ route('resources.programs.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 lg:p-6 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
+                    <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left gap-3 lg:gap-4">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <x-icon name="building-office" class="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-lg font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Programs</h2>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($counts['programs']) }}</p>
-                            <p class="text-xs text-gray-500 mt-1">Interventions, support groups</p>
+                            <h2 class="text-sm lg:text-lg font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Programs</h2>
+                            <p class="text-xl lg:text-2xl font-bold text-gray-900">{{ number_format($counts['programs']) }}</p>
+                            <p class="text-xs text-gray-500 mt-1 hidden sm:block">Interventions, support groups</p>
                         </div>
                     </div>
                 </a>
 
                 <!-- Courses Card -->
-                <a href="{{ route('resources.courses.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                            <x-icon name="academic-cap" class="w-7 h-7 text-orange-600" />
+                <a href="{{ route('resources.courses.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 lg:p-6 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
+                    <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left gap-3 lg:gap-4">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <x-icon name="academic-cap" class="w-5 h-5 lg:w-6 lg:h-6 text-orange-600" />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-lg font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Courses</h2>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($counts['courses']) }}</p>
-                            <p class="text-xs text-gray-500 mt-1">Mini-courses, learning paths</p>
+                            <h2 class="text-sm lg:text-lg font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Courses</h2>
+                            <p class="text-xl lg:text-2xl font-bold text-gray-900">{{ number_format($counts['courses']) }}</p>
+                            <p class="text-xs text-gray-500 mt-1 hidden sm:block">Mini-courses, learning paths</p>
                         </div>
                     </div>
                 </a>
