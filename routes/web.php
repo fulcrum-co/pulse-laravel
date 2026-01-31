@@ -115,6 +115,59 @@ Route::get('/reset-dashboard-temp', function () {
     return "<pre>" . implode("\n", $output) . "</pre>";
 })->middleware('auth');
 
+// Temporary route to seed marketplace - visit once then remove
+Route::get('/seed-marketplace-temp', function () {
+    set_time_limit(300);
+    $output = [];
+    $output[] = "Seeding marketplace data...";
+    $output[] = "";
+
+    try {
+        $school = \App\Models\Organization::where('org_type', 'school')->first();
+        if (!$school) {
+            $school = \App\Models\Organization::first();
+        }
+        if (!$school) {
+            return "<pre>No organization found. Please seed organizations first.</pre>";
+        }
+
+        // Check if already seeded
+        $existingCount = \App\Models\MarketplaceItem::count();
+        if ($existingCount > 0) {
+            $output[] = "Marketplace already has {$existingCount} items.";
+            $output[] = "Skipping to avoid duplicates.";
+            $output[] = "";
+            $output[] = "Visit /marketplace to see the items.";
+            return "<pre>" . implode("\n", $output) . "</pre>";
+        }
+
+        // Run the seeder
+        $seeder = new \Database\Seeders\MarketplaceSeeder();
+        $seeder->run();
+
+        $sellerCount = \App\Models\SellerProfile::count();
+        $itemCount = \App\Models\MarketplaceItem::count();
+        $reviewCount = \App\Models\MarketplaceReview::count();
+
+        $output[] = "SUCCESS! Marketplace seeded:";
+        $output[] = "- {$sellerCount} seller profiles";
+        $output[] = "- {$itemCount} marketplace items";
+        $output[] = "- {$reviewCount} reviews";
+        $output[] = "";
+        $output[] = "Visit /marketplace to see the items.";
+        $output[] = "After confirming, remove this route from routes/web.php";
+
+    } catch (\Exception $e) {
+        $output[] = "ERROR: " . $e->getMessage();
+        $output[] = "File: " . $e->getFile() . ":" . $e->getLine();
+        $output[] = "";
+        $output[] = "Stack trace:";
+        $output[] = $e->getTraceAsString();
+    }
+
+    return "<pre>" . implode("\n", $output) . "</pre>";
+});
+
 // Public dashboard view (shareable reports, no auth required)
 Route::get('/dashboard/{token}', [ReportController::class, 'publicView'])->name('reports.public');
 
