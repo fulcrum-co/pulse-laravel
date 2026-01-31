@@ -61,20 +61,21 @@
     @livewireStyles
     @stack('styles')
 </head>
-<body class="bg-gray-50 {{ session('demo_role_override') && session('demo_role_override') !== 'actual' && auth()->user()?->isActualAdmin() ? 'pt-10' : '' }}">
+<body class="bg-gray-50 {{ session('demo_role_override') && session('demo_role_override') !== 'actual' ? 'pt-10' : '' }}">
     <div x-data="{ sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true', hoveredItem: null }"
          x-init="$watch('sidebarCollapsed', val => localStorage.setItem('sidebarCollapsed', val))"
          class="flex h-screen">
 
         <!-- Sidebar -->
+        @php $inDemoMode = session('demo_role_override') && session('demo_role_override') !== 'actual'; @endphp
         <aside :class="sidebarCollapsed ? 'w-16 sidebar-collapsed overflow-visible' : 'w-64'"
-               class="sidebar-transition bg-white border-r border-gray-200 flex flex-col">
+               class="sidebar-transition flex flex-col {{ $inDemoMode ? 'bg-purple-50 border-r-4 border-purple-400' : 'bg-white border-r border-gray-200' }}">
 
             <!-- Logo & Toggle -->
-            <div class="px-3 py-4 border-b border-gray-200">
+            <div class="px-3 py-4 {{ $inDemoMode ? 'border-b border-purple-200' : 'border-b border-gray-200' }}">
                 <div class="flex items-center justify-between">
                     <a href="/dashboard" class="flex items-center">
-                        <span class="text-2xl font-bold text-pulse-orange-500">
+                        <span class="text-2xl font-bold {{ $inDemoMode ? 'text-purple-600' : 'text-pulse-orange-500' }}">
                             <span x-show="!sidebarCollapsed">Pulse</span>
                             <span x-show="sidebarCollapsed" class="text-xl">P</span>
                         </span>
@@ -89,6 +90,11 @@
                         </svg>
                     </button>
                 </div>
+                @if($inDemoMode)
+                <div x-show="!sidebarCollapsed" class="mt-2 px-2 py-1 bg-purple-100 rounded text-xs text-purple-700 font-medium text-center">
+                    Viewing as: {{ ucfirst(str_replace('_', ' ', session('demo_role_override'))) }}
+                </div>
+                @endif
             </div>
 
             <!-- User Profile & Organization Switcher -->
