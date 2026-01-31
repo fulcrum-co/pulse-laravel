@@ -68,9 +68,14 @@
         @else
         <span></span>
         @endif
-        <a href="{{ route('resources.providers.show', $provider) }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-            View
-        </a>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('resources.providers.show', $provider) }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
+                View
+            </a>
+            <a href="{{ route('resources.providers.show', $provider) }}#connect" class="text-xs font-medium text-green-600 hover:text-green-700">
+                Message
+            </a>
+        </div>
     </div>
 </div>
 @else

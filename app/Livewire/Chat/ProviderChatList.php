@@ -17,11 +17,15 @@ class ProviderChatList extends Component
 
     protected $queryString = [
         'search' => ['except' => ''],
+        'conversation' => ['except' => '', 'as' => 'conversation'],
     ];
+
+    public ?string $conversation = null;
 
     public function mount(?string $conversationId = null): void
     {
-        $this->selectedConversationId = $conversationId;
+        // Handle conversation from query string or parameter
+        $this->selectedConversationId = $conversationId ?? $this->conversation ?? request()->query('conversation');
 
         // Check if we have real conversations or should use demo data
         $user = auth()->user();
@@ -31,6 +35,11 @@ class ProviderChatList extends Component
                 ->where('initiator_id', $user->id)
                 ->count();
             $this->useDemoData = $realConversations === 0;
+        }
+
+        // If a conversation was specified and it's a real one, use real data mode
+        if ($this->selectedConversationId && is_numeric($this->selectedConversationId)) {
+            $this->useDemoData = false;
         }
     }
 
