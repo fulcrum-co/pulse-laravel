@@ -27,12 +27,33 @@ class SurveyController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
-        $surveys = Survey::forOrganization($user->org_id)
+        $effectiveOrgId = $user->effective_org_id;
+
+        // Build query for surveys
+        $query = Survey::query();
+
+        // If user is a consultant/admin at district level, they can see surveys from child orgs
+        if ($user->isAdmin() && $user->organization) {
+            $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
+            $query->whereIn('org_id', $accessibleOrgIds);
+
+            // Filter by specific org if requested
+            if ($request->has('org_filter') && in_array($request->org_filter, $accessibleOrgIds)) {
+                $query->where('org_id', $request->org_filter);
+            }
+        } else {
+            $query->where('org_id', $effectiveOrgId);
+        }
+
+        $surveys = $query->with('organization')
             ->withCount('attempts', 'completedAttempts')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return view('surveys.index', compact('surveys'));
+        // Get accessible orgs for filter dropdown (if admin)
+        $accessibleOrgs = $user->isAdmin() ? $user->getAccessibleOrganizations() : collect();
+
+        return view('surveys.index', compact('surveys', 'accessibleOrgs'));
     }
 
     /**
@@ -224,6 +245,49 @@ class SurveyController extends Controller
             'survey' => $newSurvey,
             'redirect' => route('surveys.edit', $newSurvey),
         ], 201);
+    }
+
+    /**
+     * Push a survey to one or more child organizations.
+     */
+    public function push(Request $request, Survey $survey): JsonResponse
+    {
+        $this->authorize('update', $survey);
+
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'target_org_ids' => 'required|array|min:1',
+            'target_org_ids.*' => 'required|integer|exists:organizations,id',
+        ]);
+
+        $sourceOrg = $survey->organization;
+        $pushed = [];
+        $errors = [];
+
+        foreach ($validated['target_org_ids'] as $targetOrgId) {
+            $targetOrg = \App\Models\Organization::find($targetOrgId);
+
+            // Verify the source org can push to target org
+            if (!$sourceOrg->canPushContentTo($targetOrg)) {
+                $errors[] = "Cannot push to {$targetOrg->org_name} - not a child organization.";
+                continue;
+            }
+
+            $newSurvey = $survey->pushToOrganization($targetOrg, $user->id);
+            $pushed[] = [
+                'org_id' => $targetOrg->id,
+                'org_name' => $targetOrg->org_name,
+                'survey_id' => $newSurvey->id,
+            ];
+        }
+
+        return response()->json([
+            'success' => count($pushed) > 0,
+            'pushed' => $pushed,
+            'errors' => $errors,
+            'message' => count($pushed) . ' survey(s) pushed successfully.',
+        ]);
     }
 
     // ============================================

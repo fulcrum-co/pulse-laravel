@@ -16,12 +16,34 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
+        $effectiveOrgId = $user->effective_org_id;
 
-        $reports = CustomReport::where('org_id', $user->org_id)
+        // Build query for reports
+        $query = CustomReport::query();
+
+        // If user is a consultant/admin at district level, they can see reports from child orgs
+        if ($user->isAdmin() && $user->organization) {
+            // Get all accessible org IDs (includes own org and all descendants)
+            $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
+            $query->whereIn('org_id', $accessibleOrgIds);
+
+            // Filter by specific org if requested
+            if ($request->has('org_filter') && in_array($request->org_filter, $accessibleOrgIds)) {
+                $query->where('org_id', $request->org_filter);
+            }
+        } else {
+            // Regular users only see their effective org's reports
+            $query->where('org_id', $effectiveOrgId);
+        }
+
+        $reports = $query->with('organization')
             ->orderBy('updated_at', 'desc')
             ->paginate(12);
 
-        return view('reports.index', compact('reports'));
+        // Get accessible orgs for filter dropdown (if admin)
+        $accessibleOrgs = $user->isAdmin() ? $user->getAccessibleOrganizations() : collect();
+
+        return view('reports.index', compact('reports', 'accessibleOrgs'));
     }
 
     /**
@@ -48,8 +70,8 @@ class ReportController extends Controller
     {
         $user = auth()->user();
 
-        // Ensure user can access this report
-        if ($report->org_id !== $user->org_id) {
+        // Ensure user can access this report (own org or accessible child org)
+        if (!$user->canAccessOrganization($report->org_id)) {
             abort(403);
         }
 
@@ -67,7 +89,7 @@ class ReportController extends Controller
     {
         $user = auth()->user();
 
-        if ($report->org_id !== $user->org_id) {
+        if (!$user->canAccessOrganization($report->org_id)) {
             abort(403);
         }
 
@@ -75,6 +97,52 @@ class ReportController extends Controller
 
         return redirect()->route('reports.edit', $newReport)
             ->with('success', 'Report duplicated successfully.');
+    }
+
+    /**
+     * Push a report to one or more child organizations.
+     */
+    public function push(Request $request, CustomReport $report)
+    {
+        $user = auth()->user();
+
+        // Only allow push from user's own org
+        if ($report->org_id !== $user->org_id && $report->org_id !== $user->effective_org_id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'target_org_ids' => 'required|array|min:1',
+            'target_org_ids.*' => 'required|integer|exists:organizations,id',
+        ]);
+
+        $sourceOrg = $report->organization;
+        $pushed = [];
+        $errors = [];
+
+        foreach ($validated['target_org_ids'] as $targetOrgId) {
+            $targetOrg = \App\Models\Organization::find($targetOrgId);
+
+            // Verify the source org can push to target org
+            if (!$sourceOrg->canPushContentTo($targetOrg)) {
+                $errors[] = "Cannot push to {$targetOrg->org_name} - not a child organization.";
+                continue;
+            }
+
+            $newReport = $report->pushToOrganization($targetOrg, $user->id);
+            $pushed[] = [
+                'org_id' => $targetOrg->id,
+                'org_name' => $targetOrg->org_name,
+                'report_id' => $newReport->id,
+            ];
+        }
+
+        return response()->json([
+            'success' => count($pushed) > 0,
+            'pushed' => $pushed,
+            'errors' => $errors,
+            'message' => count($pushed) . ' report(s) pushed successfully.',
+        ]);
     }
 
     /**

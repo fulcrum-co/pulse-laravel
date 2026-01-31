@@ -14,6 +14,8 @@ class Survey extends Model
 
     protected $fillable = [
         'org_id',
+        'source_survey_id',
+        'source_org_id',
         'title',
         'description',
         'survey_type',
@@ -76,6 +78,65 @@ class Survey extends Model
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class, 'org_id');
+    }
+
+    /**
+     * Get the source survey this was pushed from.
+     */
+    public function sourceSurvey(): BelongsTo
+    {
+        return $this->belongsTo(Survey::class, 'source_survey_id');
+    }
+
+    /**
+     * Get the source organization this was pushed from.
+     */
+    public function sourceOrganization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'source_org_id');
+    }
+
+    /**
+     * Get all surveys pushed from this survey.
+     */
+    public function pushedSurveys(): HasMany
+    {
+        return $this->hasMany(Survey::class, 'source_survey_id');
+    }
+
+    /**
+     * Push this survey to another organization.
+     * Creates a copy with draft status for the target org to review.
+     */
+    public function pushToOrganization(Organization $targetOrg, ?int $pushedBy = null): self
+    {
+        $newSurvey = $this->replicate([
+            'org_id',
+            'source_survey_id',
+            'source_org_id',
+            'created_by',
+            'status',
+            'start_date',
+            'end_date',
+        ]);
+
+        $newSurvey->org_id = $targetOrg->id;
+        $newSurvey->source_survey_id = $this->id;
+        $newSurvey->source_org_id = $this->org_id;
+        $newSurvey->created_by = $pushedBy;
+        $newSurvey->status = self::STATUS_DRAFT;
+        $newSurvey->title = $this->title . ' (from ' . $this->organization->org_name . ')';
+        $newSurvey->save();
+
+        return $newSurvey;
+    }
+
+    /**
+     * Check if this survey was pushed from another organization.
+     */
+    public function wasPushed(): bool
+    {
+        return $this->source_survey_id !== null;
     }
 
     /**

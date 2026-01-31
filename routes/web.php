@@ -419,6 +419,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/surveys/{survey}', [SurveyController::class, 'destroy'])->name('surveys.destroy');
     Route::post('/surveys/{survey}/toggle', [SurveyController::class, 'toggle'])->name('surveys.toggle');
     Route::post('/surveys/{survey}/duplicate', [SurveyController::class, 'duplicate'])->name('surveys.duplicate');
+    Route::post('/surveys/{survey}/push', [SurveyController::class, 'push'])->name('surveys.push');
 
     // Survey Creation Sessions (AI-assisted)
     Route::post('/api/surveys/sessions/start', [SurveyController::class, 'startCreationSession'])->name('api.surveys.sessions.start');
@@ -632,6 +633,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/{report}/edit', [ReportController::class, 'edit'])->name('reports.edit');
     Route::get('/reports/{report}/preview', [ReportController::class, 'preview'])->name('reports.preview');
     Route::post('/reports/{report}/duplicate', [ReportController::class, 'duplicate'])->name('reports.duplicate');
+    Route::post('/reports/{report}/push', [ReportController::class, 'push'])->name('reports.push');
     Route::get('/reports/{report}/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
     Route::post('/reports/{report}/publish', [ReportController::class, 'publish'])->name('reports.publish');
     Route::delete('/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');

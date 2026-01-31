@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CustomReport extends Model
 {
@@ -25,6 +26,8 @@ class CustomReport extends Model
 
     protected $fillable = [
         'org_id',
+        'source_report_id',
+        'source_org_id',
         'team_id',
         'created_by',
         'report_name',
@@ -89,6 +92,67 @@ class CustomReport extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the source report this was pushed from.
+     */
+    public function sourceReport(): BelongsTo
+    {
+        return $this->belongsTo(CustomReport::class, 'source_report_id');
+    }
+
+    /**
+     * Get the source organization this was pushed from.
+     */
+    public function sourceOrganization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'source_org_id');
+    }
+
+    /**
+     * Get all reports pushed from this report.
+     */
+    public function pushedReports(): HasMany
+    {
+        return $this->hasMany(CustomReport::class, 'source_report_id');
+    }
+
+    /**
+     * Push this report to another organization.
+     * Creates a copy as draft for the target org to review and customize.
+     */
+    public function pushToOrganization(Organization $targetOrg, ?int $pushedBy = null): self
+    {
+        $newReport = $this->replicate([
+            'org_id',
+            'source_report_id',
+            'source_org_id',
+            'created_by',
+            'status',
+            'public_token',
+            'version',
+        ]);
+
+        $newReport->org_id = $targetOrg->id;
+        $newReport->source_report_id = $this->id;
+        $newReport->source_org_id = $this->org_id;
+        $newReport->created_by = $pushedBy;
+        $newReport->status = self::STATUS_DRAFT;
+        $newReport->public_token = null;
+        $newReport->version = 1;
+        $newReport->report_name = $this->report_name . ' (from ' . $this->organization->org_name . ')';
+        $newReport->save();
+
+        return $newReport;
+    }
+
+    /**
+     * Check if this report was pushed from another organization.
+     */
+    public function wasPushed(): bool
+    {
+        return $this->source_report_id !== null;
     }
 
     /**

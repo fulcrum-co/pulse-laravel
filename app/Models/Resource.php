@@ -13,6 +13,8 @@ class Resource extends Model
 
     protected $fillable = [
         'org_id',
+        'source_resource_id',
+        'source_org_id',
         'title',
         'description',
         'resource_type',
@@ -54,11 +56,66 @@ class Resource extends Model
     }
 
     /**
+     * Get the source resource this was pushed from.
+     */
+    public function sourceResource(): BelongsTo
+    {
+        return $this->belongsTo(Resource::class, 'source_resource_id');
+    }
+
+    /**
+     * Get the source organization this was pushed from.
+     */
+    public function sourceOrganization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'source_org_id');
+    }
+
+    /**
+     * Get all resources pushed from this resource.
+     */
+    public function pushedResources(): HasMany
+    {
+        return $this->hasMany(Resource::class, 'source_resource_id');
+    }
+
+    /**
      * Get all assignments for this resource.
      */
     public function assignments(): HasMany
     {
         return $this->hasMany(ResourceAssignment::class);
+    }
+
+    /**
+     * Push this resource to another organization.
+     * Creates a copy for the target org.
+     */
+    public function pushToOrganization(Organization $targetOrg, ?int $pushedBy = null): self
+    {
+        $newResource = $this->replicate([
+            'org_id',
+            'source_resource_id',
+            'source_org_id',
+            'created_by',
+        ]);
+
+        $newResource->org_id = $targetOrg->id;
+        $newResource->source_resource_id = $this->id;
+        $newResource->source_org_id = $this->org_id;
+        $newResource->created_by = $pushedBy;
+        $newResource->title = $this->title . ' (from ' . $this->organization->org_name . ')';
+        $newResource->save();
+
+        return $newResource;
+    }
+
+    /**
+     * Check if this resource was pushed from another organization.
+     */
+    public function wasPushed(): bool
+    {
+        return $this->source_resource_id !== null;
     }
 
     /**
