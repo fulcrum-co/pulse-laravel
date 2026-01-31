@@ -4,6 +4,7 @@ namespace App\Livewire\Chat;
 
 use App\Models\Provider;
 use App\Models\ProviderConversation;
+use App\Services\DemoConversationService;
 use App\Services\StreamChatService;
 use Illuminate\Support\Collection;
 use Livewire\Component;
@@ -11,15 +12,26 @@ use Livewire\Component;
 class ProviderChatList extends Component
 {
     public string $search = '';
-    public ?int $selectedConversationId = null;
+    public ?string $selectedConversationId = null;
+    public bool $useDemoData = true;
 
     protected $queryString = [
         'search' => ['except' => ''],
     ];
 
-    public function mount(?int $conversationId = null): void
+    public function mount(?string $conversationId = null): void
     {
         $this->selectedConversationId = $conversationId;
+
+        // Check if we have real conversations or should use demo data
+        $user = auth()->user();
+        if ($user) {
+            $realConversations = ProviderConversation::query()
+                ->where('initiator_type', get_class($user))
+                ->where('initiator_id', $user->id)
+                ->count();
+            $this->useDemoData = $realConversations === 0;
+        }
     }
 
     /**
@@ -27,6 +39,11 @@ class ProviderChatList extends Component
      */
     public function getConversationsProperty(): Collection
     {
+        // Use demo data if no real conversations exist
+        if ($this->useDemoData) {
+            return $this->getDemoConversations();
+        }
+
         $user = auth()->user();
 
         $query = ProviderConversation::query()
@@ -46,10 +63,37 @@ class ProviderChatList extends Component
     }
 
     /**
+     * Get demo conversations.
+     */
+    protected function getDemoConversations(): Collection
+    {
+        $conversations = DemoConversationService::getConversations();
+
+        $demoConversations = array_map(
+            fn($conv) => DemoConversationService::createDemoConversation($conv),
+            $conversations
+        );
+
+        // Filter by search if needed
+        if ($this->search) {
+            $search = strtolower($this->search);
+            $demoConversations = array_filter($demoConversations, function ($conv) use ($search) {
+                return str_contains(strtolower($conv->provider->name), $search);
+            });
+        }
+
+        return collect($demoConversations);
+    }
+
+    /**
      * Get unread count for the current user.
      */
     public function getUnreadCountProperty(): int
     {
+        if ($this->useDemoData) {
+            return collect($this->conversations)->sum('unread_count_initiator');
+        }
+
         $user = auth()->user();
 
         return ProviderConversation::query()
@@ -65,6 +109,14 @@ class ProviderChatList extends Component
      */
     public function getAvailableProvidersProperty(): Collection
     {
+        if ($this->useDemoData) {
+            $providers = DemoConversationService::getAvailableProviders();
+            return collect(array_map(
+                fn($p) => DemoConversationService::createDemoProvider($p),
+                $providers
+            ));
+        }
+
         $user = auth()->user();
 
         // Get providers not already in conversation with this user
@@ -85,25 +137,36 @@ class ProviderChatList extends Component
     /**
      * Select a conversation.
      */
-    public function selectConversation(int $conversationId): void
+    public function selectConversation(string $conversationId): void
     {
         $this->selectedConversationId = $conversationId;
 
-        // Mark as read
-        $conversation = ProviderConversation::find($conversationId);
-        if ($conversation) {
-            $conversation->markReadByInitiator();
+        // Mark as read for real conversations
+        if (!$this->useDemoData && is_numeric($conversationId)) {
+            $conversation = ProviderConversation::find($conversationId);
+            if ($conversation) {
+                $conversation->markReadByInitiator();
+            }
         }
 
         // Emit event for the chat window
-        $this->dispatch('conversation-selected', conversationId: $conversationId);
+        $this->dispatch('conversation-selected', conversationId: $conversationId, isDemo: $this->useDemoData);
     }
 
     /**
      * Start a new conversation with a provider.
      */
-    public function startConversation(int $providerId): void
+    public function startConversation(string $providerId): void
     {
+        // For demo providers, just select a demo conversation
+        if (str_starts_with($providerId, 'demo_')) {
+            $conversations = $this->conversations;
+            if ($conversations->isNotEmpty()) {
+                $this->selectConversation($conversations->first()->id);
+            }
+            return;
+        }
+
         $user = auth()->user();
         $provider = Provider::findOrFail($providerId);
 
@@ -115,7 +178,7 @@ class ProviderChatList extends Component
             ->first();
 
         if ($existing) {
-            $this->selectConversation($existing->id);
+            $this->selectConversation((string) $existing->id);
             return;
         }
 
@@ -138,7 +201,8 @@ class ProviderChatList extends Component
                 'status' => ProviderConversation::STATUS_ACTIVE,
             ]);
 
-            $this->selectConversation($conversation->id);
+            $this->useDemoData = false;
+            $this->selectConversation((string) $conversation->id);
 
             session()->flash('message', "Started conversation with {$provider->name}");
         } catch (\Exception $e) {
@@ -149,8 +213,13 @@ class ProviderChatList extends Component
     /**
      * Archive a conversation.
      */
-    public function archiveConversation(int $conversationId): void
+    public function archiveConversation(string $conversationId): void
     {
+        if ($this->useDemoData) {
+            session()->flash('message', 'Demo conversations cannot be archived');
+            return;
+        }
+
         $conversation = ProviderConversation::find($conversationId);
 
         if ($conversation && $conversation->initiator_id === auth()->id()) {

@@ -1,16 +1,21 @@
-<div class="flex flex-col h-full bg-gray-50">
+<div class="flex flex-col h-full bg-gray-50" x-data="{ showAttachments: false }">
     @if($conversation)
     <!-- Chat Header -->
     <div class="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
         <div class="flex items-center gap-4">
             <!-- Provider Avatar -->
-            @if($conversation->provider->thumbnail_url)
-            <img src="{{ $conversation->provider->thumbnail_url }}" alt="" class="w-12 h-12 rounded-full object-cover">
-            @else
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pulse-orange-400 to-pulse-orange-600 flex items-center justify-center">
-                <span class="text-white font-semibold text-lg">{{ substr($conversation->provider->name, 0, 1) }}</span>
+            <div class="relative">
+                @if($conversation->provider->thumbnail_url)
+                <img src="{{ $conversation->provider->thumbnail_url }}" alt="" class="w-12 h-12 rounded-full object-cover">
+                @else
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pulse-orange-400 to-pulse-orange-600 flex items-center justify-center">
+                    <span class="text-white font-semibold text-lg">{{ substr($conversation->provider->name, 0, 1) }}</span>
+                </div>
+                @endif
+                @if($conversation->provider->online ?? false)
+                <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                @endif
             </div>
-            @endif
 
             <!-- Provider Info -->
             <div>
@@ -25,12 +30,30 @@
                         Verified
                     </span>
                     @endif
+                    @if($conversation->provider->online ?? false)
+                    <span class="flex items-center gap-1 text-green-600">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Online
+                    </span>
+                    @endif
                 </div>
             </div>
         </div>
 
         <!-- Actions -->
         <div class="flex items-center gap-2">
+            <!-- Video Call Button -->
+            <button
+                wire:click="startVideoCall"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+                title="Start video call"
+            >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                Video Call
+            </button>
+
             <!-- Book Session Button -->
             <button
                 wire:click="openBookingModal"
@@ -56,13 +79,13 @@
                     x-transition
                     class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10"
                 >
-                    <a href="{{ route('resources.providers.show', $conversation->provider_id) }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <button @click="open = false" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>
                         View Profile
-                    </a>
-                    <button wire:click="$parent.archiveConversation({{ $conversation->id }})" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                    </button>
+                    <button wire:click="$parent.archiveConversation('{{ $conversation->id }}')" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
                         </svg>
@@ -78,23 +101,41 @@
         @if($conversation->student)
         <div class="flex justify-center">
             <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                Regarding: {{ $conversation->student->full_name }}
+                Regarding: {{ $conversation->student->full_name ?? $conversation->student->name }}
+            </span>
+        </div>
+        @endif
+
+        @if($isDemo)
+        <div class="flex justify-center mb-4">
+            <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs rounded-full flex items-center gap-1">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                Demo Conversation - Try sending a message or starting a video call
             </span>
         </div>
         @endif
 
         @forelse($messages as $message)
         @php
-            $isCurrentUser = str_starts_with($message['user']['id'] ?? '', 'user_' . auth()->id());
-            $isProvider = str_starts_with($message['user']['id'] ?? '', 'provider_');
+            $isCurrentUser = $this->isCurrentUserMessage($message);
+            $isSystem = ($message['is_system'] ?? false) || ($message['user']['id'] ?? '') === 'system';
         @endphp
 
+        @if($isSystem)
+        <div class="flex justify-center">
+            <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                {{ $message['text'] ?? '' }}
+            </span>
+        </div>
+        @else
         <div class="flex {{ $isCurrentUser ? 'justify-end' : 'justify-start' }}">
             <div class="flex items-end gap-2 max-w-lg {{ $isCurrentUser ? 'flex-row-reverse' : '' }}">
                 <!-- Avatar -->
                 @if(!$isCurrentUser)
                 <div class="flex-shrink-0">
-                    @if($isProvider && $conversation->provider->thumbnail_url)
+                    @if($conversation->provider->thumbnail_url)
                     <img src="{{ $conversation->provider->thumbnail_url }}" alt="" class="w-8 h-8 rounded-full object-cover">
                     @else
                     <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
@@ -105,7 +146,7 @@
                 @endif
 
                 <!-- Message Bubble -->
-                <div class="{{ $isCurrentUser ? 'bg-pulse-orange-500 text-white' : 'bg-white border border-gray-200' }} px-4 py-3 rounded-2xl {{ $isCurrentUser ? 'rounded-br-md' : 'rounded-bl-md' }}">
+                <div class="{{ $isCurrentUser ? 'bg-pulse-orange-500 text-white' : 'bg-white border border-gray-200' }} px-4 py-3 rounded-2xl {{ $isCurrentUser ? 'rounded-br-md' : 'rounded-bl-md' }} shadow-sm">
                     <p class="text-sm whitespace-pre-wrap">{{ $message['text'] ?? '' }}</p>
                     <p class="text-xs {{ $isCurrentUser ? 'text-orange-200' : 'text-gray-400' }} mt-1">
                         {{ $this->formatMessageTime($message['created_at'] ?? now()) }}
@@ -113,6 +154,7 @@
                 </div>
             </div>
         </div>
+        @endif
         @empty
         <div class="flex flex-col items-center justify-center h-full text-center">
             <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -129,6 +171,17 @@
     <!-- Message Input -->
     <div class="px-6 py-4 bg-white border-t border-gray-200">
         <form wire:submit="sendMessage" class="flex items-end gap-3">
+            <!-- Attachment button -->
+            <button
+                type="button"
+                @click="showAttachments = !showAttachments"
+                class="flex-shrink-0 p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                </svg>
+            </button>
+
             <div class="flex-1">
                 <textarea
                     wire:model="messageText"
@@ -173,6 +226,158 @@
         </p>
     </div>
     @endif
+
+    <!-- Video Call Modal -->
+    @if($showVideoModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/75" x-data="videoCall()" x-init="init()">
+        <div class="relative w-full max-w-4xl h-[80vh] bg-gray-900 rounded-2xl overflow-hidden shadow-2xl">
+            <!-- Video Container -->
+            <div class="relative h-full">
+                <!-- Remote Video (Full Screen) -->
+                <div class="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900">
+                    @if($videoCallState === 'connecting')
+                    <div class="flex flex-col items-center justify-center h-full">
+                        <div class="w-32 h-32 rounded-full bg-gradient-to-br from-pulse-orange-400 to-pulse-orange-600 flex items-center justify-center mb-6 animate-pulse">
+                            @if($conversation->provider->thumbnail_url)
+                            <img src="{{ $conversation->provider->thumbnail_url }}" alt="" class="w-28 h-28 rounded-full object-cover">
+                            @else
+                            <span class="text-white text-4xl font-bold">{{ substr($conversation->provider->name, 0, 1) }}</span>
+                            @endif
+                        </div>
+                        <h3 class="text-white text-xl font-semibold mb-2">{{ $conversation->provider->name }}</h3>
+                        <p class="text-gray-400 flex items-center gap-2">
+                            <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Connecting...
+                        </p>
+                        <button
+                            wire:click="connectCall"
+                            class="mt-6 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        >
+                            Simulate Connect
+                        </button>
+                    </div>
+                    @elseif($videoCallState === 'connected')
+                    <div class="flex flex-col items-center justify-center h-full">
+                        <!-- Simulated video feed -->
+                        <div class="relative">
+                            @if($conversation->provider->thumbnail_url)
+                            <img src="{{ $conversation->provider->thumbnail_url }}" alt="" class="w-48 h-48 rounded-full object-cover ring-4 ring-green-500 ring-offset-4 ring-offset-gray-900">
+                            @else
+                            <div class="w-48 h-48 rounded-full bg-gradient-to-br from-pulse-orange-400 to-pulse-orange-600 flex items-center justify-center ring-4 ring-green-500 ring-offset-4 ring-offset-gray-900">
+                                <span class="text-white text-6xl font-bold">{{ substr($conversation->provider->name, 0, 1) }}</span>
+                            </div>
+                            @endif
+                            <span class="absolute bottom-2 right-2 w-4 h-4 bg-green-500 rounded-full animate-pulse"></span>
+                        </div>
+                        <h3 class="text-white text-xl font-semibold mt-6">{{ $conversation->provider->name }}</h3>
+                        <p class="text-green-400 flex items-center gap-2 mt-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            Connected
+                        </p>
+                        <p class="text-gray-400 text-sm mt-1" x-text="callDuration"></p>
+                    </div>
+                    @elseif($videoCallState === 'ended')
+                    <div class="flex flex-col items-center justify-center h-full">
+                        <div class="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
+                            <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-white text-xl font-semibold">Call Ended</h3>
+                        <p class="text-gray-400 mt-2" x-text="'Duration: ' + callDuration"></p>
+                    </div>
+                    @endif
+                </div>
+
+                <!-- Local Video (Picture in Picture) -->
+                @if($videoCallState === 'connected')
+                <div class="absolute bottom-24 right-6 w-48 h-36 bg-gray-800 rounded-xl overflow-hidden shadow-lg border-2 border-gray-700">
+                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800">
+                        <span class="text-gray-400 text-sm">Your camera</span>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Call Controls -->
+                <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+                    <div class="flex items-center justify-center gap-4">
+                        <!-- Mute -->
+                        <button
+                            @click="toggleMute()"
+                            :class="isMuted ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-700 hover:bg-gray-600'"
+                            class="p-4 rounded-full transition-colors"
+                        >
+                            <svg x-show="!isMuted" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                            </svg>
+                            <svg x-show="isMuted" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clip-rule="evenodd"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Camera Toggle -->
+                        <button
+                            @click="toggleCamera()"
+                            :class="cameraOff ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-700 hover:bg-gray-600'"
+                            class="p-4 rounded-full transition-colors"
+                        >
+                            <svg x-show="!cameraOff" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                            <svg x-show="cameraOff" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                            </svg>
+                        </button>
+
+                        <!-- End Call -->
+                        <button
+                            wire:click="endVideoCall"
+                            class="p-4 bg-red-600 hover:bg-red-700 rounded-full transition-colors"
+                        >
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Screen Share -->
+                        <button
+                            @click="toggleScreenShare()"
+                            :class="isScreenSharing ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-700 hover:bg-gray-600'"
+                            class="p-4 rounded-full transition-colors"
+                        >
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Chat Toggle -->
+                        <button
+                            class="p-4 bg-gray-700 hover:bg-gray-600 rounded-full transition-colors"
+                        >
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Close Button -->
+                <button
+                    wire:click="closeVideoModal"
+                    class="absolute top-4 right-4 p-2 bg-gray-800/80 hover:bg-gray-700 rounded-full transition-colors"
+                >
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 
 @push('scripts')
@@ -190,5 +395,46 @@
             }
         });
     });
+
+    // Video call Alpine component
+    function videoCall() {
+        return {
+            isMuted: false,
+            cameraOff: false,
+            isScreenSharing: false,
+            callDuration: '0:00',
+            callStart: null,
+            interval: null,
+
+            init() {
+                this.callStart = new Date();
+                this.interval = setInterval(() => {
+                    const now = new Date();
+                    const diff = Math.floor((now - this.callStart) / 1000);
+                    const minutes = Math.floor(diff / 60);
+                    const seconds = diff % 60;
+                    this.callDuration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            },
+
+            toggleMute() {
+                this.isMuted = !this.isMuted;
+            },
+
+            toggleCamera() {
+                this.cameraOff = !this.cameraOff;
+            },
+
+            toggleScreenShare() {
+                this.isScreenSharing = !this.isScreenSharing;
+            },
+
+            destroy() {
+                if (this.interval) {
+                    clearInterval(this.interval);
+                }
+            }
+        }
+    }
 </script>
 @endpush

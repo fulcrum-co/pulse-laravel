@@ -5,11 +5,18 @@
         <div class="p-4 border-b border-gray-200">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900">Messages</h2>
-                @if($unreadCount > 0)
-                <span class="px-2 py-1 bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium rounded-full">
-                    {{ $unreadCount }} unread
-                </span>
-                @endif
+                <div class="flex items-center gap-2">
+                    @if($unreadCount > 0)
+                    <span class="px-2 py-1 bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium rounded-full">
+                        {{ $unreadCount }} unread
+                    </span>
+                    @endif
+                    @if($useDemoData)
+                    <span class="px-2 py-1 bg-purple-100 text-purple-600 text-xs font-medium rounded-full">
+                        Demo
+                    </span>
+                    @endif
+                </div>
             </div>
 
             <!-- Search -->
@@ -30,17 +37,20 @@
         <div class="flex-1 overflow-y-auto">
             @forelse($conversations as $conv)
             <button
-                wire:click="selectConversation({{ $conv->id }})"
+                wire:click="selectConversation('{{ $conv->id }}')"
                 class="w-full flex items-start gap-3 p-4 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 {{ $selectedConversationId === $conv->id ? 'bg-pulse-orange-50 border-l-4 border-l-pulse-orange-500' : '' }}"
             >
                 <!-- Avatar -->
-                <div class="flex-shrink-0">
+                <div class="flex-shrink-0 relative">
                     @if($conv->provider->thumbnail_url)
                     <img src="{{ $conv->provider->thumbnail_url }}" alt="" class="w-12 h-12 rounded-full object-cover">
                     @else
                     <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pulse-orange-400 to-pulse-orange-600 flex items-center justify-center">
                         <span class="text-white font-semibold text-lg">{{ substr($conv->provider->name, 0, 1) }}</span>
                     </div>
+                    @endif
+                    @if($conv->provider->online ?? false)
+                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                     @endif
                 </div>
 
@@ -52,7 +62,17 @@
                         <span class="text-xs text-gray-500">{{ $conv->last_message_at->diffForHumans(null, true) }}</span>
                         @endif
                     </div>
-                    <p class="text-xs text-gray-500 mb-1">{{ ucfirst($conv->provider->provider_type) }}</p>
+                    <div class="flex items-center gap-1 text-xs text-gray-500 mb-1">
+                        <span>{{ ucfirst($conv->provider->provider_type) }}</span>
+                        @if($conv->provider->isVerified())
+                        <svg class="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        @endif
+                    </div>
+                    @if($conv->student)
+                    <p class="text-xs text-blue-600 mb-1">Re: {{ $conv->student->name }}</p>
+                    @endif
                     @if($conv->last_message_preview)
                     <p class="text-sm text-gray-600 truncate">{{ $conv->last_message_preview }}</p>
                     @endif
@@ -83,7 +103,7 @@
             <div class="space-y-2 max-h-32 overflow-y-auto">
                 @foreach($availableProviders as $provider)
                 <button
-                    wire:click="startConversation({{ $provider->id }})"
+                    wire:click="startConversation('{{ $provider->id }}')"
                     class="w-full flex items-center gap-2 p-2 text-left text-sm rounded-lg hover:bg-white transition-colors"
                 >
                     @if($provider->thumbnail_url)
@@ -109,6 +129,6 @@
 
     <!-- Chat Window -->
     <div class="flex-1">
-        @livewire('chat.provider-chat-window', ['conversationId' => $selectedConversationId])
+        @livewire('chat.provider-chat-window', ['conversationId' => $selectedConversationId, 'isDemo' => $useDemoData])
     </div>
 </div>
