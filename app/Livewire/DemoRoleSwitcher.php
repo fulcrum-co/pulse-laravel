@@ -41,15 +41,15 @@ class DemoRoleSwitcher extends Component
         $this->currentRole = $role;
         $this->isOpen = false;
 
-        // Refresh the page to apply the new role
-        $this->dispatch('refresh-page');
+        // Refresh the page to apply the new role using Livewire's redirect
+        $this->redirect(request()->url(), navigate: false);
     }
 
     public function clearDemoRole(): void
     {
         session()->forget('demo_role_override');
         $this->currentRole = 'actual';
-        $this->dispatch('refresh-page');
+        $this->redirect(request()->url(), navigate: false);
     }
 
     public function render()

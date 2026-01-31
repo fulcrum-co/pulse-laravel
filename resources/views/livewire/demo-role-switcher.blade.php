@@ -135,13 +135,4 @@
         </div>
     </div>
 </div>
-
-<!-- Page Refresh Script -->
-<script>
-    document.addEventListener('livewire:init', () => {
-        Livewire.on('refresh-page', () => {
-            window.location.reload();
-        });
-    });
-</script>
 @endif
