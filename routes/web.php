@@ -199,13 +199,39 @@ Route::get('/seed-district-temp', function () {
             ->whereNull('parent_org_id')
             ->get();
 
-        foreach ($schools as $school) {
-            $school->update(['parent_org_id' => $district->id]);
-            $output[] = "Linked school to district: " . $school->org_name;
+        if ($schools->isEmpty()) {
+            $output[] = "";
+            $output[] = "No schools found. Creating sample schools...";
+
+            // Create sample schools
+            $schoolData = [
+                ['org_name' => 'Lincoln High School', 'primary_contact_email' => 'admin@lincolnhs.edu'],
+                ['org_name' => 'Washington Middle School', 'primary_contact_email' => 'admin@washingtonms.edu'],
+                ['org_name' => 'Jefferson Elementary', 'primary_contact_email' => 'admin@jeffersonelem.edu'],
+                ['org_name' => 'Roosevelt Elementary', 'primary_contact_email' => 'admin@rooseveltelem.edu'],
+            ];
+
+            foreach ($schoolData as $data) {
+                $school = \App\Models\Organization::create([
+                    'org_type' => 'school',
+                    'org_name' => $data['org_name'],
+                    'parent_org_id' => $district->id,
+                    'primary_contact_email' => $data['primary_contact_email'],
+                    'timezone' => 'America/Los_Angeles',
+                    'subscription_status' => 'active',
+                    'active' => true,
+                ]);
+                $output[] = "Created school: " . $school->org_name;
+            }
+        } else {
+            foreach ($schools as $school) {
+                $school->update(['parent_org_id' => $district->id]);
+                $output[] = "Linked school to district: " . $school->org_name;
+            }
         }
 
         // Create consultant user at district level
-        $consultant = \App\Models\User::where('primary_role', 'consultant')->first();
+        $consultant = \App\Models\User::where('email', 'superintendent@lincolnschools.edu')->first();
         if (!$consultant) {
             $consultant = \App\Models\User::create([
                 'org_id' => $district->id,
@@ -218,18 +244,36 @@ Route::get('/seed-district-temp', function () {
                 'active' => true,
                 'suspended' => false,
             ]);
+            $output[] = "";
             $output[] = "Created consultant: superintendent@lincolnschools.edu";
         } else {
-            // Move existing consultant to district level
-            $consultant->update(['org_id' => $district->id]);
-            $output[] = "Moved consultant to district: " . $consultant->email;
+            // Update existing consultant to district level
+            $consultant->update([
+                'org_id' => $district->id,
+                'primary_role' => 'consultant',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            ]);
+            $output[] = "";
+            $output[] = "Updated consultant: " . $consultant->email;
+        }
+
+        // Verify the hierarchy
+        $output[] = "";
+        $output[] = "=== VERIFICATION ===";
+        $childCount = \App\Models\Organization::where('parent_org_id', $district->id)->count();
+        $output[] = "District: " . $district->org_name . " (ID: " . $district->id . ")";
+        $output[] = "Child schools: " . $childCount;
+
+        $childSchools = \App\Models\Organization::where('parent_org_id', $district->id)->get();
+        foreach ($childSchools as $child) {
+            $output[] = "  - " . $child->org_name . " (ID: " . $child->id . ")";
         }
 
         $output[] = "";
         $output[] = "=== SUCCESS ===";
         $output[] = "";
         $output[] = "Login as consultant:";
-        $output[] = "  Email: " . $consultant->email;
+        $output[] = "  Email: superintendent@lincolnschools.edu";
         $output[] = "  Password: password";
         $output[] = "";
         $output[] = "The consultant can switch between schools using the dropdown";
@@ -237,6 +281,7 @@ Route::get('/seed-district-temp', function () {
 
     } catch (\Exception $e) {
         $output[] = "ERROR: " . $e->getMessage();
+        $output[] = "Line: " . $e->getLine();
     }
 
     return "<pre>" . implode("\n", $output) . "</pre>";
