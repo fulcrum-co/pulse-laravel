@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Carbon\Carbon;
+use stdClass;
 
 class DemoConversationService
 {
@@ -443,91 +444,65 @@ class DemoConversationService
     }
 
     /**
-     * Create a demo provider object.
+     * Create a demo provider object (using stdClass for Livewire serialization).
      */
-    public static function createDemoProvider(array $data): object
+    public static function createDemoProvider(array $data): stdClass
     {
-        return new class($data) {
-            public $id;
-            public $name;
-            public $display_name;
-            public $provider_type;
-            public $thumbnail_url;
-            public $verified;
-            public $online;
-
-            public function __construct(array $data)
-            {
-                foreach ($data as $key => $value) {
-                    $this->$key = $value;
-                }
-            }
-
-            public function isVerified(): bool
-            {
-                return $this->verified ?? false;
-            }
-
-            public function isOnline(): bool
-            {
-                return $this->online ?? false;
-            }
-        };
+        $obj = new stdClass();
+        $obj->id = $data['id'] ?? '';
+        $obj->name = $data['name'] ?? '';
+        $obj->display_name = $data['display_name'] ?? $data['name'] ?? '';
+        $obj->provider_type = $data['provider_type'] ?? '';
+        $obj->thumbnail_url = $data['thumbnail_url'] ?? '';
+        $obj->verified = $data['verified'] ?? false;
+        $obj->online = $data['online'] ?? false;
+        return $obj;
     }
 
     /**
-     * Create a demo student object.
+     * Create a demo student object (using stdClass for Livewire serialization).
      */
-    public static function createDemoStudent(array $data): object
+    public static function createDemoStudent(array $data): stdClass
     {
-        return new class($data) {
-            public $id;
-            public $name;
-            public $full_name;
-            public $grade;
-
-            public function __construct(array $data)
-            {
-                $this->id = $data['id'];
-                $this->name = $data['name'];
-                $this->full_name = $data['name'];
-                $this->grade = $data['grade'];
-            }
-        };
+        $obj = new stdClass();
+        $obj->id = $data['id'] ?? '';
+        $obj->name = $data['name'] ?? '';
+        $obj->full_name = $data['name'] ?? '';
+        $obj->grade = $data['grade'] ?? '';
+        return $obj;
     }
 
     /**
-     * Create a demo conversation object.
+     * Create a demo conversation object (using stdClass for Livewire serialization).
      */
-    public static function createDemoConversation(array $data): object
+    public static function createDemoConversation(array $data): stdClass
     {
-        return new class($data) {
-            public $id;
-            public $provider;
-            public $student;
-            public $last_message_preview;
-            public $last_message_at;
-            public $unread_count_initiator;
-            public $stream_channel_id;
-            public $stream_channel_type = 'messaging';
-            public $provider_id;
+        $obj = new stdClass();
+        $obj->id = $data['id'] ?? '';
+        $obj->provider = self::createDemoProvider($data['provider'] ?? []);
+        $obj->student = isset($data['student']) && $data['student'] ? self::createDemoStudent($data['student']) : null;
+        $obj->last_message_preview = $data['last_message'] ?? '';
+        $obj->last_message_at = $data['last_message_at'] ?? now();
+        $obj->unread_count_initiator = $data['unread_count'] ?? 0;
+        $obj->stream_channel_id = $data['stream_channel_id'] ?? '';
+        $obj->stream_channel_type = 'messaging';
+        $obj->provider_id = $data['provider']['id'] ?? '';
+        return $obj;
+    }
 
-            public function __construct(array $data)
-            {
-                $this->id = $data['id'];
-                $this->provider = DemoConversationService::createDemoProvider($data['provider']);
-                $this->student = $data['student'] ? DemoConversationService::createDemoStudent($data['student']) : null;
-                $this->last_message_preview = $data['last_message'];
-                $this->last_message_at = $data['last_message_at'];
-                $this->unread_count_initiator = $data['unread_count'];
-                $this->stream_channel_id = $data['stream_channel_id'];
-                $this->provider_id = $data['provider']['id'];
-            }
+    /**
+     * Helper to check if provider is verified (for use in templates).
+     */
+    public static function isVerified(stdClass $provider): bool
+    {
+        return $provider->verified ?? false;
+    }
 
-            public function markReadByInitiator(): void
-            {
-                $this->unread_count_initiator = 0;
-            }
-        };
+    /**
+     * Helper to check if provider is online (for use in templates).
+     */
+    public static function isOnline(stdClass $provider): bool
+    {
+        return $provider->online ?? false;
     }
 }
