@@ -247,7 +247,9 @@ class ResourceDetail extends Component
         $user = auth()->user();
         $hasDownstream = $user->organization?->getDownstreamOrganizations()->count() > 0;
         $hasAssignedOrgs = $user->organizations()->count() > 0;
-        return ($user->isAdmin() && $hasDownstream) || ($user->primary_role === 'consultant' && $hasAssignedOrgs);
+
+        // Can push if: has downstream orgs from primary org, OR is consultant with assigned orgs
+        return $hasDownstream || ($user->primary_role === 'consultant' && $hasAssignedOrgs);
     }
 
     /**
