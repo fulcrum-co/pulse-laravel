@@ -30,7 +30,10 @@ Route::get('/notifications/unsubscribe/{user}', [NotificationController::class, 
 Route::post('/api/notifications/{notification}/resolve', function (UserNotification $notification) {
     abort_unless($notification->user_id === auth()->id(), 403);
     $notification->resolve();
-    return response()->json(['success' => true]);
+
+    // Return updated unread count for header badge
+    $unreadCount = UserNotification::getUnreadCountForUser(auth()->id());
+    return response()->json(['success' => true, 'unread_count' => $unreadCount]);
 })->middleware(['web', 'auth'])->name('notifications.resolve');
 
 // Root redirect to dashboard

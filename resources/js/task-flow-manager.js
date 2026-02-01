@@ -89,7 +89,17 @@ document.addEventListener('alpine:init', () => {
                         'X-CSRF-TOKEN': csrfToken,
                         'Accept': 'application/json',
                     },
-                }).catch(err => {
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Update the header notification badge
+                    if (data.unread_count !== undefined) {
+                        window.dispatchEvent(new CustomEvent('notification-badge-update', {
+                            detail: { count: data.unread_count }
+                        }));
+                    }
+                })
+                .catch(err => {
                     console.error('Task flow: Failed to resolve notification', err);
                 });
             }
