@@ -83,6 +83,11 @@ class MiniCourse extends Model
         'approved_by',
         'approved_at',
         'approval_notes',
+        // Generation tracking
+        'generation_request_id',
+        'template_id',
+        'assigned_student_ids',
+        'assigned_group_id',
     ];
 
     protected $casts = [
@@ -98,6 +103,7 @@ class MiniCourse extends Model
         'published_at' => 'datetime',
         'auto_generated_at' => 'datetime',
         'approved_at' => 'datetime',
+        'assigned_student_ids' => 'array',
     ];
 
     protected $attributes = [
@@ -249,6 +255,22 @@ class MiniCourse extends Model
     public function targetEntity(): \Illuminate\Database\Eloquent\Relations\MorphTo
     {
         return $this->morphTo('target_entity', 'target_entity_type', 'target_entity_id');
+    }
+
+    /**
+     * Generation request that created this course.
+     */
+    public function generationRequest(): BelongsTo
+    {
+        return $this->belongsTo(CourseGenerationRequest::class, 'generation_request_id');
+    }
+
+    /**
+     * Template used to generate this course.
+     */
+    public function template(): BelongsTo
+    {
+        return $this->belongsTo(CourseTemplate::class, 'template_id');
     }
 
     /**
