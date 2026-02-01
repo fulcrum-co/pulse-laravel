@@ -673,6 +673,11 @@
         return {
             chart: null,
             init() {
+                // Destroy existing chart if present
+                const existingChart = Chart.getChart(this.$refs.canvas);
+                if (existingChart) {
+                    existingChart.destroy();
+                }
                 const ctx = this.$refs.canvas.getContext('2d');
                 this.chart = new Chart(ctx, {
                     type: 'bar',
@@ -715,6 +720,11 @@
         return {
             chart: null,
             init() {
+                // Destroy existing chart if present
+                const existingChart = Chart.getChart(this.$refs.canvas);
+                if (existingChart) {
+                    existingChart.destroy();
+                }
                 const ctx = this.$refs.canvas.getContext('2d');
                 this.chart = new Chart(ctx, {
                     type: 'line',
