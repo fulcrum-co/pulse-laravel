@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\ContentBlock;
 use App\Models\ContentModerationResult;
 use App\Models\MiniCourse;
+use App\Models\ModerationQueueItem;
 use Illuminate\Console\Command;
 
 class PopulateDemoModeration extends Command
@@ -38,6 +39,8 @@ class PopulateDemoModeration extends Command
             ContentModerationResult::STATUS_PASSED,
             ContentModerationResult::STATUS_FLAGGED,
             ContentModerationResult::STATUS_FLAGGED,
+            ContentModerationResult::STATUS_FLAGGED,
+            ContentModerationResult::STATUS_PENDING,
             ContentModerationResult::STATUS_REJECTED,
             ContentModerationResult::STATUS_APPROVED_OVERRIDE,
         ];
@@ -131,6 +134,28 @@ class PopulateDemoModeration extends Command
                 $moderatable->update([
                     'moderation_status' => $status,
                     'latest_moderation_id' => $result->id,
+                ]);
+            }
+
+            // Create queue item for items that need review (flagged or pending status)
+            if (in_array($status, [ContentModerationResult::STATUS_FLAGGED, ContentModerationResult::STATUS_PENDING])) {
+                $priorities = [
+                    ModerationQueueItem::PRIORITY_LOW,
+                    ModerationQueueItem::PRIORITY_NORMAL,
+                    ModerationQueueItem::PRIORITY_NORMAL,
+                    ModerationQueueItem::PRIORITY_HIGH,
+                    ModerationQueueItem::PRIORITY_URGENT,
+                ];
+
+                ModerationQueueItem::create([
+                    'org_id' => $orgId,
+                    'moderation_result_id' => $result->id,
+                    'status' => ModerationQueueItem::STATUS_PENDING,
+                    'assigned_to' => $user->id,
+                    'assigned_by' => $user->id,
+                    'assigned_at' => now(),
+                    'due_at' => now()->addHours(rand(4, 72)),
+                    'priority' => $priorities[array_rand($priorities)],
                 ]);
             }
 
