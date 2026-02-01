@@ -132,7 +132,8 @@ class PopulateDemoNotifications extends Command
         $courses = MiniCourse::limit(3)->pluck('title', 'id')->toArray();
         $reports = CustomReport::limit(3)->pluck('report_name', 'id')->toArray();
         $workflows = Workflow::limit(3)->pluck('name', 'id')->toArray();
-        $students = Student::limit(3)->get(['id', 'first_name', 'last_name'])->toArray();
+        // Students may be linked to users table via user_id - get student IDs and try to get names from user relationship
+        $students = Student::with('user')->limit(3)->get(['id', 'user_id', 'student_number'])->toArray();
         $strategies = StrategicPlan::limit(3)->pluck('title', 'id')->toArray();
 
         $notifications = [];
@@ -220,7 +221,9 @@ class PopulateDemoNotifications extends Command
 
         // Student contact notifications - use actual student IDs
         foreach ($students as $student) {
-            $name = ($student['first_name'] ?? '') . ' ' . ($student['last_name'] ?? '');
+            // Try to get name from user relationship, fall back to student_number or ID
+            $name = $student['user']['name']
+                ?? ($student['student_number'] ? "#{$student['student_number']}" : "#{$student['id']}");
             $notifications[] = [
                 'category' => UserNotification::CATEGORY_WORKFLOW_ALERT,
                 'type' => 'student_flagged',
