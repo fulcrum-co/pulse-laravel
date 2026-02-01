@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasContentModeration;
 use App\Traits\HasEmbedding;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ContentBlock extends Model
 {
-    use SoftDeletes, Searchable, HasEmbedding;
+    use SoftDeletes, Searchable, HasEmbedding, HasContentModeration;
 
     // Block types
     public const TYPE_VIDEO = 'video';
@@ -430,5 +431,57 @@ class ContentBlock extends Model
     protected function getEmbeddingTextFields(): array
     {
         return ['title', 'description', 'topics', 'skills', 'grade_levels', 'subject_areas', 'target_risk_factors'];
+    }
+
+    /**
+     * Get the content text to be moderated.
+     */
+    public function getModerationContent(): string
+    {
+        $parts = [
+            "Title: {$this->title}",
+            "Description: {$this->description}",
+            "Block Type: {$this->block_type}",
+        ];
+
+        // Include content data if it's text-based
+        if (!empty($this->content_data) && isset($this->content_data['text'])) {
+            $parts[] = "Content: {$this->content_data['text']}";
+        }
+
+        if (!empty($this->topics)) {
+            $topics = is_array($this->topics) ? implode(', ', $this->topics) : $this->topics;
+            $parts[] = "Topics: {$topics}";
+        }
+
+        if (!empty($this->skills)) {
+            $skills = is_array($this->skills) ? implode(', ', $this->skills) : $this->skills;
+            $parts[] = "Skills: {$skills}";
+        }
+
+        return implode("\n\n", array_filter($parts));
+    }
+
+    /**
+     * Get context information for moderation.
+     */
+    public function getModerationContext(): array
+    {
+        return [
+            'type' => 'ContentBlock',
+            'id' => $this->id,
+            'org_id' => $this->org_id,
+            'target_grades' => $this->grade_levels ?? [],
+            'block_type' => $this->block_type,
+            'is_ai_generated' => false, // Content blocks are typically not AI-generated
+        ];
+    }
+
+    /**
+     * Get the fields that require re-moderation when changed.
+     */
+    protected function getModerationTextFields(): array
+    {
+        return ['title', 'description', 'content_data'];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasContentModeration;
 use App\Traits\HasEmbedding;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class MiniCourse extends Model
 {
-    use SoftDeletes, Searchable, HasEmbedding;
+    use SoftDeletes, Searchable, HasEmbedding, HasContentModeration;
 
     // Course types
     public const TYPE_INTERVENTION = 'intervention';
@@ -682,5 +683,61 @@ class MiniCourse extends Model
     protected function getEmbeddingTextFields(): array
     {
         return ['title', 'description', 'rationale', 'expected_experience', 'objectives', 'target_grades', 'target_needs', 'target_risk_levels'];
+    }
+
+    /**
+     * Get the content text to be moderated.
+     */
+    public function getModerationContent(): string
+    {
+        $parts = [
+            "Title: {$this->title}",
+            "Description: {$this->description}",
+        ];
+
+        if ($this->rationale) {
+            $parts[] = "Rationale: {$this->rationale}";
+        }
+
+        if ($this->expected_experience) {
+            $parts[] = "Expected Experience: {$this->expected_experience}";
+        }
+
+        if (!empty($this->objectives)) {
+            $objectives = is_array($this->objectives) ? implode("\n- ", $this->objectives) : $this->objectives;
+            $parts[] = "Objectives:\n- {$objectives}";
+        }
+
+        // Include step content if loaded
+        if ($this->relationLoaded('steps')) {
+            foreach ($this->steps as $step) {
+                $parts[] = "Step {$step->sort_order}: {$step->title}\n{$step->description}";
+            }
+        }
+
+        return implode("\n\n", array_filter($parts));
+    }
+
+    /**
+     * Get context information for moderation.
+     */
+    public function getModerationContext(): array
+    {
+        return [
+            'type' => 'MiniCourse',
+            'id' => $this->id,
+            'org_id' => $this->org_id,
+            'target_grades' => $this->target_grades ?? [],
+            'course_type' => $this->course_type,
+            'is_ai_generated' => $this->isAiGenerated(),
+        ];
+    }
+
+    /**
+     * Get the fields that require re-moderation when changed.
+     */
+    protected function getModerationTextFields(): array
+    {
+        return ['title', 'description', 'rationale', 'expected_experience', 'objectives'];
     }
 }

@@ -94,6 +94,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Content Moderation Configuration
+    |--------------------------------------------------------------------------
+    |
+    | AI-powered content moderation for K-12 educational content.
+    | Evaluates age appropriateness, clinical safety, cultural sensitivity,
+    | and accuracy of AI-generated content.
+    |
+    */
+    'moderation' => [
+        'enabled' => env('CONTENT_MODERATION_ENABLED', true),
+        'auto_moderate' => env('CONTENT_MODERATION_AUTO', true),
+        'model' => env('CONTENT_MODERATION_MODEL', 'claude-sonnet-4-20250514'),
+        'queue' => env('CONTENT_MODERATION_QUEUE', 'moderation'),
+        'thresholds' => [
+            'auto_pass' => (float) env('MODERATION_THRESHOLD_PASS', 0.85),
+            'flag_for_review' => (float) env('MODERATION_THRESHOLD_FLAG', 0.70),
+            'auto_reject' => (float) env('MODERATION_THRESHOLD_REJECT', 0.40),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | AssemblyAI API (Transcription)
     |--------------------------------------------------------------------------
     */
