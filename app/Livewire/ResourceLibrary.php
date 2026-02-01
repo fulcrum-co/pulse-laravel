@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\ContentModerationResult;
 use App\Models\MiniCourse;
 use App\Models\Program;
 use App\Models\Provider;
@@ -504,6 +505,32 @@ class ResourceLibrary extends Component
         ];
     }
 
+    /**
+     * Check if user has moderation access.
+     */
+    public function getCanModerateProperty(): bool
+    {
+        $user = auth()->user();
+        return in_array($user->effective_role, [
+            'admin', 'consultant', 'superintendent', 'school_admin'
+        ]);
+    }
+
+    /**
+     * Get pending moderation count for current user's org.
+     */
+    public function getModerationCountProperty(): int
+    {
+        if (!$this->canModerate) {
+            return 0;
+        }
+
+        $user = auth()->user();
+        return ContentModerationResult::where('org_id', $user->org_id)
+            ->needsReview()
+            ->count();
+    }
+
     protected function getResourceIcon(string $type): string
     {
         return match ($type) {
@@ -526,6 +553,8 @@ class ResourceLibrary extends Component
             'miniCourses' => $this->activeTab === 'courses' ? $this->miniCourses : null,
             'allItems' => $this->activeTab === 'all' ? $this->allItems : null,
             'counts' => $this->counts,
+            'canModerate' => $this->canModerate,
+            'moderationCount' => $this->moderationCount,
         ])->layout('layouts.dashboard', ['title' => 'Resource Library']);
     }
 }

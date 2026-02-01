@@ -21,6 +21,7 @@ class RolePermissions
         'collect' => ['admin', 'consultant', 'superintendent', 'school_admin'],
         'distribute' => ['admin', 'consultant', 'superintendent', 'school_admin'],
         'resources' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher', 'student', 'parent'],
+        'moderation' => ['admin', 'consultant', 'superintendent', 'school_admin'],
         'alerts' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher'],
         'marketplace' => ['admin', 'consultant', 'superintendent', 'school_admin'],
 

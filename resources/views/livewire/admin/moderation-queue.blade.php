@@ -1,292 +1,500 @@
-<div>
-    {{-- Header with Stats --}}
-    <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Content Moderation Queue</h2>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Review AI-generated content before publication
-        </p>
+<div class="flex gap-6">
+    {{-- Left Sidebar --}}
+    <div class="w-64 flex-shrink-0">
+        {{-- Search --}}
+        <div class="relative mb-6">
+            <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+                type="text"
+                wire:model.live.debounce.300ms="search"
+                placeholder="Search queue..."
+                class="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+            >
+        </div>
+
+        {{-- Status Filter --}}
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</h3>
+                @if($statusFilter)
+                    <button wire:click="$set('statusFilter', '')" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700">Clear</button>
+                @endif
+            </div>
+            <div class="space-y-1">
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="radio" wire:model.live="statusFilter" value="needs_review" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
+                    <x-icon name="clock" class="w-4 h-4 text-yellow-500" />
+                    <span class="text-sm text-gray-700">Needs Review</span>
+                </label>
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="radio" wire:model.live="statusFilter" value="flagged" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
+                    <x-icon name="flag" class="w-4 h-4 text-yellow-500" />
+                    <span class="text-sm text-gray-700">Flagged</span>
+                </label>
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="radio" wire:model.live="statusFilter" value="passed" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
+                    <x-icon name="check-circle" class="w-4 h-4 text-green-500" />
+                    <span class="text-sm text-gray-700">Passed</span>
+                </label>
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="radio" wire:model.live="statusFilter" value="rejected" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
+                    <x-icon name="x-circle" class="w-4 h-4 text-red-500" />
+                    <span class="text-sm text-gray-700">Rejected</span>
+                </label>
+            </div>
+        </div>
+
+        {{-- Content Type Filter --}}
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Content Type</h3>
+                @if($contentTypeFilter)
+                    <button wire:click="$set('contentTypeFilter', '')" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700">Clear</button>
+                @endif
+            </div>
+            <div class="space-y-1">
+                @foreach($contentTypes as $class => $label)
+                    <label class="flex items-center gap-2 py-1 cursor-pointer">
+                        <input type="radio" wire:model.live="contentTypeFilter" value="{{ $class }}" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
+                        <x-icon name="{{ $label === 'MiniCourse' ? 'academic-cap' : 'document-text' }}" class="w-4 h-4 text-gray-400" />
+                        <span class="text-sm text-gray-700">{{ $label }}</span>
+                    </label>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Assignment Filter --}}
+        @if($canViewAll)
+            <div class="mb-6">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Assignment</h3>
+                <select wire:model.live="assignmentFilter" class="w-full text-sm border border-gray-300 rounded-lg py-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
+                    <option value="all">All Items</option>
+                    <option value="my_assignments">My Assignments ({{ $assignmentStats['my_assignments'] ?? 0 }})</option>
+                    <option value="collaborating">Collaborating ({{ $assignmentStats['collaborating'] ?? 0 }})</option>
+                    <option value="unassigned">Unassigned ({{ $assignmentStats['unassigned'] ?? 0 }})</option>
+                </select>
+            </div>
+        @endif
+
+        {{-- Sort By --}}
+        <div>
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Sort By</h3>
+            <select wire:model.live="sortBy" class="w-full text-sm border border-gray-300 rounded-lg py-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="score_low">Lowest Score</option>
+                <option value="score_high">Highest Score</option>
+            </select>
+        </div>
     </div>
 
-    {{-- Stats Cards --}}
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['pending_review'] ?? 0 }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Needs Review</div>
+    {{-- Main Content --}}
+    <div class="flex-1 min-w-0">
+        {{-- Stats Cards --}}
+        <div class="grid grid-cols-4 gap-3 mb-4">
+            <div class="bg-white border border-gray-200 rounded-lg p-3 text-center cursor-pointer hover:border-yellow-300 transition-colors {{ $statusFilter === 'needs_review' ? 'border-yellow-400 bg-yellow-50' : '' }}" wire:click="$set('statusFilter', 'needs_review')">
+                <div class="flex items-center justify-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-yellow-100 flex items-center justify-center">
+                        <x-icon name="clock" class="w-4 h-4 text-yellow-600" />
+                    </div>
+                    <div class="text-left">
+                        <div class="text-xs text-yellow-600">Pending</div>
+                        <div class="text-lg font-bold text-gray-900">{{ $stats['pending_review'] ?? 0 }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-3 text-center cursor-pointer hover:border-orange-300 transition-colors {{ $statusFilter === 'flagged' ? 'border-orange-400 bg-orange-50' : '' }}" wire:click="$set('statusFilter', 'flagged')">
+                <div class="flex items-center justify-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center">
+                        <x-icon name="flag" class="w-4 h-4 text-orange-600" />
+                    </div>
+                    <div class="text-left">
+                        <div class="text-xs text-orange-600">Flagged</div>
+                        <div class="text-lg font-bold text-gray-900">{{ $stats['flagged'] ?? 0 }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-3 text-center cursor-pointer hover:border-green-300 transition-colors {{ $statusFilter === 'passed' ? 'border-green-400 bg-green-50' : '' }}" wire:click="$set('statusFilter', 'passed')">
+                <div class="flex items-center justify-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-green-100 flex items-center justify-center">
+                        <x-icon name="check-circle" class="w-4 h-4 text-green-600" />
+                    </div>
+                    <div class="text-left">
+                        <div class="text-xs text-green-600">Passed</div>
+                        <div class="text-lg font-bold text-gray-900">{{ $stats['passed'] ?? 0 }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg p-3 text-center cursor-pointer hover:border-red-300 transition-colors {{ $statusFilter === 'rejected' ? 'border-red-400 bg-red-50' : '' }}" wire:click="$set('statusFilter', 'rejected')">
+                <div class="flex items-center justify-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center">
+                        <x-icon name="x-circle" class="w-4 h-4 text-red-600" />
+                    </div>
+                    <div class="text-left">
+                        <div class="text-xs text-red-600">Rejected</div>
+                        <div class="text-lg font-bold text-gray-900">{{ $stats['rejected'] ?? 0 }}</div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-            <div class="text-2xl font-bold text-green-600">{{ $stats['passed'] ?? 0 }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Passed</div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-            <div class="text-2xl font-bold text-yellow-600">{{ $stats['flagged'] ?? 0 }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Flagged</div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-            <div class="text-2xl font-bold text-red-600">{{ $stats['rejected'] ?? 0 }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Rejected</div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-            <div class="text-2xl font-bold text-blue-600">{{ number_format(($stats['average_score'] ?? 0) * 100) }}%</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Avg Score</div>
-        </div>
-    </div>
 
-    {{-- Filters --}}
-    <div class="flex flex-wrap gap-4 mb-6">
-        <select wire:model.live="statusFilter" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
-            <option value="needs_review">Needs Review</option>
-            <option value="flagged">Flagged</option>
-            <option value="rejected">Rejected</option>
-            <option value="passed">Passed</option>
-            <option value="pending">Pending</option>
-            <option value="">All</option>
-        </select>
+        {{-- Queue Header --}}
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <x-icon name="clock" class="w-5 h-5 text-gray-400" />
+                <h2 class="text-lg font-semibold text-gray-900">Review Queue</h2>
+                <span class="text-sm text-gray-500">({{ $results->total() }} items)</span>
+            </div>
 
-        <select wire:model.live="contentTypeFilter" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
-            <option value="">All Content Types</option>
-            @foreach($contentTypes as $class => $label)
-                <option value="{{ $class }}">{{ $label }}</option>
-            @endforeach
-        </select>
-    </div>
+            <div class="flex items-center gap-2">
+                {{-- Bulk Actions --}}
+                @if($canAssign && count($selectedItems) > 0)
+                    <span class="text-sm text-gray-500 mr-2">{{ count($selectedItems) }} selected</span>
+                    <button wire:click="bulkAssign" class="px-3 py-1.5 text-sm font-medium text-pulse-orange-600 bg-pulse-orange-50 hover:bg-pulse-orange-100 rounded-lg">
+                        Assign
+                    </button>
+                    <button wire:click="$set('selectedItems', [])" class="p-1.5 text-gray-400 hover:text-gray-600">
+                        <x-icon name="x" class="w-4 h-4" />
+                    </button>
+                @endif
 
-    {{-- Results Table --}}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('created_at')">
-                        Date
-                        @if($sortBy === 'created_at')
-                            <span class="ml-1">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                        @endif
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Content
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Type
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('overall_score')">
-                        Score
-                        @if($sortBy === 'overall_score')
-                            <span class="ml-1">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                        @endif
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Status
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Flags
-                    </th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Actions
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {{-- View Toggle --}}
+                <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden ml-2">
+                    <button
+                        wire:click="$set('viewMode', 'list')"
+                        class="p-2 {{ ($viewMode ?? 'list') === 'list' ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}"
+                        title="List view"
+                    >
+                        <x-icon name="list-bullet" class="w-4 h-4" />
+                    </button>
+                    <button
+                        wire:click="$set('viewMode', 'grid')"
+                        class="p-2 border-l border-gray-200 {{ ($viewMode ?? 'list') === 'grid' ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}"
+                        title="Grid view"
+                    >
+                        <x-icon name="squares-2x2" class="w-4 h-4" />
+                    </button>
+                    <button
+                        wire:click="$set('viewMode', 'table')"
+                        class="p-2 border-l border-gray-200 {{ ($viewMode ?? 'list') === 'table' ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}"
+                        title="Table view"
+                    >
+                        <x-icon name="table-cells" class="w-4 h-4" />
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- LIST VIEW --}}
+        @if(($viewMode ?? 'list') === 'list')
+            <div class="space-y-3">
                 @forelse($results as $result)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {{ $result->created_at->format('M j, Y H:i') }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                            <div class="max-w-xs truncate">
-                                {{ $result->moderatable?->title ?? 'Unknown' }}
+                    @php
+                        $scorePercent = ($result->overall_score ?? 0) * 100;
+                        $scoreColor = $scorePercent >= 85 ? 'green' : ($scorePercent >= 70 ? 'yellow' : 'red');
+                        $statusColors = [
+                            'flagged' => 'yellow',
+                            'rejected' => 'red',
+                            'passed' => 'green',
+                            'approved_override' => 'blue',
+                        ];
+                        $statusColor = $statusColors[$result->status] ?? 'gray';
+                    @endphp
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition-colors">
+                        <div class="flex items-start gap-3">
+                            @if($canAssign)
+                                <input type="checkbox" wire:model.live="selectedItems" value="{{ $result->id }}" class="mt-1 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
+                            @endif
+
+                            <div class="w-10 h-10 rounded-lg bg-{{ $statusColor }}-100 flex items-center justify-center flex-shrink-0">
+                                <x-icon name="{{ $result->status === 'flagged' ? 'flag' : ($result->status === 'rejected' ? 'x-circle' : 'document-text') }}" class="w-5 h-5 text-{{ $statusColor }}-600" />
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {{ class_basename($result->moderatable_type) }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="font-medium text-gray-900 truncate">{{ $result->moderatable?->title ?? 'Unknown Content' }}</h3>
+                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-{{ $scoreColor }}-100 text-{{ $scoreColor }}-700">
+                                        {{ number_format($scorePercent) }}%
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-500 mb-2">{{ class_basename($result->moderatable_type) }}</p>
+                                @if($result->flags && count($result->flags) > 0)
+                                    <p class="text-sm text-red-600 line-clamp-1">{{ $result->flags[0] }}</p>
+                                @endif
+                            </div>
+
+                            <div class="flex flex-col items-end gap-2">
+                                <span class="text-xs text-gray-400">{{ $result->created_at->diffForHumans() }}</span>
+                                @if($result->assignee)
+                                    <span class="text-xs text-pulse-orange-600">{{ $result->assignee->first_name }}</span>
+                                @endif
+                                <div class="flex items-center gap-1">
+                                    @if($canAssign)
+                                        <button wire:click="openAssignModal({{ $result->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-600 hover:bg-pulse-orange-50 rounded-lg" title="Assign">
+                                            <x-icon name="user-plus" class="w-4 h-4" />
+                                        </button>
+                                    @endif
+                                    <a href="{{ route('admin.moderation.edit', $result->id) }}" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg" title="Review">
+                                        <x-icon name="pencil-square" class="w-4 h-4" />
+                                    </a>
+                                    <button wire:click="quickApprove({{ $result->id }})" class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg" title="Approve">
+                                        <x-icon name="check-circle" class="w-4 h-4" />
+                                    </button>
+                                    <button wire:click="quickReject({{ $result->id }})" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg" title="Reject">
+                                        <x-icon name="x-circle" class="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="bg-white border border-gray-200 rounded-xl p-12 text-center">
+                        <x-icon name="check-circle" class="w-12 h-12 mx-auto text-green-200" />
+                        <h3 class="mt-3 text-lg font-medium text-gray-900">All caught up!</h3>
+                        <p class="mt-1 text-sm text-gray-500">No items need review right now.</p>
+                    </div>
+                @endforelse
+            </div>
+        @endif
+
+        {{-- GRID VIEW --}}
+        @if(($viewMode ?? 'list') === 'grid')
+            <div class="grid grid-cols-2 xl:grid-cols-3 gap-4">
+                @forelse($results as $result)
+                    @php
+                        $scorePercent = ($result->overall_score ?? 0) * 100;
+                        $scoreColor = $scorePercent >= 85 ? 'green' : ($scorePercent >= 70 ? 'yellow' : 'red');
+                        $statusColors = [
+                            'flagged' => 'yellow',
+                            'rejected' => 'red',
+                            'passed' => 'green',
+                            'approved_override' => 'blue',
+                        ];
+                        $statusColor = $statusColors[$result->status] ?? 'gray';
+                    @endphp
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition-colors">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                @if($canAssign)
+                                    <input type="checkbox" wire:model.live="selectedItems" value="{{ $result->id }}" class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
+                                @endif
+                                <div class="w-8 h-8 rounded-lg bg-{{ $statusColor }}-100 flex items-center justify-center">
+                                    <x-icon name="{{ $result->status === 'flagged' ? 'flag' : 'document-text' }}" class="w-4 h-4 text-{{ $statusColor }}-600" />
+                                </div>
+                            </div>
+                            <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-{{ $scoreColor }}-100 text-{{ $scoreColor }}-700">
+                                {{ number_format($scorePercent) }}%
+                            </span>
+                        </div>
+
+                        <h3 class="font-medium text-gray-900 line-clamp-2 mb-1">{{ $result->moderatable?->title ?? 'Unknown Content' }}</h3>
+                        <p class="text-xs text-gray-500 mb-2">{{ class_basename($result->moderatable_type) }} &middot; {{ $result->created_at->diffForHumans() }}</p>
+
+                        @if($result->flags && count($result->flags) > 0)
+                            <p class="text-xs text-red-600 line-clamp-1 mb-3">{{ $result->flags[0] }}</p>
+                        @endif
+
+                        <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                            <span class="text-xs text-gray-400">{{ $result->assignee?->first_name ?? 'Unassigned' }}</span>
+                            <div class="flex items-center gap-0.5">
+                                @if($canAssign)
+                                    <button wire:click="openAssignModal({{ $result->id }})" class="p-1 text-gray-400 hover:text-pulse-orange-600 rounded" title="Assign">
+                                        <x-icon name="user-plus" class="w-4 h-4" />
+                                    </button>
+                                @endif
+                                <a href="{{ route('admin.moderation.edit', $result->id) }}" class="p-1 text-gray-400 hover:text-blue-600 rounded" title="Review">
+                                    <x-icon name="pencil-square" class="w-4 h-4" />
+                                </a>
+                                <button wire:click="quickApprove({{ $result->id }})" class="p-1 text-gray-400 hover:text-green-600 rounded" title="Approve">
+                                    <x-icon name="check-circle" class="w-4 h-4" />
+                                </button>
+                                <button wire:click="quickReject({{ $result->id }})" class="p-1 text-gray-400 hover:text-red-600 rounded" title="Reject">
+                                    <x-icon name="x-circle" class="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full bg-white border border-gray-200 rounded-xl p-12 text-center">
+                        <x-icon name="check-circle" class="w-12 h-12 mx-auto text-green-200" />
+                        <h3 class="mt-3 text-lg font-medium text-gray-900">All caught up!</h3>
+                        <p class="mt-1 text-sm text-gray-500">No items need review right now.</p>
+                    </div>
+                @endforelse
+            </div>
+        @endif
+
+        {{-- TABLE VIEW --}}
+        @if(($viewMode ?? 'list') === 'table')
+            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            @if($canAssign)
+                                <th scope="col" class="w-10 px-3 py-3">
+                                    <input type="checkbox" class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
+                                </th>
+                            @endif
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Content</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        @forelse($results as $result)
                             @php
                                 $scorePercent = ($result->overall_score ?? 0) * 100;
                                 $scoreColor = $scorePercent >= 85 ? 'green' : ($scorePercent >= 70 ? 'yellow' : 'red');
-                            @endphp
-                            <div class="flex items-center">
-                                <div class="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-2 mr-2">
-                                    <div class="bg-{{ $scoreColor }}-500 h-2 rounded-full" style="width: {{ $scorePercent }}%"></div>
-                                </div>
-                                <span class="text-sm font-medium text-{{ $scoreColor }}-600 dark:text-{{ $scoreColor }}-400">
-                                    {{ number_format($scorePercent) }}%
-                                </span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @php
                                 $statusColors = [
-                                    'passed' => 'green',
                                     'flagged' => 'yellow',
                                     'rejected' => 'red',
+                                    'passed' => 'green',
                                     'approved_override' => 'blue',
-                                    'pending' => 'gray',
                                 ];
-                                $color = $statusColors[$result->status] ?? 'gray';
+                                $statusColor = $statusColors[$result->status] ?? 'gray';
                             @endphp
-                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-{{ $color }}-100 text-{{ $color }}-800 dark:bg-{{ $color }}-900 dark:text-{{ $color }}-200">
-                                {{ ucfirst(str_replace('_', ' ', $result->status)) }}
-                            </span>
-                            @if($result->human_reviewed)
-                                <span class="ml-1 text-xs text-gray-400" title="Reviewed by {{ $result->reviewer?->name ?? 'Unknown' }}">
-                                    ✓
-                                </span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4">
-                            @if($result->flags && count($result->flags) > 0)
-                                <span class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ count($result->flags) }} flag(s)
-                                </span>
-                            @else
-                                <span class="text-sm text-gray-400">-</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button
-                                wire:click="openReviewModal({{ $result->id }})"
-                                class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                            >
-                                Review
-                            </button>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                            No items in the moderation queue
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                            <tr class="hover:bg-gray-50">
+                                @if($canAssign)
+                                    <td class="px-3 py-3">
+                                        <input type="checkbox" wire:model.live="selectedItems" value="{{ $result->id }}" class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
+                                    </td>
+                                @endif
+                                <td class="px-4 py-3">
+                                    <div class="text-sm font-medium text-gray-900 truncate max-w-xs">{{ $result->moderatable?->title ?? 'Unknown Content' }}</div>
+                                    @if($result->flags && count($result->flags) > 0)
+                                        <div class="text-xs text-red-500 truncate max-w-xs">{{ $result->flags[0] }}</div>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="text-sm text-gray-500">{{ class_basename($result->moderatable_type) }}</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-{{ $scoreColor }}-100 text-{{ $scoreColor }}-700">
+                                        {{ number_format($scorePercent) }}%
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-{{ $statusColor }}-100 text-{{ $statusColor }}-700 capitalize">
+                                        {{ str_replace('_', ' ', $result->status) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="text-sm text-gray-500">{{ $result->assignee?->first_name ?? '—' }}</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="text-sm text-gray-500">{{ $result->created_at->format('M j') }}</span>
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        @if($canAssign)
+                                            <button wire:click="openAssignModal({{ $result->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-600 hover:bg-pulse-orange-50 rounded" title="Assign">
+                                                <x-icon name="user-plus" class="w-4 h-4" />
+                                            </button>
+                                        @endif
+                                        <a href="{{ route('admin.moderation.edit', $result->id) }}" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Review">
+                                            <x-icon name="pencil-square" class="w-4 h-4" />
+                                        </a>
+                                        <button wire:click="quickApprove({{ $result->id }})" class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded" title="Approve">
+                                            <x-icon name="check-circle" class="w-4 h-4" />
+                                        </button>
+                                        <button wire:click="quickReject({{ $result->id }})" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Reject">
+                                            <x-icon name="x-circle" class="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="{{ $canAssign ? 8 : 7 }}" class="px-4 py-12 text-center">
+                                    <x-icon name="check-circle" class="w-12 h-12 mx-auto text-green-200" />
+                                    <h3 class="mt-3 text-lg font-medium text-gray-900">All caught up!</h3>
+                                    <p class="mt-1 text-sm text-gray-500">No items need review right now.</p>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        @endif
 
         {{-- Pagination --}}
-        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-            {{ $results->links() }}
-        </div>
+        @if($results->hasPages())
+            <div class="mt-6">
+                {{ $results->links() }}
+            </div>
+        @endif
     </div>
 
-    {{-- Review Modal --}}
-    @if($showReviewModal && $selectedResult)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-gray-500 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75 transition-opacity" wire:click="closeReviewModal"></div>
+    {{-- Assignment Modal --}}
+    @if($showAssignModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="fixed inset-0 bg-black/50" wire:click="closeAssignModal"></div>
 
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md">
+                    <div class="p-5">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            {{ count($selectedItems) > 1 ? 'Assign ' . count($selectedItems) . ' Items' : 'Assign for Review' }}
+                        </h3>
 
-                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-                    <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                                Review: {{ $selectedResult->moderatable?->title ?? 'Content' }}
-                            </h3>
-                            <button wire:click="closeReviewModal" class="text-gray-400 hover:text-gray-500">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {{-- Scores --}}
+                        <div class="space-y-4">
                             <div>
-                                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Dimension Scores</h4>
-                                <div class="space-y-3">
-                                    @php
-                                        $dimensions = [
-                                            'Age Appropriateness' => $selectedResult->age_appropriateness_score,
-                                            'Clinical Safety' => $selectedResult->clinical_safety_score,
-                                            'Cultural Sensitivity' => $selectedResult->cultural_sensitivity_score,
-                                            'Accuracy' => $selectedResult->accuracy_score,
-                                        ];
-                                    @endphp
-                                    @foreach($dimensions as $label => $score)
-                                        <div>
-                                            <div class="flex justify-between text-sm mb-1">
-                                                <span class="text-gray-600 dark:text-gray-400">{{ $label }}</span>
-                                                <span class="font-medium {{ $score >= 0.85 ? 'text-green-600' : ($score >= 0.7 ? 'text-yellow-600' : 'text-red-600') }}">
-                                                    {{ $score !== null ? number_format($score * 100) . '%' : 'N/A' }}
-                                                </span>
-                                            </div>
-                                            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                                                <div class="h-2 rounded-full {{ $score >= 0.85 ? 'bg-green-500' : ($score >= 0.7 ? 'bg-yellow-500' : 'bg-red-500') }}" style="width: {{ ($score ?? 0) * 100 }}%"></div>
-                                            </div>
-                                        </div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Assign To</label>
+                                <select wire:model="assignToUserId" class="w-full text-sm rounded-lg border-gray-300 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
+                                    <option value="">Select moderator...</option>
+                                    @foreach($eligibleModerators as $moderator)
+                                        <option value="{{ $moderator->id }}">{{ $moderator->first_name }} {{ $moderator->last_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                                    <select wire:model="assignmentPriority" class="w-full text-sm rounded-lg border-gray-300 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
+                                        @foreach($assignmentPriorities as $value => $label)
+                                            <option value="{{ $value }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+                                    <input type="date" wire:model="assignmentDueAt" class="w-full text-sm rounded-lg border-gray-300 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
+                                </div>
+                            </div>
+
+                            <details class="text-sm">
+                                <summary class="cursor-pointer text-gray-600 hover:text-gray-900">Add collaborators</summary>
+                                <div class="mt-2 space-y-1 max-h-24 overflow-y-auto">
+                                    @foreach($eligibleModerators as $moderator)
+                                        @if($moderator->id != $assignToUserId)
+                                            <label class="flex items-center gap-2">
+                                                <input type="checkbox" wire:model="selectedCollaborators" value="{{ $moderator->id }}" class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
+                                                <span class="text-gray-700">{{ $moderator->first_name }} {{ $moderator->last_name }}</span>
+                                            </label>
+                                        @endif
                                     @endforeach
                                 </div>
+                            </details>
 
-                                <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Overall Score</span>
-                                        <span class="text-2xl font-bold {{ ($selectedResult->overall_score ?? 0) >= 0.85 ? 'text-green-600' : (($selectedResult->overall_score ?? 0) >= 0.7 ? 'text-yellow-600' : 'text-red-600') }}">
-                                            {{ number_format(($selectedResult->overall_score ?? 0) * 100) }}%
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Flags & Recommendations --}}
                             <div>
-                                @if($selectedResult->flags && count($selectedResult->flags) > 0)
-                                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Concerns Identified</h4>
-                                    <ul class="list-disc list-inside text-sm text-red-600 dark:text-red-400 space-y-1 mb-4">
-                                        @foreach($selectedResult->flags as $flag)
-                                            <li>{{ $flag }}</li>
-                                        @endforeach
-                                    </ul>
-                                @endif
-
-                                @if($selectedResult->recommendations && count($selectedResult->recommendations) > 0)
-                                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Recommendations</h4>
-                                    <ul class="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                                        @foreach($selectedResult->recommendations as $rec)
-                                            <li>{{ $rec }}</li>
-                                        @endforeach
-                                    </ul>
-                                @endif
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                                <textarea wire:model="assignmentNotes" rows="2" placeholder="Optional instructions..." class="w-full text-sm rounded-lg border-gray-300 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"></textarea>
                             </div>
                         </div>
 
-                        {{-- Review Notes --}}
-                        <div class="mt-6">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Review Notes
-                            </label>
-                            <textarea
-                                wire:model="reviewNotes"
-                                rows="3"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                                placeholder="Add notes about your review decision..."
-                            ></textarea>
+                        <div class="flex justify-end gap-3 mt-5 pt-4 border-t border-gray-100">
+                            <button wire:click="closeAssignModal" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">
+                                Cancel
+                            </button>
+                            <button wire:click="saveAssignment" class="px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 hover:bg-pulse-orange-600 rounded-lg">
+                                Assign
+                            </button>
                         </div>
-                    </div>
-
-                    {{-- Actions --}}
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
-                        <button
-                            wire:click="approveContent"
-                            class="w-full sm:w-auto inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:text-sm"
-                        >
-                            Approve
-                        </button>
-                        <button
-                            wire:click="requestRevision"
-                            class="w-full sm:w-auto inline-flex justify-center rounded-md border border-yellow-300 shadow-sm px-4 py-2 bg-yellow-50 text-base font-medium text-yellow-700 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:text-sm dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700"
-                        >
-                            Request Revision
-                        </button>
-                        <button
-                            wire:click="rejectContent"
-                            class="w-full sm:w-auto inline-flex justify-center rounded-md border border-red-300 shadow-sm px-4 py-2 bg-red-50 text-base font-medium text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm dark:bg-red-900 dark:text-red-200 dark:border-red-700"
-                        >
-                            Reject
-                        </button>
-                        <button
-                            wire:click="closeReviewModal"
-                            class="w-full sm:w-auto inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500"
-                        >
-                            Cancel
-                        </button>
                     </div>
                 </div>
             </div>
