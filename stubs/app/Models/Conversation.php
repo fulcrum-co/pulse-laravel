@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use MongoDB\Laravel\Eloquent\Model;
 
 class Conversation extends Model
 {
     protected $connection = 'mongodb';
+
     protected $collection = 'conversations';
 
     protected $fillable = [
@@ -81,7 +82,7 @@ class Conversation extends Model
     {
         $seconds = $this->call_duration_seconds;
 
-        if (!$seconds) {
+        if (! $seconds) {
             return 'N/A';
         }
 
@@ -98,7 +99,7 @@ class Conversation extends Model
     {
         $messages = $this->messages ?? [];
         $messages[] = [
-            'message_id' => (string) new \MongoDB\BSON\ObjectId(),
+            'message_id' => (string) new \MongoDB\BSON\ObjectId,
             'direction' => $direction,
             'text' => $text,
             'timestamp' => now()->toISOString(),

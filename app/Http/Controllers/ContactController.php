@@ -95,7 +95,7 @@ class ContactController extends Controller
     public function showTeacher(Request $request, User $teacher)
     {
         // Verify the user is a teacher
-        if (!$teacher->hasRole('teacher')) {
+        if (! $teacher->hasRole('teacher')) {
             abort(404);
         }
 
@@ -147,7 +147,7 @@ class ContactController extends Controller
     public function showParent(Request $request, User $parent)
     {
         // Verify the user is a parent
-        if (!$parent->hasRole('parent')) {
+        if (! $parent->hasRole('parent')) {
             abort(404);
         }
 

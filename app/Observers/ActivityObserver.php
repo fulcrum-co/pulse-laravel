@@ -21,7 +21,7 @@ class ActivityObserver
     public function updated(Activity $activity): void
     {
         // Check if status changed
-        if (!$activity->isDirty('status')) {
+        if (! $activity->isDirty('status')) {
             return;
         }
 
@@ -49,10 +49,11 @@ class ActivityObserver
         $focusArea = $objective?->focusArea;
         $plan = $focusArea?->strategicPlan;
 
-        if (!$plan || !$plan->created_by) {
+        if (! $plan || ! $plan->created_by) {
             Log::info('ActivityObserver: No plan creator to notify', [
                 'activity_id' => $activity->id,
             ]);
+
             return;
         }
 
@@ -66,7 +67,7 @@ class ActivityObserver
             [
                 'title' => "Activity {$statusLabel}: {$activity->title}",
                 'body' => $this->buildNotificationBody($activity, $plan),
-                'action_url' => route('strategies.show', $plan->id) . '#activity-' . $activity->id,
+                'action_url' => route('strategies.show', $plan->id).'#activity-'.$activity->id,
                 'action_label' => 'View Activity',
                 'icon' => $isOffTrack ? 'exclamation-triangle' : 'exclamation-circle',
                 'priority' => $isOffTrack
@@ -104,9 +105,9 @@ class ActivityObserver
         if ($activity->end_date) {
             $daysRemaining = now()->diffInDays($activity->end_date, false);
             if ($daysRemaining < 0) {
-                $parts[] = 'This activity is ' . abs($daysRemaining) . ' days overdue.';
+                $parts[] = 'This activity is '.abs($daysRemaining).' days overdue.';
             } elseif ($daysRemaining <= 7) {
-                $parts[] = 'Due in ' . $daysRemaining . ' days.';
+                $parts[] = 'Due in '.$daysRemaining.' days.';
             }
         }
 

@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 class AdaptiveTrigger extends Model
 {
@@ -13,20 +13,29 @@ class AdaptiveTrigger extends Model
 
     // Trigger types
     public const TYPE_COURSE_SUGGESTION = 'course_suggestion';
+
     public const TYPE_COURSE_EDIT = 'course_edit';
+
     public const TYPE_PROVIDER_RECOMMENDATION = 'provider_recommendation';
+
     public const TYPE_INTERVENTION_ALERT = 'intervention_alert';
 
     // Output actions
     public const ACTION_SUGGEST_FOR_REVIEW = 'suggest_for_review';
+
     public const ACTION_AUTO_CREATE = 'auto_create';
+
     public const ACTION_AUTO_ENROLL = 'auto_enroll';
+
     public const ACTION_NOTIFY = 'notify';
 
     // Input source types
     public const INPUT_QUANTITATIVE = 'quantitative';
+
     public const INPUT_QUALITATIVE = 'qualitative';
+
     public const INPUT_BEHAVIORAL = 'behavioral';
+
     public const INPUT_EXPLICIT = 'explicit';
 
     protected $fillable = [
@@ -203,7 +212,7 @@ class AdaptiveTrigger extends Model
      */
     public function isOnCooldown(): bool
     {
-        if (!$this->last_triggered_at || !$this->cooldown_hours) {
+        if (! $this->last_triggered_at || ! $this->cooldown_hours) {
             return false;
         }
 
@@ -269,7 +278,7 @@ class AdaptiveTrigger extends Model
     public function addInputSource(string $sourceType): void
     {
         $sources = $this->input_sources ?? [];
-        if (!in_array($sourceType, $sources)) {
+        if (! in_array($sourceType, $sources)) {
             $sources[] = $sourceType;
             $this->update(['input_sources' => $sources]);
         }
@@ -281,7 +290,7 @@ class AdaptiveTrigger extends Model
     public function removeInputSource(string $sourceType): void
     {
         $sources = $this->input_sources ?? [];
-        $sources = array_filter($sources, fn($s) => $s !== $sourceType);
+        $sources = array_filter($sources, fn ($s) => $s !== $sourceType);
         $this->update(['input_sources' => array_values($sources)]);
     }
 
@@ -307,7 +316,7 @@ class AdaptiveTrigger extends Model
     public function duplicate(): self
     {
         $newTrigger = $this->replicate(['id', 'created_at', 'updated_at', 'last_triggered_at', 'triggered_count']);
-        $newTrigger->name = $this->name . ' (Copy)';
+        $newTrigger->name = $this->name.' (Copy)';
         $newTrigger->triggered_count = 0;
         $newTrigger->last_triggered_at = null;
         $newTrigger->save();

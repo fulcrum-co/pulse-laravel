@@ -2,20 +2,24 @@
 
 namespace App\Livewire;
 
-use App\Models\Organization;
-use App\Models\Survey;
 use App\Models\CustomReport;
-use App\Models\Resource;
-use App\Models\Provider;
+use App\Models\Organization;
 use App\Models\Program;
+use App\Models\Provider;
+use App\Models\Resource;
+use App\Models\Survey;
 use Livewire\Component;
 
 class PushContentModal extends Component
 {
     public bool $show = false;
+
     public string $contentType = '';
+
     public int $contentId = 0;
+
     public array $selectedOrgIds = [];
+
     public bool $selectAll = false;
 
     protected $listeners = [
@@ -88,8 +92,9 @@ class PushContentModal extends Component
         }
 
         $content = $this->getContent();
-        if (!$content) {
+        if (! $content) {
             session()->flash('error', 'Content not found.');
+
             return;
         }
 
@@ -106,8 +111,9 @@ class PushContentModal extends Component
         foreach ($this->selectedOrgIds as $orgId) {
             $targetOrg = Organization::find($orgId);
 
-            if (!$targetOrg) {
-                $errors[] = "Organization not found";
+            if (! $targetOrg) {
+                $errors[] = 'Organization not found';
+
                 continue;
             }
 
@@ -115,8 +121,9 @@ class PushContentModal extends Component
             $canPush = ($userOrg && $userOrg->canPushContentTo($targetOrg))
                 || in_array($orgId, $assignedOrgIds);
 
-            if (!$canPush) {
+            if (! $canPush) {
                 $errors[] = "Cannot push to {$targetOrg->org_name}";
+
                 continue;
             }
 
@@ -127,7 +134,7 @@ class PushContentModal extends Component
         $this->close();
 
         if (count($pushed) > 0) {
-            $typeLabel = match($this->contentType) {
+            $typeLabel = match ($this->contentType) {
                 'survey' => 'Survey',
                 'report' => 'Report',
                 'resource' => 'Resource',
@@ -135,7 +142,7 @@ class PushContentModal extends Component
                 'program' => 'Program',
                 default => 'Content',
             };
-            session()->flash('success', "{$typeLabel} pushed to: " . implode(', ', $pushed));
+            session()->flash('success', "{$typeLabel} pushed to: ".implode(', ', $pushed));
         }
 
         if (count($errors) > 0) {
@@ -145,7 +152,7 @@ class PushContentModal extends Component
 
     protected function getContent()
     {
-        return match($this->contentType) {
+        return match ($this->contentType) {
             'survey' => Survey::find($this->contentId),
             'report' => CustomReport::find($this->contentId),
             'resource' => Resource::find($this->contentId),
@@ -176,9 +183,11 @@ class PushContentModal extends Component
     public function getContentTitleProperty(): string
     {
         $content = $this->getContent();
-        if (!$content) return '';
+        if (! $content) {
+            return '';
+        }
 
-        return match($this->contentType) {
+        return match ($this->contentType) {
             'survey' => $content->title ?? 'Survey',
             'report' => $content->report_name ?? 'Report',
             'resource' => $content->title ?? 'Resource',
@@ -190,7 +199,7 @@ class PushContentModal extends Component
 
     public function getContentTypeLabelProperty(): string
     {
-        return match($this->contentType) {
+        return match ($this->contentType) {
             'survey' => 'Survey',
             'report' => 'Report',
             'resource' => 'Resource',

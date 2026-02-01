@@ -2,24 +2,31 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
 
 class MiniCourseEnrollment extends Model
 {
     // Enrollment sources
     public const SOURCE_MANUAL = 'manual';
+
     public const SOURCE_AI_SUGGESTED = 'ai_suggested';
+
     public const SOURCE_RULE_TRIGGERED = 'rule_triggered';
+
     public const SOURCE_SELF_ENROLLED = 'self_enrolled';
 
     // Statuses
     public const STATUS_ENROLLED = 'enrolled';
+
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_PAUSED = 'paused';
+
     public const STATUS_WITHDRAWN = 'withdrawn';
 
     protected $fillable = [
@@ -197,7 +204,7 @@ class MiniCourseEnrollment extends Model
     /**
      * Complete a step and move to next.
      */
-    public function completeStep(MiniCourseStep $step, array $responseData = null, string $feedback = null): void
+    public function completeStep(MiniCourseStep $step, ?array $responseData = null, ?string $feedback = null): void
     {
         // Update step progress
         $progress = $this->stepProgress()->where('step_id', $step->id)->first();
@@ -227,7 +234,7 @@ class MiniCourseEnrollment extends Model
         $this->recalculateProgress();
 
         // Check if course is complete
-        if (!$nextStep || $this->progress_percent >= 100) {
+        if (! $nextStep || $this->progress_percent >= 100) {
             $this->markCompleted();
         }
     }
@@ -322,6 +329,7 @@ class MiniCourseEnrollment extends Model
         if ($hours > 0) {
             return sprintf('%dh %dm', $hours, $minutes % 60);
         }
+
         return sprintf('%dm', $minutes);
     }
 

@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\MiniCourse;
 use App\Models\CourseApprovalWorkflow;
+use App\Models\MiniCourse;
 use App\Models\Organization;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -242,7 +242,7 @@ class CourseApprovalService
     {
         $org = Organization::find($orgId);
 
-        if (!$org) {
+        if (! $org) {
             return $this->getDefaultSettings();
         }
 

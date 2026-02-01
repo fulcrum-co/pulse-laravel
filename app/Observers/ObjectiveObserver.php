@@ -21,7 +21,7 @@ class ObjectiveObserver
     public function updated(Objective $objective): void
     {
         // Check if status changed
-        if (!$objective->isDirty('status')) {
+        if (! $objective->isDirty('status')) {
             return;
         }
 
@@ -48,10 +48,11 @@ class ObjectiveObserver
         $focusArea = $objective->focusArea;
         $plan = $focusArea?->strategicPlan;
 
-        if (!$plan || !$plan->created_by) {
+        if (! $plan || ! $plan->created_by) {
             Log::info('ObjectiveObserver: No plan creator to notify', [
                 'objective_id' => $objective->id,
             ]);
+
             return;
         }
 
@@ -65,7 +66,7 @@ class ObjectiveObserver
             [
                 'title' => "Objective {$statusLabel}: {$objective->title}",
                 'body' => $this->buildNotificationBody($objective, $focusArea, $plan),
-                'action_url' => route('strategies.show', $plan->id) . '#objective-' . $objective->id,
+                'action_url' => route('strategies.show', $plan->id).'#objective-'.$objective->id,
                 'action_label' => 'View Objective',
                 'icon' => $isOffTrack ? 'exclamation-triangle' : 'exclamation-circle',
                 'priority' => $isOffTrack
@@ -109,9 +110,9 @@ class ObjectiveObserver
         if ($objective->end_date) {
             $daysRemaining = now()->diffInDays($objective->end_date, false);
             if ($daysRemaining < 0) {
-                $parts[] = 'This objective is ' . abs($daysRemaining) . ' days overdue.';
+                $parts[] = 'This objective is '.abs($daysRemaining).' days overdue.';
             } elseif ($daysRemaining <= 14) {
-                $parts[] = 'Due in ' . $daysRemaining . ' days.';
+                $parts[] = 'Due in '.$daysRemaining.' days.';
             }
         }
 

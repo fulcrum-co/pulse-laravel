@@ -4,34 +4,45 @@ namespace App\Models;
 
 use App\Traits\HasEmbedding;
 use App\Traits\Searchable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 class Program extends Model
 {
-    use SoftDeletes, Searchable, HasEmbedding;
+    use HasEmbedding, Searchable, SoftDeletes;
 
     // Program types
     public const TYPE_THERAPY = 'therapy';
+
     public const TYPE_TUTORING = 'tutoring';
+
     public const TYPE_MENTORSHIP = 'mentorship';
+
     public const TYPE_ENRICHMENT = 'enrichment';
+
     public const TYPE_INTERVENTION = 'intervention';
+
     public const TYPE_SUPPORT_GROUP = 'support_group';
+
     public const TYPE_EXTERNAL_SERVICE = 'external_service';
 
     // Cost structures
     public const COST_FREE = 'free';
+
     public const COST_SLIDING_SCALE = 'sliding_scale';
+
     public const COST_FIXED = 'fixed';
+
     public const COST_INSURANCE = 'insurance';
 
     // Location types
     public const LOCATION_IN_PERSON = 'in_person';
+
     public const LOCATION_VIRTUAL = 'virtual';
+
     public const LOCATION_HYBRID = 'hybrid';
 
     protected $fillable = [
@@ -176,7 +187,7 @@ class Program extends Model
         $newProgram->source_program_id = $this->id;
         $newProgram->source_org_id = $this->org_id;
         $newProgram->created_by = $pushedBy;
-        $newProgram->name = $this->name . ' (from ' . $this->organization->org_name . ')';
+        $newProgram->name = $this->name.' (from '.$this->organization->org_name.')';
         $newProgram->current_enrollment = 0;
         $newProgram->save();
 
@@ -254,7 +265,7 @@ class Program extends Model
     {
         return $query->where(function ($q) {
             $q->whereNull('capacity')
-              ->orWhereRaw('current_enrollment < capacity');
+                ->orWhereRaw('current_enrollment < capacity');
         });
     }
 
@@ -265,10 +276,10 @@ class Program extends Model
     {
         return $query->where(function ($q) {
             $q->where('is_rolling_enrollment', true)
-              ->orWhere(function ($q2) {
-                  $q2->where('start_date', '<=', now())
-                     ->where('end_date', '>=', now());
-              });
+                ->orWhere(function ($q2) {
+                    $q2->where('start_date', '<=', now())
+                        ->where('end_date', '>=', now());
+                });
         });
     }
 
@@ -296,6 +307,7 @@ class Program extends Model
         if ($this->capacity === null) {
             return true;
         }
+
         return $this->current_enrollment < $this->capacity;
     }
 
@@ -307,6 +319,7 @@ class Program extends Model
         if ($this->capacity === null) {
             return null;
         }
+
         return max(0, $this->capacity - $this->current_enrollment);
     }
 
@@ -333,17 +346,17 @@ class Program extends Model
      */
     public function getFormattedDurationAttribute(): ?string
     {
-        if (!$this->duration_weeks) {
+        if (! $this->duration_weeks) {
             return null;
         }
 
         $weeks = $this->duration_weeks;
         $frequency = $this->frequency_per_week;
 
-        $duration = $weeks . ' ' . ($weeks === 1 ? 'week' : 'weeks');
+        $duration = $weeks.' '.($weeks === 1 ? 'week' : 'weeks');
 
         if ($frequency) {
-            $duration .= ', ' . $frequency . 'x/week';
+            $duration .= ', '.$frequency.'x/week';
         }
 
         return $duration;
@@ -392,7 +405,7 @@ class Program extends Model
      */
     public function shouldBeSearchable(): bool
     {
-        return !$this->trashed() && $this->active;
+        return ! $this->trashed() && $this->active;
     }
 
     /**
@@ -407,22 +420,22 @@ class Program extends Model
             $this->provider_org_name,
         ];
 
-        if (!empty($this->target_needs)) {
+        if (! empty($this->target_needs)) {
             $needs = is_array($this->target_needs) ? $this->target_needs : [];
-            $parts[] = 'Target needs: ' . implode(', ', $needs);
+            $parts[] = 'Target needs: '.implode(', ', $needs);
         }
 
-        if (!empty($this->eligibility_criteria)) {
+        if (! empty($this->eligibility_criteria)) {
             $criteria = is_array($this->eligibility_criteria) ? $this->eligibility_criteria : [];
-            $parts[] = 'Eligibility: ' . implode(', ', $criteria);
+            $parts[] = 'Eligibility: '.implode(', ', $criteria);
         }
 
         if ($this->cost_structure) {
-            $parts[] = 'Cost: ' . $this->cost_structure;
+            $parts[] = 'Cost: '.$this->cost_structure;
         }
 
         if ($this->location_type) {
-            $parts[] = 'Location: ' . $this->location_type;
+            $parts[] = 'Location: '.$this->location_type;
         }
 
         return implode('. ', array_filter($parts));

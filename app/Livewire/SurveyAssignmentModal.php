@@ -2,15 +2,18 @@
 
 namespace App\Livewire;
 
-use App\Models\Survey;
 use App\Models\StrategySurveyAssignment;
+use App\Models\Survey;
 use Livewire\Component;
 
 class SurveyAssignmentModal extends Component
 {
     public $show = false;
+
     public $assignableType = '';
+
     public $assignableId = null;
+
     public $search = '';
 
     protected $listeners = ['openSurveyAssignment' => 'open'];
@@ -39,7 +42,7 @@ class SurveyAssignmentModal extends Component
             ->where('assignable_id', $this->assignableId)
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             StrategySurveyAssignment::create([
                 'survey_id' => $surveyId,
                 'assignable_type' => $this->getModelClass(),
@@ -62,7 +65,7 @@ class SurveyAssignmentModal extends Component
 
     protected function getModelClass(): string
     {
-        return match($this->assignableType) {
+        return match ($this->assignableType) {
             'focus_area' => 'App\\Models\\FocusArea',
             'objective' => 'App\\Models\\Objective',
             'activity' => 'App\\Models\\Activity',
@@ -78,7 +81,7 @@ class SurveyAssignmentModal extends Component
             ->where('status', 'active');
 
         if ($this->search) {
-            $query->where('title', 'like', '%' . $this->search . '%');
+            $query->where('title', 'like', '%'.$this->search.'%');
         }
 
         return $query->limit(20)->get();
@@ -86,7 +89,7 @@ class SurveyAssignmentModal extends Component
 
     public function getAssignedSurveysProperty()
     {
-        if (!$this->assignableId) {
+        if (! $this->assignableId) {
             return collect();
         }
 

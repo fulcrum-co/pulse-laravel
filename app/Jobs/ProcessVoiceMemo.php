@@ -58,7 +58,7 @@ class ProcessVoiceMemo implements ShouldQueue
                 $this->note->audio_disk
             );
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 throw new \Exception($result['error']);
             }
 

@@ -56,18 +56,20 @@ class ModerationWorkflowService
     {
         $workflow = $item->workflow;
 
-        if (!$workflow) {
+        if (! $workflow) {
             Log::warning('No workflow found for queue item', ['queue_item_id' => $item->id]);
+
             return;
         }
 
         $baseWorkflow = $workflow->workflow;
 
-        if (!$baseWorkflow || empty($baseWorkflow->nodes)) {
+        if (! $baseWorkflow || empty($baseWorkflow->nodes)) {
             Log::warning('No workflow nodes found', [
                 'queue_item_id' => $item->id,
                 'workflow_id' => $workflow->id,
             ]);
+
             return;
         }
 
@@ -77,7 +79,7 @@ class ModerationWorkflowService
 
         $startNode = $nodes->firstWhere('type', 'trigger');
 
-        if (!$startNode) {
+        if (! $startNode) {
             $startNode = $nodes->first();
         }
 
@@ -147,7 +149,7 @@ class ModerationWorkflowService
     protected function findNextNode(string $currentNodeId, $conditionResult, $edges): ?string
     {
         // Find edges from current node
-        $outgoingEdges = $edges->filter(fn($e) => $e['source'] === $currentNodeId);
+        $outgoingEdges = $edges->filter(fn ($e) => $e['source'] === $currentNodeId);
 
         if ($outgoingEdges->isEmpty()) {
             return null;
@@ -222,7 +224,7 @@ class ModerationWorkflowService
         $flags = $result->flags ?? [];
 
         if (empty($flags)) {
-            return !$hasFlag;
+            return ! $hasFlag;
         }
 
         // If checking for specific category
@@ -230,13 +232,13 @@ class ModerationWorkflowService
             $categoryFound = isset($flags[$flagCategory]) ||
                              in_array($flagCategory, array_keys($flags));
 
-            return $hasFlag ? $categoryFound : !$categoryFound;
+            return $hasFlag ? $categoryFound : ! $categoryFound;
         }
 
         // Check if any flags exist
-        $anyFlags = !empty($flags);
+        $anyFlags = ! empty($flags);
 
-        return $hasFlag ? $anyFlags : !$anyFlags;
+        return $hasFlag ? $anyFlags : ! $anyFlags;
     }
 
     /**
@@ -268,7 +270,7 @@ class ModerationWorkflowService
      */
     protected function assignToSpecificUser(ModerationQueueItem $item, ?int $userId): ?User
     {
-        if (!$userId) {
+        if (! $userId) {
             return null;
         }
 

@@ -13,7 +13,7 @@
                     </div>
                 @else
                     <h2 wire:click="startEditTitle" class="text-xl font-semibold text-gray-900 cursor-pointer hover:text-pulse-orange-600">
-                        {{ $strategy->title }}
+                        {{ $plan->title }}
                     </h2>
                 @endif
             </div>
@@ -47,7 +47,7 @@
 
                 @foreach($assignments as $assignment)
                     <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-100 rounded text-sm">
-                        <x-icon name="x" class="w-3 h-3 cursor-pointer hover:text-red-500" wire:click="removeAssignment({{ $assignment->id }})" />
+                        <x-icon name="x-mark" class="w-3 h-3 cursor-pointer hover:text-red-500" wire:click="removeAssignment({{ $assignment->id }})" />
                         {{ $assignment->display_name }}
                     </span>
                 @endforeach
@@ -56,22 +56,22 @@
 
         {{-- Actions --}}
         <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500">Create Plan +</span>
+            <a href="{{ route('plans.create') }}" class="text-sm text-gray-500 hover:text-gray-700">Create Plan +</a>
 
             <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open" class="px-3 py-2 text-sm text-gray-700 hover:text-gray-900 flex items-center gap-1">
                     Actions
                     <x-icon name="chevron-down" class="w-4 h-4" />
                 </button>
-                <div x-show="open" @click.away="open = false" class="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                    <a href="{{ route('strategies.edit', $strategy) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Edit</a>
-                    <form action="{{ route('strategies.duplicate', $strategy) }}" method="POST">
+                <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                    <a href="{{ route('plans.edit', $plan) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Edit</a>
+                    <form action="{{ route('plans.duplicate', $plan) }}" method="POST">
                         @csrf
                         <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Duplicate</button>
                     </form>
-                    <button @click="$dispatch('openPushStrategy'); open = false" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Push to Org</button>
+                    <button @click="$dispatch('openPushPlan'); open = false" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Push to Org</button>
                     <hr class="my-1">
-                    <form action="{{ route('strategies.destroy', $strategy) }}" method="POST" onsubmit="return confirm('Are you sure?')">
+                    <form action="{{ route('plans.destroy', $plan) }}" method="POST" onsubmit="return confirm('Are you sure?')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Delete</button>
@@ -141,7 +141,7 @@
                                         <option value="viewer" {{ $collab->role === 'viewer' ? 'selected' : '' }}>Viewer</option>
                                     </select>
                                     <button wire:click="removeCollaborator({{ $collab->id }})" class="text-gray-400 hover:text-red-500">
-                                        <x-icon name="x" class="w-4 h-4" />
+                                        <x-icon name="x-mark" class="w-4 h-4" />
                                     </button>
                                 </div>
                             </div>

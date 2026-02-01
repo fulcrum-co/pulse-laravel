@@ -20,8 +20,9 @@ class ContactMetricSeeder extends Seeder
     public function run(): void
     {
         $school = Organization::where('org_type', 'school')->first();
-        if (!$school) {
+        if (! $school) {
             $this->command->warn('No school organization found. Skipping ContactMetricSeeder.');
+
             return;
         }
 
@@ -43,7 +44,7 @@ class ContactMetricSeeder extends Seeder
             $this->createResourceSuggestions($student, $school->id);
         }
 
-        $this->command->info('Created rich demo data for ' . $students->count() . ' students.');
+        $this->command->info('Created rich demo data for '.$students->count().' students.');
     }
 
     private function getTrendPattern(int $index, string $riskLevel): string
@@ -331,8 +332,8 @@ class ContactMetricSeeder extends Seeder
             "Based on {$student->user?->first_name}'s recent academic performance trends, this resource addresses key skill gaps.",
             "Student's engagement patterns suggest this type of intervention would be beneficial.",
             "Matches student's learning style and current support needs identified in recent assessments.",
-            "Recommended based on similar successful interventions with comparable student profiles.",
-            "Addresses specific areas flagged in recent wellness check-in responses.",
+            'Recommended based on similar successful interventions with comparable student profiles.',
+            'Addresses specific areas flagged in recent wellness check-in responses.',
         ];
 
         return $rationales[array_rand($rationales)];
@@ -343,6 +344,7 @@ class ContactMetricSeeder extends Seeder
         if (empty($this->staffUsers)) {
             return null;
         }
+
         return $this->staffUsers[array_rand($this->staffUsers)]->id;
     }
 
@@ -355,6 +357,7 @@ class ContactMetricSeeder extends Seeder
             ContactMetric::SOURCE_CALCULATED,
             ContactMetric::SOURCE_MANUAL,
         ];
+
         return $sources[array_rand($sources)];
     }
 
@@ -369,12 +372,14 @@ class ContactMetricSeeder extends Seeder
     private function getSchoolYearFromDate(Carbon $date): string
     {
         $year = $date->month >= 8 ? $date->year : $date->year - 1;
-        return $year . '-' . ($year + 1);
+
+        return $year.'-'.($year + 1);
     }
 
     private function getQuarterFromDate(Carbon $date): int
     {
         $month = $date->month;
+
         return match (true) {
             $month >= 8 && $month <= 10 => 1,
             $month >= 11 || $month <= 1 => 2,

@@ -12,7 +12,9 @@ class DistributionDetail extends Component
     use WithPagination;
 
     public Distribution $distribution;
+
     public bool $showSendModal = false;
+
     public bool $showDeleteModal = false;
 
     public function mount(Distribution $distribution): void
@@ -144,6 +146,7 @@ class DistributionDetail extends Component
         }
 
         $totalRate = $deliveries->sum(fn ($d) => $d->getOpenRate());
+
         return round($totalRate / $deliveries->count(), 1);
     }
 }

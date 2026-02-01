@@ -3,8 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\SurveyCompleted;
-use App\Models\Workflow;
 use App\Jobs\ProcessWorkflow;
+use App\Models\Workflow;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 
@@ -69,7 +69,7 @@ class SurveyCompletedListener implements ShouldQueue
                 ? $config['risk_level']
                 : [$config['risk_level']];
 
-            if (!in_array($attempt->risk_level, $requiredRisk)) {
+            if (! in_array($attempt->risk_level, $requiredRisk)) {
                 return false;
             }
         }
@@ -94,7 +94,7 @@ class SurveyCompletedListener implements ShouldQueue
                 default => false,
             };
 
-            if (!$passes) {
+            if (! $passes) {
                 return false;
             }
         }
@@ -124,7 +124,7 @@ class SurveyCompletedListener implements ShouldQueue
                     default => false,
                 };
 
-                if (!$passes) {
+                if (! $passes) {
                     return false;
                 }
             }

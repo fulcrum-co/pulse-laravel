@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\QuestionBank;
 use App\Models\Survey;
 use App\Models\SurveyCreationSession;
-use App\Models\QuestionBank;
 use Illuminate\Http\UploadedFile;
 
 class SurveyCreationService
@@ -39,7 +39,7 @@ class SurveyCreationService
 
         $result = $this->claudeService->sendMessage($message, $systemPrompt, $conversationHistory);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return [
                 'response' => "I'm having trouble processing that. Could you try rephrasing your request?",
                 'suggestions' => null,
@@ -52,7 +52,7 @@ class SurveyCreationService
         $extractedQuestions = $this->extractQuestionsFromResponse($response);
 
         // Add extracted questions to draft
-        if (!empty($extractedQuestions)) {
+        if (! empty($extractedQuestions)) {
             foreach ($extractedQuestions as $question) {
                 $session->addDraftQuestion($question);
             }
@@ -117,7 +117,7 @@ PROMPT;
      */
     public function refineQuestion(string $question, string $feedback, ?string $questionType = null): array
     {
-        $typeHint = $questionType ? " The question should be a {$questionType} type question." : "";
+        $typeHint = $questionType ? " The question should be a {$questionType} type question." : '';
 
         $prompt = <<<PROMPT
 Refine this survey question based on the feedback provided.
@@ -205,12 +205,12 @@ PROMPT;
     public function processVoiceInput(SurveyCreationSession $session, UploadedFile $audio): array
     {
         // Store the audio file
-        $path = $audio->store('survey-creation-audio/' . $session->id, 'local');
+        $path = $audio->store('survey-creation-audio/'.$session->id, 'local');
 
         // Transcribe the audio
         $transcriptionResult = $this->transcriptionService->transcribe($path);
 
-        if (!$transcriptionResult['success']) {
+        if (! $transcriptionResult['success']) {
             return [
                 'success' => false,
                 'error' => 'Failed to transcribe audio.',
@@ -288,8 +288,7 @@ PROMPT;
 
         if ($questions && is_array($questions)) {
             // Ensure each question has required fields
-            return array_filter($questions, fn($q) =>
-                isset($q['question']) && isset($q['type'])
+            return array_filter($questions, fn ($q) => isset($q['question']) && isset($q['type'])
             );
         }
 
@@ -301,7 +300,7 @@ PROMPT;
      */
     protected function getSurveyCreationPrompt(): string
     {
-        return <<<PROMPT
+        return <<<'PROMPT'
 You are a helpful survey creation assistant for an educational wellness platform called Pulse.
 Help educators create effective surveys to check on student wellbeing, academic stress, and engagement.
 
@@ -338,7 +337,7 @@ PROMPT;
     {
         $history = $session->conversation_history ?? [];
 
-        return array_map(fn($msg) => [
+        return array_map(fn ($msg) => [
             'role' => $msg['role'],
             'content' => $msg['content'],
         ], $history);
@@ -354,7 +353,7 @@ PROMPT;
         }
 
         return collect($questions)
-            ->map(fn($q) => "- " . ($q['question'] ?? $q))
+            ->map(fn ($q) => '- '.($q['question'] ?? $q))
             ->join("\n");
     }
 
@@ -391,7 +390,7 @@ PROMPT;
             ->orderBy('usage_count', 'desc')
             ->limit($count)
             ->get()
-            ->map(fn($q) => $q->toSurveyQuestion())
+            ->map(fn ($q) => $q->toSurveyQuestion())
             ->toArray();
     }
 }

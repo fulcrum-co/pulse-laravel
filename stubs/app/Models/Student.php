@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
-use MongoDB\Laravel\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use MongoDB\Laravel\Eloquent\Model;
+use MongoDB\Laravel\Eloquent\SoftDeletes;
 
 class Student extends Model
 {
     use SoftDeletes;
 
     protected $connection = 'mongodb';
+
     protected $collection = 'students';
 
     protected $fillable = [
@@ -126,7 +127,7 @@ class Student extends Model
     {
         $latest = $this->latest_survey_attempt;
 
-        if (!$latest) {
+        if (! $latest) {
             return 'unknown';
         }
 

@@ -46,16 +46,24 @@ class ProviderPayment extends Model
 
     // Payment types
     const TYPE_SESSION = 'session';
+
     const TYPE_DEPOSIT = 'deposit';
+
     const TYPE_PACKAGE = 'package';
+
     const TYPE_CANCELLATION_FEE = 'cancellation_fee';
 
     // Statuses
     const STATUS_PENDING = 'pending';
+
     const STATUS_PROCESSING = 'processing';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_REFUNDED = 'refunded';
+
     const STATUS_PARTIALLY_REFUNDED = 'partially_refunded';
+
     const STATUS_FAILED = 'failed';
 
     // Platform fee percentage (10%)
@@ -71,7 +79,7 @@ class ProviderPayment extends Model
             }
 
             // Calculate platform fee and provider payout if not set
-            if ($payment->amount && !$payment->platform_fee) {
+            if ($payment->amount && ! $payment->platform_fee) {
                 $payment->platform_fee = (int) round($payment->amount * (self::PLATFORM_FEE_PERCENTAGE / 100));
                 $payment->provider_payout = $payment->amount - $payment->platform_fee;
             }
@@ -145,7 +153,7 @@ class ProviderPayment extends Model
     /**
      * Mark payment as completed.
      */
-    public function markCompleted(string $chargeId = null): void
+    public function markCompleted(?string $chargeId = null): void
     {
         $this->update([
             'status' => self::STATUS_COMPLETED,
@@ -218,7 +226,7 @@ class ProviderPayment extends Model
      */
     public function getFormattedAmountAttribute(): string
     {
-        return '$' . number_format($this->amount_in_dollars, 2);
+        return '$'.number_format($this->amount_in_dollars, 2);
     }
 
     /**
@@ -226,7 +234,7 @@ class ProviderPayment extends Model
      */
     public function getFormattedPayoutAttribute(): string
     {
-        return '$' . number_format($this->provider_payout_in_dollars, 2);
+        return '$'.number_format($this->provider_payout_in_dollars, 2);
     }
 
     /**

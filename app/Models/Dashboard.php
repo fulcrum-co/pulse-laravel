@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
 
 class Dashboard extends Model
 {
@@ -29,11 +29,17 @@ class Dashboard extends Model
      * Widget type constants
      */
     public const WIDGET_METRIC_CARD = 'metric_card';
+
     public const WIDGET_BAR_CHART = 'bar_chart';
+
     public const WIDGET_LINE_CHART = 'line_chart';
+
     public const WIDGET_STUDENT_LIST = 'student_list';
+
     public const WIDGET_SURVEY_SUMMARY = 'survey_summary';
+
     public const WIDGET_ALERT_FEED = 'alert_feed';
+
     public const WIDGET_NOTIFICATION_FEED = 'notification_feed';
 
     /**
@@ -111,10 +117,10 @@ class Dashboard extends Model
     {
         return $query->where(function ($q) use ($user) {
             $q->where('user_id', $user->id)
-              ->orWhere(function ($q2) use ($user) {
-                  $q2->where('org_id', $user->org_id)
-                     ->where('is_shared', true);
-              });
+                ->orWhere(function ($q2) use ($user) {
+                    $q2->where('org_id', $user->org_id)
+                        ->where('is_shared', true);
+                });
         });
     }
 
@@ -171,7 +177,7 @@ class Dashboard extends Model
     /**
      * Add a widget to this dashboard.
      */
-    public function addWidget(string $type, string $title, array $config = [], array $position = null): DashboardWidget
+    public function addWidget(string $type, string $title, array $config = [], ?array $position = null): DashboardWidget
     {
         $maxOrder = $this->widgets()->max('order') ?? -1;
 

@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Collection extends Model
 {
@@ -41,29 +41,38 @@ class Collection extends Model
      * Collection type constants
      */
     public const TYPE_RECURRING = 'recurring';
+
     public const TYPE_ONE_TIME = 'one_time';
+
     public const TYPE_EVENT_TRIGGERED = 'event_triggered';
 
     /**
      * Data source constants
      */
     public const SOURCE_SURVEY = 'survey';
+
     public const SOURCE_INLINE = 'inline';
+
     public const SOURCE_HYBRID = 'hybrid';
 
     /**
      * Format mode constants
      */
     public const FORMAT_CONVERSATIONAL = 'conversational';
+
     public const FORMAT_FORM = 'form';
+
     public const FORMAT_GRID = 'grid';
 
     /**
      * Status constants
      */
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_PAUSED = 'paused';
+
     public const STATUS_ARCHIVED = 'archived';
 
     /**
@@ -154,6 +163,7 @@ class Collection extends Model
         if ($this->data_source === self::SOURCE_HYBRID && $this->survey) {
             $surveyQuestions = $this->survey->questions ?? [];
             $inlineQuestions = $this->inline_questions ?? [];
+
             return array_merge($surveyQuestions, $inlineQuestions);
         }
 

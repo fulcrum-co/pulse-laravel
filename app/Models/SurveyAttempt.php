@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\Events\SurveyCompleted;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class SurveyAttempt extends Model
 {
@@ -47,15 +47,20 @@ class SurveyAttempt extends Model
      * Status constants
      */
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_ABANDONED = 'abandoned';
 
     /**
      * Response channel constants
      */
     public const CHANNEL_WEB = 'web';
+
     public const CHANNEL_SMS = 'sms';
+
     public const CHANNEL_VOICE = 'voice';
+
     public const CHANNEL_CHAT = 'chat';
 
     /**
@@ -151,7 +156,7 @@ class SurveyAttempt extends Model
     /**
      * Record a voice response.
      */
-    public function recordVoiceResponse(string $questionId, string $audioPath, string $transcription = null): void
+    public function recordVoiceResponse(string $questionId, string $audioPath, ?string $transcription = null): void
     {
         $voiceRecordings = $this->voice_recordings ?? [];
         $voiceRecordings[$questionId] = $audioPath;
@@ -220,7 +225,7 @@ class SurveyAttempt extends Model
     /**
      * Get the respondent (student or user).
      */
-    public function getRespondent(): Model|null
+    public function getRespondent(): ?Model
     {
         return $this->student ?? $this->user;
     }
@@ -236,6 +241,7 @@ class SurveyAttempt extends Model
         if ($this->user) {
             return $this->user->name ?? 'User';
         }
+
         return 'Anonymous';
     }
 

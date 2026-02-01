@@ -22,6 +22,7 @@ class ModerationWorkflowSeeder extends Seeder
 
         if ($organizations->isEmpty()) {
             $this->command->warn('No organizations found. Skipping moderation workflow seeding.');
+
             return;
         }
 
@@ -49,7 +50,7 @@ class ModerationWorkflowSeeder extends Seeder
     protected function seedSlaConfigs(Organization $org): void
     {
         ModerationSlaConfig::createDefaultsForOrganization($org->id);
-        $this->command->info("  - Created SLA configs");
+        $this->command->info('  - Created SLA configs');
     }
 
     protected function seedDefaultWorkflow(Organization $org): void
@@ -60,13 +61,14 @@ class ModerationWorkflowSeeder extends Seeder
             ->first();
 
         if ($existingDefault) {
-            $this->command->info("  - Default workflow already exists");
+            $this->command->info('  - Default workflow already exists');
+
             return;
         }
 
         // Create the default workflow
         ModerationWorkflowService::createDefaultWorkflow($org->id);
-        $this->command->info("  - Created default moderation workflow");
+        $this->command->info('  - Created default moderation workflow');
     }
 
     protected function seedTeamSettings(Organization $org): void
@@ -77,7 +79,8 @@ class ModerationWorkflowSeeder extends Seeder
             ->get();
 
         if ($moderators->isEmpty()) {
-            $this->command->info("  - No eligible moderators found");
+            $this->command->info('  - No eligible moderators found');
+
             return;
         }
 

@@ -28,9 +28,13 @@ class ModerationDecision extends Model
 
     // Decision constants
     public const DECISION_APPROVE = 'approve';
+
     public const DECISION_REJECT = 'reject';
+
     public const DECISION_REQUEST_CHANGES = 'request_changes';
+
     public const DECISION_ESCALATE = 'escalate';
+
     public const DECISION_SKIP = 'skip';
 
     public static array $decisions = [
@@ -78,14 +82,14 @@ class ModerationDecision extends Model
     public function scopeThisMonth($query)
     {
         return $query->whereMonth('created_at', now()->month)
-                     ->whereYear('created_at', now()->year);
+            ->whereYear('created_at', now()->year);
     }
 
     // Accessors
 
     public function getFormattedTimeSpentAttribute(): string
     {
-        if (!$this->time_spent_seconds) {
+        if (! $this->time_spent_seconds) {
             return '0s';
         }
 
@@ -127,12 +131,12 @@ class ModerationDecision extends Model
 
     public function hasFieldChanges(): bool
     {
-        return !empty($this->field_changes);
+        return ! empty($this->field_changes);
     }
 
     public function getChangedFields(): array
     {
-        if (!$this->hasFieldChanges()) {
+        if (! $this->hasFieldChanges()) {
             return [];
         }
 

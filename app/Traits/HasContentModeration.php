@@ -4,9 +4,8 @@ namespace App\Traits;
 
 use App\Jobs\ModerateContentJob;
 use App\Models\ContentModerationResult;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * Trait for models that support AI content moderation.
@@ -61,6 +60,7 @@ trait HasContentModeration
         foreach ($moderationFields as $field) {
             if ($this->wasChanged($field)) {
                 $this->queueModeration();
+
                 return;
             }
         }
@@ -158,7 +158,7 @@ trait HasContentModeration
      */
     public function getModerationStatusLabelAttribute(): string
     {
-        if (!$this->moderation_status) {
+        if (! $this->moderation_status) {
             return 'Not Moderated';
         }
 
@@ -170,7 +170,7 @@ trait HasContentModeration
      */
     public function getModerationStatusColorAttribute(): string
     {
-        if (!$this->moderation_status) {
+        if (! $this->moderation_status) {
             return 'gray';
         }
 

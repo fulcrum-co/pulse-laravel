@@ -38,8 +38,9 @@ class SendDailyDigest extends Command
         // If specific user requested, just process that user
         if ($userId = $this->option('user')) {
             $user = User::find($userId);
-            if (!$user) {
+            if (! $user) {
                 $this->error("User {$userId} not found.");
+
                 return Command::FAILURE;
             }
 
@@ -55,12 +56,12 @@ class SendDailyDigest extends Command
                 $digest = $prefs['digest'] ?? [];
 
                 // Check if digest is enabled and frequency includes daily
-                if (!($digest['enabled'] ?? false)) {
+                if (! ($digest['enabled'] ?? false)) {
                     return false;
                 }
 
                 $frequency = $digest['frequency'] ?? 'daily';
-                if (!in_array($frequency, ['daily', 'both'])) {
+                if (! in_array($frequency, ['daily', 'both'])) {
                     return false;
                 }
 
@@ -98,6 +99,7 @@ class SendDailyDigest extends Command
         // Check if already sent recently (prevent duplicates)
         if (NotificationDigest::wasSentRecently($user->id, $type, 120)) {
             $this->line("  Skipping {$user->email} - digest sent recently");
+
             return false;
         }
 
@@ -115,6 +117,7 @@ class SendDailyDigest extends Command
 
         if ($notifications->isEmpty()) {
             $this->line("  Skipping {$user->email} - no new notifications");
+
             return false;
         }
 
@@ -123,6 +126,7 @@ class SendDailyDigest extends Command
 
         if ($this->option('dry-run')) {
             $this->info("  Would send to {$user->email}: {$notifications->count()} notifications in {$grouped->count()} categories");
+
             return true;
         }
 
@@ -140,9 +144,11 @@ class SendDailyDigest extends Command
             ]);
 
             $this->info("  Sent digest to {$user->email}: {$notifications->count()} notifications");
+
             return true;
         } catch (\Exception $e) {
             $this->error("  Failed to send to {$user->email}: {$e->getMessage()}");
+
             return false;
         }
     }

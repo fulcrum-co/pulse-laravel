@@ -19,9 +19,9 @@ class DigestEmail extends Mailable
     /**
      * Create a new message instance.
      *
-     * @param User $user The recipient user
-     * @param Collection $groupedNotifications Notifications grouped by category
-     * @param string $digestType 'daily' or 'weekly'
+     * @param  User  $user  The recipient user
+     * @param  Collection  $groupedNotifications  Notifications grouped by category
+     * @param  string  $digestType  'daily' or 'weekly'
      */
     public function __construct(
         public User $user,
@@ -38,7 +38,7 @@ class DigestEmail extends Mailable
         $typeLabel = ucfirst($this->digestType);
 
         return new Envelope(
-            subject: "Your {$typeLabel} Digest: {$count} notification" . ($count !== 1 ? 's' : ''),
+            subject: "Your {$typeLabel} Digest: {$count} notification".($count !== 1 ? 's' : ''),
         );
     }
 

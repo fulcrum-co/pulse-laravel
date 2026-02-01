@@ -2,11 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Models\ContactList;
 use App\Models\Provider;
 use App\Models\ProviderAssignment;
 use App\Models\ProviderConversation;
 use App\Models\Student;
-use App\Models\ContactList;
 use App\Services\StreamChatService;
 use Livewire\Component;
 
@@ -16,15 +16,19 @@ class ProviderProfile extends Component
 
     // Assign modal state
     public bool $showAssignModal = false;
+
     public string $assignType = 'student'; // student or list
+
     public ?int $selectedStudentId = null;
+
     public ?int $selectedListId = null;
+
     public string $assignNote = '';
 
     public function mount(Provider $provider): void
     {
         // Ensure the user has access to this provider's organization
-        if (!auth()->user()->canAccessOrganization($provider->org_id)) {
+        if (! auth()->user()->canAccessOrganization($provider->org_id)) {
             abort(403);
         }
 
@@ -100,6 +104,7 @@ class ProviderProfile extends Component
 
             if ($exists) {
                 session()->flash('error', 'This provider is already assigned to this student.');
+
                 return;
             }
 
@@ -130,7 +135,7 @@ class ProviderProfile extends Component
                     ->whereIn('status', ['assigned', 'active'])
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     ProviderAssignment::create([
                         'provider_id' => $this->provider->id,
                         'student_id' => $student->id,
@@ -200,7 +205,8 @@ class ProviderProfile extends Component
 
         if ($existing) {
             // Redirect to existing conversation
-            $this->redirect(route('messages.index') . '?conversation=' . $existing->id);
+            $this->redirect(route('messages.index').'?conversation='.$existing->id);
+
             return;
         }
 
@@ -225,7 +231,7 @@ class ProviderProfile extends Component
                 'status' => ProviderConversation::STATUS_ACTIVE,
             ]);
 
-            $this->redirect(route('messages.index') . '?conversation=' . $conversation->id);
+            $this->redirect(route('messages.index').'?conversation='.$conversation->id);
 
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to start conversation. Please try again.');

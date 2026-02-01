@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\CustomReport;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ReportPdfService
@@ -86,13 +85,13 @@ class ReportPdfService
             'branding' => $branding,
             'elements' => $report->report_layout ?? [],
         ])
-        ->setPaper($pageSettings['size'], $pageSettings['orientation'])
-        ->setOptions([
-            'isHtml5ParserEnabled' => true,
-            'isRemoteEnabled' => true,
-        ]);
+            ->setPaper($pageSettings['size'], $pageSettings['orientation'])
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+            ]);
 
-        $filename = \Illuminate\Support\Str::slug($report->report_name) . '.pdf';
+        $filename = \Illuminate\Support\Str::slug($report->report_name).'.pdf';
 
         return $pdf->download($filename);
     }
@@ -115,9 +114,9 @@ class ReportPdfService
             'branding' => $branding,
             'elements' => $report->report_layout ?? [],
         ])
-        ->setPaper($pageSettings['size'], $pageSettings['orientation']);
+            ->setPaper($pageSettings['size'], $pageSettings['orientation']);
 
-        $filename = \Illuminate\Support\Str::slug($report->report_name) . '.pdf';
+        $filename = \Illuminate\Support\Str::slug($report->report_name).'.pdf';
 
         return $pdf->stream($filename);
     }

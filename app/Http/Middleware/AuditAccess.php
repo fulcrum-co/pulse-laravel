@@ -33,13 +33,13 @@ class AuditAccess
     private function logAccess(Request $request, string $action): void
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
         // Extract model from route parameters
         $route = $request->route();
-        if (!$route) {
+        if (! $route) {
             return;
         }
 

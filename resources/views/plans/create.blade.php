@@ -1,7 +1,7 @@
 <x-layouts.dashboard title="Create Plan">
     <div class="max-w-2xl">
         <x-card>
-            <form action="{{ route('strategies.store') }}" method="POST" class="space-y-6">
+            <form action="{{ route('plans.store') }}" method="POST" class="space-y-6">
                 @csrf
 
                 <div>
@@ -59,7 +59,7 @@
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t">
-                    <a href="{{ route('strategies.index') }}" class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium">
+                    <a href="{{ route('plans.index') }}" class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium">
                         Cancel
                     </a>
                     <button type="submit" class="px-6 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">

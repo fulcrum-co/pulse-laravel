@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 class MiniCourseStep extends Model
 {
@@ -14,19 +14,30 @@ class MiniCourseStep extends Model
 
     // Step types
     public const TYPE_CONTENT = 'content';
+
     public const TYPE_REFLECTION = 'reflection';
+
     public const TYPE_ACTION = 'action';
+
     public const TYPE_PRACTICE = 'practice';
+
     public const TYPE_HUMAN_CONNECTION = 'human_connection';
+
     public const TYPE_ASSESSMENT = 'assessment';
+
     public const TYPE_CHECKPOINT = 'checkpoint';
 
     // Content types
     public const CONTENT_TEXT = 'text';
+
     public const CONTENT_VIDEO = 'video';
+
     public const CONTENT_DOCUMENT = 'document';
+
     public const CONTENT_LINK = 'link';
+
     public const CONTENT_EMBEDDED = 'embedded';
+
     public const CONTENT_INTERACTIVE = 'interactive';
 
     protected $fillable = [

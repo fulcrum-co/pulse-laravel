@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('user_organizations')) {
+        if (! Schema::hasTable('user_organizations')) {
             Schema::create('user_organizations', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -28,7 +28,7 @@ return new class extends Migration
         }
 
         // Add current_org_id to users table for tracking which org they're currently viewing
-        if (!Schema::hasColumn('users', 'current_org_id')) {
+        if (! Schema::hasColumn('users', 'current_org_id')) {
             Schema::table('users', function (Blueprint $table) {
                 $table->foreignId('current_org_id')->nullable()->after('org_id')->constrained('organizations')->nullOnDelete();
             });

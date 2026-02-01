@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Alerts;
 
-use App\Models\Workflow;
 use App\Models\User;
-use Livewire\Component;
+use App\Models\Workflow;
 use Illuminate\Support\Str;
+use Livewire\Component;
 
 class AlertWizard extends Component
 {
@@ -17,16 +17,21 @@ class AlertWizard extends Component
 
     // Step 1: Basic Info
     public string $name = '';
+
     public string $description = '';
 
     // Step 2: Trigger Configuration
     public string $triggerType = 'metric_threshold';
+
     public array $conditions = [];
+
     public string $conditionLogic = 'and';
 
     // Step 3: Delay (optional)
     public bool $hasDelay = false;
+
     public int $delayDuration = 1;
+
     public string $delayUnit = 'hours';
 
     // Step 4: Actions
@@ -34,12 +39,16 @@ class AlertWizard extends Component
 
     // Step 5: Settings
     public int $cooldownMinutes = 60;
+
     public int $maxExecutionsPerDay = 100;
 
     // UI state
     public bool $showConditionModal = false;
+
     public bool $showActionModal = false;
+
     public ?int $editingConditionIndex = null;
+
     public ?int $editingActionIndex = null;
 
     // Temp form data for modals
@@ -122,7 +131,7 @@ class AlertWizard extends Component
 
         // Load actions from nodes
         $actionNodes = collect($workflow->nodes)->where('type', 'action');
-        $this->actions = $actionNodes->map(fn($node) => [
+        $this->actions = $actionNodes->map(fn ($node) => [
             'action_type' => $node['data']['action_type'] ?? 'send_sms',
             'config' => $node['data']['config'] ?? [],
         ])->values()->toArray();
@@ -154,10 +163,10 @@ class AlertWizard extends Component
     {
         return match ($step) {
             1 => true,
-            2 => !empty($this->name),
-            3 => !empty($this->conditions),
+            2 => ! empty($this->name),
+            3 => ! empty($this->conditions),
             4 => true, // Delay is optional
-            5 => !empty($this->actions),
+            5 => ! empty($this->actions),
             default => false,
         };
     }
@@ -434,9 +443,9 @@ class AlertWizard extends Component
         return User::where('org_id', auth()->user()->org_id)
             ->whereIn('primary_role', ['admin', 'support_rep', 'teacher'])
             ->get()
-            ->map(fn($user) => [
+            ->map(fn ($user) => [
                 'id' => $user->id,
-                'name' => $user->first_name . ' ' . $user->last_name,
+                'name' => $user->first_name.' '.$user->last_name,
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'role' => $user->primary_role,

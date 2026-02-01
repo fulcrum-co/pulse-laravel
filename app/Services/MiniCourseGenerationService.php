@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\MiniCourse;
 use App\Models\MiniCourseStep;
 use App\Models\MiniCourseSuggestion;
-use App\Models\Resource;
 use App\Models\Student;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -26,8 +25,9 @@ class MiniCourseGenerationService
         // Generate course structure with AI
         $courseData = $this->generateCourseStructure($context);
 
-        if (!$courseData) {
+        if (! $courseData) {
             Log::warning('Failed to generate course structure', ['student_id' => $student->id]);
+
             return null;
         }
 
@@ -55,7 +55,7 @@ class MiniCourseGenerationService
         ]);
 
         // Create steps
-        if (!empty($courseData['steps'])) {
+        if (! empty($courseData['steps'])) {
             foreach ($courseData['steps'] as $index => $stepData) {
                 MiniCourseStep::create([
                     'mini_course_id' => $course->id,
@@ -84,11 +84,11 @@ class MiniCourseGenerationService
         $newCourse = $template->duplicate();
 
         // Apply customizations
-        if (!empty($customizations['title'])) {
+        if (! empty($customizations['title'])) {
             $newCourse->title = $customizations['title'];
         }
 
-        if (!empty($customizations['target_student'])) {
+        if (! empty($customizations['target_student'])) {
             $student = Student::find($customizations['target_student']);
             if ($student) {
                 $newCourse->target_grades = [$student->grade_level];
@@ -131,7 +131,7 @@ class MiniCourseGenerationService
             ];
         }
 
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are an educational course designer. Analyze the given course and suggest improvements.
 Consider the student context if provided.
 
@@ -150,7 +150,7 @@ PROMPT;
             $systemPrompt
         );
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'suggestions' => [],
                 'missing_elements' => [],
@@ -258,7 +258,7 @@ PROMPT;
      */
     protected function generateCourseStructure(array $context): ?array
     {
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are an educational intervention designer creating personalized mini-courses for students.
 Based on the student context provided, design a short, focused intervention course.
 
@@ -291,14 +291,15 @@ Focus on:
 PROMPT;
 
         $response = $this->claudeService->sendMessage(
-            "Generate a personalized mini-course for this student:\n\n" . json_encode($context, JSON_PRETTY_PRINT),
+            "Generate a personalized mini-course for this student:\n\n".json_encode($context, JSON_PRETTY_PRINT),
             $systemPrompt
         );
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             Log::error('Failed to generate course structure', [
                 'error' => $response['error'] ?? 'Unknown error',
             ]);
+
             return null;
         }
 
@@ -321,7 +322,7 @@ PROMPT;
             'objectives' => $c->objectives,
         ])->toArray();
 
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are matching a student to existing courses. Find the best match based on the student's needs and context.
 
 Return a JSON object with:
@@ -333,12 +334,12 @@ Return a JSON object with:
 PROMPT;
 
         $response = $this->claudeService->sendMessage(
-            "Student context:\n" . json_encode($context, JSON_PRETTY_PRINT) .
-            "\n\nAvailable courses:\n" . json_encode($courseList, JSON_PRETTY_PRINT),
+            "Student context:\n".json_encode($context, JSON_PRETTY_PRINT).
+            "\n\nAvailable courses:\n".json_encode($courseList, JSON_PRETTY_PRINT),
             $systemPrompt
         );
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return null;
         }
 
@@ -363,7 +364,7 @@ PROMPT;
     /**
      * Parse JSON from AI response.
      */
-    protected function parseJsonResponse(string $content, array $default = null): ?array
+    protected function parseJsonResponse(string $content, ?array $default = null): ?array
     {
         // Try to extract JSON from response
         if (preg_match('/\{[\s\S]*\}/', $content, $matches)) {
@@ -398,7 +399,7 @@ PROMPT;
 
         $prompt = $prompts[$stepType] ?? $prompts[MiniCourseStep::TYPE_CONTENT];
 
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are creating content for a mini-course step. Create engaging, age-appropriate content.
 Return a JSON object with:
 - body: Main content text (markdown supported)
@@ -407,11 +408,11 @@ Return a JSON object with:
 PROMPT;
 
         $response = $this->claudeService->sendMessage(
-            $prompt . "\n\nContext: " . json_encode($context),
+            $prompt."\n\nContext: ".json_encode($context),
             $systemPrompt
         );
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'body' => "Content about {$topic}",
                 'prompts' => [],

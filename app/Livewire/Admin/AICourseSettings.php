@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Organization;
 use App\Models\CourseApprovalWorkflow;
 use App\Models\MiniCourse;
+use App\Models\Organization;
 use App\Services\CourseApprovalService;
 use Livewire\Component;
 
@@ -12,16 +12,24 @@ class AICourseSettings extends Component
 {
     // Settings fields
     public string $approvalMode = 'create_approve';
+
     public bool $autoGenerateEnabled = false;
+
     public array $generationTriggers = [];
+
     public array $notificationRecipients = [];
+
     public int $maxAutoCoursesPerDay = 10;
+
     public bool $requireReviewForAiGenerated = true;
 
     // Pending approvals
     public bool $showApprovalModal = false;
+
     public ?int $selectedWorkflowId = null;
+
     public string $reviewNotes = '';
+
     public string $rejectionReason = '';
 
     protected CourseApprovalService $approvalService;
@@ -153,7 +161,7 @@ class AICourseSettings extends Component
 
     public function approveCourse(): void
     {
-        if (!$this->selectedWorkflowId) {
+        if (! $this->selectedWorkflowId) {
             return;
         }
 
@@ -173,7 +181,7 @@ class AICourseSettings extends Component
 
     public function rejectCourse(): void
     {
-        if (!$this->selectedWorkflowId) {
+        if (! $this->selectedWorkflowId) {
             return;
         }
 
@@ -197,7 +205,7 @@ class AICourseSettings extends Component
 
     public function requestRevision(): void
     {
-        if (!$this->selectedWorkflowId) {
+        if (! $this->selectedWorkflowId) {
             return;
         }
 

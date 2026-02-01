@@ -15,23 +15,32 @@ class ContactListManager extends Component
 
     // Search and filters
     public string $search = '';
+
     public string $filterType = '';
 
     // Create/Edit modal
     public bool $showModal = false;
+
     public ?ContactList $editingList = null;
 
     // Form fields
     public string $listName = '';
+
     public string $listDescription = '';
+
     public string $listType = 'student';
+
     public bool $isDynamic = false;
+
     public array $filterCriteria = [];
 
     // Member management modal
     public bool $showMembersModal = false;
+
     public ?ContactList $viewingList = null;
+
     public string $memberSearch = '';
+
     public array $selectedMembers = [];
 
     // Preview for dynamic lists
@@ -165,13 +174,13 @@ class ContactListManager extends Component
 
     public function toggleFilterArrayValue(string $key, $value): void
     {
-        if (!isset($this->filterCriteria[$key])) {
+        if (! isset($this->filterCriteria[$key])) {
             $this->filterCriteria[$key] = [];
         }
 
         if (in_array($value, $this->filterCriteria[$key])) {
             $this->filterCriteria[$key] = array_values(
-                array_filter($this->filterCriteria[$key], fn($v) => $v !== $value)
+                array_filter($this->filterCriteria[$key], fn ($v) => $v !== $value)
             );
 
             if (empty($this->filterCriteria[$key])) {
@@ -186,8 +195,9 @@ class ContactListManager extends Component
 
     public function updatePreview(): void
     {
-        if (!$this->isDynamic || empty($this->filterCriteria)) {
+        if (! $this->isDynamic || empty($this->filterCriteria)) {
             $this->previewCount = 0;
+
             return;
         }
 
@@ -227,7 +237,7 @@ class ContactListManager extends Component
 
     public function addSelectedMembers(): void
     {
-        if (!$this->viewingList || empty($this->selectedMembers)) {
+        if (! $this->viewingList || empty($this->selectedMembers)) {
             return;
         }
 
@@ -256,7 +266,7 @@ class ContactListManager extends Component
 
     public function removeMember(string $type, int $id): void
     {
-        if (!$this->viewingList) {
+        if (! $this->viewingList) {
             return;
         }
 
@@ -293,8 +303,8 @@ class ContactListManager extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('description', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('description', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -334,7 +344,7 @@ class ContactListManager extends Component
 
     public function getAvailableMembersProperty()
     {
-        if (!$this->viewingList) {
+        if (! $this->viewingList) {
             return collect();
         }
 
@@ -347,18 +357,18 @@ class ContactListManager extends Component
                 ->when($search, function ($q) use ($search) {
                     $q->whereHas('user', function ($uq) use ($search) {
                         $uq->where('first_name', 'like', "%{$search}%")
-                           ->orWhere('last_name', 'like', "%{$search}%");
+                            ->orWhere('last_name', 'like', "%{$search}%");
                     });
                 })
                 ->with('user')
                 ->limit(20)
                 ->get()
                 ->map(fn ($s) => [
-                    'key' => 'student:' . $s->id,
+                    'key' => 'student:'.$s->id,
                     'type' => 'student',
                     'id' => $s->id,
                     'name' => $s->full_name,
-                    'meta' => 'Grade ' . $s->grade_level,
+                    'meta' => 'Grade '.$s->grade_level,
                 ]);
 
             if ($this->viewingList->list_type === ContactList::TYPE_STUDENT) {
@@ -371,12 +381,12 @@ class ContactListManager extends Component
                 ->whereNull('deleted_at')
                 ->when($search, function ($q) use ($search) {
                     $q->where('first_name', 'like', "%{$search}%")
-                      ->orWhere('last_name', 'like', "%{$search}%");
+                        ->orWhere('last_name', 'like', "%{$search}%");
                 })
                 ->limit(20)
                 ->get()
                 ->map(fn ($u) => [
-                    'key' => 'user:' . $u->id,
+                    'key' => 'user:'.$u->id,
                     'type' => 'user',
                     'id' => $u->id,
                     'name' => $u->full_name,

@@ -70,7 +70,7 @@ class CheckStrategyDeadlines extends Command
     {
         $plan = $activity->objective?->focusArea?->strategicPlan;
 
-        if (!$plan) {
+        if (! $plan) {
             return;
         }
 
@@ -99,12 +99,13 @@ class CheckStrategyDeadlines extends Command
 
         if (empty($usersToNotify)) {
             $this->line("  Activity {$activity->id}: All users already notified recently");
+
             return;
         }
 
         $hoursRemaining = now()->diffInHours($activity->end_date, false);
 
-        $this->line("  Activity {$activity->id}: Notifying " . count($usersToNotify) . " users (skipped " . count($recentlyNotified) . " already notified)");
+        $this->line("  Activity {$activity->id}: Notifying ".count($usersToNotify).' users (skipped '.count($recentlyNotified).' already notified)');
 
         // Create high priority notifications
         $count = $this->notificationService->notifyMany(
@@ -114,7 +115,7 @@ class CheckStrategyDeadlines extends Command
             [
                 'title' => "Activity due soon: {$activity->title}",
                 'body' => $this->buildActivityDueMessage($activity, $hoursRemaining),
-                'action_url' => route('strategies.show', $plan->id) . '#activity-' . $activity->id,
+                'action_url' => route('strategies.show', $plan->id).'#activity-'.$activity->id,
                 'action_label' => 'View Activity',
                 'icon' => 'clock',
                 'priority' => UserNotification::PRIORITY_HIGH,

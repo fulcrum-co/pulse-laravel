@@ -23,14 +23,15 @@ class AlertsHub extends Component
     public function getUnreadCountProperty(): int
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return 0;
         }
 
         try {
-            if (!Schema::hasTable('user_notifications')) {
+            if (! Schema::hasTable('user_notifications')) {
                 return 0;
             }
+
             return UserNotification::getUnreadCountForUser($user->id);
         } catch (\Exception $e) {
             return 0;

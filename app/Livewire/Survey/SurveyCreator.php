@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Survey;
 
-use App\Models\Survey;
-use App\Models\SurveyTemplate;
-use App\Models\SurveyCreationSession;
 use App\Models\QuestionBank;
+use App\Models\Survey;
+use App\Models\SurveyCreationSession;
+use App\Models\SurveyTemplate;
 use App\Services\SurveyCreationService;
-use Livewire\Component;
 use Illuminate\Support\Str;
+use Livewire\Component;
 
 class SurveyCreator extends Component
 {
@@ -18,6 +18,7 @@ class SurveyCreator extends Component
     {
         $this->surveyCreationService = $surveyCreationService;
     }
+
     // Mode: select, form, chat, voice, template
     public string $mode = 'select';
 
@@ -26,7 +27,9 @@ class SurveyCreator extends Component
 
     // Basic Info
     public string $title = '';
+
     public string $description = '';
+
     public string $surveyType = 'wellness';
 
     // Questions
@@ -34,20 +37,29 @@ class SurveyCreator extends Component
 
     // Settings
     public array $deliveryChannels = ['web'];
+
     public bool $isAnonymous = true;
+
     public ?int $estimatedDuration = 5;
+
     public bool $allowVoiceResponses = false;
+
     public bool $aiFollowUpEnabled = false;
+
     public ?array $targetGrades = null;
 
     // AI Chat mode state
     public ?int $sessionId = null;
+
     public array $chatMessages = [];
+
     public string $chatInput = '';
+
     public bool $isProcessing = false;
 
     // Voice mode state
     public bool $isRecording = false;
+
     public ?string $transcription = null;
 
     // Template selection
@@ -55,10 +67,15 @@ class SurveyCreator extends Component
 
     // UI State
     public bool $showQuestionEditor = false;
+
     public ?int $editingQuestionIndex = null;
+
     public bool $showQuestionBank = false;
+
     public bool $showTemplates = false;
+
     public bool $showDeliveryConfig = false;
+
     public bool $showPreview = false;
 
     // Service configuration status
@@ -87,9 +104,9 @@ class SurveyCreator extends Component
 
         // Check service configuration status
         $this->serviceStatus = [
-            'claude' => !empty(config('services.anthropic.api_key')),
-            'transcription' => !empty(config('services.openai.api_key')) ||
-                              !empty(config('services.assembly_ai.api_key')),
+            'claude' => ! empty(config('services.anthropic.api_key')),
+            'transcription' => ! empty(config('services.openai.api_key')) ||
+                              ! empty(config('services.assembly_ai.api_key')),
         ];
 
         if ($surveyId) {
@@ -211,7 +228,7 @@ class SurveyCreator extends Component
                 $draftQuestions = $session->fresh()->draft_questions ?? [];
 
                 // Convert AI suggested format to our internal format
-                if (!empty($draftQuestions)) {
+                if (! empty($draftQuestions)) {
                     $this->questions = array_map(function ($q) {
                         return [
                             'id' => $q['id'] ?? (string) Str::uuid(),
@@ -239,7 +256,7 @@ class SurveyCreator extends Component
                     $session->addMessage('assistant', $response);
                     $this->chatMessages[] = [
                         'role' => 'assistant',
-                        'content' => "[Simplified mode - AI temporarily unavailable]\n\n" . $response,
+                        'content' => "[Simplified mode - AI temporarily unavailable]\n\n".$response,
                     ];
                 }
                 $this->questions = $session->fresh()->draft_questions ?? $this->questions;
@@ -272,8 +289,8 @@ class SurveyCreator extends Component
             $max = $question['max'] ?? 5;
 
             return [
-                (string)$min => $labels[0] ?? 'Very Low',
-                (string)$max => $labels[count($labels) - 1] ?? 'Very High',
+                (string) $min => $labels[0] ?? 'Very Low',
+                (string) $max => $labels[count($labels) - 1] ?? 'Very High',
             ];
         }
 
@@ -298,8 +315,8 @@ class SurveyCreator extends Component
                 $session->update(['draft_questions' => $suggestedQuestions]);
                 $this->questions = $suggestedQuestions;
 
-                return "Great! A wellness check-in survey. I've drafted " . count($suggestedQuestions) . " questions for you:\n\n" .
-                    collect($suggestedQuestions)->map(fn($q, $i) => ($i + 1) . ". " . $q['question'])->join("\n") .
+                return "Great! A wellness check-in survey. I've drafted ".count($suggestedQuestions)." questions for you:\n\n".
+                    collect($suggestedQuestions)->map(fn ($q, $i) => ($i + 1).'. '.$q['question'])->join("\n").
                     "\n\nWould you like to modify any of these, or shall we add more questions?";
             }
 
@@ -309,8 +326,8 @@ class SurveyCreator extends Component
                 $session->update(['draft_questions' => $suggestedQuestions]);
                 $this->questions = $suggestedQuestions;
 
-                return "I'll help you create an academic stress assessment. Here are " . count($suggestedQuestions) . " suggested questions:\n\n" .
-                    collect($suggestedQuestions)->map(fn($q, $i) => ($i + 1) . ". " . $q['question'])->join("\n") .
+                return "I'll help you create an academic stress assessment. Here are ".count($suggestedQuestions)." suggested questions:\n\n".
+                    collect($suggestedQuestions)->map(fn ($q, $i) => ($i + 1).'. '.$q['question'])->join("\n").
                     "\n\nFeel free to ask me to modify, remove, or add questions!";
             }
 
@@ -323,7 +340,7 @@ class SurveyCreator extends Component
         }
 
         if (str_contains($lowerMessage, 'looks good') || str_contains($lowerMessage, 'done') || str_contains($lowerMessage, 'finish')) {
-            return "Excellent! Your survey with " . count($this->questions) . " questions is ready. Click 'Finish & Edit' above to review and customize the final details, or continue chatting if you'd like to make more changes.";
+            return 'Excellent! Your survey with '.count($this->questions)." questions is ready. Click 'Finish & Edit' above to review and customize the final details, or continue chatting if you'd like to make more changes.";
         }
 
         return "I can help you:\n- Add more questions\n- Modify existing questions\n- Change question types\n- Remove questions\n\nJust tell me what you'd like to do!";
@@ -331,7 +348,7 @@ class SurveyCreator extends Component
 
     protected function suggestQuestionsForType(string $type): array
     {
-        return match($type) {
+        return match ($type) {
             'wellness' => [
                 [
                     'id' => (string) Str::uuid(),
@@ -426,14 +443,14 @@ class SurveyCreator extends Component
                 $extractedQuestions[] = [
                     'id' => (string) Str::uuid(),
                     'type' => 'scale',
-                    'question' => ucfirst($line) . (str_ends_with($line, '?') ? '' : '?'),
+                    'question' => ucfirst($line).(str_ends_with($line, '?') ? '' : '?'),
                     'options' => ['1' => 'Strongly Disagree', '5' => 'Strongly Agree'],
                     'required' => true,
                 ];
             }
         }
 
-        if (!empty($extractedQuestions)) {
+        if (! empty($extractedQuestions)) {
             $this->questions = array_merge($this->questions, $extractedQuestions);
         }
 
@@ -505,10 +522,11 @@ class SurveyCreator extends Component
         if ($this->questionForm['type'] === 'multiple_choice') {
             $options = $this->questionForm['options'] ?? [];
             // Filter out empty options
-            $validOptions = array_values(array_filter($options, fn($opt) => trim($opt) !== ''));
+            $validOptions = array_values(array_filter($options, fn ($opt) => trim($opt) !== ''));
 
             if (count($validOptions) < 2) {
                 $this->addError('questionForm.options', 'Multiple choice questions require at least 2 options.');
+
                 return;
             }
 
@@ -566,7 +584,7 @@ class SurveyCreator extends Component
         $options = $this->questionForm['options'] ?? [];
 
         // For multiple choice, options is a simple array of strings
-        if (!is_array($options)) {
+        if (! is_array($options)) {
             $options = [];
         }
 
@@ -588,7 +606,7 @@ class SurveyCreator extends Component
 
     public function updateOption(int $index, string $value): void
     {
-        if (!isset($this->questionForm['options'])) {
+        if (! isset($this->questionForm['options'])) {
             $this->questionForm['options'] = [];
         }
 

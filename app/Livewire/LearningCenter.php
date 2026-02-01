@@ -11,7 +11,9 @@ class LearningCenter extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $activeCategory = 'all';
+
     public string $viewMode = 'grid';
 
     protected $queryString = [
@@ -44,8 +46,8 @@ class LearningCenter extends Component
         // Search
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('title', 'ilike', '%' . $this->search . '%')
-                  ->orWhere('description', 'ilike', '%' . $this->search . '%');
+                $q->where('title', 'ilike', '%'.$this->search.'%')
+                    ->orWhere('description', 'ilike', '%'.$this->search.'%');
             });
         }
 

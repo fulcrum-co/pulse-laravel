@@ -9,18 +9,18 @@ use App\Models\Organization;
 use App\Models\SellerProfile;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class MarketplaceSeeder extends Seeder
 {
     public function run(): void
     {
         $school = Organization::where('org_type', 'school')->first();
-        if (!$school) {
+        if (! $school) {
             $school = Organization::first();
         }
-        if (!$school) {
+        if (! $school) {
             $this->log('No organization found. Please seed organizations first.', 'error');
+
             return;
         }
 
@@ -34,8 +34,8 @@ class MarketplaceSeeder extends Seeder
         $this->createReviews($items, $school);
 
         $this->log('Marketplace seeded successfully!');
-        $this->log('- ' . count($sellers) . ' seller profiles created');
-        $this->log('- ' . count($items) . ' marketplace items created');
+        $this->log('- '.count($sellers).' seller profiles created');
+        $this->log('- '.count($items).' marketplace items created');
     }
 
     private function log(string $message, string $type = 'info'): void
@@ -59,7 +59,7 @@ class MarketplaceSeeder extends Seeder
             $sellers[] = SellerProfile::create([
                 'user_id' => $user->id,
                 'org_id' => $school->id,
-                'display_name' => $user->first_name . ' ' . $user->last_name,
+                'display_name' => $user->first_name.' '.$user->last_name,
                 'bio' => 'Passionate educator sharing resources to help students succeed.',
                 'avatar_url' => $user->avatar_url,
                 'expertise_areas' => $this->getRandomExpertise(),
@@ -484,32 +484,32 @@ class MarketplaceSeeder extends Seeder
     {
         $reviewTexts = [
             5 => [
-                "Exactly what I was looking for! My students love it.",
-                "Incredible resource. Well worth the price.",
-                "This has transformed my classroom. Highly recommend!",
-                "Comprehensive and easy to implement. Five stars!",
-                "My students showed immediate improvement after using this.",
-                "Perfect for differentiation. Works great for all learners.",
-                "The quality is outstanding. Very professional materials.",
+                'Exactly what I was looking for! My students love it.',
+                'Incredible resource. Well worth the price.',
+                'This has transformed my classroom. Highly recommend!',
+                'Comprehensive and easy to implement. Five stars!',
+                'My students showed immediate improvement after using this.',
+                'Perfect for differentiation. Works great for all learners.',
+                'The quality is outstanding. Very professional materials.',
             ],
             4 => [
-                "Great resource overall. Minor improvements could be made.",
-                "Very helpful for my students. Solid purchase.",
-                "Good value for the price. Would recommend.",
-                "Works well, though I made some modifications for my class.",
-                "Nice addition to my teaching toolkit.",
+                'Great resource overall. Minor improvements could be made.',
+                'Very helpful for my students. Solid purchase.',
+                'Good value for the price. Would recommend.',
+                'Works well, though I made some modifications for my class.',
+                'Nice addition to my teaching toolkit.',
             ],
             3 => [
-                "Decent resource but not as comprehensive as I hoped.",
+                'Decent resource but not as comprehensive as I hoped.',
                 "It's okay. Some parts were more useful than others.",
-                "Average quality. Does the job but nothing special.",
+                'Average quality. Does the job but nothing special.',
             ],
         ];
 
         $sellerResponses = [
             "Thank you so much for your feedback! We're thrilled it's working well for your students.",
-            "We appreciate your review! Let us know if you have any questions.",
-            "Thanks for the kind words! We love hearing success stories from educators.",
+            'We appreciate your review! Let us know if you have any questions.',
+            'Thanks for the kind words! We love hearing success stories from educators.',
             null,
             null,
         ];
@@ -547,9 +547,16 @@ class MarketplaceSeeder extends Seeder
     private function weightedRating(): int
     {
         $rand = rand(1, 100);
-        if ($rand <= 60) return 5;
-        if ($rand <= 85) return 4;
-        if ($rand <= 95) return 3;
+        if ($rand <= 60) {
+            return 5;
+        }
+        if ($rand <= 85) {
+            return 4;
+        }
+        if ($rand <= 95) {
+            return 3;
+        }
+
         return rand(1, 2);
     }
 
@@ -563,6 +570,7 @@ class MarketplaceSeeder extends Seeder
             ['Classroom Management', 'Behavior', 'PBIS'],
             ['Mental Health', 'Counseling', 'Wellness'],
         ];
+
         return $options[array_rand($options)];
     }
 
@@ -577,6 +585,7 @@ class MarketplaceSeeder extends Seeder
                 ['title' => 'Certified Behavior Analyst', 'issuer' => 'BACB', 'year' => '2019'],
             ],
         ];
+
         return $credentials[array_rand($credentials)];
     }
 }

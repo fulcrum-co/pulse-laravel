@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class CollectionQueueItem extends Model
 {
@@ -24,16 +24,22 @@ class CollectionQueueItem extends Model
      * Status constants
      */
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_CURRENT = 'current';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_SKIPPED = 'skipped';
 
     /**
      * Priority constants
      */
     public const PRIORITY_LOW = 1;
+
     public const PRIORITY_NORMAL = 3;
+
     public const PRIORITY_HIGH = 4;
+
     public const PRIORITY_CRITICAL = 5;
 
     /**
@@ -123,7 +129,7 @@ class CollectionQueueItem extends Model
     {
         $contact = $this->contact;
 
-        if (!$contact) {
+        if (! $contact) {
             return 'Unknown';
         }
 
@@ -132,7 +138,7 @@ class CollectionQueueItem extends Model
         }
 
         if (isset($contact->first_name, $contact->last_name)) {
-            return trim($contact->first_name . ' ' . $contact->last_name);
+            return trim($contact->first_name.' '.$contact->last_name);
         }
 
         return $contact->name ?? 'Unknown';

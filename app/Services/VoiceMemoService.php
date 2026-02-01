@@ -90,7 +90,7 @@ class VoiceMemoService
      */
     public function extractStructuredData(string $transcription, ContactNote $note): array
     {
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are analyzing a voice memo from an educator about a student or contact. Extract structured information from the transcription.
 
 Return a JSON object with:
@@ -109,7 +109,7 @@ PROMPT;
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return ['success' => false, 'error' => $response['error']];
         }
 
@@ -118,7 +118,7 @@ PROMPT;
             if (json_last_error() !== JSON_ERROR_NONE) {
                 // Try to extract JSON from response
                 preg_match('/\{.*\}/s', $response['content'], $matches);
-                if (!empty($matches[0])) {
+                if (! empty($matches[0])) {
                     $data = json_decode($matches[0], true);
                 }
             }
@@ -136,26 +136,26 @@ PROMPT;
     {
         $summary = '';
 
-        if (!empty($data['summary'])) {
-            $summary = $data['summary'] . "\n\n";
+        if (! empty($data['summary'])) {
+            $summary = $data['summary']."\n\n";
         }
 
-        if (!empty($data['concerns'])) {
-            $summary .= "**Concerns:** " . implode(', ', $data['concerns']) . "\n";
+        if (! empty($data['concerns'])) {
+            $summary .= '**Concerns:** '.implode(', ', $data['concerns'])."\n";
         }
 
-        if (!empty($data['positives'])) {
-            $summary .= "**Positives:** " . implode(', ', $data['positives']) . "\n";
+        if (! empty($data['positives'])) {
+            $summary .= '**Positives:** '.implode(', ', $data['positives'])."\n";
         }
 
-        if (!empty($data['action_items'])) {
-            $summary .= "**Action Items:** " . implode(', ', $data['action_items']) . "\n";
+        if (! empty($data['action_items'])) {
+            $summary .= '**Action Items:** '.implode(', ', $data['action_items'])."\n";
         }
 
         if (empty($summary)) {
             // Use first 500 characters of transcription
             $summary = strlen($transcription) > 500
-                ? substr($transcription, 0, 500) . '...'
+                ? substr($transcription, 0, 500).'...'
                 : $transcription;
         }
 
@@ -189,7 +189,7 @@ PROMPT;
      */
     public function getAudioUrl(ContactNote $note): ?string
     {
-        if (!$note->audio_file_path) {
+        if (! $note->audio_file_path) {
             return null;
         }
 

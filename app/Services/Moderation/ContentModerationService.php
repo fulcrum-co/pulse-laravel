@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 class ContentModerationService
 {
     protected string $apiKey;
+
     protected string $model;
 
     public function __construct()
@@ -69,7 +70,7 @@ class ContentModerationService
             'x-api-key' => $this->apiKey,
             'anthropic-version' => '2023-06-01',
             'content-type' => 'application/json',
-        ])->timeout(60)->post(config('services.anthropic.base_url') . '/messages', [
+        ])->timeout(60)->post(config('services.anthropic.base_url').'/messages', [
             'model' => $this->model,
             'max_tokens' => 2048,
             'messages' => [
@@ -81,8 +82,8 @@ class ContentModerationService
             'system' => $this->getSystemPrompt(),
         ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('Moderation API request failed: ' . $response->body());
+        if (! $response->successful()) {
+            throw new \Exception('Moderation API request failed: '.$response->body());
         }
 
         $responseText = $response->json('content.0.text');
@@ -149,12 +150,12 @@ PROMPT;
     {
         $contextStr = '';
 
-        if (!empty($context['target_grades'])) {
+        if (! empty($context['target_grades'])) {
             $grades = is_array($context['target_grades']) ? implode(', ', $context['target_grades']) : $context['target_grades'];
             $contextStr .= "Target grades: {$grades}\n";
         }
 
-        if (!empty($context['type'])) {
+        if (! empty($context['type'])) {
             $contextStr .= "Content type: {$context['type']}\n";
         }
 
@@ -189,6 +190,7 @@ PROMPT;
 
             if (json_last_error() === JSON_ERROR_NONE) {
                 $parsed['token_count'] = $tokenCount;
+
                 return $parsed;
             }
         }
@@ -264,7 +266,7 @@ PROMPT;
             'moderatable_id' => $model->getKey(),
             'status' => ContentModerationResult::STATUS_PENDING,
             'overall_score' => 0,
-            'flags' => ['Moderation processing failed: ' . $error],
+            'flags' => ['Moderation processing failed: '.$error],
             'recommendations' => ['Please retry moderation or review manually'],
         ]);
     }

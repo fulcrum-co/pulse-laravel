@@ -13,6 +13,7 @@ class MarketplaceItemDetail extends Component
     use WithPagination;
 
     public MarketplaceItem $item;
+
     public string $activeTab = 'description';
 
     public function mount(string $uuid)
@@ -32,7 +33,7 @@ class MarketplaceItemDetail extends Component
     public function getHasAccessProperty(): bool
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 

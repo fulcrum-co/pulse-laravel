@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class CollectionReminder extends Model
 {
@@ -30,15 +30,20 @@ class CollectionReminder extends Model
      * Channel constants
      */
     public const CHANNEL_SMS = 'sms';
+
     public const CHANNEL_EMAIL = 'email';
+
     public const CHANNEL_WHATSAPP = 'whatsapp';
 
     /**
      * Status constants
      */
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_SENT = 'sent';
+
     public const STATUS_DELIVERED = 'delivered';
+
     public const STATUS_FAILED = 'failed';
 
     /**
@@ -93,7 +98,7 @@ class CollectionReminder extends Model
     /**
      * Mark as sent.
      */
-    public function markSent(array $metadata = null): void
+    public function markSent(?array $metadata = null): void
     {
         $data = [
             'status' => self::STATUS_SENT,
@@ -113,7 +118,7 @@ class CollectionReminder extends Model
     /**
      * Mark as delivered.
      */
-    public function markDelivered(array $metadata = null): void
+    public function markDelivered(?array $metadata = null): void
     {
         $data = ['status' => self::STATUS_DELIVERED];
 
@@ -130,7 +135,7 @@ class CollectionReminder extends Model
     /**
      * Mark as failed.
      */
-    public function markFailed(string $error = null): void
+    public function markFailed(?string $error = null): void
     {
         $metadata = $this->delivery_metadata ?? [];
         $metadata['error'] = $error;

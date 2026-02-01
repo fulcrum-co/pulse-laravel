@@ -2,24 +2,31 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class MiniCourseSuggestion extends Model
 {
     // Suggestion sources
     public const SOURCE_AI_GENERATED = 'ai_generated';
+
     public const SOURCE_AI_RECOMMENDED = 'ai_recommended';
+
     public const SOURCE_RULE_BASED = 'rule_based';
+
     public const SOURCE_PEER_SUCCESS = 'peer_success';
+
     public const SOURCE_MANUAL = 'manual';
 
     // Statuses
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_ACCEPTED = 'accepted';
+
     public const STATUS_DECLINED = 'declined';
+
     public const STATUS_AUTO_ENROLLED = 'auto_enrolled';
 
     protected $fillable = [
@@ -217,7 +224,7 @@ class MiniCourseSuggestion extends Model
     /**
      * Decline the suggestion.
      */
-    public function decline(int $userId, string $notes = null): void
+    public function decline(int $userId, ?string $notes = null): void
     {
         $this->update([
             'status' => self::STATUS_DECLINED,
@@ -290,6 +297,6 @@ class MiniCourseSuggestion extends Model
      */
     public function getFormattedRelevanceAttribute(): string
     {
-        return round($this->relevance_score ?? 0) . '%';
+        return round($this->relevance_score ?? 0).'%';
     }
 }

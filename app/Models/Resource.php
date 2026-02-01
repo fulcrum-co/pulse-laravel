@@ -5,13 +5,13 @@ namespace App\Models;
 use App\Traits\HasEmbedding;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Resource extends Model
 {
-    use SoftDeletes, Searchable, HasEmbedding;
+    use HasEmbedding, Searchable, SoftDeletes;
 
     protected $fillable = [
         'org_id',
@@ -106,7 +106,7 @@ class Resource extends Model
         $newResource->source_resource_id = $this->id;
         $newResource->source_org_id = $this->org_id;
         $newResource->created_by = $pushedBy;
-        $newResource->title = $this->title . ' (from ' . $this->organization->org_name . ')';
+        $newResource->title = $this->title.' (from '.$this->organization->org_name.')';
         $newResource->save();
 
         return $newResource;
@@ -180,7 +180,7 @@ class Resource extends Model
      */
     public function shouldBeSearchable(): bool
     {
-        return !$this->trashed() && $this->active;
+        return ! $this->trashed() && $this->active;
     }
 
     /**
@@ -195,19 +195,19 @@ class Resource extends Model
             $this->resource_type,
         ];
 
-        if (!empty($this->tags)) {
+        if (! empty($this->tags)) {
             $tags = is_array($this->tags) ? $this->tags : [];
-            $parts[] = 'Tags: ' . implode(', ', $tags);
+            $parts[] = 'Tags: '.implode(', ', $tags);
         }
 
-        if (!empty($this->target_grades)) {
+        if (! empty($this->target_grades)) {
             $grades = is_array($this->target_grades) ? $this->target_grades : [];
-            $parts[] = 'Grades: ' . implode(', ', $grades);
+            $parts[] = 'Grades: '.implode(', ', $grades);
         }
 
-        if (!empty($this->target_risk_levels)) {
+        if (! empty($this->target_risk_levels)) {
             $levels = is_array($this->target_risk_levels) ? $this->target_risk_levels : [];
-            $parts[] = 'Risk levels: ' . implode(', ', $levels);
+            $parts[] = 'Risk levels: '.implode(', ', $levels);
         }
 
         return implode('. ', array_filter($parts));

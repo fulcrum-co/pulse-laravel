@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Resource;
+use App\Models\ResourceAssignment;
 use App\Models\Student;
 use App\Models\Survey;
 use App\Models\SurveyAttempt;
-use App\Models\Resource;
-use App\Models\ResourceAssignment;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller

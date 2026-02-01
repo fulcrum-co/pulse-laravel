@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\StrategicPlan;
 use App\Models\Organization;
+use App\Models\StrategicPlan;
 use App\Models\StrategyCollaborator;
 use Illuminate\Http\Request;
 
@@ -28,7 +28,7 @@ class StrategyController extends Controller
 
         // Search by title
         if ($request->has('search')) {
-            $query->where('title', 'like', '%' . $request->get('search') . '%');
+            $query->where('title', 'like', '%'.$request->get('search').'%');
         }
 
         // Filter by status
@@ -64,22 +64,35 @@ class StrategyController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'plan_type' => 'required|in:organizational,teacher,student,department,grade',
+            'plan_type' => 'required|in:organizational,teacher,student,department,grade,improvement,growth,strategic,action',
+            'category' => 'nullable|in:pip,idp,okr,action_plan',
             'target_type' => 'nullable|string',
             'target_id' => 'nullable|integer',
+            'manager_id' => 'nullable|exists:users,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
         ]);
 
         $user = $request->user();
 
+        // Determine category based on plan type if not provided
+        $category = $validated['category'] ?? match ($validated['plan_type']) {
+            'improvement' => 'pip',
+            'growth' => 'idp',
+            'strategic' => 'okr',
+            'action' => 'action_plan',
+            default => null,
+        };
+
         $strategy = StrategicPlan::create([
             'org_id' => $user->org_id,
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'plan_type' => $validated['plan_type'],
+            'category' => $category,
             'target_type' => $validated['target_type'] ?? null,
             'target_id' => $validated['target_id'] ?? null,
+            'manager_id' => $validated['manager_id'] ?? null,
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
             'status' => StrategicPlan::STATUS_DRAFT,
@@ -104,13 +117,32 @@ class StrategyController extends Controller
     {
         $this->authorizeView($request->user(), $strategy);
 
-        $strategy->load([
-            'focusAreas.objectives.activities',
-            'collaborators.user',
-            'assignments.assignable',
-        ]);
+        // Load appropriate relationships based on plan type
+        if ($strategy->isOkrStyle()) {
+            $strategy->load([
+                'goals.keyResults',
+                'goals.owner',
+                'milestones.goal',
+                'milestones.completedByUser',
+                'progressUpdates.creator',
+                'progressSummaries',
+                'collaborators.user',
+                'assignments.assignable',
+                'manager',
+            ]);
+            // Default to goals view for OKR plans
+            $defaultView = 'goals';
+        } else {
+            $strategy->load([
+                'focusAreas.objectives.activities',
+                'collaborators.user',
+                'assignments.assignable',
+            ]);
+            // Default to planner view for traditional plans
+            $defaultView = 'planner';
+        }
 
-        $view = $request->get('view', 'planner');
+        $view = $request->get('view', $defaultView);
 
         return view('strategies.show', [
             'strategy' => $strategy,
@@ -200,14 +232,14 @@ class StrategyController extends Controller
         $userOrg = Organization::findOrFail($request->user()->org_id);
 
         // Check if user's org can push to target org
-        if (!$userOrg->canPushContentTo($targetOrg)) {
+        if (! $userOrg->canPushContentTo($targetOrg)) {
             return back()->withErrors(['target_org_id' => 'You cannot push content to this organization.']);
         }
 
         $newStrategy = $strategy->pushToOrganization($targetOrg);
 
         return redirect()->route('strategies.show', $strategy)
-            ->with('success', 'Strategy pushed to ' . $targetOrg->org_name . ' successfully.');
+            ->with('success', 'Strategy pushed to '.$targetOrg->org_name.' successfully.');
     }
 
     /**
@@ -230,9 +262,9 @@ class StrategyController extends Controller
         // Check if user is owner or collaborator with edit rights
         $collaborator = $strategy->collaborators()->where('user_id', $user->id)->first();
 
-        if (!$collaborator || !$collaborator->canEdit()) {
+        if (! $collaborator || ! $collaborator->canEdit()) {
             // Allow org admins
-            if (!$user->isAdmin()) {
+            if (! $user->isAdmin()) {
                 abort(403, 'You do not have permission to edit this strategy.');
             }
         }
@@ -248,8 +280,8 @@ class StrategyController extends Controller
         // Only owners or admins can delete
         $collaborator = $strategy->collaborators()->where('user_id', $user->id)->first();
 
-        if (!$collaborator || !$collaborator->isOwner()) {
-            if (!$user->isAdmin()) {
+        if (! $collaborator || ! $collaborator->isOwner()) {
+            if (! $user->isAdmin()) {
                 abort(403, 'You do not have permission to delete this strategy.');
             }
         }

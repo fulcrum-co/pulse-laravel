@@ -3,7 +3,6 @@
 namespace App\Livewire;
 
 use App\Models\Student;
-use App\Models\User;
 use App\Services\ContactMetricService;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -11,9 +10,13 @@ use Livewire\Component;
 class ContactOverviewCharts extends Component
 {
     public string $contactType;
+
     public int $contactId;
+
     public string $dateRange = '12_months';
+
     public array $selectedMetrics = ['gpa', 'wellness_score', 'emotional_wellbeing', 'engagement_score', 'plan_progress'];
+
     public array $availableMetrics = [];
 
     protected ContactMetricService $metricService;

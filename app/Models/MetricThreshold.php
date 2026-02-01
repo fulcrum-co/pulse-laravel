@@ -36,8 +36,11 @@ class MetricThreshold extends Model
 
     // Default colors
     public const DEFAULT_COLOR_ON_TRACK = '#22c55e';  // green-500
+
     public const DEFAULT_COLOR_AT_RISK = '#eab308';   // yellow-500
+
     public const DEFAULT_COLOR_OFF_TRACK = '#ef4444'; // red-500
+
     public const DEFAULT_COLOR_NO_DATA = '#9ca3af';   // gray-400
 
     /**
@@ -93,6 +96,7 @@ class MetricThreshold extends Model
             if ($this->at_risk_min !== null && $value <= $this->at_risk_min) {
                 return ContactMetric::STATUS_AT_RISK;
             }
+
             return ContactMetric::STATUS_OFF_TRACK;
         }
 
@@ -103,6 +107,7 @@ class MetricThreshold extends Model
         if ($this->at_risk_min !== null && $value >= $this->at_risk_min) {
             return ContactMetric::STATUS_AT_RISK;
         }
+
         return ContactMetric::STATUS_OFF_TRACK;
     }
 

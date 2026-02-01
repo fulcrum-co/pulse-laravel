@@ -10,10 +10,15 @@ use Livewire\Component;
 class MarketplaceHub extends Component
 {
     public string $search = '';
+
     public bool $isSearching = false;
+
     public array $selectedCategories = [];
+
     public string $priceFilter = '';
+
     public string $ratingFilter = '';
+
     public string $sortBy = 'popular';
 
     protected $queryString = [
@@ -81,9 +86,10 @@ class MarketplaceHub extends Component
     public function getCountsProperty(): array
     {
         try {
-            if (!Schema::hasTable('marketplace_items')) {
+            if (! Schema::hasTable('marketplace_items')) {
                 return ['surveys' => 0, 'strategies' => 0, 'content' => 0, 'providers' => 0];
             }
+
             return [
                 'surveys' => MarketplaceItem::published()->inCategory(MarketplaceItem::CATEGORY_SURVEY)->count(),
                 'strategies' => MarketplaceItem::published()->inCategory(MarketplaceItem::CATEGORY_STRATEGY)->count(),
@@ -101,7 +107,7 @@ class MarketplaceHub extends Component
     public function getFeaturedItemsProperty()
     {
         try {
-            if (!Schema::hasTable('marketplace_items')) {
+            if (! Schema::hasTable('marketplace_items')) {
                 return collect();
             }
 
@@ -142,7 +148,7 @@ class MarketplaceHub extends Component
     public function getRecentItemsProperty()
     {
         try {
-            if (!Schema::hasTable('marketplace_items')) {
+            if (! Schema::hasTable('marketplace_items')) {
                 return collect();
             }
 
@@ -190,14 +196,15 @@ class MarketplaceHub extends Component
     public function getHasSellerProfileProperty(): bool
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
         try {
-            if (!Schema::hasTable('seller_profiles')) {
+            if (! Schema::hasTable('seller_profiles')) {
                 return false;
             }
+
             return SellerProfile::where('user_id', $user->id)->exists();
         } catch (\Exception $e) {
             return false;
@@ -209,16 +216,16 @@ class MarketplaceHub extends Component
      */
     public function getSearchResultsProperty(): array
     {
-        if (!$this->isSearching) {
+        if (! $this->isSearching) {
             return [];
         }
 
         try {
-            if (!Schema::hasTable('marketplace_items')) {
+            if (! Schema::hasTable('marketplace_items')) {
                 return [];
             }
 
-            $searchTerm = '%' . $this->search . '%';
+            $searchTerm = '%'.$this->search.'%';
 
             $categories = [
                 'surveys' => MarketplaceItem::CATEGORY_SURVEY,

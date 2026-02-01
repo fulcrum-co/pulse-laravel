@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class SurveyDelivery extends Model
 {
@@ -38,18 +38,26 @@ class SurveyDelivery extends Model
      * Channel constants
      */
     public const CHANNEL_WEB = 'web';
+
     public const CHANNEL_SMS = 'sms';
+
     public const CHANNEL_VOICE = 'voice_call';
+
     public const CHANNEL_WHATSAPP = 'whatsapp';
+
     public const CHANNEL_CHAT = 'chat';
 
     /**
      * Status constants
      */
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_SENT = 'sent';
+
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_FAILED = 'failed';
 
     /**
@@ -132,14 +140,14 @@ class SurveyDelivery extends Model
         return $query->where('status', self::STATUS_PENDING)
             ->where(function ($q) {
                 $q->whereNull('scheduled_for')
-                  ->orWhere('scheduled_for', '<=', now());
+                    ->orWhere('scheduled_for', '<=', now());
             });
     }
 
     /**
      * Mark as sent.
      */
-    public function markSent(string $externalId = null): void
+    public function markSent(?string $externalId = null): void
     {
         $this->update([
             'status' => self::STATUS_SENT,
@@ -159,7 +167,7 @@ class SurveyDelivery extends Model
     /**
      * Mark as completed.
      */
-    public function markCompleted(int $surveyAttemptId = null): void
+    public function markCompleted(?int $surveyAttemptId = null): void
     {
         $data = [
             'status' => self::STATUS_COMPLETED,
@@ -174,7 +182,7 @@ class SurveyDelivery extends Model
     /**
      * Mark as failed.
      */
-    public function markFailed(string $reason = null): void
+    public function markFailed(?string $reason = null): void
     {
         $metadata = $this->delivery_metadata ?? [];
         $metadata['failure_reason'] = $reason;
@@ -190,7 +198,7 @@ class SurveyDelivery extends Model
     public function recordResponse(mixed $response): void
     {
         $responses = $this->response_data ?? [];
-        $responses['q' . ($this->current_question_index + 1)] = $response;
+        $responses['q'.($this->current_question_index + 1)] = $response;
         $this->update(['response_data' => $responses]);
     }
 
@@ -208,6 +216,7 @@ class SurveyDelivery extends Model
     public function getCurrentQuestion(): ?array
     {
         $questions = $this->survey->questions ?? [];
+
         return $questions[$this->current_question_index] ?? null;
     }
 
@@ -217,6 +226,7 @@ class SurveyDelivery extends Model
     public function isComplete(): bool
     {
         $totalQuestions = count($this->survey->questions ?? []);
+
         return $this->current_question_index >= $totalQuestions;
     }
 
@@ -228,6 +238,7 @@ class SurveyDelivery extends Model
         if ($this->recipient) {
             return $this->recipient->name ?? $this->recipient->first_name ?? 'Unknown';
         }
+
         return $this->phone_number ?? 'Unknown';
     }
 
@@ -236,7 +247,7 @@ class SurveyDelivery extends Model
      */
     public function getFormattedPhoneAttribute(): ?string
     {
-        if (!$this->phone_number) {
+        if (! $this->phone_number) {
             return null;
         }
         // Simple formatting - can be enhanced
@@ -248,6 +259,7 @@ class SurveyDelivery extends Model
                 substr($number, 7, 4)
             );
         }
+
         return $this->phone_number;
     }
 

@@ -43,10 +43,11 @@ class SendNotificationSms implements ShouldQueue
     {
         $user = $this->notification->user;
 
-        if (!$user) {
+        if (! $user) {
             Log::warning('SendNotificationSms: User not found', [
                 'notification_id' => $this->notification->id,
             ]);
+
             return;
         }
 
@@ -55,15 +56,17 @@ class SendNotificationSms implements ShouldQueue
                 'notification_id' => $this->notification->id,
                 'user_id' => $user->id,
             ]);
+
             return;
         }
 
         // Skip if notification is no longer active (resolved/dismissed)
-        if (!$this->notification->isActive()) {
+        if (! $this->notification->isActive()) {
             Log::info('SendNotificationSms: Notification no longer active, skipping', [
                 'notification_id' => $this->notification->id,
                 'status' => $this->notification->status,
             ]);
+
             return;
         }
 
@@ -123,9 +126,9 @@ class SendNotificationSms implements ShouldQueue
         if ($body && strlen($message) < 100) {
             $maxBodyLength = 100 - strlen($message);
             if (strlen($body) > $maxBodyLength) {
-                $body = substr($body, 0, $maxBodyLength - 3) . '...';
+                $body = substr($body, 0, $maxBodyLength - 3).'...';
             }
-            $message .= ': ' . $body;
+            $message .= ': '.$body;
         }
 
         // Add shortened URL hint if available (user can find link in app)

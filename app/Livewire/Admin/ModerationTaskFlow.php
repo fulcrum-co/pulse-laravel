@@ -22,14 +22,21 @@ class ModerationTaskFlow extends Component
     public ?int $item = null;
 
     public ?ModerationQueueItem $currentItem = null;
+
     public string $viewMode = 'queue'; // queue, reviewing, complete
+
     public string $notes = '';
+
     public bool $showEditModal = false;
+
     public array $editableContent = [];
+
     public int $reviewStartTime = 0;
+
     public int $itemsReviewedToday = 0;
 
     protected ModerationQueueService $queueService;
+
     protected ModerationWorkflowService $workflowService;
 
     public function boot(
@@ -83,11 +90,12 @@ class ModerationTaskFlow extends Component
         $item = ModerationQueueItem::with(['moderationResult.moderatable'])
             ->find($itemId);
 
-        if (!$item) {
+        if (! $item) {
             $this->dispatch('notify', [
                 'type' => 'error',
                 'message' => 'Item not found.',
             ]);
+
             return;
         }
 
@@ -97,11 +105,12 @@ class ModerationTaskFlow extends Component
                 'type' => 'error',
                 'message' => 'You do not have access to this item.',
             ]);
+
             return;
         }
 
         // Assign if not already assigned
-        if (!$item->assigned_to) {
+        if (! $item->assigned_to) {
             $this->queueService->assignToUser($item, auth()->user());
             $item->refresh();
         }
@@ -138,16 +147,17 @@ class ModerationTaskFlow extends Component
      */
     public function submitDecision(string $decision): void
     {
-        if (!$this->currentItem) {
+        if (! $this->currentItem) {
             return;
         }
 
         // Validate decision
-        if (!in_array($decision, ModerationDecision::$decisions)) {
+        if (! in_array($decision, ModerationDecision::$decisions)) {
             $this->dispatch('notify', [
                 'type' => 'error',
                 'message' => 'Invalid decision.',
             ]);
+
             return;
         }
 
@@ -158,6 +168,7 @@ class ModerationTaskFlow extends Component
                 'type' => 'error',
                 'message' => 'Please add notes before submitting.',
             ]);
+
             return;
         }
 
@@ -211,6 +222,7 @@ class ModerationTaskFlow extends Component
                 'type' => 'warning',
                 'message' => 'Please add notes explaining what changes are needed.',
             ]);
+
             return;
         }
 
@@ -230,7 +242,7 @@ class ModerationTaskFlow extends Component
      */
     public function skipItem(): void
     {
-        if (!$this->currentItem) {
+        if (! $this->currentItem) {
             return;
         }
 
@@ -288,8 +300,9 @@ class ModerationTaskFlow extends Component
      */
     protected function loadEditableContent(): void
     {
-        if (!$this->currentItem?->moderationResult?->moderatable) {
+        if (! $this->currentItem?->moderationResult?->moderatable) {
             $this->editableContent = [];
+
             return;
         }
 
@@ -322,7 +335,7 @@ class ModerationTaskFlow extends Component
      */
     public function saveEditedContent(): void
     {
-        if (!$this->currentItem?->moderationResult?->moderatable) {
+        if (! $this->currentItem?->moderationResult?->moderatable) {
             return;
         }
 
@@ -339,7 +352,7 @@ class ModerationTaskFlow extends Component
         };
 
         // Track field changes for audit
-        if (!empty($newValues)) {
+        if (! empty($newValues)) {
             $this->currentItem->update([
                 'metadata' => array_merge($this->currentItem->metadata ?? [], [
                     'content_edited' => true,
@@ -391,7 +404,7 @@ class ModerationTaskFlow extends Component
             }
         }
 
-        if (!empty($updates)) {
+        if (! empty($updates)) {
             $course->update($updates);
         }
     }
@@ -425,7 +438,7 @@ class ModerationTaskFlow extends Component
             }
         }
 
-        if (!empty($updates)) {
+        if (! empty($updates)) {
             $block->update($updates);
         }
     }
@@ -436,7 +449,7 @@ class ModerationTaskFlow extends Component
     #[Computed]
     public function timeSpent(): string
     {
-        if (!$this->reviewStartTime) {
+        if (! $this->reviewStartTime) {
             return '0:00';
         }
 

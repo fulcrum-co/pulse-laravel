@@ -6,13 +6,16 @@ use App\Models\StrategicPlan;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class StrategyList extends Component
+class PlanList extends Component
 {
     use WithPagination;
 
     public $search = '';
+
     public $typeFilter = 'all';
+
     public $statusFilter = '';
+
     public string $viewMode = 'grid';
 
     protected $queryString = [
@@ -61,7 +64,7 @@ class StrategyList extends Component
         $user = auth()->user();
 
         $query = StrategicPlan::where('org_id', $user->org_id)
-            ->with(['focusAreas', 'collaborators.user', 'creator']);
+            ->with(['focusAreas', 'goals', 'collaborators.user', 'creator']);
 
         // Apply type filter
         if ($this->typeFilter !== 'all') {
@@ -70,7 +73,7 @@ class StrategyList extends Component
 
         // Apply search
         if ($this->search) {
-            $query->where('title', 'like', '%' . $this->search . '%');
+            $query->where('title', 'like', '%'.$this->search.'%');
         }
 
         // Apply status filter
@@ -78,9 +81,9 @@ class StrategyList extends Component
             $query->where('status', $this->statusFilter);
         }
 
-        $strategies = $query->orderBy('created_at', 'desc')->paginate(12);
+        $plans = $query->orderBy('created_at', 'desc')->paginate(12);
 
-        // Get counts for tabs
+        // Get counts for dropdown
         $counts = [
             'all' => StrategicPlan::where('org_id', $user->org_id)->count(),
             'organizational' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'organizational')->count(),
@@ -88,10 +91,14 @@ class StrategyList extends Component
             'student' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'student')->count(),
             'department' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'department')->count(),
             'grade' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'grade')->count(),
+            'improvement' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'improvement')->count(),
+            'growth' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'growth')->count(),
+            'strategic' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'strategic')->count(),
+            'action' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'action')->count(),
         ];
 
-        return view('livewire.strategy-list', [
-            'strategies' => $strategies,
+        return view('livewire.plan-list', [
+            'plans' => $plans,
             'counts' => $counts,
         ]);
     }

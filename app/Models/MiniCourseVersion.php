@@ -55,7 +55,7 @@ class MiniCourseVersion extends Model
      */
     public function getVersionLabelAttribute(): string
     {
-        return 'v' . $this->version_number;
+        return 'v'.$this->version_number;
     }
 
     /**

@@ -2,11 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\ContactMetric;
 use App\Models\CustomReport;
 use App\Models\Student;
-use App\Models\ContactMetric;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 
 class ReportDataService
 {
@@ -82,12 +81,12 @@ class ReportDataService
             ->forPeriod($dateRange['start'], $dateRange['end']);
 
         // Apply filters
-        if (!empty($filters['grade_level'])) {
+        if (! empty($filters['grade_level'])) {
             // Would need to join with students table
             // For now, we'll skip this filter
         }
 
-        if (!empty($filters['risk_level'])) {
+        if (! empty($filters['risk_level'])) {
             // Would need to join with students table
         }
 
@@ -154,6 +153,7 @@ class ReportDataService
         foreach ($metricKeys as $key) {
             $result[$key] = $grouped->map(function ($group, $period) use ($key) {
                 $values = $group->where('metric_key', $key)->pluck('numeric_value')->filter();
+
                 return [
                     'period' => $period,
                     'value' => $values->isNotEmpty() ? round($values->avg(), 2) : null,
@@ -173,11 +173,11 @@ class ReportDataService
             ->with('user');
 
         // Apply filters
-        if (!empty($filters['grade_level'])) {
+        if (! empty($filters['grade_level'])) {
             $query->where('grade_level', $filters['grade_level']);
         }
 
-        if (!empty($filters['risk_level'])) {
+        if (! empty($filters['risk_level'])) {
             $query->where('risk_level', $filters['risk_level']);
         }
 
@@ -217,7 +217,7 @@ class ReportDataService
         $contactType = $filters['contact_type'] ?? Student::class;
         $contactId = $filters['contact_id'] ?? null;
 
-        if (!$contactId) {
+        if (! $contactId) {
             return $data;
         }
 

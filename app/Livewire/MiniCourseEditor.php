@@ -4,8 +4,8 @@ namespace App\Livewire;
 
 use App\Models\MiniCourse;
 use App\Models\MiniCourseStep;
-use App\Models\Provider;
 use App\Models\Program;
+use App\Models\Provider;
 use App\Models\Resource;
 use App\Services\CourseContentAIService;
 use Livewire\Component;
@@ -14,25 +14,39 @@ use Livewire\WithFileUploads;
 class MiniCourseEditor extends Component
 {
     use WithFileUploads;
+
     public ?MiniCourse $course = null;
+
     public bool $isNew = true;
 
     // Course form data
     public string $title = '';
+
     public string $description = '';
+
     public array $objectives = [];
+
     public string $rationale = '';
+
     public string $expectedExperience = '';
+
     public string $courseType = 'intervention';
+
     public array $targetGrades = [];
+
     public array $targetRiskLevels = [];
+
     public array $targetNeeds = [];
+
     public ?int $estimatedDuration = null;
+
     public bool $isTemplate = false;
+
     public bool $isPublic = false;
 
     // Step editing
     public ?int $editingStepId = null;
+
     public array $stepForm = [];
 
     // New objective input
@@ -40,21 +54,31 @@ class MiniCourseEditor extends Component
 
     // Modals
     public bool $showStepModal = false;
+
     public bool $showPreview = false;
+
     public bool $showPublishConfirm = false;
 
     // AI Assistant
     public bool $showAIPanel = false;
+
     public bool $aiGenerating = false;
+
     public string $aiTopic = '';
+
     public string $aiAudience = 'students';
+
     public ?string $aiGradeLevel = null;
+
     public int $aiDurationMinutes = 30;
+
     public array $aiSuggestions = [];
+
     public ?string $aiError = null;
 
     // Document upload for AI extraction
     public $uploadedDocument = null;
+
     public bool $processingDocument = false;
 
     protected $rules = [
@@ -255,11 +279,12 @@ class MiniCourseEditor extends Component
 
     public function publish(): void
     {
-        if (!$this->course || $this->course->steps->isEmpty()) {
+        if (! $this->course || $this->course->steps->isEmpty()) {
             $this->dispatch('notify', [
                 'type' => 'error',
                 'message' => 'Add at least one step before publishing.',
             ]);
+
             return;
         }
 
@@ -275,18 +300,21 @@ class MiniCourseEditor extends Component
     public function getAvailableResourcesProperty()
     {
         $user = auth()->user();
+
         return Resource::forOrganization($user->org_id)->active()->orderBy('title')->get();
     }
 
     public function getAvailableProvidersProperty()
     {
         $user = auth()->user();
+
         return Provider::where('org_id', $user->org_id)->active()->orderBy('name')->get();
     }
 
     public function getAvailableProgramsProperty()
     {
         $user = auth()->user();
+
         return Program::where('org_id', $user->org_id)->active()->orderBy('name')->get();
     }
 
@@ -333,7 +361,7 @@ class MiniCourseEditor extends Component
 
     public function toggleAIPanel(): void
     {
-        $this->showAIPanel = !$this->showAIPanel;
+        $this->showAIPanel = ! $this->showAIPanel;
         $this->aiError = null;
     }
 
@@ -344,6 +372,7 @@ class MiniCourseEditor extends Component
     {
         if (empty($this->aiTopic)) {
             $this->aiError = 'Please enter a topic for the course.';
+
             return;
         }
 
@@ -400,7 +429,7 @@ class MiniCourseEditor extends Component
         }
 
         // Create steps if provided
-        if (!empty($courseData['steps']) && $this->course) {
+        if (! empty($courseData['steps']) && $this->course) {
             // Clear existing steps if this is AI generation
             $this->course->steps()->delete();
 
@@ -408,7 +437,7 @@ class MiniCourseEditor extends Component
                 $this->course->steps()->create([
                     'sort_order' => $index + 1,
                     'step_type' => $stepData['step_type'] ?? MiniCourseStep::TYPE_CONTENT,
-                    'title' => $stepData['title'] ?? 'Step ' . ($index + 1),
+                    'title' => $stepData['title'] ?? 'Step '.($index + 1),
                     'description' => $stepData['description'] ?? null,
                     'instructions' => $stepData['instructions'] ?? null,
                     'content_type' => $stepData['content_type'] ?? MiniCourseStep::CONTENT_TEXT,
@@ -424,7 +453,7 @@ class MiniCourseEditor extends Component
         }
 
         // Save course updates
-        if (!$this->isNew) {
+        if (! $this->isNew) {
             $this->saveCourse();
         }
     }
@@ -461,7 +490,7 @@ class MiniCourseEditor extends Component
                 $this->aiSuggestions = $result[$sectionType] ?? $result['data'] ?? $result;
                 $this->dispatch('notify', [
                     'type' => 'success',
-                    'message' => ucfirst($sectionType) . ' content generated! Click to apply.',
+                    'message' => ucfirst($sectionType).' content generated! Click to apply.',
                 ]);
             } else {
                 $this->aiError = $result['error'] ?? 'Failed to generate content.';
@@ -496,7 +525,7 @@ class MiniCourseEditor extends Component
      */
     public function addAIStep(array $stepData): void
     {
-        if (!$this->course) {
+        if (! $this->course) {
             $this->saveCourse();
         }
 
@@ -530,8 +559,9 @@ class MiniCourseEditor extends Component
      */
     public function processDocument(): void
     {
-        if (!$this->uploadedDocument) {
+        if (! $this->uploadedDocument) {
             $this->aiError = 'Please upload a document first.';
+
             return;
         }
 
@@ -548,6 +578,7 @@ class MiniCourseEditor extends Component
 
             if (empty($text)) {
                 $this->aiError = 'Could not extract text from the document.';
+
                 return;
             }
 
@@ -595,6 +626,7 @@ class MiniCourseEditor extends Component
             $content = file_get_contents($file->getRealPath());
             // Strip binary content and try to get text
             $text = preg_replace('/[^\x20-\x7E\n\r\t]/', '', $content);
+
             return $text ?: '';
         }
 
@@ -610,6 +642,7 @@ class MiniCourseEditor extends Component
     {
         if (empty($this->stepForm['title'])) {
             $this->aiError = 'Please enter a step title first.';
+
             return;
         }
 
@@ -687,6 +720,7 @@ class MiniCourseEditor extends Component
 
         if (empty($content)) {
             $this->aiError = 'Please enter some content first.';
+
             return;
         }
 

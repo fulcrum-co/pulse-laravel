@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Services\AutoCourseGenerationService;
 use App\Models\Organization;
+use App\Services\AutoCourseGenerationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -16,13 +16,14 @@ class BatchCourseGenerationJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected ?int $orgId;
+
     protected array $options;
 
     /**
      * Create a new job instance.
      *
-     * @param int|null $orgId Specific org to process, or null for all
-     * @param array $options Generation options
+     * @param  int|null  $orgId  Specific org to process, or null for all
+     * @param  array  $options  Generation options
      */
     public function __construct(?int $orgId = null, array $options = [])
     {

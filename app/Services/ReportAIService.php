@@ -2,9 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\CustomReport;
-use App\Models\Student;
 use App\Models\ContactMetric;
+use App\Models\CustomReport;
 use Illuminate\Support\Facades\Log;
 
 class ReportAIService
@@ -29,9 +28,11 @@ class ReportAIService
             }
 
             Log::error('Failed to generate adaptive text', ['error' => $response['error'] ?? 'Unknown error']);
+
             return 'Unable to generate content. Please try again.';
         } catch (\Exception $e) {
             Log::error('Exception generating adaptive text', ['error' => $e->getMessage()]);
+
             return 'An error occurred while generating content.';
         }
     }
@@ -70,12 +71,14 @@ class ReportAIService
                 }
 
                 Log::warning('Could not parse layout JSON from AI response');
+
                 return [];
             }
 
             return [];
         } catch (\Exception $e) {
             Log::error('Exception generating layout from prompt', ['error' => $e->getMessage()]);
+
             return [];
         }
     }
@@ -107,6 +110,7 @@ class ReportAIService
             return [];
         } catch (\Exception $e) {
             Log::error('Exception getting auto insights', ['error' => $e->getMessage()]);
+
             return [];
         }
     }
@@ -237,7 +241,7 @@ PROMPT;
         $normalized = [];
 
         foreach ($layout as $element) {
-            if (!isset($element['type'])) {
+            if (! isset($element['type'])) {
                 continue;
             }
 

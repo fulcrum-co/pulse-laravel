@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ContactMetric extends Model
 {
@@ -50,27 +50,40 @@ class ContactMetric extends Model
 
     // Metric categories for students
     public const CATEGORY_ACADEMICS = 'academics';
+
     public const CATEGORY_ATTENDANCE = 'attendance';
+
     public const CATEGORY_BEHAVIOR = 'behavior';
+
     public const CATEGORY_LIFE_SKILLS = 'life_skills';
+
     public const CATEGORY_WELLNESS = 'wellness';
+
     public const CATEGORY_ENGAGEMENT = 'engagement';
 
     // Metric categories for teachers
     public const CATEGORY_CLASSROOM = 'classroom';
+
     public const CATEGORY_PD = 'professional_development';
 
     // Source types
     public const SOURCE_SIS_API = 'sis_api';
+
     public const SOURCE_SURVEY = 'survey';
+
     public const SOURCE_MANUAL = 'manual';
+
     public const SOURCE_CALCULATED = 'calculated';
+
     public const SOURCE_CONVERSATION = 'conversation';
 
     // Status values
     public const STATUS_ON_TRACK = 'on_track';
+
     public const STATUS_AT_RISK = 'at_risk';
+
     public const STATUS_OFF_TRACK = 'off_track';
+
     public const STATUS_NOT_STARTED = 'not_started';
 
     /**

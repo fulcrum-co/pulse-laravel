@@ -17,17 +17,17 @@ return new class extends Migration
 
         // Get the school org - this is where demo data should live
         $school = DB::table('organizations')->where('org_type', 'school')->first();
-        if (!$school) {
+        if (! $school) {
             // Try district if no school
             $school = DB::table('organizations')->where('org_type', 'district')->first();
         }
-        if (!$school) {
+        if (! $school) {
             return;
         }
 
         // Get a user for created_by
         $admin = DB::table('users')->where('org_id', $school->id)->first();
-        if (!$admin) {
+        if (! $admin) {
             $admin = DB::table('users')->first();
         }
         $createdBy = $admin?->id;
@@ -43,7 +43,7 @@ return new class extends Migration
         $district = DB::table('organizations')->where('org_type', 'district')->first();
         $school = DB::table('organizations')->where('org_type', 'school')->first();
 
-        if ($district && $school && !$school->parent_org_id) {
+        if ($district && $school && ! $school->parent_org_id) {
             DB::table('organizations')
                 ->where('id', $school->id)
                 ->update(['parent_org_id' => $district->id]);

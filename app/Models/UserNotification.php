@@ -2,34 +2,47 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 
 class UserNotification extends Model
 {
     // Status constants
     public const STATUS_UNREAD = 'unread';
+
     public const STATUS_READ = 'read';
+
     public const STATUS_SNOOZED = 'snoozed';
+
     public const STATUS_DISMISSED = 'dismissed';
+
     public const STATUS_RESOLVED = 'resolved';
 
     // Category constants
     public const CATEGORY_SURVEY = 'survey';
+
     public const CATEGORY_REPORT = 'report';
+
     public const CATEGORY_STRATEGY = 'strategy';
+
     public const CATEGORY_WORKFLOW_ALERT = 'workflow_alert';
+
     public const CATEGORY_COURSE = 'course';
+
     public const CATEGORY_COLLECTION = 'collection';
+
     public const CATEGORY_SYSTEM = 'system';
 
     // Priority constants
     public const PRIORITY_LOW = 'low';
+
     public const PRIORITY_NORMAL = 'normal';
+
     public const PRIORITY_HIGH = 'high';
+
     public const PRIORITY_URGENT = 'urgent';
 
     protected $fillable = [
@@ -255,7 +268,7 @@ class UserNotification extends Model
     {
         return $query->where(function ($q) {
             $q->whereNull('expires_at')
-              ->orWhere('expires_at', '>', now());
+                ->orWhere('expires_at', '>', now());
         });
     }
 
@@ -265,7 +278,7 @@ class UserNotification extends Model
     public function scopeReadyToUnsnooze(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_SNOOZED)
-                     ->where('snoozed_until', '<=', now());
+            ->where('snoozed_until', '<=', now());
     }
 
     /**
@@ -274,8 +287,8 @@ class UserNotification extends Model
     public function scopeExpired(Builder $query): Builder
     {
         return $query->whereNotNull('expires_at')
-                     ->where('expires_at', '<=', now())
-                     ->whereIn('status', [self::STATUS_UNREAD, self::STATUS_READ]);
+            ->where('expires_at', '<=', now())
+            ->whereIn('status', [self::STATUS_UNREAD, self::STATUS_READ]);
     }
 
     /**
@@ -290,7 +303,7 @@ class UserNotification extends Model
                 WHEN 'normal' THEN 3
                 WHEN 'low' THEN 4
                 ELSE 5 END")
-                     ->orderByDesc('created_at');
+            ->orderByDesc('created_at');
     }
 
     // ==================== Status Methods ====================

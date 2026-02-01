@@ -17,7 +17,9 @@ class StrategyCollaborator extends Model
      * Role constants.
      */
     public const ROLE_OWNER = 'owner';
+
     public const ROLE_COLLABORATOR = 'collaborator';
+
     public const ROLE_VIEWER = 'viewer';
 
     /**

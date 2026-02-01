@@ -11,11 +11,17 @@ class ContentLibrary extends Component
     use WithPagination;
 
     public string $search = '';
+
     public array $selectedTypes = [];
+
     public array $selectedGrades = [];
+
     public array $selectedCategories = [];
+
     public array $selectedRiskLevels = [];
+
     public string $sortBy = 'recent';
+
     public string $viewMode = 'grid';
 
     protected $queryString = [
@@ -94,8 +100,8 @@ class ContentLibrary extends Component
         // Search
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('title', 'ilike', '%' . $this->search . '%')
-                  ->orWhere('description', 'ilike', '%' . $this->search . '%');
+                $q->where('title', 'ilike', '%'.$this->search.'%')
+                    ->orWhere('description', 'ilike', '%'.$this->search.'%');
             });
         }
 

@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class MarketplacePurchase extends Model
 {
@@ -106,7 +106,7 @@ class MarketplacePurchase extends Model
      */
     public function hasActiveAccess(): bool
     {
-        if (!$this->has_access) {
+        if (! $this->has_access) {
             return false;
         }
 
@@ -126,7 +126,7 @@ class MarketplacePurchase extends Model
      */
     public function isExpiringSoon(): bool
     {
-        if (!$this->access_expires_at) {
+        if (! $this->access_expires_at) {
             return false;
         }
 
@@ -189,6 +189,7 @@ class MarketplacePurchase extends Model
         }
 
         $this->decrement('downloads_remaining');
+
         return true;
     }
 
@@ -197,7 +198,7 @@ class MarketplacePurchase extends Model
      */
     public function getDaysUntilExpirationAttribute(): ?int
     {
-        if (!$this->access_expires_at) {
+        if (! $this->access_expires_at) {
             return null;
         }
 

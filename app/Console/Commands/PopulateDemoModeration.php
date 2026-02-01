@@ -11,6 +11,7 @@ use Illuminate\Console\Command;
 class PopulateDemoModeration extends Command
 {
     protected $signature = 'moderation:demo {--count=10 : Number of moderation results to create}';
+
     protected $description = 'Populate demo moderation data for testing';
 
     public function handle(): int
@@ -18,8 +19,9 @@ class PopulateDemoModeration extends Command
         $count = (int) $this->option('count');
         $user = auth()->user() ?? \App\Models\User::first();
 
-        if (!$user) {
+        if (! $user) {
             $this->error('No users found.');
+
             return Command::FAILURE;
         }
 
@@ -171,7 +173,7 @@ class PopulateDemoModeration extends Command
                 ->selectRaw('status, count(*) as count')
                 ->groupBy('status')
                 ->get()
-                ->map(fn($r) => [$r->status, $r->count])
+                ->map(fn ($r) => [$r->status, $r->count])
                 ->toArray()
         );
 

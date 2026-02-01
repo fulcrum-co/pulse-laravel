@@ -7,25 +7,28 @@ use App\Models\MiniCourse;
 use App\Models\Program;
 use App\Models\Provider;
 use App\Models\Resource;
-use Livewire\Component;
-use Livewire\WithPagination;
-use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
-use Illuminate\Support\Facades\Storage;
+use Livewire\Component;
+use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 
 class ResourceLibrary extends Component
 {
-    use WithPagination;
     use WithFileUploads;
+    use WithPagination;
 
     // Active tab
     public string $activeTab = 'all';
 
     // Search and filters
     public string $search = '';
+
     public string $filterType = '';
+
     public string $filterCategory = '';
+
     public array $filterGrades = [];
+
     public array $filterTags = [];
 
     // View mode
@@ -33,30 +36,46 @@ class ResourceLibrary extends Component
 
     // Add Resource Modal
     public bool $showAddModal = false;
+
     public string $addResourceType = 'resource'; // resource, provider, program
 
     // Resource form fields
     public string $resourceTitle = '';
+
     public string $resourceDescription = '';
+
     public string $resourceTypeField = 'article';
+
     public string $resourceCategory = '';
+
     public string $resourceUrl = '';
+
     public ?int $resourceDuration = null;
+
     public $resourceFile = null;
 
     // Provider form fields
     public string $providerName = '';
+
     public string $providerBio = '';
+
     public string $providerTypeField = 'therapist';
+
     public string $providerEmail = '';
+
     public string $providerPhone = '';
+
     public bool $providerServesRemote = false;
 
     // Program form fields
     public string $programName = '';
+
     public string $programDescription = '';
+
     public string $programTypeField = 'therapy';
+
     public ?int $programDurationWeeks = null;
+
     public ?int $programCapacity = null;
 
     protected $queryString = [
@@ -163,7 +182,7 @@ class ResourceLibrary extends Component
             $filePath = null;
             if ($this->resourceFile) {
                 $filePath = $this->resourceFile->store(
-                    'resources/' . $user->org_id,
+                    'resources/'.$user->org_id,
                     'public'
                 );
             }
@@ -246,8 +265,8 @@ class ResourceLibrary extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')
-                  ->orWhere('description', 'like', '%' . $this->search . '%');
+                $q->where('title', 'like', '%'.$this->search.'%')
+                    ->orWhere('description', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -273,9 +292,9 @@ class ResourceLibrary extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('bio', 'like', '%' . $this->search . '%')
-                  ->orWhereJsonContains('specialty_areas', $this->search);
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('bio', 'like', '%'.$this->search.'%')
+                    ->orWhereJsonContains('specialty_areas', $this->search);
             });
         }
 
@@ -297,8 +316,8 @@ class ResourceLibrary extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('description', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('description', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -322,8 +341,8 @@ class ResourceLibrary extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')
-                  ->orWhere('description', 'like', '%' . $this->search . '%');
+                $q->where('title', 'like', '%'.$this->search.'%')
+                    ->orWhere('description', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -346,8 +365,8 @@ class ResourceLibrary extends Component
         $resources = Resource::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->when($this->search, function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')
-                  ->orWhere('description', 'like', '%' . $this->search . '%');
+                $q->where('title', 'like', '%'.$this->search.'%')
+                    ->orWhere('description', 'like', '%'.$this->search.'%');
             })
             ->limit(6)
             ->get()
@@ -358,7 +377,7 @@ class ResourceLibrary extends Component
                 'description' => $r->description,
                 'subtitle' => ucfirst($r->resource_type),
                 'icon' => $this->getResourceIcon($r->resource_type),
-                'meta' => $r->estimated_duration_minutes ? $r->estimated_duration_minutes . ' min' : null,
+                'meta' => $r->estimated_duration_minutes ? $r->estimated_duration_minutes.' min' : null,
                 'model' => $r,
             ]);
 
@@ -366,7 +385,7 @@ class ResourceLibrary extends Component
         $providers = Provider::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->when($this->search, function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%');
             })
             ->limit(6)
             ->get()
@@ -385,7 +404,7 @@ class ResourceLibrary extends Component
         $programs = Program::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->when($this->search, function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%');
             })
             ->limit(6)
             ->get()
@@ -396,7 +415,7 @@ class ResourceLibrary extends Component
                 'description' => $p->description,
                 'subtitle' => ucfirst(str_replace('_', ' ', $p->program_type)),
                 'icon' => 'building',
-                'meta' => $p->duration_weeks ? $p->duration_weeks . ' weeks' : null,
+                'meta' => $p->duration_weeks ? $p->duration_weeks.' weeks' : null,
                 'model' => $p,
             ]);
 
@@ -405,7 +424,7 @@ class ResourceLibrary extends Component
             ->where('status', MiniCourse::STATUS_ACTIVE)
             ->withCount('steps')
             ->when($this->search, function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%');
+                $q->where('title', 'like', '%'.$this->search.'%');
             })
             ->limit(6)
             ->get()
@@ -416,7 +435,7 @@ class ResourceLibrary extends Component
                 'description' => $c->description,
                 'subtitle' => ucfirst(str_replace('_', ' ', $c->course_type)),
                 'icon' => 'academic-cap',
-                'meta' => $c->steps_count . ' steps',
+                'meta' => $c->steps_count.' steps',
                 'model' => $c,
             ]);
 
@@ -511,8 +530,9 @@ class ResourceLibrary extends Component
     public function getCanModerateProperty(): bool
     {
         $user = auth()->user();
+
         return in_array($user->effective_role, [
-            'admin', 'consultant', 'superintendent', 'school_admin'
+            'admin', 'consultant', 'superintendent', 'school_admin',
         ]);
     }
 
@@ -521,11 +541,12 @@ class ResourceLibrary extends Component
      */
     public function getModerationCountProperty(): int
     {
-        if (!$this->canModerate) {
+        if (! $this->canModerate) {
             return 0;
         }
 
         $user = auth()->user();
+
         return ContentModerationResult::where('org_id', $user->org_id)
             ->needsReview()
             ->count();

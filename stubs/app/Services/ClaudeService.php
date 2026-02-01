@@ -2,17 +2,21 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use App\Models\Student;
 use App\Models\Survey;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class ClaudeService
 {
     protected string $apiKey;
+
     protected string $model;
+
     protected int $maxTokens;
+
     protected float $temperature;
+
     protected string $baseUrl;
 
     public function __construct()
@@ -54,6 +58,7 @@ class ClaudeService
 
             if ($response->successful()) {
                 $data = $response->json();
+
                 return [
                     'success' => true,
                     'content' => $data['content'][0]['text'] ?? '',
@@ -91,9 +96,9 @@ class ClaudeService
         $systemPrompt = $survey->llm_system_prompt ?: config('pulse.prompts.conversational_survey');
         $systemPrompt .= "\n\nStudents to discuss: {$studentNames}";
 
-        $initialMessage = "Hello! I'm ready to help you complete your check-in for your students. " .
-            "We'll go through each student one at a time. Let's start with the first student. " .
-            "How has their week been academically?";
+        $initialMessage = "Hello! I'm ready to help you complete your check-in for your students. ".
+            "We'll go through each student one at a time. Let's start with the first student. ".
+            'How has their week been academically?';
 
         return [
             'system_prompt' => $systemPrompt,
@@ -143,14 +148,14 @@ class ClaudeService
     {
         $systemPrompt = config('pulse.prompts.data_extraction');
 
-        $userMessage = "Student: {$student->full_name}\n" .
-            "Grade: {$student->grade_level}\n\n" .
-            "Conversation transcript:\n{$transcript}\n\n" .
-            "Extract the structured data as JSON.";
+        $userMessage = "Student: {$student->full_name}\n".
+            "Grade: {$student->grade_level}\n\n".
+            "Conversation transcript:\n{$transcript}\n\n".
+            'Extract the structured data as JSON.';
 
         $response = $this->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'success' => false,
                 'error' => $response['error'],
@@ -193,14 +198,14 @@ class ClaudeService
     {
         $systemPrompt = config('pulse.prompts.report_narrative');
 
-        $userMessage = "Generate a narrative report for the following data:\n\n" .
-            "Organization: " . ($context['org_name'] ?? 'Unknown') . "\n" .
-            "Time Period: " . ($context['time_period'] ?? 'Unknown') . "\n\n" .
-            "Data:\n" . json_encode($data, JSON_PRETTY_PRINT);
+        $userMessage = "Generate a narrative report for the following data:\n\n".
+            'Organization: '.($context['org_name'] ?? 'Unknown')."\n".
+            'Time Period: '.($context['time_period'] ?? 'Unknown')."\n\n".
+            "Data:\n".json_encode($data, JSON_PRETTY_PRINT);
 
         $response = $this->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'success' => false,
                 'error' => $response['error'],
@@ -228,17 +233,17 @@ class ClaudeService
             ];
         })->toArray();
 
-        $systemPrompt = "You are an educational resource specialist. " .
-            "Rank the following resources by relevance to the student's needs. " .
-            "Return a JSON array of indices in order of relevance (most relevant first).";
+        $systemPrompt = 'You are an educational resource specialist. '.
+            "Rank the following resources by relevance to the student's needs. ".
+            'Return a JSON array of indices in order of relevance (most relevant first).';
 
-        $userMessage = "Student need: {$needDescription}\n\n" .
-            "Resources:\n" . json_encode($resourceList, JSON_PRETTY_PRINT) . "\n\n" .
-            "Return only a JSON array of indices, e.g., [2, 0, 3, 1]";
+        $userMessage = "Student need: {$needDescription}\n\n".
+            "Resources:\n".json_encode($resourceList, JSON_PRETTY_PRINT)."\n\n".
+            'Return only a JSON array of indices, e.g., [2, 0, 3, 1]';
 
         $response = $this->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             // Return original order if ranking fails
             return array_keys($resources);
         }
@@ -265,9 +270,9 @@ class ClaudeService
      */
     public function filterEmotionalLanguage(string $text): string
     {
-        $systemPrompt = "You are a professional editor. " .
-            "Rewrite the following text to remove emotional language and keep only factual observations. " .
-            "Maintain the core information but use neutral, professional language.";
+        $systemPrompt = 'You are a professional editor. '.
+            'Rewrite the following text to remove emotional language and keep only factual observations. '.
+            'Maintain the core information but use neutral, professional language.';
 
         $response = $this->sendMessage($text, $systemPrompt);
 

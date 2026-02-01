@@ -4,11 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Student;
-use App\Models\Survey;
-use App\Models\SurveyAttempt;
-use App\Models\Workflow;
-use App\Models\WorkflowExecution;
 
 class DashboardWidget extends Model
 {
@@ -66,12 +61,12 @@ class DashboardWidget extends Model
             'students_low_risk' => Student::where('org_id', $orgId)->where('risk_level', 'low')->count(),
             'surveys_active' => Survey::where('org_id', $orgId)->where('status', 'active')->count(),
             'surveys_total' => Survey::where('org_id', $orgId)->count(),
-            'responses_today' => SurveyAttempt::whereHas('survey', fn($q) => $q->where('org_id', $orgId))
+            'responses_today' => SurveyAttempt::whereHas('survey', fn ($q) => $q->where('org_id', $orgId))
                 ->whereDate('completed_at', today())->count(),
-            'responses_week' => SurveyAttempt::whereHas('survey', fn($q) => $q->where('org_id', $orgId))
+            'responses_week' => SurveyAttempt::whereHas('survey', fn ($q) => $q->where('org_id', $orgId))
                 ->where('completed_at', '>=', now()->startOfWeek())->count(),
             'students_need_attention' => Student::where('org_id', $orgId)
-                ->where(function($q) {
+                ->where(function ($q) {
                     $q->where('risk_level', 'high');
                 })->count(),
             default => 0,
@@ -79,9 +74,9 @@ class DashboardWidget extends Model
 
         // Calculate change from last period
         $previousValue = match ($dataSource) {
-            'responses_today' => SurveyAttempt::whereHas('survey', fn($q) => $q->where('org_id', $orgId))
+            'responses_today' => SurveyAttempt::whereHas('survey', fn ($q) => $q->where('org_id', $orgId))
                 ->whereDate('completed_at', today()->subDay())->count(),
-            'responses_week' => SurveyAttempt::whereHas('survey', fn($q) => $q->where('org_id', $orgId))
+            'responses_week' => SurveyAttempt::whereHas('survey', fn ($q) => $q->where('org_id', $orgId))
                 ->whereBetween('completed_at', [now()->subWeek()->startOfWeek(), now()->subWeek()->endOfWeek()])->count(),
             default => null,
         };
@@ -113,7 +108,7 @@ class DashboardWidget extends Model
         if ($dataSource === 'survey_responses_weekly') {
             for ($i = 6; $i >= 0; $i--) {
                 $date = now()->subDays($i);
-                $thisWeek = SurveyAttempt::whereHas('survey', fn($q) => $q->where('org_id', $orgId))
+                $thisWeek = SurveyAttempt::whereHas('survey', fn ($q) => $q->where('org_id', $orgId))
                     ->whereDate('completed_at', $date)->count();
 
                 $item = [
@@ -122,7 +117,7 @@ class DashboardWidget extends Model
                 ];
 
                 if ($compare) {
-                    $lastWeek = SurveyAttempt::whereHas('survey', fn($q) => $q->where('org_id', $orgId))
+                    $lastWeek = SurveyAttempt::whereHas('survey', fn ($q) => $q->where('org_id', $orgId))
                         ->whereDate('completed_at', $date->copy()->subWeek())->count();
                     $item['compare_value'] = $lastWeek;
                 }
@@ -156,7 +151,7 @@ class DashboardWidget extends Model
 
         for ($i = $days - 1; $i >= 0; $i--) {
             $date = now()->subDays($i);
-            $value = SurveyAttempt::whereHas('survey', fn($q) => $q->where('org_id', $orgId))
+            $value = SurveyAttempt::whereHas('survey', fn ($q) => $q->where('org_id', $orgId))
                 ->whereDate('completed_at', $date)->count();
 
             $data[] = [
@@ -184,7 +179,7 @@ class DashboardWidget extends Model
             'low_risk' => $query->where('risk_level', 'low'),
             'good' => $query->where('risk_level', 'good'),
             'recent_checkin' => $query->whereHas('user', function ($q) {
-                $q->whereHas('surveyAttempts', fn($q2) => $q2->where('completed_at', '>=', now()->subWeek()));
+                $q->whereHas('surveyAttempts', fn ($q2) => $q2->where('completed_at', '>=', now()->subWeek()));
             }),
             default => $query,
         };
@@ -192,7 +187,7 @@ class DashboardWidget extends Model
         $students = $query->orderBy('risk_score', 'desc')->limit($limit)->get();
 
         return [
-            'students' => $students->map(fn($s) => [
+            'students' => $students->map(fn ($s) => [
                 'id' => $s->id,
                 'name' => $s->user->full_name ?? 'Unknown',
                 'grade' => $s->grade_level,
@@ -211,13 +206,13 @@ class DashboardWidget extends Model
     protected function getSurveySummaryData(int $orgId): array
     {
         $surveys = Survey::where('org_id', $orgId)
-            ->withCount(['attempts', 'attempts as completed_count' => fn($q) => $q->completed()])
+            ->withCount(['attempts', 'attempts as completed_count' => fn ($q) => $q->completed()])
             ->orderBy('created_at', 'desc')
             ->limit($this->config['limit'] ?? 5)
             ->get();
 
         return [
-            'surveys' => $surveys->map(fn($s) => [
+            'surveys' => $surveys->map(fn ($s) => [
                 'id' => $s->id,
                 'title' => $s->title,
                 'status' => $s->status,
@@ -237,18 +232,18 @@ class DashboardWidget extends Model
     protected function getAlertFeedData(int $orgId): array
     {
         // Check if WorkflowExecution model exists
-        if (!class_exists(WorkflowExecution::class)) {
+        if (! class_exists(WorkflowExecution::class)) {
             return ['executions' => [], 'message' => 'Workflow system not configured'];
         }
 
-        $executions = WorkflowExecution::whereHas('workflow', fn($q) => $q->where('org_id', $orgId))
+        $executions = WorkflowExecution::whereHas('workflow', fn ($q) => $q->where('org_id', $orgId))
             ->with('workflow')
             ->orderBy('started_at', 'desc')
             ->limit($this->config['limit'] ?? 10)
             ->get();
 
         return [
-            'executions' => $executions->map(fn($e) => [
+            'executions' => $executions->map(fn ($e) => [
                 'id' => $e->id,
                 'workflow_name' => $e->workflow->name ?? 'Unknown',
                 'status' => $e->status,
@@ -267,18 +262,18 @@ class DashboardWidget extends Model
 
         // 1. Workflow alerts (recent executions)
         if (class_exists(WorkflowExecution::class)) {
-            $alerts = WorkflowExecution::whereHas('workflow', fn($q) => $q->where('org_id', $orgId))
+            $alerts = WorkflowExecution::whereHas('workflow', fn ($q) => $q->where('org_id', $orgId))
                 ->with('workflow')
                 ->where('started_at', '>=', now()->subWeek())
                 ->orderBy('started_at', 'desc')
                 ->limit(5)
                 ->get()
-                ->map(fn($e) => [
+                ->map(fn ($e) => [
                     'type' => 'alert',
                     'icon' => 'bell',
                     'title' => $e->workflow->name ?? 'Alert triggered',
                     'subtitle' => $e->started_at?->diffForHumans(),
-                    'url' => '/alerts/' . $e->workflow_id . '/executions/' . $e->id,
+                    'url' => '/alerts/'.$e->workflow_id.'/executions/'.$e->id,
                     'status' => $e->status,
                     'timestamp' => $e->started_at,
                 ]);
@@ -292,12 +287,12 @@ class DashboardWidget extends Model
             ->orderBy('updated_at', 'desc')
             ->limit(5)
             ->get()
-            ->map(fn($s) => [
+            ->map(fn ($s) => [
                 'type' => 'action',
                 'icon' => 'user',
-                'title' => ($s->user->full_name ?? 'Student') . ' needs check-in',
+                'title' => ($s->user->full_name ?? 'Student').' needs check-in',
                 'subtitle' => 'High risk student',
-                'url' => '/contacts/students/' . $s->id,
+                'url' => '/contacts/students/'.$s->id,
                 'status' => 'warning',
                 'timestamp' => $s->updated_at,
             ]);
@@ -309,12 +304,12 @@ class DashboardWidget extends Model
             ->orderBy('created_at', 'desc')
             ->limit(3)
             ->get()
-            ->map(fn($s) => [
+            ->map(fn ($s) => [
                 'type' => 'info',
                 'icon' => 'clipboard',
-                'title' => 'Survey "' . $s->title . '" is active',
-                'subtitle' => 'Created ' . $s->created_at?->diffForHumans(),
-                'url' => '/surveys/' . $s->id,
+                'title' => 'Survey "'.$s->title.'" is active',
+                'subtitle' => 'Created '.$s->created_at?->diffForHumans(),
+                'url' => '/surveys/'.$s->id,
                 'status' => 'info',
                 'timestamp' => $s->created_at,
             ]);
@@ -335,11 +330,12 @@ class DashboardWidget extends Model
     protected function formatNumber(int $value): string
     {
         if ($value >= 1000000) {
-            return round($value / 1000000, 1) . 'M';
+            return round($value / 1000000, 1).'M';
         }
         if ($value >= 1000) {
-            return round($value / 1000, 1) . 'K';
+            return round($value / 1000, 1).'K';
         }
+
         return (string) $value;
     }
 

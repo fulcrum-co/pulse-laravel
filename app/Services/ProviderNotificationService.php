@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Provider;
-use App\Models\ProviderAccount;
 use App\Models\ProviderConversation;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -28,10 +27,11 @@ class ProviderNotificationService
         $account = $provider->account;
 
         // Check if we should send notification
-        if (!$conversation->canSendNotification()) {
+        if (! $conversation->canSendNotification()) {
             Log::debug('ProviderNotificationService: Rate limited, skipping notification', [
                 'conversation_id' => $conversation->id,
             ]);
+
             return;
         }
 
@@ -41,6 +41,7 @@ class ProviderNotificationService
 
         if ($account && $account->isFullAccount() && $isOnline) {
             Log::debug('ProviderNotificationService: Provider online, skipping notification');
+
             return;
         }
 
@@ -104,10 +105,11 @@ class ProviderNotificationService
     ): void {
         $email = $provider->contact_email;
 
-        if (!$email) {
+        if (! $email) {
             Log::warning('ProviderNotificationService: No email for provider', [
                 'provider_id' => $provider->id,
             ]);
+
             return;
         }
 
@@ -145,10 +147,11 @@ class ProviderNotificationService
     ): void {
         $phone = $provider->contact_phone;
 
-        if (!$phone) {
+        if (! $phone) {
             Log::warning('ProviderNotificationService: No phone for provider', [
                 'provider_id' => $provider->id,
             ]);
+
             return;
         }
 
@@ -157,7 +160,7 @@ class ProviderNotificationService
 
         // Truncate if too long
         if (strlen($message) > 160) {
-            $message = Str::limit($message, 157) . '...';
+            $message = Str::limit($message, 157).'...';
         }
 
         try {
@@ -184,7 +187,7 @@ class ProviderNotificationService
     ): void {
         $email = $provider->contact_email;
 
-        if (!$email) {
+        if (! $email) {
             return;
         }
 
@@ -210,7 +213,7 @@ class ProviderNotificationService
     ): void {
         $email = $provider->contact_email;
 
-        if (!$email) {
+        if (! $email) {
             return;
         }
 
@@ -252,7 +255,7 @@ class ProviderNotificationService
     {
         $email = $provider->contact_email;
 
-        if (!$email) {
+        if (! $email) {
             return;
         }
 
@@ -276,7 +279,7 @@ class ProviderNotificationService
     {
         $phone = $provider->contact_phone;
 
-        if (!$phone) {
+        if (! $phone) {
             return;
         }
 

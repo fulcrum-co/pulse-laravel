@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 class MarketplaceReview extends Model
 {
@@ -13,8 +13,11 @@ class MarketplaceReview extends Model
 
     // Statuses
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_PUBLISHED = 'published';
+
     public const STATUS_HIDDEN = 'hidden';
+
     public const STATUS_FLAGGED = 'flagged';
 
     protected $fillable = [
@@ -183,6 +186,7 @@ class MarketplaceReview extends Model
     {
         $filled = str_repeat('★', $this->rating);
         $empty = str_repeat('☆', 5 - $this->rating);
-        return $filled . $empty;
+
+        return $filled.$empty;
     }
 }

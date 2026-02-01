@@ -2,32 +2,42 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class CourseGenerationRequest extends Model
 {
     // Trigger types
     public const TRIGGER_RISK_THRESHOLD = 'risk_threshold';
+
     public const TRIGGER_WORKFLOW = 'workflow';
+
     public const TRIGGER_MANUAL = 'manual';
 
     // Assignment types
     public const ASSIGNMENT_INDIVIDUAL = 'individual';
+
     public const ASSIGNMENT_GROUP = 'group';
 
     // Generation strategies
     public const STRATEGY_TEMPLATE_FILL = 'template_fill';
+
     public const STRATEGY_AI_FULL = 'ai_full';
+
     public const STRATEGY_HYBRID = 'hybrid';
 
     // Statuses
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_GENERATING = 'generating';
+
     public const STATUS_PENDING_APPROVAL = 'pending_approval';
+
     public const STATUS_APPROVED = 'approved';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_FAILED = 'failed';
 
     protected $fillable = [
@@ -292,7 +302,7 @@ class CourseGenerationRequest extends Model
     /**
      * Mark as rejected.
      */
-    public function reject(int $userId, string $reason = null): void
+    public function reject(int $userId, ?string $reason = null): void
     {
         $this->update([
             'status' => self::STATUS_REJECTED,

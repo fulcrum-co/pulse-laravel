@@ -21,7 +21,7 @@ class StudentSeeder extends Seeder
 
         foreach ($studentUsers as $index => $user) {
             $riskLevel = $riskLevels[array_rand($riskLevels)];
-            $riskScore = match($riskLevel) {
+            $riskScore = match ($riskLevel) {
                 'good' => rand(0, 30) / 10,
                 'low' => rand(31, 60) / 10,
                 'high' => rand(61, 100) / 10,
@@ -30,7 +30,7 @@ class StudentSeeder extends Seeder
             Student::create([
                 'user_id' => $user->id,
                 'org_id' => $school->id,
-                'student_number' => 'STU' . str_pad($index + 1, 5, '0', STR_PAD_LEFT),
+                'student_number' => 'STU'.str_pad($index + 1, 5, '0', STR_PAD_LEFT),
                 'grade_level' => $grades[array_rand($grades)],
                 'date_of_birth' => now()->subYears(rand(14, 18))->subDays(rand(0, 365)),
                 'gender' => $genders[array_rand($genders)],
@@ -61,7 +61,7 @@ class StudentSeeder extends Seeder
 
         for ($i = 0; $i < $numTags; $i++) {
             $tag = $possibleTags[array_rand($possibleTags)];
-            if (!in_array($tag, $tags)) {
+            if (! in_array($tag, $tags)) {
                 $tags[] = $tag;
             }
         }

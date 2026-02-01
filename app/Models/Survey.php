@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Survey extends Model
 {
@@ -59,17 +59,24 @@ class Survey extends Model
      * Creation mode constants
      */
     public const MODE_STATIC = 'static';
+
     public const MODE_CHAT = 'chat';
+
     public const MODE_VOICE = 'voice';
+
     public const MODE_AI_ASSISTED = 'ai_assisted';
 
     /**
      * Status constants
      */
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_PAUSED = 'paused';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_ARCHIVED = 'archived';
 
     /**
@@ -125,7 +132,7 @@ class Survey extends Model
         $newSurvey->source_org_id = $this->org_id;
         $newSurvey->created_by = $pushedBy;
         $newSurvey->status = self::STATUS_DRAFT;
-        $newSurvey->title = $this->title . ' (from ' . $this->organization->org_name . ')';
+        $newSurvey->title = $this->title.' (from '.$this->organization->org_name.')';
         $newSurvey->save();
 
         return $newSurvey;
@@ -277,6 +284,7 @@ class Survey extends Model
                 return $question;
             }
         }
+
         return null;
     }
 
@@ -294,7 +302,7 @@ class Survey extends Model
     public function calculateScore(array $responses): ?float
     {
         $config = $this->interpretation_config;
-        if (!$config) {
+        if (! $config) {
             return null;
         }
 
@@ -303,7 +311,7 @@ class Survey extends Model
 
         foreach ($this->questions ?? [] as $question) {
             $questionId = $question['id'] ?? null;
-            if (!$questionId || !isset($responses[$questionId])) {
+            if (! $questionId || ! isset($responses[$questionId])) {
                 continue;
             }
 
@@ -320,7 +328,7 @@ class Survey extends Model
 
         return match ($method) {
             'average' => array_sum($scores) / count($scores),
-            'weighted' => array_sum($scores) / array_sum(array_map(fn($q) => $config['weights'][$q['id'] ?? ''] ?? 1, $this->questions ?? [])),
+            'weighted' => array_sum($scores) / array_sum(array_map(fn ($q) => $config['weights'][$q['id'] ?? ''] ?? 1, $this->questions ?? [])),
             'sum' => array_sum($scores),
             default => array_sum($scores) / count($scores),
         };
@@ -339,6 +347,7 @@ class Survey extends Model
         if (isset($thresholds['medium']) && $score <= $thresholds['medium']) {
             return 'medium';
         }
+
         return 'low';
     }
 

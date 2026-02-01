@@ -11,9 +11,13 @@ class ProviderDirectory extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $filterType = '';
+
     public string $filterAvailability = '';
+
     public string $filterLocation = '';
+
     public string $viewMode = 'grid';
 
     protected $queryString = [
@@ -49,9 +53,9 @@ class ProviderDirectory extends Component
         // Search
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'ilike', '%' . $this->search . '%')
-                  ->orWhere('bio', 'ilike', '%' . $this->search . '%')
-                  ->orWhereRaw("specialty_areas::text ilike ?", ['%' . $this->search . '%']);
+                $q->where('name', 'ilike', '%'.$this->search.'%')
+                    ->orWhere('bio', 'ilike', '%'.$this->search.'%')
+                    ->orWhereRaw('specialty_areas::text ilike ?', ['%'.$this->search.'%']);
             });
         }
 

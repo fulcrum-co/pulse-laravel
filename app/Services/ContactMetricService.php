@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\ContactMetric;
 use App\Models\MetricThreshold;
 use App\Models\Student;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -53,7 +52,7 @@ class ContactMetricService
                 'day' => $metric->period_start->format('Y-m-d'),
                 'week' => $metric->period_start->startOfWeek()->format('Y-m-d'),
                 'month' => $metric->period_start->format('Y-m'),
-                'quarter' => $metric->school_year . '-Q' . $metric->quarter,
+                'quarter' => $metric->school_year.'-Q'.$metric->quarter,
                 default => $metric->period_start->format('Y-m-d'),
             };
         });
@@ -76,7 +75,7 @@ class ContactMetricService
             ->whereIn('metric_category', $categories)
             ->active()
             ->get()
-            ->keyBy(fn ($t) => $t->metric_category . ':' . $t->metric_key);
+            ->keyBy(fn ($t) => $t->metric_category.':'.$t->metric_key);
 
         $heatMap = [];
         foreach ($categories as $category) {
@@ -130,6 +129,7 @@ class ContactMetricService
         foreach ($metricKeys as $metric) {
             $result[$metric] = $data->map(function ($group, $period) use ($metric) {
                 $metricData = $group->firstWhere('metric_key', $metric);
+
                 return [
                     'period' => $period,
                     'value' => $metricData?->numeric_value,
@@ -270,7 +270,7 @@ class ContactMetricService
         $now = now();
         $year = $now->month >= 8 ? $now->year : $now->year - 1;
 
-        return $year . '-' . ($year + 1);
+        return $year.'-'.($year + 1);
     }
 
     /**

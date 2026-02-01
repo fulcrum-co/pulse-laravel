@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\MiniCourse;
-use App\Models\MiniCourseStep;
 use Illuminate\Support\Facades\Log;
 
 class CourseContentAIService
@@ -24,7 +22,7 @@ class CourseContentAIService
         $duration = $params['duration_minutes'] ?? 30;
         $objectives = $params['objectives'] ?? [];
 
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are an expert educational course designer. Create a comprehensive mini-course structure.
 
 Return a JSON object with:
@@ -67,14 +65,15 @@ PROMPT;
         $userMessage .= "Course type: {$courseType}\n";
         $userMessage .= "Target duration: {$duration} minutes\n";
 
-        if (!empty($objectives)) {
-            $userMessage .= "Desired objectives:\n" . implode("\n", array_map(fn($o) => "- {$o}", $objectives));
+        if (! empty($objectives)) {
+            $userMessage .= "Desired objectives:\n".implode("\n", array_map(fn ($o) => "- {$o}", $objectives));
         }
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             Log::error('Failed to generate complete course', ['error' => $response['error'] ?? 'Unknown']);
+
             return [
                 'success' => false,
                 'error' => $response['error'] ?? 'Failed to generate course',
@@ -83,7 +82,7 @@ PROMPT;
 
         $courseData = $this->parseJsonResponse($response['content']);
 
-        if (!$courseData) {
+        if (! $courseData) {
             return [
                 'success' => false,
                 'error' => 'Failed to parse AI response',
@@ -101,7 +100,7 @@ PROMPT;
      */
     public function generateIntroduction(string $topic, array $context = []): array
     {
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are an educational content writer. Create an engaging introduction for a mini-course.
 
 Return a JSON object with:
@@ -125,7 +124,7 @@ PROMPT;
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'success' => false,
                 'error' => $response['error'] ?? 'Failed to generate introduction',
@@ -150,7 +149,7 @@ PROMPT;
      */
     public function generateContentSection(string $topic, array $objectives = [], array $context = []): array
     {
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are an educational content writer. Create educational content for a mini-course step.
 
 Return a JSON object with:
@@ -167,8 +166,8 @@ PROMPT;
         $courseType = $context['course_type'] ?? 'skill_building';
 
         $userMessage = "Create educational content about: {$topic}\n\n";
-        if (!empty($objectives)) {
-            $userMessage .= "Learning objectives to address:\n" . implode("\n", array_map(fn($o) => "- {$o}", $objectives)) . "\n\n";
+        if (! empty($objectives)) {
+            $userMessage .= "Learning objectives to address:\n".implode("\n", array_map(fn ($o) => "- {$o}", $objectives))."\n\n";
         }
         $userMessage .= "Course type: {$courseType}\n";
         if ($gradeLevel) {
@@ -177,7 +176,7 @@ PROMPT;
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'success' => false,
                 'error' => $response['error'] ?? 'Failed to generate content section',
@@ -201,7 +200,7 @@ PROMPT;
      */
     public function generateReflectionPrompts(string $topic, array $context = []): array
     {
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are an educational coach. Create thoughtful reflection prompts for learners.
 
 Return a JSON object with:
@@ -219,13 +218,13 @@ PROMPT;
         $objectives = $context['objectives'] ?? [];
 
         $userMessage = "Create reflection prompts for learners after studying: {$contentCovered}\n\n";
-        if (!empty($objectives)) {
-            $userMessage .= "Learning objectives covered:\n" . implode("\n", array_map(fn($o) => "- {$o}", $objectives));
+        if (! empty($objectives)) {
+            $userMessage .= "Learning objectives covered:\n".implode("\n", array_map(fn ($o) => "- {$o}", $objectives));
         }
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'success' => false,
                 'error' => $response['error'] ?? 'Failed to generate reflection prompts',
@@ -249,7 +248,7 @@ PROMPT;
      */
     public function generateAssessment(array $objectives, string $format = 'quiz', array $context = []): array
     {
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are an assessment designer. Create appropriate assessment items.
 
 Return a JSON object with:
@@ -271,13 +270,13 @@ PROMPT;
         $difficulty = $context['difficulty'] ?? 'moderate';
 
         $userMessage = "Create a {$format} assessment for the following learning objectives:\n";
-        $userMessage .= implode("\n", array_map(fn($o) => "- {$o}", $objectives)) . "\n\n";
+        $userMessage .= implode("\n", array_map(fn ($o) => "- {$o}", $objectives))."\n\n";
         $userMessage .= "Number of questions: {$numQuestions}\n";
         $userMessage .= "Difficulty: {$difficulty}\n";
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'success' => false,
                 'error' => $response['error'] ?? 'Failed to generate assessment',
@@ -301,7 +300,7 @@ PROMPT;
      */
     public function generateActionPlan(string $topic, array $context = []): array
     {
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are a learning coach. Create an action plan template for learners to apply what they've learned.
 
 Return a JSON object with:
@@ -320,13 +319,13 @@ PROMPT;
         $objectives = $context['objectives'] ?? [];
 
         $userMessage = "Create an action plan for applying learning about: {$topic}\n\n";
-        if (!empty($objectives)) {
-            $userMessage .= "Based on objectives:\n" . implode("\n", array_map(fn($o) => "- {$o}", $objectives));
+        if (! empty($objectives)) {
+            $userMessage .= "Based on objectives:\n".implode("\n", array_map(fn ($o) => "- {$o}", $objectives));
         }
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'success' => false,
                 'error' => $response['error'] ?? 'Failed to generate action plan',
@@ -352,7 +351,7 @@ PROMPT;
      */
     public function getInlineSuggestions(string $content, string $fieldType, array $context = []): array
     {
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are an educational content assistant. Provide helpful suggestions to improve the content.
 
 Return a JSON object with:
@@ -368,12 +367,12 @@ PROMPT;
         $stepContext = isset($context['step_title']) ? "Step: {$context['step_title']}\n" : '';
 
         $userMessage = "Provide suggestions for improving this {$fieldType} content:\n\n";
-        $userMessage .= $courseContext . $stepContext;
+        $userMessage .= $courseContext.$stepContext;
         $userMessage .= "Current content:\n{$content}";
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'success' => false,
                 'error' => $response['error'] ?? 'Failed to get suggestions',
@@ -395,7 +394,7 @@ PROMPT;
      */
     public function completeText(string $partial, string $fieldType, array $context = []): array
     {
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are an educational content writer. Complete the partial text in a way that is:
 - Natural and flows from what's written
 - Appropriate for the context and audience
@@ -414,7 +413,7 @@ PROMPT;
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'success' => false,
                 'error' => $response['error'] ?? 'Failed to complete text',
@@ -435,7 +434,7 @@ PROMPT;
      */
     public function extractCourseFromDocument(string $documentText, array $params = []): array
     {
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are an expert at converting documents into structured educational courses.
 Analyze the document and create a mini-course structure.
 
@@ -478,8 +477,9 @@ PROMPT;
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             Log::error('Failed to extract course from document', ['error' => $response['error'] ?? 'Unknown']);
+
             return [
                 'success' => false,
                 'error' => $response['error'] ?? 'Failed to extract course from document',
@@ -488,7 +488,7 @@ PROMPT;
 
         $courseData = $this->parseJsonResponse($response['content']);
 
-        if (!$courseData) {
+        if (! $courseData) {
             return [
                 'success' => false,
                 'error' => 'Failed to parse extracted course structure',
@@ -506,7 +506,7 @@ PROMPT;
      */
     public function convertDocumentToBlocks(string $documentText, array $params = []): array
     {
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are an expert at converting documents into structured content blocks for an educational platform.
 
 Return a JSON object with:
@@ -525,7 +525,7 @@ PROMPT;
             $systemPrompt
         );
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'success' => false,
                 'error' => $response['error'] ?? 'Failed to convert document',
@@ -573,7 +573,7 @@ PROMPT;
             $systemPrompt
         );
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'success' => false,
                 'error' => $response['error'] ?? 'Failed to improve content',
@@ -595,7 +595,7 @@ PROMPT;
      */
     public function generateQuizFromContent(string $content, int $numQuestions = 5, array $context = []): array
     {
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are an assessment expert. Create quiz questions based on the content provided.
 
 Return a JSON object with:
@@ -613,12 +613,12 @@ PROMPT;
         $difficulty = $context['difficulty'] ?? 'mixed';
 
         $userMessage = "Create {$numQuestions} quiz questions based on this content:\n\n{$content}\n\n";
-        $userMessage .= "Question types to include: " . implode(', ', $questionTypes) . "\n";
+        $userMessage .= 'Question types to include: '.implode(', ', $questionTypes)."\n";
         $userMessage .= "Difficulty: {$difficulty}";
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return [
                 'success' => false,
                 'error' => $response['error'] ?? 'Failed to generate quiz',

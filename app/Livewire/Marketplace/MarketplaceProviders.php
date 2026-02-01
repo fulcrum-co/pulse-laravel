@@ -11,11 +11,17 @@ class MarketplaceProviders extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $priceFilter = '';
+
     public string $ratingFilter = '';
+
     public array $selectedTypes = [];
+
     public bool $verifiedOnly = false;
+
     public string $sortBy = 'popular';
+
     public string $viewMode = 'list'; // Providers default to list view
 
     protected $queryString = [
@@ -45,7 +51,7 @@ class MarketplaceProviders extends Component
 
     public function toggleVerified(): void
     {
-        $this->verifiedOnly = !$this->verifiedOnly;
+        $this->verifiedOnly = ! $this->verifiedOnly;
         $this->resetPage();
     }
 

@@ -3,14 +3,14 @@
 namespace App\Services;
 
 use App\Models\Collection;
-use App\Models\CollectionSchedule;
-use App\Models\CollectionSession;
 use App\Models\CollectionEntry;
 use App\Models\CollectionQueueItem;
+use App\Models\CollectionSchedule;
+use App\Models\CollectionSession;
 use App\Models\Student;
 use App\Models\User;
-use Illuminate\Support\Collection as SupportCollection;
 use Carbon\Carbon;
+use Illuminate\Support\Collection as SupportCollection;
 
 class CollectionService
 {
@@ -32,6 +32,7 @@ class CollectionService
     public function update(Collection $collection, array $data): Collection
     {
         $collection->update($data);
+
         return $collection->fresh();
     }
 
@@ -78,7 +79,7 @@ class CollectionService
     public function duplicate(Collection $collection, User $user): Collection
     {
         $newCollection = $collection->replicate(['id', 'created_at', 'updated_at']);
-        $newCollection->title = $collection->title . ' (Copy)';
+        $newCollection->title = $collection->title.' (Copy)';
         $newCollection->status = Collection::STATUS_DRAFT;
         $newCollection->created_by = $user->id;
         $newCollection->archived_at = null;
@@ -204,17 +205,17 @@ class CollectionService
                 ->whereNull('deleted_at');
 
             // Filter by grades
-            if (!empty($scope['grades'])) {
+            if (! empty($scope['grades'])) {
                 $query->whereIn('grade_level', $scope['grades']);
             }
 
             // Filter by classrooms (homeroom)
-            if (!empty($scope['classrooms'])) {
+            if (! empty($scope['classrooms'])) {
                 $query->whereIn('homeroom_classroom_id', $scope['classrooms']);
             }
 
             // Filter by tags
-            if (!empty($scope['tags'])) {
+            if (! empty($scope['tags'])) {
                 $query->where(function ($q) use ($scope) {
                     foreach ($scope['tags'] as $tag) {
                         $q->orWhereJsonContains('tags', $tag);
@@ -229,7 +230,7 @@ class CollectionService
         if ($targetType === 'users') {
             $query = User::where('org_id', $collection->org_id);
 
-            if (!empty($scope['roles'])) {
+            if (! empty($scope['roles'])) {
                 $query->whereIn('role', $scope['roles']);
             }
 
@@ -318,7 +319,7 @@ class CollectionService
     /**
      * Skip a contact in the queue.
      */
-    public function skipInQueue(CollectionSession $session, CollectionEntry $entry, string $reason = null): ?CollectionQueueItem
+    public function skipInQueue(CollectionSession $session, CollectionEntry $entry, ?string $reason = null): ?CollectionQueueItem
     {
         // Mark entry as skipped
         $entry->skip($reason);
@@ -355,7 +356,7 @@ class CollectionService
     /**
      * Complete an entry.
      */
-    public function completeEntry(CollectionEntry $entry, array $scores = null, array $flags = null): void
+    public function completeEntry(CollectionEntry $entry, ?array $scores = null, ?array $flags = null): void
     {
         $entry->complete($scores, $flags);
     }

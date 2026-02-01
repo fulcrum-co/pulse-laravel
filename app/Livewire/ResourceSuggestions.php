@@ -10,14 +10,17 @@ use Livewire\Component;
 class ResourceSuggestions extends Component
 {
     public string $contactType;
+
     public int $contactId;
 
     // Manual suggestion form
     public bool $showAddForm = false;
+
     public ?int $selectedResourceId = null;
 
     // Review modal
     public ?int $reviewingSuggestionId = null;
+
     public string $reviewNotes = '';
 
     protected ResourceSuggestionService $suggestionService;
@@ -35,7 +38,7 @@ class ResourceSuggestions extends Component
 
     public function toggleAddForm()
     {
-        $this->showAddForm = !$this->showAddForm;
+        $this->showAddForm = ! $this->showAddForm;
         $this->selectedResourceId = null;
     }
 

@@ -29,7 +29,7 @@ class NotificationMail extends Mailable
 
         // Add priority indicator for high/urgent notifications
         if (in_array($this->notification->priority, [UserNotification::PRIORITY_HIGH, UserNotification::PRIORITY_URGENT])) {
-            $subject = '[' . ucfirst($this->notification->priority) . '] ' . $subject;
+            $subject = '['.ucfirst($this->notification->priority).'] '.$subject;
         }
 
         return new Envelope(

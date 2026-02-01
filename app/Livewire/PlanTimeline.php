@@ -3,23 +3,24 @@
 namespace App\Livewire;
 
 use App\Models\StrategicPlan;
-use Livewire\Component;
 use Carbon\Carbon;
+use Livewire\Component;
 
-class StrategyTimeline extends Component
+class PlanTimeline extends Component
 {
-    public StrategicPlan $strategy;
+    public StrategicPlan $plan;
 
     // Expanded states
     public $expandedFocusAreas = [];
+
     public $expandedObjectives = [];
 
-    public function mount(StrategicPlan $strategy)
+    public function mount(StrategicPlan $plan)
     {
-        $this->strategy = $strategy;
+        $this->plan = $plan;
 
         // Expand all by default
-        foreach ($strategy->focusAreas as $fa) {
+        foreach ($plan->focusAreas as $fa) {
             $this->expandedFocusAreas[$fa->id] = true;
             foreach ($fa->objectives as $obj) {
                 $this->expandedObjectives[$obj->id] = true;
@@ -29,12 +30,12 @@ class StrategyTimeline extends Component
 
     public function toggleFocusArea($id)
     {
-        $this->expandedFocusAreas[$id] = !($this->expandedFocusAreas[$id] ?? false);
+        $this->expandedFocusAreas[$id] = ! ($this->expandedFocusAreas[$id] ?? false);
     }
 
     public function toggleObjective($id)
     {
-        $this->expandedObjectives[$id] = !($this->expandedObjectives[$id] ?? false);
+        $this->expandedObjectives[$id] = ! ($this->expandedObjectives[$id] ?? false);
     }
 
     /**
@@ -43,12 +44,12 @@ class StrategyTimeline extends Component
     public function getTimelineData(): array
     {
         $items = [];
-        $startDate = $this->strategy->start_date;
-        $endDate = $this->strategy->end_date;
+        $startDate = $this->plan->start_date;
+        $endDate = $this->plan->end_date;
 
-        foreach ($this->strategy->focusAreas as $fa) {
+        foreach ($this->plan->focusAreas as $fa) {
             $items[] = [
-                'id' => 'fa_' . $fa->id,
+                'id' => 'fa_'.$fa->id,
                 'type' => 'focus_area',
                 'title' => $fa->title,
                 'start_date' => $startDate->format('Y-m-d'),
@@ -63,7 +64,7 @@ class StrategyTimeline extends Component
                     $objEnd = $obj->end_date ?? $endDate;
 
                     $items[] = [
-                        'id' => 'obj_' . $obj->id,
+                        'id' => 'obj_'.$obj->id,
                         'type' => 'objective',
                         'title' => $obj->title,
                         'start_date' => $objStart->format('Y-m-d'),
@@ -78,7 +79,7 @@ class StrategyTimeline extends Component
                             $actEnd = $act->end_date ?? $objEnd;
 
                             $items[] = [
-                                'id' => 'act_' . $act->id,
+                                'id' => 'act_'.$act->id,
                                 'type' => 'activity',
                                 'title' => $act->title,
                                 'start_date' => $actStart->format('Y-m-d'),
@@ -101,8 +102,8 @@ class StrategyTimeline extends Component
     public function getMonths(): array
     {
         $months = [];
-        $current = $this->strategy->start_date->copy()->startOfMonth();
-        $end = $this->strategy->end_date->copy()->endOfMonth();
+        $current = $this->plan->start_date->copy()->startOfMonth();
+        $end = $this->plan->end_date->copy()->endOfMonth();
 
         while ($current <= $end) {
             $months[] = [
@@ -122,8 +123,8 @@ class StrategyTimeline extends Component
      */
     public function getBarStyle(string $startDate, string $endDate): array
     {
-        $timelineStart = $this->strategy->start_date->timestamp;
-        $timelineEnd = $this->strategy->end_date->timestamp;
+        $timelineStart = $this->plan->start_date->timestamp;
+        $timelineEnd = $this->plan->end_date->timestamp;
         $totalDuration = $timelineEnd - $timelineStart;
 
         if ($totalDuration <= 0) {
@@ -141,16 +142,16 @@ class StrategyTimeline extends Component
         $width = max(1, min(100 - $left, $width));
 
         return [
-            'left' => $left . '%',
-            'width' => $width . '%',
+            'left' => $left.'%',
+            'width' => $width.'%',
         ];
     }
 
     public function render()
     {
-        $this->strategy->load(['focusAreas.objectives.activities']);
+        $this->plan->load(['focusAreas.objectives.activities']);
 
-        return view('livewire.strategy-timeline', [
+        return view('livewire.plan-timeline', [
             'items' => $this->getTimelineData(),
             'months' => $this->getMonths(),
         ]);

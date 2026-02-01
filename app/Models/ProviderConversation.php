@@ -36,7 +36,9 @@ class ProviderConversation extends Model
     ];
 
     const STATUS_ACTIVE = 'active';
+
     const STATUS_ARCHIVED = 'archived';
+
     const STATUS_BLOCKED = 'blocked';
 
     protected static function boot()
@@ -140,7 +142,7 @@ class ProviderConversation extends Model
      */
     public function canSendNotification(): bool
     {
-        if (!$this->last_notification_sent_at) {
+        if (! $this->last_notification_sent_at) {
             return true;
         }
 
@@ -162,6 +164,7 @@ class ProviderConversation extends Model
     public function generateStreamChannelId(): string
     {
         $initiatorPrefix = $this->initiator_type === 'App\\Models\\User' ? 'user' : 'student';
+
         return "provider_{$this->provider_id}_{$initiatorPrefix}_{$this->initiator_id}";
     }
 

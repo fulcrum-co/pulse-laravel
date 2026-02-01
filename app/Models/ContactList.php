@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ContactList extends Model
 {
@@ -14,7 +14,9 @@ class ContactList extends Model
 
     // List types
     const TYPE_STUDENT = 'student';
+
     const TYPE_TEACHER = 'teacher';
+
     const TYPE_MIXED = 'mixed';
 
     protected $fillable = [
@@ -128,17 +130,17 @@ class ContactList extends Model
             ->whereNull('deleted_at');
 
         // Grade level filter
-        if (!empty($criteria['grade_levels'])) {
+        if (! empty($criteria['grade_levels'])) {
             $query->whereIn('grade_level', $criteria['grade_levels']);
         }
 
         // Risk level filter
-        if (!empty($criteria['risk_levels'])) {
+        if (! empty($criteria['risk_levels'])) {
             $query->whereIn('risk_level', $criteria['risk_levels']);
         }
 
         // Classroom filter
-        if (!empty($criteria['classroom_ids'])) {
+        if (! empty($criteria['classroom_ids'])) {
             $query->whereIn('homeroom_classroom_id', $criteria['classroom_ids']);
         }
 
@@ -153,19 +155,19 @@ class ContactList extends Model
         }
 
         // Enrollment status filter
-        if (!empty($criteria['enrollment_status'])) {
+        if (! empty($criteria['enrollment_status'])) {
             $query->where('enrollment_status', $criteria['enrollment_status']);
         }
 
         // Tags filter
-        if (!empty($criteria['tags'])) {
+        if (! empty($criteria['tags'])) {
             foreach ($criteria['tags'] as $tag) {
                 $query->whereJsonContains('tags', $tag);
             }
         }
 
         // Counselor filter
-        if (!empty($criteria['counselor_ids'])) {
+        if (! empty($criteria['counselor_ids'])) {
             $query->whereIn('counselor_user_id', $criteria['counselor_ids']);
         }
 
@@ -181,12 +183,12 @@ class ContactList extends Model
             ->whereNull('deleted_at');
 
         // Role filter
-        if (!empty($criteria['roles'])) {
+        if (! empty($criteria['roles'])) {
             $query->whereIn('role', $criteria['roles']);
         }
 
         // Department filter (if using custom field)
-        if (!empty($criteria['departments'])) {
+        if (! empty($criteria['departments'])) {
             $query->where(function ($q) use ($criteria) {
                 foreach ($criteria['departments'] as $dept) {
                     $q->orWhereJsonContains('metadata->department', $dept);
@@ -204,7 +206,7 @@ class ContactList extends Model
      */
     public function refreshDynamicMembers(): void
     {
-        if (!$this->is_dynamic || empty($this->filter_criteria)) {
+        if (! $this->is_dynamic || empty($this->filter_criteria)) {
             return;
         }
 
@@ -226,7 +228,7 @@ class ContactList extends Model
             $student->id => [
                 'added_at' => now(),
                 'added_by' => $addedBy,
-            ]
+            ],
         ]);
     }
 
@@ -243,7 +245,7 @@ class ContactList extends Model
             $user->id => [
                 'added_at' => now(),
                 'added_by' => $addedBy,
-            ]
+            ],
         ]);
     }
 
@@ -268,7 +270,7 @@ class ContactList extends Model
      */
     public function addContacts(array $studentIds = [], array $userIds = [], ?int $addedBy = null): void
     {
-        if (!empty($studentIds) && $this->list_type !== self::TYPE_TEACHER) {
+        if (! empty($studentIds) && $this->list_type !== self::TYPE_TEACHER) {
             $syncData = [];
             foreach ($studentIds as $id) {
                 $syncData[$id] = ['added_at' => now(), 'added_by' => $addedBy];
@@ -276,7 +278,7 @@ class ContactList extends Model
             $this->students()->syncWithoutDetaching($syncData);
         }
 
-        if (!empty($userIds) && $this->list_type !== self::TYPE_STUDENT) {
+        if (! empty($userIds) && $this->list_type !== self::TYPE_STUDENT) {
             $syncData = [];
             foreach ($userIds as $id) {
                 $syncData[$id] = ['added_at' => now(), 'added_by' => $addedBy];
@@ -294,6 +296,7 @@ class ContactList extends Model
             if ($this->is_dynamic) {
                 return $this->getContactsQuery()->where('id', $contact->id)->exists();
             }
+
             return $this->students()->where('students.id', $contact->id)->exists();
         }
 
@@ -301,6 +304,7 @@ class ContactList extends Model
             if ($this->is_dynamic) {
                 return $this->getContactsQuery()->where('id', $contact->id)->exists();
             }
+
             return $this->users()->where('users.id', $contact->id)->exists();
         }
 

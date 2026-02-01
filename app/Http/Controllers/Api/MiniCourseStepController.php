@@ -56,7 +56,7 @@ class MiniCourseStepController extends Controller
         ]);
 
         // Set sort order if not provided
-        if (!isset($validated['sort_order'])) {
+        if (! isset($validated['sort_order'])) {
             $maxSort = $course->steps()->max('sort_order') ?? 0;
             $validated['sort_order'] = $maxSort + 1;
         }

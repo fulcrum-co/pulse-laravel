@@ -13,7 +13,6 @@ use App\Models\User;
 use App\Models\UserNotification;
 use App\Services\NotificationService;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ModerationQueueService
@@ -136,7 +135,7 @@ class ModerationQueueService
         // If no assigned items, check if user has capacity for auto-assignment
         $teamSetting = ModerationTeamSetting::getOrCreateForUser($user->org_id, $user->id);
 
-        if (!$teamSetting->is_available) {
+        if (! $teamSetting->is_available) {
             return null;
         }
 
@@ -208,7 +207,7 @@ class ModerationQueueService
             ->first();
 
         $lastAssignedIndex = $lastAssignment
-            ? $eligibleModerators->search(fn($u) => $u->id === $lastAssignment->assigned_to)
+            ? $eligibleModerators->search(fn ($u) => $u->id === $lastAssignment->assigned_to)
             : -1;
 
         $nextIndex = ($lastAssignedIndex + 1) % $eligibleModerators->count();
@@ -234,6 +233,7 @@ class ModerationQueueService
 
         if ($teamSetting?->user) {
             $this->assignToUser($item, $teamSetting->user);
+
             return $teamSetting->user;
         }
 
@@ -255,6 +255,7 @@ class ModerationQueueService
 
             if ($teamSetting?->user) {
                 $this->assignToUser($item, $teamSetting->user);
+
                 return $teamSetting->user;
             }
         }
@@ -523,7 +524,7 @@ class ModerationQueueService
         }
 
         $onTime = $completed->filter(function ($item) {
-            return !$item->completed_at || !$item->due_at ||
+            return ! $item->completed_at || ! $item->due_at ||
                    $item->completed_at->lte($item->due_at);
         })->count();
 
@@ -538,9 +539,9 @@ class ModerationQueueService
         return (int) ModerationDecision::whereHas('queueItem', function ($q) use ($orgId) {
             $q->forOrganization($orgId);
         })
-        ->where('created_at', '>=', now()->subDays(30))
-        ->whereNotNull('time_spent_seconds')
-        ->avg('time_spent_seconds') ?? 0;
+            ->where('created_at', '>=', now()->subDays(30))
+            ->whereNotNull('time_spent_seconds')
+            ->avg('time_spent_seconds') ?? 0;
     }
 
     // Notification methods
@@ -558,7 +559,7 @@ class ModerationQueueService
                 'body' => "{$assigner->full_name} assigned you to review \"{$contentTitle}\"",
                 'icon' => 'shield-check',
                 'priority' => $this->mapPriorityToNotification($item->priority),
-                'action_url' => route('admin.moderation.task-flow') . '?item=' . $item->id,
+                'action_url' => route('admin.moderation.task-flow').'?item='.$item->id,
                 'action_label' => 'Start Review',
                 'metadata' => [
                     'queue_item_id' => $item->id,
@@ -599,7 +600,7 @@ class ModerationQueueService
                 'body' => "A moderation task for \"{$contentTitle}\" has been escalated to you.",
                 'icon' => 'exclamation-triangle',
                 'priority' => UserNotification::PRIORITY_HIGH,
-                'action_url' => route('admin.moderation.task-flow') . '?item=' . $item->id,
+                'action_url' => route('admin.moderation.task-flow').'?item='.$item->id,
                 'action_label' => 'Review Now',
             ]
         );
@@ -618,7 +619,7 @@ class ModerationQueueService
                 'body' => "Moderation for \"{$contentTitle}\" has exceeded SLA. Immediate attention required.",
                 'icon' => 'clock',
                 'priority' => UserNotification::PRIORITY_URGENT,
-                'action_url' => route('admin.moderation.task-flow') . '?item=' . $item->id,
+                'action_url' => route('admin.moderation.task-flow').'?item='.$item->id,
                 'action_label' => 'Review Immediately',
             ]
         );

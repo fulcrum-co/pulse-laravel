@@ -2,16 +2,14 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Student;
+use App\Models\User;
+use App\Models\UserNotification;
 use App\Models\Workflow;
 use App\Models\WorkflowExecution;
-use App\Models\UserNotification;
-use App\Services\NotificationService;
-use App\Services\NotificationDeliveryService;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 
 class WorkflowActionService
@@ -211,7 +209,7 @@ class WorkflowActionService
         $headers = $config['headers'] ?? [];
         $payload = $config['payload'] ?? $context;
 
-        if (!$url) {
+        if (! $url) {
             return [
                 'success' => false,
                 'action_type' => 'webhook',
@@ -286,7 +284,7 @@ class WorkflowActionService
         $resourceId = $config['resource_id'] ?? null;
         $studentId = $context['student_id'] ?? $context['contact_id'] ?? null;
 
-        if (!$resourceId || !$studentId) {
+        if (! $resourceId || ! $studentId) {
             return [
                 'success' => false,
                 'action_type' => 'assign_resource',
@@ -372,7 +370,7 @@ class WorkflowActionService
             ],
         ];
 
-        if (!empty($url)) {
+        if (! empty($url)) {
             $notificationData['action_url'] = $url;
             $notificationData['action_label'] = $actionLabel;
         }
@@ -422,7 +420,7 @@ class WorkflowActionService
     {
         $workflowId = $config['workflow_id'] ?? null;
 
-        if (!$workflowId) {
+        if (! $workflowId) {
             return [
                 'success' => false,
                 'action_type' => 'trigger_workflow',
@@ -433,7 +431,7 @@ class WorkflowActionService
 
         $workflow = Workflow::find($workflowId);
 
-        if (!$workflow || !$workflow->isActive()) {
+        if (! $workflow || ! $workflow->isActive()) {
             return [
                 'success' => false,
                 'action_type' => 'trigger_workflow',
@@ -468,7 +466,7 @@ class WorkflowActionService
         $entityType = $config['entity_type'] ?? 'student';
         $entityId = $context["{$entityType}_id"] ?? $context['contact_id'] ?? null;
 
-        if (!$field || !$entityId) {
+        if (! $field || ! $entityId) {
             return [
                 'success' => false,
                 'action_type' => 'update_field',
@@ -587,6 +585,7 @@ class WorkflowActionService
     {
         return preg_replace_callback('/\{\{([^}]+)\}\}/', function ($matches) use ($context) {
             $key = trim($matches[1]);
+
             return data_get($context, $key, $matches[0]);
         }, $template);
     }

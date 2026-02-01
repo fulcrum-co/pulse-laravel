@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Services\SurveyDeliveryService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class SurveyWebhookController extends Controller
@@ -44,6 +44,7 @@ class SurveyWebhookController extends Controller
 
             default:
                 Log::warning('Unknown Sinch voice event', ['event' => $event]);
+
                 return response()->json(['status' => 'ignored']);
         }
     }
@@ -61,7 +62,7 @@ class SurveyWebhookController extends Controller
         $from = $payload['from'] ?? null;
         $body = $payload['body'] ?? $payload['message'] ?? null;
 
-        if (!$from || !$body) {
+        if (! $from || ! $body) {
             return response()->json(['error' => 'Invalid payload'], 400);
         }
 
@@ -147,7 +148,7 @@ class SurveyWebhookController extends Controller
         $callId = $payload['callId'] ?? null;
         $dtmf = $payload['menuResult']['value'] ?? null;
 
-        if (!$callId || !$dtmf) {
+        if (! $callId || ! $dtmf) {
             return response()->json([
                 'action' => ['name' => 'continue'],
             ]);
@@ -161,7 +162,7 @@ class SurveyWebhookController extends Controller
                 'instructions' => [
                     [
                         'name' => 'playFiles',
-                        'ids' => ['#tts[' . $result['tts'] . ']'],
+                        'ids' => ['#tts['.$result['tts'].']'],
                         'locale' => 'en-US',
                     ],
                     [
@@ -176,7 +177,7 @@ class SurveyWebhookController extends Controller
             'instructions' => [
                 [
                     'name' => 'playFiles',
-                    'ids' => ['#tts[' . $result['tts'] . ']'],
+                    'ids' => ['#tts['.$result['tts'].']'],
                     'locale' => 'en-US',
                 ],
                 [

@@ -14,7 +14,7 @@ return new class extends Migration
             ->where('org_id', $school?->id)
             ->first();
 
-        if (!$school || !$admin) {
+        if (! $school || ! $admin) {
             return;
         }
 

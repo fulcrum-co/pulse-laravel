@@ -2,41 +2,54 @@
 
 namespace App\Livewire\Dashboard;
 
-use Livewire\Component;
 use App\Models\Dashboard;
 use App\Models\DashboardWidget;
 use Illuminate\Support\Collection;
+use Livewire\Component;
 
 class DashboardIndex extends Component
 {
     public ?int $selectedDashboardId = null;
+
     public ?Dashboard $currentDashboard = null;
 
     // Create dashboard modal
     public bool $showCreateModal = false;
+
     public string $newDashboardName = '';
+
     public string $newDashboardDescription = '';
+
     public bool $createFromTemplate = false;
 
     // Add widget panel
     public bool $showWidgetPanel = false;
+
     public string $newWidgetType = '';
+
     public string $newWidgetTitle = '';
+
     public array $newWidgetConfig = [];
 
     // Edit widget modal
     public bool $showEditWidgetModal = false;
+
     public ?int $editingWidgetId = null;
+
     public string $editWidgetTitle = '';
+
     public array $editWidgetConfig = [];
 
     // Actions menu
     public bool $showActionsMenu = false;
+
     public bool $showShareMenu = false;
 
     // Date range
     public string $dateRange = 'week';
+
     public ?string $startDate = null;
+
     public ?string $endDate = null;
 
     protected $listeners = ['widgetMoved' => 'updateWidgetPosition'];
@@ -48,7 +61,7 @@ class DashboardIndex extends Component
         // Try to get last viewed dashboard or default
         $this->currentDashboard = Dashboard::getDefaultForUser($user);
 
-        if (!$this->currentDashboard) {
+        if (! $this->currentDashboard) {
             // Create a default dashboard if none exists
             $this->currentDashboard = Dashboard::createDefault($user);
         }
@@ -132,7 +145,7 @@ class DashboardIndex extends Component
 
     public function deleteDashboard(): void
     {
-        if (!$this->currentDashboard || $this->currentDashboard->user_id !== auth()->id()) {
+        if (! $this->currentDashboard || $this->currentDashboard->user_id !== auth()->id()) {
             return;
         }
 
@@ -141,7 +154,7 @@ class DashboardIndex extends Component
         // Switch to another dashboard
         $this->currentDashboard = Dashboard::getDefaultForUser(auth()->user());
 
-        if (!$this->currentDashboard) {
+        if (! $this->currentDashboard) {
             $this->currentDashboard = Dashboard::createDefault(auth()->user());
         }
 
@@ -156,12 +169,12 @@ class DashboardIndex extends Component
 
     public function toggleShare(): void
     {
-        if (!$this->currentDashboard || $this->currentDashboard->user_id !== auth()->id()) {
+        if (! $this->currentDashboard || $this->currentDashboard->user_id !== auth()->id()) {
             return;
         }
 
         $this->currentDashboard->update([
-            'is_shared' => !$this->currentDashboard->is_shared,
+            'is_shared' => ! $this->currentDashboard->is_shared,
         ]);
 
         $this->currentDashboard->refresh();
@@ -177,7 +190,7 @@ class DashboardIndex extends Component
 
     public function setAsDefault(): void
     {
-        if (!$this->currentDashboard) {
+        if (! $this->currentDashboard) {
             return;
         }
 
@@ -237,7 +250,7 @@ class DashboardIndex extends Component
 
     public function addWidget(): void
     {
-        if (!$this->currentDashboard || !$this->newWidgetType) {
+        if (! $this->currentDashboard || ! $this->newWidgetType) {
             return;
         }
 
@@ -260,7 +273,7 @@ class DashboardIndex extends Component
     {
         $widget = DashboardWidget::find($widgetId);
 
-        if (!$widget || $widget->dashboard_id !== $this->currentDashboard?->id) {
+        if (! $widget || $widget->dashboard_id !== $this->currentDashboard?->id) {
             return;
         }
 
@@ -274,7 +287,7 @@ class DashboardIndex extends Component
     {
         $widget = DashboardWidget::find($this->editingWidgetId);
 
-        if (!$widget || $widget->dashboard_id !== $this->currentDashboard?->id) {
+        if (! $widget || $widget->dashboard_id !== $this->currentDashboard?->id) {
             return;
         }
 
@@ -296,7 +309,7 @@ class DashboardIndex extends Component
     {
         $widget = DashboardWidget::find($widgetId);
 
-        if (!$widget || $widget->dashboard_id !== $this->currentDashboard?->id) {
+        if (! $widget || $widget->dashboard_id !== $this->currentDashboard?->id) {
             return;
         }
 
@@ -313,7 +326,7 @@ class DashboardIndex extends Component
     {
         $widget = DashboardWidget::find($widgetId);
 
-        if (!$widget || $widget->dashboard_id !== $this->currentDashboard?->id) {
+        if (! $widget || $widget->dashboard_id !== $this->currentDashboard?->id) {
             return;
         }
 

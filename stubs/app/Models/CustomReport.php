@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use MongoDB\Laravel\Eloquent\Model;
 use MongoDB\Laravel\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CustomReport extends Model
 {
     use SoftDeletes;
 
     protected $connection = 'mongodb';
+
     protected $collection = 'custom_reports';
 
     protected $fillable = [
@@ -66,7 +67,7 @@ class CustomReport extends Model
      */
     public function isDueForSend(): bool
     {
-        if (!$this->auto_send || !$this->distribution_schedule) {
+        if (! $this->auto_send || ! $this->distribution_schedule) {
             return false;
         }
 

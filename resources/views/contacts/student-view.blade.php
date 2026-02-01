@@ -186,7 +186,7 @@
                 <div x-show="open" x-collapse class="border-t border-gray-100">
                     <div class="divide-y divide-gray-100">
                         @foreach($student->strategicPlans as $plan)
-                        <a href="{{ route('strategies.show', $plan) }}" class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors">
+                        <a href="{{ route('plans.show', $plan) }}" class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors">
                             <div>
                                 <div class="text-sm font-medium text-gray-900">{{ $plan->title }}</div>
                                 <div class="text-xs text-gray-500">{{ $plan->school_year }}</div>

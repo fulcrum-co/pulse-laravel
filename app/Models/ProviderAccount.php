@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -40,6 +39,7 @@ class ProviderAccount extends Authenticatable
     ];
 
     const TYPE_FULL = 'full';
+
     const TYPE_EMAIL_ONLY = 'email_only';
 
     /**
@@ -96,7 +96,7 @@ class ProviderAccount extends Authenticatable
      */
     public function getStreamUserId(): string
     {
-        return $this->stream_user_id ?? 'provider_' . $this->provider_id;
+        return $this->stream_user_id ?? 'provider_'.$this->provider_id;
     }
 
     /**

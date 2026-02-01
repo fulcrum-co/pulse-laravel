@@ -2,29 +2,38 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class ContentModerationResult extends Model
 {
     // Moderation statuses
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_PASSED = 'passed';
+
     public const STATUS_FLAGGED = 'flagged';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_APPROVED_OVERRIDE = 'approved_override';
 
     // Assignment priorities
     public const PRIORITY_LOW = 'low';
+
     public const PRIORITY_NORMAL = 'normal';
+
     public const PRIORITY_HIGH = 'high';
+
     public const PRIORITY_URGENT = 'urgent';
 
     // Thresholds for auto-decisions
     public const THRESHOLD_AUTO_PASS = 0.85;
+
     public const THRESHOLD_FLAG_FOR_REVIEW = 0.70;
+
     public const THRESHOLD_AUTO_REJECT = 0.40;
 
     // Dimension weights for K-12 education context
@@ -158,6 +167,7 @@ class ContentModerationResult extends Model
         if (empty($this->collaborator_ids)) {
             return collect();
         }
+
         return User::whereIn('id', $this->collaborator_ids)->get();
     }
 
@@ -233,7 +243,7 @@ class ContentModerationResult extends Model
     {
         return $query->where(function ($q) use ($userId) {
             $q->where('assigned_to', $userId)
-              ->orWhereJsonContains('collaborator_ids', $userId);
+                ->orWhereJsonContains('collaborator_ids', $userId);
         });
     }
 
@@ -277,7 +287,7 @@ class ContentModerationResult extends Model
         $weightedSum = 0;
 
         foreach (self::DIMENSION_WEIGHTS as $dimension => $weight) {
-            $scoreField = $dimension . '_score';
+            $scoreField = $dimension.'_score';
             if ($this->$scoreField !== null) {
                 $weightedSum += $this->$scoreField * $weight;
                 $totalWeight += $weight;
@@ -357,7 +367,7 @@ class ContentModerationResult extends Model
     public function requiresReview(): bool
     {
         return in_array($this->status, [self::STATUS_FLAGGED, self::STATUS_REJECTED])
-            && !$this->human_reviewed;
+            && ! $this->human_reviewed;
     }
 
     /**
@@ -372,7 +382,7 @@ class ContentModerationResult extends Model
             'accuracy' => $this->accuracy_score,
         ];
 
-        $dimensions = array_filter($dimensions, fn($score) => $score !== null);
+        $dimensions = array_filter($dimensions, fn ($score) => $score !== null);
 
         if (empty($dimensions)) {
             return null;
@@ -403,7 +413,7 @@ class ContentModerationResult extends Model
         }
 
         if ($flagCount > 0) {
-            return "{$flagCount} concern" . ($flagCount > 1 ? 's' : '') . ' identified';
+            return "{$flagCount} concern".($flagCount > 1 ? 's' : '').' identified';
         }
 
         return 'Review required';
@@ -461,7 +471,7 @@ class ContentModerationResult extends Model
     public function addCollaborator(int $userId): void
     {
         $collaborators = $this->collaborator_ids ?? [];
-        if (!in_array($userId, $collaborators)) {
+        if (! in_array($userId, $collaborators)) {
             $collaborators[] = $userId;
             $this->update(['collaborator_ids' => $collaborators]);
         }
@@ -473,7 +483,7 @@ class ContentModerationResult extends Model
     public function removeCollaborator(int $userId): void
     {
         $collaborators = $this->collaborator_ids ?? [];
-        $collaborators = array_filter($collaborators, fn($id) => $id !== $userId);
+        $collaborators = array_filter($collaborators, fn ($id) => $id !== $userId);
         $this->update(['collaborator_ids' => array_values($collaborators)]);
     }
 
@@ -524,7 +534,7 @@ class ContentModerationResult extends Model
     protected function canUserModerate(User $user): bool
     {
         return in_array($user->effective_role, [
-            'admin', 'consultant', 'superintendent', 'school_admin'
+            'admin', 'consultant', 'superintendent', 'school_admin',
         ]);
     }
 
@@ -533,7 +543,7 @@ class ContentModerationResult extends Model
      */
     public function isOverdue(): bool
     {
-        return $this->due_at !== null && $this->due_at->isPast() && !$this->human_reviewed;
+        return $this->due_at !== null && $this->due_at->isPast() && ! $this->human_reviewed;
     }
 
     /**
@@ -544,6 +554,6 @@ class ContentModerationResult extends Model
         return $this->due_at !== null
             && $this->due_at->isFuture()
             && $this->due_at->diffInHours(now()) <= 24
-            && !$this->human_reviewed;
+            && ! $this->human_reviewed;
     }
 }

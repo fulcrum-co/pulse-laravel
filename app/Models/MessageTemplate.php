@@ -12,6 +12,7 @@ class MessageTemplate extends Model
     use HasFactory;
 
     const CHANNEL_EMAIL = 'email';
+
     const CHANNEL_SMS = 'sms';
 
     protected $fillable = [

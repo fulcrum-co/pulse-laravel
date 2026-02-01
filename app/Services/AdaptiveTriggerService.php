@@ -9,7 +9,6 @@ use App\Models\MiniCourseEnrollment;
 use App\Models\MiniCourseSuggestion;
 use App\Models\Student;
 use App\Models\User;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
@@ -48,7 +47,7 @@ class AdaptiveTriggerService
                     $aiAnalysis = $this->getAiInterpretation($trigger, $student, $signals);
 
                     // AI can veto the trigger if conditions are met but context suggests otherwise
-                    if ($aiAnalysis && isset($aiAnalysis['should_proceed']) && !$aiAnalysis['should_proceed']) {
+                    if ($aiAnalysis && isset($aiAnalysis['should_proceed']) && ! $aiAnalysis['should_proceed']) {
                         continue;
                     }
                 }
@@ -250,10 +249,11 @@ class AdaptiveTriggerService
         // Handle 'all' conditions (AND)
         if (isset($conditions['all'])) {
             foreach ($conditions['all'] as $condition) {
-                if (!$this->evaluateSingleCondition($condition, $flatSignals)) {
+                if (! $this->evaluateSingleCondition($condition, $flatSignals)) {
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -264,6 +264,7 @@ class AdaptiveTriggerService
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -279,7 +280,7 @@ class AdaptiveTriggerService
         $operator = $condition['operator'] ?? null;
         $value = $condition['value'] ?? null;
 
-        if (!$field || !$operator) {
+        if (! $field || ! $operator) {
             return false;
         }
 
@@ -294,11 +295,11 @@ class AdaptiveTriggerService
             'greater_than_or_equals' => is_numeric($signalValue) && $signalValue >= $value,
             'less_than_or_equals' => is_numeric($signalValue) && $signalValue <= $value,
             'contains' => is_string($signalValue) && str_contains($signalValue, $value),
-            'contains_any' => is_array($signalValue) && !empty(array_intersect($signalValue, (array) $value)),
+            'contains_any' => is_array($signalValue) && ! empty(array_intersect($signalValue, (array) $value)),
             'is_empty' => empty($signalValue),
-            'is_not_empty' => !empty($signalValue),
+            'is_not_empty' => ! empty($signalValue),
             'in' => in_array($signalValue, (array) $value),
-            'not_in' => !in_array($signalValue, (array) $value),
+            'not_in' => ! in_array($signalValue, (array) $value),
             default => false,
         };
     }
@@ -313,7 +314,7 @@ class AdaptiveTriggerService
         foreach ($signals as $key => $value) {
             $fullKey = $prefix ? "{$prefix}.{$key}" : $key;
 
-            if (is_array($value) && !$this->isIndexedArray($value)) {
+            if (is_array($value) && ! $this->isIndexedArray($value)) {
                 $result = array_merge($result, $this->flattenSignals($value, $fullKey));
             } else {
                 $result[$fullKey] = $value;
@@ -336,7 +337,7 @@ class AdaptiveTriggerService
      */
     protected function getAiInterpretation(AdaptiveTrigger $trigger, Student $student, array $signals): ?array
     {
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are analyzing a student's situation to determine if an intervention trigger should proceed.
 Consider the full context, not just the individual metrics that triggered the alert.
 
@@ -349,16 +350,16 @@ Return a JSON object with:
 PROMPT;
 
         if ($trigger->ai_prompt_context) {
-            $systemPrompt .= "\n\nAdditional context from the trigger configuration:\n" . $trigger->ai_prompt_context;
+            $systemPrompt .= "\n\nAdditional context from the trigger configuration:\n".$trigger->ai_prompt_context;
         }
 
         $response = $this->claudeService->sendMessage(
-            "Analyze this situation:\n\nTrigger: {$trigger->name}\nTrigger Type: {$trigger->trigger_type}\n\nSignals:\n" .
+            "Analyze this situation:\n\nTrigger: {$trigger->name}\nTrigger Type: {$trigger->trigger_type}\n\nSignals:\n".
             json_encode($signals, JSON_PRETTY_PRINT),
             $systemPrompt
         );
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return null;
         }
 
@@ -432,7 +433,7 @@ PROMPT;
         // Find or generate a suitable course
         $suggestion = $this->courseGenerationService->generateCourseSuggestion($student, $signals);
 
-        if (!$suggestion) {
+        if (! $suggestion) {
             // No matching course found, create a placeholder suggestion
             $courseTypes = $config['course_types'] ?? [MiniCourse::TYPE_INTERVENTION];
 
@@ -491,7 +492,7 @@ PROMPT;
             $query->where('is_template', true);
         }
 
-        if (!empty($courseTags)) {
+        if (! empty($courseTags)) {
             $query->where(function ($q) use ($courseTags) {
                 foreach ($courseTags as $tag) {
                     $q->orWhereJsonContains('target_needs', $tag);
@@ -501,7 +502,7 @@ PROMPT;
 
         $course = $query->first();
 
-        if (!$course) {
+        if (! $course) {
             return ['error' => 'No suitable course found'];
         }
 

@@ -42,7 +42,7 @@ class SurveyPolicy
     public function update(User $user, Survey $survey): bool
     {
         // Must have access to the survey's organization
-        if (!$user->canAccessOrganization($survey->org_id)) {
+        if (! $user->canAccessOrganization($survey->org_id)) {
             return false;
         }
 
@@ -61,7 +61,7 @@ class SurveyPolicy
     public function delete(User $user, Survey $survey): bool
     {
         // Must have access to the survey's organization
-        if (!$user->canAccessOrganization($survey->org_id)) {
+        if (! $user->canAccessOrganization($survey->org_id)) {
             return false;
         }
 

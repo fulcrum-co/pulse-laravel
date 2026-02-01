@@ -11,8 +11,11 @@ class ContactList extends Component
     use WithPagination;
 
     public $search = '';
+
     public $riskFilter = '';
+
     public $gradeFilter = '';
+
     public $selectedIds = [];
 
     protected $queryString = [
@@ -55,9 +58,9 @@ class ContactList extends Component
             ->whereIn('org_id', $accessibleOrgIds)
             ->when($this->search, function ($query) {
                 $query->whereHas('user', function ($q) {
-                    $q->where('first_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('last_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('email', 'like', '%' . $this->search . '%');
+                    $q->where('first_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('last_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('email', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->riskFilter, function ($query) {

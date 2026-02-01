@@ -11,11 +11,17 @@ class MarketplaceStrategies extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $priceFilter = '';
+
     public string $ratingFilter = '';
+
     public array $selectedGrades = [];
+
     public array $selectedTypes = [];
+
     public string $sortBy = 'popular';
+
     public string $viewMode = 'grid';
 
     protected $queryString = [

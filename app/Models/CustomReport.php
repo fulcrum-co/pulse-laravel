@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CustomReport extends Model
 {
@@ -15,13 +15,18 @@ class CustomReport extends Model
 
     // Report statuses
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_PUBLISHED = 'published';
+
     public const STATUS_ARCHIVED = 'archived';
 
     // Report types
     public const TYPE_STUDENT_PROGRESS = 'student_progress';
+
     public const TYPE_COHORT_SUMMARY = 'cohort_summary';
+
     public const TYPE_SCHOOL_DASHBOARD = 'school_dashboard';
+
     public const TYPE_CUSTOM = 'custom';
 
     protected $fillable = [
@@ -141,7 +146,7 @@ class CustomReport extends Model
         $newReport->status = self::STATUS_DRAFT;
         $newReport->public_token = null;
         $newReport->version = 1;
-        $newReport->report_name = $this->report_name . ' (from ' . $this->organization->org_name . ')';
+        $newReport->report_name = $this->report_name.' (from '.$this->organization->org_name.')';
         $newReport->save();
 
         return $newReport;
@@ -160,7 +165,7 @@ class CustomReport extends Model
      */
     public function isDueForSend(): bool
     {
-        if (!$this->auto_send || !$this->distribution_schedule) {
+        if (! $this->auto_send || ! $this->distribution_schedule) {
             return false;
         }
 
@@ -250,7 +255,7 @@ class CustomReport extends Model
      */
     public function getPublicUrl(): ?string
     {
-        if (!$this->public_token) {
+        if (! $this->public_token) {
             return null;
         }
 
@@ -263,7 +268,7 @@ class CustomReport extends Model
     public function getEmbedCode(): ?string
     {
         $url = $this->getPublicUrl();
-        if (!$url) {
+        if (! $url) {
             return null;
         }
 
@@ -327,7 +332,7 @@ class CustomReport extends Model
      */
     public function isDraft(): bool
     {
-        return $this->status === self::STATUS_DRAFT || !$this->status;
+        return $this->status === self::STATUS_DRAFT || ! $this->status;
     }
 
     /**
@@ -335,7 +340,7 @@ class CustomReport extends Model
      */
     public function publish(): void
     {
-        if (!$this->public_token) {
+        if (! $this->public_token) {
             $this->generatePublicToken();
         }
 
@@ -367,7 +372,7 @@ class CustomReport extends Model
     public function duplicate(?int $userId = null): self
     {
         $newReport = $this->replicate();
-        $newReport->report_name = $this->report_name . ' (Copy)';
+        $newReport->report_name = $this->report_name.' (Copy)';
         $newReport->status = self::STATUS_DRAFT;
         $newReport->public_token = null;
         $newReport->version = 1;

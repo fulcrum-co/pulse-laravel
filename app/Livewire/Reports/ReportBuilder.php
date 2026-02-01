@@ -9,9 +9,9 @@ use App\Services\ReportAIService;
 use App\Services\ReportDataService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
-use Livewire\Component;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class ReportBuilder extends Component
 {
@@ -32,15 +32,21 @@ class ReportBuilder extends Component
 
     // Temporary storage for chart images during PDF export
     public array $chartImages = [];
+
     // Report model
     public ?string $reportId = null;
+
     public string $reportName = 'Untitled Report';
+
     public string $reportDescription = '';
+
     public string $reportType = 'custom';
+
     public string $status = 'draft';
 
     // Layout state
     public array $elements = [];
+
     public ?string $selectedElementId = null;
 
     // Page settings
@@ -75,18 +81,25 @@ class ReportBuilder extends Component
 
     // Undo/redo
     protected array $history = [];
+
     protected int $historyIndex = -1;
+
     protected int $maxHistory = 50;
 
     // UI state
     public bool $showTemplateGallery = false;
+
     public bool $showBrandingPanel = false;
+
     public bool $showFilterBar = false;
+
     public bool $showPublishModal = false;
+
     public string $activeTab = 'elements'; // elements, settings
 
     // Publish state
     public ?string $publicUrl = null;
+
     public ?string $embedCode = null;
 
     // Available templates
@@ -347,7 +360,7 @@ class ReportBuilder extends Component
     {
         $this->elements = array_values(array_filter(
             $this->elements,
-            fn($el) => $el['id'] !== $elementId
+            fn ($el) => $el['id'] !== $elementId
         ));
 
         if ($this->selectedElementId === $elementId) {
@@ -369,7 +382,7 @@ class ReportBuilder extends Component
 
     public function moveElementUp(string $elementId): void
     {
-        $index = collect($this->elements)->search(fn($el) => $el['id'] === $elementId);
+        $index = collect($this->elements)->search(fn ($el) => $el['id'] === $elementId);
 
         if ($index !== false && $index < count($this->elements) - 1) {
             $temp = $this->elements[$index];
@@ -381,7 +394,7 @@ class ReportBuilder extends Component
 
     public function moveElementDown(string $elementId): void
     {
-        $index = collect($this->elements)->search(fn($el) => $el['id'] === $elementId);
+        $index = collect($this->elements)->search(fn ($el) => $el['id'] === $elementId);
 
         if ($index !== false && $index > 0) {
             $temp = $this->elements[$index];
@@ -473,7 +486,7 @@ class ReportBuilder extends Component
 
     public function publish(): void
     {
-        if (!$this->reportId) {
+        if (! $this->reportId) {
             $this->save();
         }
 
@@ -494,7 +507,7 @@ class ReportBuilder extends Component
     public function openPublishModal(): void
     {
         // Ensure report is saved first
-        if (!$this->reportId) {
+        if (! $this->reportId) {
             $this->save();
         }
 
@@ -516,7 +529,7 @@ class ReportBuilder extends Component
     public function previewReport(): void
     {
         // Ensure report is saved first
-        if (!$this->reportId) {
+        if (! $this->reportId) {
             $this->save();
         }
 
@@ -530,7 +543,7 @@ class ReportBuilder extends Component
     public function exportPdf(): void
     {
         // First, ensure the report is saved
-        if (!$this->reportId) {
+        if (! $this->reportId) {
             $this->save();
         }
 
@@ -563,7 +576,7 @@ class ReportBuilder extends Component
 
     public function getSelectedElement(): ?array
     {
-        if (!$this->selectedElementId) {
+        if (! $this->selectedElementId) {
             return null;
         }
 
@@ -627,7 +640,7 @@ class ReportBuilder extends Component
     public function generateAiContent(string $elementId): void
     {
         $element = collect($this->elements)->firstWhere('id', $elementId);
-        if (!$element || $element['type'] !== 'ai_text') {
+        if (! $element || $element['type'] !== 'ai_text') {
             return;
         }
 
@@ -767,9 +780,9 @@ class ReportBuilder extends Component
                 $this->filters['contact_type'] === 'student' ? Student::class : 'App\\Models\\User',
                 (int) $this->filters['contact_id']
             )
-            ->where('metric_key', $metricKey)
-            ->orderBy('recorded_at', 'desc')
-            ->first();
+                ->where('metric_key', $metricKey)
+                ->orderBy('recorded_at', 'desc')
+                ->first();
 
             return $metric?->numeric_value;
         }
@@ -798,7 +811,7 @@ class ReportBuilder extends Component
             ->with('user')
             ->limit(100)
             ->get()
-            ->map(fn($s) => [
+            ->map(fn ($s) => [
                 'id' => $s->id,
                 'name' => $s->user?->full_name ?? 'Unknown',
             ])
@@ -843,6 +856,7 @@ class ReportBuilder extends Component
         $user = auth()->user();
         $hasDownstream = $user->organization?->getDownstreamOrganizations()->count() > 0;
         $hasAssignedOrgs = $user->organizations()->count() > 0;
+
         return ($user->isAdmin() && $hasDownstream) || ($user->primary_role === 'consultant' && $hasAssignedOrgs);
     }
 

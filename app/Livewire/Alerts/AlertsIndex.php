@@ -24,8 +24,11 @@ class AlertsIndex extends Component
     public string $viewMode = 'grid';
 
     public ?string $workflowToDelete = null;
+
     public bool $showDeleteModal = false;
+
     public array $selected = [];
+
     public bool $showBulkDeleteModal = false;
 
     public function setViewMode(string $mode): void
@@ -77,8 +80,8 @@ class AlertsIndex extends Component
         $this->selected = Workflow::forOrg($user->org_id)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('description', 'like', '%' . $this->search . '%');
+                    $q->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('description', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->statusFilter, function ($query) {
@@ -88,7 +91,7 @@ class AlertsIndex extends Component
                 $query->where('trigger_type', $this->triggerTypeFilter);
             })
             ->pluck('id')
-            ->map(fn($id) => (string) $id)
+            ->map(fn ($id) => (string) $id)
             ->toArray();
     }
 
@@ -150,7 +153,7 @@ class AlertsIndex extends Component
     {
         $workflow = Workflow::forOrg(auth()->user()->org_id)->find($workflowId);
 
-        if (!$workflow) {
+        if (! $workflow) {
             return;
         }
 
@@ -191,7 +194,7 @@ class AlertsIndex extends Component
      */
     public function deleteWorkflow(): void
     {
-        if (!$this->workflowToDelete) {
+        if (! $this->workflowToDelete) {
             return;
         }
 
@@ -217,12 +220,12 @@ class AlertsIndex extends Component
     {
         $workflow = Workflow::forOrg(auth()->user()->org_id)->find($workflowId);
 
-        if (!$workflow) {
+        if (! $workflow) {
             return;
         }
 
         $newWorkflow = $workflow->replicate();
-        $newWorkflow->name = $workflow->name . ' (Copy)';
+        $newWorkflow->name = $workflow->name.' (Copy)';
         $newWorkflow->status = Workflow::STATUS_DRAFT;
         $newWorkflow->execution_count = 0;
         $newWorkflow->last_triggered_at = null;
@@ -241,7 +244,7 @@ class AlertsIndex extends Component
     {
         $workflow = Workflow::forOrg(auth()->user()->org_id)->find($workflowId);
 
-        if (!$workflow) {
+        if (! $workflow) {
             return;
         }
 
@@ -267,8 +270,8 @@ class AlertsIndex extends Component
         return Workflow::forOrg($user->org_id)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('description', 'like', '%' . $this->search . '%');
+                    $q->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('description', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->statusFilter, function ($query) {

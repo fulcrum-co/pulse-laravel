@@ -95,7 +95,7 @@ class SurveySeeder extends Seeder
         $students = Student::where('org_id', $school->id)->take(15)->get();
 
         foreach ($students as $student) {
-            $overallScore = match($student->risk_level) {
+            $overallScore = match ($student->risk_level) {
                 'good' => rand(70, 100) / 10,
                 'low' => rand(40, 70) / 10,
                 'high' => rand(20, 50) / 10,

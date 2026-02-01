@@ -14,11 +14,17 @@ class CreateAnnouncement extends Component
     public bool $showModal = false;
 
     public string $title = '';
+
     public string $body = '';
+
     public string $priority = 'normal';
+
     public string $targetType = 'all'; // all, role, specific
+
     public array $targetRoles = [];
+
     public array $targetUserIds = [];
+
     public ?string $expiresAt = null;
 
     protected $listeners = ['openAnnouncementModal' => 'open'];
@@ -66,6 +72,7 @@ class CreateAnnouncement extends Component
 
         if (empty($userIds)) {
             $this->addError('targetType', 'No users match the selected criteria.');
+
             return;
         }
 
@@ -123,7 +130,7 @@ class CreateAnnouncement extends Component
                 ->where('id', '!=', $user->id)
                 ->pluck('id')
                 ->toArray(),
-            'specific' => array_filter($this->targetUserIds, fn($id) => $id != $user->id),
+            'specific' => array_filter($this->targetUserIds, fn ($id) => $id != $user->id),
             default => [],
         };
     }

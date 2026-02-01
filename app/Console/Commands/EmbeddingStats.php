@@ -120,11 +120,11 @@ class EmbeddingStats extends Command
         // Configuration info
         $this->line('');
         $this->info('Configuration');
-        $this->line('  Provider: ' . config('services.embeddings.provider', 'openai'));
-        $this->line('  Model: ' . config('services.embeddings.model', 'text-embedding-3-small'));
-        $this->line('  Dimensions: ' . config('services.embeddings.dimensions', 1536));
-        $this->line('  Auto-generate: ' . (config('services.embeddings.auto_generate', true) ? 'Yes' : 'No'));
-        $this->line('  Queue: ' . config('services.embeddings.queue', 'embeddings'));
+        $this->line('  Provider: '.config('services.embeddings.provider', 'openai'));
+        $this->line('  Model: '.config('services.embeddings.model', 'text-embedding-3-small'));
+        $this->line('  Dimensions: '.config('services.embeddings.dimensions', 1536));
+        $this->line('  Auto-generate: '.(config('services.embeddings.auto_generate', true) ? 'Yes' : 'No'));
+        $this->line('  Queue: '.config('services.embeddings.queue', 'embeddings'));
 
         return Command::SUCCESS;
     }

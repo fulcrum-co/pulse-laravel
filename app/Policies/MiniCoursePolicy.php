@@ -57,7 +57,7 @@ class MiniCoursePolicy
     public function update(User $user, MiniCourse $course): bool
     {
         // Must have access to the organization
-        if (!$user->canAccessOrganization($course->org_id)) {
+        if (! $user->canAccessOrganization($course->org_id)) {
             return false;
         }
 
@@ -81,7 +81,7 @@ class MiniCoursePolicy
     public function delete(User $user, MiniCourse $course): bool
     {
         // Must have access to the organization
-        if (!$user->canAccessOrganization($course->org_id)) {
+        if (! $user->canAccessOrganization($course->org_id)) {
             return false;
         }
 
@@ -104,7 +104,7 @@ class MiniCoursePolicy
     public function publish(User $user, MiniCourse $course): bool
     {
         // Must have access to the organization
-        if (!$user->canAccessOrganization($course->org_id)) {
+        if (! $user->canAccessOrganization($course->org_id)) {
             return false;
         }
 
@@ -132,7 +132,7 @@ class MiniCoursePolicy
     public function archive(User $user, MiniCourse $course): bool
     {
         // Must have access to the organization
-        if (!$user->canAccessOrganization($course->org_id)) {
+        if (! $user->canAccessOrganization($course->org_id)) {
             return false;
         }
 
@@ -165,7 +165,7 @@ class MiniCoursePolicy
         }
 
         // Must have access to the organization
-        if (!$user->canAccessOrganization($course->org_id)) {
+        if (! $user->canAccessOrganization($course->org_id)) {
             return false;
         }
 

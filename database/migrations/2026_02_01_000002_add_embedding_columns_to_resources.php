@@ -34,10 +34,10 @@ return new class extends Migration
             if (Schema::hasTable($table)) {
                 // Add metadata columns (works on all databases)
                 Schema::table($table, function (Blueprint $blueprint) use ($table) {
-                    if (!Schema::hasColumn($table, 'embedding_generated_at')) {
+                    if (! Schema::hasColumn($table, 'embedding_generated_at')) {
                         $blueprint->timestamp('embedding_generated_at')->nullable();
                     }
-                    if (!Schema::hasColumn($table, 'embedding_model')) {
+                    if (! Schema::hasColumn($table, 'embedding_model')) {
                         $blueprint->string('embedding_model', 50)->nullable();
                     }
                 });

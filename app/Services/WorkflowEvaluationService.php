@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Jobs\ContinueWorkflowJob;
 use App\Models\Workflow;
 use App\Models\WorkflowExecution;
-use App\Jobs\ContinueWorkflowJob;
 use Illuminate\Support\Facades\Log;
 
 class WorkflowEvaluationService
@@ -19,7 +19,7 @@ class WorkflowEvaluationService
     public function shouldTrigger(Workflow $workflow, array $eventData): bool
     {
         // Check if workflow is active
-        if (!$workflow->isActive()) {
+        if (! $workflow->isActive()) {
             return false;
         }
 
@@ -63,7 +63,7 @@ class WorkflowEvaluationService
         }
 
         return strtolower($logic) === 'and'
-            ? !in_array(false, $results, true)
+            ? ! in_array(false, $results, true)
             : in_array(true, $results, true);
     }
 
@@ -76,7 +76,7 @@ class WorkflowEvaluationService
         $operator = $condition['operator'] ?? 'equals';
         $value = $condition['value'] ?? null;
 
-        if (!$field) {
+        if (! $field) {
             return false;
         }
 
@@ -98,15 +98,15 @@ class WorkflowEvaluationService
             'greater_or_equal', '>=' => is_numeric($actual) && $actual >= $expected,
             'less_or_equal', '<=' => is_numeric($actual) && $actual <= $expected,
             'contains' => is_string($actual) && str_contains(strtolower($actual), strtolower($expected)),
-            'not_contains' => is_string($actual) && !str_contains(strtolower($actual), strtolower($expected)),
+            'not_contains' => is_string($actual) && ! str_contains(strtolower($actual), strtolower($expected)),
             'starts_with' => is_string($actual) && str_starts_with(strtolower($actual), strtolower($expected)),
             'ends_with' => is_string($actual) && str_ends_with(strtolower($actual), strtolower($expected)),
             'in' => is_array($expected) && in_array($actual, $expected),
-            'not_in' => is_array($expected) && !in_array($actual, $expected),
+            'not_in' => is_array($expected) && ! in_array($actual, $expected),
             'is_empty' => empty($actual),
-            'is_not_empty' => !empty($actual),
+            'is_not_empty' => ! empty($actual),
             'is_null' => is_null($actual),
-            'is_not_null' => !is_null($actual),
+            'is_not_null' => ! is_null($actual),
             'changed_to' => isset($context['_previous'][$condition['field'] ?? ''])
                 && $context['_previous'][$condition['field']] != $actual
                 && $actual == $expected,
@@ -142,8 +142,9 @@ class WorkflowEvaluationService
             // Get entry node
             $entryNode = $workflow->getEntryNode();
 
-            if (!$entryNode) {
+            if (! $entryNode) {
                 $execution->markFailed('No entry node found in workflow');
+
                 return $execution;
             }
 
@@ -173,7 +174,7 @@ class WorkflowEvaluationService
      */
     public function resumeExecution(WorkflowExecution $execution): void
     {
-        if (!$execution->isWaiting()) {
+        if (! $execution->isWaiting()) {
             return;
         }
 
@@ -209,7 +210,7 @@ class WorkflowEvaluationService
         $queue = [$nodeId];
         $executed = [];
 
-        while (!empty($queue) && $iterations < $maxIterations) {
+        while (! empty($queue) && $iterations < $maxIterations) {
             $iterations++;
             $currentNodeId = array_shift($queue);
 
@@ -219,13 +220,13 @@ class WorkflowEvaluationService
             }
 
             $node = $workflow->getNode($currentNodeId);
-            if (!$node) {
+            if (! $node) {
                 continue;
             }
 
             // Check if execution has been paused/cancelled
             $execution->refresh();
-            if (!$execution->isRunning()) {
+            if (! $execution->isRunning()) {
                 return;
             }
 
@@ -242,7 +243,7 @@ class WorkflowEvaluationService
             if ($result['status'] === 'branch') {
                 // Branch node - add selected branches to queue
                 foreach ($result['next_nodes'] ?? [] as $nextId) {
-                    if (!in_array($nextId, $executed)) {
+                    if (! in_array($nextId, $executed)) {
                         $queue[] = $nextId;
                     }
                 }
@@ -250,7 +251,7 @@ class WorkflowEvaluationService
                 // Normal flow - add all next nodes to queue
                 $nextNodes = $workflow->getNextNodes($currentNodeId);
                 foreach ($nextNodes as $nextNode) {
-                    if (!in_array($nextNode['id'], $executed)) {
+                    if (! in_array($nextNode['id'], $executed)) {
                         $queue[] = $nextNode['id'];
                     }
                 }
@@ -384,7 +385,7 @@ class WorkflowEvaluationService
         $actionType = $data['action_type'] ?? null;
         $config = $data['config'] ?? [];
 
-        if (!$actionType) {
+        if (! $actionType) {
             return [
                 'status' => 'failed',
                 'error' => 'No action type specified',
@@ -398,7 +399,7 @@ class WorkflowEvaluationService
         $result = $this->actionService->execute($actionType, $config, $context);
 
         // Update execution context with any output
-        if (!empty($result['details'])) {
+        if (! empty($result['details'])) {
             $execution->updateContext(['last_action_result' => $result['details']]);
         }
 
@@ -448,7 +449,7 @@ class WorkflowEvaluationService
         // If no branches matched, use default (first outgoing edge)
         if (empty($selectedBranches)) {
             $edges = $workflow->getOutgoingEdges($node['id']);
-            if (!empty($edges)) {
+            if (! empty($edges)) {
                 $selectedBranches[] = array_values($edges)[0]['target'];
             }
         }
@@ -482,7 +483,7 @@ class WorkflowEvaluationService
     {
         $workflowId = $data['workflow_id'] ?? null;
 
-        if (!$workflowId) {
+        if (! $workflowId) {
             return [
                 'status' => 'failed',
                 'error' => 'No sub-workflow ID specified',
@@ -491,7 +492,7 @@ class WorkflowEvaluationService
 
         $subworkflow = Workflow::find($workflowId);
 
-        if (!$subworkflow || !$subworkflow->isActive()) {
+        if (! $subworkflow || ! $subworkflow->isActive()) {
             return [
                 'status' => 'failed',
                 'error' => 'Sub-workflow not found or not active',

@@ -12,9 +12,13 @@ class DistributionDelivery extends Model
     use HasFactory;
 
     const STATUS_PENDING = 'pending';
+
     const STATUS_SENDING = 'sending';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_FAILED = 'failed';
+
     const STATUS_PARTIAL = 'partial';
 
     protected $fillable = [

@@ -41,7 +41,8 @@ class ReindexSearch extends Command
         // Health check
         $health = $service->healthCheck();
         if ($health['status'] !== 'healthy') {
-            $this->error('Meilisearch is not accessible: ' . ($health['error'] ?? 'Unknown error'));
+            $this->error('Meilisearch is not accessible: '.($health['error'] ?? 'Unknown error'));
+
             return Command::FAILURE;
         }
 
@@ -52,9 +53,10 @@ class ReindexSearch extends Command
         $modelsToReindex = $this->models;
 
         if ($modelName = $this->option('model')) {
-            if (!isset($this->models[$modelName])) {
+            if (! isset($this->models[$modelName])) {
                 $this->error("Unknown model: {$modelName}");
-                $this->line('Available models: ' . implode(', ', array_keys($this->models)));
+                $this->line('Available models: '.implode(', ', array_keys($this->models)));
+
                 return Command::FAILURE;
             }
             $modelsToReindex = [$modelName => $this->models[$modelName]];
@@ -65,7 +67,7 @@ class ReindexSearch extends Command
 
         if ($fresh) {
             $this->warn('Fresh mode: Indexes will be cleared before reindexing.');
-            if (!$this->confirm('Continue?')) {
+            if (! $this->confirm('Continue?')) {
                 return Command::SUCCESS;
             }
         }
@@ -82,7 +84,7 @@ class ReindexSearch extends Command
         $stats = $service->getIndexStats();
         $this->table(
             ['Index', 'Documents'],
-            collect($stats)->map(fn($stat, $index) => [
+            collect($stats)->map(fn ($stat, $index) => [
                 $index,
                 $stat['numberOfDocuments'] ?? 'N/A',
             ])->toArray()
@@ -111,6 +113,7 @@ class ReindexSearch extends Command
 
         if ($count === 0) {
             $this->line('  Skipping (no records)');
+
             return;
         }
 

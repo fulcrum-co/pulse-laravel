@@ -32,14 +32,20 @@ class ContactResourceSuggestion extends Model
 
     // Suggestion sources
     public const SOURCE_MANUAL = 'manual';
+
     public const SOURCE_AI_RECOMMENDATION = 'ai_recommendation';
+
     public const SOURCE_RULE_BASED = 'rule_based';
+
     public const SOURCE_PEER_SUCCESS = 'peer_success';
 
     // Status values
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_ACCEPTED = 'accepted';
+
     public const STATUS_DECLINED = 'declined';
+
     public const STATUS_ASSIGNED = 'assigned';
 
     /**

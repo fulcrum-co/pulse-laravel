@@ -6,27 +6,40 @@ use App\Models\Provider;
 use App\Models\ProviderConversation;
 use App\Services\DemoConversationService;
 use App\Services\StreamChatService;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class ProviderChatWindow extends Component
 {
     public ?object $conversation = null;
+
     public string $messageText = '';
+
     public array $messages = [];
+
     public bool $isLoading = false;
+
     public bool $showBookingModal = false;
+
     public bool $showVideoModal = false;
+
     public bool $isDemo = false;
+
     public string $videoCallState = 'idle'; // idle, connecting, connected, ended
 
     // Booking modal state
     public ?string $selectedDate = null;
+
     public ?string $selectedTime = null;
+
     public string $bookingType = 'session';
+
     public string $locationType = 'remote';
+
     public string $bookingNotes = '';
+
     public int $currentMonth;
+
     public int $currentYear;
 
     protected StreamChatService $streamService;
@@ -65,13 +78,14 @@ class ProviderChatWindow extends Component
 
         if ($isDemo || str_starts_with($conversationId, 'conv_')) {
             $this->loadDemoConversation($conversationId);
+
             return;
         }
 
         $this->conversation = ProviderConversation::with(['provider', 'student'])
             ->find($conversationId);
 
-        if (!$this->conversation) {
+        if (! $this->conversation) {
             return;
         }
 
@@ -93,12 +107,13 @@ class ProviderChatWindow extends Component
             if ($conv['id'] === $conversationId) {
                 $this->conversation = DemoConversationService::createDemoConversation($conv);
                 $this->messages = DemoConversationService::getMessages($conversationId);
+
                 return;
             }
         }
 
         // If not found, use first conversation
-        if (!empty($conversations)) {
+        if (! empty($conversations)) {
             $conv = $conversations[0];
             $this->conversation = DemoConversationService::createDemoConversation($conv);
             $this->messages = DemoConversationService::getMessages($conv['id']);
@@ -110,8 +125,9 @@ class ProviderChatWindow extends Component
      */
     protected function loadMessages(): void
     {
-        if (!$this->conversation || !$this->streamService->isConfigured()) {
+        if (! $this->conversation || ! $this->streamService->isConfigured()) {
             $this->messages = [];
+
             return;
         }
 
@@ -135,7 +151,7 @@ class ProviderChatWindow extends Component
             return;
         }
 
-        if (!$this->conversation) {
+        if (! $this->conversation) {
             return;
         }
 
@@ -146,7 +162,7 @@ class ProviderChatWindow extends Component
         // For demo mode, add message to local array
         if ($this->isDemo) {
             $this->messages[] = [
-                'id' => 'msg_new_' . uniqid(),
+                'id' => 'msg_new_'.uniqid(),
                 'text' => $messageContent,
                 'user' => ['id' => 'user_current', 'name' => $user->full_name ?? 'You'],
                 'created_at' => now()->toIso8601String(),
@@ -156,6 +172,7 @@ class ProviderChatWindow extends Component
 
             // Simulate provider response after 2 seconds
             $this->dispatch('demo-message-sent');
+
             return;
         }
 
@@ -224,8 +241,8 @@ class ProviderChatWindow extends Component
         // Add system message about call
         if ($this->isDemo && $this->conversation) {
             $this->messages[] = [
-                'id' => 'msg_call_' . uniqid(),
-                'text' => '📹 Video call ended • Duration: 0:' . rand(30, 59),
+                'id' => 'msg_call_'.uniqid(),
+                'text' => '📹 Video call ended • Duration: 0:'.rand(30, 59),
                 'user' => ['id' => 'system', 'name' => 'System'],
                 'created_at' => now()->toIso8601String(),
                 'is_system' => true,
@@ -247,7 +264,7 @@ class ProviderChatWindow extends Component
      */
     public function getStreamTokenProperty(): ?string
     {
-        if (!$this->streamService->isConfigured()) {
+        if (! $this->streamService->isConfigured()) {
             return null;
         }
 
@@ -273,7 +290,7 @@ class ProviderChatWindow extends Component
      */
     public function getStreamConfigProperty(): array
     {
-        if ($this->isDemo || !$this->streamService->isConfigured()) {
+        if ($this->isDemo || ! $this->streamService->isConfigured()) {
             return ['configured' => false, 'isDemo' => true];
         }
 
@@ -377,9 +394,9 @@ class ProviderChatWindow extends Component
                 'date' => $date->format('Y-m-d'),
                 'day' => $day,
                 'isToday' => $date->isToday(),
-                'isPast' => $date->isPast() && !$date->isToday(),
+                'isPast' => $date->isPast() && ! $date->isToday(),
                 'isWeekend' => $date->isWeekend(),
-                'isAvailable' => !$date->isPast() && !$date->isWeekend(),
+                'isAvailable' => ! $date->isPast() && ! $date->isWeekend(),
             ];
         }
 
@@ -391,7 +408,7 @@ class ProviderChatWindow extends Component
      */
     public function getAvailableTimesProperty(): array
     {
-        if (!$this->selectedDate) {
+        if (! $this->selectedDate) {
             return [];
         }
 
@@ -423,14 +440,14 @@ class ProviderChatWindow extends Component
      */
     public function confirmBooking(): void
     {
-        if (!$this->selectedDate || !$this->selectedTime) {
+        if (! $this->selectedDate || ! $this->selectedTime) {
             return;
         }
 
         // In demo mode, just show success message
         if ($this->isDemo) {
             $this->messages[] = [
-                'id' => 'msg_booking_' . uniqid(),
+                'id' => 'msg_booking_'.uniqid(),
                 'text' => "📅 Booking request sent for {$this->selectedDate} at {$this->selectedTime}",
                 'user' => ['id' => 'system', 'name' => 'System'],
                 'created_at' => now()->toIso8601String(),
@@ -438,6 +455,7 @@ class ProviderChatWindow extends Component
             ];
             $this->closeBookingModal();
             session()->flash('message', 'Booking request sent successfully!');
+
             return;
         }
 
@@ -456,7 +474,7 @@ class ProviderChatWindow extends Component
         if ($date->isToday()) {
             return $date->format('g:i A');
         } elseif ($date->isYesterday()) {
-            return 'Yesterday ' . $date->format('g:i A');
+            return 'Yesterday '.$date->format('g:i A');
         } elseif ($date->isCurrentWeek()) {
             return $date->format('l g:i A');
         } else {
@@ -475,7 +493,7 @@ class ProviderChatWindow extends Component
             return $userId === 'user_current' || $userId === 'student_current';
         }
 
-        return str_starts_with($userId, 'user_' . auth()->id());
+        return str_starts_with($userId, 'user_'.auth()->id());
     }
 
     public function render()

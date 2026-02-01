@@ -22,7 +22,7 @@ class CourseGenerationRequestObserver
     public function updated(CourseGenerationRequest $request): void
     {
         // Check if status changed
-        if (!$request->isDirty('status')) {
+        if (! $request->isDirty('status')) {
             return;
         }
 
@@ -54,6 +54,7 @@ class CourseGenerationRequestObserver
                 'request_id' => $request->id,
                 'org_id' => $request->org_id,
             ]);
+
             return;
         }
 
@@ -103,7 +104,7 @@ class CourseGenerationRequestObserver
      */
     protected function notifyRequester(CourseGenerationRequest $request, bool $approved): void
     {
-        if (!$request->triggered_by_user_id) {
+        if (! $request->triggered_by_user_id) {
             return;
         }
 
@@ -149,7 +150,7 @@ class CourseGenerationRequestObserver
      */
     protected function notifyRequesterOfFailure(CourseGenerationRequest $request): void
     {
-        if (!$request->triggered_by_user_id) {
+        if (! $request->triggered_by_user_id) {
             return;
         }
 
@@ -209,7 +210,7 @@ class CourseGenerationRequestObserver
             $parts[] = "Target: {$request->student_count} students";
         }
 
-        return implode('. ', $parts) . '.';
+        return implode('. ', $parts).'.';
     }
 
     /**

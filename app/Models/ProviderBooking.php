@@ -45,19 +45,27 @@ class ProviderBooking extends Model
 
     // Booking types
     const TYPE_CONSULTATION = 'consultation';
+
     const TYPE_SESSION = 'session';
+
     const TYPE_ASSESSMENT = 'assessment';
 
     // Statuses
     const STATUS_PENDING = 'pending';
+
     const STATUS_CONFIRMED = 'confirmed';
+
     const STATUS_CANCELLED = 'cancelled';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_NO_SHOW = 'no_show';
 
     // Location types
     const LOCATION_IN_PERSON = 'in_person';
+
     const LOCATION_REMOTE = 'remote';
+
     const LOCATION_PHONE = 'phone';
 
     protected static function boot()
@@ -182,7 +190,7 @@ class ProviderBooking extends Model
     /**
      * Cancel the booking.
      */
-    public function cancel($cancelledBy, string $reason = null): void
+    public function cancel($cancelledBy, ?string $reason = null): void
     {
         $this->update([
             'status' => self::STATUS_CANCELLED,

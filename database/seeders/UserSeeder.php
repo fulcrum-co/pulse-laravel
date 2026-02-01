@@ -82,7 +82,7 @@ class UserSeeder extends Seeder
                 'email' => $teacher['email'],
                 'password' => Hash::make('password'),
                 'primary_role' => 'teacher',
-                'avatar_url' => 'https://randomuser.me/api/portraits/' . $teacher['gender'] . '/' . $teacher['img'] . '.jpg',
+                'avatar_url' => 'https://randomuser.me/api/portraits/'.$teacher['gender'].'/'.$teacher['img'].'.jpg',
                 'active' => true,
                 'suspended' => false,
             ]);
@@ -119,8 +119,8 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($studentData as $student) {
-            $email = strtolower($student['first_name'][0] . $student['last_name']) . '@student.lincolnhigh.edu';
-            $avatarUrl = 'https://randomuser.me/api/portraits/' . $student['gender'] . '/' . $student['img'] . '.jpg';
+            $email = strtolower($student['first_name'][0].$student['last_name']).'@student.lincolnhigh.edu';
+            $avatarUrl = 'https://randomuser.me/api/portraits/'.$student['gender'].'/'.$student['img'].'.jpg';
             User::create([
                 'org_id' => $school->id,
                 'first_name' => $student['first_name'],

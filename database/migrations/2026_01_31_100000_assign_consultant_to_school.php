@@ -18,7 +18,7 @@ return new class extends Migration
                 ->where('organization_id', $school->id)
                 ->exists();
 
-            if (!$exists) {
+            if (! $exists) {
                 DB::table('user_organizations')->insert([
                     'user_id' => $consultant->id,
                     'organization_id' => $school->id,

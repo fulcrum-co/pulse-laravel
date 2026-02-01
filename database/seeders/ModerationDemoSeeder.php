@@ -13,20 +13,22 @@ class ModerationDemoSeeder extends Seeder
     public function run(): void
     {
         $school = Organization::where('org_type', 'school')->first();
-        if (!$school) {
+        if (! $school) {
             $school = Organization::first();
         }
-        if (!$school) {
+        if (! $school) {
             $this->command->error('No organization found. Please seed organizations first.');
+
             return;
         }
 
         $admin = User::where('org_id', $school->id)->first();
-        if (!$admin) {
+        if (! $admin) {
             $admin = User::first();
         }
-        if (!$admin) {
+        if (! $admin) {
             $this->command->error('No user found. Please seed users first.');
+
             return;
         }
 
@@ -187,7 +189,7 @@ class ModerationDemoSeeder extends Seeder
                 'cultural_sensitivity_score' => $courseData['score'] + (rand(-5, 10) / 100),
                 'accuracy_score' => $courseData['score'] + (rand(-10, 10) / 100),
                 'flags' => $courseData['flags'],
-                'recommendations' => !empty($courseData['flags']) ? ['Review flagged items before approval'] : [],
+                'recommendations' => ! empty($courseData['flags']) ? ['Review flagged items before approval'] : [],
                 'human_reviewed' => $courseData['human_reviewed'] ?? false,
                 'reviewed_by' => ($courseData['human_reviewed'] ?? false) ? $admin->id : null,
                 'reviewed_at' => ($courseData['human_reviewed'] ?? false) ? now()->subDays(rand(1, 3)) : null,
@@ -222,7 +224,7 @@ class ModerationDemoSeeder extends Seeder
             }
         }
 
-        $this->command->info('Created ' . count($demoCourses) . ' demo moderation items.');
+        $this->command->info('Created '.count($demoCourses).' demo moderation items.');
         $this->command->info('Visit /admin/moderation to review the queue.');
     }
 }

@@ -2,10 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Models\ContactList;
 use App\Models\Resource;
 use App\Models\ResourceAssignment;
 use App\Models\Student;
-use App\Models\ContactList;
 use Livewire\Component;
 
 class ResourceDetail extends Component
@@ -14,15 +14,19 @@ class ResourceDetail extends Component
 
     // Assign modal state
     public bool $showAssignModal = false;
+
     public string $assignType = 'student'; // student or list
+
     public ?int $selectedStudentId = null;
+
     public ?int $selectedListId = null;
+
     public string $assignNote = '';
 
     public function mount(Resource $resource): void
     {
         // Ensure the user has access to this resource's organization
-        if (!auth()->user()->canAccessOrganization($resource->org_id)) {
+        if (! auth()->user()->canAccessOrganization($resource->org_id)) {
             abort(403);
         }
 
@@ -87,7 +91,7 @@ class ResourceDetail extends Component
                     ->where('student_id', $student->id)
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     ResourceAssignment::create([
                         'resource_id' => $this->resource->id,
                         'student_id' => $student->id,
@@ -222,18 +226,18 @@ class ResourceDetail extends Component
 
     public function getVideoEmbedUrlProperty(): ?string
     {
-        if (!$this->resource->url) {
+        if (! $this->resource->url) {
             return null;
         }
 
         // YouTube
         if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $this->resource->url, $matches)) {
-            return 'https://www.youtube.com/embed/' . $matches[1];
+            return 'https://www.youtube.com/embed/'.$matches[1];
         }
 
         // Vimeo
         if (preg_match('/vimeo\.com\/(\d+)/', $this->resource->url, $matches)) {
-            return 'https://player.vimeo.com/video/' . $matches[1];
+            return 'https://player.vimeo.com/video/'.$matches[1];
         }
 
         return null;

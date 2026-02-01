@@ -1,24 +1,23 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
 
 // Register broadcast authentication routes
 Broadcast::routes(['middleware' => ['web', 'auth']]);
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\AlertController;
 use App\Http\Controllers\ContactController;
-use App\Http\Controllers\ContactNoteController;
 use App\Http\Controllers\ContactMetricController;
+use App\Http\Controllers\ContactNoteController;
+use App\Http\Controllers\FocusAreaController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ObjectiveController;
+use App\Http\Controllers\PlanController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResourceSuggestionController;
 use App\Http\Controllers\SurveyController;
-use App\Http\Controllers\StrategyController;
-use App\Http\Controllers\FocusAreaController;
-use App\Http\Controllers\ObjectiveController;
-use App\Http\Controllers\ActivityController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\AlertController;
-use App\Http\Controllers\NotificationController;
 use App\Models\UserNotification;
 
 // Notification unsubscribe - signed URL, no auth required
@@ -30,7 +29,7 @@ Route::get('/notifications/unsubscribe/{user}', [NotificationController::class, 
 Route::post('/api/notifications/{id}/resolve', function (int $id) {
     $notification = UserNotification::find($id);
 
-    if (!$notification) {
+    if (! $notification) {
         return response()->json(['error' => 'Notification not found'], 404);
     }
 
@@ -46,6 +45,7 @@ Route::post('/api/notifications/{id}/resolve', function (int $id) {
 
     // Return updated unread count for header badge
     $unreadCount = UserNotification::getUnreadCountForUser(auth()->id());
+
     return response()->json([
         'success' => true,
         'resolved' => $wasResolved,
@@ -64,11 +64,11 @@ Route::get('/fix-avatars-temp', function () {
     set_time_limit(300); // 5 minutes
 
     $output = [];
-    $output[] = "Starting avatar fix...";
+    $output[] = 'Starting avatar fix...';
 
     try {
         // Common female first names
-        $femaleNames = ['Emma','Olivia','Ava','Sophia','Isabella','Mia','Charlotte','Amelia','Harper','Evelyn','Luna','Chloe','Emily','Sarah','Maria','Jessica','Ashley','Jennifer','Amanda','Stephanie','Nicole','Michelle','Elizabeth','Heather','Melissa','Amy','Anna','Rebecca','Katherine','Christine','Rachel','Laura','Julia','Madison','Grace','Lily'];
+        $femaleNames = ['Emma', 'Olivia', 'Ava', 'Sophia', 'Isabella', 'Mia', 'Charlotte', 'Amelia', 'Harper', 'Evelyn', 'Luna', 'Chloe', 'Emily', 'Sarah', 'Maria', 'Jessica', 'Ashley', 'Jennifer', 'Amanda', 'Stephanie', 'Nicole', 'Michelle', 'Elizabeth', 'Heather', 'Melissa', 'Amy', 'Anna', 'Rebecca', 'Katherine', 'Christine', 'Rachel', 'Laura', 'Julia', 'Madison', 'Grace', 'Lily'];
 
         $maleImg = 1;
         $femaleImg = 1;
@@ -83,18 +83,18 @@ Route::get('/fix-avatars-temp', function () {
 
                     if ($isFemale) {
                         $imgNum = (($femaleImg - 1) % 99) + 1;
-                        $user->avatar_url = 'https://randomuser.me/api/portraits/women/' . $imgNum . '.jpg';
+                        $user->avatar_url = 'https://randomuser.me/api/portraits/women/'.$imgNum.'.jpg';
                         $femaleImg++;
                     } else {
                         $imgNum = (($maleImg - 1) % 99) + 1;
-                        $user->avatar_url = 'https://randomuser.me/api/portraits/men/' . $imgNum . '.jpg';
+                        $user->avatar_url = 'https://randomuser.me/api/portraits/men/'.$imgNum.'.jpg';
                         $maleImg++;
                     }
 
                     $user->save();
                     $updated++;
                 } catch (\Exception $e) {
-                    $errors[] = "User {$user->id}: " . $e->getMessage();
+                    $errors[] = "User {$user->id}: ".$e->getMessage();
                 }
             }
         });
@@ -102,36 +102,36 @@ Route::get('/fix-avatars-temp', function () {
         $output[] = "Updated {$updated} user avatars!";
 
         if (count($errors) > 0) {
-            $output[] = "Errors encountered:";
+            $output[] = 'Errors encountered:';
             foreach (array_slice($errors, 0, 10) as $error) {
-                $output[] = "- " . $error;
+                $output[] = '- '.$error;
             }
             if (count($errors) > 10) {
-                $output[] = "... and " . (count($errors) - 10) . " more errors";
+                $output[] = '... and '.(count($errors) - 10).' more errors';
             }
         }
 
-        $output[] = "";
-        $output[] = "You can now visit /contacts to see the avatars.";
-        $output[] = "After confirming, remove this route from routes/web.php";
+        $output[] = '';
+        $output[] = 'You can now visit /contacts to see the avatars.';
+        $output[] = 'After confirming, remove this route from routes/web.php';
 
     } catch (\Exception $e) {
-        $output[] = "FATAL ERROR: " . $e->getMessage();
-        $output[] = "File: " . $e->getFile() . ":" . $e->getLine();
+        $output[] = 'FATAL ERROR: '.$e->getMessage();
+        $output[] = 'File: '.$e->getFile().':'.$e->getLine();
     }
 
-    return "<pre>" . implode("\n", $output) . "</pre>";
+    return '<pre>'.implode("\n", $output).'</pre>';
 });
 
 // Temporary route to reset dashboard - visit once then remove
 Route::get('/reset-dashboard-temp', function () {
-    if (!auth()->check()) {
+    if (! auth()->check()) {
         return redirect('/login');
     }
 
     $user = auth()->user();
     $output = [];
-    $output[] = "Resetting dashboard for " . $user->first_name . " " . $user->last_name . "...";
+    $output[] = 'Resetting dashboard for '.$user->first_name.' '.$user->last_name.'...';
 
     try {
         // Delete existing dashboards for this user
@@ -140,65 +140,65 @@ Route::get('/reset-dashboard-temp', function () {
 
         // Create new default dashboard with updated layout
         $dashboard = \App\Models\Dashboard::createDefault($user);
-        $output[] = "Created new dashboard with " . $dashboard->widgets()->count() . " widgets.";
+        $output[] = 'Created new dashboard with '.$dashboard->widgets()->count().' widgets.';
 
-        $output[] = "";
-        $output[] = "Done! Visit /dashboard to see the new layout.";
-        $output[] = "After confirming, remove this route from routes/web.php";
+        $output[] = '';
+        $output[] = 'Done! Visit /dashboard to see the new layout.';
+        $output[] = 'After confirming, remove this route from routes/web.php';
 
     } catch (\Exception $e) {
-        $output[] = "ERROR: " . $e->getMessage();
+        $output[] = 'ERROR: '.$e->getMessage();
     }
 
-    return "<pre>" . implode("\n", $output) . "</pre>";
+    return '<pre>'.implode("\n", $output).'</pre>';
 })->middleware('auth');
 
 // Temporary route to list users - visit once then remove
 Route::get('/list-users-temp', function () {
     $orgCount = \App\Models\Organization::count();
-    $output = ["=== ORGANIZATIONS ({$orgCount}) ===", ""];
+    $output = ["=== ORGANIZATIONS ({$orgCount}) ===", ''];
 
     $orgs = \App\Models\Organization::with('parent')->orderBy('parent_org_id')->orderBy('org_name')->get();
     if ($orgs->isEmpty()) {
-        $output[] = "(No organizations found - database may need seeding)";
+        $output[] = '(No organizations found - database may need seeding)';
     }
     foreach ($orgs as $org) {
-        $parent = $org->parent ? " (child of: {$org->parent->org_name})" : " [TOP LEVEL]";
-        $output[] = sprintf("%-30s | %-10s%s", $org->org_name, $org->org_type, $parent);
+        $parent = $org->parent ? " (child of: {$org->parent->org_name})" : ' [TOP LEVEL]';
+        $output[] = sprintf('%-30s | %-10s%s', $org->org_name, $org->org_type, $parent);
     }
 
-    $output[] = "";
-    $output[] = "=== ALL USERS (" . \App\Models\User::count() . " total) ===";
-    $output[] = "";
+    $output[] = '';
+    $output[] = '=== ALL USERS ('.\App\Models\User::count().' total) ===';
+    $output[] = '';
 
     $users = \App\Models\User::with('organization')->limit(50)->get();
 
     if ($users->isEmpty()) {
-        $output[] = "(No users found - database may need seeding)";
+        $output[] = '(No users found - database may need seeding)';
     }
 
     foreach ($users as $user) {
         $org = $user->organization ? $user->organization->org_name : 'No org';
-        $output[] = sprintf("%-40s | %-12s | %s", $user->email, $user->primary_role ?? 'no role', $org);
+        $output[] = sprintf('%-40s | %-12s | %s', $user->email, $user->primary_role ?? 'no role', $org);
     }
 
-    $output[] = "";
-    $output[] = "=== RESET PASSWORD ===";
-    $output[] = "Visit: /reset-password-temp?email=USER_EMAIL_HERE";
-    $output[] = "This will set password to: password";
+    $output[] = '';
+    $output[] = '=== RESET PASSWORD ===';
+    $output[] = 'Visit: /reset-password-temp?email=USER_EMAIL_HERE';
+    $output[] = 'This will set password to: password';
 
-    return "<pre>" . implode("\n", $output) . "</pre>";
+    return '<pre>'.implode("\n", $output).'</pre>';
 });
 
 // Temporary route to reset a user's password - visit once then remove
 Route::get('/reset-password-temp', function () {
     $email = request('email');
-    if (!$email) {
+    if (! $email) {
         return "<pre>Usage: /reset-password-temp?email=user@example.com\n\nThis will reset the password to 'password'</pre>";
     }
 
     $user = \App\Models\User::where('email', $email)->first();
-    if (!$user) {
+    if (! $user) {
         return "<pre>User not found: {$email}</pre>";
     }
 
@@ -211,13 +211,13 @@ Route::get('/reset-password-temp', function () {
 // Temporary route to seed district/multi-tenancy data
 Route::get('/seed-district-temp', function () {
     $output = [];
-    $output[] = "Setting up district and multi-tenancy demo...";
-    $output[] = "";
+    $output[] = 'Setting up district and multi-tenancy demo...';
+    $output[] = '';
 
     try {
         // Find or create district
         $district = \App\Models\Organization::where('org_type', 'district')->first();
-        if (!$district) {
+        if (! $district) {
             $district = \App\Models\Organization::create([
                 'org_type' => 'district',
                 'org_name' => 'Lincoln County School District',
@@ -227,9 +227,9 @@ Route::get('/seed-district-temp', function () {
                 'subscription_status' => 'active',
                 'active' => true,
             ]);
-            $output[] = "Created district: Lincoln County School District";
+            $output[] = 'Created district: Lincoln County School District';
         } else {
-            $output[] = "Found existing district: " . $district->org_name;
+            $output[] = 'Found existing district: '.$district->org_name;
         }
 
         // Find existing schools and link them to district
@@ -238,8 +238,8 @@ Route::get('/seed-district-temp', function () {
             ->get();
 
         if ($schools->isEmpty()) {
-            $output[] = "";
-            $output[] = "No schools found. Creating sample schools...";
+            $output[] = '';
+            $output[] = 'No schools found. Creating sample schools...';
 
             // Create sample schools
             $schoolData = [
@@ -259,18 +259,18 @@ Route::get('/seed-district-temp', function () {
                     'subscription_status' => 'active',
                     'active' => true,
                 ]);
-                $output[] = "Created school: " . $school->org_name;
+                $output[] = 'Created school: '.$school->org_name;
             }
         } else {
             foreach ($schools as $school) {
                 $school->update(['parent_org_id' => $district->id]);
-                $output[] = "Linked school to district: " . $school->org_name;
+                $output[] = 'Linked school to district: '.$school->org_name;
             }
         }
 
         // Create consultant user at district level
         $consultant = \App\Models\User::where('email', 'superintendent@lincolnschools.edu')->first();
-        if (!$consultant) {
+        if (! $consultant) {
             $consultant = \App\Models\User::create([
                 'org_id' => $district->id,
                 'first_name' => 'Margaret',
@@ -282,8 +282,8 @@ Route::get('/seed-district-temp', function () {
                 'active' => true,
                 'suspended' => false,
             ]);
-            $output[] = "";
-            $output[] = "Created consultant: superintendent@lincolnschools.edu";
+            $output[] = '';
+            $output[] = 'Created consultant: superintendent@lincolnschools.edu';
         } else {
             // Update existing consultant to district level
             $consultant->update([
@@ -291,103 +291,104 @@ Route::get('/seed-district-temp', function () {
                 'primary_role' => 'consultant',
                 'password' => \Illuminate\Support\Facades\Hash::make('password'),
             ]);
-            $output[] = "";
-            $output[] = "Updated consultant: " . $consultant->email;
+            $output[] = '';
+            $output[] = 'Updated consultant: '.$consultant->email;
         }
 
         // Verify the hierarchy
-        $output[] = "";
-        $output[] = "=== VERIFICATION ===";
+        $output[] = '';
+        $output[] = '=== VERIFICATION ===';
         $childCount = \App\Models\Organization::where('parent_org_id', $district->id)->count();
-        $output[] = "District: " . $district->org_name . " (ID: " . $district->id . ")";
-        $output[] = "Child schools: " . $childCount;
+        $output[] = 'District: '.$district->org_name.' (ID: '.$district->id.')';
+        $output[] = 'Child schools: '.$childCount;
 
         $childSchools = \App\Models\Organization::where('parent_org_id', $district->id)->get();
         foreach ($childSchools as $child) {
-            $output[] = "  - " . $child->org_name . " (ID: " . $child->id . ")";
+            $output[] = '  - '.$child->org_name.' (ID: '.$child->id.')';
         }
 
-        $output[] = "";
-        $output[] = "=== SUCCESS ===";
-        $output[] = "";
-        $output[] = "Login as consultant:";
-        $output[] = "  Email: superintendent@lincolnschools.edu";
-        $output[] = "  Password: password";
-        $output[] = "";
-        $output[] = "The consultant can switch between schools using the dropdown";
-        $output[] = "in the bottom-left of the sidebar after logging in.";
+        $output[] = '';
+        $output[] = '=== SUCCESS ===';
+        $output[] = '';
+        $output[] = 'Login as consultant:';
+        $output[] = '  Email: superintendent@lincolnschools.edu';
+        $output[] = '  Password: password';
+        $output[] = '';
+        $output[] = 'The consultant can switch between schools using the dropdown';
+        $output[] = 'in the bottom-left of the sidebar after logging in.';
 
     } catch (\Exception $e) {
-        $output[] = "ERROR: " . $e->getMessage();
-        $output[] = "Line: " . $e->getLine();
+        $output[] = 'ERROR: '.$e->getMessage();
+        $output[] = 'Line: '.$e->getLine();
     }
 
-    return "<pre>" . implode("\n", $output) . "</pre>";
+    return '<pre>'.implode("\n", $output).'</pre>';
 });
 
 // Temporary route to seed marketplace - visit once then remove
 Route::get('/seed-marketplace-temp', function () {
     set_time_limit(300);
     $output = [];
-    $output[] = "Seeding marketplace data...";
-    $output[] = "";
+    $output[] = 'Seeding marketplace data...';
+    $output[] = '';
 
     try {
         // First, ensure listable columns are nullable
-        $output[] = "Checking database schema...";
+        $output[] = 'Checking database schema...';
         try {
             \Illuminate\Support\Facades\DB::statement('ALTER TABLE marketplace_items ALTER COLUMN listable_type DROP NOT NULL');
             \Illuminate\Support\Facades\DB::statement('ALTER TABLE marketplace_items ALTER COLUMN listable_id DROP NOT NULL');
-            $output[] = "- Made listable columns nullable";
+            $output[] = '- Made listable columns nullable';
         } catch (\Exception $e) {
             // Columns might already be nullable, that's fine
-            $output[] = "- Schema already updated";
+            $output[] = '- Schema already updated';
         }
-        $output[] = "";
+        $output[] = '';
 
         $school = \App\Models\Organization::where('org_type', 'school')->first();
-        if (!$school) {
+        if (! $school) {
             $school = \App\Models\Organization::first();
         }
-        if (!$school) {
-            return "<pre>No organization found. Please seed organizations first.</pre>";
+        if (! $school) {
+            return '<pre>No organization found. Please seed organizations first.</pre>';
         }
 
         // Check if already seeded
         $existingCount = \App\Models\MarketplaceItem::count();
         if ($existingCount > 0) {
             $output[] = "Marketplace already has {$existingCount} items.";
-            $output[] = "Skipping to avoid duplicates.";
-            $output[] = "";
-            $output[] = "Visit /marketplace to see the items.";
-            return "<pre>" . implode("\n", $output) . "</pre>";
+            $output[] = 'Skipping to avoid duplicates.';
+            $output[] = '';
+            $output[] = 'Visit /marketplace to see the items.';
+
+            return '<pre>'.implode("\n", $output).'</pre>';
         }
 
         // Run the seeder
-        $seeder = new \Database\Seeders\MarketplaceSeeder();
+        $seeder = new \Database\Seeders\MarketplaceSeeder;
         $seeder->run();
 
         $sellerCount = \App\Models\SellerProfile::count();
         $itemCount = \App\Models\MarketplaceItem::count();
         $reviewCount = \App\Models\MarketplaceReview::count();
 
-        $output[] = "SUCCESS! Marketplace seeded:";
+        $output[] = 'SUCCESS! Marketplace seeded:';
         $output[] = "- {$sellerCount} seller profiles";
         $output[] = "- {$itemCount} marketplace items";
         $output[] = "- {$reviewCount} reviews";
-        $output[] = "";
-        $output[] = "Visit /marketplace to see the items.";
-        $output[] = "After confirming, remove this route from routes/web.php";
+        $output[] = '';
+        $output[] = 'Visit /marketplace to see the items.';
+        $output[] = 'After confirming, remove this route from routes/web.php';
 
     } catch (\Exception $e) {
-        $output[] = "ERROR: " . $e->getMessage();
-        $output[] = "File: " . $e->getFile() . ":" . $e->getLine();
-        $output[] = "";
-        $output[] = "Stack trace:";
+        $output[] = 'ERROR: '.$e->getMessage();
+        $output[] = 'File: '.$e->getFile().':'.$e->getLine();
+        $output[] = '';
+        $output[] = 'Stack trace:';
         $output[] = $e->getTraceAsString();
     }
 
-    return "<pre>" . implode("\n", $output) . "</pre>";
+    return '<pre>'.implode("\n", $output).'</pre>';
 });
 
 // Public dashboard view (shareable reports, no auth required)
@@ -489,19 +490,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/surveys/{survey}/deliver', [SurveyController::class, 'deliver'])->name('surveys.deliver');
     Route::get('/surveys/{survey}/deliveries', [SurveyController::class, 'deliveryStatus'])->name('surveys.deliveries');
 
-    // Strategies
-    Route::get('/strategies', [StrategyController::class, 'index'])->name('strategies.index');
-    Route::get('/strategies/create', [StrategyController::class, 'create'])->name('strategies.create');
-    Route::post('/strategies', [StrategyController::class, 'store'])->name('strategies.store');
-    Route::get('/strategies/{strategy}', [StrategyController::class, 'show'])->name('strategies.show');
-    Route::get('/strategies/{strategy}/edit', [StrategyController::class, 'edit'])->name('strategies.edit');
-    Route::put('/strategies/{strategy}', [StrategyController::class, 'update'])->name('strategies.update');
-    Route::delete('/strategies/{strategy}', [StrategyController::class, 'destroy'])->name('strategies.destroy');
-    Route::post('/strategies/{strategy}/duplicate', [StrategyController::class, 'duplicate'])->name('strategies.duplicate');
-    Route::post('/strategies/{strategy}/push', [StrategyController::class, 'push'])->name('strategies.push');
+    // Plans
+    Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
+    Route::get('/plans/create', [PlanController::class, 'create'])->name('plans.create');
+    Route::post('/plans', [PlanController::class, 'store'])->name('plans.store');
+    Route::get('/plans/{plan}', [PlanController::class, 'show'])->name('plans.show');
+    Route::get('/plans/{plan}/edit', [PlanController::class, 'edit'])->name('plans.edit');
+    Route::put('/plans/{plan}', [PlanController::class, 'update'])->name('plans.update');
+    Route::delete('/plans/{plan}', [PlanController::class, 'destroy'])->name('plans.destroy');
+    Route::post('/plans/{plan}/duplicate', [PlanController::class, 'duplicate'])->name('plans.duplicate');
+    Route::post('/plans/{plan}/push', [PlanController::class, 'push'])->name('plans.push');
 
     // Focus Areas
-    Route::post('/strategies/{strategy}/focus-areas', [FocusAreaController::class, 'store'])->name('focus-areas.store');
+    Route::post('/plans/{plan}/focus-areas', [FocusAreaController::class, 'store'])->name('focus-areas.store');
     Route::put('/focus-areas/{focusArea}', [FocusAreaController::class, 'update'])->name('focus-areas.update');
     Route::delete('/focus-areas/{focusArea}', [FocusAreaController::class, 'destroy'])->name('focus-areas.destroy');
     Route::put('/focus-areas/reorder', [FocusAreaController::class, 'reorder'])->name('focus-areas.reorder');
@@ -517,6 +518,29 @@ Route::middleware('auth')->group(function () {
     Route::put('/activities/{activity}', [ActivityController::class, 'update'])->name('activities.update');
     Route::delete('/activities/{activity}', [ActivityController::class, 'destroy'])->name('activities.destroy');
     Route::put('/activities/reorder', [ActivityController::class, 'reorder'])->name('activities.reorder');
+
+    // Goals (OKR-style)
+    Route::post('/plans/{plan}/goals', [App\Http\Controllers\GoalController::class, 'store'])->name('goals.store');
+    Route::put('/goals/{goal}', [App\Http\Controllers\GoalController::class, 'update'])->name('goals.update');
+    Route::delete('/goals/{goal}', [App\Http\Controllers\GoalController::class, 'destroy'])->name('goals.destroy');
+    Route::put('/goals/reorder', [App\Http\Controllers\GoalController::class, 'reorder'])->name('goals.reorder');
+
+    // Key Results
+    Route::post('/goals/{goal}/key-results', [App\Http\Controllers\KeyResultController::class, 'store'])->name('key-results.store');
+    Route::put('/key-results/{keyResult}', [App\Http\Controllers\KeyResultController::class, 'update'])->name('key-results.update');
+    Route::delete('/key-results/{keyResult}', [App\Http\Controllers\KeyResultController::class, 'destroy'])->name('key-results.destroy');
+
+    // Milestones
+    Route::post('/plans/{plan}/milestones', [App\Http\Controllers\MilestoneController::class, 'store'])->name('milestones.store');
+    Route::put('/milestones/{milestone}', [App\Http\Controllers\MilestoneController::class, 'update'])->name('milestones.update');
+    Route::delete('/milestones/{milestone}', [App\Http\Controllers\MilestoneController::class, 'destroy'])->name('milestones.destroy');
+    Route::post('/milestones/{milestone}/complete', [App\Http\Controllers\MilestoneController::class, 'complete'])->name('milestones.complete');
+
+    // Progress Updates
+    Route::get('/plans/{plan}/progress', [App\Http\Controllers\ProgressUpdateController::class, 'index'])->name('progress.index');
+    Route::post('/plans/{plan}/progress', [App\Http\Controllers\ProgressUpdateController::class, 'store'])->name('progress.store');
+    Route::post('/plans/{plan}/progress/generate-summary', [App\Http\Controllers\ProgressUpdateController::class, 'generateSummary'])->name('progress.generate-summary');
+    Route::get('/plans/{plan}/progress/analytics', [App\Http\Controllers\ProgressUpdateController::class, 'analytics'])->name('progress.analytics');
 
     // Resource Library - Hub + Sub-pages
     Route::get('/resources', App\Livewire\ResourceHub::class)->name('resources.index');

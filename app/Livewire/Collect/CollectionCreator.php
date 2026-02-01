@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Collect;
 
-use App\Models\Collection;
-use App\Models\Survey;
-use App\Models\Student;
 use App\Models\Classroom;
+use App\Models\Collection;
+use App\Models\Student;
+use App\Models\Survey;
 use App\Services\CollectionService;
-use Livewire\Component;
 use Illuminate\Support\Str;
+use Livewire\Component;
 
 class CollectionCreator extends Component
 {
@@ -24,12 +24,16 @@ class CollectionCreator extends Component
 
     // Step 1: Basic Info
     public string $title = '';
+
     public string $description = '';
+
     public string $collectionType = 'recurring';
 
     // Step 2: Data Source
     public string $dataSource = 'inline'; // survey, inline, hybrid
+
     public ?int $surveyId = null;
+
     public array $inlineQuestions = [];
 
     // Step 3: Format Mode
@@ -37,39 +41,59 @@ class CollectionCreator extends Component
 
     // Step 4: Schedule Configuration
     public string $scheduleType = 'interval'; // interval, custom, event
+
     public string $intervalType = 'weekly'; // daily, weekly, monthly
+
     public int $intervalValue = 1;
+
     public array $customDays = []; // monday, tuesday, etc.
+
     public array $customTimes = ['09:00'];
+
     public ?string $eventTrigger = null;
+
     public string $timezone = 'America/New_York';
+
     public ?string $startDate = null;
+
     public ?string $endDate = null;
 
     // Step 5: Contact Scope
     public string $targetType = 'students'; // students, users
+
     public array $selectedGrades = [];
+
     public array $selectedClassrooms = [];
+
     public array $selectedTags = [];
+
     public array $selectedRoles = [];
 
     // Step 6: Reminder Settings
     public bool $enableReminders = true;
+
     public array $reminderChannels = ['email'];
+
     public int $reminderLeadTime = 60; // minutes before
+
     public bool $enableFollowUp = true;
+
     public int $followUpDelay = 24; // hours after
 
     // Step 7: Review (no additional fields)
 
     // UI State
     public bool $showQuestionEditor = false;
+
     public ?int $editingQuestionIndex = null;
+
     public array $questionForm = [];
 
     // Available options
     public array $availableSurveys = [];
+
     public array $availableGrades = [];
+
     public array $availableClassrooms = [];
 
     protected $rules = [
@@ -155,6 +179,7 @@ class CollectionCreator extends Component
             'title' => 'required|string|max:255',
             'collectionType' => 'required|in:recurring,one_time,event_triggered',
         ]);
+
         return true;
     }
 
@@ -164,13 +189,15 @@ class CollectionCreator extends Component
             'dataSource' => 'required|in:survey,inline,hybrid',
         ]);
 
-        if ($this->dataSource === 'survey' && !$this->surveyId) {
+        if ($this->dataSource === 'survey' && ! $this->surveyId) {
             $this->addError('surveyId', 'Please select a survey.');
+
             return false;
         }
 
         if (in_array($this->dataSource, ['inline', 'hybrid']) && empty($this->inlineQuestions)) {
             $this->addError('inlineQuestions', 'Please add at least one question.');
+
             return false;
         }
 
@@ -182,6 +209,7 @@ class CollectionCreator extends Component
         $this->validate([
             'formatMode' => 'required|in:conversational,form,grid',
         ]);
+
         return true;
     }
 
@@ -198,6 +226,7 @@ class CollectionCreator extends Component
 
         if ($this->scheduleType === 'custom' && empty($this->customDays)) {
             $this->addError('customDays', 'Please select at least one day.');
+
             return false;
         }
 
@@ -210,6 +239,7 @@ class CollectionCreator extends Component
             // At least one filter should be set, or all students
             return true;
         }
+
         return true;
     }
 
@@ -217,8 +247,10 @@ class CollectionCreator extends Component
     {
         if ($this->enableReminders && empty($this->reminderChannels)) {
             $this->addError('reminderChannels', 'Please select at least one reminder channel.');
+
             return false;
         }
+
         return true;
     }
 
@@ -294,7 +326,7 @@ class CollectionCreator extends Component
     public function toggleDay(string $day): void
     {
         if (in_array($day, $this->customDays)) {
-            $this->customDays = array_values(array_filter($this->customDays, fn($d) => $d !== $day));
+            $this->customDays = array_values(array_filter($this->customDays, fn ($d) => $d !== $day));
         } else {
             $this->customDays[] = $day;
         }
@@ -318,7 +350,7 @@ class CollectionCreator extends Component
     public function toggleGrade(string $grade): void
     {
         if (in_array($grade, $this->selectedGrades)) {
-            $this->selectedGrades = array_values(array_filter($this->selectedGrades, fn($g) => $g !== $grade));
+            $this->selectedGrades = array_values(array_filter($this->selectedGrades, fn ($g) => $g !== $grade));
         } else {
             $this->selectedGrades[] = $grade;
         }
@@ -327,7 +359,7 @@ class CollectionCreator extends Component
     public function toggleClassroom(int $classroomId): void
     {
         if (in_array($classroomId, $this->selectedClassrooms)) {
-            $this->selectedClassrooms = array_values(array_filter($this->selectedClassrooms, fn($c) => $c !== $classroomId));
+            $this->selectedClassrooms = array_values(array_filter($this->selectedClassrooms, fn ($c) => $c !== $classroomId));
         } else {
             $this->selectedClassrooms[] = $classroomId;
         }
@@ -336,7 +368,7 @@ class CollectionCreator extends Component
     public function toggleReminderChannel(string $channel): void
     {
         if (in_array($channel, $this->reminderChannels)) {
-            $this->reminderChannels = array_values(array_filter($this->reminderChannels, fn($c) => $c !== $channel));
+            $this->reminderChannels = array_values(array_filter($this->reminderChannels, fn ($c) => $c !== $channel));
         } else {
             $this->reminderChannels[] = $channel;
         }
@@ -356,17 +388,17 @@ class CollectionCreator extends Component
         ];
 
         if ($this->targetType === 'students') {
-            if (!empty($this->selectedGrades)) {
+            if (! empty($this->selectedGrades)) {
                 $contactScope['grades'] = $this->selectedGrades;
             }
-            if (!empty($this->selectedClassrooms)) {
+            if (! empty($this->selectedClassrooms)) {
                 $contactScope['classrooms'] = $this->selectedClassrooms;
             }
-            if (!empty($this->selectedTags)) {
+            if (! empty($this->selectedTags)) {
                 $contactScope['tags'] = $this->selectedTags;
             }
         } else {
-            if (!empty($this->selectedRoles)) {
+            if (! empty($this->selectedRoles)) {
                 $contactScope['roles'] = $this->selectedRoles;
             }
         }
@@ -496,11 +528,11 @@ class CollectionCreator extends Component
         $user = auth()->user();
         $query = Student::where('org_id', $user->org_id)->whereNull('deleted_at');
 
-        if (!empty($this->selectedGrades)) {
+        if (! empty($this->selectedGrades)) {
             $query->whereIn('grade', $this->selectedGrades);
         }
 
-        if (!empty($this->selectedClassrooms)) {
+        if (! empty($this->selectedClassrooms)) {
             $query->whereIn('classroom_id', $this->selectedClassrooms);
         }
 

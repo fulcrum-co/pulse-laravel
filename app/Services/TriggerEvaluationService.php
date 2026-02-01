@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\Trigger;
-use App\Models\TriggerLog;
 use App\Models\Student;
 use App\Models\SurveyAttempt;
+use App\Models\Trigger;
+use App\Models\TriggerLog;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -70,7 +70,7 @@ class TriggerEvaluationService
         }
 
         return $condition === 'AND'
-            ? !in_array(false, $results, true)
+            ? ! in_array(false, $results, true)
             : in_array(true, $results, true);
     }
 
@@ -89,7 +89,7 @@ class TriggerEvaluationService
 
             $actualValue = $this->getFieldValue($operandType, $field, $student, $attempt);
 
-            if (!$this->compareValues($actualValue, $condition, $value)) {
+            if (! $this->compareValues($actualValue, $condition, $value)) {
                 return false;
             }
         }
@@ -105,6 +105,7 @@ class TriggerEvaluationService
         switch ($operandType) {
             case 'survey_score':
                 $data = $attempt->llm_extracted_data ?? [];
+
                 return data_get($data, $field);
 
             case 'risk_level':
@@ -112,10 +113,12 @@ class TriggerEvaluationService
 
             case 'attendance':
                 $data = $attempt->llm_extracted_data['attendance'] ?? [];
+
                 return data_get($data, $field);
 
             case 'behavior':
                 $data = $attempt->llm_extracted_data['behavior'] ?? [];
+
                 return data_get($data, $field);
 
             case 'student':
@@ -157,7 +160,7 @@ class TriggerEvaluationService
                 return is_array($expected) && in_array($actual, $expected);
 
             case 'not_in':
-                return is_array($expected) && !in_array($actual, $expected);
+                return is_array($expected) && ! in_array($actual, $expected);
 
             default:
                 return false;

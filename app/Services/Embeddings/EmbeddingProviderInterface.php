@@ -7,7 +7,7 @@ interface EmbeddingProviderInterface
     /**
      * Generate an embedding for a single text.
      *
-     * @param string $text The text to embed
+     * @param  string  $text  The text to embed
      * @return array{embedding: array<float>, model: string, tokens: int}
      */
     public function embed(string $text): array;
@@ -15,7 +15,7 @@ interface EmbeddingProviderInterface
     /**
      * Generate embeddings for multiple texts.
      *
-     * @param array<string> $texts The texts to embed
+     * @param  array<string>  $texts  The texts to embed
      * @return array<array{embedding: array<float>, model: string, tokens: int}>
      */
     public function embedBatch(array $texts): array;

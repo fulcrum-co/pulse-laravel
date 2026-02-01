@@ -46,28 +46,31 @@ class PopulateDemoNotifications extends Command
         if ($email) {
             // Find by email
             $user = User::where('email', $email)->first();
-            if (!$user) {
+            if (! $user) {
                 $this->error("User with email '{$email}' not found.");
+
                 return Command::FAILURE;
             }
             $userId = $user->id;
-        } elseif (!$userId) {
+        } elseif (! $userId) {
             // Get first admin user or first user
             $user = User::where('primary_role', 'admin')->first() ?? User::first();
-            if (!$user) {
+            if (! $user) {
                 $this->error('No users found in the database.');
+
                 return Command::FAILURE;
             }
             $userId = $user->id;
         } else {
             $user = User::find($userId);
-            if (!$user) {
+            if (! $user) {
                 $this->error("User with ID {$userId} not found.");
+
                 return Command::FAILURE;
             }
         }
 
-        $userName = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) ?: $user->email;
+        $userName = trim(($user->first_name ?? '').' '.($user->last_name ?? '')) ?: $user->email;
         $this->info("Creating {$count} demo notifications for user: {$userName} (ID: {$userId})");
 
         // Clear existing notifications if --fresh flag is set
@@ -125,7 +128,7 @@ class PopulateDemoNotifications extends Command
 
         $this->table(
             ['Category', 'Total', 'Unread'],
-            $categories->map(fn($c) => [$c->category, $c->count, $c->unread])
+            $categories->map(fn ($c) => [$c->category, $c->count, $c->unread])
         );
 
         return Command::SUCCESS;
@@ -234,7 +237,7 @@ class PopulateDemoNotifications extends Command
             // Try to get name from user relationship (first_name + last_name), fall back to student_number or ID
             $studentUser = $student['user'] ?? null;
             $name = $studentUser
-                ? trim(($studentUser['first_name'] ?? '') . ' ' . ($studentUser['last_name'] ?? ''))
+                ? trim(($studentUser['first_name'] ?? '').' '.($studentUser['last_name'] ?? ''))
                 : null;
             $name = $name ?: ($student['student_number'] ? "#{$student['student_number']}" : "#{$student['id']}");
             $notifications[] = [

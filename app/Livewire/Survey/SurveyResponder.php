@@ -2,20 +2,25 @@
 
 namespace App\Livewire\Survey;
 
+use App\Events\SurveyCompleted;
 use App\Models\Survey;
 use App\Models\SurveyAttempt;
-use App\Events\SurveyCompleted;
 use Livewire\Component;
 
 class SurveyResponder extends Component
 {
     public Survey $survey;
+
     public SurveyAttempt $attempt;
 
     public int $currentQuestionIndex = 0;
+
     public array $responses = [];
+
     public bool $isComplete = false;
+
     public bool $showWelcome = true;
+
     public bool $showThankYou = false;
 
     protected $rules = [
@@ -58,7 +63,7 @@ class SurveyResponder extends Component
     {
         $currentQuestion = $this->getCurrentQuestion();
 
-        if (!$currentQuestion) {
+        if (! $currentQuestion) {
             return;
         }
 
@@ -89,12 +94,12 @@ class SurveyResponder extends Component
     {
         $currentQuestion = $this->getCurrentQuestion();
 
-        if (!$currentQuestion) {
+        if (! $currentQuestion) {
             return;
         }
 
         // Only allow skip if not required
-        if (!($currentQuestion['required'] ?? true)) {
+        if (! ($currentQuestion['required'] ?? true)) {
             $this->responses[$currentQuestion['id']] = null;
 
             if ($this->currentQuestionIndex < count($this->survey->questions) - 1) {
@@ -149,7 +154,7 @@ class SurveyResponder extends Component
         $average = array_sum($scaleResponses) / count($scaleResponses);
 
         // Determine risk level based on average (lower scores = higher risk for wellness)
-        $riskLevel = match(true) {
+        $riskLevel = match (true) {
             $average <= 2 => 'high',
             $average <= 3 => 'medium',
             default => 'low',
@@ -169,7 +174,10 @@ class SurveyResponder extends Component
     public function getProgressProperty(): int
     {
         $total = count($this->survey->questions);
-        if ($total === 0) return 0;
+        if ($total === 0) {
+            return 0;
+        }
+
         return round(($this->currentQuestionIndex / $total) * 100);
     }
 

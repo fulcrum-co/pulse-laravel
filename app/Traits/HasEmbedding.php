@@ -3,7 +3,6 @@
 namespace App\Traits;
 
 use App\Jobs\GenerateEmbeddingJob;
-use App\Services\Embeddings\EmbeddingService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -55,6 +54,7 @@ trait HasEmbedding
         foreach ($embeddingFields as $field) {
             if ($this->wasChanged($field)) {
                 $this->queueEmbeddingGeneration();
+
                 return;
             }
         }
@@ -78,9 +78,8 @@ trait HasEmbedding
     /**
      * Find similar models using cosine similarity.
      *
-     * @param int $limit Maximum number of results
-     * @param float $threshold Minimum similarity score (0-1)
-     * @return Collection
+     * @param  int  $limit  Maximum number of results
+     * @param  float  $threshold  Minimum similarity score (0-1)
      */
     public function findSimilar(int $limit = 10, float $threshold = 0.5): Collection
     {
@@ -91,7 +90,7 @@ trait HasEmbedding
         return static::query()
             ->where('id', '!=', $this->id)
             ->whereNotNull('embedding')
-            ->when($this->org_id ?? null, fn($q) => $q->where('org_id', $this->org_id))
+            ->when($this->org_id ?? null, fn ($q) => $q->where('org_id', $this->org_id))
             ->selectRaw('*, 1 - (embedding <=> ?) as similarity', [$this->embedding])
             ->having('similarity', '>=', $threshold)
             ->orderByDesc('similarity')
@@ -102,10 +101,7 @@ trait HasEmbedding
     /**
      * Scope to find nearest neighbors to a given embedding.
      *
-     * @param Builder $query
-     * @param string $embedding The embedding vector (formatted as '[...]')
-     * @param int $limit
-     * @return Builder
+     * @param  string  $embedding  The embedding vector (formatted as '[...]')
      */
     public function scopeNearestTo(Builder $query, string $embedding, int $limit = 10): Builder
     {
@@ -159,7 +155,7 @@ trait HasEmbedding
      */
     public function hasEmbedding(): bool
     {
-        return !empty($this->embedding);
+        return ! empty($this->embedding);
     }
 
     /**
@@ -167,7 +163,7 @@ trait HasEmbedding
      */
     public function needsEmbeddingUpdate(): bool
     {
-        if (!$this->hasEmbedding()) {
+        if (! $this->hasEmbedding()) {
             return true;
         }
 

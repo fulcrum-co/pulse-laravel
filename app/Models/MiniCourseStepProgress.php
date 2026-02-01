@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class MiniCourseStepProgress extends Model
 {
     // Statuses
     public const STATUS_NOT_STARTED = 'not_started';
+
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_SKIPPED = 'skipped';
 
     protected $table = 'mini_course_step_progress';
@@ -107,7 +110,7 @@ class MiniCourseStepProgress extends Model
     /**
      * Complete the step.
      */
-    public function complete(array $responseData = null, string $feedback = null): void
+    public function complete(?array $responseData = null, ?string $feedback = null): void
     {
         $this->update([
             'status' => self::STATUS_COMPLETED,
@@ -169,6 +172,7 @@ class MiniCourseStepProgress extends Model
         if ($minutes > 0) {
             return sprintf('%dm %ds', $minutes, $remainingSeconds);
         }
+
         return sprintf('%ds', $seconds);
     }
 
@@ -180,6 +184,7 @@ class MiniCourseStepProgress extends Model
         if ($this->started_at && $this->completed_at) {
             return $this->completed_at->diffInSeconds($this->started_at);
         }
+
         return null;
     }
 

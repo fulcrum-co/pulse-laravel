@@ -117,7 +117,7 @@ class DemoConversationService
                 'id' => 'conv_staff_2',
                 'provider' => self::$demoProviders[1], // James Miller
                 'student' => self::$demoStudents[1], // About Liam
-                'last_message' => "Liam has been making great progress with algebra. His test scores are improving.",
+                'last_message' => 'Liam has been making great progress with algebra. His test scores are improving.',
                 'last_message_at' => Carbon::now()->subHours(2),
                 'unread_count' => 0,
                 'stream_channel_id' => 'provider_2_user_1',
@@ -144,7 +144,7 @@ class DemoConversationService
                 'id' => 'conv_teacher_2',
                 'provider' => self::$demoProviders[1], // James Miller (tutor)
                 'student' => self::$demoStudents[1], // About Liam
-                'last_message' => "Absolutely, I can coordinate on his homework assignments. When would you like to have a call?",
+                'last_message' => 'Absolutely, I can coordinate on his homework assignments. When would you like to have a call?',
                 'last_message_at' => Carbon::now()->subHours(1),
                 'unread_count' => 0,
                 'stream_channel_id' => 'provider_2_teacher_1',
@@ -171,7 +171,7 @@ class DemoConversationService
                 'id' => 'conv_student_1',
                 'provider' => self::$demoProviders[3], // Marcus Thompson (college advisor)
                 'student' => null,
-                'last_message' => "Your college essay draft looks great! I have a few suggestions for the introduction.",
+                'last_message' => 'Your college essay draft looks great! I have a few suggestions for the introduction.',
                 'last_message_at' => Carbon::now()->subMinutes(30),
                 'unread_count' => 1,
                 'stream_channel_id' => 'provider_4_student_1',
@@ -207,7 +207,7 @@ class DemoConversationService
                 'id' => 'conv_counselor_2',
                 'provider' => self::$demoProviders[2], // Dr. Emily Rodriguez
                 'student' => self::$demoStudents[0], // About Emma
-                'last_message' => "The learning assessment results are in. Can we schedule a video call to discuss?",
+                'last_message' => 'The learning assessment results are in. Can we schedule a video call to discuss?',
                 'last_message_at' => Carbon::now()->subHours(4),
                 'unread_count' => 1,
                 'stream_channel_id' => 'provider_3_counselor_1',
@@ -304,7 +304,7 @@ class DemoConversationService
             ],
             [
                 'id' => 'msg_4',
-                'text' => "Absolutely, I can coordinate on his homework assignments. When would you like to have a call?",
+                'text' => 'Absolutely, I can coordinate on his homework assignments. When would you like to have a call?',
                 'user' => ['id' => 'provider_demo_2', 'name' => $provider['name']],
                 'created_at' => $now->copy()->subHours(1)->toIso8601String(),
             ],
@@ -352,7 +352,7 @@ class DemoConversationService
             ],
             [
                 'id' => 'msg_6',
-                'text' => "Your college essay draft looks great! I have a few suggestions for the introduction. Want to hop on a quick video call to go over them together?",
+                'text' => 'Your college essay draft looks great! I have a few suggestions for the introduction. Want to hop on a quick video call to go over them together?',
                 'user' => ['id' => 'provider_demo_4', 'name' => $provider['name']],
                 'created_at' => $now->copy()->subMinutes(30)->toIso8601String(),
             ],
@@ -376,13 +376,13 @@ class DemoConversationService
             ],
             [
                 'id' => 'msg_2',
-                'text' => "No worries, limits can be tricky! Let me explain - for problem 5, you want to factor the numerator first. Try factoring x² - 4 as (x+2)(x-2).",
+                'text' => 'No worries, limits can be tricky! Let me explain - for problem 5, you want to factor the numerator first. Try factoring x² - 4 as (x+2)(x-2).',
                 'user' => ['id' => 'provider_demo_2', 'name' => $provider['name']],
                 'created_at' => $now->copy()->subHours(4)->subMinutes(30)->toIso8601String(),
             ],
             [
                 'id' => 'msg_3',
-                'text' => "Oh! That cancels out the (x-2) in the denominator! I got it now. Thanks!",
+                'text' => 'Oh! That cancels out the (x-2) in the denominator! I got it now. Thanks!',
                 'user' => ['id' => 'student_current', 'name' => 'You'],
                 'created_at' => $now->copy()->subHours(4)->toIso8601String(),
             ],
@@ -405,7 +405,7 @@ class DemoConversationService
         return [
             [
                 'id' => 'msg_default_1',
-                'text' => "Welcome! How can I help you today?",
+                'text' => 'Welcome! How can I help you today?',
                 'user' => ['id' => 'provider_demo', 'name' => 'Provider'],
                 'created_at' => $now->copy()->subHours(1)->toIso8601String(),
             ],
@@ -430,7 +430,7 @@ class DemoConversationService
     protected static function getEffectiveRole(): string
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return 'guest';
         }
 
@@ -448,7 +448,7 @@ class DemoConversationService
      */
     public static function createDemoProvider(array $data): stdClass
     {
-        $obj = new stdClass();
+        $obj = new stdClass;
         $obj->id = $data['id'] ?? '';
         $obj->name = $data['name'] ?? '';
         $obj->display_name = $data['display_name'] ?? $data['name'] ?? '';
@@ -456,6 +456,7 @@ class DemoConversationService
         $obj->thumbnail_url = $data['thumbnail_url'] ?? '';
         $obj->verified = $data['verified'] ?? false;
         $obj->online = $data['online'] ?? false;
+
         return $obj;
     }
 
@@ -464,11 +465,12 @@ class DemoConversationService
      */
     public static function createDemoStudent(array $data): stdClass
     {
-        $obj = new stdClass();
+        $obj = new stdClass;
         $obj->id = $data['id'] ?? '';
         $obj->name = $data['name'] ?? '';
         $obj->full_name = $data['name'] ?? '';
         $obj->grade = $data['grade'] ?? '';
+
         return $obj;
     }
 
@@ -477,7 +479,7 @@ class DemoConversationService
      */
     public static function createDemoConversation(array $data): stdClass
     {
-        $obj = new stdClass();
+        $obj = new stdClass;
         $obj->id = $data['id'] ?? '';
         $obj->provider = self::createDemoProvider($data['provider'] ?? []);
         $obj->student = isset($data['student']) && $data['student'] ? self::createDemoStudent($data['student']) : null;
@@ -487,6 +489,7 @@ class DemoConversationService
         $obj->stream_channel_id = $data['stream_channel_id'] ?? '';
         $obj->stream_channel_type = 'messaging';
         $obj->provider_id = $data['provider']['id'] ?? '';
+
         return $obj;
     }
 

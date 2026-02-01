@@ -2,39 +2,45 @@
 
 namespace App\Livewire;
 
-use App\Models\StrategicPlan;
+use App\Models\Activity;
 use App\Models\FocusArea;
 use App\Models\Objective;
-use App\Models\Activity;
+use App\Models\StrategicPlan;
 use Livewire\Component;
 
-class StrategyPlanner extends Component
+class PlanPlanner extends Component
 {
-    public StrategicPlan $strategy;
+    public StrategicPlan $plan;
 
     // For adding new items
     public $newFocusAreaTitle = '';
+
     public $newObjectiveTitle = '';
+
     public $newActivityTitle = '';
-    public $addingTo = null; // 'strategy', 'focus_area_X', 'objective_X'
+
+    public $addingTo = null; // 'plan', 'focus_area_X', 'objective_X'
 
     // For inline editing
     public $editingId = null;
+
     public $editingType = null;
+
     public $editingTitle = '';
 
     // Expanded states
     public $expandedFocusAreas = [];
+
     public $expandedObjectives = [];
 
     protected $listeners = ['refreshPlanner' => '$refresh'];
 
-    public function mount(StrategicPlan $strategy)
+    public function mount(StrategicPlan $plan)
     {
-        $this->strategy = $strategy;
+        $this->plan = $plan;
 
         // Expand all by default
-        foreach ($strategy->focusAreas as $fa) {
+        foreach ($plan->focusAreas as $fa) {
             $this->expandedFocusAreas[$fa->id] = true;
             foreach ($fa->objectives as $obj) {
                 $this->expandedObjectives[$obj->id] = true;
@@ -44,30 +50,30 @@ class StrategyPlanner extends Component
 
     public function toggleFocusArea($id)
     {
-        $this->expandedFocusAreas[$id] = !($this->expandedFocusAreas[$id] ?? false);
+        $this->expandedFocusAreas[$id] = ! ($this->expandedFocusAreas[$id] ?? false);
     }
 
     public function toggleObjective($id)
     {
-        $this->expandedObjectives[$id] = !($this->expandedObjectives[$id] ?? false);
+        $this->expandedObjectives[$id] = ! ($this->expandedObjectives[$id] ?? false);
     }
 
     // Start adding
     public function startAddFocusArea()
     {
-        $this->addingTo = 'strategy';
+        $this->addingTo = 'plan';
         $this->newFocusAreaTitle = '';
     }
 
     public function startAddObjective($focusAreaId)
     {
-        $this->addingTo = 'focus_area_' . $focusAreaId;
+        $this->addingTo = 'focus_area_'.$focusAreaId;
         $this->newObjectiveTitle = '';
     }
 
     public function startAddActivity($objectiveId)
     {
-        $this->addingTo = 'objective_' . $objectiveId;
+        $this->addingTo = 'objective_'.$objectiveId;
         $this->newActivityTitle = '';
     }
 
@@ -84,10 +90,10 @@ class StrategyPlanner extends Component
     {
         $this->validate(['newFocusAreaTitle' => 'required|string|max:255']);
 
-        $maxSortOrder = $this->strategy->focusAreas()->max('sort_order') ?? -1;
+        $maxSortOrder = $this->plan->focusAreas()->max('sort_order') ?? -1;
 
         $fa = FocusArea::create([
-            'strategic_plan_id' => $this->strategy->id,
+            'strategic_plan_id' => $this->plan->id,
             'title' => $this->newFocusAreaTitle,
             'sort_order' => $maxSortOrder + 1,
             'status' => 'not_started',
@@ -95,7 +101,7 @@ class StrategyPlanner extends Component
 
         $this->expandedFocusAreas[$fa->id] = true;
         $this->cancelAdd();
-        $this->strategy->refresh();
+        $this->plan->refresh();
     }
 
     public function saveObjective($focusAreaId)
@@ -114,7 +120,7 @@ class StrategyPlanner extends Component
 
         $this->expandedObjectives[$obj->id] = true;
         $this->cancelAdd();
-        $this->strategy->refresh();
+        $this->plan->refresh();
     }
 
     public function saveActivity($objectiveId)
@@ -132,7 +138,7 @@ class StrategyPlanner extends Component
         ]);
 
         $this->cancelAdd();
-        $this->strategy->refresh();
+        $this->plan->refresh();
     }
 
     // Inline editing
@@ -154,7 +160,7 @@ class StrategyPlanner extends Component
     {
         $this->validate(['editingTitle' => 'required|string|max:255']);
 
-        $model = match($this->editingType) {
+        $model = match ($this->editingType) {
             'focus_area' => FocusArea::findOrFail($this->editingId),
             'objective' => Objective::findOrFail($this->editingId),
             'activity' => Activity::findOrFail($this->editingId),
@@ -166,13 +172,13 @@ class StrategyPlanner extends Component
         }
 
         $this->cancelEdit();
-        $this->strategy->refresh();
+        $this->plan->refresh();
     }
 
     // Update status
     public function updateStatus($type, $id, $status)
     {
-        $model = match($type) {
+        $model = match ($type) {
             'focus_area' => FocusArea::findOrFail($id),
             'objective' => Objective::findOrFail($id),
             'activity' => Activity::findOrFail($id),
@@ -190,14 +196,14 @@ class StrategyPlanner extends Component
             }
         }
 
-        $this->strategy->refresh();
+        $this->plan->refresh();
     }
 
     // Delete items
     public function deleteFocusArea($id)
     {
         FocusArea::findOrFail($id)->delete();
-        $this->strategy->refresh();
+        $this->plan->refresh();
     }
 
     public function deleteObjective($id)
@@ -206,7 +212,7 @@ class StrategyPlanner extends Component
         $focusArea = $objective->focusArea;
         $objective->delete();
         $focusArea->updateStatusFromChildren();
-        $this->strategy->refresh();
+        $this->plan->refresh();
     }
 
     public function deleteActivity($id)
@@ -215,15 +221,15 @@ class StrategyPlanner extends Component
         $objective = $activity->objective;
         $activity->delete();
         $objective->updateStatusFromChildren();
-        $this->strategy->refresh();
+        $this->plan->refresh();
     }
 
     public function render()
     {
-        $this->strategy->load(['focusAreas.objectives.activities']);
+        $this->plan->load(['focusAreas.objectives.activities']);
 
-        return view('livewire.strategy-planner', [
-            'focusAreas' => $this->strategy->focusAreas,
+        return view('livewire.plan-planner', [
+            'focusAreas' => $this->plan->focusAreas,
         ]);
     }
 }

@@ -2,20 +2,23 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Carbon\Carbon;
 
 class DistributionSchedule extends Model
 {
     use HasFactory;
 
     const TYPE_INTERVAL = 'interval';
+
     const TYPE_CUSTOM = 'custom';
 
     const INTERVAL_DAILY = 'daily';
+
     const INTERVAL_WEEKLY = 'weekly';
+
     const INTERVAL_MONTHLY = 'monthly';
 
     protected $fillable = [
@@ -63,11 +66,11 @@ class DistributionSchedule extends Model
 
     public function isDue(): bool
     {
-        if (!$this->is_active) {
+        if (! $this->is_active) {
             return false;
         }
 
-        if (!$this->next_scheduled_at) {
+        if (! $this->next_scheduled_at) {
             return true;
         }
 
@@ -134,8 +137,8 @@ class DistributionSchedule extends Model
             'saturday' => 6,
         ];
 
-        $targetDays = array_map(fn($day) => $dayMap[strtolower($day)] ?? null, $this->custom_days);
-        $targetDays = array_filter($targetDays, fn($d) => $d !== null);
+        $targetDays = array_map(fn ($day) => $dayMap[strtolower($day)] ?? null, $this->custom_days);
+        $targetDays = array_filter($targetDays, fn ($d) => $d !== null);
 
         if (empty($targetDays)) {
             return null;
@@ -150,6 +153,7 @@ class DistributionSchedule extends Model
                 $daysToAdd = $day - $currentDayOfWeek;
                 $next = $now->copy()->addDays($daysToAdd);
                 $next->setTime($baseTime->hour, $baseTime->minute, 0);
+
                 return $next;
             }
         }

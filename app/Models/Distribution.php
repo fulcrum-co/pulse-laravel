@@ -15,31 +15,42 @@ class Distribution extends Model
 
     // Distribution types
     const TYPE_ONE_TIME = 'one_time';
+
     const TYPE_RECURRING = 'recurring';
 
     // Channels
     const CHANNEL_EMAIL = 'email';
+
     const CHANNEL_SMS = 'sms';
 
     // Statuses
     const STATUS_DRAFT = 'draft';
+
     const STATUS_SCHEDULED = 'scheduled';
+
     const STATUS_ACTIVE = 'active';
+
     const STATUS_PAUSED = 'paused';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_ARCHIVED = 'archived';
 
     // Content types
     const CONTENT_REPORT = 'report';
+
     const CONTENT_CUSTOM = 'custom';
 
     // Report modes
     const REPORT_MODE_STATIC = 'static';
+
     const REPORT_MODE_LIVE = 'live';
 
     // Recipient types
     const RECIPIENT_CONTACT_LIST = 'contact_list';
+
     const RECIPIENT_INDIVIDUAL = 'individual';
+
     const RECIPIENT_QUERY = 'query';
 
     protected $fillable = [

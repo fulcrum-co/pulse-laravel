@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SurveyTemplate extends Model
 {
@@ -41,9 +41,13 @@ class SurveyTemplate extends Model
      * Template type constants
      */
     public const TYPE_WELLNESS_CHECK = 'wellness_check';
+
     public const TYPE_ACADEMIC_STRESS = 'academic_stress';
+
     public const TYPE_SEL_SCREENER = 'sel_screener';
+
     public const TYPE_BEHAVIORAL = 'behavioral';
+
     public const TYPE_CUSTOM = 'custom';
 
     /**
@@ -77,7 +81,7 @@ class SurveyTemplate extends Model
     {
         return $query->where(function ($q) use ($orgId) {
             $q->where('is_public', true)
-              ->orWhere('org_id', $orgId);
+                ->orWhere('org_id', $orgId);
         });
     }
 

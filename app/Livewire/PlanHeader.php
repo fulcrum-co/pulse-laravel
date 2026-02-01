@@ -3,51 +3,55 @@
 namespace App\Livewire;
 
 use App\Models\StrategicPlan;
-use App\Models\User;
-use App\Models\StrategyCollaborator;
 use App\Models\StrategyAssignment;
+use App\Models\StrategyCollaborator;
+use App\Models\User;
 use Livewire\Component;
 
-class StrategyHeader extends Component
+class PlanHeader extends Component
 {
-    public StrategicPlan $strategy;
+    public StrategicPlan $plan;
 
     public $editingTitle = false;
+
     public $newTitle = '';
 
     // For adding collaborators
     public $showCollaboratorModal = false;
+
     public $searchCollaborator = '';
+
     public $selectedCollaboratorRole = 'collaborator';
 
     // For adding assignments
     public $showAssignmentModal = false;
+
     public $searchAssignment = '';
 
-    public function mount(StrategicPlan $strategy)
+    public function mount(StrategicPlan $plan)
     {
-        $this->strategy = $strategy;
-        $this->newTitle = $strategy->title;
+        $this->plan = $plan;
+        $this->newTitle = $plan->title;
     }
 
     public function startEditTitle()
     {
         $this->editingTitle = true;
-        $this->newTitle = $this->strategy->title;
+        $this->newTitle = $this->plan->title;
     }
 
     public function saveTitle()
     {
         $this->validate(['newTitle' => 'required|string|max:255']);
 
-        $this->strategy->update(['title' => $this->newTitle]);
+        $this->plan->update(['title' => $this->newTitle]);
         $this->editingTitle = false;
     }
 
     public function cancelEditTitle()
     {
         $this->editingTitle = false;
-        $this->newTitle = $this->strategy->title;
+        $this->newTitle = $this->plan->title;
     }
 
     // Collaborator management
@@ -66,18 +70,18 @@ class StrategyHeader extends Component
     public function addCollaborator($userId)
     {
         // Check if already a collaborator
-        $exists = StrategyCollaborator::where('strategic_plan_id', $this->strategy->id)
+        $exists = StrategyCollaborator::where('strategic_plan_id', $this->plan->id)
             ->where('user_id', $userId)
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             StrategyCollaborator::create([
-                'strategic_plan_id' => $this->strategy->id,
+                'strategic_plan_id' => $this->plan->id,
                 'user_id' => $userId,
                 'role' => $this->selectedCollaboratorRole,
             ]);
 
-            $this->strategy->refresh();
+            $this->plan->refresh();
         }
 
         $this->closeCollaboratorModal();
@@ -89,7 +93,7 @@ class StrategyHeader extends Component
 
         // Don't remove the last owner
         if ($collaborator && $collaborator->role === 'owner') {
-            $ownerCount = $this->strategy->collaborators()->where('role', 'owner')->count();
+            $ownerCount = $this->plan->collaborators()->where('role', 'owner')->count();
             if ($ownerCount <= 1) {
                 return; // Can't remove last owner
             }
@@ -97,7 +101,7 @@ class StrategyHeader extends Component
 
         if ($collaborator) {
             $collaborator->delete();
-            $this->strategy->refresh();
+            $this->plan->refresh();
         }
     }
 
@@ -108,14 +112,14 @@ class StrategyHeader extends Component
         if ($collaborator) {
             // Don't demote the last owner
             if ($collaborator->role === 'owner' && $role !== 'owner') {
-                $ownerCount = $this->strategy->collaborators()->where('role', 'owner')->count();
+                $ownerCount = $this->plan->collaborators()->where('role', 'owner')->count();
                 if ($ownerCount <= 1) {
                     return;
                 }
             }
 
             $collaborator->update(['role' => $role]);
-            $this->strategy->refresh();
+            $this->plan->refresh();
         }
     }
 
@@ -135,20 +139,20 @@ class StrategyHeader extends Component
     public function addAssignment($type, $id)
     {
         // Check if already assigned
-        $exists = StrategyAssignment::where('strategic_plan_id', $this->strategy->id)
+        $exists = StrategyAssignment::where('strategic_plan_id', $this->plan->id)
             ->where('assignable_type', $type)
             ->where('assignable_id', $id)
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             StrategyAssignment::create([
-                'strategic_plan_id' => $this->strategy->id,
+                'strategic_plan_id' => $this->plan->id,
                 'assignable_type' => $type,
                 'assignable_id' => $id,
                 'assigned_by' => auth()->id(),
             ]);
 
-            $this->strategy->refresh();
+            $this->plan->refresh();
         }
 
         $this->closeAssignmentModal();
@@ -157,7 +161,7 @@ class StrategyHeader extends Component
     public function removeAssignment($assignmentId)
     {
         StrategyAssignment::find($assignmentId)?->delete();
-        $this->strategy->refresh();
+        $this->plan->refresh();
     }
 
     public function getSearchedUsersProperty()
@@ -168,22 +172,22 @@ class StrategyHeader extends Component
 
         return User::where('org_id', auth()->user()->org_id)
             ->where(function ($q) {
-                $q->where('first_name', 'like', '%' . $this->searchCollaborator . '%')
-                  ->orWhere('last_name', 'like', '%' . $this->searchCollaborator . '%')
-                  ->orWhere('email', 'like', '%' . $this->searchCollaborator . '%');
+                $q->where('first_name', 'like', '%'.$this->searchCollaborator.'%')
+                    ->orWhere('last_name', 'like', '%'.$this->searchCollaborator.'%')
+                    ->orWhere('email', 'like', '%'.$this->searchCollaborator.'%');
             })
-            ->whereNotIn('id', $this->strategy->collaborators->pluck('user_id'))
+            ->whereNotIn('id', $this->plan->collaborators->pluck('user_id'))
             ->limit(10)
             ->get();
     }
 
     public function render()
     {
-        $this->strategy->load(['collaborators.user', 'assignments.assignable']);
+        $this->plan->load(['collaborators.user', 'assignments.assignable']);
 
-        return view('livewire.strategy-header', [
-            'collaborators' => $this->strategy->collaborators,
-            'assignments' => $this->strategy->assignments,
+        return view('livewire.plan-header', [
+            'collaborators' => $this->plan->collaborators,
+            'assignments' => $this->plan->assignments,
         ]);
     }
 }

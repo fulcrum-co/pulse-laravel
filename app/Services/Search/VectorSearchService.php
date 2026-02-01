@@ -11,7 +11,6 @@ use App\Models\Student;
 use App\Services\Embeddings\EmbeddingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class VectorSearchService
@@ -34,10 +33,9 @@ class VectorSearchService
     /**
      * Find similar items to a given model.
      *
-     * @param Model $model The model to find similar items for
-     * @param int $limit Maximum results
-     * @param float $threshold Minimum similarity (0-1)
-     * @return Collection
+     * @param  Model  $model  The model to find similar items for
+     * @param  int  $limit  Maximum results
+     * @param  float  $threshold  Minimum similarity (0-1)
      */
     public function findSimilar(Model $model, int $limit = 10, float $threshold = 0.5): Collection
     {
@@ -52,6 +50,7 @@ class VectorSearchService
                     'id' => $model->getKey(),
                     'error' => $e->getMessage(),
                 ]);
+
                 return collect();
             }
         }
@@ -62,12 +61,11 @@ class VectorSearchService
     /**
      * Search by text query using semantic similarity.
      *
-     * @param string $query The search query
-     * @param string $modelClass The model class to search
-     * @param array $filters Additional filters (org_id, etc.)
-     * @param int $limit Maximum results
-     * @param float $threshold Minimum similarity
-     * @return Collection
+     * @param  string  $query  The search query
+     * @param  string  $modelClass  The model class to search
+     * @param  array  $filters  Additional filters (org_id, etc.)
+     * @param  int  $limit  Maximum results
+     * @param  float  $threshold  Minimum similarity
      */
     public function searchByText(
         string $query,
@@ -79,7 +77,7 @@ class VectorSearchService
         try {
             // Generate embedding for the query
             $result = $this->embeddingService->generateEmbedding($query);
-            $queryEmbedding = '[' . implode(',', $result['embedding']) . ']';
+            $queryEmbedding = '['.implode(',', $result['embedding']).']';
 
             // Build query
             $builder = $modelClass::query()
@@ -109,6 +107,7 @@ class VectorSearchService
                 'model' => $modelClass,
                 'error' => $e->getMessage(),
             ]);
+
             return collect();
         }
     }
@@ -116,11 +115,10 @@ class VectorSearchService
     /**
      * Search across multiple model types.
      *
-     * @param string $query The search query
-     * @param array $types Model types to search (keys from $searchableModels)
-     * @param array $filters Common filters
-     * @param int $limitPerType Results per model type
-     * @return array
+     * @param  string  $query  The search query
+     * @param  array  $types  Model types to search (keys from $searchableModels)
+     * @param  array  $filters  Common filters
+     * @param  int  $limitPerType  Results per model type
      */
     public function searchAcrossTypes(
         string $query,
@@ -136,7 +134,7 @@ class VectorSearchService
         $results = [];
 
         foreach ($types as $type) {
-            if (!isset($this->searchableModels[$type])) {
+            if (! isset($this->searchableModels[$type])) {
                 continue;
             }
 
@@ -154,9 +152,8 @@ class VectorSearchService
     /**
      * Get resource recommendations for a student based on their profile.
      *
-     * @param Student $student The student to get recommendations for
-     * @param int $limit Maximum results
-     * @return Collection
+     * @param  Student  $student  The student to get recommendations for
+     * @param  int  $limit  Maximum results
      */
     public function getRecommendationsForStudent(Student $student, int $limit = 10): Collection
     {
@@ -170,7 +167,7 @@ class VectorSearchService
         try {
             // Generate embedding for student context
             $result = $this->embeddingService->generateEmbedding($context);
-            $contextEmbedding = '[' . implode(',', $result['embedding']) . ']';
+            $contextEmbedding = '['.implode(',', $result['embedding']).']';
 
             // Search for matching resources and courses
             $resources = Resource::query()
@@ -202,6 +199,7 @@ class VectorSearchService
                 'student_id' => $student->id,
                 'error' => $e->getMessage(),
             ]);
+
             return collect();
         }
     }
@@ -224,19 +222,19 @@ class VectorSearchService
         }
 
         // Tags/needs
-        if (!empty($student->tags)) {
+        if (! empty($student->tags)) {
             $tags = is_array($student->tags) ? $student->tags : json_decode($student->tags, true);
-            if (!empty($tags)) {
-                $parts[] = "Needs: " . implode(', ', $tags);
+            if (! empty($tags)) {
+                $parts[] = 'Needs: '.implode(', ', $tags);
             }
         }
 
         // IEP/ELL status
         if ($student->iep_status) {
-            $parts[] = "Has IEP";
+            $parts[] = 'Has IEP';
         }
         if ($student->ell_status) {
-            $parts[] = "English Language Learner";
+            $parts[] = 'English Language Learner';
         }
 
         // Recent survey data could be added here

@@ -7,13 +7,13 @@ use App\Models\MiniCourse;
 use App\Models\Program;
 use App\Models\Provider;
 use App\Models\Resource;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Meilisearch\Client;
 
 class MeilisearchService
 {
     protected Client $client;
+
     protected array $searchableModels = [
         Resource::class,
         MiniCourse::class,
@@ -99,7 +99,7 @@ class MeilisearchService
         // Search each index
         $searches = [
             'resources' => [
-                'indexUid' => config('scout.prefix') . 'resources',
+                'indexUid' => config('scout.prefix').'resources',
                 'q' => $query,
                 'filter' => $filterString,
                 'limit' => $limit,
@@ -107,7 +107,7 @@ class MeilisearchService
                 'facets' => ['resource_type', 'category', 'target_grades'],
             ],
             'courses' => [
-                'indexUid' => config('scout.prefix') . 'mini_courses',
+                'indexUid' => config('scout.prefix').'mini_courses',
                 'q' => $query,
                 'filter' => $filterString,
                 'limit' => $limit,
@@ -115,7 +115,7 @@ class MeilisearchService
                 'facets' => ['course_type', 'status', 'target_grades'],
             ],
             'content_blocks' => [
-                'indexUid' => config('scout.prefix') . 'content_blocks',
+                'indexUid' => config('scout.prefix').'content_blocks',
                 'q' => $query,
                 'filter' => $filterString,
                 'limit' => $limit,
@@ -123,7 +123,7 @@ class MeilisearchService
                 'facets' => ['block_type', 'grade_levels', 'topics'],
             ],
             'providers' => [
-                'indexUid' => config('scout.prefix') . 'providers',
+                'indexUid' => config('scout.prefix').'providers',
                 'q' => $query,
                 'filter' => $filterString,
                 'limit' => $limit,
@@ -131,7 +131,7 @@ class MeilisearchService
                 'facets' => ['provider_type', 'specialties'],
             ],
             'programs' => [
-                'indexUid' => config('scout.prefix') . 'programs',
+                'indexUid' => config('scout.prefix').'programs',
                 'q' => $query,
                 'filter' => $filterString,
                 'limit' => $limit,
@@ -185,7 +185,7 @@ class MeilisearchService
                 'offset' => $offset,
             ];
 
-            if (!empty($facets)) {
+            if (! empty($facets)) {
                 $searchParams['facets'] = $facets;
             }
 
@@ -235,7 +235,7 @@ class MeilisearchService
 
                 // Import all records
                 $count = $modelClass::query()
-                    ->when(method_exists($modelClass, 'withTrashed'), fn($q) => $q->withoutTrashed())
+                    ->when(method_exists($modelClass, 'withTrashed'), fn ($q) => $q->withoutTrashed())
                     ->searchable();
 
                 $results[$modelClass] = [
@@ -325,12 +325,12 @@ class MeilisearchService
 
             if (is_array($value)) {
                 // Handle array values (IN clause)
-                $escaped = array_map(fn($v) => $this->escapeValue($v), $value);
-                $filterParts[] = "{$field} IN [" . implode(', ', $escaped) . "]";
+                $escaped = array_map(fn ($v) => $this->escapeValue($v), $value);
+                $filterParts[] = "{$field} IN [".implode(', ', $escaped).']';
             } elseif (is_bool($value)) {
-                $filterParts[] = "{$field} = " . ($value ? 'true' : 'false');
+                $filterParts[] = "{$field} = ".($value ? 'true' : 'false');
             } else {
-                $filterParts[] = "{$field} = " . $this->escapeValue($value);
+                $filterParts[] = "{$field} = ".$this->escapeValue($value);
             }
         }
 
@@ -347,7 +347,7 @@ class MeilisearchService
         }
 
         // Escape quotes and wrap in quotes
-        return '"' . str_replace('"', '\\"', $value) . '"';
+        return '"'.str_replace('"', '\\"', $value).'"';
     }
 
     /**

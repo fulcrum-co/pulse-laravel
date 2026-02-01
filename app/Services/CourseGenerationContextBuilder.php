@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\Classroom;
+use App\Models\ContactList;
 use App\Models\Student;
 use App\Models\User;
-use App\Models\ContactList;
-use App\Models\Classroom;
 use Illuminate\Support\Collection;
 
 class CourseGenerationContextBuilder
@@ -166,7 +166,7 @@ class CourseGenerationContextBuilder
 
         foreach ($enrollments as $enrollment) {
             if ($enrollment->course) {
-                $needs[] = 'Enrolled in: ' . $enrollment->course->title;
+                $needs[] = 'Enrolled in: '.$enrollment->course->title;
             }
         }
 
@@ -221,7 +221,7 @@ class CourseGenerationContextBuilder
         foreach ($recentMetrics as $type => $metrics) {
             $trend = $this->calculateTrend($metrics);
             if ($trend === 'declining') {
-                $areas[] = ucfirst(str_replace('_', ' ', $type)) . ' - declining trend';
+                $areas[] = ucfirst(str_replace('_', ' ', $type)).' - declining trend';
             }
         }
 
@@ -251,7 +251,7 @@ class CourseGenerationContextBuilder
         foreach ($recentMetrics as $type => $metrics) {
             $trend = $this->calculateTrend($metrics);
             if ($trend === 'improving') {
-                $strengths[] = ucfirst(str_replace('_', ' ', $type)) . ' - improving';
+                $strengths[] = ucfirst(str_replace('_', ' ', $type)).' - improving';
             }
         }
 
@@ -275,7 +275,7 @@ class CourseGenerationContextBuilder
     protected function getTeacherBasicInfo(User $teacher): array
     {
         return [
-            'name' => $teacher->first_name . ' ' . $teacher->last_name,
+            'name' => $teacher->first_name.' '.$teacher->last_name,
             'role' => $teacher->role,
             'department' => $teacher->department ?? null,
         ];
@@ -333,7 +333,7 @@ class CourseGenerationContextBuilder
         // Get survey responses where teacher was the target or respondent
         $attempts = \App\Models\SurveyAttempt::where(function ($q) use ($teacher) {
             $q->where('respondent_id', $teacher->id)
-              ->orWhere('respondent_type', 'teacher');
+                ->orWhere('respondent_type', 'teacher');
         })
             ->where('status', 'completed')
             ->where('completed_at', '>=', now()->subMonths(6))
@@ -373,7 +373,7 @@ class CourseGenerationContextBuilder
         $outcomes = $this->getTeacherStudentOutcomes($teacher);
         foreach ($outcomes as $type => $data) {
             if (($data['trend'] ?? '') === 'declining') {
-                $areas[] = 'Student ' . str_replace('_', ' ', $type) . ' declining';
+                $areas[] = 'Student '.str_replace('_', ' ', $type).' declining';
             }
         }
 
@@ -401,11 +401,11 @@ class CourseGenerationContextBuilder
         $teacherQuery = User::where('org_id', $orgId)
             ->where('role', 'teacher');
 
-        if (!empty($criteria['department'])) {
+        if (! empty($criteria['department'])) {
             $teacherQuery->where('department', $criteria['department']);
         }
 
-        if (!empty($criteria['grade_levels'])) {
+        if (! empty($criteria['grade_levels'])) {
             // Filter by classrooms with matching grade levels
             $teacherQuery->whereHas('classrooms', function ($q) use ($criteria) {
                 $q->whereIn('grade_level', $criteria['grade_levels']);
@@ -450,7 +450,7 @@ class CourseGenerationContextBuilder
 
         foreach ($metrics as $type => $data) {
             if (($data['average'] ?? 0) < 60) {
-                $challenges[] = 'Low average in ' . str_replace('_', ' ', $type);
+                $challenges[] = 'Low average in '.str_replace('_', ' ', $type);
             }
         }
 
@@ -470,7 +470,7 @@ class CourseGenerationContextBuilder
         $teacherQuery = User::where('org_id', $orgId)
             ->where('role', 'teacher');
 
-        if (!empty($criteria['department'])) {
+        if (! empty($criteria['department'])) {
             $teacherQuery->where('department', $criteria['department']);
         }
 
@@ -489,13 +489,13 @@ class CourseGenerationContextBuilder
 
         // From filter criteria
         if ($list->filter_criteria) {
-            if (!empty($list->filter_criteria['grade_levels'])) {
+            if (! empty($list->filter_criteria['grade_levels'])) {
                 $characteristics['grade_levels'] = $list->filter_criteria['grade_levels'];
             }
-            if (!empty($list->filter_criteria['risk_levels'])) {
+            if (! empty($list->filter_criteria['risk_levels'])) {
                 $characteristics['risk_levels'] = $list->filter_criteria['risk_levels'];
             }
-            if (!empty($list->filter_criteria['tags'])) {
+            if (! empty($list->filter_criteria['tags'])) {
                 $characteristics['tags'] = $list->filter_criteria['tags'];
             }
         }
@@ -573,28 +573,28 @@ class CourseGenerationContextBuilder
         $lines = [];
 
         $entityType = $context['entity_type'] ?? 'unknown';
-        $lines[] = "## Target: " . ucfirst($entityType);
+        $lines[] = '## Target: '.ucfirst($entityType);
 
         if ($entityType === 'student') {
             $basic = $context['basic_info'] ?? [];
-            $lines[] = "- Grade Level: " . ($basic['grade_level'] ?? 'Unknown');
-            $lines[] = "- Risk Level: " . ($context['behavioral_profile']['risk_level'] ?? 'Unknown');
+            $lines[] = '- Grade Level: '.($basic['grade_level'] ?? 'Unknown');
+            $lines[] = '- Risk Level: '.($context['behavioral_profile']['risk_level'] ?? 'Unknown');
 
-            if (!empty($basic['has_iep'])) {
-                $lines[] = "- Has IEP: Yes";
+            if (! empty($basic['has_iep'])) {
+                $lines[] = '- Has IEP: Yes';
             }
-            if (!empty($basic['is_ell'])) {
-                $lines[] = "- ELL Student: Yes";
+            if (! empty($basic['is_ell'])) {
+                $lines[] = '- ELL Student: Yes';
             }
 
-            if (!empty($context['improvement_areas'])) {
+            if (! empty($context['improvement_areas'])) {
                 $lines[] = "\n### Improvement Areas:";
                 foreach ($context['improvement_areas'] as $area) {
                     $lines[] = "- $area";
                 }
             }
 
-            if (!empty($context['strengths'])) {
+            if (! empty($context['strengths'])) {
                 $lines[] = "\n### Strengths:";
                 foreach ($context['strengths'] as $strength) {
                     $lines[] = "- $strength";
@@ -602,35 +602,35 @@ class CourseGenerationContextBuilder
             }
         } elseif ($entityType === 'teacher') {
             $basic = $context['basic_info'] ?? [];
-            $lines[] = "- Role: " . ($basic['role'] ?? 'Teacher');
+            $lines[] = '- Role: '.($basic['role'] ?? 'Teacher');
 
-            if (!empty($context['improvement_areas'])) {
+            if (! empty($context['improvement_areas'])) {
                 $lines[] = "\n### Areas for Professional Development:";
                 foreach ($context['improvement_areas'] as $area) {
                     $lines[] = "- $area";
                 }
             }
 
-            if (!empty($context['student_outcomes'])) {
+            if (! empty($context['student_outcomes'])) {
                 $lines[] = "\n### Student Outcome Trends:";
                 foreach ($context['student_outcomes'] as $type => $data) {
                     $trend = $data['trend'] ?? 'unknown';
-                    $lines[] = "- " . ucfirst(str_replace('_', ' ', $type)) . ": $trend";
+                    $lines[] = '- '.ucfirst(str_replace('_', ' ', $type)).": $trend";
                 }
             }
         } elseif ($entityType === 'department') {
-            if (!empty($context['criteria'])) {
-                $lines[] = "- Department: " . ($context['criteria']['department'] ?? 'All');
+            if (! empty($context['criteria'])) {
+                $lines[] = '- Department: '.($context['criteria']['department'] ?? 'All');
             }
 
-            if (!empty($context['common_challenges'])) {
+            if (! empty($context['common_challenges'])) {
                 $lines[] = "\n### Common Challenges:";
                 foreach ($context['common_challenges'] as $challenge) {
                     $lines[] = "- $challenge";
                 }
             }
 
-            if (!empty($context['improvement_priorities'])) {
+            if (! empty($context['improvement_priorities'])) {
                 $lines[] = "\n### Improvement Priorities:";
                 foreach ($context['improvement_priorities'] as $priority) {
                     $lines[] = "- $priority";

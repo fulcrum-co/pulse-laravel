@@ -11,13 +11,21 @@ class SurveyList extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $statusFilter = '';
+
     public string $typeFilter = '';
+
     public string $orgFilter = '';
+
     public string $viewMode = 'grid';
+
     public ?string $surveyToDelete = null;
+
     public bool $showDeleteModal = false;
+
     public array $selected = [];
+
     public bool $showBulkDeleteModal = false;
 
     protected $queryString = [
@@ -78,6 +86,7 @@ class SurveyList extends Component
         $user = auth()->user();
         $hasDownstream = $user->organization?->getDownstreamOrganizations()->count() > 0;
         $hasAssignedOrgs = $user->organizations()->count() > 0;
+
         return ($user->isAdmin() && $hasDownstream) || ($user->primary_role === 'consultant' && $hasAssignedOrgs);
     }
 
@@ -102,8 +111,8 @@ class SurveyList extends Component
         $this->selected = Survey::forOrganization($user->org_id)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('title', 'like', '%' . $this->search . '%')
-                      ->orWhere('description', 'like', '%' . $this->search . '%');
+                    $q->where('title', 'like', '%'.$this->search.'%')
+                        ->orWhere('description', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->statusFilter, function ($query) {
@@ -113,7 +122,7 @@ class SurveyList extends Component
                 $query->where('survey_type', $this->typeFilter);
             })
             ->pluck('id')
-            ->map(fn($id) => (string) $id)
+            ->map(fn ($id) => (string) $id)
             ->toArray();
     }
 
@@ -174,7 +183,7 @@ class SurveyList extends Component
     {
         $survey = Survey::forOrganization(auth()->user()->org_id)->find($surveyId);
 
-        if (!$survey) {
+        if (! $survey) {
             return;
         }
 
@@ -215,7 +224,7 @@ class SurveyList extends Component
      */
     public function deleteSurvey(): void
     {
-        if (!$this->surveyToDelete) {
+        if (! $this->surveyToDelete) {
             return;
         }
 
@@ -241,12 +250,12 @@ class SurveyList extends Component
     {
         $survey = Survey::forOrganization(auth()->user()->org_id)->find($surveyId);
 
-        if (!$survey) {
+        if (! $survey) {
             return;
         }
 
         $newSurvey = $survey->replicate();
-        $newSurvey->title = $survey->title . ' (Copy)';
+        $newSurvey->title = $survey->title.' (Copy)';
         $newSurvey->status = Survey::STATUS_DRAFT;
         $newSurvey->save();
 
@@ -270,7 +279,7 @@ class SurveyList extends Component
             $query->whereIn('org_id', $accessibleOrgIds);
 
             // Filter by specific org if selected
-            if ($this->orgFilter && in_array((int)$this->orgFilter, $accessibleOrgIds)) {
+            if ($this->orgFilter && in_array((int) $this->orgFilter, $accessibleOrgIds)) {
                 $query->where('org_id', $this->orgFilter);
             }
         } else {
@@ -280,8 +289,8 @@ class SurveyList extends Component
         $surveys = $query
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('title', 'ilike', '%' . $this->search . '%')
-                      ->orWhere('description', 'ilike', '%' . $this->search . '%');
+                    $q->where('title', 'ilike', '%'.$this->search.'%')
+                        ->orWhere('description', 'ilike', '%'.$this->search.'%');
                 });
             })
             ->when($this->statusFilter, function ($query) {

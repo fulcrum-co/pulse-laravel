@@ -79,7 +79,7 @@ class ResourceSuggestionService
             }
 
             $resource = $resources->firstWhere('id', $ranked['resource_id']);
-            if (!$resource) {
+            if (! $resource) {
                 continue;
             }
 
@@ -168,7 +168,7 @@ class ResourceSuggestionService
         // Check behavior
         $behavior = $metrics->where('metric_category', ContactMetric::CATEGORY_BEHAVIOR)->first();
         if ($behavior && $behavior->status !== ContactMetric::STATUS_ON_TRACK) {
-            $needs[] = "Behavioral support needed";
+            $needs[] = 'Behavioral support needed';
         }
 
         // Include risk level
@@ -178,8 +178,8 @@ class ResourceSuggestionService
         $needs[] = "Grade level: {$student->grade_level}";
 
         // Include any tags
-        if (!empty($student->tags)) {
-            $needs[] = "Tags: " . implode(', ', $student->tags);
+        if (! empty($student->tags)) {
+            $needs[] = 'Tags: '.implode(', ', $student->tags);
         }
 
         return implode('. ', $needs);
@@ -198,7 +198,7 @@ class ResourceSuggestionService
             'tags' => $r->tags ?? [],
         ])->toArray();
 
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are helping match educational resources to student needs. Given a student's needs and a list of available resources, rank the top 5 most relevant resources.
 
 Return a JSON array of objects with:
@@ -209,11 +209,11 @@ Return a JSON array of objects with:
 Only return valid JSON array, no other text.
 PROMPT;
 
-        $userMessage = "Student needs:\n{$needDescription}\n\nAvailable resources:\n" . json_encode($resourceList);
+        $userMessage = "Student needs:\n{$needDescription}\n\nAvailable resources:\n".json_encode($resourceList);
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             // Fallback: return resources in order
             return $resources->take(5)->map(fn ($r, $i) => [
                 'resource_id' => $r->id,
@@ -227,7 +227,7 @@ PROMPT;
             if (json_last_error() !== JSON_ERROR_NONE) {
                 // Try to extract JSON array from response
                 preg_match('/\[.*\]/s', $response['content'], $matches);
-                if (!empty($matches[0])) {
+                if (! empty($matches[0])) {
                     $ranking = json_decode($matches[0], true);
                 }
             }

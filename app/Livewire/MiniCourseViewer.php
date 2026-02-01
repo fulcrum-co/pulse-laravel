@@ -12,9 +12,13 @@ use Livewire\Component;
 class MiniCourseViewer extends Component
 {
     public MiniCourse $course;
+
     public ?MiniCourseEnrollment $enrollment = null;
+
     public ?MiniCourseStep $currentStep = null;
+
     public bool $showRationale = false;
+
     public bool $previewMode = false;
 
     // For staff viewing student progress
@@ -45,7 +49,7 @@ class MiniCourseViewer extends Component
         }
 
         // Default to first step if no enrollment
-        if (!$this->currentStep && $this->course->steps->isNotEmpty()) {
+        if (! $this->currentStep && $this->course->steps->isNotEmpty()) {
             $this->currentStep = $this->course->steps->first();
         }
     }
@@ -57,7 +61,7 @@ class MiniCourseViewer extends Component
 
     public function toggleRationale(): void
     {
-        $this->showRationale = !$this->showRationale;
+        $this->showRationale = ! $this->showRationale;
     }
 
     public function completeCurrentStep(): void
@@ -65,10 +69,11 @@ class MiniCourseViewer extends Component
         // Handle preview mode - just advance to next step without tracking
         if ($this->previewMode) {
             $this->advanceToNextStep();
+
             return;
         }
 
-        if (!$this->enrollment || !$this->currentStep) {
+        if (! $this->enrollment || ! $this->currentStep) {
             return;
         }
 
@@ -88,7 +93,7 @@ class MiniCourseViewer extends Component
 
         // Move to next step using course's steps collection (reset keys with values())
         $steps = $this->course->steps->values();
-        $currentIndex = $steps->search(fn($s) => $s->id === $this->currentStep->id);
+        $currentIndex = $steps->search(fn ($s) => $s->id === $this->currentStep->id);
 
         if ($currentIndex !== false && $currentIndex < $steps->count() - 1) {
             $nextStep = $steps->get($currentIndex + 1);
@@ -104,13 +109,13 @@ class MiniCourseViewer extends Component
 
     public function advanceToNextStep(): void
     {
-        if (!$this->currentStep) {
+        if (! $this->currentStep) {
             return;
         }
 
         // Find next step using the course's steps collection (reset keys with values())
         $steps = $this->course->steps->values();
-        $currentIndex = $steps->search(fn($s) => $s->id === $this->currentStep->id);
+        $currentIndex = $steps->search(fn ($s) => $s->id === $this->currentStep->id);
 
         if ($currentIndex !== false && $currentIndex < $steps->count() - 1) {
             $this->currentStep = $steps->get($currentIndex + 1);
@@ -125,18 +130,19 @@ class MiniCourseViewer extends Component
     public function startEnrollment(): void
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
         // For staff users without a student account, enable preview mode
-        if (!$user->student) {
+        if (! $user->student) {
             $this->previewMode = true;
             $this->currentStep = $this->course->steps->first();
             $this->dispatch('notify', [
                 'type' => 'info',
                 'message' => 'Previewing course as staff member.',
             ]);
+
             return;
         }
 
@@ -161,35 +167,37 @@ class MiniCourseViewer extends Component
 
     public function getNextStepProperty(): ?MiniCourseStep
     {
-        if (!$this->currentStep) {
+        if (! $this->currentStep) {
             return null;
         }
         $steps = $this->course->steps->values();
-        $currentIndex = $steps->search(fn($s) => $s->id === $this->currentStep->id);
+        $currentIndex = $steps->search(fn ($s) => $s->id === $this->currentStep->id);
 
         if ($currentIndex !== false && $currentIndex < $steps->count() - 1) {
             return $steps->get($currentIndex + 1);
         }
+
         return null;
     }
 
     public function getPreviousStepProperty(): ?MiniCourseStep
     {
-        if (!$this->currentStep) {
+        if (! $this->currentStep) {
             return null;
         }
         $steps = $this->course->steps->values();
-        $currentIndex = $steps->search(fn($s) => $s->id === $this->currentStep->id);
+        $currentIndex = $steps->search(fn ($s) => $s->id === $this->currentStep->id);
 
         if ($currentIndex !== false && $currentIndex > 0) {
             return $steps->get($currentIndex - 1);
         }
+
         return null;
     }
 
     public function getStepProgressProperty(): array
     {
-        if (!$this->enrollment) {
+        if (! $this->enrollment) {
             return [];
         }
 
@@ -206,6 +214,7 @@ class MiniCourseViewer extends Component
         $user = auth()->user();
         $hasDownstream = $user->organization?->getDownstreamOrganizations()->count() > 0;
         $hasAssignedOrgs = $user->organizations()->count() > 0;
+
         return ($user->isAdmin() && $hasDownstream) || ($user->primary_role === 'consultant' && $hasAssignedOrgs);
     }
 

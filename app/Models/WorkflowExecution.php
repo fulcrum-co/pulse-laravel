@@ -11,10 +11,15 @@ class WorkflowExecution extends Model
 
     // Status constants
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_RUNNING = 'running';
+
     public const STATUS_WAITING = 'waiting';  // Waiting for delay/external
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_FAILED = 'failed';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
@@ -261,7 +266,7 @@ class WorkflowExecution extends Model
      */
     public function getDurationAttribute(): ?int
     {
-        if (!$this->started_at) {
+        if (! $this->started_at) {
             return null;
         }
 

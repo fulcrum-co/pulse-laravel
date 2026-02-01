@@ -87,10 +87,11 @@ class CheckSurveyDeadlines extends Command
 
         if (empty($usersToNotify)) {
             $this->line("  Survey {$survey->id}: All users already notified recently");
+
             return;
         }
 
-        $this->line("  Survey {$survey->id}: Notifying " . count($usersToNotify) . " users (skipped " . count($recentlyNotified) . " already notified)");
+        $this->line("  Survey {$survey->id}: Notifying ".count($usersToNotify).' users (skipped '.count($recentlyNotified).' already notified)');
 
         // Create urgent notifications
         $count = $this->notificationService->notifyMany(

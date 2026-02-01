@@ -22,23 +22,31 @@ class NotificationPreferences extends Component
      * Quiet hours settings.
      */
     public bool $quietHoursEnabled = false;
+
     public string $quietHoursStart = '21:00';
+
     public string $quietHoursEnd = '07:00';
+
     public ?string $quietHoursTimezone = null;
 
     /**
      * Digest settings.
      */
     public bool $digestEnabled = true;
+
     public string $digestFrequency = 'daily';
+
     public string $digestDay = 'monday';
+
     public string $digestTime = '07:00';
+
     public bool $digestSuppressIndividual = false;
 
     /**
      * Toast settings.
      */
     public bool $toastEnabled = true;
+
     public string $toastPriorityThreshold = 'low';
 
     /**
@@ -209,7 +217,7 @@ class NotificationPreferences extends Component
             return;
         }
 
-        $this->preferences[$category][$channel] = !$this->preferences[$category][$channel];
+        $this->preferences[$category][$channel] = ! $this->preferences[$category][$channel];
         $this->savePreferences();
     }
 
@@ -228,7 +236,7 @@ class NotificationPreferences extends Component
             return;
         }
 
-        $this->channelsByPriority[$priority][$channel] = !$this->channelsByPriority[$priority][$channel];
+        $this->channelsByPriority[$priority][$channel] = ! $this->channelsByPriority[$priority][$channel];
         $this->savePreferences();
     }
 
@@ -269,7 +277,7 @@ class NotificationPreferences extends Component
      */
     public function toggleQuietHours(): void
     {
-        $this->quietHoursEnabled = !$this->quietHoursEnabled;
+        $this->quietHoursEnabled = ! $this->quietHoursEnabled;
         $this->savePreferences();
     }
 
@@ -278,7 +286,7 @@ class NotificationPreferences extends Component
      */
     public function toggleDigest(): void
     {
-        $this->digestEnabled = !$this->digestEnabled;
+        $this->digestEnabled = ! $this->digestEnabled;
         $this->savePreferences();
     }
 
@@ -287,7 +295,7 @@ class NotificationPreferences extends Component
      */
     public function toggleDigestSuppressIndividual(): void
     {
-        $this->digestSuppressIndividual = !$this->digestSuppressIndividual;
+        $this->digestSuppressIndividual = ! $this->digestSuppressIndividual;
         $this->savePreferences();
     }
 
@@ -296,7 +304,7 @@ class NotificationPreferences extends Component
      */
     public function toggleToast(): void
     {
-        $this->toastEnabled = !$this->toastEnabled;
+        $this->toastEnabled = ! $this->toastEnabled;
         $this->savePreferences();
     }
 

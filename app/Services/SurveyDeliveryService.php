@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\Student;
 use App\Models\Survey;
 use App\Models\SurveyAttempt;
 use App\Models\SurveyDelivery;
-use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
@@ -40,7 +40,7 @@ class SurveyDeliveryService
         ]);
 
         // If not scheduled for later, deliver immediately
-        if (!$scheduledFor) {
+        if (! $scheduledFor) {
             $this->processDelivery($delivery);
         }
 
@@ -68,6 +68,7 @@ class SurveyDeliveryService
             ]);
 
             $delivery->markFailed($e->getMessage());
+
             return false;
         }
     }
@@ -108,8 +109,9 @@ class SurveyDeliveryService
      */
     protected function deliverViaSms(SurveyDelivery $delivery): bool
     {
-        if (!$delivery->phone_number) {
+        if (! $delivery->phone_number) {
             $delivery->markFailed('No phone number provided');
+
             return false;
         }
 
@@ -137,10 +139,12 @@ class SurveyDeliveryService
         if ($result['success'] ?? false) {
             $delivery->markSent($result['message_id'] ?? null);
             $delivery->update(['survey_attempt_id' => $attempt->id]);
+
             return true;
         }
 
         $delivery->markFailed($result['error'] ?? 'SMS send failed');
+
         return false;
     }
 
@@ -149,8 +153,9 @@ class SurveyDeliveryService
      */
     protected function deliverViaVoiceCall(SurveyDelivery $delivery): bool
     {
-        if (!$delivery->phone_number) {
+        if (! $delivery->phone_number) {
             $delivery->markFailed('No phone number provided');
+
             return false;
         }
 
@@ -182,10 +187,12 @@ class SurveyDeliveryService
                     'greeting' => $greeting,
                 ],
             ]);
+
             return true;
         }
 
         $delivery->markFailed($result['error'] ?? 'Voice call initiation failed');
+
         return false;
     }
 
@@ -194,8 +201,9 @@ class SurveyDeliveryService
      */
     protected function deliverViaWhatsApp(SurveyDelivery $delivery): bool
     {
-        if (!$delivery->phone_number) {
+        if (! $delivery->phone_number) {
             $delivery->markFailed('No phone number provided');
+
             return false;
         }
 
@@ -223,10 +231,12 @@ class SurveyDeliveryService
         if ($result['success'] ?? false) {
             $delivery->markSent($result['message_id'] ?? null);
             $delivery->update(['survey_attempt_id' => $attempt->id]);
+
             return true;
         }
 
         $delivery->markFailed($result['error'] ?? 'WhatsApp send failed');
+
         return false;
     }
 
@@ -277,7 +287,7 @@ class SurveyDeliveryService
             ->latest()
             ->first();
 
-        if (!$delivery) {
+        if (! $delivery) {
             return [
                 'success' => false,
                 'error' => 'No active survey found for this number.',
@@ -288,7 +298,7 @@ class SurveyDeliveryService
         $attempt = $delivery->surveyAttempt;
         $currentQuestion = $delivery->getCurrentQuestion();
 
-        if (!$currentQuestion) {
+        if (! $currentQuestion) {
             return [
                 'success' => false,
                 'error' => 'No current question.',
@@ -337,7 +347,7 @@ class SurveyDeliveryService
             ->channel(SurveyDelivery::CHANNEL_VOICE)
             ->first();
 
-        if (!$delivery) {
+        if (! $delivery) {
             return [
                 'success' => false,
                 'error' => 'No delivery found for this call.',
@@ -348,7 +358,7 @@ class SurveyDeliveryService
         $attempt = $delivery->surveyAttempt;
         $currentQuestion = $delivery->getCurrentQuestion();
 
-        if (!$currentQuestion) {
+        if (! $currentQuestion) {
             return [
                 'success' => false,
                 'tts' => 'Thank you, the survey is complete. Goodbye!',
@@ -397,8 +407,8 @@ class SurveyDeliveryService
         $firstQuestion = $survey->questions[0] ?? null;
         $questionText = $firstQuestion ? $this->formatQuestionForTts($firstQuestion, 1) : '';
 
-        return "Hello! This is Pulse calling with a quick survey called {$survey->title}. " .
-               "Please use your phone keypad to respond. " .
+        return "Hello! This is Pulse calling with a quick survey called {$survey->title}. ".
+               'Please use your phone keypad to respond. '.
                $questionText;
     }
 
@@ -416,12 +426,12 @@ class SurveyDeliveryService
 
             $text .= "Press a number from {$min} to {$max}. ";
 
-            if (!empty($labels)) {
-                $text .= "{$min} means {$labels[0]}, and {$max} means " . end($labels) . ". ";
+            if (! empty($labels)) {
+                $text .= "{$min} means {$labels[0]}, and {$max} means ".end($labels).'. ';
             }
         } elseif ($question['type'] === 'multiple_choice') {
             $options = $question['options'] ?? [];
-            $text .= "Your options are: ";
+            $text .= 'Your options are: ';
             foreach ($options as $i => $option) {
                 $num = $i + 1;
                 $text .= "Press {$num} for {$option}. ";
@@ -436,7 +446,7 @@ class SurveyDeliveryService
      */
     protected function formatQuestionForSms(array $question): string
     {
-        $text = $question['question'] . "\n\n";
+        $text = $question['question']."\n\n";
 
         if ($question['type'] === 'scale') {
             $min = $question['min'] ?? 1;
@@ -445,7 +455,7 @@ class SurveyDeliveryService
 
             $text .= "Reply with a number ({$min}-{$max}):\n";
 
-            if (!empty($labels)) {
+            if (! empty($labels)) {
                 for ($i = $min; $i <= $max; $i++) {
                     $labelIndex = $i - $min;
                     if (isset($labels[$labelIndex])) {
@@ -457,10 +467,10 @@ class SurveyDeliveryService
             $options = $question['options'] ?? [];
             $text .= "Reply with a number:\n";
             foreach ($options as $i => $option) {
-                $text .= ($i + 1) . " = {$option}\n";
+                $text .= ($i + 1)." = {$option}\n";
             }
         } else {
-            $text .= "Reply with your answer.";
+            $text .= 'Reply with your answer.';
         }
 
         return $text;
@@ -478,6 +488,7 @@ class SurveyDeliveryService
                 $value = (int) $response;
                 $min = $question['min'] ?? 1;
                 $max = $question['max'] ?? 5;
+
                 return max($min, min($max, $value));
             }
         }
@@ -486,6 +497,7 @@ class SurveyDeliveryService
             if (is_numeric($response)) {
                 $options = $question['options'] ?? [];
                 $index = (int) $response - 1;
+
                 return $options[$index] ?? $response;
             }
         }
@@ -505,12 +517,14 @@ class SurveyDeliveryService
             $value = (int) $digit;
             $min = $question['min'] ?? 1;
             $max = $question['max'] ?? 5;
+
             return max($min, min($max, $value));
         }
 
         if ($question['type'] === 'multiple_choice' && is_numeric($digit)) {
             $options = $question['options'] ?? [];
             $index = (int) $digit - 1;
+
             return $options[$index] ?? $digit;
         }
 
@@ -527,15 +541,15 @@ class SurveyDeliveryService
 
         // Add +1 if US number without country code
         if (strlen($cleaned) === 10) {
-            return '+1' . $cleaned;
+            return '+1'.$cleaned;
         }
 
         // Add + if not present
         if (strlen($cleaned) === 11 && str_starts_with($cleaned, '1')) {
-            return '+' . $cleaned;
+            return '+'.$cleaned;
         }
 
         // Return with + prefix
-        return '+' . $cleaned;
+        return '+'.$cleaned;
     }
 }

@@ -11,7 +11,9 @@ class ReportList extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $statusFilter = '';
+
     public string $viewMode = 'grid';
 
     protected $queryString = [
@@ -86,6 +88,7 @@ class ReportList extends Component
         $user = auth()->user();
         $hasDownstream = $user->organization?->getDownstreamOrganizations()->count() > 0;
         $hasAssignedOrgs = $user->organizations()->count() > 0;
+
         return ($user->isAdmin() && $hasDownstream) || ($user->primary_role === 'consultant' && $hasAssignedOrgs);
     }
 
@@ -107,7 +110,7 @@ class ReportList extends Component
 
         $reports = $query
             ->when($this->search, function ($query) {
-                $query->where('report_name', 'ilike', '%' . $this->search . '%');
+                $query->where('report_name', 'ilike', '%'.$this->search.'%');
             })
             ->when($this->statusFilter, function ($query) {
                 $query->where('status', $this->statusFilter);

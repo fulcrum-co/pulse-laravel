@@ -47,9 +47,10 @@ class BackfillEmbeddings extends Command
         $modelsToProcess = $this->models;
 
         if ($modelName = $this->option('model')) {
-            if (!isset($this->models[$modelName])) {
+            if (! isset($this->models[$modelName])) {
                 $this->error("Unknown model: {$modelName}");
-                $this->line('Available models: ' . implode(', ', array_keys($this->models)));
+                $this->line('Available models: '.implode(', ', array_keys($this->models)));
+
                 return Command::FAILURE;
             }
             $modelsToProcess = [$modelName => $this->models[$modelName]];
@@ -73,7 +74,7 @@ class BackfillEmbeddings extends Command
         $this->info('Backfill complete!');
         $this->line("Total records processed: {$totalProcessed}");
 
-        if (!$sync) {
+        if (! $sync) {
             $this->line("Total jobs queued: {$totalQueued}");
             $this->warn('Run your queue workers to process the embedding jobs:');
             $this->line('  php artisan queue:work --queue=embeddings');
@@ -104,7 +105,7 @@ class BackfillEmbeddings extends Command
         }
 
         // Only get records missing embeddings unless force is true
-        if (!$force) {
+        if (! $force) {
             $query->whereNull('embedding');
         }
 

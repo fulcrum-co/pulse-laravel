@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class SurveyCreationSession extends Model
 {
@@ -35,15 +35,20 @@ class SurveyCreationSession extends Model
      * Creation mode constants
      */
     public const MODE_CHAT = 'chat';
+
     public const MODE_VOICE = 'voice';
+
     public const MODE_STATIC = 'static';
+
     public const MODE_HYBRID = 'hybrid';
 
     /**
      * Status constants
      */
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_ABANDONED = 'abandoned';
 
     /**
@@ -114,7 +119,7 @@ class SurveyCreationSession extends Model
     public function addDraftQuestion(array $question): void
     {
         $questions = $this->draft_questions ?? [];
-        $question['id'] = $question['id'] ?? 'q' . (count($questions) + 1);
+        $question['id'] = $question['id'] ?? 'q'.(count($questions) + 1);
         $questions[] = $question;
         $this->update(['draft_questions' => $questions]);
     }
@@ -140,7 +145,7 @@ class SurveyCreationSession extends Model
         array_splice($questions, $index, 1);
         // Re-index question IDs
         foreach ($questions as $i => $q) {
-            $questions[$i]['id'] = 'q' . ($i + 1);
+            $questions[$i]['id'] = 'q'.($i + 1);
         }
         $this->update(['draft_questions' => $questions]);
     }
@@ -199,7 +204,8 @@ class SurveyCreationSession extends Model
     public function getLastMessage(): ?array
     {
         $history = $this->conversation_history ?? [];
-        return !empty($history) ? end($history) : null;
+
+        return ! empty($history) ? end($history) : null;
     }
 
     /**

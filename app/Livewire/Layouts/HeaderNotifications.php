@@ -15,14 +15,15 @@ class HeaderNotifications extends Component
     public function getUnreadAlertsProperty(): int
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return 0;
         }
 
         try {
-            if (!Schema::hasTable('user_notifications')) {
+            if (! Schema::hasTable('user_notifications')) {
                 return 0;
             }
+
             return UserNotification::getUnreadCountForUser($user->id);
         } catch (\Exception $e) {
             return 0;
@@ -35,14 +36,15 @@ class HeaderNotifications extends Component
     public function getUnreadMessagesProperty(): int
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return 0;
         }
 
         try {
-            if (!Schema::hasTable('provider_conversations')) {
+            if (! Schema::hasTable('provider_conversations')) {
                 return 0;
             }
+
             return ProviderConversation::where('initiator_type', get_class($user))
                 ->where('initiator_id', $user->id)
                 ->where('unread_count_initiator', '>', 0)

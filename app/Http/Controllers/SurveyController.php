@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Survey;
-use App\Models\SurveyAttempt;
-use App\Models\SurveyTemplate;
-use App\Models\SurveyCreationSession;
-use App\Models\SurveyDelivery;
 use App\Models\QuestionBank;
+use App\Models\Survey;
+use App\Models\SurveyCreationSession;
+use App\Models\SurveyTemplate;
 use App\Services\SurveyCreationService;
 use App\Services\SurveyDeliveryService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class SurveyController extends Controller
@@ -235,7 +233,7 @@ class SurveyController extends Controller
         $user = $request->user();
 
         $newSurvey = $survey->replicate();
-        $newSurvey->title = $survey->title . ' (Copy)';
+        $newSurvey->title = $survey->title.' (Copy)';
         $newSurvey->status = 'draft';
         $newSurvey->created_by = $user->id;
         $newSurvey->save();
@@ -269,8 +267,9 @@ class SurveyController extends Controller
             $targetOrg = \App\Models\Organization::find($targetOrgId);
 
             // Verify the source org can push to target org
-            if (!$sourceOrg->canPushContentTo($targetOrg)) {
+            if (! $sourceOrg->canPushContentTo($targetOrg)) {
                 $errors[] = "Cannot push to {$targetOrg->org_name} - not a child organization.";
+
                 continue;
             }
 
@@ -286,7 +285,7 @@ class SurveyController extends Controller
             'success' => count($pushed) > 0,
             'pushed' => $pushed,
             'errors' => $errors,
-            'message' => count($pushed) . ' survey(s) pushed successfully.',
+            'message' => count($pushed).' survey(s) pushed successfully.',
         ]);
     }
 
@@ -339,7 +338,7 @@ class SurveyController extends Controller
     {
         $this->authorize('update', $session);
 
-        if (!$session->isActive()) {
+        if (! $session->isActive()) {
             return response()->json([
                 'success' => false,
                 'error' => 'Session is no longer active.',
@@ -377,7 +376,7 @@ class SurveyController extends Controller
     {
         $this->authorize('update', $session);
 
-        if (!$session->isActive()) {
+        if (! $session->isActive()) {
             return response()->json([
                 'success' => false,
                 'error' => 'Session is no longer active.',
@@ -412,7 +411,7 @@ class SurveyController extends Controller
     {
         $this->authorize('update', $session);
 
-        if (!$session->isActive()) {
+        if (! $session->isActive()) {
             return response()->json([
                 'success' => false,
                 'error' => 'Session is no longer active.',
@@ -486,11 +485,11 @@ class SurveyController extends Controller
         // Fallback: return questions from question bank
         $user = $request->user();
         $questions = QuestionBank::availableTo($user->org_id)
-            ->when($validated['survey_type'] ?? null, fn($q, $type) => $q->category($type))
+            ->when($validated['survey_type'] ?? null, fn ($q, $type) => $q->category($type))
             ->orderBy('usage_count', 'desc')
             ->limit($validated['count'] ?? 5)
             ->get()
-            ->map(fn($q) => $q->toSurveyQuestion());
+            ->map(fn ($q) => $q->toSurveyQuestion());
 
         return response()->json([
             'success' => true,
@@ -566,10 +565,10 @@ class SurveyController extends Controller
         $user = $request->user();
 
         $questions = QuestionBank::availableTo($user->org_id)
-            ->when($request->category, fn($q, $cat) => $q->category($cat))
-            ->when($request->type, fn($q, $type) => $q->ofType($type))
-            ->when($request->search, fn($q, $search) => $q->search($search))
-            ->when($request->tags, fn($q, $tags) => $q->withTags(explode(',', $tags)))
+            ->when($request->category, fn ($q, $cat) => $q->category($cat))
+            ->when($request->type, fn ($q, $type) => $q->ofType($type))
+            ->when($request->search, fn ($q, $search) => $q->search($search))
+            ->when($request->tags, fn ($q, $tags) => $q->withTags(explode(',', $tags)))
             ->orderBy('usage_count', 'desc')
             ->paginate($request->per_page ?? 20);
 
@@ -618,8 +617,8 @@ class SurveyController extends Controller
         $user = $request->user();
 
         $templates = SurveyTemplate::availableTo($user->org_id)
-            ->when($request->type, fn($q, $type) => $q->ofType($type))
-            ->when($request->featured, fn($q) => $q->featured())
+            ->when($request->type, fn ($q, $type) => $q->ofType($type))
+            ->when($request->featured, fn ($q) => $q->featured())
             ->orderBy('is_featured', 'desc')
             ->orderBy('usage_count', 'desc')
             ->get();
@@ -680,7 +679,7 @@ class SurveyController extends Controller
             'scheduled_for' => 'nullable|date|after:now',
         ]);
 
-        if (!$this->deliveryService) {
+        if (! $this->deliveryService) {
             return response()->json([
                 'success' => false,
                 'error' => 'Delivery service not available.',
@@ -703,7 +702,7 @@ class SurveyController extends Controller
         return response()->json([
             'success' => true,
             'deliveries' => $deliveries,
-            'message' => count($deliveries) . ' delivery(ies) initiated.',
+            'message' => count($deliveries).' delivery(ies) initiated.',
         ]);
     }
 

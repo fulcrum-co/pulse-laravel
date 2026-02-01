@@ -46,16 +46,16 @@ class StrategyAssignment extends Model
     {
         $assignable = $this->assignable;
 
-        if (!$assignable) {
+        if (! $assignable) {
             return 'Unknown';
         }
 
         if ($assignable instanceof User) {
-            return $assignable->first_name . ' ' . $assignable->last_name;
+            return $assignable->first_name.' '.$assignable->last_name;
         }
 
         if ($assignable instanceof Student) {
-            return $assignable->user->first_name . ' ' . $assignable->user->last_name;
+            return $assignable->user->first_name.' '.$assignable->user->last_name;
         }
 
         if ($assignable instanceof Department) {

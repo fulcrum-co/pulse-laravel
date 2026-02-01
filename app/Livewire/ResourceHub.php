@@ -11,10 +11,15 @@ use Livewire\Component;
 class ResourceHub extends Component
 {
     public string $search = '';
+
     public bool $isSearching = false;
+
     public array $selectedCategories = [];
+
     public array $selectedContentTypes = [];
+
     public string $sortBy = 'recent';
+
     public string $viewMode = 'grid';
 
     protected $queryString = [
@@ -44,7 +49,7 @@ class ResourceHub extends Component
             $this->selectedCategories[] = $category;
         }
         // Clear content types if content category is deselected
-        if ($category === 'content' && !in_array('content', $this->selectedCategories)) {
+        if ($category === 'content' && ! in_array('content', $this->selectedCategories)) {
             $this->selectedContentTypes = [];
         }
     }
@@ -133,7 +138,7 @@ class ResourceHub extends Component
         $hasFilters = count($this->selectedCategories) > 0;
 
         // Get content items
-        if (!$hasFilters || in_array('content', $this->selectedCategories)) {
+        if (! $hasFilters || in_array('content', $this->selectedCategories)) {
             $contentQuery = Resource::whereIn('org_id', $accessibleOrgIds)->active();
 
             // Apply content type filter
@@ -159,7 +164,7 @@ class ResourceHub extends Component
         }
 
         // Get providers
-        if (!$hasFilters || in_array('provider', $this->selectedCategories)) {
+        if (! $hasFilters || in_array('provider', $this->selectedCategories)) {
             $providers = Provider::whereIn('org_id', $accessibleOrgIds)
                 ->active()
                 ->latest('created_at')
@@ -180,7 +185,7 @@ class ResourceHub extends Component
         }
 
         // Get programs
-        if (!$hasFilters || in_array('program', $this->selectedCategories)) {
+        if (! $hasFilters || in_array('program', $this->selectedCategories)) {
             $programs = Program::whereIn('org_id', $accessibleOrgIds)
                 ->active()
                 ->latest('created_at')
@@ -201,7 +206,7 @@ class ResourceHub extends Component
         }
 
         // Get courses
-        if (!$hasFilters || in_array('course', $this->selectedCategories)) {
+        if (! $hasFilters || in_array('course', $this->selectedCategories)) {
             $courses = MiniCourse::whereIn('org_id', $accessibleOrgIds)
                 ->where('status', MiniCourse::STATUS_ACTIVE)
                 ->withCount('steps')
@@ -213,7 +218,7 @@ class ResourceHub extends Component
                     'type' => 'course',
                     'title' => $c->title,
                     'description' => $c->description,
-                    'subtitle' => $c->steps_count . ' steps',
+                    'subtitle' => $c->steps_count.' steps',
                     'icon' => 'academic-cap',
                     'icon_bg' => 'orange',
                     'url' => route('resources.courses.show', $c),
@@ -237,20 +242,20 @@ class ResourceHub extends Component
      */
     public function getSearchResultsProperty(): array
     {
-        if (!$this->isSearching) {
+        if (! $this->isSearching) {
             return [];
         }
 
         $user = auth()->user();
         $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
-        $searchTerm = '%' . $this->search . '%';
+        $searchTerm = '%'.$this->search.'%';
 
         // Search content resources
         $content = Resource::whereIn('org_id', $accessibleOrgIds)
             ->active()
             ->where(function ($q) use ($searchTerm) {
                 $q->where('title', 'ilike', $searchTerm)
-                  ->orWhere('description', 'ilike', $searchTerm);
+                    ->orWhere('description', 'ilike', $searchTerm);
             })
             ->limit(4)
             ->get()
@@ -269,7 +274,7 @@ class ResourceHub extends Component
             ->active()
             ->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'ilike', $searchTerm)
-                  ->orWhere('bio', 'ilike', $searchTerm);
+                    ->orWhere('bio', 'ilike', $searchTerm);
             })
             ->limit(4)
             ->get()
@@ -289,7 +294,7 @@ class ResourceHub extends Component
             ->active()
             ->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'ilike', $searchTerm)
-                  ->orWhere('description', 'ilike', $searchTerm);
+                    ->orWhere('description', 'ilike', $searchTerm);
             })
             ->limit(4)
             ->get()
@@ -299,7 +304,7 @@ class ResourceHub extends Component
                 'title' => $p->name,
                 'description' => $p->description,
                 'subtitle' => ucfirst(str_replace('_', ' ', $p->program_type)),
-                'meta' => $p->duration_weeks ? $p->duration_weeks . ' weeks' : null,
+                'meta' => $p->duration_weeks ? $p->duration_weeks.' weeks' : null,
                 'url' => route('resources.programs.show', $p),
             ]);
 
@@ -309,7 +314,7 @@ class ResourceHub extends Component
             ->withCount('steps')
             ->where(function ($q) use ($searchTerm) {
                 $q->where('title', 'ilike', $searchTerm)
-                  ->orWhere('description', 'ilike', $searchTerm);
+                    ->orWhere('description', 'ilike', $searchTerm);
             })
             ->limit(4)
             ->get()
@@ -319,7 +324,7 @@ class ResourceHub extends Component
                 'title' => $c->title,
                 'description' => $c->description,
                 'subtitle' => ucfirst(str_replace('_', ' ', $c->course_type)),
-                'meta' => $c->steps_count . ' steps',
+                'meta' => $c->steps_count.' steps',
                 'url' => route('resources.courses.show', $c),
             ]);
 
@@ -331,7 +336,7 @@ class ResourceHub extends Component
                     ->active()
                     ->where(function ($q) use ($searchTerm) {
                         $q->where('title', 'ilike', $searchTerm)
-                          ->orWhere('description', 'ilike', $searchTerm);
+                            ->orWhere('description', 'ilike', $searchTerm);
                     })
                     ->count(),
             ],
@@ -342,7 +347,7 @@ class ResourceHub extends Component
                     ->active()
                     ->where(function ($q) use ($searchTerm) {
                         $q->where('name', 'ilike', $searchTerm)
-                          ->orWhere('bio', 'ilike', $searchTerm);
+                            ->orWhere('bio', 'ilike', $searchTerm);
                     })
                     ->count(),
             ],
@@ -353,7 +358,7 @@ class ResourceHub extends Component
                     ->active()
                     ->where(function ($q) use ($searchTerm) {
                         $q->where('name', 'ilike', $searchTerm)
-                          ->orWhere('description', 'ilike', $searchTerm);
+                            ->orWhere('description', 'ilike', $searchTerm);
                     })
                     ->count(),
             ],
@@ -364,7 +369,7 @@ class ResourceHub extends Component
                     ->where('status', MiniCourse::STATUS_ACTIVE)
                     ->where(function ($q) use ($searchTerm) {
                         $q->where('title', 'ilike', $searchTerm)
-                          ->orWhere('description', 'ilike', $searchTerm);
+                            ->orWhere('description', 'ilike', $searchTerm);
                     })
                     ->count(),
             ],

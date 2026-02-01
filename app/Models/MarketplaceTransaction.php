@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class MarketplaceTransaction extends Model
@@ -16,18 +16,25 @@ class MarketplaceTransaction extends Model
 
     // Transaction types
     public const TYPE_PURCHASE = 'purchase';
+
     public const TYPE_SUBSCRIPTION = 'subscription';
+
     public const TYPE_DOWNLOAD = 'download'; // Free items
 
     // Statuses
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_REFUNDED = 'refunded';
+
     public const STATUS_CANCELLED = 'cancelled';
+
     public const STATUS_FAILED = 'failed';
 
     // Platform fee rates
     public const DIRECT_FEE_RATE = 0.10; // 10% for direct purchases
+
     public const DISCOVERY_FEE_RATE = 0.30; // 30% for marketplace discovery
 
     protected $fillable = [
@@ -116,6 +123,7 @@ class MarketplaceTransaction extends Model
     public static function calculatePlatformFee(float $amount, bool $isDiscovery = true): float
     {
         $rate = $isDiscovery ? self::DISCOVERY_FEE_RATE : self::DIRECT_FEE_RATE;
+
         return round($amount * $rate, 2);
     }
 
@@ -234,7 +242,7 @@ class MarketplaceTransaction extends Model
      */
     public function isSubscriptionActive(): bool
     {
-        if (!$this->isSubscription()) {
+        if (! $this->isSubscription()) {
             return false;
         }
 
@@ -276,7 +284,7 @@ class MarketplaceTransaction extends Model
     {
         $this->increment('access_count');
 
-        if (!$this->first_accessed_at) {
+        if (! $this->first_accessed_at) {
             $this->update(['first_accessed_at' => now()]);
         }
     }

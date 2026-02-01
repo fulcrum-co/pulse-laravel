@@ -219,14 +219,14 @@
 
                 @if(RolePermissions::currentUserCanAccess('strategy'))
                 <!-- Plan -->
-                <div @mouseenter="hoveredItem = 'strategy'" @mouseleave="hoveredItem = null" class="relative">
-                    <a href="/strategies"
+                <div @mouseenter="hoveredItem = 'plan'" @mouseleave="hoveredItem = null" class="relative">
+                    <a href="/plans"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
-                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('strategies*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('plans*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="clipboard-document-list" class="w-5 h-5 flex-shrink-0" />
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Plan</span>
                     </a>
-                    <div x-show="sidebarCollapsed && hoveredItem === 'strategy'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Plan</div>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'plan'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Plan</div>
                 </div>
                 @endif
 
@@ -456,7 +456,7 @@
                                     </a>
                                     @endif
                                     @if(RolePermissions::currentUserCanAccess('create_strategy'))
-                                    <a href="/strategies/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <a href="/plans/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         <x-icon name="clipboard-document-list" class="w-4 h-4 text-gray-400" />
                                         Plan
                                     </a>
@@ -494,9 +494,9 @@
                             <x-icon name="plus" class="w-4 h-4 mr-2" />
                             Create Distribution
                         </a>
-                    @elseif(request()->is('strategies') || request()->is('strategies/'))
+                    @elseif(request()->is('plans') || request()->is('plans/'))
                         <!-- New Plan Button -->
-                        <a href="{{ route('strategies.create') }}" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                        <a href="{{ route('plans.create') }}" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
                             <x-icon name="plus" class="w-4 h-4 mr-2" />
                             New Plan
                         </a>

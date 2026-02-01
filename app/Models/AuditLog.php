@@ -43,23 +43,35 @@ class AuditLog extends Model
 
     // Action types
     public const ACTION_VIEW = 'view';
+
     public const ACTION_CREATE = 'create';
+
     public const ACTION_UPDATE = 'update';
+
     public const ACTION_DELETE = 'delete';
+
     public const ACTION_EXPORT = 'export';
+
     public const ACTION_SHARE = 'share';
+
     public const ACTION_PRINT = 'print';
 
     // Action categories
     public const CATEGORY_DATA_ACCESS = 'data_access';
+
     public const CATEGORY_DATA_MODIFICATION = 'data_modification';
+
     public const CATEGORY_REPORT_GENERATION = 'report_generation';
+
     public const CATEGORY_SHARE = 'share';
 
     // Legal basis options (FERPA)
     public const LEGAL_BASIS_EDUCATIONAL_INTEREST = 'legitimate_educational_interest';
+
     public const LEGAL_BASIS_DIRECTORY_INFO = 'directory_info';
+
     public const LEGAL_BASIS_CONSENT = 'consent';
+
     public const LEGAL_BASIS_HEALTH_SAFETY = 'health_safety_emergency';
 
     /**

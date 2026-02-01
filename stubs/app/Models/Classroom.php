@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use MongoDB\Laravel\Eloquent\Model;
 use MongoDB\Laravel\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Classroom extends Model
 {
     use SoftDeletes;
 
     protected $connection = 'mongodb';
+
     protected $collection = 'classrooms';
 
     protected $fillable = [
@@ -89,7 +90,7 @@ class Classroom extends Model
         }
 
         $studentIds = $this->student_ids ?? [];
-        if (!in_array($studentId, $studentIds)) {
+        if (! in_array($studentId, $studentIds)) {
             $studentIds[] = $studentId;
             $this->update(['student_ids' => $studentIds]);
         }
@@ -103,7 +104,7 @@ class Classroom extends Model
     public function removeStudent(string $studentId): void
     {
         $studentIds = $this->student_ids ?? [];
-        $studentIds = array_filter($studentIds, fn($id) => $id !== $studentId);
+        $studentIds = array_filter($studentIds, fn ($id) => $id !== $studentId);
         $this->update(['student_ids' => array_values($studentIds)]);
     }
 
@@ -130,7 +131,7 @@ class Classroom extends Model
     {
         return $query->where(function ($q) use ($teacherId) {
             $q->where('primary_teacher_id', $teacherId)
-              ->orWhere('co_teacher_ids', $teacherId);
+                ->orWhere('co_teacher_ids', $teacherId);
         });
     }
 }

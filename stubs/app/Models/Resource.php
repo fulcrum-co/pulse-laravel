@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
-use MongoDB\Laravel\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use MongoDB\Laravel\Eloquent\Model;
+use MongoDB\Laravel\Eloquent\SoftDeletes;
 
 class Resource extends Model
 {
     use SoftDeletes;
 
     protected $connection = 'mongodb';
+
     protected $collection = 'resources';
 
     protected $fillable = [
@@ -155,7 +156,7 @@ class Resource extends Model
     {
         return $query->where(function ($q) use ($orgId) {
             $q->where('org_id', $orgId)
-              ->orWhere('accessible_to_org_ids', $orgId);
+                ->orWhere('accessible_to_org_ids', $orgId);
         });
     }
 }

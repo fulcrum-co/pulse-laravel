@@ -5,7 +5,6 @@ namespace App\Livewire\Admin;
 use App\Models\ModerationDecision;
 use App\Models\ModerationQueueItem;
 use App\Models\ModerationTeamSetting;
-use App\Models\User;
 use App\Services\Moderation\ModerationQueueService;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -18,6 +17,7 @@ use Livewire\Component;
 class ModerationDashboard extends Component
 {
     public string $timeRange = '7d'; // 24h, 7d, 30d
+
     public string $selectedTeamMember = 'all';
 
     protected ModerationQueueService $queueService;
@@ -39,7 +39,7 @@ class ModerationDashboard extends Component
         return ModerationTeamSetting::forOrganization(auth()->user()->org_id)
             ->with('user')
             ->get()
-            ->map(fn($setting) => [
+            ->map(fn ($setting) => [
                 'id' => $setting->user_id,
                 'name' => $setting->user->full_name ?? 'Unknown',
                 'current_load' => $setting->current_load,
@@ -85,7 +85,7 @@ class ModerationDashboard extends Component
             ->latest()
             ->limit(20)
             ->get()
-            ->map(fn($decision) => [
+            ->map(fn ($decision) => [
                 'id' => $decision->id,
                 'user_name' => $decision->user->full_name ?? 'Unknown',
                 'decision' => $decision->decision_label,
@@ -101,7 +101,7 @@ class ModerationDashboard extends Component
     public function slaWarnings(): Collection
     {
         return $this->queueService->getItemsDueSoon(auth()->user()->org_id, 24)
-            ->map(fn($item) => [
+            ->map(fn ($item) => [
                 'id' => $item->id,
                 'content_title' => $item->moderationResult?->moderatable?->title ?? 'Unknown',
                 'priority' => $item->priority,
@@ -125,7 +125,7 @@ class ModerationDashboard extends Component
         $startDate = now()->subDays($days);
 
         $decisions = ModerationDecision::selectRaw('DATE(created_at) as date, decision, COUNT(*) as count')
-            ->whereHas('queueItem', fn($q) => $q->forOrganization($orgId))
+            ->whereHas('queueItem', fn ($q) => $q->forOrganization($orgId))
             ->where('created_at', '>=', $startDate)
             ->groupBy('date', 'decision')
             ->orderBy('date')
@@ -167,6 +167,7 @@ class ModerationDashboard extends Component
 
         $breakdown = $items->groupBy(function ($item) {
             $type = class_basename($item->moderationResult?->moderatable_type ?? 'Unknown');
+
             return $type;
         })->map->count();
 
@@ -181,7 +182,7 @@ class ModerationDashboard extends Component
     protected function formatSeconds(float $seconds): string
     {
         if ($seconds < 60) {
-            return round($seconds) . 's';
+            return round($seconds).'s';
         }
 
         $minutes = floor($seconds / 60);

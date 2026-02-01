@@ -138,10 +138,10 @@ class ModerationAssignmentService
             'moderation_assigned',
             [
                 'title' => 'Content Moderation Assigned',
-                'body' => ($assigner?->full_name ?? 'Someone') . " assigned you to review \"{$contentTitle}\"",
+                'body' => ($assigner?->full_name ?? 'Someone')." assigned you to review \"{$contentTitle}\"",
                 'icon' => 'shield-check',
                 'priority' => $notificationPriority,
-                'action_url' => route('admin.moderation') . '?review=' . $result->id,
+                'action_url' => route('admin.moderation').'?review='.$result->id,
                 'action_label' => 'Review Content',
                 'notifiable_type' => ContentModerationResult::class,
                 'notifiable_id' => $result->id,
@@ -198,10 +198,10 @@ class ModerationAssignmentService
             'moderation_collaborator_added',
             [
                 'title' => 'Added as Moderation Collaborator',
-                'body' => ($adder?->full_name ?? 'Someone') . " added you as a collaborator on \"{$contentTitle}\"",
+                'body' => ($adder?->full_name ?? 'Someone')." added you as a collaborator on \"{$contentTitle}\"",
                 'icon' => 'users',
                 'priority' => UserNotification::PRIORITY_NORMAL,
-                'action_url' => route('admin.moderation') . '?review=' . $result->id,
+                'action_url' => route('admin.moderation').'?review='.$result->id,
                 'action_label' => 'View Content',
                 'notifiable_type' => ContentModerationResult::class,
                 'notifiable_id' => $result->id,
@@ -219,7 +219,7 @@ class ModerationAssignmentService
     ): void {
         // Find the content owner
         $moderatable = $result->moderatable;
-        if (!$moderatable || !isset($moderatable->created_by)) {
+        if (! $moderatable || ! isset($moderatable->created_by)) {
             return;
         }
 
@@ -257,7 +257,7 @@ class ModerationAssignmentService
         $this->notificationService->notify(
             $ownerId,
             UserNotification::CATEGORY_COURSE,
-            'moderation_' . $action,
+            'moderation_'.$action,
             [
                 'title' => $messageConfig['title'],
                 'body' => $messageConfig['body'],

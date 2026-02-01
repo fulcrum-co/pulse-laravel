@@ -15,31 +15,48 @@ class DistributionCreator extends Component
 
     // Basics
     public string $title = '';
+
     public string $description = '';
+
     public string $channel = 'email';
+
     public string $distributionType = 'one_time';
 
     // Content
     public string $contentType = 'custom';
+
     public ?int $reportId = null;
+
     public string $reportMode = 'live';
+
     public string $subject = '';
+
     public string $messageBody = '';
+
     public ?int $messageTemplateId = null;
 
     // Recipients
     public string $recipientType = 'contact_list';
+
     public ?int $contactListId = null;
+
     public array $recipientIds = [];
 
     // Schedule
     public bool $sendImmediately = true;
+
     public ?string $scheduledFor = null;
+
     public string $scheduleType = 'interval';
+
     public string $intervalType = 'weekly';
+
     public int $intervalValue = 1;
+
     public array $customDays = [];
+
     public string $sendTime = '09:00';
+
     public string $timezone = 'America/New_York';
 
     public function mount(?int $distribution = null): void
@@ -55,7 +72,7 @@ class DistributionCreator extends Component
         $distribution = Distribution::where('org_id', auth()->user()->org_id)
             ->find($this->distributionId);
 
-        if (!$distribution) {
+        if (! $distribution) {
             return;
         }
 
@@ -73,7 +90,7 @@ class DistributionCreator extends Component
         $this->contactListId = $distribution->contact_list_id;
         $this->recipientIds = $distribution->recipient_ids ?? [];
         $this->scheduledFor = $distribution->scheduled_for?->format('Y-m-d\TH:i');
-        $this->sendImmediately = !$distribution->scheduled_for && $distribution->distribution_type === 'one_time';
+        $this->sendImmediately = ! $distribution->scheduled_for && $distribution->distribution_type === 'one_time';
         $this->timezone = $distribution->timezone;
 
         if ($distribution->schedule) {
@@ -134,7 +151,7 @@ class DistributionCreator extends Component
             'recipient_type' => $this->recipientType,
             'contact_list_id' => $this->recipientType === 'contact_list' ? $this->contactListId : null,
             'recipient_ids' => $this->recipientType === 'individual' ? $this->recipientIds : null,
-            'scheduled_for' => !$this->sendImmediately && $this->scheduledFor ? $this->scheduledFor : null,
+            'scheduled_for' => ! $this->sendImmediately && $this->scheduledFor ? $this->scheduledFor : null,
             'timezone' => $this->timezone,
             'created_by' => auth()->id(),
         ];

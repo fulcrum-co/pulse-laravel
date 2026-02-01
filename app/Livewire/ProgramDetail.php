@@ -2,10 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Models\ContactList;
 use App\Models\Program;
 use App\Models\ProgramEnrollment;
 use App\Models\Student;
-use App\Models\ContactList;
 use Livewire\Component;
 
 class ProgramDetail extends Component
@@ -14,15 +14,19 @@ class ProgramDetail extends Component
 
     // Enroll modal state
     public bool $showEnrollModal = false;
+
     public string $enrollType = 'student'; // student or list
+
     public ?int $selectedStudentId = null;
+
     public ?int $selectedListId = null;
+
     public string $enrollNote = '';
 
     public function mount(Program $program): void
     {
         // Ensure the user has access to this program's organization
-        if (!auth()->user()->canAccessOrganization($program->org_id)) {
+        if (! auth()->user()->canAccessOrganization($program->org_id)) {
             abort(403);
         }
 
@@ -98,6 +102,7 @@ class ProgramDetail extends Component
 
             if ($exists) {
                 session()->flash('error', 'This student is already enrolled in this program.');
+
                 return;
             }
 
@@ -131,7 +136,7 @@ class ProgramDetail extends Component
                     ->whereIn('status', ['enrolled', 'active'])
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     ProgramEnrollment::create([
                         'program_id' => $this->program->id,
                         'student_id' => $student->id,

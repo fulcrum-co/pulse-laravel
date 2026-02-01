@@ -26,6 +26,7 @@ class NotificationCenter extends Component
     public string $viewMode = 'list'; // 'list', 'grouped', or 'table'
 
     public array $selected = [];
+
     public bool $showBulkActions = false;
 
     /**
@@ -105,7 +106,7 @@ class NotificationCenter extends Component
     public function getNotificationsProperty()
     {
         try {
-            if (!Schema::hasTable('user_notifications')) {
+            if (! Schema::hasTable('user_notifications')) {
                 return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
             }
 
@@ -143,8 +144,8 @@ class NotificationCenter extends Component
             // Search
             if ($this->search) {
                 $query->where(function ($q) {
-                    $q->where('title', 'like', '%' . $this->search . '%')
-                      ->orWhere('body', 'like', '%' . $this->search . '%');
+                    $q->where('title', 'like', '%'.$this->search.'%')
+                        ->orWhere('body', 'like', '%'.$this->search.'%');
                 });
             }
 
@@ -160,9 +161,10 @@ class NotificationCenter extends Component
     public function getUnreadCountProperty(): int
     {
         try {
-            if (!Schema::hasTable('user_notifications')) {
+            if (! Schema::hasTable('user_notifications')) {
                 return 0;
             }
+
             return UserNotification::getUnreadCountForUser(auth()->id());
         } catch (\Exception $e) {
             return 0;
@@ -176,7 +178,7 @@ class NotificationCenter extends Component
     public function getActionableNotificationsProperty(): array
     {
         try {
-            if (!Schema::hasTable('user_notifications')) {
+            if (! Schema::hasTable('user_notifications')) {
                 return [];
             }
 
@@ -188,7 +190,7 @@ class NotificationCenter extends Component
                 ->orderByPriorityAndDate()
                 ->limit(20)
                 ->get()
-                ->map(fn($n) => [
+                ->map(fn ($n) => [
                     'id' => $n->id,
                     'title' => $n->title,
                     'action_url' => $n->action_url,
@@ -207,7 +209,7 @@ class NotificationCenter extends Component
     public function getCategoryCountsProperty(): array
     {
         try {
-            if (!Schema::hasTable('user_notifications')) {
+            if (! Schema::hasTable('user_notifications')) {
                 return [];
             }
 
@@ -250,7 +252,7 @@ class NotificationCenter extends Component
     public function getGroupedNotificationsProperty(): array
     {
         try {
-            if (!Schema::hasTable('user_notifications')) {
+            if (! Schema::hasTable('user_notifications')) {
                 return [];
             }
 
@@ -289,8 +291,8 @@ class NotificationCenter extends Component
             // Apply search
             if ($this->search) {
                 $query->where(function ($q) {
-                    $q->where('title', 'like', '%' . $this->search . '%')
-                      ->orWhere('body', 'like', '%' . $this->search . '%');
+                    $q->where('title', 'like', '%'.$this->search.'%')
+                        ->orWhere('body', 'like', '%'.$this->search.'%');
                 });
             }
 
@@ -341,7 +343,7 @@ class NotificationCenter extends Component
     public function snooze(int $id, string $duration): void
     {
         $notification = $this->getNotification($id);
-        if (!$notification) {
+        if (! $notification) {
             return;
         }
 
@@ -357,7 +359,7 @@ class NotificationCenter extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Notification snoozed until ' . $until->format('M j, g:i A'),
+            'message' => 'Notification snoozed until '.$until->format('M j, g:i A'),
         ]);
     }
 
@@ -367,7 +369,7 @@ class NotificationCenter extends Component
     public function snoozeUntil(int $id, string $datetime): void
     {
         $notification = $this->getNotification($id);
-        if (!$notification) {
+        if (! $notification) {
             return;
         }
 
@@ -377,6 +379,7 @@ class NotificationCenter extends Component
                 'type' => 'error',
                 'message' => 'Please select a future date and time.',
             ]);
+
             return;
         }
 
@@ -384,7 +387,7 @@ class NotificationCenter extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Notification snoozed until ' . $until->format('M j, g:i A'),
+            'message' => 'Notification snoozed until '.$until->format('M j, g:i A'),
         ]);
     }
 

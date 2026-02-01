@@ -15,13 +15,18 @@ class ContactNotes extends Component
     use AuthorizesRequests, WithFileUploads, WithPagination;
 
     public string $contactType;
+
     public int $contactId;
 
     // New note form
     public string $newNoteContent = '';
+
     public string $newNoteType = 'general';
+
     public bool $isPrivate = false;
+
     public string $visibility = 'organization';
+
     public $voiceMemo = null;
 
     // Recording state
@@ -29,7 +34,9 @@ class ContactNotes extends Component
 
     // Edit state
     public ?int $editingNoteId = null;
+
     public string $editContent = '';
+
     public string $editNoteType = 'general';
 
     // Filter

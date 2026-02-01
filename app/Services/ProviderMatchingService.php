@@ -36,6 +36,7 @@ class ProviderMatchingService
         // Score and rank providers
         $scoredProviders = $providers->map(function ($provider) use ($needs, $student) {
             $score = $this->calculateMatchScore($provider, $needs, $student);
+
             return [
                 'provider' => $provider,
                 'score' => $score['total'],
@@ -71,6 +72,7 @@ class ProviderMatchingService
 
         $scoredPrograms = $programs->map(function ($program) use ($needs, $student) {
             $score = $this->calculateProgramMatchScore($program, $needs, $student);
+
             return [
                 'program' => $program,
                 'score' => $score['total'],
@@ -124,7 +126,7 @@ class ProviderMatchingService
             'preferences' => $context['preferences'] ?? [],
         ];
 
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are a student support specialist matching students with appropriate service providers.
 Analyze the student's needs and available providers to recommend the best matches.
 
@@ -140,12 +142,12 @@ Return a JSON object with:
 PROMPT;
 
         $response = $this->claudeService->sendMessage(
-            "Match providers for this student:\n\nStudent:\n" . json_encode($studentContext, JSON_PRETTY_PRINT) .
-            "\n\nAvailable Providers:\n" . json_encode($providerList, JSON_PRETTY_PRINT),
+            "Match providers for this student:\n\nStudent:\n".json_encode($studentContext, JSON_PRETTY_PRINT).
+            "\n\nAvailable Providers:\n".json_encode($providerList, JSON_PRETTY_PRINT),
             $systemPrompt
         );
 
-        if (!$response['success']) {
+        if (! $response['success']) {
             return $this->generateFallbackRecommendations($providers, $student);
         }
 
@@ -159,6 +161,7 @@ PROMPT;
                     $result['recommendations'] = collect($result['recommendations'])->map(function ($rec) use ($providers) {
                         $provider = $providers->firstWhere('id', $rec['provider_id']);
                         $rec['provider'] = $provider;
+
                         return $rec;
                     })->filter(fn ($r) => $r['provider'] !== null)->values()->toArray();
                 }
@@ -224,7 +227,7 @@ PROMPT;
         }
 
         // Based on tags
-        if (!empty($student->tags)) {
+        if (! empty($student->tags)) {
             $tagToNeeds = [
                 'anxiety' => ['anxiety management', 'therapy'],
                 'depression' => ['mental health', 'therapy', 'counseling'],
@@ -427,11 +430,11 @@ PROMPT;
     protected function generateRecommendationReason(Provider $provider, array $factors): string
     {
         if (empty($factors)) {
-            return "Available provider in your area.";
+            return 'Available provider in your area.';
         }
 
         $primary = $factors[0];
-        $additional = count($factors) > 1 ? ' Also: ' . implode(', ', array_slice($factors, 1)) : '';
+        $additional = count($factors) > 1 ? ' Also: '.implode(', ', array_slice($factors, 1)) : '';
 
         return "{$provider->name} is recommended because: {$primary}.{$additional}";
     }
@@ -442,10 +445,10 @@ PROMPT;
     protected function generateProgramRecommendationReason(Program $program, array $factors): string
     {
         if (empty($factors)) {
-            return "Available program that may help.";
+            return 'Available program that may help.';
         }
 
-        return "{$program->name} is recommended because it " . strtolower(implode(', ', array_slice($factors, 0, 2))) . ".";
+        return "{$program->name} is recommended because it ".strtolower(implode(', ', array_slice($factors, 0, 2))).'.';
     }
 
     /**

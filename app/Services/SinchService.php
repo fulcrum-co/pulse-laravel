@@ -2,20 +2,27 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use App\Models\Conversation;
 use App\Models\User;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class SinchService
 {
     protected string $projectId;
+
     protected string $keyId;
+
     protected string $keySecret;
+
     protected string $phoneNumber;
+
     protected string $whatsappNumber;
+
     protected string $voiceUrl;
+
     protected string $smsUrl;
+
     protected string $whatsappUrl;
 
     public function __construct()
@@ -182,7 +189,7 @@ class SinchService
                 ->where('status', '!=', 'completed')
                 ->first();
 
-            if (!$conversation) {
+            if (! $conversation) {
                 $conversation = Conversation::create([
                     'channel' => 'sms',
                     'direction' => 'outbound',
@@ -214,7 +221,7 @@ class SinchService
             ->where('status', '!=', 'completed')
             ->first();
 
-        if (!$conversation) {
+        if (! $conversation) {
             $conversation = Conversation::create([
                 'channel' => 'sms',
                 'direction' => 'inbound',
@@ -271,7 +278,7 @@ class SinchService
                 ->where('status', '!=', 'completed')
                 ->first();
 
-            if (!$conversation) {
+            if (! $conversation) {
                 $conversation = Conversation::create([
                     'channel' => 'whatsapp',
                     'direction' => 'outbound',
@@ -303,7 +310,7 @@ class SinchService
             ->where('status', '!=', 'completed')
             ->first();
 
-        if (!$conversation) {
+        if (! $conversation) {
             $conversation = Conversation::create([
                 'channel' => 'whatsapp',
                 'direction' => 'inbound',
@@ -346,10 +353,10 @@ class SinchService
 
         // Add country code if not present (assuming US)
         if (strlen($number) === 10) {
-            $number = '1' . $number;
+            $number = '1'.$number;
         }
 
-        return '+' . $number;
+        return '+'.$number;
     }
 
     /**

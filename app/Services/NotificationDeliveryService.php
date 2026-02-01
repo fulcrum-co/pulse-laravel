@@ -16,7 +16,6 @@ class NotificationDeliveryService
      * In-app is already created by NotificationService.
      * This method dispatches email/SMS jobs based on user preferences.
      *
-     * @param UserNotification $notification
      * @return array Summary of channels dispatched/skipped
      */
     public function deliver(UserNotification $notification): array
@@ -27,12 +26,13 @@ class NotificationDeliveryService
             'sms' => ['dispatched' => false, 'reason' => null],
         ];
 
-        if (!$user) {
+        if (! $user) {
             Log::warning('NotificationDeliveryService: User not found', [
                 'notification_id' => $notification->id,
             ]);
             $summary['email']['reason'] = 'user_not_found';
             $summary['sms']['reason'] = 'user_not_found';
+
             return $summary;
         }
 
@@ -75,8 +75,7 @@ class NotificationDeliveryService
      * Deliver notifications to multiple users.
      * Use this when notifyMany() is called and you need multi-channel delivery.
      *
-     * @param Collection $notifications Collection of UserNotification models
-     * @return void
+     * @param  Collection  $notifications  Collection of UserNotification models
      */
     public function deliverMany(Collection $notifications): void
     {
@@ -88,9 +87,6 @@ class NotificationDeliveryService
     /**
      * Deliver notifications by IDs.
      * Useful when you have IDs from a bulk insert.
-     *
-     * @param array $notificationIds
-     * @return void
      */
     public function deliverByIds(array $notificationIds): void
     {
@@ -113,7 +109,6 @@ class NotificationDeliveryService
      * 6. Category preference
      * 7. Quiet hours
      *
-     * @param UserNotification $notification
      * @return array ['should_send' => bool, 'reason' => string|null]
      */
     protected function shouldSendEmail(UserNotification $notification): array
@@ -136,6 +131,7 @@ class NotificationDeliveryService
                 'user_id' => $user->id,
                 'type' => $notification->type,
             ]);
+
             return ['should_send' => false, 'reason' => 'type_disabled'];
         }
 
@@ -145,21 +141,23 @@ class NotificationDeliveryService
                 'user_id' => $user->id,
                 'notification_id' => $notification->id,
             ]);
+
             return ['should_send' => false, 'reason' => 'digest_suppress'];
         }
 
         // 5. Check priority-based channel config
         $priority = $notification->priority ?? 'normal';
-        if (!$user->wantsChannelForPriority($priority, 'email')) {
+        if (! $user->wantsChannelForPriority($priority, 'email')) {
             Log::debug('NotificationDeliveryService: Email suppressed - priority channel disabled', [
                 'user_id' => $user->id,
                 'priority' => $priority,
             ]);
+
             return ['should_send' => false, 'reason' => 'priority_channel_disabled'];
         }
 
         // 6. Check category preference
-        if (!$user->wantsNotificationVia($notification->category, 'email')) {
+        if (! $user->wantsNotificationVia($notification->category, 'email')) {
             return ['should_send' => false, 'reason' => 'category_preference'];
         }
 
@@ -169,6 +167,7 @@ class NotificationDeliveryService
                 'user_id' => $user->id,
                 'category' => $notification->category,
             ]);
+
             return ['should_send' => false, 'reason' => 'quiet_hours'];
         }
 
@@ -186,7 +185,6 @@ class NotificationDeliveryService
      * 5. Category preference
      * 6. Quiet hours
      *
-     * @param UserNotification $notification
      * @return array ['should_send' => bool, 'reason' => string|null]
      */
     protected function shouldSendSms(UserNotification $notification): array
@@ -209,21 +207,23 @@ class NotificationDeliveryService
                 'user_id' => $user->id,
                 'type' => $notification->type,
             ]);
+
             return ['should_send' => false, 'reason' => 'type_disabled'];
         }
 
         // 4. Check priority-based channel config
         $priority = $notification->priority ?? 'normal';
-        if (!$user->wantsChannelForPriority($priority, 'sms')) {
+        if (! $user->wantsChannelForPriority($priority, 'sms')) {
             Log::debug('NotificationDeliveryService: SMS suppressed - priority channel disabled', [
                 'user_id' => $user->id,
                 'priority' => $priority,
             ]);
+
             return ['should_send' => false, 'reason' => 'priority_channel_disabled'];
         }
 
         // 5. Check category preference
-        if (!$user->wantsNotificationVia($notification->category, 'sms')) {
+        if (! $user->wantsNotificationVia($notification->category, 'sms')) {
             return ['should_send' => false, 'reason' => 'category_preference'];
         }
 
@@ -233,6 +233,7 @@ class NotificationDeliveryService
                 'user_id' => $user->id,
                 'category' => $notification->category,
             ]);
+
             return ['should_send' => false, 'reason' => 'quiet_hours'];
         }
 
@@ -241,9 +242,6 @@ class NotificationDeliveryService
 
     /**
      * Check if this is a critical admin notification that bypasses all preferences.
-     *
-     * @param UserNotification $notification
-     * @return bool
      */
     protected function isCriticalAdminNotification(UserNotification $notification): bool
     {
@@ -256,28 +254,25 @@ class NotificationDeliveryService
      * Force deliver a notification via specific channels (bypasses preferences).
      * Use for urgent/critical notifications.
      *
-     * @param UserNotification $notification
-     * @param array $channels Array of channels: ['email', 'sms']
-     * @param bool $bypassQuietHours
-     * @return void
+     * @param  array  $channels  Array of channels: ['email', 'sms']
      */
     public function forceDeliver(UserNotification $notification, array $channels, bool $bypassQuietHours = false): void
     {
         $user = $notification->user;
 
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
-        if (in_array('email', $channels) && !empty($user->email)) {
-            if ($bypassQuietHours || !$user->isInQuietHours()) {
+        if (in_array('email', $channels) && ! empty($user->email)) {
+            if ($bypassQuietHours || ! $user->isInQuietHours()) {
                 SendNotificationEmail::dispatch($notification)
                     ->onQueue('notifications-email');
             }
         }
 
-        if (in_array('sms', $channels) && !empty($user->phone)) {
-            if ($bypassQuietHours || !$user->isInQuietHours()) {
+        if (in_array('sms', $channels) && ! empty($user->phone)) {
+            if ($bypassQuietHours || ! $user->isInQuietHours()) {
                 SendNotificationSms::dispatch($notification)
                     ->onQueue('notifications-sms');
             }
@@ -286,25 +281,19 @@ class NotificationDeliveryService
 
     /**
      * Check channel availability for a user.
-     *
-     * @param User $user
-     * @return array
      */
     public function getAvailableChannels(User $user): array
     {
         return [
             'in_app' => true, // Always available
-            'email' => !empty($user->email),
-            'sms' => !empty($user->phone),
+            'email' => ! empty($user->email),
+            'sms' => ! empty($user->phone),
         ];
     }
 
     /**
      * Get a preview of which channels would be used for a notification.
      * Useful for debugging or UI display.
-     *
-     * @param UserNotification $notification
-     * @return array
      */
     public function previewDeliveryChannels(UserNotification $notification): array
     {

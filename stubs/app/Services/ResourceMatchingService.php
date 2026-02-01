@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Student;
 use App\Models\Resource;
 use App\Models\ResourceAssignment;
+use App\Models\Student;
 use App\Models\SurveyAttempt;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -35,6 +35,7 @@ class ResourceMatchingService
                     'student_id' => $student->_id,
                     'concern' => $concern,
                 ]);
+
                 continue;
             }
 
@@ -71,7 +72,7 @@ class ResourceMatchingService
         }
 
         // Send notifications
-        if (!empty($assignments)) {
+        if (! empty($assignments)) {
             $this->notifyAssignments($student, $assignments);
         }
 
@@ -159,10 +160,10 @@ class ResourceMatchingService
             ->accessibleTo($student->org_id);
 
         // Filter by subject domain
-        if (!empty($concern['subject'])) {
+        if (! empty($concern['subject'])) {
             $query->where(function ($q) use ($concern) {
                 $q->where('tags.subject_domain', $concern['subject'])
-                  ->orWhere('tags.subject_domain', 'general');
+                    ->orWhere('tags.subject_domain', 'general');
             });
         }
 
@@ -171,15 +172,15 @@ class ResourceMatchingService
         if ($gradeLevel) {
             $query->where(function ($q) use ($gradeLevel) {
                 $q->where('tags.grade_level', $gradeLevel)
-                  ->orWhereNull('tags.grade_level');
+                    ->orWhereNull('tags.grade_level');
             });
         }
 
         // Filter by trigger type
-        if (!empty($concern['trigger'])) {
+        if (! empty($concern['trigger'])) {
             $query->where(function ($q) use ($concern) {
                 $q->where('tags.performance_trigger', $concern['trigger'])
-                  ->orWhereNull('tags.performance_trigger');
+                    ->orWhereNull('tags.performance_trigger');
             });
         }
 
@@ -187,7 +188,7 @@ class ResourceMatchingService
         if ($concern['severity'] === 'high') {
             $query->where(function ($q) {
                 $q->where('tags.intervention_type', 'Remedial')
-                  ->orWhere('tags.intervention_type', 'Support');
+                    ->orWhere('tags.intervention_type', 'Support');
             });
         }
 
@@ -240,7 +241,7 @@ class ResourceMatchingService
     public function getRecommendations(Student $student, ?array $surveyData = null): Collection
     {
         // If no survey data provided, use latest survey attempt
-        if (!$surveyData) {
+        if (! $surveyData) {
             $latestAttempt = $student->latest_survey_attempt;
             $surveyData = $latestAttempt?->llm_extracted_data ?? [];
         }

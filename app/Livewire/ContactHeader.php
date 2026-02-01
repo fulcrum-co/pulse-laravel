@@ -9,6 +9,7 @@ use Livewire\Component;
 class ContactHeader extends Component
 {
     public $contact;
+
     public string $contactType;
 
     public function mount($contact)
@@ -20,10 +21,10 @@ class ContactHeader extends Component
     public function getDisplayNameProperty()
     {
         if ($this->contact instanceof Student) {
-            return $this->contact->full_name ?? $this->contact->first_name . ' ' . $this->contact->last_name;
+            return $this->contact->full_name ?? $this->contact->first_name.' '.$this->contact->last_name;
         }
 
-        return $this->contact->name ?? $this->contact->first_name . ' ' . $this->contact->last_name;
+        return $this->contact->name ?? $this->contact->first_name.' '.$this->contact->last_name;
     }
 
     public function getAvatarUrlProperty()
@@ -45,7 +46,7 @@ class ContactHeader extends Component
             ->take(2)
             ->join('');
 
-        return "https://ui-avatars.com/api/?name=" . urlencode($initials) . "&background=3b82f6&color=fff&size=128";
+        return 'https://ui-avatars.com/api/?name='.urlencode($initials).'&background=3b82f6&color=fff&size=128';
     }
 
     public function getRoleDisplayProperty()

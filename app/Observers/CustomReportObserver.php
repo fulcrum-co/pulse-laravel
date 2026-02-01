@@ -57,6 +57,7 @@ class CustomReportObserver
             Log::info('CustomReportObserver: No assigned users for report', [
                 'report_id' => $report->id,
             ]);
+
             return;
         }
 
@@ -78,7 +79,7 @@ class CustomReportObserver
                 'notifiable_id' => $report->id,
                 'metadata' => [
                     'report_type' => $report->report_type,
-                    'has_public_link' => !empty($report->public_token),
+                    'has_public_link' => ! empty($report->public_token),
                 ],
             ]
         );
@@ -105,7 +106,7 @@ class CustomReportObserver
      */
     protected function handleReportArchived(CustomReport $report): void
     {
-        if (!$report->created_by) {
+        if (! $report->created_by) {
             return;
         }
 

@@ -148,10 +148,10 @@ class EnrollmentController extends Controller
 
         // Handle status changes
         if (isset($validated['status'])) {
-            if ($validated['status'] === MiniCourseEnrollment::STATUS_IN_PROGRESS && !$enrollment->started_at) {
+            if ($validated['status'] === MiniCourseEnrollment::STATUS_IN_PROGRESS && ! $enrollment->started_at) {
                 $enrollment->started_at = now();
             }
-            if ($validated['status'] === MiniCourseEnrollment::STATUS_COMPLETED && !$enrollment->completed_at) {
+            if ($validated['status'] === MiniCourseEnrollment::STATUS_COMPLETED && ! $enrollment->completed_at) {
                 $enrollment->completed_at = now();
                 $enrollment->progress_percent = 100;
             }
@@ -343,6 +343,7 @@ class EnrollmentController extends Controller
 
         $stepsWithProgress = $steps->map(function ($step) use ($progress) {
             $stepProgress = $progress->get($step->id);
+
             return [
                 'step' => $step,
                 'progress' => $stepProgress,

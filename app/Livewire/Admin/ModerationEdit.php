@@ -14,9 +14,13 @@ class ModerationEdit extends Component
 
     // Form fields
     public string $title = '';
+
     public string $description = '';
+
     public string $rationale = '';
+
     public string $expectedExperience = '';
+
     public string $reviewNotes = '';
 
     // Content type
@@ -36,9 +40,10 @@ class ModerationEdit extends Component
     {
         $this->result = $result->load('moderatable');
 
-        if (!$this->result->moderatable) {
+        if (! $this->result->moderatable) {
             session()->flash('error', 'Content not found.');
             $this->redirect(route('admin.moderation'));
+
             return;
         }
 
@@ -113,6 +118,7 @@ class ModerationEdit extends Component
     {
         if ($this->contentType !== 'MiniCourse') {
             session()->flash('error', 'Only Mini Courses can be published.');
+
             return;
         }
 

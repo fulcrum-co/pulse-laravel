@@ -29,14 +29,20 @@ class VoiceMemoJob extends Model
 
     // Status values
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_UPLOADING = 'uploading';
+
     public const STATUS_TRANSCRIBING = 'transcribing';
+
     public const STATUS_EXTRACTING = 'extracting';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_FAILED = 'failed';
 
     // Provider options
     public const PROVIDER_WHISPER = 'whisper';
+
     public const PROVIDER_ASSEMBLY_AI = 'assembly_ai';
 
     /**

@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Workflow extends Model
@@ -16,21 +16,31 @@ class Workflow extends Model
 
     // Status constants
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_PAUSED = 'paused';
+
     public const STATUS_ARCHIVED = 'archived';
 
     // Mode constants
     public const MODE_SIMPLE = 'simple';
+
     public const MODE_ADVANCED = 'advanced';
 
     // Trigger type constants
     public const TRIGGER_METRIC_THRESHOLD = 'metric_threshold';
+
     public const TRIGGER_METRIC_CHANGE = 'metric_change';
+
     public const TRIGGER_SURVEY_RESPONSE = 'survey_response';
+
     public const TRIGGER_SURVEY_ANSWER = 'survey_answer';
+
     public const TRIGGER_ATTENDANCE = 'attendance';
+
     public const TRIGGER_SCHEDULE = 'schedule';
+
     public const TRIGGER_MANUAL = 'manual';
 
     protected $fillable = [
@@ -151,7 +161,7 @@ class Workflow extends Model
      */
     public function isInCooldown(?string $entityId = null): bool
     {
-        if (!$this->last_triggered_at) {
+        if (! $this->last_triggered_at) {
             return false;
         }
 
@@ -306,7 +316,7 @@ class Workflow extends Model
 
         // Check for entry node
         $entryNode = $this->getEntryNode();
-        if (!$entryNode) {
+        if (! $entryNode) {
             $errors[] = 'Workflow must have at least one trigger node.';
         }
 
@@ -367,6 +377,7 @@ class Workflow extends Model
         }
 
         unset($recursionStack[$nodeId]);
+
         return false;
     }
 

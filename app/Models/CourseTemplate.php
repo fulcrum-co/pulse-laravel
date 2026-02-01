@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 class CourseTemplate extends Model
 {
@@ -14,7 +14,9 @@ class CourseTemplate extends Model
 
     // Statuses
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_ARCHIVED = 'archived';
 
     protected $fillable = [
@@ -121,7 +123,7 @@ class CourseTemplate extends Model
     {
         return $query->where(function ($q) use ($orgId) {
             $q->where('org_id', $orgId)
-              ->orWhere('is_system', true);
+                ->orWhere('is_system', true);
         });
     }
 
@@ -217,9 +219,10 @@ class CourseTemplate extends Model
         if (is_string($data)) {
             foreach ($values as $key => $value) {
                 if (is_string($value)) {
-                    $data = str_replace('{' . $key . '}', $value, $data);
+                    $data = str_replace('{'.$key.'}', $value, $data);
                 }
             }
+
             return $data;
         }
 
@@ -241,7 +244,7 @@ class CourseTemplate extends Model
         $variables = $this->variables;
 
         foreach ($variables as $name => $config) {
-            if (($config['required'] ?? false) && !isset($values[$name])) {
+            if (($config['required'] ?? false) && ! isset($values[$name])) {
                 $errors[] = "Missing required variable: {$name}";
             }
         }

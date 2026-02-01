@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Storage;
 class TranscriptionService
 {
     protected string $openaiApiKey;
+
     protected string $assemblyAiApiKey;
+
     protected string $defaultProvider;
 
     public function __construct()
@@ -53,7 +55,7 @@ class TranscriptionService
             $mimeType = $this->getMimeType($filePath);
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->openaiApiKey,
+                'Authorization' => 'Bearer '.$this->openaiApiKey,
             ])->attach(
                 'file',
                 $fileContent,
@@ -117,7 +119,7 @@ class TranscriptionService
             ])->withBody($fileContent, 'application/octet-stream')
                 ->post('https://api.assemblyai.com/v2/upload');
 
-            if (!$uploadResponse->successful()) {
+            if (! $uploadResponse->successful()) {
                 return [
                     'success' => false,
                     'error' => 'Failed to upload audio file',
@@ -135,7 +137,7 @@ class TranscriptionService
                 'language_code' => 'en',
             ]);
 
-            if (!$transcribeResponse->successful()) {
+            if (! $transcribeResponse->successful()) {
                 return [
                     'success' => false,
                     'error' => 'Failed to start transcription',

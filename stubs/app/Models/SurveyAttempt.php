@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use MongoDB\Laravel\Eloquent\Model;
 
 class SurveyAttempt extends Model
 {
     protected $connection = 'mongodb';
+
     protected $collection = 'survey_attempts';
 
     protected $fillable = [

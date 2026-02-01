@@ -8,8 +8,11 @@ use Illuminate\Support\Facades\Log;
 class OpenAIEmbeddingProvider implements EmbeddingProviderInterface
 {
     protected string $apiKey;
+
     protected string $model;
+
     protected int $dimensions;
+
     protected int $maxTokens;
 
     public function __construct()
@@ -100,7 +103,7 @@ class OpenAIEmbeddingProvider implements EmbeddingProviderInterface
             'dimensions' => $this->dimensions,
         ]);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             $error = $response->json('error.message', 'Unknown error');
             Log::error('OpenAI Embeddings API error', [
                 'status' => $response->status(),
@@ -135,6 +138,7 @@ class OpenAIEmbeddingProvider implements EmbeddingProviderInterface
 
         // Truncate to approximate max length
         $maxChars = $this->maxTokens * 4;
+
         return mb_substr($text, 0, $maxChars);
     }
 }

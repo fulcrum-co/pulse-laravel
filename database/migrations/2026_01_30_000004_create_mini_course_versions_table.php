@@ -30,9 +30,9 @@ return new class extends Migration
         // Add foreign key from mini_courses to current_version_id
         Schema::table('mini_courses', function (Blueprint $table) {
             $table->foreign('current_version_id')
-                  ->references('id')
-                  ->on('mini_course_versions')
-                  ->nullOnDelete();
+                ->references('id')
+                ->on('mini_course_versions')
+                ->nullOnDelete();
         });
     }
 

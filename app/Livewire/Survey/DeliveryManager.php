@@ -2,13 +2,12 @@
 
 namespace App\Livewire\Survey;
 
-use App\Models\Survey;
-use App\Models\SurveyDelivery;
 use App\Models\Student;
+use App\Models\Survey;
 use App\Models\User;
 use App\Services\SurveyDeliveryService;
-use Livewire\Component;
 use Illuminate\Support\Collection;
+use Livewire\Component;
 
 class DeliveryManager extends Component
 {
@@ -16,10 +15,15 @@ class DeliveryManager extends Component
 
     // Delivery Configuration
     public string $channel = 'web';
+
     public string $recipientType = 'student';
+
     public array $selectedRecipients = [];
+
     public string $phoneNumber = '';
+
     public ?string $scheduledFor = null;
+
     public bool $scheduleDelivery = false;
 
     // Search/Filter
@@ -27,8 +31,11 @@ class DeliveryManager extends Component
 
     // UI State
     public bool $showRecipientPicker = false;
+
     public bool $showPhoneInput = false;
+
     public bool $isDelivering = false;
+
     public ?array $deliveryResult = null;
 
     protected SurveyDeliveryService $deliveryService;
@@ -94,7 +101,7 @@ class DeliveryManager extends Component
             return;
         }
 
-        $key = "manual_" . md5($this->phoneNumber);
+        $key = 'manual_'.md5($this->phoneNumber);
         $this->selectedRecipients[$key] = [
             'type' => 'manual',
             'id' => 0,
@@ -176,8 +183,8 @@ class DeliveryManager extends Component
             if ($this->search) {
                 $query->where(function ($q) {
                     $q->where('first_name', 'like', "%{$this->search}%")
-                      ->orWhere('last_name', 'like', "%{$this->search}%")
-                      ->orWhere('email', 'like', "%{$this->search}%");
+                        ->orWhere('last_name', 'like', "%{$this->search}%")
+                        ->orWhere('email', 'like', "%{$this->search}%");
                 });
             }
 
@@ -199,8 +206,8 @@ class DeliveryManager extends Component
             if ($this->search) {
                 $query->where(function ($q) {
                     $q->where('first_name', 'like', "%{$this->search}%")
-                      ->orWhere('last_name', 'like', "%{$this->search}%")
-                      ->orWhere('email', 'like', "%{$this->search}%");
+                        ->orWhere('last_name', 'like', "%{$this->search}%")
+                        ->orWhere('email', 'like', "%{$this->search}%");
                 });
             }
 
@@ -210,7 +217,7 @@ class DeliveryManager extends Component
                 $recipients[] = [
                     'type' => 'user',
                     'id' => $u->id,
-                    'name' => $u->first_name . ' ' . $u->last_name,
+                    'name' => $u->first_name.' '.$u->last_name,
                     'email' => $u->email,
                     'phone' => $u->phone,
                     'role' => $u->primary_role,

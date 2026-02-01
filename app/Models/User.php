@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Notifications\Notifiable;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
@@ -162,7 +161,7 @@ class User extends Authenticatable
 
         // Add explicitly assigned organizations
         foreach ($this->organizations as $org) {
-            if (!$accessible->contains('id', $org->id)) {
+            if (! $accessible->contains('id', $org->id)) {
                 $accessible->push($org);
             }
         }
@@ -171,7 +170,7 @@ class User extends Authenticatable
         if ($this->isAdmin() && $this->organization) {
             $children = $this->organization->getDownstreamOrganizations();
             foreach ($children as $child) {
-                if (!$accessible->contains('id', $child->id)) {
+                if (! $accessible->contains('id', $child->id)) {
                     $accessible->push($child);
                 }
             }
@@ -185,7 +184,7 @@ class User extends Authenticatable
      */
     public function getManagedChildOrganizations(): \Illuminate\Support\Collection
     {
-        if (!$this->organization) {
+        if (! $this->organization) {
             return collect();
         }
 
@@ -224,11 +223,12 @@ class User extends Authenticatable
      */
     public function switchOrganization(int $orgId): bool
     {
-        if (!$this->canAccessOrganization($orgId)) {
+        if (! $this->canAccessOrganization($orgId)) {
             return false;
         }
 
         $this->update(['current_org_id' => $orgId]);
+
         return true;
     }
 
@@ -262,6 +262,7 @@ class User extends Authenticatable
     public function isInDemoMode(): bool
     {
         $demoRole = session('demo_role_override');
+
         return $demoRole && $demoRole !== 'actual';
     }
 
@@ -270,7 +271,7 @@ class User extends Authenticatable
      */
     public function getDemoRoleLabelAttribute(): ?string
     {
-        if (!$this->isInDemoMode()) {
+        if (! $this->isInDemoMode()) {
             return null;
         }
 
@@ -309,6 +310,7 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         $role = $this->effective_role;
+
         return in_array($role, ['admin', 'consultant', 'superintendent']);
     }
 
@@ -383,27 +385,27 @@ class User extends Authenticatable
     public function getNotificationPreferencesAttribute($value): array
     {
         $stored = $value ? json_decode($value, true) : [];
+
         return array_replace_recursive(self::DEFAULT_NOTIFICATION_PREFERENCES, $stored);
     }
 
     /**
      * Get a specific notification preference.
      *
-     * @param string $category e.g., 'survey', 'workflow', 'strategy'
-     * @param string $channel e.g., 'in_app', 'email', 'sms'
-     * @return bool
+     * @param  string  $category  e.g., 'survey', 'workflow', 'strategy'
+     * @param  string  $channel  e.g., 'in_app', 'email', 'sms'
      */
     public function getNotificationPreference(string $category, string $channel): bool
     {
         $prefs = $this->notification_preferences;
+
         return $prefs[$category][$channel] ?? false;
     }
 
     /**
      * Update notification preferences (merges with existing).
      *
-     * @param array $preferences Partial preferences to merge
-     * @return bool
+     * @param  array  $preferences  Partial preferences to merge
      */
     public function updateNotificationPreferences(array $preferences): bool
     {
@@ -417,9 +419,8 @@ class User extends Authenticatable
     /**
      * Check if user wants to receive notifications via a specific channel.
      *
-     * @param string $category Notification category
-     * @param string $channel Delivery channel (in_app, email, sms)
-     * @return bool
+     * @param  string  $category  Notification category
+     * @param  string  $channel  Delivery channel (in_app, email, sms)
      */
     public function wantsNotificationVia(string $category, string $channel): bool
     {
@@ -434,15 +435,13 @@ class User extends Authenticatable
     /**
      * Check if user is currently in quiet hours.
      * During quiet hours, email and SMS notifications are suppressed.
-     *
-     * @return bool
      */
     public function isInQuietHours(): bool
     {
         $prefs = $this->notification_preferences;
         $quietHours = $prefs['quiet_hours'] ?? [];
 
-        if (!($quietHours['enabled'] ?? false)) {
+        if (! ($quietHours['enabled'] ?? false)) {
             return false;
         }
 
@@ -475,12 +474,11 @@ class User extends Authenticatable
 
     /**
      * Get quiet hours settings.
-     *
-     * @return array
      */
     public function getQuietHoursSettings(): array
     {
         $prefs = $this->notification_preferences;
+
         return $prefs['quiet_hours'] ?? [
             'enabled' => false,
             'start' => '21:00',
@@ -491,11 +489,9 @@ class User extends Authenticatable
     /**
      * Set quiet hours.
      *
-     * @param bool $enabled
-     * @param string|null $start Time in HH:MM format
-     * @param string|null $end Time in HH:MM format
-     * @param string|null $timezone IANA timezone (e.g., 'America/New_York')
-     * @return bool
+     * @param  string|null  $start  Time in HH:MM format
+     * @param  string|null  $end  Time in HH:MM format
+     * @param  string|null  $timezone  IANA timezone (e.g., 'America/New_York')
      */
     public function setQuietHours(bool $enabled, ?string $start = null, ?string $end = null, ?string $timezone = null): bool
     {
@@ -521,9 +517,8 @@ class User extends Authenticatable
     /**
      * Check if a channel is enabled for a specific priority level.
      *
-     * @param string $priority urgent, high, normal, low
-     * @param string $channel in_app, email, sms
-     * @return bool
+     * @param  string  $priority  urgent, high, normal, low
+     * @param  string  $channel  in_app, email, sms
      */
     public function wantsChannelForPriority(string $priority, string $channel): bool
     {
@@ -543,10 +538,9 @@ class User extends Authenticatable
      * Get effective channel preference checking both priority and category.
      * Priority-based config takes precedence if set.
      *
-     * @param string $category Notification category
-     * @param string $priority Notification priority
-     * @param string $channel Delivery channel
-     * @return bool
+     * @param  string  $category  Notification category
+     * @param  string  $priority  Notification priority
+     * @param  string  $channel  Delivery channel
      */
     public function getEffectiveChannelPreference(string $category, string $priority, string $channel): bool
     {
@@ -556,7 +550,7 @@ class User extends Authenticatable
         }
 
         // Check priority-based config first
-        if (!$this->wantsChannelForPriority($priority, $channel)) {
+        if (! $this->wantsChannelForPriority($priority, $channel)) {
             return false;
         }
 
@@ -569,7 +563,7 @@ class User extends Authenticatable
     /**
      * Check if a specific notification type is disabled.
      *
-     * @param string $type Notification type (e.g., 'survey_closing', 'workflow_triggered')
+     * @param  string  $type  Notification type (e.g., 'survey_closing', 'workflow_triggered')
      * @return bool True if disabled
      */
     public function isTypeDisabled(string $type): bool
@@ -583,9 +577,8 @@ class User extends Authenticatable
     /**
      * Set a type-level override.
      *
-     * @param string $type Notification type
-     * @param bool $enabled Whether the type should be enabled
-     * @return bool
+     * @param  string  $type  Notification type
+     * @param  bool  $enabled  Whether the type should be enabled
      */
     public function setTypeOverride(string $type, bool $enabled): bool
     {
@@ -599,8 +592,7 @@ class User extends Authenticatable
     /**
      * Clear a type-level override (inherit from category).
      *
-     * @param string $type Notification type
-     * @return bool
+     * @param  string  $type  Notification type
      */
     public function clearTypeOverride(string $type): bool
     {
@@ -609,6 +601,7 @@ class User extends Authenticatable
 
         if (isset($overrides[$type])) {
             unset($overrides[$type]);
+
             return $this->updateNotificationPreferences(['type_overrides' => $overrides]);
         }
 
@@ -617,12 +610,11 @@ class User extends Authenticatable
 
     /**
      * Get all type overrides.
-     *
-     * @return array
      */
     public function getTypeOverrides(): array
     {
         $prefs = $this->notification_preferences;
+
         return $prefs['type_overrides'] ?? [];
     }
 
@@ -630,12 +622,11 @@ class User extends Authenticatable
 
     /**
      * Get digest settings.
-     *
-     * @return array
      */
     public function getDigestSettings(): array
     {
         $prefs = $this->notification_preferences;
+
         return array_merge([
             'enabled' => true,
             'frequency' => 'daily',
@@ -648,8 +639,7 @@ class User extends Authenticatable
     /**
      * Update digest settings.
      *
-     * @param array $settings Digest settings to update
-     * @return bool
+     * @param  array  $settings  Digest settings to update
      */
     public function updateDigestSettings(array $settings): bool
     {
@@ -659,14 +649,13 @@ class User extends Authenticatable
     /**
      * Check if digest is enabled for a specific frequency.
      *
-     * @param string $frequency 'daily' or 'weekly'
-     * @return bool
+     * @param  string  $frequency  'daily' or 'weekly'
      */
     public function wantsDigest(string $frequency): bool
     {
         $settings = $this->getDigestSettings();
 
-        if (!($settings['enabled'] ?? false)) {
+        if (! ($settings['enabled'] ?? false)) {
             return false;
         }
 
@@ -682,8 +671,6 @@ class User extends Authenticatable
 
     /**
      * Check if individual emails should be suppressed when digest is active.
-     *
-     * @return bool
      */
     public function shouldSuppressIndividualEmails(): bool
     {
@@ -696,12 +683,11 @@ class User extends Authenticatable
 
     /**
      * Get toast popup settings.
-     *
-     * @return array
      */
     public function getToastSettings(): array
     {
         $prefs = $this->notification_preferences;
+
         return array_merge([
             'enabled' => true,
             'priority_threshold' => 'low',
@@ -711,8 +697,7 @@ class User extends Authenticatable
     /**
      * Update toast settings.
      *
-     * @param array $settings Toast settings to update
-     * @return bool
+     * @param  array  $settings  Toast settings to update
      */
     public function updateToastSettings(array $settings): bool
     {
@@ -722,14 +707,13 @@ class User extends Authenticatable
     /**
      * Check if a toast should be shown for a given priority.
      *
-     * @param string $priority Notification priority (low, normal, high, urgent)
-     * @return bool
+     * @param  string  $priority  Notification priority (low, normal, high, urgent)
      */
     public function shouldShowToast(string $priority): bool
     {
         $settings = $this->getToastSettings();
 
-        if (!($settings['enabled'] ?? true)) {
+        if (! ($settings['enabled'] ?? true)) {
             return false;
         }
 

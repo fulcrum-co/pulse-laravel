@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class MarketplaceItem extends Model
@@ -17,20 +17,29 @@ class MarketplaceItem extends Model
 
     // Categories
     public const CATEGORY_SURVEY = 'survey';
+
     public const CATEGORY_STRATEGY = 'strategy';
+
     public const CATEGORY_CONTENT = 'content';
+
     public const CATEGORY_PROVIDER = 'provider';
 
     // Pricing types
     public const PRICING_FREE = 'free';
+
     public const PRICING_ONE_TIME = 'one_time';
+
     public const PRICING_RECURRING = 'recurring';
 
     // Statuses
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_PENDING_REVIEW = 'pending_review';
+
     public const STATUS_APPROVED = 'approved';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_SUSPENDED = 'suspended';
 
     protected $fillable = [
@@ -391,7 +400,7 @@ class MarketplaceItem extends Model
     public function getPriceAttribute(): ?float
     {
         $primary = $this->primaryPricing;
-        if (!$primary) {
+        if (! $primary) {
             return null;
         }
 

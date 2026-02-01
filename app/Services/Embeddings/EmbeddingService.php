@@ -6,7 +6,6 @@ use App\Jobs\GenerateEmbeddingJob;
 use App\Models\EmbeddingJob;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class EmbeddingService
@@ -15,7 +14,7 @@ class EmbeddingService
 
     public function __construct(?EmbeddingProviderInterface $provider = null)
     {
-        $this->provider = $provider ?? new OpenAIEmbeddingProvider();
+        $this->provider = $provider ?? new OpenAIEmbeddingProvider;
     }
 
     /**
@@ -23,9 +22,9 @@ class EmbeddingService
      */
     public function generateEmbeddingForModel(Model $model): bool
     {
-        if (!method_exists($model, 'getEmbeddingText')) {
+        if (! method_exists($model, 'getEmbeddingText')) {
             throw new \InvalidArgumentException(
-                get_class($model) . ' must implement getEmbeddingText() method'
+                get_class($model).' must implement getEmbeddingText() method'
             );
         }
 
@@ -36,6 +35,7 @@ class EmbeddingService
                 'model' => get_class($model),
                 'id' => $model->getKey(),
             ]);
+
             return false;
         }
 
@@ -107,14 +107,16 @@ class EmbeddingService
         $texts = [];
 
         foreach ($models as $model) {
-            if (!method_exists($model, 'getEmbeddingText')) {
+            if (! method_exists($model, 'getEmbeddingText')) {
                 $results['skipped']++;
+
                 continue;
             }
 
             $text = $model->getEmbeddingText();
             if (empty($text)) {
                 $results['skipped']++;
+
                 continue;
             }
 
@@ -164,6 +166,7 @@ class EmbeddingService
     public function generateEmbedding(string $text): array
     {
         $text = $this->provider->truncateToFit($text);
+
         return $this->provider->embed($text);
     }
 
@@ -172,7 +175,7 @@ class EmbeddingService
      */
     protected function formatEmbeddingForStorage(array $embedding): string
     {
-        return '[' . implode(',', $embedding) . ']';
+        return '['.implode(',', $embedding).']';
     }
 
     /**

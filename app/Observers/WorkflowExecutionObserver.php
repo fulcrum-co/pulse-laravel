@@ -22,14 +22,14 @@ class WorkflowExecutionObserver
     public function updated(WorkflowExecution $execution): void
     {
         // Only proceed if status changed
-        if (!$execution->isDirty('status')) {
+        if (! $execution->isDirty('status')) {
             return;
         }
 
         $newStatus = $execution->status;
 
         // Only notify on terminal states
-        if (!in_array($newStatus, [
+        if (! in_array($newStatus, [
             WorkflowExecution::STATUS_COMPLETED,
             WorkflowExecution::STATUS_FAILED,
         ])) {
@@ -46,20 +46,22 @@ class WorkflowExecutionObserver
     {
         $workflow = $execution->workflow;
 
-        if (!$workflow) {
+        if (! $workflow) {
             Log::warning('WorkflowExecutionObserver: Workflow not found', [
                 'execution_id' => $execution->id,
             ]);
+
             return;
         }
 
         // Get the workflow creator
         $creatorId = $workflow->created_by;
 
-        if (!$creatorId) {
+        if (! $creatorId) {
             Log::info('WorkflowExecutionObserver: No creator_id for workflow', [
                 'workflow_id' => $workflow->id,
             ]);
+
             return;
         }
 
@@ -141,10 +143,10 @@ class WorkflowExecutionObserver
         // Build summary like "2 emails sent, 1 SMS sent, 3 notifications created"
         $parts = [];
         foreach ($actionSummary as $action => $count) {
-            $parts[] = "{$count} {$action}" . ($count !== 1 ? 's' : '');
+            $parts[] = "{$count} {$action}".($count !== 1 ? 's' : '');
         }
 
-        return implode(', ', $parts) . '.';
+        return implode(', ', $parts).'.';
     }
 
     /**

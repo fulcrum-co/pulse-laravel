@@ -12,11 +12,15 @@ class CollectionList extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $statusFilter = '';
+
     public string $typeFilter = '';
+
     public string $viewMode = 'grid';
 
     public ?int $collectionToDelete = null;
+
     public bool $showDeleteModal = false;
 
     protected $queryString = [
@@ -68,7 +72,7 @@ class CollectionList extends Component
 
     public function deleteCollection(): void
     {
-        if (!$this->collectionToDelete) {
+        if (! $this->collectionToDelete) {
             return;
         }
 
@@ -93,7 +97,7 @@ class CollectionList extends Component
         $collection = Collection::forOrganization(auth()->user()->org_id)
             ->find($collectionId);
 
-        if (!$collection) {
+        if (! $collection) {
             return;
         }
 
@@ -118,7 +122,7 @@ class CollectionList extends Component
         $collection = Collection::forOrganization(auth()->user()->org_id)
             ->find($collectionId);
 
-        if (!$collection) {
+        if (! $collection) {
             return;
         }
 
@@ -138,8 +142,8 @@ class CollectionList extends Component
         $collections = Collection::forOrganization($user->org_id)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('title', 'like', '%' . $this->search . '%')
-                      ->orWhere('description', 'like', '%' . $this->search . '%');
+                    $q->where('title', 'like', '%'.$this->search.'%')
+                        ->orWhere('description', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->statusFilter, function ($query) {

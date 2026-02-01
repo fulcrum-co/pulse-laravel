@@ -2,22 +2,25 @@
 
 namespace App\Livewire;
 
-use App\Models\StrategicPlan;
 use App\Models\Organization;
+use App\Models\StrategicPlan;
 use Livewire\Component;
 
-class PushStrategyModal extends Component
+class PushPlanModal extends Component
 {
     public $show = false;
-    public StrategicPlan $strategy;
+
+    public StrategicPlan $plan;
+
     public $selectedOrgId = null;
+
     public $includeSurveys = true;
 
-    protected $listeners = ['openPushStrategy' => 'open'];
+    protected $listeners = ['openPushPlan' => 'open'];
 
-    public function mount(StrategicPlan $strategy)
+    public function mount(StrategicPlan $plan)
     {
-        $this->strategy = $strategy;
+        $this->plan = $plan;
     }
 
     public function open()
@@ -35,33 +38,35 @@ class PushStrategyModal extends Component
 
     public function push()
     {
-        if (!$this->selectedOrgId) {
+        if (! $this->selectedOrgId) {
             return;
         }
 
         $targetOrg = Organization::find($this->selectedOrgId);
         $userOrg = auth()->user()->organization;
 
-        if (!$targetOrg || !$userOrg->canPushContentTo($targetOrg)) {
+        if (! $targetOrg || ! $userOrg->canPushContentTo($targetOrg)) {
             session()->flash('error', 'Cannot push to this organization.');
+
             return;
         }
 
-        $newStrategy = $this->strategy->pushToOrganization($targetOrg);
+        $newPlan = $this->plan->pushToOrganization($targetOrg);
 
         $this->close();
-        session()->flash('success', 'Strategy pushed to ' . $targetOrg->org_name . ' successfully.');
+        session()->flash('success', 'Plan pushed to '.$targetOrg->org_name.' successfully.');
     }
 
     public function getDownstreamOrgsProperty()
     {
         $userOrg = auth()->user()->organization;
+
         return $userOrg->getDownstreamOrganizations();
     }
 
     public function render()
     {
-        return view('livewire.push-strategy-modal', [
+        return view('livewire.push-plan-modal', [
             'downstreamOrgs' => $this->downstreamOrgs,
         ]);
     }

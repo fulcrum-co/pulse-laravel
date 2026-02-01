@@ -4,23 +4,28 @@ namespace App\Models;
 
 use App\Traits\HasEmbedding;
 use App\Traits\Searchable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 class Provider extends Model
 {
-    use SoftDeletes, Searchable, HasEmbedding;
+    use HasEmbedding, Searchable, SoftDeletes;
 
     // Provider types
     public const TYPE_THERAPIST = 'therapist';
+
     public const TYPE_TUTOR = 'tutor';
+
     public const TYPE_COACH = 'coach';
+
     public const TYPE_MENTOR = 'mentor';
+
     public const TYPE_COUNSELOR = 'counselor';
+
     public const TYPE_SPECIALIST = 'specialist';
 
     protected $fillable = [
@@ -147,7 +152,7 @@ class Provider extends Model
         $newProvider->source_provider_id = $this->id;
         $newProvider->source_org_id = $this->org_id;
         $newProvider->created_by = $pushedBy;
-        $newProvider->name = $this->name . ' (from ' . $this->organization->org_name . ')';
+        $newProvider->name = $this->name.' (from '.$this->organization->org_name.')';
         $newProvider->ratings_average = 0;
         $newProvider->ratings_count = 0;
         $newProvider->verified_at = null;
@@ -306,6 +311,7 @@ class Provider extends Model
         if ($this->credentials) {
             return "{$this->name}, {$this->credentials}";
         }
+
         return $this->name;
     }
 
@@ -315,8 +321,9 @@ class Provider extends Model
     public function getFormattedRateAttribute(): ?string
     {
         if ($this->hourly_rate) {
-            return '$' . number_format($this->hourly_rate, 2) . '/hr';
+            return '$'.number_format($this->hourly_rate, 2).'/hr';
         }
+
         return null;
     }
 
@@ -348,7 +355,7 @@ class Provider extends Model
      */
     public function shouldBeSearchable(): bool
     {
-        return !$this->trashed() && $this->active;
+        return ! $this->trashed() && $this->active;
     }
 
     /**
@@ -363,9 +370,9 @@ class Provider extends Model
             $this->credentials,
         ];
 
-        if (!empty($this->specialty_areas)) {
+        if (! empty($this->specialty_areas)) {
             $specialties = is_array($this->specialty_areas) ? $this->specialty_areas : [];
-            $parts[] = 'Specialties: ' . implode(', ', $specialties);
+            $parts[] = 'Specialties: '.implode(', ', $specialties);
         }
 
         $serviceTypes = [];
@@ -375,8 +382,8 @@ class Provider extends Model
         if ($this->serves_in_person) {
             $serviceTypes[] = 'in-person services';
         }
-        if (!empty($serviceTypes)) {
-            $parts[] = 'Offers: ' . implode(' and ', $serviceTypes);
+        if (! empty($serviceTypes)) {
+            $parts[] = 'Offers: '.implode(' and ', $serviceTypes);
         }
 
         return implode('. ', array_filter($parts));

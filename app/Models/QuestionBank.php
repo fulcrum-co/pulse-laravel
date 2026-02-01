@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class QuestionBank extends Model
 {
@@ -44,18 +44,26 @@ class QuestionBank extends Model
      * Question type constants
      */
     public const TYPE_SCALE = 'scale';
+
     public const TYPE_MULTIPLE_CHOICE = 'multiple_choice';
+
     public const TYPE_TEXT = 'text';
+
     public const TYPE_VOICE = 'voice';
+
     public const TYPE_MATRIX = 'matrix';
 
     /**
      * Category constants
      */
     public const CATEGORY_WELLNESS = 'wellness';
+
     public const CATEGORY_ACADEMIC = 'academic';
+
     public const CATEGORY_BEHAVIORAL = 'behavioral';
+
     public const CATEGORY_SEL = 'sel';
+
     public const CATEGORY_CUSTOM = 'custom';
 
     /**
@@ -82,7 +90,7 @@ class QuestionBank extends Model
     {
         return $query->where(function ($q) use ($orgId) {
             $q->where('is_public', true)
-              ->orWhere('org_id', $orgId);
+                ->orWhere('org_id', $orgId);
         });
     }
 
@@ -141,10 +149,10 @@ class QuestionBank extends Model
     /**
      * Convert to survey question format.
      */
-    public function toSurveyQuestion(string $id = null): array
+    public function toSurveyQuestion(?string $id = null): array
     {
         $question = [
-            'id' => $id ?? 'q_' . $this->id,
+            'id' => $id ?? 'q_'.$this->id,
             'type' => $this->question_type,
             'question' => $this->question_text,
             'bank_question_id' => $this->id,

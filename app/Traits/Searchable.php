@@ -20,7 +20,7 @@ trait Searchable
      */
     public function searchableAs(): string
     {
-        return config('scout.prefix') . $this->getTable();
+        return config('scout.prefix').$this->getTable();
     }
 
     /**

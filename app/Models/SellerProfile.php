@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class SellerProfile extends Model
@@ -15,19 +15,27 @@ class SellerProfile extends Model
 
     // Seller types
     public const TYPE_INDIVIDUAL = 'individual';
+
     public const TYPE_ORGANIZATION = 'organization';
+
     public const TYPE_VERIFIED_EDUCATOR = 'verified_educator';
 
     // Verification badges
     public const BADGE_EDUCATOR = 'educator';
+
     public const BADGE_EXPERT = 'expert';
+
     public const BADGE_PARTNER = 'partner';
+
     public const BADGE_TOP_SELLER = 'top_seller';
 
     // Stripe account statuses
     public const STRIPE_PENDING = 'pending';
+
     public const STRIPE_ACTIVE = 'active';
+
     public const STRIPE_RESTRICTED = 'restricted';
+
     public const STRIPE_DISABLED = 'disabled';
 
     protected $fillable = [
@@ -100,7 +108,7 @@ class SellerProfile extends Model
         $counter = 1;
 
         while (static::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 

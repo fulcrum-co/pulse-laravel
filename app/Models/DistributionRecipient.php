@@ -12,11 +12,17 @@ class DistributionRecipient extends Model
     use HasFactory;
 
     const STATUS_PENDING = 'pending';
+
     const STATUS_SENT = 'sent';
+
     const STATUS_DELIVERED = 'delivered';
+
     const STATUS_OPENED = 'opened';
+
     const STATUS_CLICKED = 'clicked';
+
     const STATUS_BOUNCED = 'bounced';
+
     const STATUS_FAILED = 'failed';
 
     protected $fillable = [
@@ -164,7 +170,7 @@ class DistributionRecipient extends Model
     public function markAsOpened(): void
     {
         // Only update if not already opened
-        if (!$this->opened_at) {
+        if (! $this->opened_at) {
             $this->update([
                 'status' => self::STATUS_OPENED,
                 'opened_at' => now(),
@@ -177,7 +183,7 @@ class DistributionRecipient extends Model
     public function markAsClicked(): void
     {
         // Only update if not already clicked
-        if (!$this->clicked_at) {
+        if (! $this->clicked_at) {
             $this->update([
                 'status' => self::STATUS_CLICKED,
                 'clicked_at' => now(),
@@ -187,7 +193,7 @@ class DistributionRecipient extends Model
         }
     }
 
-    public function markAsBounced(string $error = null): void
+    public function markAsBounced(?string $error = null): void
     {
         $this->update([
             'status' => self::STATUS_BOUNCED,
@@ -195,7 +201,7 @@ class DistributionRecipient extends Model
         ]);
     }
 
-    public function markAsFailed(string $error = null): void
+    public function markAsFailed(?string $error = null): void
     {
         $this->update([
             'status' => self::STATUS_FAILED,
@@ -207,9 +213,10 @@ class DistributionRecipient extends Model
     {
         if ($this->contact) {
             if ($this->contact_type === 'App\\Models\\Student') {
-                return $this->contact->user->first_name . ' ' . $this->contact->user->last_name;
+                return $this->contact->user->first_name.' '.$this->contact->user->last_name;
             }
-            return $this->contact->first_name . ' ' . $this->contact->last_name;
+
+            return $this->contact->first_name.' '.$this->contact->last_name;
         }
 
         return $this->email ?? $this->phone ?? 'Unknown';

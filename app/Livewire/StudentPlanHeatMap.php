@@ -9,6 +9,7 @@ use Livewire\Component;
 class StudentPlanHeatMap extends Component
 {
     public Student $student;
+
     public string $schoolYear;
 
     protected ContactMetricService $metricService;
@@ -30,7 +31,7 @@ class StudentPlanHeatMap extends Component
         if (count($parts) === 2) {
             $startYear = (int) $parts[0] - 1;
             $endYear = (int) $parts[1] - 1;
-            $this->schoolYear = $startYear . '-' . $endYear;
+            $this->schoolYear = $startYear.'-'.$endYear;
         }
     }
 
@@ -40,7 +41,7 @@ class StudentPlanHeatMap extends Component
         if (count($parts) === 2) {
             $startYear = (int) $parts[0] + 1;
             $endYear = (int) $parts[1] + 1;
-            $this->schoolYear = $startYear . '-' . $endYear;
+            $this->schoolYear = $startYear.'-'.$endYear;
         }
     }
 

@@ -41,19 +41,21 @@ class ContinueWorkflowJob implements ShouldQueue
     {
         $execution = WorkflowExecution::find($this->executionId);
 
-        if (!$execution) {
+        if (! $execution) {
             Log::warning('ContinueWorkflowJob: Execution not found', [
                 'execution_id' => $this->executionId,
             ]);
+
             return;
         }
 
         // Only resume if still waiting
-        if (!$execution->isWaiting()) {
+        if (! $execution->isWaiting()) {
             Log::info('ContinueWorkflowJob: Execution no longer waiting, skipping', [
                 'execution_id' => $this->executionId,
                 'status' => $execution->status,
             ]);
+
             return;
         }
 
@@ -89,7 +91,7 @@ class ContinueWorkflowJob implements ShouldQueue
                 'error' => $e->getMessage(),
             ]);
 
-            $execution->markFailed('Resume failed: ' . $e->getMessage());
+            $execution->markFailed('Resume failed: '.$e->getMessage());
             throw $e;
         }
     }
@@ -105,8 +107,8 @@ class ContinueWorkflowJob implements ShouldQueue
         ]);
 
         $execution = WorkflowExecution::find($this->executionId);
-        if ($execution && !$execution->isComplete()) {
-            $execution->markFailed('Job failed: ' . $exception->getMessage());
+        if ($execution && ! $execution->isComplete()) {
+            $execution->markFailed('Job failed: '.$exception->getMessage());
         }
     }
 
@@ -118,7 +120,7 @@ class ContinueWorkflowJob implements ShouldQueue
         return [
             'workflow',
             'workflow-continue',
-            'execution:' . $this->executionId,
+            'execution:'.$this->executionId,
         ];
     }
 }

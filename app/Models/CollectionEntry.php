@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class CollectionEntry extends Model
 {
@@ -47,16 +47,22 @@ class CollectionEntry extends Model
      * Status constants
      */
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_SKIPPED = 'skipped';
 
     /**
      * Input mode constants
      */
     public const MODE_FORM = 'form';
+
     public const MODE_VOICE = 'voice';
+
     public const MODE_AI_CONVERSATION = 'ai_conversation';
+
     public const MODE_GRID = 'grid';
 
     /**
@@ -118,7 +124,7 @@ class CollectionEntry extends Model
     /**
      * Start the entry.
      */
-    public function start(int $userId, string $mode = null): void
+    public function start(int $userId, ?string $mode = null): void
     {
         $this->update([
             'status' => self::STATUS_IN_PROGRESS,
@@ -182,7 +188,7 @@ class CollectionEntry extends Model
     /**
      * Complete the entry.
      */
-    public function complete(array $scores = null, array $flags = null): void
+    public function complete(?array $scores = null, ?array $flags = null): void
     {
         $data = [
             'status' => self::STATUS_COMPLETED,
@@ -207,7 +213,7 @@ class CollectionEntry extends Model
     /**
      * Skip the entry.
      */
-    public function skip(string $reason = null): void
+    public function skip(?string $reason = null): void
     {
         $this->update([
             'status' => self::STATUS_SKIPPED,

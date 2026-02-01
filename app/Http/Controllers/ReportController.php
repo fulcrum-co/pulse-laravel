@@ -71,7 +71,7 @@ class ReportController extends Controller
         $user = auth()->user();
 
         // Ensure user can access this report (own org or accessible child org)
-        if (!$user->canAccessOrganization($report->org_id)) {
+        if (! $user->canAccessOrganization($report->org_id)) {
             abort(403);
         }
 
@@ -89,7 +89,7 @@ class ReportController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->canAccessOrganization($report->org_id)) {
+        if (! $user->canAccessOrganization($report->org_id)) {
             abort(403);
         }
 
@@ -124,8 +124,9 @@ class ReportController extends Controller
             $targetOrg = \App\Models\Organization::find($targetOrgId);
 
             // Verify the source org can push to target org
-            if (!$sourceOrg->canPushContentTo($targetOrg)) {
+            if (! $sourceOrg->canPushContentTo($targetOrg)) {
                 $errors[] = "Cannot push to {$targetOrg->org_name} - not a child organization.";
+
                 continue;
             }
 
@@ -141,7 +142,7 @@ class ReportController extends Controller
             'success' => count($pushed) > 0,
             'pushed' => $pushed,
             'errors' => $errors,
-            'message' => count($pushed) . ' report(s) pushed successfully.',
+            'message' => count($pushed).' report(s) pushed successfully.',
         ]);
     }
 

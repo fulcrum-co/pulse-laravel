@@ -2,15 +2,15 @@
 
 namespace App\Livewire;
 
+use App\Models\AuditLog;
 use App\Models\MiniCourse;
 use App\Models\MiniCourseEnrollment;
 use App\Models\MiniCourseSuggestion;
-use App\Models\Provider;
 use App\Models\Program;
+use App\Models\Provider;
 use App\Models\Resource;
 use App\Models\ResourceAssignment;
 use App\Models\Student;
-use App\Models\AuditLog;
 use App\Services\ProviderMatchingService;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -20,6 +20,7 @@ class ContactResources extends Component
     use WithPagination;
 
     public string $contactType;
+
     public int $contactId;
 
     // Active tab
@@ -27,27 +28,37 @@ class ContactResources extends Component
 
     // Assign resource modal
     public bool $showAssignModal = false;
+
     public ?int $selectedResourceId = null;
+
     public string $assignmentNotes = '';
+
     public string $searchResources = '';
 
     // Enroll in course modal
     public bool $showEnrollModal = false;
+
     public ?int $selectedCourseId = null;
+
     public string $searchCourses = '';
 
     // Expanded assignment tracking
     public ?int $expandedAssignmentId = null;
+
     public ?int $expandedEnrollmentId = null;
 
     // Edit mode
     public ?int $editingAssignmentId = null;
+
     public ?int $editingProgress = null;
+
     public string $editingStatus = '';
+
     public string $editingNotes = '';
 
     // Filter
     public string $filterStatus = 'all';
+
     public string $enrollmentFilterStatus = 'all';
 
     public function mount(string $contactType, int $contactId)
@@ -148,10 +159,10 @@ class ContactResources extends Component
         ];
 
         // Auto-update timestamps based on status
-        if ($this->editingStatus === 'in_progress' && !$assignment->started_at) {
+        if ($this->editingStatus === 'in_progress' && ! $assignment->started_at) {
             $updateData['started_at'] = now();
         }
-        if ($this->editingStatus === 'completed' && !$assignment->completed_at) {
+        if ($this->editingStatus === 'completed' && ! $assignment->completed_at) {
             $updateData['completed_at'] = now();
             $updateData['progress_percent'] = 100;
         }
@@ -210,8 +221,8 @@ class ContactResources extends Component
 
         if ($this->searchResources) {
             $query->where(function ($q) {
-                $q->where('title', 'like', '%' . $this->searchResources . '%')
-                  ->orWhere('description', 'like', '%' . $this->searchResources . '%');
+                $q->where('title', 'like', '%'.$this->searchResources.'%')
+                    ->orWhere('description', 'like', '%'.$this->searchResources.'%');
             });
         }
 
@@ -259,6 +270,7 @@ class ContactResources extends Component
                 'type' => 'error',
                 'message' => 'Student is already enrolled in this course.',
             ]);
+
             return;
         }
 
@@ -374,8 +386,8 @@ class ContactResources extends Component
 
         if ($this->searchCourses) {
             $query->where(function ($q) {
-                $q->where('title', 'like', '%' . $this->searchCourses . '%')
-                  ->orWhere('description', 'like', '%' . $this->searchCourses . '%');
+                $q->where('title', 'like', '%'.$this->searchCourses.'%')
+                    ->orWhere('description', 'like', '%'.$this->searchCourses.'%');
             });
         }
 
@@ -437,11 +449,12 @@ class ContactResources extends Component
         }
 
         $student = Student::find($this->contactId);
-        if (!$student) {
+        if (! $student) {
             return collect();
         }
 
         $service = app(ProviderMatchingService::class);
+
         return $service->findMatchingProviders($student, [], 5);
     }
 
@@ -456,11 +469,12 @@ class ContactResources extends Component
         }
 
         $student = Student::find($this->contactId);
-        if (!$student) {
+        if (! $student) {
             return collect();
         }
 
         $service = app(ProviderMatchingService::class);
+
         return $service->findMatchingPrograms($student, [], 5);
     }
 

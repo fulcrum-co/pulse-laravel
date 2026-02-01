@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\SurveyAttempt;
+use Livewire\Component;
 
 class DashboardChart extends Component
 {

@@ -11,8 +11,11 @@ use Illuminate\Support\Facades\Log;
 class StreamChatService
 {
     protected mixed $client = null;
+
     protected ?string $apiKey = null;
+
     protected ?string $apiSecret = null;
+
     protected bool $sdkAvailable = false;
 
     public function __construct()
@@ -38,7 +41,7 @@ class StreamChatService
      */
     public function isConfigured(): bool
     {
-        return $this->sdkAvailable && !empty($this->apiKey) && !empty($this->apiSecret) && $this->client !== null;
+        return $this->sdkAvailable && ! empty($this->apiKey) && ! empty($this->apiSecret) && $this->client !== null;
     }
 
     /**
@@ -54,8 +57,9 @@ class StreamChatService
      */
     public function createOrUpdateUser(string $userId, array $data): void
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             Log::warning('StreamChatService: Not configured, skipping user creation');
+
             return;
         }
 
@@ -65,7 +69,7 @@ class StreamChatService
                 'name' => $data['name'] ?? $userId,
                 'image' => $data['image'] ?? null,
                 'role' => $data['role'] ?? 'user',
-                ...array_filter($data, fn($key) => !in_array($key, ['name', 'image', 'role']), ARRAY_FILTER_USE_KEY),
+                ...array_filter($data, fn ($key) => ! in_array($key, ['name', 'image', 'role']), ARRAY_FILTER_USE_KEY),
             ]);
         } catch (\Exception $e) {
             Log::error('StreamChatService: Failed to create/update user', [
@@ -81,7 +85,7 @@ class StreamChatService
      */
     public function generateUserToken(string $userId): string
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             throw new \Exception('StreamChatService is not configured');
         }
 
@@ -93,7 +97,7 @@ class StreamChatService
      */
     public function deleteUser(string $userId): void
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return;
         }
 
@@ -112,7 +116,7 @@ class StreamChatService
      */
     public function createProviderChannel(Provider $provider, User|Student $initiator): array
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             throw new \Exception('StreamChatService is not configured');
         }
 
@@ -153,7 +157,7 @@ class StreamChatService
      */
     public function getOrCreateChannel(string $channelType, string $channelId): array
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             throw new \Exception('StreamChatService is not configured');
         }
 
@@ -182,7 +186,7 @@ class StreamChatService
      */
     public function archiveChannel(string $channelType, string $channelId): void
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return;
         }
 
@@ -202,7 +206,7 @@ class StreamChatService
      */
     public function sendSystemMessage(string $channelType, string $channelId, string $text): void
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return;
         }
 
@@ -225,7 +229,7 @@ class StreamChatService
      */
     public function getChannelMessages(string $channelType, string $channelId, int $limit = 50): array
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return [];
         }
 
@@ -241,6 +245,7 @@ class StreamChatService
                 'channel_id' => $channelId,
                 'error' => $e->getMessage(),
             ]);
+
             return [];
         }
     }
@@ -250,7 +255,7 @@ class StreamChatService
      */
     public function addMember(string $channelType, string $channelId, string $userId): void
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return;
         }
 
@@ -271,7 +276,7 @@ class StreamChatService
      */
     public function removeMember(string $channelType, string $channelId, string $userId): void
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return;
         }
 
@@ -314,11 +319,12 @@ class StreamChatService
      */
     public function verifyWebhookSignature(string $body, string $signature): bool
     {
-        if (!$this->apiSecret) {
+        if (! $this->apiSecret) {
             return false;
         }
 
         $expectedSignature = hash_hmac('sha256', $body, $this->apiSecret);
+
         return hash_equals($expectedSignature, $signature);
     }
 
@@ -331,15 +337,16 @@ class StreamChatService
         $message = $payload['message'] ?? [];
         $user = $payload['user'] ?? [];
 
-        if (!$channelId) {
+        if (! $channelId) {
             return;
         }
 
         // Find the conversation
         $conversation = ProviderConversation::where('stream_channel_id', $channelId)->first();
 
-        if (!$conversation) {
+        if (! $conversation) {
             Log::warning('StreamChatService: Conversation not found for channel', ['channel_id' => $channelId]);
+
             return;
         }
 
@@ -373,13 +380,13 @@ class StreamChatService
         $channelId = $payload['channel_id'] ?? null;
         $user = $payload['user'] ?? [];
 
-        if (!$channelId) {
+        if (! $channelId) {
             return;
         }
 
         $conversation = ProviderConversation::where('stream_channel_id', $channelId)->first();
 
-        if (!$conversation) {
+        if (! $conversation) {
             return;
         }
 
@@ -424,7 +431,7 @@ class StreamChatService
      */
     public function getProviderStreamId(Provider $provider): string
     {
-        return 'provider_' . $provider->id;
+        return 'provider_'.$provider->id;
     }
 
     /**
@@ -432,7 +439,7 @@ class StreamChatService
      */
     public function getUserStreamId(User $user): string
     {
-        return 'user_' . $user->id;
+        return 'user_'.$user->id;
     }
 
     /**
@@ -440,7 +447,7 @@ class StreamChatService
      */
     public function getStudentStreamId(Student $student): string
     {
-        return 'student_' . $student->id;
+        return 'student_'.$student->id;
     }
 
     /**
@@ -451,6 +458,7 @@ class StreamChatService
         if ($initiator instanceof User) {
             return $this->getUserStreamId($initiator);
         }
+
         return $this->getStudentStreamId($initiator);
     }
 
@@ -460,6 +468,7 @@ class StreamChatService
     public function generateChannelId(Provider $provider, User|Student $initiator): string
     {
         $initiatorPrefix = $initiator instanceof User ? 'user' : 'student';
+
         return "provider_{$provider->id}_{$initiatorPrefix}_{$initiator->id}";
     }
 

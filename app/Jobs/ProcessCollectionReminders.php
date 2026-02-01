@@ -65,8 +65,9 @@ class ProcessCollectionReminders implements ShouldQueue
             $collection = $reminder->collection;
             $session = $reminder->session;
 
-            if (!$user || !$collection) {
+            if (! $user || ! $collection) {
                 $reminder->markFailed('Missing user or collection');
+
                 return;
             }
 
@@ -117,7 +118,7 @@ class ProcessCollectionReminders implements ShouldQueue
     {
         $user = $reminder->user;
 
-        if (!$user->phone) {
+        if (! $user->phone) {
             return ['success' => false, 'error' => 'User has no phone number'];
         }
 
@@ -148,7 +149,7 @@ class ProcessCollectionReminders implements ShouldQueue
         $user = $reminder->user;
         $collection = $reminder->collection;
 
-        if (!$user->email) {
+        if (! $user->email) {
             return ['success' => false, 'error' => 'User has no email'];
         }
 
@@ -185,7 +186,7 @@ class ProcessCollectionReminders implements ShouldQueue
     {
         $user = $reminder->user;
 
-        if (!$user->phone) {
+        if (! $user->phone) {
             return ['success' => false, 'error' => 'User has no phone number'];
         }
 

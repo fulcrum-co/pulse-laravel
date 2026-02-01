@@ -1,13 +1,12 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
-use App\Models\Organization;
 use App\Models\ContentBlock;
 use App\Models\ContentTag;
 use App\Models\CourseTemplate;
 use App\Models\MiniCourse;
 use App\Models\MiniCourseStep;
+use App\Models\Organization;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -16,7 +15,7 @@ return new class extends Migration
         // Get the demo school organization
         $demoSchool = Organization::where('org_name', 'Lincoln High School')->first();
 
-        if (!$demoSchool) {
+        if (! $demoSchool) {
             return;
         }
 

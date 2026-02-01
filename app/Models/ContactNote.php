@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ContactNote extends Model
 {
@@ -51,21 +51,31 @@ class ContactNote extends Model
 
     // Note types
     public const TYPE_GENERAL = 'general';
+
     public const TYPE_FOLLOW_UP = 'follow_up';
+
     public const TYPE_CONCERN = 'concern';
+
     public const TYPE_MILESTONE = 'milestone';
+
     public const TYPE_VOICE_MEMO = 'voice_memo';
+
     public const TYPE_AI_SUMMARY = 'ai_summary';
 
     // Visibility options
     public const VISIBILITY_PRIVATE = 'private';
+
     public const VISIBILITY_TEAM = 'team';
+
     public const VISIBILITY_ORGANIZATION = 'organization';
 
     // Transcription statuses
     public const TRANSCRIPTION_PENDING = 'pending';
+
     public const TRANSCRIPTION_PROCESSING = 'processing';
+
     public const TRANSCRIPTION_COMPLETED = 'completed';
+
     public const TRANSCRIPTION_FAILED = 'failed';
 
     /**
@@ -167,10 +177,10 @@ class ContactNote extends Model
     {
         return $query->where(function ($q) use ($user) {
             $q->where('created_by', $user->id)
-              ->orWhere(function ($q2) use ($user) {
-                  $q2->where('is_private', false)
-                     ->where('org_id', $user->org_id);
-              });
+                ->orWhere(function ($q2) use ($user) {
+                    $q2->where('is_private', false)
+                        ->where('org_id', $user->org_id);
+                });
         });
     }
 
@@ -212,7 +222,7 @@ class ContactNote extends Model
      */
     public function getFormattedDurationAttribute(): ?string
     {
-        if (!$this->audio_duration_seconds) {
+        if (! $this->audio_duration_seconds) {
             return null;
         }
 

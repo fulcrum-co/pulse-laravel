@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\AuditLog;
 use App\Models\ContactNote;
 use App\Services\VoiceMemoService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ContactNoteController extends Controller
 {
@@ -155,7 +155,7 @@ class ContactNoteController extends Controller
     {
         $this->authorize('view', $note);
 
-        if (!$note->is_voice_memo || !$note->audio_file_path) {
+        if (! $note->is_voice_memo || ! $note->audio_file_path) {
             abort(404);
         }
 
@@ -163,7 +163,7 @@ class ContactNoteController extends Controller
 
         $disk = \Illuminate\Support\Facades\Storage::disk($note->audio_disk);
 
-        if (!$disk->exists($note->audio_file_path)) {
+        if (! $disk->exists($note->audio_file_path)) {
             abort(404);
         }
 

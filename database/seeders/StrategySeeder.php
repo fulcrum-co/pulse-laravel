@@ -2,17 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\StrategicPlan;
+use App\Models\Activity;
 use App\Models\FocusArea;
 use App\Models\Objective;
-use App\Models\Activity;
-use App\Models\StrategyCollaborator;
-use App\Models\StrategyAssignment;
 use App\Models\Organization;
-use App\Models\User;
+use App\Models\StrategicPlan;
+use App\Models\StrategyCollaborator;
 use App\Models\Student;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class StrategySeeder extends Seeder
 {
@@ -21,8 +20,9 @@ class StrategySeeder extends Seeder
         // Get the first school organization
         $school = Organization::where('org_type', 'school')->first();
 
-        if (!$school) {
+        if (! $school) {
             $this->command->warn('No school organization found. Please run OrganizationSeeder first.');
+
             return;
         }
 
@@ -31,8 +31,9 @@ class StrategySeeder extends Seeder
         $teachers = User::where('org_id', $school->id)->where('primary_role', 'teacher')->get();
         $students = Student::where('org_id', $school->id)->get();
 
-        if (!$admin) {
+        if (! $admin) {
             $this->command->warn('No admin user found. Please run UserSeeder first.');
+
             return;
         }
 
@@ -249,7 +250,7 @@ class StrategySeeder extends Seeder
         if ($teachers->count() >= 2) {
             $teacherPlan = StrategicPlan::create([
                 'org_id' => $school->id,
-                'title' => 'Professional Growth Plan - ' . $teachers[0]->first_name . ' ' . $teachers[0]->last_name,
+                'title' => 'Professional Growth Plan - '.$teachers[0]->first_name.' '.$teachers[0]->last_name,
                 'description' => 'Individual improvement plan for classroom management and student engagement.',
                 'plan_type' => 'teacher',
                 'target_type' => 'App\\Models\\User',
@@ -314,7 +315,7 @@ class StrategySeeder extends Seeder
 
             $studentPlan = StrategicPlan::create([
                 'org_id' => $school->id,
-                'title' => 'Student Support Plan - ' . $highRiskStudent->user->first_name . ' ' . $highRiskStudent->user->last_name,
+                'title' => 'Student Support Plan - '.$highRiskStudent->user->first_name.' '.$highRiskStudent->user->last_name,
                 'description' => 'Individualized support plan addressing social-emotional needs.',
                 'plan_type' => 'student',
                 'target_type' => 'App\\Models\\Student',

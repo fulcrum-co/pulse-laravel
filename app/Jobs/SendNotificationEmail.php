@@ -44,10 +44,11 @@ class SendNotificationEmail implements ShouldQueue
     {
         $user = $this->notification->user;
 
-        if (!$user) {
+        if (! $user) {
             Log::warning('SendNotificationEmail: User not found', [
                 'notification_id' => $this->notification->id,
             ]);
+
             return;
         }
 
@@ -56,15 +57,17 @@ class SendNotificationEmail implements ShouldQueue
                 'notification_id' => $this->notification->id,
                 'user_id' => $user->id,
             ]);
+
             return;
         }
 
         // Skip if notification is no longer active (resolved/dismissed)
-        if (!$this->notification->isActive()) {
+        if (! $this->notification->isActive()) {
             Log::info('SendNotificationEmail: Notification no longer active, skipping', [
                 'notification_id' => $this->notification->id,
                 'status' => $this->notification->status,
             ]);
+
             return;
         }
 

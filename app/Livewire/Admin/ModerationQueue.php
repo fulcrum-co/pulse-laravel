@@ -17,35 +17,50 @@ class ModerationQueue extends Component
 
     // Existing filters
     public string $statusFilter = 'needs_review';
+
     public string $contentTypeFilter = '';
+
     public string $sortBy = 'newest';
+
     public string $sortDirection = 'desc';
+
     public string $search = '';
+
     public string $viewMode = 'list';
 
     // Assignment filters
     public string $assignmentFilter = 'all';
+
     public string $priorityFilter = '';
 
     // Review modal state
     public bool $showReviewModal = false;
+
     public ?int $selectedResultId = null;
+
     public string $reviewNotes = '';
 
     // Assignment modal state
     public bool $showAssignModal = false;
+
     public ?int $assignToUserId = null;
+
     public string $assignmentPriority = 'normal';
+
     public ?string $assignmentDueAt = null;
+
     public string $assignmentNotes = '';
+
     public array $selectedCollaborators = [];
 
     // Edit content modal state
     public bool $showEditModal = false;
+
     public array $editForm = [];
 
     // Bulk selection
     public array $selectedItems = [];
+
     public bool $selectAll = false;
 
     protected $queryString = [
@@ -135,7 +150,7 @@ class ModerationQueue extends Component
 
     public function getSelectedResultProperty(): ?ContentModerationResult
     {
-        if (!$this->selectedResultId) {
+        if (! $this->selectedResultId) {
             return null;
         }
 
@@ -143,7 +158,8 @@ class ModerationQueue extends Component
             return ContentModerationResult::with(['moderatable', 'reviewer', 'assignee'])->find($this->selectedResultId);
         } catch (\Exception $e) {
             // Fallback without relationships if there's an issue
-            \Log::error('Error loading moderation result: ' . $e->getMessage());
+            \Log::error('Error loading moderation result: '.$e->getMessage());
+
             return ContentModerationResult::find($this->selectedResultId);
         }
     }
@@ -151,16 +167,17 @@ class ModerationQueue extends Component
     public function approveContent(): void
     {
         $result = $this->selectedResult;
-        if (!$result) {
+        if (! $result) {
             return;
         }
 
         // Check permission
-        if (!$result->canBeReviewedBy(auth()->user())) {
+        if (! $result->canBeReviewedBy(auth()->user())) {
             $this->dispatch('notify', [
                 'type' => 'error',
                 'message' => 'You do not have permission to review this item.',
             ]);
+
             return;
         }
 
@@ -180,7 +197,7 @@ class ModerationQueue extends Component
     public function rejectContent(): void
     {
         $result = $this->selectedResult;
-        if (!$result) {
+        if (! $result) {
             return;
         }
 
@@ -199,7 +216,7 @@ class ModerationQueue extends Component
     public function requestRevision(): void
     {
         $result = $this->selectedResult;
-        if (!$result) {
+        if (! $result) {
             return;
         }
 
@@ -256,7 +273,7 @@ class ModerationQueue extends Component
         $this->assignmentDueAt = null;
         $this->assignmentNotes = '';
         $this->selectedCollaborators = [];
-        if (!$this->showReviewModal && !$this->showEditModal) {
+        if (! $this->showReviewModal && ! $this->showEditModal) {
             $this->selectedResultId = null;
         }
     }
@@ -295,7 +312,7 @@ class ModerationQueue extends Component
             }
         }
         // Bulk assignment
-        elseif (!empty($this->selectedItems)) {
+        elseif (! empty($this->selectedItems)) {
             $service->bulkAssign(
                 $this->selectedItems,
                 $this->assignToUserId,
@@ -339,11 +356,12 @@ class ModerationQueue extends Component
     {
         $result = ContentModerationResult::with('moderatable')->find($resultId);
 
-        if (!$result?->moderatable) {
+        if (! $result?->moderatable) {
             $this->dispatch('notify', [
                 'type' => 'error',
                 'message' => 'Content not found.',
             ]);
+
             return;
         }
 
@@ -383,7 +401,7 @@ class ModerationQueue extends Component
     {
         $this->showEditModal = false;
         $this->editForm = [];
-        if (!$this->showReviewModal && !$this->showAssignModal) {
+        if (! $this->showReviewModal && ! $this->showAssignModal) {
             $this->selectedResultId = null;
         }
     }
@@ -391,7 +409,7 @@ class ModerationQueue extends Component
     public function saveContentEdits(): void
     {
         $result = $this->selectedResult;
-        if (!$result?->moderatable) {
+        if (! $result?->moderatable) {
             return;
         }
 
@@ -420,7 +438,7 @@ class ModerationQueue extends Component
     public function saveAndApprove(): void
     {
         $result = $this->selectedResult;
-        if (!$result?->moderatable) {
+        if (! $result?->moderatable) {
             return;
         }
 
@@ -450,18 +468,19 @@ class ModerationQueue extends Component
     public function saveAndPublish(): void
     {
         $result = $this->selectedResult;
-        if (!$result?->moderatable) {
+        if (! $result?->moderatable) {
             return;
         }
 
         $moderatable = $result->moderatable;
 
         // Only MiniCourses can be published
-        if (!($moderatable instanceof MiniCourse)) {
+        if (! ($moderatable instanceof MiniCourse)) {
             $this->dispatch('notify', [
                 'type' => 'warning',
                 'message' => 'Only Mini Courses can be published.',
             ]);
+
             return;
         }
 
@@ -543,28 +562,30 @@ class ModerationQueue extends Component
     public function submitForApproval(): void
     {
         $result = $this->selectedResult;
-        if (!$result?->moderatable) {
+        if (! $result?->moderatable) {
             return;
         }
 
         $moderatable = $result->moderatable;
 
         // Only MiniCourses have approval workflow
-        if (!($moderatable instanceof MiniCourse)) {
+        if (! ($moderatable instanceof MiniCourse)) {
             $this->dispatch('notify', [
                 'type' => 'warning',
                 'message' => 'Approval workflow is only available for Mini Courses.',
             ]);
+
             return;
         }
 
         // Check if moderation has passed
-        if (!$result->status === ContentModerationResult::STATUS_PASSED &&
-            !$result->status === ContentModerationResult::STATUS_APPROVED_OVERRIDE) {
+        if (! $result->status === ContentModerationResult::STATUS_PASSED &&
+            ! $result->status === ContentModerationResult::STATUS_APPROVED_OVERRIDE) {
             $this->dispatch('notify', [
                 'type' => 'error',
                 'message' => 'Content must pass moderation before submitting for approval.',
             ]);
+
             return;
         }
 
@@ -598,7 +619,7 @@ class ModerationQueue extends Component
     public function approveAndPublish(): void
     {
         $result = $this->selectedResult;
-        if (!$result?->moderatable) {
+        if (! $result?->moderatable) {
             return;
         }
 
@@ -667,7 +688,7 @@ class ModerationQueue extends Component
     public function toggleSelect(int $id): void
     {
         if (in_array($id, $this->selectedItems)) {
-            $this->selectedItems = array_values(array_filter($this->selectedItems, fn($i) => $i !== $id));
+            $this->selectedItems = array_values(array_filter($this->selectedItems, fn ($i) => $i !== $id));
         } else {
             $this->selectedItems[] = $id;
         }
@@ -682,6 +703,7 @@ class ModerationQueue extends Component
                 'type' => 'warning',
                 'message' => 'Please select items to assign.',
             ]);
+
             return;
         }
 
@@ -696,16 +718,17 @@ class ModerationQueue extends Component
     public function quickApprove(int $resultId): void
     {
         $result = ContentModerationResult::find($resultId);
-        if (!$result) {
+        if (! $result) {
             return;
         }
 
         // Check permission
-        if (!$result->canBeReviewedBy(auth()->user())) {
+        if (! $result->canBeReviewedBy(auth()->user())) {
             $this->dispatch('notify', [
                 'type' => 'error',
                 'message' => 'You do not have permission to review this item.',
             ]);
+
             return;
         }
 
@@ -722,16 +745,17 @@ class ModerationQueue extends Component
     public function quickReject(int $resultId): void
     {
         $result = ContentModerationResult::find($resultId);
-        if (!$result) {
+        if (! $result) {
             return;
         }
 
         // Check permission
-        if (!$result->canBeReviewedBy(auth()->user())) {
+        if (! $result->canBeReviewedBy(auth()->user())) {
             $this->dispatch('notify', [
                 'type' => 'error',
                 'message' => 'You do not have permission to review this item.',
             ]);
+
             return;
         }
 
@@ -762,7 +786,7 @@ class ModerationQueue extends Component
         $orgId = auth()->user()->org_id ?? null;
         $userId = auth()->id();
 
-        if (!$orgId) {
+        if (! $orgId) {
             return ['my_assignments' => 0, 'collaborating' => 0, 'unassigned' => 0, 'overdue' => 0];
         }
 
@@ -772,7 +796,7 @@ class ModerationQueue extends Component
     public function getEligibleModeratorsProperty(): \Illuminate\Support\Collection
     {
         $orgId = auth()->user()->org_id ?? null;
-        if (!$orgId) {
+        if (! $orgId) {
             return collect();
         }
 
@@ -808,12 +832,14 @@ class ModerationQueue extends Component
     protected function canViewAllItems(): bool
     {
         $user = auth()->user();
+
         return in_array($user->effective_role, ['admin', 'consultant', 'superintendent']);
     }
 
     protected function canAssign(): bool
     {
         $user = auth()->user();
+
         return in_array($user->effective_role, ['admin', 'consultant', 'superintendent', 'school_admin']);
     }
 
@@ -847,7 +873,7 @@ class ModerationQueue extends Component
         }
 
         // Role-based visibility
-        if (!$this->canViewAllItems()) {
+        if (! $this->canViewAllItems()) {
             // Non-admin users only see their assignments and collaborations
             $query->assignedToOrCollaborator($user->id);
         }
@@ -863,7 +889,7 @@ class ModerationQueue extends Component
             case 'unassigned':
                 $query->unassigned();
                 break;
-            // 'all' shows everything (respecting role visibility above)
+                // 'all' shows everything (respecting role visibility above)
         }
 
         // Status filter
@@ -886,7 +912,7 @@ class ModerationQueue extends Component
 
         // Search filter
         if ($this->search) {
-            $searchTerm = '%' . $this->search . '%';
+            $searchTerm = '%'.$this->search.'%';
             $query->where(function ($q) use ($searchTerm) {
                 $q->whereHasMorph('moderatable', '*', function ($subQuery) use ($searchTerm) {
                     $subQuery->where('title', 'like', $searchTerm)

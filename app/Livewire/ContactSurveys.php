@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use App\Models\SurveyAttempt;
 use App\Models\AuditLog;
+use App\Models\SurveyAttempt;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -12,6 +12,7 @@ class ContactSurveys extends Component
     use WithPagination;
 
     public string $contactType;
+
     public int $contactId;
 
     // Expanded survey tracking
@@ -19,7 +20,9 @@ class ContactSurveys extends Component
 
     // Edit mode
     public ?int $editingAttemptId = null;
+
     public array $editingResponses = [];
+
     public ?float $editingScore = null;
 
     // Filter

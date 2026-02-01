@@ -5,22 +5,28 @@ namespace App\Livewire\Marketplace;
 use App\Models\SellerProfile;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Str;
 
 class SellerProfileCreate extends Component
 {
     use WithFileUploads;
 
     public string $displayName = '';
+
     public string $bio = '';
+
     public string $sellerType = 'individual';
+
     public $avatar;
+
     public array $expertiseAreas = [];
+
     public array $credentials = [];
 
     // Credential form fields
     public string $newCredentialTitle = '';
+
     public string $newCredentialIssuer = '';
+
     public string $newCredentialYear = '';
 
     protected $rules = [
@@ -47,7 +53,7 @@ class SellerProfileCreate extends Component
     public function addExpertise(string $area): void
     {
         $area = trim($area);
-        if ($area && !in_array($area, $this->expertiseAreas) && count($this->expertiseAreas) < 10) {
+        if ($area && ! in_array($area, $this->expertiseAreas) && count($this->expertiseAreas) < 10) {
             $this->expertiseAreas[] = $area;
         }
     }
@@ -91,7 +97,7 @@ class SellerProfileCreate extends Component
         $avatarUrl = null;
         if ($this->avatar) {
             $path = $this->avatar->store('seller-avatars', 'public');
-            $avatarUrl = '/storage/' . $path;
+            $avatarUrl = '/storage/'.$path;
         }
 
         // Create the seller profile
@@ -103,8 +109,8 @@ class SellerProfileCreate extends Component
             'bio' => $this->bio ?: null,
             'avatar_url' => $avatarUrl,
             'seller_type' => $this->sellerType,
-            'expertise_areas' => !empty($this->expertiseAreas) ? $this->expertiseAreas : null,
-            'credentials' => !empty($this->credentials) ? $this->credentials : null,
+            'expertise_areas' => ! empty($this->expertiseAreas) ? $this->expertiseAreas : null,
+            'credentials' => ! empty($this->credentials) ? $this->credentials : null,
         ]);
 
         session()->flash('success', 'Your seller profile has been created! You can now start listing items on the marketplace.');

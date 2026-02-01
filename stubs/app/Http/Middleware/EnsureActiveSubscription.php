@@ -15,13 +15,13 @@ class EnsureActiveSubscription
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user()) {
+        if (! $request->user()) {
             return redirect()->route('login');
         }
 
         $org = $request->user()->organization;
 
-        if (!$org) {
+        if (! $org) {
             abort(403, 'No organization associated with this account.');
         }
 

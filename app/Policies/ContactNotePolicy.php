@@ -24,7 +24,7 @@ class ContactNotePolicy
     public function view(User $user, ContactNote $note): bool
     {
         // Must have access to the organization
-        if (!$user->canAccessOrganization($note->org_id)) {
+        if (! $user->canAccessOrganization($note->org_id)) {
             return false;
         }
 
@@ -50,7 +50,7 @@ class ContactNotePolicy
     public function update(User $user, ContactNote $note): bool
     {
         // Must have access to the organization
-        if (!$user->canAccessOrganization($note->org_id)) {
+        if (! $user->canAccessOrganization($note->org_id)) {
             return false;
         }
 
@@ -69,7 +69,7 @@ class ContactNotePolicy
     public function delete(User $user, ContactNote $note): bool
     {
         // Must have access to the organization
-        if (!$user->canAccessOrganization($note->org_id)) {
+        if (! $user->canAccessOrganization($note->org_id)) {
             return false;
         }
 

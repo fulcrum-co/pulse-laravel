@@ -6,7 +6,6 @@ use App\Models\Workflow;
 use App\Services\WorkflowEvaluationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -48,7 +47,7 @@ class ProcessWorkflow implements ShouldQueue
             ?? 'general';
 
         // Unique per workflow + entity + 30 second window
-        return "workflow:{$this->workflow->_id}:{$entityId}:" . floor(time() / 30);
+        return "workflow:{$this->workflow->_id}:{$entityId}:".floor(time() / 30);
     }
 
     /**
@@ -72,10 +71,11 @@ class ProcessWorkflow implements ShouldQueue
 
         try {
             // Check if workflow should still trigger (conditions might have changed)
-            if (!$evaluationService->shouldTrigger($this->workflow, $this->triggerData)) {
+            if (! $evaluationService->shouldTrigger($this->workflow, $this->triggerData)) {
                 Log::info('Workflow conditions no longer met, skipping', [
                     'workflow_id' => $this->workflow->_id,
                 ]);
+
                 return;
             }
 
@@ -117,8 +117,8 @@ class ProcessWorkflow implements ShouldQueue
     {
         return [
             'workflow',
-            'workflow:' . $this->workflow->_id,
-            'org:' . $this->workflow->org_id,
+            'workflow:'.$this->workflow->_id,
+            'org:'.$this->workflow->org_id,
         ];
     }
 }

@@ -13,7 +13,9 @@ use Livewire\Component;
 class ProviderChatList extends Component
 {
     public string $search = '';
+
     public ?string $selectedConversationId = null;
+
     public bool $useDemoData = true;
 
     protected $queryString = [
@@ -32,7 +34,7 @@ class ProviderChatList extends Component
         $user = auth()->user();
         if ($user) {
             try {
-                if (!Schema::hasTable('provider_conversations')) {
+                if (! Schema::hasTable('provider_conversations')) {
                     $this->useDemoData = true;
                 } else {
                     $realConversations = ProviderConversation::query()
@@ -88,7 +90,7 @@ class ProviderChatList extends Component
         $conversations = DemoConversationService::getConversations();
 
         $demoConversations = array_map(
-            fn($conv) => DemoConversationService::createDemoConversation($conv),
+            fn ($conv) => DemoConversationService::createDemoConversation($conv),
             $conversations
         );
 
@@ -129,8 +131,9 @@ class ProviderChatList extends Component
     {
         if ($this->useDemoData) {
             $providers = DemoConversationService::getAvailableProviders();
+
             return collect(array_map(
-                fn($p) => DemoConversationService::createDemoProvider($p),
+                fn ($p) => DemoConversationService::createDemoProvider($p),
                 $providers
             ));
         }
@@ -160,7 +163,7 @@ class ProviderChatList extends Component
         $this->selectedConversationId = $conversationId;
 
         // Mark as read for real conversations
-        if (!$this->useDemoData && is_numeric($conversationId)) {
+        if (! $this->useDemoData && is_numeric($conversationId)) {
             $conversation = ProviderConversation::find($conversationId);
             if ($conversation) {
                 $conversation->markReadByInitiator();
@@ -182,6 +185,7 @@ class ProviderChatList extends Component
             if ($conversations->isNotEmpty()) {
                 $this->selectConversation($conversations->first()->id);
             }
+
             return;
         }
 
@@ -197,6 +201,7 @@ class ProviderChatList extends Component
 
         if ($existing) {
             $this->selectConversation((string) $existing->id);
+
             return;
         }
 
@@ -235,6 +240,7 @@ class ProviderChatList extends Component
     {
         if ($this->useDemoData) {
             session()->flash('message', 'Demo conversations cannot be archived');
+
             return;
         }
 

@@ -2,21 +2,26 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class CourseApprovalWorkflow extends Model
 {
     // Workflow modes (admin-configurable)
     public const MODE_AUTO_ACTIVATE = 'auto_activate';
+
     public const MODE_CREATE_APPROVE = 'create_approve';
+
     public const MODE_APPROVE_FIRST = 'approve_first';
 
     // Statuses
     public const STATUS_PENDING = 'pending_review';
+
     public const STATUS_APPROVED = 'approved';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_REVISION = 'revision_requested';
 
     protected $fillable = [

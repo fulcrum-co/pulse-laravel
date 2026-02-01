@@ -19,20 +19,22 @@ class MiniCourseSeeder extends Seeder
     public function run(): void
     {
         $school = Organization::where('org_type', 'school')->first();
-        if (!$school) {
+        if (! $school) {
             $school = Organization::first();
         }
-        if (!$school) {
+        if (! $school) {
             $this->command->error('No organization found. Please seed organizations first.');
+
             return;
         }
 
         $admin = User::where('org_id', $school->id)->first();
-        if (!$admin) {
+        if (! $admin) {
             $admin = User::first();
         }
-        if (!$admin) {
+        if (! $admin) {
             $this->command->error('No user found. Please seed users first.');
+
             return;
         }
 

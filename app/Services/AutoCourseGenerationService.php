@@ -2,19 +2,19 @@
 
 namespace App\Services;
 
+use App\Models\ContactList;
+use App\Models\CourseApprovalWorkflow;
 use App\Models\MiniCourse;
 use App\Models\MiniCourseStep;
-use App\Models\CourseApprovalWorkflow;
+use App\Models\Organization;
 use App\Models\Student;
 use App\Models\User;
-use App\Models\ContactList;
-use App\Models\Organization;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Collection;
 
 class AutoCourseGenerationService
 {
     protected CourseGenerationContextBuilder $contextBuilder;
+
     protected CourseContentAIService $aiService;
 
     public function __construct(
@@ -53,7 +53,7 @@ class AutoCourseGenerationService
                 'additional_context' => $promptContext,
             ]);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 Log::error('Failed to generate course for student', [
                     'student_id' => $student->id,
                     'error' => $result['error'] ?? 'Unknown error',
@@ -122,7 +122,7 @@ class AutoCourseGenerationService
                 'additional_context' => $promptContext,
             ]);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 Log::error('Failed to generate course for teacher', [
                     'teacher_id' => $teacher->id,
                     'error' => $result['error'] ?? 'Unknown error',
@@ -191,7 +191,7 @@ class AutoCourseGenerationService
                 'additional_context' => $promptContext,
             ]);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 Log::error('Failed to generate course for department', [
                     'org_id' => $orgId,
                     'criteria' => $criteria,
@@ -311,7 +311,7 @@ class AutoCourseGenerationService
                 ->whereIn('risk_level', ['high', 'critical'])
                 ->whereDoesntHave('enrollments', function ($q) {
                     $q->whereIn('status', ['active', 'in_progress'])
-                      ->where('created_at', '>=', now()->subDays(30));
+                        ->where('created_at', '>=', now()->subDays(30));
                 })
                 ->limit($maxCourses - $coursesCreated)
                 ->get();
@@ -342,7 +342,7 @@ class AutoCourseGenerationService
                 ->where('role', 'teacher')
                 ->whereDoesntHave('enrollments', function ($q) {
                     $q->whereIn('status', ['active', 'in_progress'])
-                      ->where('created_at', '>=', now()->subDays(30));
+                        ->where('created_at', '>=', now()->subDays(30));
                 })
                 ->limit($maxCourses - $coursesCreated)
                 ->get();
@@ -357,7 +357,7 @@ class AutoCourseGenerationService
                 $hasDecline = collect($context['student_outcomes'] ?? [])
                     ->contains(fn ($o) => ($o['trend'] ?? '') === 'declining');
 
-                if (!$hasDecline) {
+                if (! $hasDecline) {
                     continue;
                 }
 
@@ -391,12 +391,12 @@ class AutoCourseGenerationService
     {
         $settings = $this->getOrgSettings($entity->org_id ?? $entity->org_id);
 
-        if (!($settings['auto_generate_enabled'] ?? false)) {
+        if (! ($settings['auto_generate_enabled'] ?? false)) {
             return;
         }
 
         $triggers = $settings['generation_triggers'] ?? [];
-        if (!in_array($signalType, $triggers)) {
+        if (! in_array($signalType, $triggers)) {
             return;
         }
 
@@ -478,12 +478,12 @@ class AutoCourseGenerationService
         ]);
 
         // Create steps
-        if (!empty($courseData['steps'])) {
+        if (! empty($courseData['steps'])) {
             foreach ($courseData['steps'] as $index => $stepData) {
                 $course->steps()->create([
                     'sort_order' => $index + 1,
                     'step_type' => $stepData['step_type'] ?? MiniCourseStep::TYPE_CONTENT,
-                    'title' => $stepData['title'] ?? 'Step ' . ($index + 1),
+                    'title' => $stepData['title'] ?? 'Step '.($index + 1),
                     'description' => $stepData['description'] ?? null,
                     'instructions' => $stepData['instructions'] ?? null,
                     'content_type' => $stepData['content_type'] ?? MiniCourseStep::CONTENT_TEXT,
@@ -549,7 +549,7 @@ class AutoCourseGenerationService
     {
         $org = Organization::find($orgId);
 
-        if (!$org) {
+        if (! $org) {
             return $this->getDefaultSettings();
         }
 
@@ -721,7 +721,7 @@ class AutoCourseGenerationService
         $duration = 60;
 
         // Customize based on challenges
-        if (!empty($challenges)) {
+        if (! empty($challenges)) {
             $primaryChallenge = $challenges[0] ?? '';
 
             if (str_contains(strtolower($primaryChallenge), 'behavioral')) {

@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FocusArea extends Model
 {
@@ -28,8 +28,11 @@ class FocusArea extends Model
      * Status constants.
      */
     public const STATUS_ON_TRACK = 'on_track';
+
     public const STATUS_AT_RISK = 'at_risk';
+
     public const STATUS_OFF_TRACK = 'off_track';
+
     public const STATUS_NOT_STARTED = 'not_started';
 
     /**

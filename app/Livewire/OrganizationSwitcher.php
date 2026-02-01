@@ -13,7 +13,7 @@ class OrganizationSwitcher extends Component
 
     public function toggleSwitcher(): void
     {
-        $this->showSwitcher = !$this->showSwitcher;
+        $this->showSwitcher = ! $this->showSwitcher;
     }
 
     public function switchOrganization(int $orgId): void
@@ -52,6 +52,7 @@ class OrganizationSwitcher extends Component
     public function getIsViewingChildOrgProperty(): bool
     {
         $user = auth()->user();
+
         return $user->current_org_id !== null && $user->current_org_id !== $user->org_id;
     }
 

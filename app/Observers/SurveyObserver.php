@@ -21,7 +21,7 @@ class SurveyObserver
     public function updated(Survey $survey): void
     {
         // Check if status changed
-        if (!$survey->isDirty('status')) {
+        if (! $survey->isDirty('status')) {
             return;
         }
 
@@ -60,6 +60,7 @@ class SurveyObserver
             Log::info('SurveyObserver: No pending deliveries for survey', [
                 'survey_id' => $survey->id,
             ]);
+
             return;
         }
 
@@ -110,7 +111,7 @@ class SurveyObserver
      */
     protected function handleSurveyCompleted(Survey $survey): void
     {
-        if (!$survey->created_by) {
+        if (! $survey->created_by) {
             return;
         }
 
@@ -150,7 +151,7 @@ class SurveyObserver
      */
     protected function handleSurveyPaused(Survey $survey): void
     {
-        if (!$survey->created_by) {
+        if (! $survey->created_by) {
             return;
         }
 

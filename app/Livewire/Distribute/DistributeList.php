@@ -11,11 +11,15 @@ class DistributeList extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $statusFilter = '';
+
     public string $channelFilter = '';
+
     public string $viewMode = 'grid';
 
     public ?int $distributionToDelete = null;
+
     public bool $showDeleteModal = false;
 
     protected $queryString = [
@@ -67,7 +71,7 @@ class DistributeList extends Component
 
     public function deleteDistribution(): void
     {
-        if (!$this->distributionToDelete) {
+        if (! $this->distributionToDelete) {
             return;
         }
 
@@ -92,7 +96,7 @@ class DistributeList extends Component
         $distribution = Distribution::where('org_id', auth()->user()->org_id)
             ->find($distributionId);
 
-        if (!$distribution) {
+        if (! $distribution) {
             return;
         }
 
@@ -117,12 +121,12 @@ class DistributeList extends Component
         $distribution = Distribution::where('org_id', auth()->user()->org_id)
             ->find($distributionId);
 
-        if (!$distribution) {
+        if (! $distribution) {
             return;
         }
 
         $newDistribution = $distribution->replicate();
-        $newDistribution->title = $distribution->title . ' (Copy)';
+        $newDistribution->title = $distribution->title.' (Copy)';
         $newDistribution->status = Distribution::STATUS_DRAFT;
         $newDistribution->created_by = auth()->id();
         $newDistribution->save();
@@ -140,8 +144,8 @@ class DistributeList extends Component
         $distributions = Distribution::where('org_id', $user->org_id)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('title', 'like', '%' . $this->search . '%')
-                      ->orWhere('description', 'like', '%' . $this->search . '%');
+                    $q->where('title', 'like', '%'.$this->search.'%')
+                        ->orWhere('description', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->statusFilter, function ($query) {

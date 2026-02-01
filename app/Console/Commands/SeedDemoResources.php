@@ -14,6 +14,7 @@ use Illuminate\Console\Command;
 class SeedDemoResources extends Command
 {
     protected $signature = 'demo:seed-resources {org_id? : The organization ID to seed resources for}';
+
     protected $description = 'Seed demo resources, providers, programs, and courses for an organization';
 
     public function handle(): int
@@ -21,18 +22,20 @@ class SeedDemoResources extends Command
         $orgId = $this->argument('org_id') ?? 1;
         $org = Organization::find($orgId);
 
-        if (!$org) {
+        if (! $org) {
             $this->error("Organization with ID {$orgId} not found.");
+
             return 1;
         }
 
         $admin = User::where('org_id', $orgId)->where('primary_role', 'admin')->first();
-        if (!$admin) {
+        if (! $admin) {
             $admin = User::where('org_id', $orgId)->first();
         }
 
-        if (!$admin) {
+        if (! $admin) {
             $this->error("No users found for organization {$orgId}.");
+
             return 1;
         }
 
@@ -44,6 +47,7 @@ class SeedDemoResources extends Command
         $this->seedCourses($orgId, $admin->id);
 
         $this->info('Demo data seeded successfully!');
+
         return 0;
     }
 
@@ -133,7 +137,7 @@ class SeedDemoResources extends Command
             );
         }
 
-        $this->info('  - Created ' . count($resources) . ' resources');
+        $this->info('  - Created '.count($resources).' resources');
     }
 
     protected function seedProviders(int $orgId, int $userId): void
@@ -203,7 +207,7 @@ class SeedDemoResources extends Command
             );
         }
 
-        $this->info('  - Created ' . count($providers) . ' providers');
+        $this->info('  - Created '.count($providers).' providers');
     }
 
     protected function seedPrograms(int $orgId, int $userId): void
@@ -277,7 +281,7 @@ class SeedDemoResources extends Command
             );
         }
 
-        $this->info('  - Created ' . count($programs) . ' programs');
+        $this->info('  - Created '.count($programs).' programs');
     }
 
     protected function seedCourses(int $orgId, int $userId): void
@@ -366,6 +370,6 @@ class SeedDemoResources extends Command
             }
         }
 
-        $this->info('  - Created ' . count($courses) . ' courses with steps');
+        $this->info('  - Created '.count($courses).' courses with steps');
     }
 }

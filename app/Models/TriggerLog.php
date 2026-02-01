@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use MongoDB\Laravel\Eloquent\Model;
 
 class TriggerLog extends Model
 {
     protected $connection = 'mongodb';
+
     protected $collection = 'trigger_logs';
 
     protected $fillable = [
@@ -57,6 +58,7 @@ class TriggerLog extends Model
                 return false;
             }
         }
+
         return true;
     }
 

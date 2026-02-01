@@ -7,6 +7,7 @@ use Livewire\Component;
 class DemoRoleSwitcher extends Component
 {
     public string $currentRole = '';
+
     public bool $isOpen = false;
 
     public array $availableRoles = [
@@ -27,7 +28,7 @@ class DemoRoleSwitcher extends Component
 
     public function toggle(): void
     {
-        $this->isOpen = !$this->isOpen;
+        $this->isOpen = ! $this->isOpen;
     }
 
     public function selectRole(string $role): void

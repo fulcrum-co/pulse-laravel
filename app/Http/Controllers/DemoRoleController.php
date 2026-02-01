@@ -10,7 +10,7 @@ class DemoRoleController extends Controller
     {
         $validRoles = ['actual', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher', 'student', 'parent'];
 
-        if (!in_array($role, $validRoles)) {
+        if (! in_array($role, $validRoles)) {
             abort(404);
         }
 

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class NotificationDigest extends Model
 {
     public const TYPE_DAILY = 'daily';
+
     public const TYPE_WEEKLY = 'weekly';
 
     protected $fillable = [

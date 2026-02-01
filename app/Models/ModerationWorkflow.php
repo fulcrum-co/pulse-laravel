@@ -27,7 +27,9 @@ class ModerationWorkflow extends Model
     ];
 
     public const CONTENT_TYPE_MINI_COURSE = 'mini_course';
+
     public const CONTENT_TYPE_CONTENT_BLOCK = 'content_block';
+
     public const CONTENT_TYPE_ALL = 'all';
 
     // Relationships
@@ -58,7 +60,7 @@ class ModerationWorkflow extends Model
     {
         return $query->where(function ($q) use ($contentType) {
             $q->where('content_type', $contentType)
-              ->orWhere('content_type', self::CONTENT_TYPE_ALL);
+                ->orWhere('content_type', self::CONTENT_TYPE_ALL);
         });
     }
 
@@ -83,7 +85,7 @@ class ModerationWorkflow extends Model
         }
 
         foreach ($this->trigger_conditions as $condition) {
-            if (!$this->evaluateCondition($condition, $result)) {
+            if (! $this->evaluateCondition($condition, $result)) {
                 return false;
             }
         }
@@ -97,7 +99,7 @@ class ModerationWorkflow extends Model
         $operator = $condition['operator'] ?? 'equals';
         $value = $condition['value'] ?? null;
 
-        if (!$field) {
+        if (! $field) {
             return true;
         }
 
@@ -108,7 +110,7 @@ class ModerationWorkflow extends Model
             'cultural_sensitivity_score' => $result->cultural_sensitivity_score,
             'accuracy_score' => $result->accuracy_score,
             'status' => $result->status,
-            'has_flags' => !empty($result->flags),
+            'has_flags' => ! empty($result->flags),
             default => null,
         };
 

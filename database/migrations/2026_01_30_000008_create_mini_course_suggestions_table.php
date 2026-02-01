@@ -37,9 +37,9 @@ return new class extends Migration
         // Add foreign key from enrollments to suggestions
         Schema::table('mini_course_enrollments', function (Blueprint $table) {
             $table->foreign('suggestion_id')
-                  ->references('id')
-                  ->on('mini_course_suggestions')
-                  ->nullOnDelete();
+                ->references('id')
+                ->on('mini_course_suggestions')
+                ->nullOnDelete();
         });
     }
 

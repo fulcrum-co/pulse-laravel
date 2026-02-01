@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\MiniCourse;
-use App\Models\MiniCourseStep;
 use App\Services\MiniCourseGenerationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -47,7 +46,7 @@ class MiniCourseController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -246,7 +245,7 @@ class MiniCourseController extends Controller
             $validated['signals'] ?? []
         );
 
-        if (!$course) {
+        if (! $course) {
             return response()->json([
                 'success' => false,
                 'error' => 'Failed to generate course. Please try again.',

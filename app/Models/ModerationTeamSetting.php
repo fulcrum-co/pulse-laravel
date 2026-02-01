@@ -30,9 +30,13 @@ class ModerationTeamSetting extends Model
 
     // Specialization constants
     public const SPEC_WELLNESS = 'wellness';
+
     public const SPEC_ACADEMIC = 'academic';
+
     public const SPEC_SOCIAL_EMOTIONAL = 'social_emotional';
+
     public const SPEC_CAREER = 'career';
+
     public const SPEC_CRISIS = 'crisis';
 
     public static array $specializations = [
@@ -70,7 +74,7 @@ class ModerationTeamSetting extends Model
     public function scopeAvailable($query)
     {
         return $query->where('auto_assign_enabled', true)
-                     ->whereRaw('current_load < max_concurrent_items');
+            ->whereRaw('current_load < max_concurrent_items');
     }
 
     public function scopeWithSpecialization($query, string $specialization)
@@ -87,7 +91,7 @@ class ModerationTeamSetting extends Model
 
     public function getIsAvailableAttribute(): bool
     {
-        if (!$this->auto_assign_enabled) {
+        if (! $this->auto_assign_enabled) {
             return false;
         }
 
@@ -96,7 +100,7 @@ class ModerationTeamSetting extends Model
         }
 
         // Check schedule if defined
-        if (!empty($this->schedule)) {
+        if (! empty($this->schedule)) {
             return $this->isWithinSchedule();
         }
 
@@ -128,7 +132,7 @@ class ModerationTeamSetting extends Model
     {
         $specs = $this->content_specializations ?? [];
 
-        if (!in_array($specialization, $specs)) {
+        if (! in_array($specialization, $specs)) {
             $specs[] = $specialization;
             $this->update(['content_specializations' => $specs]);
         }
@@ -137,7 +141,7 @@ class ModerationTeamSetting extends Model
     public function removeSpecialization(string $specialization): void
     {
         $specs = $this->content_specializations ?? [];
-        $specs = array_filter($specs, fn($s) => $s !== $specialization);
+        $specs = array_filter($specs, fn ($s) => $s !== $specialization);
         $this->update(['content_specializations' => array_values($specs)]);
     }
 
@@ -173,7 +177,7 @@ class ModerationTeamSetting extends Model
         $currentTime = $now->format('H:i');
 
         // Check if current day has schedule
-        if (!isset($this->schedule[$dayOfWeek])) {
+        if (! isset($this->schedule[$dayOfWeek])) {
             return false;
         }
 

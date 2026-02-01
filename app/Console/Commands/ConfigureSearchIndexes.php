@@ -32,19 +32,20 @@ class ConfigureSearchIndexes extends Command
         // Health check first
         $health = $service->healthCheck();
         if ($health['status'] !== 'healthy') {
-            $this->error('Meilisearch is not accessible: ' . ($health['error'] ?? 'Unknown error'));
+            $this->error('Meilisearch is not accessible: '.($health['error'] ?? 'Unknown error'));
             $this->line('');
             $this->line('Make sure Meilisearch is running and MEILISEARCH_HOST is correctly configured.');
+
             return Command::FAILURE;
         }
 
-        $this->info('Connected to Meilisearch ' . ($health['version']['pkgVersion'] ?? 'unknown'));
+        $this->info('Connected to Meilisearch '.($health['version']['pkgVersion'] ?? 'unknown'));
         $this->line('');
 
         // Fresh start?
         if ($this->option('fresh')) {
             $this->warn('Fresh mode: Existing indexes will be deleted and recreated.');
-            if (!$this->confirm('Are you sure?')) {
+            if (! $this->confirm('Are you sure?')) {
                 return Command::SUCCESS;
             }
         }
@@ -55,7 +56,7 @@ class ConfigureSearchIndexes extends Command
 
         $this->table(
             ['Index', 'Status', 'Details'],
-            collect($results)->map(fn($result, $index) => [
+            collect($results)->map(fn ($result, $index) => [
                 $index,
                 $result['status'],
                 $result['task_uid'] ?? $result['message'] ?? '',
@@ -80,19 +81,20 @@ class ConfigureSearchIndexes extends Command
         $health = $service->healthCheck();
 
         if ($health['status'] !== 'healthy') {
-            $this->error('Meilisearch is not accessible: ' . ($health['error'] ?? 'Unknown error'));
+            $this->error('Meilisearch is not accessible: '.($health['error'] ?? 'Unknown error'));
+
             return Command::FAILURE;
         }
 
-        $this->info('Meilisearch Status: ' . $health['status']);
-        $this->line('Version: ' . ($health['version']['pkgVersion'] ?? 'unknown'));
+        $this->info('Meilisearch Status: '.$health['status']);
+        $this->line('Version: '.($health['version']['pkgVersion'] ?? 'unknown'));
         $this->line('');
 
         $stats = $service->getIndexStats();
 
         $this->table(
             ['Index', 'Documents', 'Indexing'],
-            collect($stats)->map(fn($stat, $index) => [
+            collect($stats)->map(fn ($stat, $index) => [
                 $index,
                 $stat['numberOfDocuments'] ?? ($stat['error'] ?? 'N/A'),
                 isset($stat['isIndexing']) ? ($stat['isIndexing'] ? 'Yes' : 'No') : 'N/A',

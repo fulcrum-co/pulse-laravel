@@ -12,9 +12,11 @@ use Livewire\Component;
 class CourseSuggestionsPanel extends Component
 {
     public string $entityType; // 'student' or 'teacher'
+
     public int $entityId;
 
     public bool $generating = false;
+
     public ?string $error = null;
 
     public function mount(string $entityType, int $entityId): void

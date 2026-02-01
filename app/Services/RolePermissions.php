@@ -60,6 +60,7 @@ class RolePermissions
     public static function canAccess(string $role, string $navItem): bool
     {
         $permissions = self::NAV_PERMISSIONS[$navItem] ?? [];
+
         return in_array($role, $permissions, true);
     }
 
@@ -69,11 +70,12 @@ class RolePermissions
     public static function currentUserCanAccess(string $navItem): bool
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
         $effectiveRole = $user->effective_role ?? $user->primary_role;
+
         return self::canAccess($effectiveRole, $navItem);
     }
 
@@ -84,7 +86,7 @@ class RolePermissions
     {
         return array_keys(array_filter(
             self::NAV_PERMISSIONS,
-            fn($allowedRoles) => in_array($role, $allowedRoles, true)
+            fn ($allowedRoles) => in_array($role, $allowedRoles, true)
         ));
     }
 
@@ -94,6 +96,7 @@ class RolePermissions
     public static function isInDemoMode(): bool
     {
         $user = auth()->user();
+
         return $user && $user->isInDemoMode();
     }
 
@@ -103,6 +106,7 @@ class RolePermissions
     public static function getEffectiveRole(): ?string
     {
         $user = auth()->user();
+
         return $user ? ($user->effective_role ?? $user->primary_role) : null;
     }
 }

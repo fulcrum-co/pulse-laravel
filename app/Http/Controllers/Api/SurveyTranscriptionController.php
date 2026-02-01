@@ -24,7 +24,7 @@ class SurveyTranscriptionController extends Controller
         ]);
 
         $file = $request->file('audio');
-        $filename = 'transcriptions/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $filename = 'transcriptions/'.Str::uuid().'.'.$file->getClientOriginalExtension();
 
         // Store the file temporarily
         Storage::disk('local')->put($filename, file_get_contents($file->getRealPath()));
@@ -54,7 +54,7 @@ class SurveyTranscriptionController extends Controller
 
             return response()->json([
                 'success' => false,
-                'error' => 'Transcription service error: ' . $e->getMessage(),
+                'error' => 'Transcription service error: '.$e->getMessage(),
             ], 500);
         }
     }

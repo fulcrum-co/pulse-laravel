@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
-use Carbon\Carbon;
 
 class CollectionSchedule extends Model
 {
@@ -41,14 +41,18 @@ class CollectionSchedule extends Model
      * Schedule type constants
      */
     public const TYPE_INTERVAL = 'interval';
+
     public const TYPE_CUSTOM = 'custom';
+
     public const TYPE_EVENT = 'event';
 
     /**
      * Interval type constants
      */
     public const INTERVAL_DAILY = 'daily';
+
     public const INTERVAL_WEEKLY = 'weekly';
+
     public const INTERVAL_MONTHLY = 'monthly';
 
     /**
@@ -154,7 +158,9 @@ class CollectionSchedule extends Model
 
         foreach ($days as $day) {
             $dayNum = $dayMap[strtolower($day)] ?? null;
-            if ($dayNum === null) continue;
+            if ($dayNum === null) {
+                continue;
+            }
 
             foreach ($times as $time) {
                 $parts = explode(':', $time);
@@ -168,6 +174,7 @@ class CollectionSchedule extends Model
                     $todayCandidate = $now->copy()->setTime($hour, $minute, 0);
                     if ($todayCandidate->greaterThan($now)) {
                         $candidates[] = $todayCandidate;
+
                         continue;
                     }
                 }
@@ -181,7 +188,8 @@ class CollectionSchedule extends Model
         }
 
         // Return the earliest candidate
-        usort($candidates, fn($a, $b) => $a->timestamp - $b->timestamp);
+        usort($candidates, fn ($a, $b) => $a->timestamp - $b->timestamp);
+
         return $candidates[0];
     }
 

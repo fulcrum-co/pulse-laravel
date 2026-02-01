@@ -11,10 +11,15 @@ class ProgramCatalog extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $filterType = '';
+
     public string $filterLocation = '';
+
     public string $filterCost = '';
+
     public bool $showActiveOnly = true;
+
     public string $viewMode = 'grid';
 
     protected $queryString = [
@@ -55,8 +60,8 @@ class ProgramCatalog extends Component
         // Search
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'ilike', '%' . $this->search . '%')
-                  ->orWhere('description', 'ilike', '%' . $this->search . '%');
+                $q->where('name', 'ilike', '%'.$this->search.'%')
+                    ->orWhere('description', 'ilike', '%'.$this->search.'%');
             });
         }
 
@@ -105,7 +110,7 @@ class ProgramCatalog extends Component
             $this->filterType !== '' ||
             $this->filterLocation !== '' ||
             $this->filterCost !== '' ||
-            !$this->showActiveOnly;
+            ! $this->showActiveOnly;
     }
 
     public function render()

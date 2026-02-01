@@ -2,25 +2,31 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class MarketplacePricing extends Model
 {
     // Pricing types
     public const TYPE_FREE = 'free';
+
     public const TYPE_ONE_TIME = 'one_time';
+
     public const TYPE_RECURRING = 'recurring';
 
     // Billing intervals
     public const INTERVAL_MONTH = 'month';
+
     public const INTERVAL_YEAR = 'year';
 
     // License types
     public const LICENSE_SINGLE = 'single';
+
     public const LICENSE_TEAM = 'team';
+
     public const LICENSE_SITE = 'site';
+
     public const LICENSE_DISTRICT = 'district';
 
     protected $table = 'marketplace_pricing';
@@ -142,7 +148,7 @@ class MarketplacePricing extends Model
         }
 
         $price = $this->isRecurring() ? $this->recurring_price : $this->price;
-        $formatted = '$' . number_format($price, 2);
+        $formatted = '$'.number_format($price, 2);
 
         if ($this->isRecurring()) {
             $interval = $this->billing_interval === self::INTERVAL_MONTH ? '/mo' : '/yr';
@@ -165,7 +171,7 @@ class MarketplacePricing extends Model
      */
     public function getDiscountPercentage(): ?int
     {
-        if (!$this->hasDiscount()) {
+        if (! $this->hasDiscount()) {
             return null;
         }
 

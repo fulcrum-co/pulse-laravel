@@ -28,7 +28,7 @@ class ContentModerationResultPolicy
      */
     public function view(User $user, ContentModerationResult $result): bool
     {
-        if (!$user->canAccessOrganization($result->org_id)) {
+        if (! $user->canAccessOrganization($result->org_id)) {
             return false;
         }
 
@@ -51,7 +51,7 @@ class ContentModerationResultPolicy
      */
     public function review(User $user, ContentModerationResult $result): bool
     {
-        if (!$user->canAccessOrganization($result->org_id)) {
+        if (! $user->canAccessOrganization($result->org_id)) {
             return false;
         }
 
@@ -63,7 +63,7 @@ class ContentModerationResultPolicy
      */
     public function assign(User $user, ContentModerationResult $result): bool
     {
-        if (!$user->canAccessOrganization($result->org_id)) {
+        if (! $user->canAccessOrganization($result->org_id)) {
             return false;
         }
 
@@ -76,18 +76,18 @@ class ContentModerationResultPolicy
      */
     public function editContent(User $user, ContentModerationResult $result): bool
     {
-        if (!$user->canAccessOrganization($result->org_id)) {
+        if (! $user->canAccessOrganization($result->org_id)) {
             return false;
         }
 
         // Must be able to review
-        if (!$result->canBeReviewedBy($user)) {
+        if (! $result->canBeReviewedBy($user)) {
             return false;
         }
 
         // Must be able to edit the underlying content
         $moderatable = $result->moderatable;
-        if (!$moderatable) {
+        if (! $moderatable) {
             return false;
         }
 
@@ -100,7 +100,7 @@ class ContentModerationResultPolicy
      */
     public function manage(User $user, ContentModerationResult $result): bool
     {
-        if (!$user->canAccessOrganization($result->org_id)) {
+        if (! $user->canAccessOrganization($result->org_id)) {
             return false;
         }
 

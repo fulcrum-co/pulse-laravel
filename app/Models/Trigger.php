@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
-use MongoDB\Laravel\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use MongoDB\Laravel\Eloquent\Model;
+use MongoDB\Laravel\Eloquent\SoftDeletes;
 
 class Trigger extends Model
 {
     use SoftDeletes;
 
     protected $connection = 'mongodb';
+
     protected $collection = 'triggers';
 
     protected $fillable = [
@@ -67,7 +68,7 @@ class Trigger extends Model
      */
     public function isInCooldown(): bool
     {
-        if (!$this->last_triggered_at || !$this->cooldown_hours) {
+        if (! $this->last_triggered_at || ! $this->cooldown_hours) {
             return false;
         }
 

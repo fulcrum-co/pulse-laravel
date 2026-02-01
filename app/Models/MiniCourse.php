@@ -5,50 +5,68 @@ namespace App\Models;
 use App\Traits\HasContentModeration;
 use App\Traits\HasEmbedding;
 use App\Traits\Searchable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 class MiniCourse extends Model
 {
-    use SoftDeletes, Searchable, HasEmbedding, HasContentModeration;
+    use HasContentModeration, HasEmbedding, Searchable, SoftDeletes;
 
     // Course types
     public const TYPE_INTERVENTION = 'intervention';
+
     public const TYPE_ENRICHMENT = 'enrichment';
+
     public const TYPE_SKILL_BUILDING = 'skill_building';
+
     public const TYPE_WELLNESS = 'wellness';
+
     public const TYPE_ACADEMIC = 'academic';
+
     public const TYPE_BEHAVIORAL = 'behavioral';
 
     // Creation sources
     public const SOURCE_AI_GENERATED = 'ai_generated';
+
     public const SOURCE_HUMAN_CREATED = 'human_created';
+
     public const SOURCE_HYBRID = 'hybrid';
+
     public const SOURCE_TEMPLATE = 'template';
 
     // Statuses
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_ARCHIVED = 'archived';
 
     // Generation triggers
     public const TRIGGER_MANUAL = 'manual';
+
     public const TRIGGER_SCHEDULED = 'scheduled';
+
     public const TRIGGER_SIGNAL = 'signal';
 
     // Approval statuses
     public const APPROVAL_PENDING = 'pending_review';
+
     public const APPROVAL_APPROVED = 'approved';
+
     public const APPROVAL_REJECTED = 'rejected';
+
     public const APPROVAL_REVISION = 'revision_requested';
 
     // Target entity types
     public const TARGET_STUDENT = 'student';
+
     public const TARGET_TEACHER = 'teacher';
+
     public const TARGET_DEPARTMENT = 'department';
+
     public const TARGET_CONTACT_LIST = 'contact_list';
 
     protected $fillable = [
@@ -434,7 +452,7 @@ class MiniCourse extends Model
     /**
      * Create a new version snapshot.
      */
-    public function createVersion(string $changeSummary = null, int $userId = null): MiniCourseVersion
+    public function createVersion(?string $changeSummary = null, ?int $userId = null): MiniCourseVersion
     {
         $latestVersion = $this->versions()->max('version_number') ?? 0;
 
@@ -458,7 +476,7 @@ class MiniCourse extends Model
     /**
      * Duplicate the course.
      */
-    public function duplicate(int $orgId = null, int $userId = null): self
+    public function duplicate(?int $orgId = null, ?int $userId = null): self
     {
         $newCourse = $this->replicate(['id', 'created_at', 'updated_at', 'published_at', 'current_version_id']);
         $newCourse->org_id = $orgId ?? $this->org_id;
@@ -466,7 +484,7 @@ class MiniCourse extends Model
         $newCourse->source_org_id = $this->org_id;
         $newCourse->created_by = $userId ?? auth()->id();
         $newCourse->status = self::STATUS_DRAFT;
-        $newCourse->title = $this->title . ' (Copy)';
+        $newCourse->title = $this->title.' (Copy)';
         $newCourse->is_template = false;
         $newCourse->save();
 
@@ -521,6 +539,7 @@ class MiniCourse extends Model
         if ($total === 0) {
             return null;
         }
+
         return round(($this->completion_count / $total) * 100, 1);
     }
 
@@ -654,24 +673,24 @@ class MiniCourse extends Model
             $this->course_type,
         ];
 
-        if (!empty($this->objectives)) {
+        if (! empty($this->objectives)) {
             $objectives = is_array($this->objectives) ? $this->objectives : [];
-            $parts[] = 'Objectives: ' . implode(', ', $objectives);
+            $parts[] = 'Objectives: '.implode(', ', $objectives);
         }
 
-        if (!empty($this->target_grades)) {
+        if (! empty($this->target_grades)) {
             $grades = is_array($this->target_grades) ? $this->target_grades : [];
-            $parts[] = 'Grades: ' . implode(', ', $grades);
+            $parts[] = 'Grades: '.implode(', ', $grades);
         }
 
-        if (!empty($this->target_needs)) {
+        if (! empty($this->target_needs)) {
             $needs = is_array($this->target_needs) ? $this->target_needs : [];
-            $parts[] = 'Target needs: ' . implode(', ', $needs);
+            $parts[] = 'Target needs: '.implode(', ', $needs);
         }
 
-        if (!empty($this->target_risk_levels)) {
+        if (! empty($this->target_risk_levels)) {
             $levels = is_array($this->target_risk_levels) ? $this->target_risk_levels : [];
-            $parts[] = 'Risk levels: ' . implode(', ', $levels);
+            $parts[] = 'Risk levels: '.implode(', ', $levels);
         }
 
         return implode('. ', array_filter($parts));
@@ -703,7 +722,7 @@ class MiniCourse extends Model
             $parts[] = "Expected Experience: {$this->expected_experience}";
         }
 
-        if (!empty($this->objectives)) {
+        if (! empty($this->objectives)) {
             $objectives = is_array($this->objectives) ? implode("\n- ", $this->objectives) : $this->objectives;
             $parts[] = "Objectives:\n- {$objectives}";
         }

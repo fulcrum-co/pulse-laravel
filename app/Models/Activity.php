@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Activity extends Model
 {
@@ -31,8 +31,11 @@ class Activity extends Model
      * Status constants.
      */
     public const STATUS_ON_TRACK = 'on_track';
+
     public const STATUS_AT_RISK = 'at_risk';
+
     public const STATUS_OFF_TRACK = 'off_track';
+
     public const STATUS_NOT_STARTED = 'not_started';
 
     /**
@@ -92,11 +95,11 @@ class Activity extends Model
      */
     public function getDateRangeAttribute(): ?string
     {
-        if (!$this->start_date || !$this->end_date) {
+        if (! $this->start_date || ! $this->end_date) {
             return null;
         }
 
-        return $this->start_date->format('n/j/Y') . ' - ' . $this->end_date->format('n/j/Y');
+        return $this->start_date->format('n/j/Y').' - '.$this->end_date->format('n/j/Y');
     }
 
     /**

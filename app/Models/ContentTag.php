@@ -2,18 +2,22 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Builder;
 
 class ContentTag extends Model
 {
     // Tag categories
     public const CATEGORY_TOPIC = 'topic';
+
     public const CATEGORY_SKILL = 'skill';
+
     public const CATEGORY_GRADE = 'grade';
+
     public const CATEGORY_SUBJECT = 'subject';
+
     public const CATEGORY_RISK_FACTOR = 'risk_factor';
 
     protected $fillable = [
@@ -88,7 +92,7 @@ class ContentTag extends Model
     {
         return $query->where(function ($q) use ($orgId) {
             $q->where('org_id', $orgId)
-              ->orWhereNull('org_id');
+                ->orWhereNull('org_id');
         });
     }
 

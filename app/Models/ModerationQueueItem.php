@@ -37,15 +37,22 @@ class ModerationQueueItem extends Model
 
     // Status constants
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_ESCALATED = 'escalated';
+
     public const STATUS_EXPIRED = 'expired';
 
     // Priority constants
     public const PRIORITY_LOW = 'low';
+
     public const PRIORITY_NORMAL = 'normal';
+
     public const PRIORITY_HIGH = 'high';
+
     public const PRIORITY_URGENT = 'urgent';
 
     public static array $priorities = [
@@ -127,14 +134,14 @@ class ModerationQueueItem extends Model
     public function scopeOverdue($query)
     {
         return $query->where('due_at', '<', now())
-                     ->whereIn('status', [self::STATUS_PENDING, self::STATUS_IN_PROGRESS]);
+            ->whereIn('status', [self::STATUS_PENDING, self::STATUS_IN_PROGRESS]);
     }
 
     public function scopeDueSoon($query, int $hoursAhead = 24)
     {
         return $query->where('due_at', '<=', now()->addHours($hoursAhead))
-                     ->where('due_at', '>', now())
-                     ->whereIn('status', [self::STATUS_PENDING, self::STATUS_IN_PROGRESS]);
+            ->where('due_at', '>', now())
+            ->whereIn('status', [self::STATUS_PENDING, self::STATUS_IN_PROGRESS]);
     }
 
     public function scopeByPriority($query)
@@ -152,7 +159,7 @@ class ModerationQueueItem extends Model
 
     public function getTimeUntilDueAttribute(): ?int
     {
-        if (!$this->due_at) {
+        if (! $this->due_at) {
             return null;
         }
 
@@ -161,7 +168,7 @@ class ModerationQueueItem extends Model
 
     public function getSlaStatusAttribute(): string
     {
-        if (!$this->due_at) {
+        if (! $this->due_at) {
             return 'no_sla';
         }
 
@@ -244,11 +251,12 @@ class ModerationQueueItem extends Model
 
     public function getTimeSpentSeconds(): int
     {
-        if (!$this->started_at) {
+        if (! $this->started_at) {
             return 0;
         }
 
         $endTime = $this->completed_at ?? now();
+
         return $this->started_at->diffInSeconds($endTime);
     }
 

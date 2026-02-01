@@ -25,7 +25,7 @@ class StrategicPlanPolicy
     public function view(User $user, StrategicPlan $strategicPlan): bool
     {
         // Check if user has access to the organization
-        if (!$user->canAccessOrganization($strategicPlan->org_id)) {
+        if (! $user->canAccessOrganization($strategicPlan->org_id)) {
             return false;
         }
 
@@ -36,6 +36,7 @@ class StrategicPlanPolicy
 
         // Check if user is a collaborator
         $collaborator = $strategicPlan->collaborators()->where('user_id', $user->id)->first();
+
         return $collaborator !== null;
     }
 
@@ -54,7 +55,7 @@ class StrategicPlanPolicy
     public function update(User $user, StrategicPlan $strategicPlan): bool
     {
         // Must have access to the organization
-        if (!$user->canAccessOrganization($strategicPlan->org_id)) {
+        if (! $user->canAccessOrganization($strategicPlan->org_id)) {
             return false;
         }
 
@@ -65,6 +66,7 @@ class StrategicPlanPolicy
 
         // Check if user is a collaborator with edit rights
         $collaborator = $strategicPlan->collaborators()->where('user_id', $user->id)->first();
+
         return $collaborator && $collaborator->canEdit();
     }
 
@@ -74,7 +76,7 @@ class StrategicPlanPolicy
     public function delete(User $user, StrategicPlan $strategicPlan): bool
     {
         // Must have access to the organization
-        if (!$user->canAccessOrganization($strategicPlan->org_id)) {
+        if (! $user->canAccessOrganization($strategicPlan->org_id)) {
             return false;
         }
 
@@ -85,6 +87,7 @@ class StrategicPlanPolicy
 
         // Owner can delete
         $collaborator = $strategicPlan->collaborators()->where('user_id', $user->id)->first();
+
         return $collaborator && $collaborator->isOwner();
     }
 
@@ -94,12 +97,12 @@ class StrategicPlanPolicy
     public function push(User $user, StrategicPlan $strategicPlan): bool
     {
         // Must have access to the organization
-        if (!$user->canAccessOrganization($strategicPlan->org_id)) {
+        if (! $user->canAccessOrganization($strategicPlan->org_id)) {
             return false;
         }
 
         // Only consultants, admins can push (they have cross-org capability)
-        if (!$user->isAdmin() && $user->primary_role !== 'consultant') {
+        if (! $user->isAdmin() && $user->primary_role !== 'consultant') {
             return false;
         }
 

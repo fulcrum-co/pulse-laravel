@@ -55,6 +55,7 @@ class OrganizationSettings extends Model
     public function getStatusLabel(string $key): string
     {
         $labels = $this->status_labels ?? [];
+
         return $labels[$key] ?? self::DEFAULT_STATUS_LABELS[$key] ?? ucfirst(str_replace('_', ' ', $key));
     }
 
@@ -64,6 +65,7 @@ class OrganizationSettings extends Model
     public function getRiskLabel(string $key): string
     {
         $labels = $this->risk_labels ?? [];
+
         return $labels[$key] ?? self::DEFAULT_RISK_LABELS[$key] ?? ucfirst($key);
     }
 
@@ -89,6 +91,7 @@ class OrganizationSettings extends Model
     public function getSetting(string $key, $default = null)
     {
         $settings = $this->settings ?? [];
+
         return $settings[$key] ?? $default;
     }
 

@@ -5,36 +5,49 @@ namespace App\Models;
 use App\Traits\HasContentModeration;
 use App\Traits\HasEmbedding;
 use App\Traits\Searchable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 class ContentBlock extends Model
 {
-    use SoftDeletes, Searchable, HasEmbedding, HasContentModeration;
+    use HasContentModeration, HasEmbedding, Searchable, SoftDeletes;
 
     // Block types
     public const TYPE_VIDEO = 'video';
+
     public const TYPE_DOCUMENT = 'document';
+
     public const TYPE_ACTIVITY = 'activity';
+
     public const TYPE_ASSESSMENT = 'assessment';
+
     public const TYPE_TEXT = 'text';
+
     public const TYPE_LINK = 'link';
+
     public const TYPE_EMBED = 'embed';
 
     // Source types
     public const SOURCE_INTERNAL = 'internal';
+
     public const SOURCE_YOUTUBE = 'youtube';
+
     public const SOURCE_VIMEO = 'vimeo';
+
     public const SOURCE_KHAN_ACADEMY = 'khan_academy';
+
     public const SOURCE_UPLOADED = 'uploaded';
+
     public const SOURCE_CUSTOM_URL = 'custom_url';
 
     // Statuses
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_ARCHIVED = 'archived';
 
     protected $fillable = [
@@ -200,7 +213,7 @@ class ContentBlock extends Model
     {
         return $query->where(function ($q) use ($orgId) {
             $q->where('org_id', $orgId)
-              ->orWhereNull('org_id');
+                ->orWhereNull('org_id');
         });
     }
 
@@ -286,7 +299,7 @@ class ContentBlock extends Model
         } else {
             // Simple moving average (you may want a more sophisticated approach)
             $this->update([
-                'avg_rating' => ($this->avg_rating + $newRating) / 2
+                'avg_rating' => ($this->avg_rating + $newRating) / 2,
             ]);
         }
     }
@@ -317,7 +330,7 @@ class ContentBlock extends Model
      */
     public function getEmbedUrlAttribute(): ?string
     {
-        if (!$this->isVideo()) {
+        if (! $this->isVideo()) {
             return null;
         }
 
@@ -383,7 +396,7 @@ class ContentBlock extends Model
      */
     public function shouldBeSearchable(): bool
     {
-        return !$this->trashed() && $this->status === self::STATUS_ACTIVE;
+        return ! $this->trashed() && $this->status === self::STATUS_ACTIVE;
     }
 
     /**
@@ -397,29 +410,29 @@ class ContentBlock extends Model
             $this->block_type,
         ];
 
-        if (!empty($this->topics)) {
+        if (! empty($this->topics)) {
             $topics = is_array($this->topics) ? $this->topics : [];
-            $parts[] = 'Topics: ' . implode(', ', $topics);
+            $parts[] = 'Topics: '.implode(', ', $topics);
         }
 
-        if (!empty($this->skills)) {
+        if (! empty($this->skills)) {
             $skills = is_array($this->skills) ? $this->skills : [];
-            $parts[] = 'Skills: ' . implode(', ', $skills);
+            $parts[] = 'Skills: '.implode(', ', $skills);
         }
 
-        if (!empty($this->grade_levels)) {
+        if (! empty($this->grade_levels)) {
             $grades = is_array($this->grade_levels) ? $this->grade_levels : [];
-            $parts[] = 'Grades: ' . implode(', ', $grades);
+            $parts[] = 'Grades: '.implode(', ', $grades);
         }
 
-        if (!empty($this->subject_areas)) {
+        if (! empty($this->subject_areas)) {
             $subjects = is_array($this->subject_areas) ? $this->subject_areas : [];
-            $parts[] = 'Subjects: ' . implode(', ', $subjects);
+            $parts[] = 'Subjects: '.implode(', ', $subjects);
         }
 
-        if (!empty($this->target_risk_factors)) {
+        if (! empty($this->target_risk_factors)) {
             $factors = is_array($this->target_risk_factors) ? $this->target_risk_factors : [];
-            $parts[] = 'Risk factors: ' . implode(', ', $factors);
+            $parts[] = 'Risk factors: '.implode(', ', $factors);
         }
 
         return implode('. ', array_filter($parts));
@@ -445,16 +458,16 @@ class ContentBlock extends Model
         ];
 
         // Include content data if it's text-based
-        if (!empty($this->content_data) && isset($this->content_data['text'])) {
+        if (! empty($this->content_data) && isset($this->content_data['text'])) {
             $parts[] = "Content: {$this->content_data['text']}";
         }
 
-        if (!empty($this->topics)) {
+        if (! empty($this->topics)) {
             $topics = is_array($this->topics) ? implode(', ', $this->topics) : $this->topics;
             $parts[] = "Topics: {$topics}";
         }
 
-        if (!empty($this->skills)) {
+        if (! empty($this->skills)) {
             $skills = is_array($this->skills) ? implode(', ', $this->skills) : $this->skills;
             $parts[] = "Skills: {$skills}";
         }

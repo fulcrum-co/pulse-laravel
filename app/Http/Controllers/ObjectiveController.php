@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Objective;
 use App\Models\FocusArea;
+use App\Models\Objective;
 use App\Models\StrategicPlan;
 use Illuminate\Http\Request;
 
@@ -133,8 +133,8 @@ class ObjectiveController extends Controller
 
         $collaborator = $strategy->collaborators()->where('user_id', $user->id)->first();
 
-        if (!$collaborator || !$collaborator->canEdit()) {
-            if (!$user->isAdmin()) {
+        if (! $collaborator || ! $collaborator->canEdit()) {
+            if (! $user->isAdmin()) {
                 abort(403, 'You do not have permission to edit this strategy.');
             }
         }

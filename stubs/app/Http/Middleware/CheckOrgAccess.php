@@ -15,19 +15,19 @@ class CheckOrgAccess
      */
     public function handle(Request $request, Closure $next, string $paramName = 'org_id'): Response
     {
-        if (!$request->user()) {
+        if (! $request->user()) {
             return redirect()->route('login');
         }
 
         // Get org ID from route parameter or request
         $orgId = $request->route($paramName) ?? $request->input($paramName);
 
-        if (!$orgId) {
+        if (! $orgId) {
             return $next($request);
         }
 
         // Check if user can access this organization
-        if (!$request->user()->canAccessOrg($orgId)) {
+        if (! $request->user()->canAccessOrg($orgId)) {
             abort(403, 'You do not have access to this organization.');
         }
 
