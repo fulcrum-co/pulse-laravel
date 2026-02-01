@@ -34,8 +34,9 @@ class LearningCenter extends Component
     public function getCoursesProperty()
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        $query = MiniCourse::where('org_id', $user->org_id)
+        $query = MiniCourse::whereIn('org_id', $accessibleOrgIds)
             ->where('status', MiniCourse::STATUS_ACTIVE)
             ->withCount('steps')
             ->withCount('enrollments');
@@ -72,9 +73,10 @@ class LearningCenter extends Component
     public function getCategoryCountsProperty(): array
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
         $counts = ['all' => 0];
 
-        $results = MiniCourse::where('org_id', $user->org_id)
+        $results = MiniCourse::whereIn('org_id', $accessibleOrgIds)
             ->where('status', MiniCourse::STATUS_ACTIVE)
             ->selectRaw('course_type, count(*) as count')
             ->groupBy('course_type')

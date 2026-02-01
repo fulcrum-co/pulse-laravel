@@ -41,8 +41,9 @@ class ProviderDirectory extends Component
     public function getProvidersProperty()
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        $query = Provider::where('org_id', $user->org_id)
+        $query = Provider::whereIn('org_id', $accessibleOrgIds)
             ->active();
 
         // Search

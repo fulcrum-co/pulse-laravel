@@ -44,8 +44,9 @@ class ProgramCatalog extends Component
     public function getProgramsProperty()
     {
         $user = auth()->user();
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        $query = Program::where('org_id', $user->org_id);
+        $query = Program::whereIn('org_id', $accessibleOrgIds);
 
         if ($this->showActiveOnly) {
             $query->active();
