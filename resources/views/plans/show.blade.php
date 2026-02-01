@@ -1,47 +1,45 @@
 <x-layouts.dashboard title="Plan">
     <x-slot name="actions">
-        <div class="flex items-center gap-3">
-            <span class="text-sm text-gray-500">
-                <x-icon name="calendar" class="w-4 h-4 inline mr-1" />
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400">
+                <x-icon name="calendar" class="w-3.5 h-3.5 inline mr-1" />
                 {{ $plan->start_date->format('n/j/Y') }} - {{ $plan->end_date->format('n/j/Y') }}
             </span>
 
-            <a href="{{ route('plans.create') }}" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
-                <x-icon name="plus" class="w-4 h-4 mr-2" />
+            <a href="{{ route('plans.create') }}" class="inline-flex items-center px-3 py-1.5 bg-pulse-orange-500 text-white rounded text-xs font-medium hover:bg-pulse-orange-600">
+                <x-icon name="plus" class="w-3.5 h-3.5 mr-1" />
                 Add Entry
             </a>
         </div>
     </x-slot>
 
-    <div class="space-y-6">
+    <div class="space-y-4">
         {{-- Header --}}
         <livewire:plan-header :plan="$plan" />
 
         {{-- Tab Navigation --}}
         <div class="border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8">
+            <nav class="-mb-px flex gap-6">
                 @if($plan->isOkrStyle())
-                    {{-- OKR-style tabs --}}
                     <a href="{{ route('plans.show', ['plan' => $plan, 'view' => 'goals']) }}"
-                       class="py-2 px-1 border-b-2 font-medium text-sm {{ $view === 'goals' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                       class="py-2 border-b-2 text-xs font-medium {{ $view === 'goals' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                         Goals
                     </a>
                     <a href="{{ route('plans.show', ['plan' => $plan, 'view' => 'milestones']) }}"
-                       class="py-2 px-1 border-b-2 font-medium text-sm {{ $view === 'milestones' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                       class="py-2 border-b-2 text-xs font-medium {{ $view === 'milestones' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                         Milestones
                     </a>
                     <a href="{{ route('plans.show', ['plan' => $plan, 'view' => 'progress']) }}"
-                       class="py-2 px-1 border-b-2 font-medium text-sm {{ $view === 'progress' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                       class="py-2 border-b-2 text-xs font-medium {{ $view === 'progress' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                         Progress
                     </a>
                 @else
-                    {{-- Traditional plan tabs --}}
                     <a href="{{ route('plans.show', ['plan' => $plan, 'view' => 'planner']) }}"
-                       class="py-2 px-1 border-b-2 font-medium text-sm {{ $view === 'planner' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                       class="py-2 border-b-2 text-xs font-medium {{ $view === 'planner' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                         Planner
                     </a>
                     <a href="{{ route('plans.show', ['plan' => $plan, 'view' => 'timeline']) }}"
-                       class="py-2 px-1 border-b-2 font-medium text-sm {{ $view === 'timeline' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                       class="py-2 border-b-2 text-xs font-medium {{ $view === 'timeline' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
                         Timeline
                     </a>
                 @endif
