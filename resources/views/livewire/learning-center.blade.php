@@ -116,7 +116,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     @foreach($courses as $course)
                         @php $color = $typeColors[$course->course_type] ?? 'gray'; @endphp
-                        <div class="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-pulse-orange-300 transition-all">
+                        <a href="{{ route('resources.courses.show', $course) }}" class="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-pulse-orange-300 transition-all block">
                             <div class="p-5">
                                 <div class="flex items-start gap-4">
                                     <div class="w-12 h-12 rounded-xl bg-{{ $color }}-100 flex items-center justify-center flex-shrink-0">
@@ -172,20 +172,17 @@
 
                             <!-- Card Footer -->
                             <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                                <a
-                                    href="{{ route('resources.courses.show', $course) }}"
-                                    class="text-xs font-medium text-gray-600 hover:text-gray-900"
-                                >
+                                <span class="text-xs font-medium text-gray-600">
                                     Preview
-                                </a>
-                                <a
-                                    href="{{ route('resources.courses.edit', $course) }}"
-                                    class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700"
+                                </span>
+                                <span
+                                    onclick="event.preventDefault(); event.stopPropagation(); window.location.href='{{ route('resources.courses.edit', $course) }}';"
+                                    class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700 cursor-pointer"
                                 >
                                     Edit &rarr;
-                                </a>
+                                </span>
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
 
@@ -194,7 +191,7 @@
                 <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
                     @foreach($courses as $course)
                         @php $color = $typeColors[$course->course_type] ?? 'gray'; @endphp
-                        <div class="flex items-center gap-5 p-5 hover:bg-gray-50 transition-colors group">
+                        <a href="{{ route('resources.courses.show', $course) }}" class="flex items-center gap-5 p-5 hover:bg-gray-50 transition-colors group">
                             <!-- Icon -->
                             <div class="w-12 h-12 rounded-xl bg-{{ $color }}-100 flex items-center justify-center flex-shrink-0">
                                 <x-icon name="academic-cap" class="w-6 h-6 text-{{ $color }}-600" />
@@ -244,20 +241,17 @@
 
                             <!-- Actions -->
                             <div class="flex items-center gap-4 flex-shrink-0">
-                                <a
-                                    href="{{ route('resources.courses.show', $course) }}"
-                                    class="text-sm text-gray-600 hover:text-gray-900"
-                                >
+                                <span class="text-sm text-gray-600">
                                     Preview
-                                </a>
-                                <a
-                                    href="{{ route('resources.courses.edit', $course) }}"
-                                    class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700"
+                                </span>
+                                <span
+                                    onclick="event.preventDefault(); event.stopPropagation(); window.location.href='{{ route('resources.courses.edit', $course) }}';"
+                                    class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700 cursor-pointer"
                                 >
                                     Edit
-                                </a>
+                                </span>
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
 
@@ -282,7 +276,7 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($courses as $course)
                                     @php $color = $typeColors[$course->course_type] ?? 'gray'; @endphp
-                                    <tr class="hover:bg-gray-50">
+                                    <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location.href='{{ route('resources.courses.show', $course) }}';">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-10 h-10 rounded-lg bg-{{ $color }}-100 flex items-center justify-center flex-shrink-0">
@@ -334,12 +328,15 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <a href="{{ route('resources.courses.show', $course) }}" class="text-gray-600 hover:text-gray-900 mr-4">
+                                            <span class="text-gray-600 mr-4">
                                                 Preview
-                                            </a>
-                                            <a href="{{ route('resources.courses.edit', $course) }}" class="text-pulse-orange-600 hover:text-pulse-orange-700">
+                                            </span>
+                                            <span
+                                                onclick="event.stopPropagation(); window.location.href='{{ route('resources.courses.edit', $course) }}';"
+                                                class="text-pulse-orange-600 hover:text-pulse-orange-700 cursor-pointer"
+                                            >
                                                 Edit
-                                            </a>
+                                            </span>
                                         </td>
                                     </tr>
                                 @endforeach
