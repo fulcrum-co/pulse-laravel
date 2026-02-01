@@ -324,8 +324,8 @@
 
                         <!-- Step Navigation -->
                         <div class="flex items-center justify-between border-t border-gray-200 pt-4">
-                            @if($currentStep->previous_step)
-                            <button wire:click="selectStep({{ $currentStep->previous_step->id }})" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+                            @if($this->previousStep)
+                            <button wire:click="selectStep({{ $this->previousStep->id }})" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
@@ -337,7 +337,7 @@
 
                             @if($enrollment)
                             <button wire:click="completeCurrentStep" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 transition-colors">
-                                @if($currentStep->next_step)
+                                @if($this->nextStep)
                                 Mark Complete & Continue
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -351,7 +351,7 @@
                             </button>
                             @elseif($previewMode)
                             <button wire:click="advanceToNextStep" class="inline-flex items-center px-4 py-2 bg-pulse-blue-500 text-white rounded-lg hover:bg-pulse-blue-600 transition-colors">
-                                @if($currentStep->next_step)
+                                @if($this->nextStep)
                                 Next Step
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

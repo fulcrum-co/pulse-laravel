@@ -86,9 +86,12 @@ class MiniCourseViewer extends Component
         // Recalculate enrollment progress
         $this->enrollment->recalculateProgress();
 
-        // Move to next step
-        $nextStep = $this->currentStep->next_step;
-        if ($nextStep) {
+        // Move to next step using course's steps collection (reset keys with values())
+        $steps = $this->course->steps->values();
+        $currentIndex = $steps->search(fn($s) => $s->id === $this->currentStep->id);
+
+        if ($currentIndex !== false && $currentIndex < $steps->count() - 1) {
+            $nextStep = $steps->get($currentIndex + 1);
             $this->currentStep = $nextStep;
             $this->enrollment->update(['current_step_id' => $nextStep->id]);
         }
@@ -105,9 +108,12 @@ class MiniCourseViewer extends Component
             return;
         }
 
-        $nextStep = $this->currentStep->next_step;
-        if ($nextStep) {
-            $this->currentStep = $nextStep;
+        // Find next step using the course's steps collection (reset keys with values())
+        $steps = $this->course->steps->values();
+        $currentIndex = $steps->search(fn($s) => $s->id === $this->currentStep->id);
+
+        if ($currentIndex !== false && $currentIndex < $steps->count() - 1) {
+            $this->currentStep = $steps->get($currentIndex + 1);
         } else {
             $this->dispatch('notify', [
                 'type' => 'success',
@@ -151,6 +157,34 @@ class MiniCourseViewer extends Component
             'type' => 'success',
             'message' => 'You have been enrolled in this course!',
         ]);
+    }
+
+    public function getNextStepProperty(): ?MiniCourseStep
+    {
+        if (!$this->currentStep) {
+            return null;
+        }
+        $steps = $this->course->steps->values();
+        $currentIndex = $steps->search(fn($s) => $s->id === $this->currentStep->id);
+
+        if ($currentIndex !== false && $currentIndex < $steps->count() - 1) {
+            return $steps->get($currentIndex + 1);
+        }
+        return null;
+    }
+
+    public function getPreviousStepProperty(): ?MiniCourseStep
+    {
+        if (!$this->currentStep) {
+            return null;
+        }
+        $steps = $this->course->steps->values();
+        $currentIndex = $steps->search(fn($s) => $s->id === $this->currentStep->id);
+
+        if ($currentIndex !== false && $currentIndex > 0) {
+            return $steps->get($currentIndex - 1);
+        }
+        return null;
     }
 
     public function getStepProgressProperty(): array
