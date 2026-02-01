@@ -424,8 +424,12 @@
                                         <!-- Expanded Content -->
                                         <div x-show="expandedItem === '{{ $item['id'] }}'" x-collapse class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                                             @if($item['type'] === 'note')
-                                            <!-- Note Details -->
-                                            <div class="space-y-3" x-show="editingNoteId !== {{ $item['model_id'] }}">
+                                            <!-- Note Details (Click to Edit) -->
+                                            <div
+                                                class="space-y-3 cursor-pointer hover:bg-gray-100 -m-3 p-3 rounded-lg transition-colors"
+                                                x-show="editingNoteId !== {{ $item['model_id'] }}"
+                                                @click="startEditNote({{ $item['model_id'] }}, {{ json_encode($item['content']) }}, '{{ $item['note_type'] ?? 'general' }}')"
+                                            >
                                                 <div class="flex items-center gap-2">
                                                     @php
                                                         $noteTypeColor = match($item['note_type'] ?? 'general') {
@@ -453,7 +457,7 @@
                                                             Edit Note
                                                         </button>
                                                         <button
-                                                            onclick="document.querySelector('[data-tab=notes]').click()"
+                                                            @click.stop="document.querySelector('[data-tab=notes]').click()"
                                                             class="text-xs text-gray-500 hover:text-gray-700"
                                                         >
                                                             View in Notes Tab
