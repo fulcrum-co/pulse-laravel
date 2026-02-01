@@ -19,7 +19,7 @@ class PopulateDemoNotifications extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'notifications:demo {--user= : User ID to create notifications for} {--count=20 : Number of notifications to create} {--fresh : Clear existing notifications first}';
+    protected $signature = 'notifications:demo {--user= : User ID to create notifications for} {--email= : User email to create notifications for} {--count=20 : Number of notifications to create} {--fresh : Clear existing notifications first}';
 
     /**
      * The console command description.
@@ -40,11 +40,20 @@ class PopulateDemoNotifications extends Command
     public function handle(): int
     {
         $userId = $this->option('user');
+        $email = $this->option('email');
         $count = (int) $this->option('count');
 
-        if (!$userId) {
+        if ($email) {
+            // Find by email
+            $user = User::where('email', $email)->first();
+            if (!$user) {
+                $this->error("User with email '{$email}' not found.");
+                return Command::FAILURE;
+            }
+            $userId = $user->id;
+        } elseif (!$userId) {
             // Get first admin user or first user
-            $user = User::where('role', 'admin')->first() ?? User::first();
+            $user = User::where('primary_role', 'admin')->first() ?? User::first();
             if (!$user) {
                 $this->error('No users found in the database.');
                 return Command::FAILURE;
@@ -58,7 +67,8 @@ class PopulateDemoNotifications extends Command
             }
         }
 
-        $this->info("Creating {$count} demo notifications for user: {$user->name} (ID: {$userId})");
+        $userName = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) ?: $user->email;
+        $this->info("Creating {$count} demo notifications for user: {$userName} (ID: {$userId})");
 
         // Clear existing notifications if --fresh flag is set
         if ($this->option('fresh')) {
@@ -221,9 +231,12 @@ class PopulateDemoNotifications extends Command
 
         // Student contact notifications - use actual student IDs
         foreach ($students as $student) {
-            // Try to get name from user relationship, fall back to student_number or ID
-            $name = $student['user']['name']
-                ?? ($student['student_number'] ? "#{$student['student_number']}" : "#{$student['id']}");
+            // Try to get name from user relationship (first_name + last_name), fall back to student_number or ID
+            $studentUser = $student['user'] ?? null;
+            $name = $studentUser
+                ? trim(($studentUser['first_name'] ?? '') . ' ' . ($studentUser['last_name'] ?? ''))
+                : null;
+            $name = $name ?: ($student['student_number'] ? "#{$student['student_number']}" : "#{$student['id']}");
             $notifications[] = [
                 'category' => UserNotification::CATEGORY_WORKFLOW_ALERT,
                 'type' => 'student_flagged',
