@@ -1,0 +1,23 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+        - database
+
+    level: 5
+
+    ignoreErrors:
+        # Livewire dynamic properties
+        - '#Access to an undefined property [a-zA-Z0-9\\_]+::\$[a-zA-Z0-9_]+#'
+        # Dynamic method calls in Eloquent
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Builder::#'
+
+    excludePaths:
+        - app/Http/Controllers/Auth
+        - vendor
+
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    reportUnmatchedIgnoredErrors: false

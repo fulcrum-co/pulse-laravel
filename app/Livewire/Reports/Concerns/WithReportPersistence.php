@@ -1,0 +1,162 @@
+<?php
+
+namespace App\Livewire\Reports\Concerns;
+
+use App\Models\CustomReport;
+
+trait WithReportPersistence
+{
+    public ?string $reportId = null;
+
+    public string $reportName = 'Untitled Report';
+
+    public string $reportDescription = '';
+
+    public string $reportType = 'custom';
+
+    public string $status = 'draft';
+
+    public bool $isLive = true;
+
+    public array $pageSettings = [
+        'size' => 'letter',
+        'orientation' => 'portrait',
+        'margins' => ['top' => 40, 'right' => 40, 'bottom' => 40, 'left' => 40],
+    ];
+
+    public array $branding = [
+        'logo_path' => null,
+        'primary_color' => '#3B82F6',
+        'secondary_color' => '#1E40AF',
+        'font_family' => 'Inter, sans-serif',
+    ];
+
+    public ?string $publicUrl = null;
+
+    public ?string $embedCode = null;
+
+    public bool $showPublishModal = false;
+
+    public array $chartImages = [];
+
+    public function loadReport(CustomReport $report): void
+    {
+        $this->reportId = (string) $report->id;
+        $this->reportName = $report->report_name ?? 'Untitled Report';
+        $this->reportDescription = $report->report_description ?? '';
+        $this->reportType = $report->report_type ?? 'custom';
+        $this->status = $report->status ?? 'draft';
+        $this->elements = $report->report_layout ?? [];
+        $this->pageSettings = array_merge($this->pageSettings, $report->page_settings ?? []);
+        $this->branding = array_merge($this->branding, $report->branding ?? []);
+        $this->filters = array_merge($this->filters, $report->filters ?? []);
+        $this->isLive = $report->is_live ?? true;
+
+        $this->pushHistory();
+    }
+
+    public function save(): void
+    {
+        $user = auth()->user();
+
+        $data = [
+            'org_id' => $user->org_id,
+            'created_by' => $user->id,
+            'last_edited_by' => $user->id,
+            'report_name' => $this->reportName,
+            'report_description' => $this->reportDescription,
+            'report_type' => $this->reportType,
+            'report_layout' => $this->elements,
+            'page_settings' => $this->pageSettings,
+            'branding' => $this->branding,
+            'filters' => $this->filters,
+            'status' => $this->status,
+            'is_live' => $this->isLive,
+        ];
+
+        if ($this->reportId) {
+            $report = CustomReport::find($this->reportId);
+            if ($report) {
+                $report->update($data);
+                $report->incrementVersion();
+            }
+        } else {
+            $data['version'] = 1;
+            $data['status'] = CustomReport::STATUS_DRAFT;
+            $report = CustomReport::create($data);
+            $this->reportId = (string) $report->id;
+        }
+
+        $this->dispatch('report-saved', reportId: $this->reportId);
+        session()->flash('message', 'Report saved successfully!');
+    }
+
+    public function publish(): void
+    {
+        if (! $this->reportId) {
+            $this->save();
+        }
+
+        $report = CustomReport::find($this->reportId);
+        if ($report) {
+            $report->publish();
+            $this->status = CustomReport::STATUS_PUBLISHED;
+            $this->publicUrl = $report->getPublicUrl();
+            $this->embedCode = $report->getEmbedCode();
+
+            $this->dispatch('report-published', [
+                'publicUrl' => $this->publicUrl,
+                'embedCode' => $this->embedCode,
+            ]);
+        }
+    }
+
+    public function openPublishModal(): void
+    {
+        if (! $this->reportId) {
+            $this->save();
+        }
+
+        if ($this->status === CustomReport::STATUS_PUBLISHED && $this->reportId) {
+            $report = CustomReport::find($this->reportId);
+            if ($report) {
+                $this->publicUrl = $report->getPublicUrl();
+                $this->embedCode = $report->getEmbedCode();
+            }
+        }
+
+        $this->showPublishModal = true;
+    }
+
+    public function previewReport(): void
+    {
+        if (! $this->reportId) {
+            $this->save();
+        }
+
+        $this->dispatch('openPreview', url: route('reports.preview', ['report' => $this->reportId]));
+    }
+
+    public function exportPdf(): void
+    {
+        if (! $this->reportId) {
+            $this->save();
+        }
+
+        $this->dispatch('prepareForPdf');
+    }
+
+    public function chartImagesReady(array $images = []): void
+    {
+        $this->chartImages = $images;
+
+        if ($this->reportId) {
+            $this->redirect(route('reports.pdf', ['report' => $this->reportId]), navigate: false);
+        }
+    }
+
+    public function updateBranding(array $newBranding): void
+    {
+        $this->branding = array_merge($this->branding, $newBranding);
+    }
+}

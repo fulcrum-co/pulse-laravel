@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Jobs\ModerateContentJob;
 use App\Models\ContentModerationResult;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
@@ -204,7 +205,7 @@ trait HasContentModeration
     /**
      * Scope to content that has passed moderation.
      */
-    public function scopeModerated($query)
+    public function scopeModerated(Builder $query): Builder
     {
         return $query->whereIn('moderation_status', [
             ContentModerationResult::STATUS_PASSED,
@@ -215,7 +216,7 @@ trait HasContentModeration
     /**
      * Scope to content pending moderation review.
      */
-    public function scopePendingModerationReview($query)
+    public function scopePendingModerationReview(Builder $query): Builder
     {
         return $query->whereIn('moderation_status', [
             ContentModerationResult::STATUS_FLAGGED,
@@ -226,7 +227,7 @@ trait HasContentModeration
     /**
      * Scope to flagged content.
      */
-    public function scopeFlaggedContent($query)
+    public function scopeFlaggedContent(Builder $query): Builder
     {
         return $query->where('moderation_status', ContentModerationResult::STATUS_FLAGGED);
     }
