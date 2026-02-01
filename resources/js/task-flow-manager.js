@@ -81,6 +81,7 @@ document.addEventListener('alpine:init', () => {
             // Mark notification as resolved via API, then navigate
             if (this.currentTask) {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                console.log('Task flow: Resolving notification', this.currentTask.id, 'CSRF:', csrfToken ? 'present' : 'MISSING');
 
                 try {
                     const response = await fetch(`/api/notifications/${this.currentTask.id}/resolve`, {
@@ -92,14 +93,20 @@ document.addEventListener('alpine:init', () => {
                         },
                     });
 
+                    console.log('Task flow: Resolve response status:', response.status);
+
                     if (response.ok) {
                         const data = await response.json();
+                        console.log('Task flow: Resolved successfully, unread count:', data.unread_count);
                         // Update the header notification badge
                         if (data.unread_count !== undefined) {
                             window.dispatchEvent(new CustomEvent('notification-badge-update', {
                                 detail: { count: data.unread_count }
                             }));
                         }
+                    } else {
+                        const errorText = await response.text();
+                        console.error('Task flow: Resolve failed:', response.status, errorText);
                     }
                 } catch (err) {
                     console.error('Task flow: Failed to resolve notification', err);
