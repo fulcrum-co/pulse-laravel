@@ -15,6 +15,7 @@ class MiniCourseViewer extends Component
     public ?MiniCourseEnrollment $enrollment = null;
     public ?MiniCourseStep $currentStep = null;
     public bool $showRationale = false;
+    public bool $previewMode = false;
 
     // For staff viewing student progress
     public ?int $viewingStudentId = null;
@@ -61,6 +62,12 @@ class MiniCourseViewer extends Component
 
     public function completeCurrentStep(): void
     {
+        // Handle preview mode - just advance to next step without tracking
+        if ($this->previewMode) {
+            $this->advanceToNextStep();
+            return;
+        }
+
         if (!$this->enrollment || !$this->currentStep) {
             return;
         }
@@ -92,10 +99,38 @@ class MiniCourseViewer extends Component
         ]);
     }
 
+    public function advanceToNextStep(): void
+    {
+        if (!$this->currentStep) {
+            return;
+        }
+
+        $nextStep = $this->currentStep->next_step;
+        if ($nextStep) {
+            $this->currentStep = $nextStep;
+        } else {
+            $this->dispatch('notify', [
+                'type' => 'success',
+                'message' => 'You\'ve reached the end of this course preview!',
+            ]);
+        }
+    }
+
     public function startEnrollment(): void
     {
         $user = auth()->user();
-        if (!$user || !$user->student) {
+        if (!$user) {
+            return;
+        }
+
+        // For staff users without a student account, enable preview mode
+        if (!$user->student) {
+            $this->previewMode = true;
+            $this->currentStep = $this->course->steps->first();
+            $this->dispatch('notify', [
+                'type' => 'info',
+                'message' => 'Previewing course as staff member.',
+            ]);
             return;
         }
 

@@ -14,19 +14,35 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="bg-gradient-to-br from-pulse-orange-500 to-pulse-orange-600 px-6 py-6">
                         <div class="flex items-start justify-between">
-                            <div>
+                            <div class="flex-1">
                                 <span class="px-3 py-1 bg-white/20 text-white text-xs rounded-full mb-3 inline-block">
                                     {{ ucfirst(str_replace('_', ' ', $course->course_type)) }}
                                 </span>
                                 <h1 class="text-2xl font-bold text-white mb-2">{{ $course->title }}</h1>
                                 <p class="text-orange-100">{{ $course->description }}</p>
                             </div>
-                            @if($enrollment)
-                            <div class="text-right">
-                                <div class="text-3xl font-bold text-white">{{ $enrollment->progress_percent }}%</div>
-                                <div class="text-orange-200 text-sm">Complete</div>
+                            <div class="flex-shrink-0 ml-4">
+                                @if($enrollment)
+                                <div class="text-right">
+                                    <div class="text-3xl font-bold text-white">{{ $enrollment->progress_percent }}%</div>
+                                    <div class="text-orange-200 text-sm">Complete</div>
+                                </div>
+                                @elseif($previewMode)
+                                <div class="text-right">
+                                    <span class="px-3 py-1.5 bg-white/20 text-white text-sm font-medium rounded-lg">
+                                        Previewing
+                                    </span>
+                                </div>
+                                @else
+                                <button wire:click="startEnrollment" class="inline-flex items-center px-4 py-2 bg-white text-pulse-orange-600 font-semibold rounded-lg hover:bg-orange-50 transition-colors shadow-sm">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Start This Course
+                                </button>
+                                @endif
                             </div>
-                            @endif
                         </div>
                     </div>
 
@@ -328,6 +344,20 @@
                                 </svg>
                                 @else
                                 Complete Course
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                @endif
+                            </button>
+                            @elseif($previewMode)
+                            <button wire:click="advanceToNextStep" class="inline-flex items-center px-4 py-2 bg-pulse-blue-500 text-white rounded-lg hover:bg-pulse-blue-600 transition-colors">
+                                @if($currentStep->next_step)
+                                Next Step
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                                @else
+                                End Preview
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
