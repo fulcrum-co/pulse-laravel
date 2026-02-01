@@ -29,11 +29,13 @@ class Organization extends Model
         'billing_contact_email',
         'active',
         'created_by',
+        'course_generation_settings',
     ];
 
     protected $casts = [
         'address' => 'array',
         'active' => 'boolean',
+        'course_generation_settings' => 'array',
     ];
 
     /**
