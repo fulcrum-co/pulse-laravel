@@ -27,17 +27,30 @@ Route::get('/notifications/unsubscribe/{user}', [NotificationController::class, 
     ->middleware('signed');
 
 // Notification resolve API - for task flow
-Route::post('/api/notifications/{notification}/resolve', function (UserNotification $notification) {
-    abort_unless($notification->user_id === auth()->id(), 403);
+Route::post('/api/notifications/{id}/resolve', function (int $id) {
+    $notification = UserNotification::find($id);
+
+    if (!$notification) {
+        return response()->json(['error' => 'Notification not found'], 404);
+    }
+
+    if ($notification->user_id !== auth()->id()) {
+        return response()->json(['error' => 'Unauthorized'], 403);
+    }
 
     // Resolve if not already resolved (idempotent)
+    $wasResolved = false;
     if ($notification->status !== UserNotification::STATUS_RESOLVED) {
-        $notification->resolve();
+        $wasResolved = $notification->resolve();
     }
 
     // Return updated unread count for header badge
     $unreadCount = UserNotification::getUnreadCountForUser(auth()->id());
-    return response()->json(['success' => true, 'unread_count' => $unreadCount]);
+    return response()->json([
+        'success' => true,
+        'resolved' => $wasResolved,
+        'unread_count' => $unreadCount,
+    ]);
 })->middleware(['web', 'auth'])->name('notifications.resolve');
 
 // Root redirect to dashboard
