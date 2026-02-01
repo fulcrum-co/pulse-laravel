@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasEmbedding;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Program extends Model
 {
-    use SoftDeletes, Searchable;
+    use SoftDeletes, Searchable, HasEmbedding;
 
     // Program types
     public const TYPE_THERAPY = 'therapy';
@@ -392,5 +393,46 @@ class Program extends Model
     public function shouldBeSearchable(): bool
     {
         return !$this->trashed() && $this->active;
+    }
+
+    /**
+     * Get the text to be embedded for semantic search.
+     */
+    public function getEmbeddingText(): string
+    {
+        $parts = [
+            $this->name,
+            $this->description,
+            $this->program_type,
+            $this->provider_org_name,
+        ];
+
+        if (!empty($this->target_needs)) {
+            $needs = is_array($this->target_needs) ? $this->target_needs : [];
+            $parts[] = 'Target needs: ' . implode(', ', $needs);
+        }
+
+        if (!empty($this->eligibility_criteria)) {
+            $criteria = is_array($this->eligibility_criteria) ? $this->eligibility_criteria : [];
+            $parts[] = 'Eligibility: ' . implode(', ', $criteria);
+        }
+
+        if ($this->cost_structure) {
+            $parts[] = 'Cost: ' . $this->cost_structure;
+        }
+
+        if ($this->location_type) {
+            $parts[] = 'Location: ' . $this->location_type;
+        }
+
+        return implode('. ', array_filter($parts));
+    }
+
+    /**
+     * Get the fields that contribute to the embedding text.
+     */
+    protected function getEmbeddingTextFields(): array
+    {
+        return ['name', 'description', 'program_type', 'target_needs', 'eligibility_criteria'];
     }
 }

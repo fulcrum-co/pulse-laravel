@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasEmbedding;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Resource extends Model
 {
-    use SoftDeletes, Searchable;
+    use SoftDeletes, Searchable, HasEmbedding;
 
     protected $fillable = [
         'org_id',
@@ -180,5 +181,43 @@ class Resource extends Model
     public function shouldBeSearchable(): bool
     {
         return !$this->trashed() && $this->active;
+    }
+
+    /**
+     * Get the text to be embedded for semantic search.
+     */
+    public function getEmbeddingText(): string
+    {
+        $parts = [
+            $this->title,
+            $this->description,
+            $this->category,
+            $this->resource_type,
+        ];
+
+        if (!empty($this->tags)) {
+            $tags = is_array($this->tags) ? $this->tags : [];
+            $parts[] = 'Tags: ' . implode(', ', $tags);
+        }
+
+        if (!empty($this->target_grades)) {
+            $grades = is_array($this->target_grades) ? $this->target_grades : [];
+            $parts[] = 'Grades: ' . implode(', ', $grades);
+        }
+
+        if (!empty($this->target_risk_levels)) {
+            $levels = is_array($this->target_risk_levels) ? $this->target_risk_levels : [];
+            $parts[] = 'Risk levels: ' . implode(', ', $levels);
+        }
+
+        return implode('. ', array_filter($parts));
+    }
+
+    /**
+     * Get the fields that contribute to the embedding text.
+     */
+    protected function getEmbeddingTextFields(): array
+    {
+        return ['title', 'description', 'category', 'resource_type', 'tags', 'target_grades', 'target_risk_levels'];
     }
 }

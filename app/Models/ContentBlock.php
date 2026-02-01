@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasEmbedding;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ContentBlock extends Model
 {
-    use SoftDeletes, Searchable;
+    use SoftDeletes, Searchable, HasEmbedding;
 
     // Block types
     public const TYPE_VIDEO = 'video';
@@ -382,5 +383,52 @@ class ContentBlock extends Model
     public function shouldBeSearchable(): bool
     {
         return !$this->trashed() && $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * Get the text to be embedded for semantic search.
+     */
+    public function getEmbeddingText(): string
+    {
+        $parts = [
+            $this->title,
+            $this->description,
+            $this->block_type,
+        ];
+
+        if (!empty($this->topics)) {
+            $topics = is_array($this->topics) ? $this->topics : [];
+            $parts[] = 'Topics: ' . implode(', ', $topics);
+        }
+
+        if (!empty($this->skills)) {
+            $skills = is_array($this->skills) ? $this->skills : [];
+            $parts[] = 'Skills: ' . implode(', ', $skills);
+        }
+
+        if (!empty($this->grade_levels)) {
+            $grades = is_array($this->grade_levels) ? $this->grade_levels : [];
+            $parts[] = 'Grades: ' . implode(', ', $grades);
+        }
+
+        if (!empty($this->subject_areas)) {
+            $subjects = is_array($this->subject_areas) ? $this->subject_areas : [];
+            $parts[] = 'Subjects: ' . implode(', ', $subjects);
+        }
+
+        if (!empty($this->target_risk_factors)) {
+            $factors = is_array($this->target_risk_factors) ? $this->target_risk_factors : [];
+            $parts[] = 'Risk factors: ' . implode(', ', $factors);
+        }
+
+        return implode('. ', array_filter($parts));
+    }
+
+    /**
+     * Get the fields that contribute to the embedding text.
+     */
+    protected function getEmbeddingTextFields(): array
+    {
+        return ['title', 'description', 'topics', 'skills', 'grade_levels', 'subject_areas', 'target_risk_factors'];
     }
 }

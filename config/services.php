@@ -66,11 +66,30 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | OpenAI API (Whisper Transcription)
+    | OpenAI API (Whisper Transcription & Embeddings)
     |--------------------------------------------------------------------------
     */
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Embeddings Configuration (Vector Search)
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for generating embeddings for semantic/vector search.
+    | Uses OpenAI's text-embedding-3-small model by default.
+    |
+    */
+    'embeddings' => [
+        'provider' => env('EMBEDDINGS_PROVIDER', 'openai'),
+        'model' => env('OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small'),
+        'dimensions' => (int) env('OPENAI_EMBEDDING_DIMENSIONS', 1536),
+        'auto_generate' => env('EMBEDDINGS_AUTO_GENERATE', true),
+        'max_tokens' => (int) env('EMBEDDINGS_MAX_TOKENS', 8191),
+        'batch_size' => (int) env('EMBEDDINGS_BATCH_SIZE', 100),
+        'queue' => env('EMBEDDINGS_QUEUE', 'embeddings'),
     ],
 
     /*

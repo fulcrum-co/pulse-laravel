@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasEmbedding;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class MiniCourse extends Model
 {
-    use SoftDeletes, Searchable;
+    use SoftDeletes, Searchable, HasEmbedding;
 
     // Course types
     public const TYPE_INTERVENTION = 'intervention';
@@ -637,5 +638,49 @@ class MiniCourse extends Model
 
         // Only index active courses
         return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * Get the text to be embedded for semantic search.
+     */
+    public function getEmbeddingText(): string
+    {
+        $parts = [
+            $this->title,
+            $this->description,
+            $this->rationale,
+            $this->expected_experience,
+            $this->course_type,
+        ];
+
+        if (!empty($this->objectives)) {
+            $objectives = is_array($this->objectives) ? $this->objectives : [];
+            $parts[] = 'Objectives: ' . implode(', ', $objectives);
+        }
+
+        if (!empty($this->target_grades)) {
+            $grades = is_array($this->target_grades) ? $this->target_grades : [];
+            $parts[] = 'Grades: ' . implode(', ', $grades);
+        }
+
+        if (!empty($this->target_needs)) {
+            $needs = is_array($this->target_needs) ? $this->target_needs : [];
+            $parts[] = 'Target needs: ' . implode(', ', $needs);
+        }
+
+        if (!empty($this->target_risk_levels)) {
+            $levels = is_array($this->target_risk_levels) ? $this->target_risk_levels : [];
+            $parts[] = 'Risk levels: ' . implode(', ', $levels);
+        }
+
+        return implode('. ', array_filter($parts));
+    }
+
+    /**
+     * Get the fields that contribute to the embedding text.
+     */
+    protected function getEmbeddingTextFields(): array
+    {
+        return ['title', 'description', 'rationale', 'expected_experience', 'objectives', 'target_grades', 'target_needs', 'target_risk_levels'];
     }
 }

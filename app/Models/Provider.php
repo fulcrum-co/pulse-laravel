@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasEmbedding;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Provider extends Model
 {
-    use SoftDeletes, Searchable;
+    use SoftDeletes, Searchable, HasEmbedding;
 
     // Provider types
     public const TYPE_THERAPIST = 'therapist';
@@ -348,5 +349,44 @@ class Provider extends Model
     public function shouldBeSearchable(): bool
     {
         return !$this->trashed() && $this->active;
+    }
+
+    /**
+     * Get the text to be embedded for semantic search.
+     */
+    public function getEmbeddingText(): string
+    {
+        $parts = [
+            $this->name,
+            $this->bio,
+            $this->provider_type,
+            $this->credentials,
+        ];
+
+        if (!empty($this->specialty_areas)) {
+            $specialties = is_array($this->specialty_areas) ? $this->specialty_areas : [];
+            $parts[] = 'Specialties: ' . implode(', ', $specialties);
+        }
+
+        $serviceTypes = [];
+        if ($this->serves_remote) {
+            $serviceTypes[] = 'remote services';
+        }
+        if ($this->serves_in_person) {
+            $serviceTypes[] = 'in-person services';
+        }
+        if (!empty($serviceTypes)) {
+            $parts[] = 'Offers: ' . implode(' and ', $serviceTypes);
+        }
+
+        return implode('. ', array_filter($parts));
+    }
+
+    /**
+     * Get the fields that contribute to the embedding text.
+     */
+    protected function getEmbeddingTextFields(): array
+    {
+        return ['name', 'bio', 'provider_type', 'credentials', 'specialty_areas'];
     }
 }
