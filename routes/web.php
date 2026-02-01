@@ -29,7 +29,11 @@ Route::get('/notifications/unsubscribe/{user}', [NotificationController::class, 
 // Notification resolve API - for task flow
 Route::post('/api/notifications/{notification}/resolve', function (UserNotification $notification) {
     abort_unless($notification->user_id === auth()->id(), 403);
-    $notification->resolve();
+
+    // Resolve if not already resolved (idempotent)
+    if ($notification->status !== UserNotification::STATUS_RESOLVED) {
+        $notification->resolve();
+    }
 
     // Return updated unread count for header badge
     $unreadCount = UserNotification::getUnreadCountForUser(auth()->id());
