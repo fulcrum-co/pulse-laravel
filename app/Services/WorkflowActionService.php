@@ -6,6 +6,9 @@ use App\Models\User;
 use App\Models\Student;
 use App\Models\Workflow;
 use App\Models\WorkflowExecution;
+use App\Models\UserNotification;
+use App\Services\NotificationService;
+use App\Services\NotificationDeliveryService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Http;
@@ -318,22 +321,86 @@ class WorkflowActionService
         $recipients = $this->resolveRecipients($config['recipients'] ?? [], $context);
         $title = $this->interpolateTemplate($config['title'] ?? 'Alert', $context);
         $message = $this->interpolateTemplate($config['message'] ?? '', $context);
-        $type = $config['type'] ?? 'info';
-        $url = $config['url'] ?? null;
+        $priority = $config['priority'] ?? UserNotification::PRIORITY_NORMAL;
+        $url = $this->interpolateTemplate($config['url'] ?? '', $context);
+        $actionLabel = $config['action_label'] ?? 'View Details';
+
+        $notificationService = app(NotificationService::class);
+        $deliveryService = app(NotificationDeliveryService::class);
 
         $sent = 0;
+        $userIds = [];
 
         foreach ($recipients as $recipient) {
             $userId = $recipient['id'] ?? $recipient['user_id'] ?? $recipient;
 
-            if ($userId) {
+            if ($userId && is_numeric($userId)) {
                 $user = User::find($userId);
                 if ($user) {
-                    // Use Laravel's notification system
-                    // $user->notify(new WorkflowAlertNotification($title, $message, $type, $url));
-                    $sent++;
+                    $userIds[] = $userId;
                 }
             }
+        }
+
+        if (empty($userIds)) {
+            return [
+                'success' => false,
+                'action_type' => 'in_app_notification',
+                'details' => [
+                    'sent' => 0,
+                    'total' => count($recipients),
+                    'error' => 'No valid recipients found',
+                ],
+                'executed_at' => now()->toISOString(),
+            ];
+        }
+
+        // Build notification data
+        $notificationData = [
+            'title' => $title,
+            'body' => $message,
+            'priority' => $priority,
+            'metadata' => [
+                'workflow_context' => array_intersect_key($context, array_flip([
+                    'workflow_id',
+                    'workflow_name',
+                    'execution_id',
+                    'trigger_type',
+                    'student_id',
+                    'contact_id',
+                ])),
+            ],
+        ];
+
+        if (!empty($url)) {
+            $notificationData['action_url'] = $url;
+            $notificationData['action_label'] = $actionLabel;
+        }
+
+        // Add notifiable reference if we have workflow context
+        if (isset($context['execution_id'])) {
+            $notificationData['notifiable_type'] = WorkflowExecution::class;
+            $notificationData['notifiable_id'] = $context['execution_id'];
+        }
+
+        // Create notifications and dispatch multi-channel delivery
+        $sent = $notificationService->notifyMany(
+            $userIds,
+            UserNotification::CATEGORY_WORKFLOW_ALERT,
+            'workflow_custom',
+            $notificationData
+        );
+
+        // Dispatch multi-channel delivery for created notifications
+        if ($sent > 0) {
+            $notifications = UserNotification::where('type', 'workflow_custom')
+                ->whereIn('user_id', $userIds)
+                ->where('created_at', '>=', now()->subMinute())
+                ->orderBy('created_at', 'desc')
+                ->limit($sent)
+                ->get();
+
+            $deliveryService->deliverMany($notifications);
         }
 
         return [

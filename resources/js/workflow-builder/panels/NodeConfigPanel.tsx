@@ -322,6 +322,90 @@ export default function NodeConfigPanel({ node, onUpdate, onClose, onDelete }: N
                     </>
                 );
 
+            case 'in_app_notification':
+                return (
+                    <>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Recipients
+                            </label>
+                            <input
+                                type="text"
+                                value={(config.recipients || []).join(', ')}
+                                onChange={(e) => updateNestedField('config', 'recipients', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                                placeholder="Enter user IDs or roles, comma-separated"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            />
+                            <p className="text-xs text-gray-400 mt-1">Use: user IDs, role:admin, context:contact_id</p>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Title
+                            </label>
+                            <input
+                                type="text"
+                                value={config.title || ''}
+                                onChange={(e) => updateNestedField('config', 'title', e.target.value)}
+                                placeholder="{{contact.name}} needs attention"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Message
+                            </label>
+                            <textarea
+                                value={config.message || ''}
+                                onChange={(e) => updateNestedField('config', 'message', e.target.value)}
+                                placeholder="Notification message content..."
+                                rows={3}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            />
+                            <p className="text-xs text-gray-400 mt-1">Variables: {'{{contact.name}}'}, {'{{metric.value}}'}</p>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Priority
+                            </label>
+                            <select
+                                value={config.priority || 'normal'}
+                                onChange={(e) => updateNestedField('config', 'priority', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            >
+                                <option value="low">Low</option>
+                                <option value="normal">Normal</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Action URL (optional)
+                            </label>
+                            <input
+                                type="text"
+                                value={config.url || ''}
+                                onChange={(e) => updateNestedField('config', 'url', e.target.value)}
+                                placeholder="/students/{{contact_id}}"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            />
+                            <p className="text-xs text-gray-400 mt-1">Deep link when notification is clicked</p>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Action Label (optional)
+                            </label>
+                            <input
+                                type="text"
+                                value={config.action_label || ''}
+                                onChange={(e) => updateNestedField('config', 'action_label', e.target.value)}
+                                placeholder="View Details"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            />
+                        </div>
+                    </>
+                );
+
             default:
                 return (
                     <p className="text-sm text-gray-500 italic">

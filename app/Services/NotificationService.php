@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\UserNotification;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -245,5 +246,57 @@ class NotificationService
             'org_id' => $orgId,
             'created_by' => $createdBy,
         ]);
+    }
+
+    /**
+     * Create a notification and dispatch multi-channel delivery in one call.
+     *
+     * @param int $userId The user to notify
+     * @param string $category Notification category
+     * @param string $type Notification type
+     * @param array $data Notification data (same as notify())
+     * @return UserNotification|null
+     */
+    public function notifyAndDeliver(int $userId, string $category, string $type, array $data): ?UserNotification
+    {
+        $notification = $this->notify($userId, $category, $type, $data);
+
+        if ($notification) {
+            app(NotificationDeliveryService::class)->deliver($notification);
+        }
+
+        return $notification;
+    }
+
+    /**
+     * Create notifications for multiple users and dispatch delivery for all.
+     *
+     * @param array $userIds Array of user IDs
+     * @param string $category Notification category
+     * @param string $type Notification type
+     * @param array $data Notification data
+     * @return Collection Created notifications
+     */
+    public function notifyManyAndDeliver(array $userIds, string $category, string $type, array $data): Collection
+    {
+        $count = $this->notifyMany($userIds, $category, $type, $data);
+
+        if ($count === 0) {
+            return collect();
+        }
+
+        // Get the newly created notifications
+        $notifications = UserNotification::where('category', $category)
+            ->where('type', $type)
+            ->whereIn('user_id', $userIds)
+            ->where('created_at', '>=', now()->subMinute())
+            ->orderBy('created_at', 'desc')
+            ->limit($count)
+            ->get();
+
+        // Dispatch delivery for all
+        app(NotificationDeliveryService::class)->deliverMany($notifications);
+
+        return $notifications;
     }
 }
