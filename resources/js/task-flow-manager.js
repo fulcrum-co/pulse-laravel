@@ -132,7 +132,18 @@ document.addEventListener('alpine:init', () => {
 
         navigateToCurrent() {
             if (this.currentTask && this.currentTask.action_url) {
+                console.log('Task flow: Navigating to', this.currentTask.action_url, 'Task:', this.currentTask.title);
                 window.location.href = this.currentTask.action_url;
+            } else {
+                console.error('Task flow: No action_url for current task', this.currentTask);
+                // Skip to next task if current has no URL
+                if (this.currentIndex < this.queue.length - 1) {
+                    this.currentIndex++;
+                    this.saveState();
+                    this.navigateToCurrent();
+                } else {
+                    this.exitFlow(true);
+                }
             }
         },
 
