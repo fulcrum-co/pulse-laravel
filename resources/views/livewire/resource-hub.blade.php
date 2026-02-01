@@ -1,40 +1,163 @@
-<div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Resources</h1>
-                    <p class="mt-1 text-sm text-gray-500">Content, providers, programs, and courses for your organization</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Unified Search -->
-        <div class="mb-10">
-            <div class="relative max-w-2xl mx-auto">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <x-icon name="magnifying-glass" class="h-5 w-5 text-gray-400" />
+<div class="flex">
+    <!-- Left Filter Sidebar -->
+    <div class="w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-140px)] p-4 flex-shrink-0">
+        <!-- Search -->
+        <div class="mb-6">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <x-icon name="magnifying-glass" class="h-4 w-4 text-gray-400" />
                 </div>
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search all resources..."
-                    class="block w-full pl-11 pr-10 py-4 border border-gray-300 rounded-xl bg-white shadow-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-gray-900 placeholder-gray-500 text-lg"
+                    placeholder="Search resources..."
+                    class="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 >
                 @if($search)
                     <button
                         wire:click="clearSearch"
-                        class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                     >
-                        <x-icon name="x-mark" class="h-5 w-5" />
+                        <x-icon name="x-mark" class="h-4 w-4" />
                     </button>
                 @endif
             </div>
         </div>
 
+        <!-- Category Filter -->
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</h3>
+                <div class="flex items-center gap-2">
+                    <button
+                        wire:click="selectAllCategories"
+                        class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700"
+                    >
+                        All
+                    </button>
+                    <span class="text-gray-300">|</span>
+                    <button
+                        wire:click="clearCategories"
+                        class="text-xs text-gray-500 hover:text-gray-700"
+                    >
+                        Clear
+                    </button>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input
+                        type="checkbox"
+                        wire:click="toggleCategory('content')"
+                        @checked(in_array('content', $selectedCategories))
+                        class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
+                    >
+                    <span class="text-sm text-gray-700 group-hover:text-gray-900 flex items-center gap-2">
+                        <x-icon name="document-text" class="w-4 h-4 text-blue-500" />
+                        Content
+                    </span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input
+                        type="checkbox"
+                        wire:click="toggleCategory('provider')"
+                        @checked(in_array('provider', $selectedCategories))
+                        class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
+                    >
+                    <span class="text-sm text-gray-700 group-hover:text-gray-900 flex items-center gap-2">
+                        <x-icon name="users" class="w-4 h-4 text-purple-500" />
+                        Providers
+                    </span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input
+                        type="checkbox"
+                        wire:click="toggleCategory('program')"
+                        @checked(in_array('program', $selectedCategories))
+                        class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
+                    >
+                    <span class="text-sm text-gray-700 group-hover:text-gray-900 flex items-center gap-2">
+                        <x-icon name="building-office" class="w-4 h-4 text-green-500" />
+                        Programs
+                    </span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input
+                        type="checkbox"
+                        wire:click="toggleCategory('course')"
+                        @checked(in_array('course', $selectedCategories))
+                        class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
+                    >
+                    <span class="text-sm text-gray-700 group-hover:text-gray-900 flex items-center gap-2">
+                        <x-icon name="academic-cap" class="w-4 h-4 text-orange-500" />
+                        Courses
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Content Type Filter (shown only when Content is selected) -->
+        @if(in_array('content', $selectedCategories))
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Content Type</h3>
+                    <div class="flex items-center gap-2">
+                        <button
+                            wire:click="selectAllContentTypes"
+                            class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700"
+                        >
+                            All
+                        </button>
+                        <span class="text-gray-300">|</span>
+                        <button
+                            wire:click="clearContentTypes"
+                            class="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                            Clear
+                        </button>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    @foreach($contentTypes as $value => $label)
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input
+                                type="checkbox"
+                                wire:click="toggleContentType('{{ $value }}')"
+                                @checked(in_array($value, $selectedContentTypes))
+                                class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
+                            >
+                            <span class="text-sm text-gray-700 group-hover:text-gray-900">{{ $label }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        <!-- Sort -->
+        <div class="mb-6">
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Sort By</h3>
+            <select
+                wire:model.live="sortBy"
+                class="w-full text-sm border-gray-300 rounded-lg focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+            >
+                <option value="recent">Recently Added</option>
+                <option value="alphabetical">Alphabetical</option>
+            </select>
+        </div>
+
+        <!-- Clear All Filters -->
+        @if($hasActiveFilters)
+            <button
+                wire:click="clearFilters"
+                class="w-full text-sm text-pulse-orange-600 hover:text-pulse-orange-700 font-medium"
+            >
+                Clear all filters
+            </button>
+        @endif
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 p-6">
         @if($isSearching && count($searchResults) > 0)
             <!-- Search Results -->
             <div class="space-y-10">
@@ -50,7 +173,7 @@
                                 View all content &rarr;
                             </a>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             @foreach($searchResults['content']['items'] as $item)
                                 <a href="{{ $item['url'] }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all">
                                     <div class="flex items-start gap-3">
@@ -119,7 +242,7 @@
                                 View all programs &rarr;
                             </a>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             @foreach($searchResults['programs']['items'] as $item)
                                 <a href="{{ $item['url'] }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all">
                                     <div class="flex items-start gap-3">
@@ -152,7 +275,7 @@
                                 View all courses &rarr;
                             </a>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             @foreach($searchResults['courses']['items'] as $item)
                                 <a href="{{ $item['url'] }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all">
                                     <div class="flex items-start gap-3">
@@ -186,60 +309,56 @@
                 @endif
             </div>
         @else
-            <!-- Category Cards (4-column layout matching Marketplace) -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-12">
+            <!-- Category Cards (3-column layout to fit with sidebar) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <!-- Content Card -->
-                <a href="{{ route('resources.content.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 lg:p-6 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
-                    <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left gap-3 lg:gap-4">
-                        <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                            <x-icon name="document-text" class="w-5 h-5 lg:w-6 lg:h-6 text-blue-600" />
+                <a href="{{ route('resources.content.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <x-icon name="document-text" class="w-5 h-5 text-blue-600" />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-sm lg:text-lg font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Content</h2>
-                            <p class="text-xl lg:text-2xl font-bold text-gray-900">{{ number_format($counts['content']) }}</p>
-                            <p class="text-xs text-gray-500 mt-1 hidden sm:block">Articles, videos, worksheets</p>
+                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Content</h2>
+                            <p class="text-xl font-bold text-gray-900">{{ number_format($counts['content']) }}</p>
                         </div>
                     </div>
                 </a>
 
                 <!-- Providers Card -->
-                <a href="{{ route('resources.providers.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 lg:p-6 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
-                    <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left gap-3 lg:gap-4">
-                        <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                            <x-icon name="users" class="w-5 h-5 lg:w-6 lg:h-6 text-purple-600" />
+                <a href="{{ route('resources.providers.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <x-icon name="users" class="w-5 h-5 text-purple-600" />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-sm lg:text-lg font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Providers</h2>
-                            <p class="text-xl lg:text-2xl font-bold text-gray-900">{{ number_format($counts['providers']) }}</p>
-                            <p class="text-xs text-gray-500 mt-1 hidden sm:block">Therapists, tutors, coaches</p>
+                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Providers</h2>
+                            <p class="text-xl font-bold text-gray-900">{{ number_format($counts['providers']) }}</p>
                         </div>
                     </div>
                 </a>
 
                 <!-- Programs Card -->
-                <a href="{{ route('resources.programs.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 lg:p-6 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
-                    <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left gap-3 lg:gap-4">
-                        <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                            <x-icon name="building-office" class="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
+                <a href="{{ route('resources.programs.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <x-icon name="building-office" class="w-5 h-5 text-green-600" />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-sm lg:text-lg font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Programs</h2>
-                            <p class="text-xl lg:text-2xl font-bold text-gray-900">{{ number_format($counts['programs']) }}</p>
-                            <p class="text-xs text-gray-500 mt-1 hidden sm:block">Interventions, support groups</p>
+                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Programs</h2>
+                            <p class="text-xl font-bold text-gray-900">{{ number_format($counts['programs']) }}</p>
                         </div>
                     </div>
                 </a>
 
                 <!-- Courses Card -->
-                <a href="{{ route('resources.courses.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 lg:p-6 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
-                    <div class="flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left gap-3 lg:gap-4">
-                        <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                            <x-icon name="academic-cap" class="w-5 h-5 lg:w-6 lg:h-6 text-orange-600" />
+                <a href="{{ route('resources.courses.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <x-icon name="academic-cap" class="w-5 h-5 text-orange-600" />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-sm lg:text-lg font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Courses</h2>
-                            <p class="text-xl lg:text-2xl font-bold text-gray-900">{{ number_format($counts['courses']) }}</p>
-                            <p class="text-xs text-gray-500 mt-1 hidden sm:block">Mini-courses, learning paths</p>
+                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Courses</h2>
+                            <p class="text-xl font-bold text-gray-900">{{ number_format($counts['courses']) }}</p>
                         </div>
                     </div>
                 </a>
@@ -254,7 +373,7 @@
                             Recently Added
                         </h2>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         @foreach($recentItems as $item)
                             <a href="{{ $item['url'] }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all">
                                 <div class="flex items-start gap-3">

@@ -7,6 +7,7 @@ use App\Models\ProviderConversation;
 use App\Services\DemoConversationService;
 use App\Services\StreamChatService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
 
 class ProviderChatList extends Component
@@ -30,11 +31,19 @@ class ProviderChatList extends Component
         // Check if we have real conversations or should use demo data
         $user = auth()->user();
         if ($user) {
-            $realConversations = ProviderConversation::query()
-                ->where('initiator_type', get_class($user))
-                ->where('initiator_id', $user->id)
-                ->count();
-            $this->useDemoData = $realConversations === 0;
+            try {
+                if (!Schema::hasTable('provider_conversations')) {
+                    $this->useDemoData = true;
+                } else {
+                    $realConversations = ProviderConversation::query()
+                        ->where('initiator_type', get_class($user))
+                        ->where('initiator_id', $user->id)
+                        ->count();
+                    $this->useDemoData = $realConversations === 0;
+                }
+            } catch (\Exception $e) {
+                $this->useDemoData = true;
+            }
         }
 
         // If a conversation was specified and it's a real one, use real data mode

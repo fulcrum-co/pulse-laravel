@@ -2,10 +2,10 @@
     @if($show)
         <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-                <h3 class="text-lg font-semibold mb-4">Push Strategy to Organization</h3>
+                <h3 class="text-lg font-semibold mb-4">Push Plan to Organization</h3>
 
                 <p class="text-sm text-gray-600 mb-4">
-                    Select a downstream organization to push this strategy to. A copy will be created in their account.
+                    Select a downstream organization to push this plan to. A copy will be created in their account.
                 </p>
 
                 @if($downstreamOrgs->count() > 0)
@@ -39,7 +39,7 @@
                         <button wire:click="push"
                             class="px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 disabled:opacity-50"
                             {{ !$selectedOrgId ? 'disabled' : '' }}>
-                            Push Strategy
+                            Push Plan
                         </button>
                     @endif
                 </div>

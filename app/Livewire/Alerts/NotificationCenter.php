@@ -4,6 +4,7 @@ namespace App\Livewire\Alerts;
 
 use App\Models\UserNotification;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -52,46 +53,54 @@ class NotificationCenter extends Component
      */
     public function getNotificationsProperty()
     {
-        $user = auth()->user();
+        try {
+            if (!Schema::hasTable('user_notifications')) {
+                return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
+            }
 
-        $query = UserNotification::forUser($user->id)
-            ->notExpired()
-            ->with('notifiable');
+            $user = auth()->user();
 
-        // Status filter
-        switch ($this->statusFilter) {
-            case 'unread':
-                $query->unread();
-                break;
-            case 'snoozed':
-                $query->snoozed();
-                break;
-            case 'resolved':
-                $query->resolved();
-                break;
-            case 'dismissed':
-                $query->dismissed();
-                break;
-            case 'all_active':
-            default:
-                $query->active();
-                break;
+            $query = UserNotification::forUser($user->id)
+                ->notExpired()
+                ->with('notifiable');
+
+            // Status filter
+            switch ($this->statusFilter) {
+                case 'unread':
+                    $query->unread();
+                    break;
+                case 'snoozed':
+                    $query->snoozed();
+                    break;
+                case 'resolved':
+                    $query->resolved();
+                    break;
+                case 'dismissed':
+                    $query->dismissed();
+                    break;
+                case 'all_active':
+                default:
+                    $query->active();
+                    break;
+            }
+
+            // Category filter
+            if ($this->categoryFilter) {
+                $query->byCategory($this->categoryFilter);
+            }
+
+            // Search
+            if ($this->search) {
+                $query->where(function ($q) {
+                    $q->where('title', 'like', '%' . $this->search . '%')
+                      ->orWhere('body', 'like', '%' . $this->search . '%');
+                });
+            }
+
+            return $query->orderByPriorityAndDate()->paginate(20);
+        } catch (\Exception $e) {
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
         }
-
-        // Category filter
-        if ($this->categoryFilter) {
-            $query->byCategory($this->categoryFilter);
-        }
-
-        // Search
-        if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')
-                  ->orWhere('body', 'like', '%' . $this->search . '%');
-            });
-        }
-
-        return $query->orderByPriorityAndDate()->paginate(20);
     }
 
     /**
@@ -99,7 +108,14 @@ class NotificationCenter extends Component
      */
     public function getUnreadCountProperty(): int
     {
-        return UserNotification::getUnreadCountForUser(auth()->id());
+        try {
+            if (!Schema::hasTable('user_notifications')) {
+                return 0;
+            }
+            return UserNotification::getUnreadCountForUser(auth()->id());
+        } catch (\Exception $e) {
+            return 0;
+        }
     }
 
     /**
@@ -107,34 +123,42 @@ class NotificationCenter extends Component
      */
     public function getCategoryCountsProperty(): array
     {
-        $user = auth()->user();
+        try {
+            if (!Schema::hasTable('user_notifications')) {
+                return [];
+            }
 
-        $query = UserNotification::forUser($user->id)->notExpired();
+            $user = auth()->user();
 
-        // Apply status filter for accurate counts
-        switch ($this->statusFilter) {
-            case 'unread':
-                $query->unread();
-                break;
-            case 'snoozed':
-                $query->snoozed();
-                break;
-            case 'resolved':
-                $query->resolved();
-                break;
-            case 'dismissed':
-                $query->dismissed();
-                break;
-            case 'all_active':
-            default:
-                $query->active();
-                break;
+            $query = UserNotification::forUser($user->id)->notExpired();
+
+            // Apply status filter for accurate counts
+            switch ($this->statusFilter) {
+                case 'unread':
+                    $query->unread();
+                    break;
+                case 'snoozed':
+                    $query->snoozed();
+                    break;
+                case 'resolved':
+                    $query->resolved();
+                    break;
+                case 'dismissed':
+                    $query->dismissed();
+                    break;
+                case 'all_active':
+                default:
+                    $query->active();
+                    break;
+            }
+
+            return $query->selectRaw('category, count(*) as count')
+                ->groupBy('category')
+                ->pluck('count', 'category')
+                ->toArray();
+        } catch (\Exception $e) {
+            return [];
         }
-
-        return $query->selectRaw('category, count(*) as count')
-            ->groupBy('category')
-            ->pluck('count', 'category')
-            ->toArray();
     }
 
     // ==================== Single Notification Actions ====================

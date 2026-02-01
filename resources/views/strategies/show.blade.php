@@ -1,4 +1,4 @@
-<x-layouts.dashboard title="Strategy">
+<x-layouts.dashboard title="Plan">
     <x-slot name="actions">
         <div class="flex items-center gap-2">
             <span class="text-sm text-gray-500">
@@ -40,7 +40,7 @@
         {{-- Survey Assignment Modal --}}
         <livewire:survey-assignment-modal />
 
-        {{-- Push Strategy Modal --}}
+        {{-- Push Plan Modal --}}
         <livewire:push-strategy-modal :strategy="$strategy" />
     </div>
 </x-layouts.dashboard>

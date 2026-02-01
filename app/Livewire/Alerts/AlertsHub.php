@@ -3,6 +3,7 @@
 namespace App\Livewire\Alerts;
 
 use App\Models\UserNotification;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -26,7 +27,14 @@ class AlertsHub extends Component
             return 0;
         }
 
-        return UserNotification::getUnreadCountForUser($user->id);
+        try {
+            if (!Schema::hasTable('user_notifications')) {
+                return 0;
+            }
+            return UserNotification::getUnreadCountForUser($user->id);
+        } catch (\Exception $e) {
+            return 0;
+        }
     }
 
     public function render()

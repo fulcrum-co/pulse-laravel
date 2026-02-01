@@ -34,7 +34,7 @@
                 <x-icon name="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input type="text" wire:model.live.debounce.300ms="search"
                     class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                    placeholder="Search strategies...">
+                    placeholder="Search plans...">
             </div>
             <select wire:model.live="statusFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
@@ -82,69 +82,65 @@
         <x-card>
             <div class="text-center py-12">
                 <x-icon name="clipboard-list" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p class="text-gray-500">No strategies found.</p>
-                <p class="text-gray-400 text-sm mt-1">Create your first strategy to get started.</p>
+                <p class="text-gray-500">No plans found.</p>
+                <p class="text-gray-400 text-sm mt-1">Create your first plan to get started.</p>
                 <a href="{{ route('strategies.create') }}" class="inline-flex items-center mt-4 px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
                     <x-icon name="plus" class="w-4 h-4 mr-2" />
-                    Create Strategy
+                    Create Plan
                 </a>
             </div>
         </x-card>
 
     {{-- Grid View --}}
     @elseif($viewMode === 'grid')
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             @foreach($strategies as $strategy)
-                <a href="{{ route('strategies.show', $strategy) }}" class="block">
-                    <x-card class="h-full hover:shadow-md transition-shadow">
-                        <div class="flex items-start justify-between mb-3">
-                            <div>
-                                <h3 class="font-semibold text-gray-900">{{ $strategy->title }}</h3>
-                                <p class="text-sm text-gray-500 capitalize">{{ str_replace('_', ' ', $strategy->plan_type) }} Plan</p>
+                <a href="{{ route('strategies.show', $strategy) }}" class="block bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="min-w-0 flex-1 pr-2">
+                            <h3 class="font-semibold text-gray-900 text-sm truncate">{{ $strategy->title }}</h3>
+                            <p class="text-xs text-gray-500 capitalize">{{ str_replace('_', ' ', $strategy->plan_type) }} Plan</p>
+                        </div>
+                        <x-badge :color="match($strategy->status) {
+                            'active' => 'green',
+                            'draft' => 'gray',
+                            'completed' => 'blue',
+                            'archived' => 'gray',
+                            default => 'gray'
+                        }">
+                            {{ ucfirst($strategy->status) }}
+                        </x-badge>
+                    </div>
+
+                    @if($strategy->description)
+                        <p class="text-xs text-gray-600 mb-2 line-clamp-2">{{ $strategy->description }}</p>
+                    @endif
+
+                    <div class="flex items-center text-xs text-gray-500 mb-2">
+                        <x-icon name="calendar" class="w-3.5 h-3.5 mr-1" />
+                        {{ $strategy->start_date->format('M j, Y') }} - {{ $strategy->end_date->format('M j, Y') }}
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-gray-500">
+                            {{ $strategy->focusAreas->count() }} focus area{{ $strategy->focusAreas->count() !== 1 ? 's' : '' }}
+                        </span>
+
+                        @if($strategy->collaborators->count() > 0)
+                            <div class="flex -space-x-1.5">
+                                @foreach($strategy->collaborators->take(3) as $collab)
+                                    <div class="w-5 h-5 rounded-full bg-pulse-orange-100 border-2 border-white flex items-center justify-center text-[10px] font-medium text-pulse-orange-600">
+                                        {{ substr($collab->user->first_name ?? 'U', 0, 1) }}
+                                    </div>
+                                @endforeach
+                                @if($strategy->collaborators->count() > 3)
+                                    <div class="w-5 h-5 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-[10px] font-medium text-gray-600">
+                                        +{{ $strategy->collaborators->count() - 3 }}
+                                    </div>
+                                @endif
                             </div>
-                            <x-badge :color="match($strategy->status) {
-                                'active' => 'green',
-                                'draft' => 'gray',
-                                'completed' => 'blue',
-                                'archived' => 'gray',
-                                default => 'gray'
-                            }">
-                                {{ ucfirst($strategy->status) }}
-                            </x-badge>
-                        </div>
-
-                        @if($strategy->description)
-                            <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ $strategy->description }}</p>
                         @endif
-
-                        <div class="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                            <span>
-                                <x-icon name="calendar" class="w-4 h-4 inline mr-1" />
-                                {{ $strategy->start_date->format('M j, Y') }} - {{ $strategy->end_date->format('M j, Y') }}
-                            </span>
-                        </div>
-
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-gray-500">
-                                {{ $strategy->focusAreas->count() }} focus area{{ $strategy->focusAreas->count() !== 1 ? 's' : '' }}
-                            </span>
-
-                            @if($strategy->collaborators->count() > 0)
-                                <div class="flex -space-x-2">
-                                    @foreach($strategy->collaborators->take(3) as $collab)
-                                        <div class="w-6 h-6 rounded-full bg-pulse-orange-100 border-2 border-white flex items-center justify-center text-xs font-medium text-pulse-orange-600">
-                                            {{ substr($collab->user->first_name ?? 'U', 0, 1) }}
-                                        </div>
-                                    @endforeach
-                                    @if($strategy->collaborators->count() > 3)
-                                        <div class="w-6 h-6 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs font-medium text-gray-600">
-                                            +{{ $strategy->collaborators->count() - 3 }}
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-                        </div>
-                    </x-card>
+                    </div>
                 </a>
             @endforeach
         </div>
@@ -203,34 +199,34 @@
 
     {{-- Table View --}}
     @else
-        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
+        <div class="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+            <table class="w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Strategy</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Range</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Focus Areas</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Collaborators</th>
-                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px]">Plan</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Date Range</th>
+                        <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Focus</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
+                        <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-16"></th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($strategies as $strategy)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $strategy->title }}</div>
+                            <td class="px-3 py-3">
+                                <div class="text-sm font-medium text-gray-900 truncate max-w-[250px]">{{ $strategy->title }}</div>
                                 @if($strategy->description)
-                                    <div class="text-xs text-gray-500 truncate max-w-xs">{{ Str::limit($strategy->description, 50) }}</div>
+                                    <div class="text-xs text-gray-500 truncate max-w-[250px]">{{ Str::limit($strategy->description, 40) }}</div>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap">
+                            <td class="px-3 py-3 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 capitalize">
                                     {{ str_replace('_', ' ', $strategy->plan_type) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap">
+                            <td class="px-3 py-3 whitespace-nowrap">
                                 <x-badge :color="match($strategy->status) {
                                     'active' => 'green',
                                     'draft' => 'gray',
@@ -241,31 +237,31 @@
                                     {{ ucfirst($strategy->status) }}
                                 </x-badge>
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-3 py-3 whitespace-nowrap text-xs text-gray-500">
                                 {{ $strategy->start_date->format('M j, Y') }} - {{ $strategy->end_date->format('M j, Y') }}
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 text-center">
                                 {{ $strategy->focusAreas->count() }}
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap">
+                            <td class="px-3 py-3 whitespace-nowrap">
                                 @if($strategy->collaborators->count() > 0)
-                                    <div class="flex -space-x-2">
+                                    <div class="flex -space-x-1.5">
                                         @foreach($strategy->collaborators->take(3) as $collab)
-                                            <div class="w-6 h-6 rounded-full bg-pulse-orange-100 border-2 border-white flex items-center justify-center text-xs font-medium text-pulse-orange-600">
+                                            <div class="w-5 h-5 rounded-full bg-pulse-orange-100 border-2 border-white flex items-center justify-center text-[10px] font-medium text-pulse-orange-600">
                                                 {{ substr($collab->user->first_name ?? 'U', 0, 1) }}
                                             </div>
                                         @endforeach
                                         @if($strategy->collaborators->count() > 3)
-                                            <div class="w-6 h-6 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs font-medium text-gray-600">
+                                            <div class="w-5 h-5 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-[10px] font-medium text-gray-600">
                                                 +{{ $strategy->collaborators->count() - 3 }}
                                             </div>
                                         @endif
                                     </div>
                                 @else
-                                    <span class="text-sm text-gray-400">-</span>
+                                    <span class="text-xs text-gray-400">-</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap text-right">
+                            <td class="px-3 py-3 whitespace-nowrap text-right">
                                 <a href="{{ route('strategies.show', $strategy) }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
                                     View
                                 </a>

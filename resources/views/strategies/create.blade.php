@@ -1,4 +1,4 @@
-<x-layouts.dashboard title="Create Strategy">
+<x-layouts.dashboard title="Create Plan">
     <div class="max-w-2xl">
         <x-card>
             <form action="{{ route('strategies.store') }}" method="POST" class="space-y-6">
@@ -8,7 +8,7 @@
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
                     <input type="text" name="title" id="title" value="{{ old('title') }}" required
                         class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                        placeholder="Enter strategy title">
+                        placeholder="Enter plan title">
                     @error('title')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -63,7 +63,7 @@
                         Cancel
                     </a>
                     <button type="submit" class="px-6 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
-                        Create Strategy
+                        Create Plan
                     </button>
                 </div>
             </form>

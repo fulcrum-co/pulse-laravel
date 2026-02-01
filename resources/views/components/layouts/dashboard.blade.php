@@ -62,8 +62,16 @@
     @stack('styles')
 </head>
 <body class="bg-gray-50 {{ session('demo_role_override') && session('demo_role_override') !== 'actual' ? 'pt-10' : '' }}">
-    <div x-data="{ sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true', hoveredItem: null }"
-         x-init="$watch('sidebarCollapsed', val => localStorage.setItem('sidebarCollapsed', val))"
+    @php
+        // Force sidebar collapsed on canvas-focused pages (Resources, Marketplace)
+        $forceCollapsed = request()->is('resources') || request()->is('marketplace');
+    @endphp
+    <div x-data="{
+            sidebarCollapsed: {{ $forceCollapsed ? 'true' : "localStorage.getItem('sidebarCollapsed') === 'true'" }},
+            hoveredItem: null,
+            forceCollapsed: {{ $forceCollapsed ? 'true' : 'false' }}
+         }"
+         x-init="$watch('sidebarCollapsed', val => { if (!forceCollapsed) localStorage.setItem('sidebarCollapsed', val) })"
          class="flex h-screen">
 
         <!-- Sidebar -->
@@ -204,15 +212,15 @@
                 <div x-show="sidebarCollapsed" class="mb-2 border-t border-gray-200"></div>
 
                 @if(RolePermissions::currentUserCanAccess('strategy'))
-                <!-- Strategy -->
+                <!-- Plan -->
                 <div @mouseenter="hoveredItem = 'strategy'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/strategies"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
                        class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('strategies*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                        <x-icon name="flag" class="w-5 h-5 flex-shrink-0" />
-                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Strategy</span>
+                        <x-icon name="clipboard-document-list" class="w-5 h-5 flex-shrink-0" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Plan</span>
                     </a>
-                    <div x-show="sidebarCollapsed && hoveredItem === 'strategy'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Strategy</div>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'strategy'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Plan</div>
                 </div>
                 @endif
 
@@ -268,20 +276,6 @@
                 </div>
                 @endif
 
-                @if(RolePermissions::currentUserCanAccess('alerts'))
-                <!-- Alerts -->
-                <div @mouseenter="hoveredItem = 'alerts'" @mouseleave="hoveredItem = null" class="relative">
-                    <a href="/alerts"
-                       :class="sidebarCollapsed ? 'justify-center' : ''"
-                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('alerts*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                        <x-icon name="bell" class="w-5 h-5 flex-shrink-0" />
-                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Alerts</span>
-                        <span x-show="!sidebarCollapsed" class="ml-auto bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded-full">4</span>
-                    </a>
-                    <div x-show="sidebarCollapsed && hoveredItem === 'alerts'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Alerts (4)</div>
-                </div>
-                @endif
-
                 @if(RolePermissions::currentUserCanAccess('marketplace'))
                 <!-- Marketplace -->
                 <div @mouseenter="hoveredItem = 'marketplace'" @mouseleave="hoveredItem = null" class="relative">
@@ -292,35 +286,6 @@
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition whitespace-nowrap">Marketplace</span>
                     </a>
                     <div x-show="sidebarCollapsed && hoveredItem === 'marketplace'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace</div>
-                </div>
-                @endif
-
-                @if(RolePermissions::currentUserCanAccess('messages'))
-                @php
-                    // Get unread message count for current user
-                    $authUser = auth()->user();
-                    $unreadMessageCount = $authUser ? \App\Models\ProviderConversation::where('initiator_type', get_class($authUser))
-                        ->where('initiator_id', $authUser->id)
-                        ->where('unread_count_initiator', '>', 0)
-                        ->count() : 0;
-                @endphp
-                <!-- Messages -->
-                <div @mouseenter="hoveredItem = 'messages'" @mouseleave="hoveredItem = null" class="relative">
-                    <a href="/messages"
-                       :class="sidebarCollapsed ? 'justify-center' : ''"
-                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('messages*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                        <div class="relative flex-shrink-0">
-                            <x-icon name="chat-bubble-left-right" class="w-5 h-5" />
-                            @if($unreadMessageCount > 0)
-                            <span class="absolute -top-1 -right-1 w-2 h-2 bg-pulse-orange-500 rounded-full"></span>
-                            @endif
-                        </div>
-                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Messages</span>
-                        @if($unreadMessageCount > 0)
-                        <span x-show="!sidebarCollapsed" class="ml-auto bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium px-2 py-0.5 rounded-full">{{ $unreadMessageCount }}</span>
-                        @endif
-                    </a>
-                    <div x-show="sidebarCollapsed && hoveredItem === 'messages'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Messages{{ $unreadMessageCount > 0 ? ' (' . $unreadMessageCount . ')' : '' }}</div>
                 </div>
                 @endif
 
@@ -417,6 +382,11 @@
                 <h1 class="text-2xl font-semibold text-gray-900">{{ $title ?? 'Dashboard' }}</h1>
 
                 <div class="flex items-center gap-3">
+                    <!-- Header Notification Icons -->
+                    <livewire:layouts.header-notifications />
+
+                    <!-- Divider -->
+                    <div class="h-6 w-px bg-gray-200"></div>
                     @if(isset($actions) && $actions->isNotEmpty())
                         {{ $actions }}
                     @elseif(request()->is('dashboard'))
@@ -424,11 +394,10 @@
                         <div x-data="{ open: false }" class="relative">
                             <button
                                 @click="open = !open"
-                                class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors"
+                                class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors"
                             >
                                 <x-icon name="plus" class="w-4 h-4 mr-2" />
                                 Create
-                                <x-icon name="chevron-down" class="w-4 h-4 ml-2" />
                             </button>
 
                             <div
@@ -458,8 +427,8 @@
                                     @endif
                                     @if(RolePermissions::currentUserCanAccess('create_strategy'))
                                     <a href="/strategies/create" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <x-icon name="flag" class="w-4 h-4 text-gray-400" />
-                                        Strategy
+                                        <x-icon name="clipboard-document-list" class="w-4 h-4 text-gray-400" />
+                                        Plan
                                     </a>
                                     @endif
                                     @if(RolePermissions::currentUserCanAccess('create_alert'))
@@ -473,27 +442,73 @@
                         </div>
                     @elseif(request()->is('dashboards'))
                         <!-- New Dashboard Button -->
-                        <a href="/dashboard" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                        <a href="/dashboard" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
                             <x-icon name="plus" class="w-4 h-4 mr-2" />
                             New Dashboard
                         </a>
                     @elseif(request()->is('resources'))
                         <!-- Add Resource Button -->
-                        <button onclick="Livewire.dispatch('openAddResourceModal')" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                        <button onclick="Livewire.dispatch('openAddResourceModal')" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
                             <x-icon name="plus" class="w-4 h-4 mr-2" />
                             Add Resource
                         </button>
                     @elseif(request()->is('collect'))
                         <!-- Add Collection Button -->
-                        <a href="{{ route('collect.create') }}" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                        <a href="{{ route('collect.create') }}" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
                             <x-icon name="plus" class="w-4 h-4 mr-2" />
                             Add Collection
                         </a>
                     @elseif(request()->is('distribute'))
                         <!-- Create Distribution Button -->
-                        <a href="{{ route('distribute.create') }}" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                        <a href="{{ route('distribute.create') }}" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
                             <x-icon name="plus" class="w-4 h-4 mr-2" />
                             Create Distribution
+                        </a>
+                    @elseif(request()->is('strategies') || request()->is('strategies/'))
+                        <!-- New Plan Button -->
+                        <a href="{{ route('strategies.create') }}" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                            <x-icon name="plus" class="w-4 h-4 mr-2" />
+                            New Plan
+                        </a>
+                    @elseif(request()->is('marketplace'))
+                        <!-- Seller Dashboard Button -->
+                        @php
+                            $hasSellerProfile = \Illuminate\Support\Facades\Schema::hasTable('seller_profiles')
+                                ? \App\Models\SellerProfile::where('user_id', auth()->id())->exists()
+                                : false;
+                        @endphp
+                        @if($hasSellerProfile)
+                            <a href="{{ route('marketplace.seller.dashboard') }}" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                                <x-icon name="squares-2x2" class="w-4 h-4 mr-2" />
+                                Seller Dashboard
+                            </a>
+                        @else
+                            <a href="{{ route('marketplace.seller.create') }}" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                                <x-icon name="sparkles" class="w-4 h-4 mr-2" />
+                                Become a Seller
+                            </a>
+                        @endif
+                    @elseif(request()->is('alerts*'))
+                        <!-- Create Alert Button -->
+                        <a href="{{ route('alerts.create') }}" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                            <x-icon name="plus" class="w-4 h-4 mr-2" />
+                            Create Alert
+                        </a>
+                    @elseif(request()->is('messages*'))
+                        <!-- New Message Button -->
+                        <button onclick="Livewire.dispatch('openNewConversation')" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                            <x-icon name="plus" class="w-4 h-4 mr-2" />
+                            New Message
+                        </button>
+                    @elseif(request()->is('resources/courses/*') && !request()->is('resources/courses/create') && !request()->is('*/edit'))
+                        <!-- Learn More Button - Links to Resource Hub filtered by course category -->
+                        @php
+                            $course = request()->route('course');
+                            $courseCategory = $course?->category ?? '';
+                        @endphp
+                        <a href="{{ route('resources.index', ['category' => $courseCategory]) }}" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                            <x-icon name="light-bulb" class="w-4 h-4 mr-2" />
+                            Learn More
                         </a>
                     @endif
                 </div>

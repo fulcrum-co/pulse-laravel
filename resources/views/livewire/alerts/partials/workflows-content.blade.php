@@ -7,16 +7,10 @@
             <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-pulse-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <x-icon name="bell-alert" class="w-8 h-8 text-pulse-orange-500" />
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-1">Create your first alert</h3>
-            <p class="text-gray-500 mb-4 max-w-sm mx-auto text-sm">
+            <h3 class="text-lg font-semibold text-gray-900 mb-1">No alerts yet</h3>
+            <p class="text-gray-500 max-w-sm mx-auto text-sm">
                 Set up automated alerts to notify staff when conditions are met.
             </p>
-            <a href="{{ route('alerts.create') }}">
-                <x-button variant="primary">
-                    <x-icon name="plus" class="w-4 h-4 mr-1" />
-                    Create Alert
-                </x-button>
-            </a>
         </div>
     </x-card>
 

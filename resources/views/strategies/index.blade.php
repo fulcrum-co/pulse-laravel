@@ -1,8 +1,8 @@
-<x-layouts.dashboard title="Strategy">
+<x-layouts.dashboard title="Plan">
     <x-slot name="actions">
-        <a href="{{ route('strategies.create') }}" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+        <a href="{{ route('strategies.create') }}" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
             <x-icon name="plus" class="w-4 h-4 mr-2" />
-            Add Entry
+            Add Plan
         </a>
     </x-slot>
 
