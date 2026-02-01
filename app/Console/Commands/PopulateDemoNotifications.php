@@ -223,7 +223,7 @@ class PopulateDemoNotifications extends Command
                     'body' => 'This alert workflow was triggered and requires your attention.',
                     'icon' => 'bolt',
                     'priority' => UserNotification::PRIORITY_URGENT,
-                    'action_url' => "/alerts/{$id}",
+                    'action_url' => "/alerts/{$id}/canvas",
                     'action_label' => 'View Alert',
                 ],
             ];
