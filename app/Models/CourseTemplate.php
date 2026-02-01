@@ -201,7 +201,7 @@ class CourseTemplate extends Model
      * Fill template with actual values.
      * Returns the template_data with placeholders replaced.
      */
-    public function fill(array $values): array
+    public function fillTemplate(array $values): array
     {
         $data = $this->template_data;
 
