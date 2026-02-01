@@ -702,6 +702,12 @@ Route::middleware('auth')->group(function () {
     // Admin Settings
     Route::prefix('admin')->group(function () {
         Route::get('/settings/ai-courses', App\Livewire\Admin\AICourseSettings::class)->name('admin.settings.ai-courses');
+
+        // Moderation
+        Route::get('/moderation', App\Livewire\Admin\ModerationQueue::class)->name('admin.moderation');
+        Route::get('/moderation/task-flow', App\Livewire\Admin\ModerationTaskFlow::class)->name('admin.moderation.task-flow');
+        Route::get('/moderation/dashboard', App\Livewire\Admin\ModerationDashboard::class)->name('admin.moderation.dashboard');
+        Route::get('/moderation/{result}/edit', App\Livewire\Admin\ModerationEdit::class)->name('admin.moderation.edit');
     });
 
     // Settings (placeholder)

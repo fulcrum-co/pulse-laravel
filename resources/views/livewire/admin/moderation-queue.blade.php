@@ -3,7 +3,7 @@
     <div class="w-64 flex-shrink-0">
         {{-- Search --}}
         <div class="relative mb-6">
-            <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" title="Search" />
             <input
                 type="text"
                 wire:model.live.debounce.300ms="search"
@@ -23,22 +23,22 @@
             <div class="space-y-1">
                 <label class="flex items-center gap-2 py-1 cursor-pointer">
                     <input type="radio" wire:model.live="statusFilter" value="needs_review" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
-                    <x-icon name="clock" class="w-4 h-4 text-yellow-500" />
+                    <x-icon name="clock" class="w-4 h-4 text-yellow-500" title="Needs Review" />
                     <span class="text-sm text-gray-700">Needs Review</span>
                 </label>
                 <label class="flex items-center gap-2 py-1 cursor-pointer">
                     <input type="radio" wire:model.live="statusFilter" value="flagged" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
-                    <x-icon name="flag" class="w-4 h-4 text-yellow-500" />
+                    <x-icon name="flag" class="w-4 h-4 text-yellow-500" title="Flagged" />
                     <span class="text-sm text-gray-700">Flagged</span>
                 </label>
                 <label class="flex items-center gap-2 py-1 cursor-pointer">
                     <input type="radio" wire:model.live="statusFilter" value="passed" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
-                    <x-icon name="check-circle" class="w-4 h-4 text-green-500" />
+                    <x-icon name="check-circle" class="w-4 h-4 text-green-500" title="Passed" />
                     <span class="text-sm text-gray-700">Passed</span>
                 </label>
                 <label class="flex items-center gap-2 py-1 cursor-pointer">
                     <input type="radio" wire:model.live="statusFilter" value="rejected" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
-                    <x-icon name="x-circle" class="w-4 h-4 text-red-500" />
+                    <x-icon name="x-circle" class="w-4 h-4 text-red-500" title="Rejected" />
                     <span class="text-sm text-gray-700">Rejected</span>
                 </label>
             </div>
@@ -56,7 +56,7 @@
                 @foreach($contentTypes as $class => $label)
                     <label class="flex items-center gap-2 py-1 cursor-pointer">
                         <input type="radio" wire:model.live="contentTypeFilter" value="{{ $class }}" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
-                        <x-icon name="{{ $label === 'MiniCourse' ? 'academic-cap' : 'document-text' }}" class="w-4 h-4 text-gray-400" />
+                        <x-icon name="{{ $label === 'MiniCourse' ? 'academic-cap' : 'document-text' }}" class="w-4 h-4 text-gray-400" title="{{ $label }}" />
                         <span class="text-sm text-gray-700">{{ $label }}</span>
                     </label>
                 @endforeach
@@ -90,70 +90,86 @@
 
     {{-- Main Content --}}
     <div class="flex-1 min-w-0">
-        {{-- Stats Cards --}}
-        <div class="grid grid-cols-4 gap-3 mb-4">
-            <div class="bg-white border border-gray-200 rounded-lg p-3 text-center cursor-pointer hover:border-yellow-300 transition-colors {{ $statusFilter === 'needs_review' ? 'border-yellow-400 bg-yellow-50' : '' }}" wire:click="$set('statusFilter', 'needs_review')">
-                <div class="flex items-center justify-center gap-2">
-                    <div class="w-7 h-7 rounded-lg bg-yellow-100 flex items-center justify-center">
-                        <x-icon name="clock" class="w-4 h-4 text-yellow-600" />
+        {{-- Stats Cards (compact, equal width) --}}
+        <div class="grid grid-cols-4 gap-2 mb-4">
+            <button wire:click="$set('statusFilter', 'needs_review')" class="w-full bg-white border rounded-lg px-3 py-2 cursor-pointer hover:border-yellow-300 transition-colors {{ $statusFilter === 'needs_review' ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200' }}">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded bg-yellow-100 flex items-center justify-center flex-shrink-0" title="Pending Review">
+                        <x-icon name="clock" class="w-3.5 h-3.5 text-yellow-600" />
                     </div>
-                    <div class="text-left">
-                        <div class="text-xs text-yellow-600">Pending</div>
-                        <div class="text-lg font-bold text-gray-900">{{ $stats['pending_review'] ?? 0 }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white border border-gray-200 rounded-lg p-3 text-center cursor-pointer hover:border-orange-300 transition-colors {{ $statusFilter === 'flagged' ? 'border-orange-400 bg-orange-50' : '' }}" wire:click="$set('statusFilter', 'flagged')">
-                <div class="flex items-center justify-center gap-2">
-                    <div class="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center">
-                        <x-icon name="flag" class="w-4 h-4 text-orange-600" />
-                    </div>
-                    <div class="text-left">
-                        <div class="text-xs text-orange-600">Flagged</div>
-                        <div class="text-lg font-bold text-gray-900">{{ $stats['flagged'] ?? 0 }}</div>
+                    <div class="text-left flex-1">
+                        <div class="text-xs text-yellow-600 leading-tight">Pending</div>
+                        <div class="text-sm font-semibold text-gray-900">{{ $stats['pending_review'] ?? 0 }}</div>
                     </div>
                 </div>
-            </div>
-            <div class="bg-white border border-gray-200 rounded-lg p-3 text-center cursor-pointer hover:border-green-300 transition-colors {{ $statusFilter === 'passed' ? 'border-green-400 bg-green-50' : '' }}" wire:click="$set('statusFilter', 'passed')">
-                <div class="flex items-center justify-center gap-2">
-                    <div class="w-7 h-7 rounded-lg bg-green-100 flex items-center justify-center">
-                        <x-icon name="check-circle" class="w-4 h-4 text-green-600" />
+            </button>
+            <button wire:click="$set('statusFilter', 'flagged')" class="w-full bg-white border rounded-lg px-3 py-2 cursor-pointer hover:border-orange-300 transition-colors {{ $statusFilter === 'flagged' ? 'border-orange-400 bg-orange-50' : 'border-gray-200' }}">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded bg-orange-100 flex items-center justify-center flex-shrink-0" title="Flagged for Review">
+                        <x-icon name="flag" class="w-3.5 h-3.5 text-orange-600" />
                     </div>
-                    <div class="text-left">
-                        <div class="text-xs text-green-600">Passed</div>
-                        <div class="text-lg font-bold text-gray-900">{{ $stats['passed'] ?? 0 }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white border border-gray-200 rounded-lg p-3 text-center cursor-pointer hover:border-red-300 transition-colors {{ $statusFilter === 'rejected' ? 'border-red-400 bg-red-50' : '' }}" wire:click="$set('statusFilter', 'rejected')">
-                <div class="flex items-center justify-center gap-2">
-                    <div class="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center">
-                        <x-icon name="x-circle" class="w-4 h-4 text-red-600" />
-                    </div>
-                    <div class="text-left">
-                        <div class="text-xs text-red-600">Rejected</div>
-                        <div class="text-lg font-bold text-gray-900">{{ $stats['rejected'] ?? 0 }}</div>
+                    <div class="text-left flex-1">
+                        <div class="text-xs text-orange-600 leading-tight">Flagged</div>
+                        <div class="text-sm font-semibold text-gray-900">{{ $stats['flagged'] ?? 0 }}</div>
                     </div>
                 </div>
-            </div>
+            </button>
+            <button wire:click="$set('statusFilter', 'passed')" class="w-full bg-white border rounded-lg px-3 py-2 cursor-pointer hover:border-green-300 transition-colors {{ $statusFilter === 'passed' ? 'border-green-400 bg-green-50' : 'border-gray-200' }}">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded bg-green-100 flex items-center justify-center flex-shrink-0" title="Passed Review">
+                        <x-icon name="check-circle" class="w-3.5 h-3.5 text-green-600" />
+                    </div>
+                    <div class="text-left flex-1">
+                        <div class="text-xs text-green-600 leading-tight">Passed</div>
+                        <div class="text-sm font-semibold text-gray-900">{{ $stats['passed'] ?? 0 }}</div>
+                    </div>
+                </div>
+            </button>
+            <button wire:click="$set('statusFilter', 'rejected')" class="w-full bg-white border rounded-lg px-3 py-2 cursor-pointer hover:border-red-300 transition-colors {{ $statusFilter === 'rejected' ? 'border-red-400 bg-red-50' : 'border-gray-200' }}">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded bg-red-100 flex items-center justify-center flex-shrink-0" title="Rejected">
+                        <x-icon name="x-circle" class="w-3.5 h-3.5 text-red-600" />
+                    </div>
+                    <div class="text-left flex-1">
+                        <div class="text-xs text-red-600 leading-tight">Rejected</div>
+                        <div class="text-sm font-semibold text-gray-900">{{ $stats['rejected'] ?? 0 }}</div>
+                    </div>
+                </div>
+            </button>
         </div>
 
         {{-- Queue Header --}}
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
-                <x-icon name="clock" class="w-5 h-5 text-gray-400" />
+                <x-icon name="clock" class="w-5 h-5 text-gray-400" title="Review Queue" />
                 <h2 class="text-lg font-semibold text-gray-900">Review Queue</h2>
                 <span class="text-sm text-gray-500">({{ $results->total() }} items)</span>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
+                {{-- Quick Actions --}}
+                <a href="{{ route('admin.moderation.task-flow') }}"
+                   class="flex items-center gap-2 px-3 py-1.5 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors"
+                   title="Start reviewing items in task flow mode">
+                    <x-icon name="play" class="w-4 h-4" />
+                    Start Reviewing
+                </a>
+                <a href="{{ route('admin.moderation.dashboard') }}"
+                   class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                   title="View moderation dashboard and analytics">
+                    <x-icon name="chart-bar" class="w-4 h-4" />
+                    Dashboard
+                </a>
+
+                <div class="w-px h-6 bg-gray-200"></div>
+
                 {{-- Bulk Actions --}}
                 @if($canAssign && count($selectedItems) > 0)
                     <span class="text-sm text-gray-500 mr-2">{{ count($selectedItems) }} selected</span>
-                    <button wire:click="bulkAssign" class="px-3 py-1.5 text-sm font-medium text-pulse-orange-600 bg-pulse-orange-50 hover:bg-pulse-orange-100 rounded-lg">
+                    <button wire:click="bulkAssign" class="px-3 py-1.5 text-sm font-medium text-pulse-orange-600 bg-pulse-orange-50 hover:bg-pulse-orange-100 rounded-lg" title="Assign selected items to a moderator">
                         Assign
                     </button>
-                    <button wire:click="$set('selectedItems', [])" class="p-1.5 text-gray-400 hover:text-gray-600">
+                    <button wire:click="$set('selectedItems', [])" class="p-1.5 text-gray-400 hover:text-gray-600" title="Clear selection">
                         <x-icon name="x" class="w-4 h-4" />
                     </button>
                 @endif
@@ -219,7 +235,7 @@
                                 </div>
                                 <p class="text-sm text-gray-500 mb-2">{{ class_basename($result->moderatable_type) }}</p>
                                 @if($result->flags && count($result->flags) > 0)
-                                    <p class="text-sm text-red-600 line-clamp-1">{{ $result->flags[0] }}</p>
+                                    <p class="text-sm text-red-600 line-clamp-1">{{ is_array($result->flags) ? current($result->flags) : $result->flags }}</p>
                                 @endif
                             </div>
 
@@ -249,7 +265,7 @@
                     </div>
                 @empty
                     <div class="bg-white border border-gray-200 rounded-xl p-12 text-center">
-                        <x-icon name="check-circle" class="w-12 h-12 mx-auto text-green-200" />
+                        <x-icon name="check-circle" class="w-12 h-12 mx-auto text-green-200" title="All caught up" />
                         <h3 class="mt-3 text-lg font-medium text-gray-900">All caught up!</h3>
                         <p class="mt-1 text-sm text-gray-500">No items need review right now.</p>
                     </div>
@@ -291,7 +307,7 @@
                         <p class="text-xs text-gray-500 mb-2">{{ class_basename($result->moderatable_type) }} &middot; {{ $result->created_at->diffForHumans() }}</p>
 
                         @if($result->flags && count($result->flags) > 0)
-                            <p class="text-xs text-red-600 line-clamp-1 mb-3">{{ $result->flags[0] }}</p>
+                            <p class="text-xs text-red-600 line-clamp-1 mb-3">{{ is_array($result->flags) ? current($result->flags) : $result->flags }}</p>
                         @endif
 
                         <div class="flex items-center justify-between pt-3 border-t border-gray-100">
@@ -316,7 +332,7 @@
                     </div>
                 @empty
                     <div class="col-span-full bg-white border border-gray-200 rounded-xl p-12 text-center">
-                        <x-icon name="check-circle" class="w-12 h-12 mx-auto text-green-200" />
+                        <x-icon name="check-circle" class="w-12 h-12 mx-auto text-green-200" title="All caught up" />
                         <h3 class="mt-3 text-lg font-medium text-gray-900">All caught up!</h3>
                         <p class="mt-1 text-sm text-gray-500">No items need review right now.</p>
                     </div>
@@ -366,7 +382,7 @@
                                 <td class="px-4 py-3">
                                     <div class="text-sm font-medium text-gray-900 truncate max-w-xs">{{ $result->moderatable?->title ?? 'Unknown Content' }}</div>
                                     @if($result->flags && count($result->flags) > 0)
-                                        <div class="text-xs text-red-500 truncate max-w-xs">{{ $result->flags[0] }}</div>
+                                        <div class="text-xs text-red-500 truncate max-w-xs">{{ is_array($result->flags) ? current($result->flags) : $result->flags }}</div>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3">
@@ -410,7 +426,7 @@
                         @empty
                             <tr>
                                 <td colspan="{{ $canAssign ? 8 : 7 }}" class="px-4 py-12 text-center">
-                                    <x-icon name="check-circle" class="w-12 h-12 mx-auto text-green-200" />
+                                    <x-icon name="check-circle" class="w-12 h-12 mx-auto text-green-200" title="All caught up" />
                                     <h3 class="mt-3 text-lg font-medium text-gray-900">All caught up!</h3>
                                     <p class="mt-1 text-sm text-gray-500">No items need review right now.</p>
                                 </td>

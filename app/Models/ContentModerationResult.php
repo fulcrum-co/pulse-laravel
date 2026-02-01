@@ -16,6 +16,12 @@ class ContentModerationResult extends Model
     public const STATUS_REJECTED = 'rejected';
     public const STATUS_APPROVED_OVERRIDE = 'approved_override';
 
+    // Assignment priorities
+    public const PRIORITY_LOW = 'low';
+    public const PRIORITY_NORMAL = 'normal';
+    public const PRIORITY_HIGH = 'high';
+    public const PRIORITY_URGENT = 'urgent';
+
     // Thresholds for auto-decisions
     public const THRESHOLD_AUTO_PASS = 0.85;
     public const THRESHOLD_FLAG_FOR_REVIEW = 0.70;
@@ -49,6 +55,14 @@ class ContentModerationResult extends Model
         'model_version',
         'processing_time_ms',
         'token_count',
+        // Assignment fields
+        'assigned_to',
+        'assigned_by',
+        'assigned_at',
+        'collaborator_ids',
+        'assignment_priority',
+        'due_at',
+        'assignment_notes',
     ];
 
     protected $casts = [
@@ -62,6 +76,10 @@ class ContentModerationResult extends Model
         'dimension_details' => 'array',
         'human_reviewed' => 'boolean',
         'reviewed_at' => 'datetime',
+        // Assignment casts
+        'assigned_at' => 'datetime',
+        'due_at' => 'datetime',
+        'collaborator_ids' => 'array',
     ];
 
     /**
@@ -114,6 +132,33 @@ class ContentModerationResult extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    /**
+     * User this moderation is assigned to.
+     */
+    public function assignee(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    /**
+     * User who made the assignment.
+     */
+    public function assigner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_by');
+    }
+
+    /**
+     * Get collaborator users.
+     */
+    public function getCollaboratorsAttribute(): \Illuminate\Support\Collection
+    {
+        if (empty($this->collaborator_ids)) {
+            return collect();
+        }
+        return User::whereIn('id', $this->collaborator_ids)->get();
     }
 
     /**
@@ -171,6 +216,56 @@ class ContentModerationResult extends Model
     public function scopeForContentType(Builder $query, string $type): Builder
     {
         return $query->where('moderatable_type', $type);
+    }
+
+    /**
+     * Scope to items assigned to a specific user.
+     */
+    public function scopeAssignedTo(Builder $query, int $userId): Builder
+    {
+        return $query->where('assigned_to', $userId);
+    }
+
+    /**
+     * Scope to items where user is assignee or collaborator.
+     */
+    public function scopeAssignedToOrCollaborator(Builder $query, int $userId): Builder
+    {
+        return $query->where(function ($q) use ($userId) {
+            $q->where('assigned_to', $userId)
+              ->orWhereJsonContains('collaborator_ids', $userId);
+        });
+    }
+
+    /**
+     * Scope to unassigned items.
+     */
+    public function scopeUnassigned(Builder $query): Builder
+    {
+        return $query->whereNull('assigned_to');
+    }
+
+    /**
+     * Scope by assignment priority.
+     */
+    public function scopeByAssignmentPriority(Builder $query, string $priority): Builder
+    {
+        return $query->where('assignment_priority', $priority);
+    }
+
+    /**
+     * Order by assignment priority then due date.
+     */
+    public function scopeOrderByPriorityAndDue(Builder $query): Builder
+    {
+        return $query->orderByRaw("CASE assignment_priority
+                WHEN 'urgent' THEN 1
+                WHEN 'high' THEN 2
+                WHEN 'normal' THEN 3
+                WHEN 'low' THEN 4
+                ELSE 5 END")
+            ->orderBy('due_at', 'asc')
+            ->orderBy('created_at', 'desc');
     }
 
     /**
@@ -312,5 +407,143 @@ class ContentModerationResult extends Model
         }
 
         return 'Review required';
+    }
+
+    // ============================================
+    // ASSIGNMENT METHODS
+    // ============================================
+
+    /**
+     * Get available priorities.
+     */
+    public static function getPriorities(): array
+    {
+        return [
+            self::PRIORITY_LOW => 'Low',
+            self::PRIORITY_NORMAL => 'Normal',
+            self::PRIORITY_HIGH => 'High',
+            self::PRIORITY_URGENT => 'Urgent',
+        ];
+    }
+
+    /**
+     * Get priority color for UI.
+     */
+    public static function getPriorityColor(string $priority): string
+    {
+        return match ($priority) {
+            self::PRIORITY_URGENT => 'red',
+            self::PRIORITY_HIGH => 'orange',
+            self::PRIORITY_NORMAL => 'blue',
+            self::PRIORITY_LOW => 'gray',
+            default => 'gray',
+        };
+    }
+
+    /**
+     * Assign this moderation result to a user.
+     */
+    public function assignTo(int $userId, int $assignedBy, array $options = []): void
+    {
+        $this->update([
+            'assigned_to' => $userId,
+            'assigned_by' => $assignedBy,
+            'assigned_at' => now(),
+            'assignment_priority' => $options['priority'] ?? self::PRIORITY_NORMAL,
+            'due_at' => $options['due_at'] ?? null,
+            'assignment_notes' => $options['notes'] ?? null,
+        ]);
+    }
+
+    /**
+     * Add a collaborator.
+     */
+    public function addCollaborator(int $userId): void
+    {
+        $collaborators = $this->collaborator_ids ?? [];
+        if (!in_array($userId, $collaborators)) {
+            $collaborators[] = $userId;
+            $this->update(['collaborator_ids' => $collaborators]);
+        }
+    }
+
+    /**
+     * Remove a collaborator.
+     */
+    public function removeCollaborator(int $userId): void
+    {
+        $collaborators = $this->collaborator_ids ?? [];
+        $collaborators = array_filter($collaborators, fn($id) => $id !== $userId);
+        $this->update(['collaborator_ids' => array_values($collaborators)]);
+    }
+
+    /**
+     * Unassign this moderation result.
+     */
+    public function unassign(): void
+    {
+        $this->update([
+            'assigned_to' => null,
+            'assigned_by' => null,
+            'assigned_at' => null,
+            'assignment_notes' => null,
+        ]);
+    }
+
+    /**
+     * Check if a user can review this item.
+     */
+    public function canBeReviewedBy(User $user): bool
+    {
+        // Assignee can always review
+        if ($this->assigned_to === $user->id) {
+            return true;
+        }
+
+        // Collaborators can review
+        if (in_array($user->id, $this->collaborator_ids ?? [])) {
+            return true;
+        }
+
+        // Admins can review any item in their org
+        if ($user->isAdmin() && $user->canAccessOrganization($this->org_id)) {
+            return true;
+        }
+
+        // Unassigned items can be reviewed by any authorized user
+        if ($this->assigned_to === null && $user->canAccessOrganization($this->org_id)) {
+            return $this->canUserModerate($user);
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if user has moderation permissions based on role.
+     */
+    protected function canUserModerate(User $user): bool
+    {
+        return in_array($user->effective_role, [
+            'admin', 'consultant', 'superintendent', 'school_admin'
+        ]);
+    }
+
+    /**
+     * Check if this item is overdue.
+     */
+    public function isOverdue(): bool
+    {
+        return $this->due_at !== null && $this->due_at->isPast() && !$this->human_reviewed;
+    }
+
+    /**
+     * Check if this item is due soon (within 24 hours).
+     */
+    public function isDueSoon(): bool
+    {
+        return $this->due_at !== null
+            && $this->due_at->isFuture()
+            && $this->due_at->diffInHours(now()) <= 24
+            && !$this->human_reviewed;
     }
 }
