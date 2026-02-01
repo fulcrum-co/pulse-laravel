@@ -77,31 +77,33 @@ document.addEventListener('alpine:init', () => {
             return Math.max(0, this.queue.length - this.currentIndex - 1);
         },
 
-        completeCurrentTask() {
-            // Mark notification as resolved via API
+        async completeCurrentTask() {
+            // Mark notification as resolved via API, then navigate
             if (this.currentTask) {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-                fetch(`/api/notifications/${this.currentTask.id}/resolve`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json',
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Update the header notification badge
-                    if (data.unread_count !== undefined) {
-                        window.dispatchEvent(new CustomEvent('notification-badge-update', {
-                            detail: { count: data.unread_count }
-                        }));
+                try {
+                    const response = await fetch(`/api/notifications/${this.currentTask.id}/resolve`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                        },
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Update the header notification badge
+                        if (data.unread_count !== undefined) {
+                            window.dispatchEvent(new CustomEvent('notification-badge-update', {
+                                detail: { count: data.unread_count }
+                            }));
+                        }
                     }
-                })
-                .catch(err => {
+                } catch (err) {
                     console.error('Task flow: Failed to resolve notification', err);
-                });
+                }
             }
             this.goToNext();
         },
