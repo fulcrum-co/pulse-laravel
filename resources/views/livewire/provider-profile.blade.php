@@ -1,11 +1,10 @@
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-    <!-- Back Link -->
-    <a href="{{ route('resources.index') }}?activeTab=providers" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-6">
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
-        Back to Providers
-    </a>
+    <!-- Breadcrumbs -->
+    <x-breadcrumbs :items="[
+        ['label' => 'Resources', 'url' => route('resources.index')],
+        ['label' => 'Providers', 'url' => route('resources.index') . '?activeTab=providers'],
+        ['label' => $provider->name],
+    ]" />
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <!-- Header -->
@@ -167,6 +166,7 @@
                     </button>
 
                     <!-- Primary CTA: Message Provider -->
+                    {{-- All provider communication must go through in-app messaging for security --}}
                     <button
                         wire:click="messageProvider"
                         class="inline-flex items-center px-6 py-3 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 transition-colors font-medium shadow-sm"
@@ -176,23 +176,6 @@
                         </svg>
                         Message Provider
                     </button>
-
-                    @if($provider->contact_email)
-                    <a href="mailto:{{ $provider->contact_email }}" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                        Send Email
-                    </a>
-                    @endif
-                    @if($provider->contact_phone)
-                    <a href="tel:{{ $provider->contact_phone }}" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                        </svg>
-                        {{ $provider->contact_phone }}
-                    </a>
-                    @endif
                 </div>
             </div>
         </div>

@@ -11,8 +11,8 @@
 @endphp
 
 @if($viewMode === 'grid')
-<div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-    <div class="p-4">
+<a href="{{ route('resources.providers.show', $provider) }}" class="block bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md hover:border-gray-300 transition-all h-full flex flex-col group">
+    <div class="p-4 flex-1">
         <div class="flex items-start justify-between gap-2 mb-3">
             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center text-purple-600 font-semibold text-sm flex-shrink-0">
                 {{ substr($provider->name, 0, 1) }}
@@ -23,7 +23,7 @@
         </div>
 
         <div class="flex items-center gap-1 mb-1">
-            <h3 class="font-medium text-gray-900 text-sm truncate">{{ $provider->name }}</h3>
+            <h3 class="font-medium text-gray-900 text-sm truncate group-hover:text-pulse-orange-600 transition-colors">{{ $provider->name }}</h3>
             @if($provider->verified_at)
             <x-icon name="check-badge" class="w-4 h-4 text-blue-500 flex-shrink-0" />
             @endif
@@ -44,7 +44,7 @@
         </div>
         @endif
 
-        <div class="flex items-center justify-between text-xs mb-3">
+        <div class="flex items-center justify-between text-xs">
             <div class="flex items-center gap-2">
                 @if($provider->serves_remote)
                 <span class="text-green-600">Remote</span>
@@ -62,31 +62,24 @@
         </div>
     </div>
 
-    <div class="px-4 py-2 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+    <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 mt-auto">
         @if($provider->hourly_rate)
-        <span class="text-xs text-gray-500">${{ number_format($provider->hourly_rate) }}/hr</span>
-        @else
-        <span></span>
+        <p class="text-xs text-gray-500 mb-2">${{ number_format($provider->hourly_rate) }}/hr</p>
         @endif
-        <div class="flex items-center gap-2">
-            <a href="{{ route('resources.providers.show', $provider) }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                View
-            </a>
-            <a href="{{ route('resources.providers.show', $provider) }}#connect" class="text-xs font-medium text-green-600 hover:text-green-700">
-                Message
-            </a>
-        </div>
+        <span class="block w-full text-center px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg group-hover:bg-pulse-orange-600 transition-colors">
+            View Profile
+        </span>
     </div>
-</div>
+</a>
 @else
-<div class="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-sm transition-shadow flex items-center gap-4">
+<a href="{{ route('resources.providers.show', $provider) }}" class="block bg-white rounded-lg border border-gray-200 p-3 hover:shadow-sm hover:border-gray-300 transition-all flex items-center gap-4 group">
     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center text-purple-600 font-semibold text-sm flex-shrink-0">
         {{ substr($provider->name, 0, 1) }}
     </div>
 
     <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2">
-            <h3 class="font-medium text-gray-900 text-sm truncate">{{ $provider->name }}</h3>
+            <h3 class="font-medium text-gray-900 text-sm truncate group-hover:text-pulse-orange-600 transition-colors">{{ $provider->name }}</h3>
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-800">
                 {{ ucfirst($provider->provider_type) }}
             </span>
@@ -116,8 +109,8 @@
         @endif
     </div>
 
-    <a href="{{ route('resources.providers.show', $provider) }}" class="ml-2 px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600">
-        View
-    </a>
-</div>
+    <span class="ml-2 px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded group-hover:bg-pulse-orange-600 transition-colors">
+        View Profile
+    </span>
+</a>
 @endif

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PHP-FPM Service
   app:
@@ -95,6 +93,25 @@ services:
     depends_on:
       - app
       - mongodb
+
+  # Reverb WebSocket Server (real-time notifications)
+  reverb:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: pulse-reverb
+    restart: unless-stopped
+    working_dir: /var/www
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080 --debug
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/var/www
+    networks:
+      - pulse-network
+    depends_on:
+      - app
+      - redis
 
 networks:
   pulse-network:

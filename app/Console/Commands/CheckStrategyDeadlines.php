@@ -3,8 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\Activity;
-use App\Models\Objective;
-use App\Models\StrategicPlan;
 use App\Models\UserNotification;
 use App\Services\NotificationDeliveryService;
 use App\Services\NotificationService;
@@ -21,7 +19,7 @@ class CheckStrategyDeadlines extends Command
     /**
      * The console command description.
      */
-    protected $description = 'Check for strategy activities and objectives due soon';
+    protected $description = 'Check for plan activities due within 4 hours';
 
     public function __construct(
         protected NotificationService $notificationService,
@@ -35,184 +33,137 @@ class CheckStrategyDeadlines extends Command
      */
     public function handle(): int
     {
-        $this->info('Checking strategy deadlines...');
+        $this->info('Checking plan activity deadlines...');
 
         $this->checkActivityDeadlines();
-        $this->checkObjectiveDeadlines();
 
-        $this->info('Strategy deadline check complete.');
+        $this->info('Plan deadline check complete.');
 
         return Command::SUCCESS;
     }
 
     /**
-     * Check activities due within 7 days.
+     * Check activities due within 4 hours.
      */
     protected function checkActivityDeadlines(): void
     {
+        $fourHoursFromNow = now()->addHours(4);
+
         $activitiesDueSoon = Activity::whereNotNull('end_date')
             ->where('end_date', '>', now())
-            ->where('end_date', '<=', now()->addDays(7))
-            ->whereNotIn('status', [Activity::STATUS_OFF_TRACK]) // Already at risk
-            ->with(['objective.focusArea.strategicPlan'])
+            ->where('end_date', '<=', $fourHoursFromNow)
+            ->whereIn('status', [Activity::STATUS_NOT_STARTED, Activity::STATUS_AT_RISK])
+            ->with(['objective.focusArea.strategicPlan.collaborators', 'assignee'])
             ->get();
 
-        $this->info("Found {$activitiesDueSoon->count()} activities due within 7 days");
+        $this->info("Found {$activitiesDueSoon->count()} activities due within 4 hours");
 
         foreach ($activitiesDueSoon as $activity) {
-            $plan = $activity->objective?->focusArea?->strategicPlan;
-
-            if (!$plan || !$plan->created_by) {
-                continue;
-            }
-
-            $daysRemaining = now()->diffInDays($activity->end_date, false);
-
-            // Only notify at key intervals: 7 days, 3 days, 1 day
-            if (!in_array($daysRemaining, [7, 3, 1])) {
-                continue;
-            }
-
-            $this->notifyActivityDue($activity, $plan, $daysRemaining);
+            $this->processActivityDeadline($activity);
         }
     }
 
     /**
-     * Check objectives due within 14 days.
+     * Process a single activity deadline.
      */
-    protected function checkObjectiveDeadlines(): void
+    protected function processActivityDeadline(Activity $activity): void
     {
-        $objectivesDueSoon = Objective::whereNotNull('end_date')
-            ->where('end_date', '>', now())
-            ->where('end_date', '<=', now()->addDays(14))
-            ->whereNotIn('status', [Objective::STATUS_OFF_TRACK])
-            ->with(['focusArea.strategicPlan'])
-            ->get();
+        $plan = $activity->objective?->focusArea?->strategicPlan;
 
-        $this->info("Found {$objectivesDueSoon->count()} objectives due within 14 days");
-
-        foreach ($objectivesDueSoon as $objective) {
-            $plan = $objective->focusArea?->strategicPlan;
-
-            if (!$plan || !$plan->created_by) {
-                continue;
-            }
-
-            $daysRemaining = now()->diffInDays($objective->end_date, false);
-
-            // Only notify at key intervals: 14 days, 7 days, 3 days
-            if (!in_array($daysRemaining, [14, 7, 3])) {
-                continue;
-            }
-
-            $this->notifyObjectiveDue($objective, $plan, $daysRemaining);
+        if (!$plan) {
+            return;
         }
-    }
 
-    /**
-     * Notify plan owner of activity due soon.
-     */
-    protected function notifyActivityDue(Activity $activity, StrategicPlan $plan, int $daysRemaining): void
-    {
-        $notification = $this->notificationService->notify(
-            $plan->created_by,
+        // Get users to notify: activity assignee + plan owner + plan collaborators
+        $userIds = collect([$activity->assigned_to, $plan->created_by])
+            ->merge($plan->collaborators?->pluck('user_id') ?? [])
+            ->unique()
+            ->filter()
+            ->toArray();
+
+        if (empty($userIds)) {
+            return;
+        }
+
+        // Deduplicate: check if we already notified within last 4 hours
+        $recentlyNotified = UserNotification::query()
+            ->whereIn('user_id', $userIds)
+            ->where('type', 'activity_due_soon')
+            ->where('notifiable_type', Activity::class)
+            ->where('notifiable_id', $activity->id)
+            ->where('created_at', '>=', now()->subHours(4))
+            ->pluck('user_id')
+            ->toArray();
+
+        $usersToNotify = array_diff($userIds, $recentlyNotified);
+
+        if (empty($usersToNotify)) {
+            $this->line("  Activity {$activity->id}: All users already notified recently");
+            return;
+        }
+
+        $hoursRemaining = now()->diffInHours($activity->end_date, false);
+
+        $this->line("  Activity {$activity->id}: Notifying " . count($usersToNotify) . " users (skipped " . count($recentlyNotified) . " already notified)");
+
+        // Create high priority notifications
+        $count = $this->notificationService->notifyMany(
+            $usersToNotify,
             UserNotification::CATEGORY_STRATEGY,
-            'strategy_action_due',
+            'activity_due_soon',
             [
-                'title' => "Activity Due: {$activity->title}",
-                'body' => $this->buildActivityDueMessage($activity, $daysRemaining),
+                'title' => "Activity due soon: {$activity->title}",
+                'body' => $this->buildActivityDueMessage($activity, $hoursRemaining),
                 'action_url' => route('strategies.show', $plan->id) . '#activity-' . $activity->id,
                 'action_label' => 'View Activity',
-                'icon' => 'calendar',
-                'priority' => $daysRemaining <= 3
-                    ? UserNotification::PRIORITY_HIGH
-                    : UserNotification::PRIORITY_NORMAL,
+                'icon' => 'clock',
+                'priority' => UserNotification::PRIORITY_HIGH,
                 'notifiable_type' => Activity::class,
                 'notifiable_id' => $activity->id,
                 'metadata' => [
                     'plan_id' => $plan->id,
                     'plan_title' => $plan->title,
-                    'days_remaining' => $daysRemaining,
+                    'hours_remaining' => $hoursRemaining,
                     'end_date' => $activity->end_date->toIso8601String(),
                 ],
             ]
         );
 
-        if ($notification) {
-            $this->deliveryService->deliver($notification);
+        // Dispatch multi-channel delivery
+        if ($count > 0) {
+            $notifications = UserNotification::where('type', 'activity_due_soon')
+                ->where('notifiable_type', Activity::class)
+                ->where('notifiable_id', $activity->id)
+                ->where('created_at', '>=', now()->subMinute())
+                ->get();
+
+            $this->deliveryService->deliverMany($notifications);
         }
 
-        $this->line("  Notified: Activity {$activity->id} due in {$daysRemaining} days");
-    }
-
-    /**
-     * Notify plan owner of objective due soon.
-     */
-    protected function notifyObjectiveDue(Objective $objective, StrategicPlan $plan, int $daysRemaining): void
-    {
-        $notification = $this->notificationService->notify(
-            $plan->created_by,
-            UserNotification::CATEGORY_STRATEGY,
-            'strategy_objective_due',
-            [
-                'title' => "Objective Due: {$objective->title}",
-                'body' => $this->buildObjectiveDueMessage($objective, $daysRemaining),
-                'action_url' => route('strategies.show', $plan->id) . '#objective-' . $objective->id,
-                'action_label' => 'View Objective',
-                'icon' => 'flag',
-                'priority' => $daysRemaining <= 7
-                    ? UserNotification::PRIORITY_HIGH
-                    : UserNotification::PRIORITY_NORMAL,
-                'notifiable_type' => Objective::class,
-                'notifiable_id' => $objective->id,
-                'metadata' => [
-                    'plan_id' => $plan->id,
-                    'plan_title' => $plan->title,
-                    'days_remaining' => $daysRemaining,
-                    'end_date' => $objective->end_date->toIso8601String(),
-                    'activity_count' => $objective->activities()->count(),
-                ],
-            ]
-        );
-
-        if ($notification) {
-            $this->deliveryService->deliver($notification);
-        }
-
-        $this->line("  Notified: Objective {$objective->id} due in {$daysRemaining} days");
+        Log::info('CheckStrategyDeadlines: Notified users of activity due soon', [
+            'activity_id' => $activity->id,
+            'plan_id' => $plan->id,
+            'notifications_created' => $count,
+            'skipped_already_notified' => count($recentlyNotified),
+            'hours_remaining' => $hoursRemaining,
+        ]);
     }
 
     /**
      * Build message for activity due notification.
      */
-    protected function buildActivityDueMessage(Activity $activity, int $daysRemaining): string
+    protected function buildActivityDueMessage(Activity $activity, int $hoursRemaining): string
     {
-        $timeText = $daysRemaining === 1 ? 'tomorrow' : "in {$daysRemaining} days";
-
-        $message = "This activity is due {$timeText}.";
+        if ($hoursRemaining <= 1) {
+            $message = 'This activity is due in less than an hour!';
+        } else {
+            $message = "This activity is due in about {$hoursRemaining} hours.";
+        }
 
         if ($activity->status === Activity::STATUS_NOT_STARTED) {
             $message .= ' It has not been started yet.';
-        }
-
-        return $message;
-    }
-
-    /**
-     * Build message for objective due notification.
-     */
-    protected function buildObjectiveDueMessage(Objective $objective, int $daysRemaining): string
-    {
-        $timeText = $daysRemaining <= 3 ? "in {$daysRemaining} days" : "in about {$daysRemaining} days";
-
-        $message = "This objective is due {$timeText}.";
-
-        $incompleteActivities = $objective->activities()
-            ->whereIn('status', [Activity::STATUS_NOT_STARTED, Activity::STATUS_AT_RISK, Activity::STATUS_OFF_TRACK])
-            ->count();
-
-        if ($incompleteActivities > 0) {
-            $message .= " {$incompleteActivities} activities still require attention.";
+        } elseif ($activity->status === Activity::STATUS_AT_RISK) {
+            $message .= ' It is currently at risk.';
         }
 
         return $message;

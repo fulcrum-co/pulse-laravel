@@ -127,97 +127,73 @@
                 <!-- Grid View - Hunhu Style Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     @foreach($providers as $provider)
-                        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-pulse-orange-300 transition-all group">
-                            <!-- Photo Area -->
-                            <div class="aspect-square bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center relative overflow-hidden">
-                                @if($provider->thumbnail_url)
-                                    <img
-                                        src="{{ $provider->thumbnail_url }}"
-                                        alt="{{ $provider->name }}"
-                                        class="w-full h-full object-cover"
-                                    >
-                                @else
-                                    <div class="w-24 h-24 rounded-full bg-purple-200 flex items-center justify-center">
-                                        <x-icon name="user" class="w-12 h-12 text-purple-500" />
+                        <a href="{{ route('resources.providers.show', $provider) }}"
+                           class="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-pulse-orange-300 transition-all flex flex-col h-full">
+                            <div class="p-5 flex-1">
+                                <!-- Header Row: Avatar + Name/Type -->
+                                <div class="flex items-start gap-4">
+                                    <div class="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                        @if($provider->thumbnail_url)
+                                            <img src="{{ $provider->thumbnail_url }}" alt="{{ $provider->name }}" class="w-14 h-14 object-cover">
+                                        @else
+                                            <x-icon name="user" class="w-7 h-7 text-purple-600" />
+                                        @endif
                                     </div>
-                                @endif
-
-                                <!-- Verified Badge -->
-                                @if($provider->isVerified())
-                                    <div class="absolute top-3 right-3">
-                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 shadow-sm">
-                                            <x-icon name="check-badge" class="w-3.5 h-3.5" />
-                                            Verified
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h3 class="text-base font-semibold text-gray-900 truncate group-hover:text-pulse-orange-600 transition-colors">
+                                                {{ $provider->name }}
+                                            </h3>
+                                            @if($provider->isVerified())
+                                                <x-icon name="check-badge" class="w-4 h-4 text-green-600 flex-shrink-0" />
+                                            @endif
+                                        </div>
+                                        @if($provider->credentials)
+                                            <p class="text-sm text-gray-500 truncate">{{ $provider->credentials }}</p>
+                                        @endif
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 mt-1">
+                                            {{ ucfirst($provider->provider_type) }}
                                         </span>
                                     </div>
-                                @endif
-                            </div>
-
-                            <!-- Card Content -->
-                            <div class="p-5">
-                                <!-- Name & Credentials -->
-                                <h3 class="text-lg font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">
-                                    {{ $provider->name }}
-                                </h3>
-                                @if($provider->credentials)
-                                    <p class="text-sm text-gray-500">{{ $provider->credentials }}</p>
-                                @endif
-
-                                <!-- Provider Type -->
-                                <div class="mt-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                                        {{ ucfirst($provider->provider_type) }}
-                                    </span>
                                 </div>
 
                                 <!-- Specialties -->
                                 @if($provider->specialty_areas && count($provider->specialty_areas) > 0)
-                                    <p class="text-sm text-gray-600 mt-3">
+                                    <p class="text-sm text-gray-600 mt-3 line-clamp-1">
                                         {{ implode(', ', array_slice($provider->specialty_areas, 0, 3)) }}
                                         @if(count($provider->specialty_areas) > 3)
-                                            <span class="text-gray-400">+{{ count($provider->specialty_areas) - 3 }} more</span>
+                                            <span class="text-gray-400">+{{ count($provider->specialty_areas) - 3 }}</span>
                                         @endif
                                     </p>
                                 @endif
 
-                                <!-- Bio Preview -->
+                                <!-- Bio -->
                                 @if($provider->bio)
                                     <p class="text-sm text-gray-500 mt-2 line-clamp-2">{{ $provider->bio }}</p>
                                 @endif
+                            </div>
 
-                                <!-- Location & Rating Row -->
-                                <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                                    <div class="flex items-center gap-2 text-xs text-gray-500">
-                                        @if($provider->serves_remote)
-                                            <span class="inline-flex items-center gap-1">
-                                                <x-icon name="globe-alt" class="w-3.5 h-3.5" />
-                                                Remote
-                                            </span>
-                                        @endif
-                                        @if($provider->serves_in_person)
-                                            <span class="inline-flex items-center gap-1">
-                                                <x-icon name="map-pin" class="w-3.5 h-3.5" />
-                                                In-Person
-                                            </span>
-                                        @endif
-                                    </div>
+                            <!-- Card Footer -->
+                            <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between mt-auto">
+                                <div class="flex items-center gap-3 text-xs text-gray-500">
+                                    @if($provider->serves_remote)
+                                        <span class="inline-flex items-center gap-1">
+                                            <x-icon name="globe-alt" class="w-3.5 h-3.5" />
+                                            Remote
+                                        </span>
+                                    @endif
                                     @if($provider->ratings_count > 0)
-                                        <span class="inline-flex items-center gap-1 text-xs font-medium text-yellow-700">
+                                        <span class="inline-flex items-center gap-1 font-medium text-yellow-700">
                                             <x-icon name="star" class="w-3.5 h-3.5 text-yellow-500" />
                                             {{ number_format($provider->ratings_average, 1) }}
                                         </span>
                                     @endif
                                 </div>
-
-                                <!-- View Profile Button -->
-                                <a
-                                    href="{{ route('resources.providers.show', $provider) }}"
-                                    class="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-                                >
-                                    View Profile
-                                </a>
+                                <span class="text-xs font-medium text-pulse-orange-600 group-hover:text-pulse-orange-700">
+                                    View Profile &rarr;
+                                </span>
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
 

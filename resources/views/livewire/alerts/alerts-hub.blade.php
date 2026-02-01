@@ -22,12 +22,28 @@
                 Alert Workflows
             </button>
         </nav>
+
+        {{-- Admin Announcement Button --}}
+        @if(auth()->user()->role === 'admin' && $tab === 'notifications')
+            <button
+                wire:click="$dispatch('openAnnouncementModal')"
+                class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+                <x-icon name="megaphone" class="w-4 h-4 mr-1.5" />
+                Create Announcement
+            </button>
+        @endif
     </div>
 
     <!-- Tab Content -->
     @if($tab === 'notifications')
-        <livewire:alerts.notification-center />
+        <livewire:alerts.notification-center wire:key="notification-center" />
     @else
-        <livewire:alerts.alerts-index />
+        <livewire:alerts.alerts-index wire:key="alerts-index" />
+    @endif
+
+    {{-- Admin Announcement Modal --}}
+    @if(auth()->user()->role === 'admin')
+        <livewire:alerts.create-announcement />
     @endif
 </div>

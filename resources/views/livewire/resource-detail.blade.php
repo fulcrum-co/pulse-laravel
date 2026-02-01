@@ -1,10 +1,14 @@
 <div class="space-y-6">
+    <!-- Breadcrumbs -->
+    <x-breadcrumbs :items="[
+        ['label' => 'Resources', 'url' => route('resources.index')],
+        ['label' => 'Content', 'url' => route('resources.index') . '?activeTab=content'],
+        ['label' => $resource->title],
+    ]" />
+
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="flex items-center gap-4">
-            <a href="{{ route('resources.index') }}" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                <x-icon name="arrow-left" class="w-5 h-5" />
-            </a>
             <div>
                 <div class="flex items-center gap-3">
                     <h1 class="text-xl font-semibold text-gray-900">{{ $resource->title }}</h1>

@@ -22,13 +22,64 @@ class NotificationCenter extends Component
     #[Url(except: '')]
     public string $categoryFilter = '';
 
+    #[Url(except: 'list')]
+    public string $viewMode = 'list'; // 'list', 'grouped', or 'table'
+
     public array $selected = [];
     public bool $showBulkActions = false;
 
-    protected $queryString = [
-        'search' => ['except' => ''],
-        'statusFilter' => ['except' => 'all_active'],
-        'categoryFilter' => ['except' => ''],
+    /**
+     * Set view mode explicitly.
+     */
+    public function setViewMode(string $mode): void
+    {
+        $this->viewMode = $mode;
+    }
+
+    /**
+     * Set status filter explicitly.
+     */
+    public function setStatusFilter(string $status): void
+    {
+        $this->statusFilter = $status;
+        $this->resetPage();
+        $this->selected = [];
+    }
+
+    /**
+     * Set category filter explicitly.
+     */
+    public function setCategoryFilter(string $category): void
+    {
+        $this->categoryFilter = $category;
+        $this->resetPage();
+        $this->selected = [];
+    }
+
+    /**
+     * Category labels for display.
+     */
+    protected array $categoryLabels = [
+        'workflow_alert' => 'Alert Workflows',
+        'survey' => 'Surveys',
+        'report' => 'Reports',
+        'strategy' => 'Plans',
+        'course' => 'Courses',
+        'collection' => 'Data Collections',
+        'system' => 'System',
+    ];
+
+    /**
+     * Category icons for display.
+     */
+    protected array $categoryIcons = [
+        'workflow_alert' => 'bolt',
+        'survey' => 'clipboard-document-list',
+        'report' => 'document-chart-bar',
+        'strategy' => 'clipboard-document-list',
+        'course' => 'academic-cap',
+        'collection' => 'circle-stack',
+        'system' => 'cog-6-tooth',
     ];
 
     public function updatingSearch(): void
@@ -119,6 +170,38 @@ class NotificationCenter extends Component
     }
 
     /**
+     * Get actionable notifications for task flow.
+     * Returns notifications that have an action_url and can be worked through.
+     */
+    public function getActionableNotificationsProperty(): array
+    {
+        try {
+            if (!Schema::hasTable('user_notifications')) {
+                return [];
+            }
+
+            return UserNotification::forUser(auth()->id())
+                ->unread()
+                ->notExpired()
+                ->whereNotNull('action_url')
+                ->where('action_url', '!=', '')
+                ->orderByPriorityAndDate()
+                ->limit(20)
+                ->get()
+                ->map(fn($n) => [
+                    'id' => $n->id,
+                    'title' => $n->title,
+                    'action_url' => $n->action_url,
+                    'category' => $n->category,
+                    'priority' => $n->priority,
+                ])
+                ->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
      * Get category counts for current filter.
      */
     public function getCategoryCountsProperty(): array
@@ -156,6 +239,73 @@ class NotificationCenter extends Component
                 ->groupBy('category')
                 ->pluck('count', 'category')
                 ->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Get notifications grouped by category with metadata.
+     */
+    public function getGroupedNotificationsProperty(): array
+    {
+        try {
+            if (!Schema::hasTable('user_notifications')) {
+                return [];
+            }
+
+            // Get all notifications (not paginated for grouping)
+            $user = auth()->user();
+
+            $query = UserNotification::forUser($user->id)
+                ->notExpired()
+                ->with('notifiable');
+
+            // Apply status filter
+            switch ($this->statusFilter) {
+                case 'unread':
+                    $query->unread();
+                    break;
+                case 'snoozed':
+                    $query->snoozed();
+                    break;
+                case 'resolved':
+                    $query->resolved();
+                    break;
+                case 'dismissed':
+                    $query->dismissed();
+                    break;
+                case 'all_active':
+                default:
+                    $query->active();
+                    break;
+            }
+
+            // Apply category filter
+            if ($this->categoryFilter) {
+                $query->byCategory($this->categoryFilter);
+            }
+
+            // Apply search
+            if ($this->search) {
+                $query->where(function ($q) {
+                    $q->where('title', 'like', '%' . $this->search . '%')
+                      ->orWhere('body', 'like', '%' . $this->search . '%');
+                });
+            }
+
+            $notifications = $query->orderByPriorityAndDate()->limit(100)->get();
+
+            // Group by category
+            return $notifications->groupBy('category')->map(function ($group, $category) {
+                return [
+                    'label' => $this->categoryLabels[$category] ?? ucfirst($category),
+                    'icon' => $this->categoryIcons[$category] ?? 'bell',
+                    'notifications' => $group,
+                    'unread_count' => $group->where('status', UserNotification::STATUS_UNREAD)->count(),
+                    'total_count' => $group->count(),
+                ];
+            })->toArray();
         } catch (\Exception $e) {
             return [];
         }
@@ -447,6 +597,7 @@ class NotificationCenter extends Component
     {
         return view('livewire.alerts.notification-center', [
             'notifications' => $this->notifications,
+            'groupedNotifications' => $this->viewMode === 'grouped' ? $this->groupedNotifications : [],
             'unreadCount' => $this->unreadCount,
             'categoryCounts' => $this->categoryCounts,
             'categories' => UserNotification::getCategories(),

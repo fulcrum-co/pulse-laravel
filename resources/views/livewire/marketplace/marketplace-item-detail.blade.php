@@ -2,18 +2,11 @@
     <!-- Header Banner -->
     <div class="bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-6 py-4">
-            <div class="flex items-center gap-4">
-                <a href="{{ route($this->categoryRoute) }}" class="text-gray-400 hover:text-gray-600">
-                    <x-icon name="chevron-left" class="w-5 h-5" />
-                </a>
-                <nav class="flex items-center gap-2 text-sm text-gray-500">
-                    <a href="{{ route('marketplace.index') }}" class="hover:text-gray-700">Marketplace</a>
-                    <span>/</span>
-                    <a href="{{ route($this->categoryRoute) }}" class="hover:text-gray-700">{{ $this->categoryLabel }}</a>
-                    <span>/</span>
-                    <span class="text-gray-900">{{ Str::limit($item->title, 30) }}</span>
-                </nav>
-            </div>
+            <x-breadcrumbs :items="[
+                ['label' => 'Marketplace', 'url' => route('marketplace.index')],
+                ['label' => $this->categoryLabel, 'url' => route($this->categoryRoute)],
+                ['label' => $item->title],
+            ]" />
         </div>
     </div>
 

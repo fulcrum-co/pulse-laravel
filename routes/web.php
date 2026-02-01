@@ -1,7 +1,11 @@
 <?php
 
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+
+// Register broadcast authentication routes
+Broadcast::routes(['middleware' => ['web', 'auth']]);
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContactNoteController;
@@ -14,6 +18,20 @@ use App\Http\Controllers\ObjectiveController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AlertController;
+use App\Http\Controllers\NotificationController;
+use App\Models\UserNotification;
+
+// Notification unsubscribe - signed URL, no auth required
+Route::get('/notifications/unsubscribe/{user}', [NotificationController::class, 'unsubscribe'])
+    ->name('notifications.unsubscribe')
+    ->middleware('signed');
+
+// Notification resolve API - for task flow
+Route::post('/api/notifications/{notification}/resolve', function (UserNotification $notification) {
+    abort_unless($notification->user_id === auth()->id(), 403);
+    $notification->resolve();
+    return response()->json(['success' => true]);
+})->middleware(['web', 'auth'])->name('notifications.resolve');
 
 // Root redirect to dashboard
 Route::get('/', function () {

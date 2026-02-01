@@ -6,11 +6,13 @@ use App\Events\SurveyCompleted;
 use App\Listeners\SurveyCompletedListener;
 use App\Models\Activity;
 use App\Models\CourseGenerationRequest;
+use App\Models\CustomReport;
 use App\Models\Objective;
 use App\Models\Survey;
 use App\Models\WorkflowExecution;
 use App\Observers\ActivityObserver;
 use App\Observers\CourseGenerationRequestObserver;
+use App\Observers\CustomReportObserver;
 use App\Observers\ObjectiveObserver;
 use App\Observers\SurveyObserver;
 use App\Observers\WorkflowExecutionObserver;
@@ -59,5 +61,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Course generation notifications (approval workflow)
         CourseGenerationRequest::observe(CourseGenerationRequestObserver::class);
+
+        // Report notifications (published, assigned)
+        CustomReport::observe(CustomReportObserver::class);
     }
 }

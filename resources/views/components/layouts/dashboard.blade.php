@@ -60,6 +60,9 @@
     </style>
     @livewireStyles
     @stack('styles')
+
+    {{-- Vite assets for Laravel Echo / real-time notifications --}}
+    @vite(['resources/js/app.js'])
 </head>
 <body class="bg-gray-50 {{ session('demo_role_override') && session('demo_role_override') !== 'actual' ? 'pt-10' : '' }}">
     @php
@@ -524,6 +527,12 @@
 
     <!-- Demo Role Switcher (for admins only) -->
     @livewire('demo-role-switcher')
+
+    <!-- Toast Notifications (real-time popups) -->
+    <x-toast-notifications />
+
+    <!-- Task Flow Bar (guided notification workflow) -->
+    <x-task-flow-bar />
 
     @livewireScripts
     @stack('scripts')

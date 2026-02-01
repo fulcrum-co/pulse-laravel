@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\NotificationCreated;
 use App\Models\UserNotification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -75,6 +76,9 @@ class NotificationService
 
         // Invalidate cache
         UserNotification::invalidateUnreadCountForUser($userId);
+
+        // Broadcast for real-time delivery
+        event(new NotificationCreated($notification));
 
         Log::info("NotificationService: Notification created", [
             'notification_id' => $notification->id,

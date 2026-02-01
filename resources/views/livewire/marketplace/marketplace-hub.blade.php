@@ -243,7 +243,7 @@
                                 </div>
                             @else
                                 <!-- Other categories as cards -->
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                     @foreach($searchResults[$key]['items'] as $item)
                                         @include('livewire.marketplace.partials.item-card', ['item' => $item])
                                     @endforeach
@@ -333,7 +333,7 @@
                             Featured
                         </h2>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         @foreach($featuredItems as $item)
                             @include('livewire.marketplace.partials.item-card', ['item' => $item, 'featured' => true])
                         @endforeach
@@ -350,7 +350,7 @@
                             Recently Added
                         </h2>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         @foreach($recentItems as $item)
                             @include('livewire.marketplace.partials.item-card', ['item' => $item])
                         @endforeach

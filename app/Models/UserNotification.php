@@ -23,6 +23,7 @@ class UserNotification extends Model
     public const CATEGORY_STRATEGY = 'strategy';
     public const CATEGORY_WORKFLOW_ALERT = 'workflow_alert';
     public const CATEGORY_COURSE = 'course';
+    public const CATEGORY_COLLECTION = 'collection';
     public const CATEGORY_SYSTEM = 'system';
 
     // Priority constants
@@ -99,8 +100,8 @@ class UserNotification extends Model
                 'color' => 'purple',
             ],
             self::CATEGORY_STRATEGY => [
-                'label' => 'Strategy',
-                'icon' => 'flag',
+                'label' => 'Plans',
+                'icon' => 'clipboard-document-list',
                 'color' => 'green',
             ],
             self::CATEGORY_WORKFLOW_ALERT => [
@@ -112,6 +113,11 @@ class UserNotification extends Model
                 'label' => 'Courses',
                 'icon' => 'academic-cap',
                 'color' => 'teal',
+            ],
+            self::CATEGORY_COLLECTION => [
+                'label' => 'Data Collections',
+                'icon' => 'circle-stack',
+                'color' => 'indigo',
             ],
             self::CATEGORY_SYSTEM => [
                 'label' => 'System',
@@ -277,7 +283,13 @@ class UserNotification extends Model
      */
     public function scopeOrderByPriorityAndDate(Builder $query): Builder
     {
-        return $query->orderByRaw("FIELD(priority, 'urgent', 'high', 'normal', 'low')")
+        // Use CASE for SQLite compatibility (FIELD is MySQL-only)
+        return $query->orderByRaw("CASE priority
+                WHEN 'urgent' THEN 1
+                WHEN 'high' THEN 2
+                WHEN 'normal' THEN 3
+                WHEN 'low' THEN 4
+                ELSE 5 END")
                      ->orderByDesc('created_at');
     }
 

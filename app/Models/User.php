@@ -20,6 +20,7 @@ class User extends Authenticatable
      * Each category has channel preferences (in_app, email, sms).
      */
     public const DEFAULT_NOTIFICATION_PREFERENCES = [
+        // Category-level preferences (backwards compatible)
         'workflow' => ['in_app' => true, 'email' => false, 'sms' => false],
         'workflow_custom' => ['in_app' => true, 'email' => false, 'sms' => false],
         'survey' => ['in_app' => true, 'email' => true, 'sms' => false],
@@ -28,7 +29,40 @@ class User extends Authenticatable
         'course' => ['in_app' => true, 'email' => true, 'sms' => false],
         'collection' => ['in_app' => true, 'email' => false, 'sms' => false],
         'system' => ['in_app' => true, 'email' => true, 'sms' => false],
-        'quiet_hours' => ['enabled' => false, 'start' => '21:00', 'end' => '07:00'],
+
+        // Priority-based channel config (Phase 4)
+        'channels' => [
+            'urgent' => ['in_app' => true, 'email' => true, 'sms' => true],
+            'high' => ['in_app' => true, 'email' => true, 'sms' => false],
+            'normal' => ['in_app' => true, 'email' => true, 'sms' => false],
+            'low' => ['in_app' => true, 'email' => false, 'sms' => false],
+        ],
+
+        // Per-type overrides - empty by default, users can disable specific types
+        'type_overrides' => [],
+
+        // Quiet hours settings
+        'quiet_hours' => [
+            'enabled' => false,
+            'start' => '21:00',
+            'end' => '07:00',
+            'timezone' => null,
+        ],
+
+        // Digest settings (Phase 4)
+        'digest' => [
+            'enabled' => true,
+            'frequency' => 'daily',
+            'day' => 'monday',
+            'time' => '07:00',
+            'suppress_individual_emails' => false,
+        ],
+
+        // Toast popup settings (Phase 4)
+        'toast' => [
+            'enabled' => true,
+            'priority_threshold' => 'low',
+        ],
     ];
 
     protected $fillable = [
@@ -414,10 +448,20 @@ class User extends Authenticatable
 
         $start = $quietHours['start'] ?? '21:00';
         $end = $quietHours['end'] ?? '07:00';
+        $timezone = $quietHours['timezone'] ?? null;
 
-        $now = Carbon::now();
-        $startTime = Carbon::parse($start);
-        $endTime = Carbon::parse($end);
+        // Use user's timezone if set, otherwise use server default
+        try {
+            $tz = $timezone ? new \DateTimeZone($timezone) : null;
+            $now = $tz ? Carbon::now($tz) : Carbon::now();
+            $startTime = Carbon::parse($start, $tz);
+            $endTime = Carbon::parse($end, $tz);
+        } catch (\Exception $e) {
+            // Fall back to server time if timezone is invalid
+            $now = Carbon::now();
+            $startTime = Carbon::parse($start);
+            $endTime = Carbon::parse($end);
+        }
 
         // Handle overnight quiet hours (e.g., 21:00 to 07:00)
         if ($startTime->gt($endTime)) {
@@ -450,9 +494,10 @@ class User extends Authenticatable
      * @param bool $enabled
      * @param string|null $start Time in HH:MM format
      * @param string|null $end Time in HH:MM format
+     * @param string|null $timezone IANA timezone (e.g., 'America/New_York')
      * @return bool
      */
-    public function setQuietHours(bool $enabled, ?string $start = null, ?string $end = null): bool
+    public function setQuietHours(bool $enabled, ?string $start = null, ?string $end = null, ?string $timezone = null): bool
     {
         $quietHours = [
             'enabled' => $enabled,
@@ -464,7 +509,236 @@ class User extends Authenticatable
         if ($end !== null) {
             $quietHours['end'] = $end;
         }
+        if ($timezone !== null) {
+            $quietHours['timezone'] = $timezone;
+        }
 
         return $this->updateNotificationPreferences(['quiet_hours' => $quietHours]);
+    }
+
+    // ==================== Phase 4: Priority-Based Channel Preferences ====================
+
+    /**
+     * Check if a channel is enabled for a specific priority level.
+     *
+     * @param string $priority urgent, high, normal, low
+     * @param string $channel in_app, email, sms
+     * @return bool
+     */
+    public function wantsChannelForPriority(string $priority, string $channel): bool
+    {
+        // in_app is always enabled
+        if ($channel === 'in_app') {
+            return true;
+        }
+
+        $prefs = $this->notification_preferences;
+        $channels = $prefs['channels'] ?? [];
+        $priorityConfig = $channels[$priority] ?? [];
+
+        return $priorityConfig[$channel] ?? false;
+    }
+
+    /**
+     * Get effective channel preference checking both priority and category.
+     * Priority-based config takes precedence if set.
+     *
+     * @param string $category Notification category
+     * @param string $priority Notification priority
+     * @param string $channel Delivery channel
+     * @return bool
+     */
+    public function getEffectiveChannelPreference(string $category, string $priority, string $channel): bool
+    {
+        // in_app is always enabled
+        if ($channel === 'in_app') {
+            return true;
+        }
+
+        // Check priority-based config first
+        if (!$this->wantsChannelForPriority($priority, $channel)) {
+            return false;
+        }
+
+        // Then check category-level preference
+        return $this->wantsNotificationVia($category, $channel);
+    }
+
+    // ==================== Phase 4: Type-Level Overrides ====================
+
+    /**
+     * Check if a specific notification type is disabled.
+     *
+     * @param string $type Notification type (e.g., 'survey_closing', 'workflow_triggered')
+     * @return bool True if disabled
+     */
+    public function isTypeDisabled(string $type): bool
+    {
+        $prefs = $this->notification_preferences;
+        $overrides = $prefs['type_overrides'] ?? [];
+
+        return isset($overrides[$type]) && $overrides[$type] === false;
+    }
+
+    /**
+     * Set a type-level override.
+     *
+     * @param string $type Notification type
+     * @param bool $enabled Whether the type should be enabled
+     * @return bool
+     */
+    public function setTypeOverride(string $type, bool $enabled): bool
+    {
+        $prefs = $this->notification_preferences;
+        $overrides = $prefs['type_overrides'] ?? [];
+        $overrides[$type] = $enabled;
+
+        return $this->updateNotificationPreferences(['type_overrides' => $overrides]);
+    }
+
+    /**
+     * Clear a type-level override (inherit from category).
+     *
+     * @param string $type Notification type
+     * @return bool
+     */
+    public function clearTypeOverride(string $type): bool
+    {
+        $prefs = $this->notification_preferences;
+        $overrides = $prefs['type_overrides'] ?? [];
+
+        if (isset($overrides[$type])) {
+            unset($overrides[$type]);
+            return $this->updateNotificationPreferences(['type_overrides' => $overrides]);
+        }
+
+        return true;
+    }
+
+    /**
+     * Get all type overrides.
+     *
+     * @return array
+     */
+    public function getTypeOverrides(): array
+    {
+        $prefs = $this->notification_preferences;
+        return $prefs['type_overrides'] ?? [];
+    }
+
+    // ==================== Phase 4: Digest Preferences ====================
+
+    /**
+     * Get digest settings.
+     *
+     * @return array
+     */
+    public function getDigestSettings(): array
+    {
+        $prefs = $this->notification_preferences;
+        return array_merge([
+            'enabled' => true,
+            'frequency' => 'daily',
+            'day' => 'monday',
+            'time' => '07:00',
+            'suppress_individual_emails' => false,
+        ], $prefs['digest'] ?? []);
+    }
+
+    /**
+     * Update digest settings.
+     *
+     * @param array $settings Digest settings to update
+     * @return bool
+     */
+    public function updateDigestSettings(array $settings): bool
+    {
+        return $this->updateNotificationPreferences(['digest' => $settings]);
+    }
+
+    /**
+     * Check if digest is enabled for a specific frequency.
+     *
+     * @param string $frequency 'daily' or 'weekly'
+     * @return bool
+     */
+    public function wantsDigest(string $frequency): bool
+    {
+        $settings = $this->getDigestSettings();
+
+        if (!($settings['enabled'] ?? false)) {
+            return false;
+        }
+
+        $userFrequency = $settings['frequency'] ?? 'daily';
+
+        // 'both' means both daily and weekly are enabled
+        if ($userFrequency === 'both') {
+            return true;
+        }
+
+        return $userFrequency === $frequency;
+    }
+
+    /**
+     * Check if individual emails should be suppressed when digest is active.
+     *
+     * @return bool
+     */
+    public function shouldSuppressIndividualEmails(): bool
+    {
+        $settings = $this->getDigestSettings();
+
+        return ($settings['enabled'] ?? false) && ($settings['suppress_individual_emails'] ?? false);
+    }
+
+    // ==================== Phase 4: Toast Preferences ====================
+
+    /**
+     * Get toast popup settings.
+     *
+     * @return array
+     */
+    public function getToastSettings(): array
+    {
+        $prefs = $this->notification_preferences;
+        return array_merge([
+            'enabled' => true,
+            'priority_threshold' => 'low',
+        ], $prefs['toast'] ?? []);
+    }
+
+    /**
+     * Update toast settings.
+     *
+     * @param array $settings Toast settings to update
+     * @return bool
+     */
+    public function updateToastSettings(array $settings): bool
+    {
+        return $this->updateNotificationPreferences(['toast' => $settings]);
+    }
+
+    /**
+     * Check if a toast should be shown for a given priority.
+     *
+     * @param string $priority Notification priority (low, normal, high, urgent)
+     * @return bool
+     */
+    public function shouldShowToast(string $priority): bool
+    {
+        $settings = $this->getToastSettings();
+
+        if (!($settings['enabled'] ?? true)) {
+            return false;
+        }
+
+        $threshold = $settings['priority_threshold'] ?? 'low';
+        $levels = ['low' => 0, 'normal' => 1, 'high' => 2, 'urgent' => 3];
+
+        $priorityLevel = $levels[$priority] ?? 1;
+        $thresholdLevel = $levels[$threshold] ?? 0;
+
+        return $priorityLevel >= $thresholdLevel;
     }
 }

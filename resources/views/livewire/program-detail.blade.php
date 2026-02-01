@@ -1,11 +1,10 @@
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-    <!-- Back Link -->
-    <a href="{{ route('resources.index') }}?activeTab=programs" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-6">
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
-        Back to Programs
-    </a>
+    <!-- Breadcrumbs -->
+    <x-breadcrumbs :items="[
+        ['label' => 'Resources', 'url' => route('resources.index')],
+        ['label' => 'Programs', 'url' => route('resources.index') . '?activeTab=programs'],
+        ['label' => $program->name],
+    ]" />
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <!-- Header -->

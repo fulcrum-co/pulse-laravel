@@ -15,9 +15,22 @@
         'green' => 'bg-green-100 text-green-600',
         'orange' => 'bg-orange-100 text-orange-600',
         'teal' => 'bg-teal-100 text-teal-600',
+        'indigo' => 'bg-indigo-100 text-indigo-600',
         'gray' => 'bg-gray-100 text-gray-600',
     ];
     $iconColor = $colorMap[$categoryInfo['color']] ?? 'bg-gray-100 text-gray-600';
+
+    // Color dot classes (can't use dynamic Tailwind classes)
+    $dotColorMap = [
+        'blue' => 'bg-blue-400',
+        'purple' => 'bg-purple-400',
+        'green' => 'bg-green-400',
+        'orange' => 'bg-orange-400',
+        'teal' => 'bg-teal-400',
+        'indigo' => 'bg-indigo-400',
+        'gray' => 'bg-gray-400',
+    ];
+    $dotColor = $dotColorMap[$categoryInfo['color']] ?? 'bg-gray-400';
 
     $priorityColors = [
         'high' => 'bg-amber-100 text-amber-700',
@@ -26,7 +39,7 @@
 @endphp
 
 <div
-    class="relative flex items-start gap-3 p-4 bg-white border border-gray-200 rounded-lg transition-all {{ $isUnread ? 'ring-1 ring-pulse-orange-200 bg-pulse-orange-50/30' : '' }} {{ $selected ? 'ring-2 ring-pulse-orange-500' : '' }} hover:shadow-sm"
+    class="relative flex items-start gap-3 p-4 bg-white border border-gray-200 rounded-lg transition-all cursor-pointer {{ $isUnread ? 'ring-1 ring-pulse-orange-200 bg-pulse-orange-50/30' : '' }} {{ $selected ? 'ring-2 ring-pulse-orange-500' : '' }} hover:shadow-sm"
     wire:click="markAsRead({{ $notification->id }})"
 >
     <!-- Selection Checkbox -->
@@ -77,7 +90,7 @@
                 <!-- Meta: Category + Timestamp -->
                 <div class="mt-1.5 flex items-center gap-3 text-xs text-gray-400">
                     <span class="inline-flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-{{ $categoryInfo['color'] }}-400"></span>
+                        <span class="w-1.5 h-1.5 rounded-full {{ $dotColor }}"></span>
                         {{ $categoryInfo['label'] }}
                     </span>
                     <span>{{ $notification->created_at->diffForHumans() }}</span>
@@ -105,6 +118,7 @@
                 <!-- Overflow Menu -->
                 <div class="relative" x-data="{ open: false }">
                     <button
+                        type="button"
                         @click.stop="open = !open"
                         class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
                     >

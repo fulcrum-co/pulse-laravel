@@ -1,12 +1,11 @@
 <div class="min-h-screen bg-gray-50">
     <div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <!-- Back Link -->
-        <a href="{{ route('resources.index') }}?activeTab=courses" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-6">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-            Back to Courses
-        </a>
+        <!-- Breadcrumbs -->
+        <x-breadcrumbs :items="[
+            ['label' => 'Resources', 'url' => route('resources.index')],
+            ['label' => 'Courses', 'url' => route('resources.index') . '?activeTab=courses'],
+            ['label' => $course->title],
+        ]" />
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Main Content Area -->
