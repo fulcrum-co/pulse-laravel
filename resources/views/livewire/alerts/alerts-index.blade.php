@@ -1,98 +1,50 @@
 <div class="space-y-4">
-    <!-- Tab Toggle -->
-    <div class="flex items-center justify-between border-b border-gray-200">
-        <nav class="flex gap-6">
-            <button
-                wire:click="setActiveTab('notifications')"
-                class="relative py-3 text-sm font-medium border-b-2 -mb-px transition-colors {{ $activeTab === 'notifications' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}"
-            >
-                Notifications
-                @if($notificationCount > 0)
-                    <span class="ml-2 px-2 py-0.5 text-xs rounded-full {{ $activeTab === 'notifications' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-gray-100 text-gray-600' }}">
-                        {{ $notificationCount }}
-                    </span>
-                @endif
-            </button>
-            <button
-                wire:click="setActiveTab('workflows')"
-                class="py-3 text-sm font-medium border-b-2 -mb-px transition-colors {{ $activeTab === 'workflows' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}"
-            >
-                Alert Workflows
-            </button>
-        </nav>
-
-        <!-- Create Button (only on workflows tab) -->
-        @if($activeTab === 'workflows')
-            <a href="{{ route('alerts.create') }}" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors">
-                <x-icon name="plus" class="w-4 h-4 mr-1.5" />
-                Create Alert
-            </a>
-        @endif
-    </div>
-
     <!-- Search, Filters & View Toggle -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-1">
             <!-- Search -->
             <div class="relative w-full sm:w-64">
-                <x-icon name="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <x-icon name="magnifying-glass" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="{{ $activeTab === 'notifications' ? 'Search by workflow name...' : 'Search alerts...' }}"
+                    placeholder="Search alerts..."
                     class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 />
             </div>
 
-            <!-- Tab-specific Filters -->
-            @if($activeTab === 'notifications')
-                <select
-                    wire:model.live="notificationStatusFilter"
-                    class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                >
-                    <option value="">All Statuses</option>
-                    @foreach($executionStatuses as $value => $label)
-                        <option value="{{ $value }}">{{ $label }}</option>
-                    @endforeach
-                </select>
+            <!-- Status Filter -->
+            <select
+                wire:model.live="statusFilter"
+                class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+            >
+                <option value="">All Statuses</option>
+                @foreach($statuses as $value => $label)
+                    <option value="{{ $value }}">{{ $label }}</option>
+                @endforeach
+            </select>
 
-                @if($search || $notificationStatusFilter)
-                    <button wire:click="clearFilters" class="text-sm text-gray-500 hover:text-gray-700">
-                        Clear
-                    </button>
-                @endif
-            @else
-                <select
-                    wire:model.live="statusFilter"
-                    class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                >
-                    <option value="">All Statuses</option>
-                    @foreach($statuses as $value => $label)
-                        <option value="{{ $value }}">{{ $label }}</option>
-                    @endforeach
-                </select>
+            <!-- Trigger Type Filter -->
+            <select
+                wire:model.live="triggerTypeFilter"
+                class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+            >
+                <option value="">All Triggers</option>
+                @foreach($triggerTypes as $value => $label)
+                    <option value="{{ $value }}">{{ $label }}</option>
+                @endforeach
+            </select>
 
-                <select
-                    wire:model.live="triggerTypeFilter"
-                    class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                >
-                    <option value="">All Triggers</option>
-                    @foreach($triggerTypes as $value => $label)
-                        <option value="{{ $value }}">{{ $label }}</option>
-                    @endforeach
-                </select>
-
-                @if($search || $statusFilter || $triggerTypeFilter)
-                    <button wire:click="clearFilters" class="text-sm text-gray-500 hover:text-gray-700">
-                        Clear
-                    </button>
-                @endif
+            @if($search || $statusFilter || $triggerTypeFilter)
+                <button wire:click="clearFilters" class="text-sm text-gray-500 hover:text-gray-700">
+                    Clear
+                </button>
             @endif
         </div>
 
         <!-- View Toggle & Bulk Actions -->
         <div class="flex items-center gap-3">
-            @if($activeTab === 'workflows' && count($selected) > 0)
+            @if(count($selected) > 0)
                 <div class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5">
                     <span class="text-sm text-red-700">{{ count($selected) }} selected</span>
                     <button wire:click="deselectAll" class="text-xs text-red-600 hover:text-red-800 underline">Clear</button>
@@ -100,7 +52,7 @@
                         Delete Selected
                     </button>
                 </div>
-            @elseif($activeTab === 'workflows')
+            @else
                 <button wire:click="selectAll" class="text-xs text-gray-500 hover:text-gray-700">Select All</button>
             @endif
 
@@ -130,12 +82,8 @@
         </div>
     </div>
 
-    <!-- Tab Content -->
-    @if($activeTab === 'notifications')
-        @include('livewire.alerts.partials.notifications-content')
-    @else
-        @include('livewire.alerts.partials.workflows-content')
-    @endif
+    <!-- Workflows Content -->
+    @include('livewire.alerts.partials.workflows-content')
 
     <!-- Delete Confirmation Modal -->
     @if($showDeleteModal)
