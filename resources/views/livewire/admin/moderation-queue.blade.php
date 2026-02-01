@@ -234,8 +234,10 @@
                                     </span>
                                 </div>
                                 <p class="text-sm text-gray-500 mb-2">{{ class_basename($result->moderatable_type) }}</p>
-                                @if($result->flags && count($result->flags) > 0)
-                                    <p class="text-sm text-red-600 line-clamp-1">{{ is_array($result->flags) ? current($result->flags) : $result->flags }}</p>
+                                @if($result->flags && is_array($result->flags) && count($result->flags) > 0)
+                                    <p class="text-sm text-red-600 line-clamp-1">{{ current($result->flags) }}</p>
+                                @elseif($result->flags && is_string($result->flags))
+                                    <p class="text-sm text-red-600 line-clamp-1">{{ $result->flags }}</p>
                                 @endif
                             </div>
 
@@ -306,8 +308,10 @@
                         <h3 class="font-medium text-gray-900 line-clamp-2 mb-1">{{ $result->moderatable?->title ?? 'Unknown Content' }}</h3>
                         <p class="text-xs text-gray-500 mb-2">{{ class_basename($result->moderatable_type) }} &middot; {{ $result->created_at->diffForHumans() }}</p>
 
-                        @if($result->flags && count($result->flags) > 0)
-                            <p class="text-xs text-red-600 line-clamp-1 mb-3">{{ is_array($result->flags) ? current($result->flags) : $result->flags }}</p>
+                        @if($result->flags && is_array($result->flags) && count($result->flags) > 0)
+                            <p class="text-xs text-red-600 line-clamp-1 mb-3">{{ current($result->flags) }}</p>
+                        @elseif($result->flags && is_string($result->flags))
+                            <p class="text-xs text-red-600 line-clamp-1 mb-3">{{ $result->flags }}</p>
                         @endif
 
                         <div class="flex items-center justify-between pt-3 border-t border-gray-100">
@@ -381,8 +385,10 @@
                                 @endif
                                 <td class="px-4 py-3">
                                     <div class="text-sm font-medium text-gray-900 truncate max-w-xs">{{ $result->moderatable?->title ?? 'Unknown Content' }}</div>
-                                    @if($result->flags && count($result->flags) > 0)
-                                        <div class="text-xs text-red-500 truncate max-w-xs">{{ is_array($result->flags) ? current($result->flags) : $result->flags }}</div>
+                                    @if($result->flags && is_array($result->flags) && count($result->flags) > 0)
+                                        <div class="text-xs text-red-500 truncate max-w-xs">{{ current($result->flags) }}</div>
+                                    @elseif($result->flags && is_string($result->flags))
+                                        <div class="text-xs text-red-500 truncate max-w-xs">{{ $result->flags }}</div>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3">
