@@ -147,13 +147,7 @@
             </div>
 
             <div class="flex items-center gap-3">
-                {{-- Quick Actions --}}
-                <a href="{{ route('admin.moderation.task-flow') }}"
-                   class="flex items-center gap-2 px-3 py-1.5 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors"
-                   title="Start reviewing items in task flow mode">
-                    <x-icon name="play" class="w-4 h-4" />
-                    Start Reviewing
-                </a>
+                {{-- Dashboard Link --}}
                 <a href="{{ route('admin.moderation.dashboard') }}"
                    class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                    title="View moderation dashboard and analytics">
@@ -161,10 +155,9 @@
                     Dashboard
                 </a>
 
-                <div class="w-px h-6 bg-gray-200"></div>
-
                 {{-- Bulk Actions --}}
                 @if($canAssign && count($selectedItems) > 0)
+                    <div class="w-px h-6 bg-gray-200"></div>
                     <span class="text-sm text-gray-500 mr-2">{{ count($selectedItems) }} selected</span>
                     <button wire:click="bulkAssign" class="px-3 py-1.5 text-sm font-medium text-pulse-orange-600 bg-pulse-orange-50 hover:bg-pulse-orange-100 rounded-lg" title="Assign selected items to a moderator">
                         Assign
@@ -174,8 +167,10 @@
                     </button>
                 @endif
 
+                <div class="w-px h-6 bg-gray-200"></div>
+
                 {{-- View Toggle --}}
-                <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden ml-2">
+                <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                     <button
                         wire:click="$set('viewMode', 'list')"
                         class="p-2 {{ ($viewMode ?? 'list') === 'list' ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}"
@@ -198,6 +193,14 @@
                         <x-icon name="table-cells" class="w-4 h-4" />
                     </button>
                 </div>
+
+                {{-- Start Reviewing Button (far right) --}}
+                <a href="{{ route('admin.moderation.task-flow') }}"
+                   class="flex items-center gap-2 px-3 py-1.5 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors"
+                   title="Start reviewing items in task flow mode">
+                    <x-icon name="play" class="w-4 h-4" />
+                    Start Reviewing
+                </a>
             </div>
         </div>
 
@@ -234,10 +237,16 @@
                                     </span>
                                 </div>
                                 <p class="text-sm text-gray-500 mb-2">{{ class_basename($result->moderatable_type) }}</p>
-                                @if($result->flags && is_array($result->flags) && count($result->flags) > 0)
-                                    <p class="text-sm text-red-600 line-clamp-1">{{ current($result->flags) }}</p>
-                                @elseif($result->flags && is_string($result->flags))
-                                    <p class="text-sm text-red-600 line-clamp-1">{{ $result->flags }}</p>
+                                @php
+                                    $displayFlags = null;
+                                    if ($result->flags && is_array($result->flags) && count($result->flags) > 0) {
+                                        $displayFlags = current($result->flags);
+                                    } elseif ($result->flags && is_string($result->flags) && !in_array($result->flags, ['', '[]', 'null'])) {
+                                        $displayFlags = $result->flags;
+                                    }
+                                @endphp
+                                @if($displayFlags)
+                                    <p class="text-sm text-red-600 line-clamp-1">{{ $displayFlags }}</p>
                                 @endif
                             </div>
 
@@ -308,10 +317,16 @@
                         <h3 class="font-medium text-gray-900 line-clamp-2 mb-1">{{ $result->moderatable?->title ?? 'Unknown Content' }}</h3>
                         <p class="text-xs text-gray-500 mb-2">{{ class_basename($result->moderatable_type) }} &middot; {{ $result->created_at->diffForHumans() }}</p>
 
-                        @if($result->flags && is_array($result->flags) && count($result->flags) > 0)
-                            <p class="text-xs text-red-600 line-clamp-1 mb-3">{{ current($result->flags) }}</p>
-                        @elseif($result->flags && is_string($result->flags))
-                            <p class="text-xs text-red-600 line-clamp-1 mb-3">{{ $result->flags }}</p>
+                        @php
+                            $gridDisplayFlags = null;
+                            if ($result->flags && is_array($result->flags) && count($result->flags) > 0) {
+                                $gridDisplayFlags = current($result->flags);
+                            } elseif ($result->flags && is_string($result->flags) && !in_array($result->flags, ['', '[]', 'null'])) {
+                                $gridDisplayFlags = $result->flags;
+                            }
+                        @endphp
+                        @if($gridDisplayFlags)
+                            <p class="text-xs text-red-600 line-clamp-1 mb-3">{{ $gridDisplayFlags }}</p>
                         @endif
 
                         <div class="flex items-center justify-between pt-3 border-t border-gray-100">
@@ -385,10 +400,16 @@
                                 @endif
                                 <td class="px-4 py-3">
                                     <div class="text-sm font-medium text-gray-900 truncate max-w-xs">{{ $result->moderatable?->title ?? 'Unknown Content' }}</div>
-                                    @if($result->flags && is_array($result->flags) && count($result->flags) > 0)
-                                        <div class="text-xs text-red-500 truncate max-w-xs">{{ current($result->flags) }}</div>
-                                    @elseif($result->flags && is_string($result->flags))
-                                        <div class="text-xs text-red-500 truncate max-w-xs">{{ $result->flags }}</div>
+                                    @php
+                                        $tableDisplayFlags = null;
+                                        if ($result->flags && is_array($result->flags) && count($result->flags) > 0) {
+                                            $tableDisplayFlags = current($result->flags);
+                                        } elseif ($result->flags && is_string($result->flags) && !in_array($result->flags, ['', '[]', 'null'])) {
+                                            $tableDisplayFlags = $result->flags;
+                                        }
+                                    @endphp
+                                    @if($tableDisplayFlags)
+                                        <div class="text-xs text-red-500 truncate max-w-xs">{{ $tableDisplayFlags }}</div>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3">

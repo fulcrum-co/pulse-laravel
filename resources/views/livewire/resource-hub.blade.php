@@ -1,163 +1,86 @@
-<div class="flex">
-    <!-- Left Filter Sidebar -->
-    <div class="w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-140px)] p-4 flex-shrink-0">
-        <!-- Search -->
+<div class="flex gap-6">
+    {{-- Left Sidebar --}}
+    <div class="w-64 flex-shrink-0">
+        {{-- Search --}}
+        <div class="relative mb-6">
+            <x-icon name="magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+                type="text"
+                wire:model.live.debounce.300ms="search"
+                placeholder="Search resources..."
+                class="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+            >
+            @if($search)
+                <button wire:click="clearSearch" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    <x-icon name="x-mark" class="w-4 h-4" />
+                </button>
+            @endif
+        </div>
+
+        {{-- Category Filter --}}
         <div class="mb-6">
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <x-icon name="magnifying-glass" class="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                    type="text"
-                    wire:model.live.debounce.300ms="search"
-                    placeholder="Search resources..."
-                    class="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                >
-                @if($search)
-                    <button
-                        wire:click="clearSearch"
-                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                    >
-                        <x-icon name="x-mark" class="h-4 w-4" />
-                    </button>
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</h3>
+                @if(count($selectedCategories) > 0)
+                    <button wire:click="clearCategories" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700">Clear</button>
                 @endif
             </div>
-        </div>
-
-        <!-- Category Filter -->
-        <div class="mb-6">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</h3>
-                <div class="flex items-center gap-2">
-                    <button
-                        wire:click="selectAllCategories"
-                        class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700"
-                    >
-                        All
-                    </button>
-                    <span class="text-gray-300">|</span>
-                    <button
-                        wire:click="clearCategories"
-                        class="text-xs text-gray-500 hover:text-gray-700"
-                    >
-                        Clear
-                    </button>
-                </div>
-            </div>
-            <div class="space-y-2">
-                <label class="flex items-center gap-2 cursor-pointer group">
-                    <input
-                        type="checkbox"
-                        wire:click="toggleCategory('content')"
-                        @checked(in_array('content', $selectedCategories))
-                        class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
-                    >
-                    <span class="text-sm text-gray-700 group-hover:text-gray-900 flex items-center gap-2">
-                        <x-icon name="document-text" class="w-4 h-4 text-blue-500" />
-                        Content
-                    </span>
+            <div class="space-y-1">
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="checkbox" wire:click="toggleCategory('content')" @checked(in_array('content', $selectedCategories)) class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
+                    <x-icon name="document-text" class="w-4 h-4 text-blue-500" />
+                    <span class="text-sm text-gray-700">Content</span>
                 </label>
-                <label class="flex items-center gap-2 cursor-pointer group">
-                    <input
-                        type="checkbox"
-                        wire:click="toggleCategory('provider')"
-                        @checked(in_array('provider', $selectedCategories))
-                        class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
-                    >
-                    <span class="text-sm text-gray-700 group-hover:text-gray-900 flex items-center gap-2">
-                        <x-icon name="users" class="w-4 h-4 text-purple-500" />
-                        Providers
-                    </span>
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="checkbox" wire:click="toggleCategory('provider')" @checked(in_array('provider', $selectedCategories)) class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
+                    <x-icon name="users" class="w-4 h-4 text-purple-500" />
+                    <span class="text-sm text-gray-700">Providers</span>
                 </label>
-                <label class="flex items-center gap-2 cursor-pointer group">
-                    <input
-                        type="checkbox"
-                        wire:click="toggleCategory('program')"
-                        @checked(in_array('program', $selectedCategories))
-                        class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
-                    >
-                    <span class="text-sm text-gray-700 group-hover:text-gray-900 flex items-center gap-2">
-                        <x-icon name="building-office" class="w-4 h-4 text-green-500" />
-                        Programs
-                    </span>
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="checkbox" wire:click="toggleCategory('program')" @checked(in_array('program', $selectedCategories)) class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
+                    <x-icon name="building-office" class="w-4 h-4 text-green-500" />
+                    <span class="text-sm text-gray-700">Programs</span>
                 </label>
-                <label class="flex items-center gap-2 cursor-pointer group">
-                    <input
-                        type="checkbox"
-                        wire:click="toggleCategory('course')"
-                        @checked(in_array('course', $selectedCategories))
-                        class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
-                    >
-                    <span class="text-sm text-gray-700 group-hover:text-gray-900 flex items-center gap-2">
-                        <x-icon name="academic-cap" class="w-4 h-4 text-orange-500" />
-                        Courses
-                    </span>
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="checkbox" wire:click="toggleCategory('course')" @checked(in_array('course', $selectedCategories)) class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
+                    <x-icon name="academic-cap" class="w-4 h-4 text-orange-500" />
+                    <span class="text-sm text-gray-700">Courses</span>
                 </label>
             </div>
         </div>
 
-        <!-- Content Type Filter (shown only when Content is selected) -->
+        {{-- Content Type Filter (shown only when Content is selected) --}}
         @if(in_array('content', $selectedCategories))
             <div class="mb-6">
-                <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center justify-between mb-2">
                     <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Content Type</h3>
-                    <div class="flex items-center gap-2">
-                        <button
-                            wire:click="selectAllContentTypes"
-                            class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700"
-                        >
-                            All
-                        </button>
-                        <span class="text-gray-300">|</span>
-                        <button
-                            wire:click="clearContentTypes"
-                            class="text-xs text-gray-500 hover:text-gray-700"
-                        >
-                            Clear
-                        </button>
-                    </div>
+                    @if(count($selectedContentTypes) > 0)
+                        <button wire:click="clearContentTypes" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700">Clear</button>
+                    @endif
                 </div>
-                <div class="space-y-2">
+                <div class="space-y-1">
                     @foreach($contentTypes as $value => $label)
-                        <label class="flex items-center gap-2 cursor-pointer group">
-                            <input
-                                type="checkbox"
-                                wire:click="toggleContentType('{{ $value }}')"
-                                @checked(in_array($value, $selectedContentTypes))
-                                class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
-                            >
-                            <span class="text-sm text-gray-700 group-hover:text-gray-900">{{ $label }}</span>
+                        <label class="flex items-center gap-2 py-1 cursor-pointer">
+                            <input type="checkbox" wire:click="toggleContentType('{{ $value }}')" @checked(in_array($value, $selectedContentTypes)) class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
+                            <span class="text-sm text-gray-700">{{ $label }}</span>
                         </label>
                     @endforeach
                 </div>
             </div>
         @endif
 
-        <!-- Sort -->
-        <div class="mb-6">
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Sort By</h3>
-            <select
-                wire:model.live="sortBy"
-                class="w-full text-sm border-gray-300 rounded-lg focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-            >
+        {{-- Sort By --}}
+        <div>
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Sort By</h3>
+            <select wire:model.live="sortBy" class="w-full text-sm border border-gray-300 rounded-lg py-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
                 <option value="recent">Recently Added</option>
                 <option value="alphabetical">Alphabetical</option>
             </select>
         </div>
-
-        <!-- Clear All Filters -->
-        @if($hasActiveFilters)
-            <button
-                wire:click="clearFilters"
-                class="w-full text-sm text-pulse-orange-600 hover:text-pulse-orange-700 font-medium"
-            >
-                Clear all filters
-            </button>
-        @endif
     </div>
 
-    <!-- Main Content Area -->
-    <div class="flex-1 p-6">
+    {{-- Main Content --}}
+    <div class="flex-1 min-w-0">
         @if($isSearching && count($searchResults) > 0)
             <!-- Search Results -->
             <div class="space-y-10">
@@ -367,46 +290,167 @@
             <!-- Recently Added -->
             @if($recentItems->count() > 0)
                 <div>
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                            <x-icon name="clock" class="w-6 h-6 text-gray-400" />
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                            <x-icon name="clock" class="w-5 h-5 text-gray-400" />
                             Recently Added
+                            <span class="text-sm font-normal text-gray-500">({{ $recentItems->count() }} items)</span>
                         </h2>
+                        {{-- View Toggle --}}
+                        <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                            <button
+                                wire:click="$set('viewMode', 'list')"
+                                class="p-2 {{ $viewMode === 'list' ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}"
+                                title="List view"
+                            >
+                                <x-icon name="list-bullet" class="w-4 h-4" />
+                            </button>
+                            <button
+                                wire:click="$set('viewMode', 'grid')"
+                                class="p-2 border-l border-gray-200 {{ $viewMode === 'grid' ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}"
+                                title="Grid view"
+                            >
+                                <x-icon name="squares-2x2" class="w-4 h-4" />
+                            </button>
+                            <button
+                                wire:click="$set('viewMode', 'table')"
+                                class="p-2 border-l border-gray-200 {{ $viewMode === 'table' ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}"
+                                title="Table view"
+                            >
+                                <x-icon name="table-cells" class="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        @foreach($recentItems as $item)
-                            <a href="{{ $item['url'] }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all">
-                                <div class="flex items-start gap-3">
-                                    @php
-                                        $bgColor = match($item['icon_bg']) {
-                                            'blue' => 'bg-blue-100',
-                                            'purple' => 'bg-purple-100',
-                                            'green' => 'bg-green-100',
-                                            'orange' => 'bg-orange-100',
-                                            default => 'bg-gray-100',
-                                        };
-                                        $textColor = match($item['icon_bg']) {
-                                            'blue' => 'text-blue-600',
-                                            'purple' => 'text-purple-600',
-                                            'green' => 'text-green-600',
-                                            'orange' => 'text-orange-600',
-                                            default => 'text-gray-600',
-                                        };
-                                    @endphp
+
+                    {{-- GRID VIEW --}}
+                    @if($viewMode === 'grid')
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            @foreach($recentItems as $item)
+                                @php
+                                    $bgColor = match($item['icon_bg']) {
+                                        'blue' => 'bg-blue-100',
+                                        'purple' => 'bg-purple-100',
+                                        'green' => 'bg-green-100',
+                                        'orange' => 'bg-orange-100',
+                                        default => 'bg-gray-100',
+                                    };
+                                    $textColor = match($item['icon_bg']) {
+                                        'blue' => 'text-blue-600',
+                                        'purple' => 'text-purple-600',
+                                        'green' => 'text-green-600',
+                                        'orange' => 'text-orange-600',
+                                        default => 'text-gray-600',
+                                    };
+                                @endphp
+                                <a href="{{ $item['url'] }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 rounded-lg {{ $bgColor }} flex items-center justify-center flex-shrink-0">
+                                            <x-icon name="{{ $item['icon'] }}" class="w-5 h-5 {{ $textColor }}" />
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <h3 class="text-sm font-medium text-gray-900 truncate">{{ $item['title'] }}</h3>
+                                            <p class="text-xs text-gray-500 mt-0.5">{{ $item['subtitle'] }}</p>
+                                            @if(isset($item['description']) && $item['description'])
+                                                <p class="text-xs text-gray-400 mt-1 line-clamp-2">{{ Str::limit($item['description'], 60) }}</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    {{-- LIST VIEW --}}
+                    @if($viewMode === 'list')
+                        <div class="space-y-3">
+                            @foreach($recentItems as $item)
+                                @php
+                                    $bgColor = match($item['icon_bg']) {
+                                        'blue' => 'bg-blue-100',
+                                        'purple' => 'bg-purple-100',
+                                        'green' => 'bg-green-100',
+                                        'orange' => 'bg-orange-100',
+                                        default => 'bg-gray-100',
+                                    };
+                                    $textColor = match($item['icon_bg']) {
+                                        'blue' => 'text-blue-600',
+                                        'purple' => 'text-purple-600',
+                                        'green' => 'text-green-600',
+                                        'orange' => 'text-orange-600',
+                                        default => 'text-gray-600',
+                                    };
+                                @endphp
+                                <a href="{{ $item['url'] }}" class="flex items-center gap-4 bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all">
                                     <div class="w-10 h-10 rounded-lg {{ $bgColor }} flex items-center justify-center flex-shrink-0">
                                         <x-icon name="{{ $item['icon'] }}" class="w-5 h-5 {{ $textColor }}" />
                                     </div>
-                                    <div class="min-w-0 flex-1">
-                                        <h3 class="text-sm font-medium text-gray-900 truncate">{{ $item['title'] }}</h3>
-                                        <p class="text-xs text-gray-500 mt-0.5">{{ $item['subtitle'] }}</p>
-                                        @if(isset($item['description']) && $item['description'])
-                                            <p class="text-xs text-gray-400 mt-1 line-clamp-2">{{ Str::limit($item['description'], 60) }}</p>
-                                        @endif
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="text-sm font-medium text-gray-900">{{ $item['title'] }}</h3>
+                                        <p class="text-xs text-gray-500">{{ $item['subtitle'] }}</p>
                                     </div>
-                                </div>
-                            </a>
-                        @endforeach
-                    </div>
+                                    @if(isset($item['description']) && $item['description'])
+                                        <p class="hidden md:block text-sm text-gray-500 max-w-md truncate">{{ Str::limit($item['description'], 80) }}</p>
+                                    @endif
+                                    <x-icon name="chevron-right" class="w-5 h-5 text-gray-400 flex-shrink-0" />
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    {{-- TABLE VIEW --}}
+                    @if($viewMode === 'table')
+                        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Description</th>
+                                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    @foreach($recentItems as $item)
+                                        @php
+                                            $bgColor = match($item['icon_bg']) {
+                                                'blue' => 'bg-blue-100',
+                                                'purple' => 'bg-purple-100',
+                                                'green' => 'bg-green-100',
+                                                'orange' => 'bg-orange-100',
+                                                default => 'bg-gray-100',
+                                            };
+                                            $textColor = match($item['icon_bg']) {
+                                                'blue' => 'text-blue-600',
+                                                'purple' => 'text-purple-600',
+                                                'green' => 'text-green-600',
+                                                'orange' => 'text-orange-600',
+                                                default => 'text-gray-600',
+                                            };
+                                        @endphp
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-4 py-3">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-8 h-8 rounded-lg {{ $bgColor }} flex items-center justify-center flex-shrink-0">
+                                                        <x-icon name="{{ $item['icon'] }}" class="w-4 h-4 {{ $textColor }}" />
+                                                    </div>
+                                                    <span class="text-sm font-medium text-gray-900">{{ $item['title'] }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <span class="text-sm text-gray-500">{{ $item['subtitle'] }}</span>
+                                            </td>
+                                            <td class="px-4 py-3 hidden md:table-cell">
+                                                <span class="text-sm text-gray-500 truncate max-w-xs block">{{ Str::limit($item['description'] ?? '', 50) }}</span>
+                                            </td>
+                                            <td class="px-4 py-3 text-right">
+                                                <a href="{{ $item['url'] }}" class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">View</a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
                 </div>
             @endif
 

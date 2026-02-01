@@ -50,6 +50,9 @@
         }
     </script>
     <style>
+        /* Hide elements with x-cloak until Alpine initializes */
+        [x-cloak] { display: none !important; }
+
         /* Smooth sidebar transition */
         .sidebar-transition {
             transition: width 0.2s ease-in-out;
@@ -58,7 +61,7 @@
             transition: opacity 0.15s ease-in-out;
         }
     </style>
-    @livewireStyles
+    {{-- Livewire styles auto-injected via config inject_assets=true --}}
     @stack('styles')
 
     {{-- Vite assets for Laravel Echo / real-time notifications --}}
@@ -66,8 +69,8 @@
 </head>
 <body class="bg-gray-50 {{ session('demo_role_override') && session('demo_role_override') !== 'actual' ? 'pt-10' : '' }}">
     @php
-        // Force sidebar collapsed on canvas-focused pages (Resources, Marketplace)
-        $forceCollapsed = request()->is('resources') || request()->is('marketplace');
+        // Force sidebar collapsed on canvas-focused pages (Resources, Marketplace, Moderation)
+        $forceCollapsed = request()->is('resources') || request()->is('marketplace') || request()->is('admin/moderation*');
     @endphp
     <div x-data="{
             sidebarCollapsed: {{ $forceCollapsed ? 'true' : "localStorage.getItem('sidebarCollapsed') === 'true'" }},
@@ -271,11 +274,35 @@
                 <div @mouseenter="hoveredItem = 'resource'" @mouseleave="hoveredItem = null" class="relative">
                     <a href="/resources"
                        :class="sidebarCollapsed ? 'justify-center' : ''"
-                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('resources*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('resources*') && !request()->is('*/moderation*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <x-icon name="book-open" class="w-5 h-5 flex-shrink-0" />
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Resource</span>
                     </a>
                     <div x-show="sidebarCollapsed && hoveredItem === 'resource'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Resource</div>
+                </div>
+                @endif
+
+                @if(RolePermissions::currentUserCanAccess('moderation'))
+                <!-- Moderation -->
+                @php
+                    $moderationCount = \App\Models\ContentModerationResult::where('org_id', auth()->user()->org_id)->needsReview()->count();
+                @endphp
+                <div @mouseenter="hoveredItem = 'moderation'" @mouseleave="hoveredItem = null" class="relative">
+                    <a href="{{ route('admin.moderation') }}"
+                       :class="sidebarCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->is('admin/moderation*') ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <x-icon name="shield-check" class="w-5 h-5 flex-shrink-0" />
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium sidebar-content-transition">Moderation</span>
+                        @if($moderationCount > 0)
+                        <span x-show="!sidebarCollapsed" class="ml-auto inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-pulse-orange-500 rounded-full">{{ $moderationCount > 99 ? '99+' : $moderationCount }}</span>
+                        @endif
+                    </a>
+                    <div x-show="sidebarCollapsed && hoveredItem === 'moderation'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50 flex items-center gap-2">
+                        Moderation
+                        @if($moderationCount > 0)
+                        <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-gray-900 bg-pulse-orange-400 rounded-full">{{ $moderationCount > 99 ? '99+' : $moderationCount }}</span>
+                        @endif
+                    </div>
                 </div>
                 @endif
 
@@ -513,6 +540,12 @@
                             <x-icon name="light-bulb" class="w-4 h-4 mr-2" />
                             Learn More
                         </a>
+                    @elseif(request()->is('admin/moderation*'))
+                        <!-- Add Content Button for Moderation -->
+                        <a href="{{ route('resources.courses.index') }}" class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
+                            <x-icon name="plus" class="w-4 h-4 mr-2" />
+                            Add Content
+                        </a>
                     @endif
                 </div>
             </header>
@@ -534,7 +567,7 @@
     <!-- Task Flow Bar (guided notification workflow) -->
     <x-task-flow-bar />
 
-    @livewireScripts
+    {{-- Livewire scripts auto-injected via config inject_assets=true --}}
     @stack('scripts')
 </body>
 </html>

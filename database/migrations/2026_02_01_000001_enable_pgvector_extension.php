@@ -10,6 +10,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // pgvector only works with PostgreSQL - skip for other databases
+        if (DB::connection()->getDriverName() !== 'pgsql') {
+            return;
+        }
+
         // Enable pgvector extension for PostgreSQL
         // This is required for storing and querying vector embeddings
         DB::statement('CREATE EXTENSION IF NOT EXISTS vector');

@@ -28,29 +28,28 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $isPostgres = DB::connection()->getDriverName() === 'pgsql';
+
         foreach ($this->tables as $table) {
             if (Schema::hasTable($table)) {
-                Schema::table($table, function (Blueprint $table) {
-                    // Add embedding column using raw SQL for vector type
-                    // Laravel's schema builder doesn't natively support pgvector
-                });
-
-                // Add embedding column with vector type
-                DB::statement("ALTER TABLE {$table} ADD COLUMN IF NOT EXISTS embedding vector({$this->dimensions})");
-
-                // Add metadata columns
-                Schema::table($table, function (Blueprint $table) {
-                    if (!Schema::hasColumn($table->getTable(), 'embedding_generated_at')) {
-                        $table->timestamp('embedding_generated_at')->nullable();
+                // Add metadata columns (works on all databases)
+                Schema::table($table, function (Blueprint $blueprint) use ($table) {
+                    if (!Schema::hasColumn($table, 'embedding_generated_at')) {
+                        $blueprint->timestamp('embedding_generated_at')->nullable();
                     }
-                    if (!Schema::hasColumn($table->getTable(), 'embedding_model')) {
-                        $table->string('embedding_model', 50)->nullable();
+                    if (!Schema::hasColumn($table, 'embedding_model')) {
+                        $blueprint->string('embedding_model', 50)->nullable();
                     }
                 });
 
-                // Create index for approximate nearest neighbor search
-                // Using IVFFlat index which is good for medium-sized datasets
-                DB::statement("CREATE INDEX IF NOT EXISTS {$table}_embedding_idx ON {$table} USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)");
+                // pgvector-specific columns and indexes (PostgreSQL only)
+                if ($isPostgres) {
+                    // Add embedding column with vector type
+                    DB::statement("ALTER TABLE {$table} ADD COLUMN IF NOT EXISTS embedding vector({$this->dimensions})");
+
+                    // Create index for approximate nearest neighbor search
+                    DB::statement("CREATE INDEX IF NOT EXISTS {$table}_embedding_idx ON {$table} USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)");
+                }
             }
         }
     }
@@ -60,17 +59,20 @@ return new class extends Migration
      */
     public function down(): void
     {
+        $isPostgres = DB::connection()->getDriverName() === 'pgsql';
+
         foreach ($this->tables as $table) {
             if (Schema::hasTable($table)) {
-                // Drop indexes first
-                DB::statement("DROP INDEX IF EXISTS {$table}_embedding_idx");
+                // Drop pgvector columns/indexes (PostgreSQL only)
+                if ($isPostgres) {
+                    DB::statement("DROP INDEX IF EXISTS {$table}_embedding_idx");
+                    DB::statement("ALTER TABLE {$table} DROP COLUMN IF EXISTS embedding");
+                }
 
-                // Drop columns
-                Schema::table($table, function (Blueprint $table) {
-                    $table->dropColumn(['embedding_generated_at', 'embedding_model']);
+                // Drop metadata columns
+                Schema::table($table, function (Blueprint $blueprint) {
+                    $blueprint->dropColumn(['embedding_generated_at', 'embedding_model']);
                 });
-
-                DB::statement("ALTER TABLE {$table} DROP COLUMN IF EXISTS embedding");
             }
         }
     }

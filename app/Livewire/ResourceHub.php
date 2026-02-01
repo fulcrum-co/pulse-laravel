@@ -15,12 +15,14 @@ class ResourceHub extends Component
     public array $selectedCategories = [];
     public array $selectedContentTypes = [];
     public string $sortBy = 'recent';
+    public string $viewMode = 'grid';
 
     protected $queryString = [
         'search' => ['except' => ''],
         'selectedCategories' => ['except' => [], 'as' => 'category'],
         'selectedContentTypes' => ['except' => [], 'as' => 'type'],
         'sortBy' => ['except' => 'recent', 'as' => 'sort'],
+        'viewMode' => ['except' => 'grid', 'as' => 'view'],
     ];
 
     public function updatedSearch(): void
