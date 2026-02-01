@@ -80,7 +80,14 @@
     <!-- Notes List -->
     <div class="space-y-4">
         @forelse($notes as $note)
-        <div class="p-4 border border-gray-200 rounded-lg {{ $note->is_private ? 'bg-yellow-50 border-yellow-200' : '' }}">
+        <div
+            @can('update', $note)
+                @if($editingNoteId !== $note->id)
+                    wire:click="startEdit({{ $note->id }})"
+                @endif
+            @endcan
+            class="p-4 border border-gray-200 rounded-lg {{ $note->is_private ? 'bg-yellow-50 border-yellow-200' : '' }} @can('update', $note) {{ $editingNoteId !== $note->id ? 'cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all' : '' }} @endcan"
+        >
             <!-- Header -->
             <div class="flex items-start justify-between mb-2">
                 <div class="flex items-center gap-3">
@@ -111,7 +118,7 @@
 
                     <!-- Actions -->
                     @can('update', $note)
-                    <div class="relative" x-data="{ open: false }">
+                    <div class="relative" x-data="{ open: false }" @click.stop>
                         <button @click="open = !open" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
@@ -128,7 +135,7 @@
 
             <!-- Content -->
             @if($editingNoteId === $note->id)
-            <div class="mt-3">
+            <div class="mt-3" @click.stop>
                 <textarea wire:model="editContent" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
                 <div class="flex gap-2 mt-2">
                     <x-button wire:click="updateNote" variant="primary" size="small">Save</x-button>
@@ -141,7 +148,7 @@
 
             <!-- Voice Memo Player -->
             @if($note->is_voice_memo && $note->audio_file_path)
-            <div class="mt-3 p-3 bg-gray-100 rounded-lg">
+            <div class="mt-3 p-3 bg-gray-100 rounded-lg" @click.stop>
                 <div class="flex items-center gap-3">
                     <button class="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
