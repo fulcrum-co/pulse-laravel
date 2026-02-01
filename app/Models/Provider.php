@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Provider extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Searchable;
 
     // Provider types
     public const TYPE_THERAPIST = 'therapist';
@@ -316,5 +317,36 @@ class Provider extends Model
             return '$' . number_format($this->hourly_rate, 2) . '/hr';
         }
         return null;
+    }
+
+    /**
+     * Get the indexable data array for the model (Meilisearch).
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'org_id' => $this->org_id,
+            'display_name' => $this->getDisplayNameAttribute(),
+            'name' => $this->name,
+            'bio' => $this->bio,
+            'provider_type' => $this->provider_type,
+            'specialties' => $this->specialty_areas ?? [],
+            'credentials' => $this->credentials,
+            'is_verified' => $this->verified_at !== null,
+            'serves_remote' => (bool) $this->serves_remote,
+            'serves_in_person' => (bool) $this->serves_in_person,
+            'is_active' => (bool) $this->active,
+            'avg_rating' => $this->ratings_average,
+            'created_at' => $this->created_at?->getTimestamp(),
+        ];
+    }
+
+    /**
+     * Determine if the model should be searchable.
+     */
+    public function shouldBeSearchable(): bool
+    {
+        return !$this->trashed() && $this->active;
     }
 }

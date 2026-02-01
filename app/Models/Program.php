@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Program extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Searchable;
 
     // Program types
     public const TYPE_THERAPY = 'therapy';
@@ -361,5 +362,35 @@ class Program extends Model
         }
 
         return true;
+    }
+
+    /**
+     * Get the indexable data array for the model (Meilisearch).
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'org_id' => $this->org_id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'program_type' => $this->program_type,
+            'target_needs' => $this->target_needs ?? [],
+            'eligibility_criteria' => $this->eligibility_criteria ?? [],
+            'cost_structure' => $this->cost_structure,
+            'location_type' => $this->location_type,
+            'is_active' => (bool) $this->active,
+            'has_availability' => $this->hasAvailability(),
+            'start_date' => $this->start_date?->getTimestamp(),
+            'created_at' => $this->created_at?->getTimestamp(),
+        ];
+    }
+
+    /**
+     * Determine if the model should be searchable.
+     */
+    public function shouldBeSearchable(): bool
+    {
+        return !$this->trashed() && $this->active;
     }
 }

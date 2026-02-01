@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ContentBlock extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Searchable;
 
     // Block types
     public const TYPE_VIDEO = 'video';
@@ -347,5 +348,39 @@ class ContentBlock extends Model
         $remainingSeconds = $seconds % 60;
 
         return sprintf('%d:%02d', $minutes, $remainingSeconds);
+    }
+
+    /**
+     * Get the indexable data array for the model (Meilisearch).
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'org_id' => $this->org_id,
+            'title' => $this->title,
+            'description' => $this->description,
+            'block_type' => $this->block_type,
+            'source_type' => $this->source_type,
+            'status' => $this->status,
+            'topics' => $this->topics ?? [],
+            'skills' => $this->skills ?? [],
+            'grade_levels' => $this->grade_levels ?? [],
+            'subject_areas' => $this->subject_areas ?? [],
+            'target_risk_factors' => $this->target_risk_factors ?? [],
+            'iep_appropriate' => (bool) $this->iep_appropriate,
+            'language' => $this->language ?? 'en',
+            'usage_count' => $this->usage_count ?? 0,
+            'avg_rating' => $this->avg_rating,
+            'created_at' => $this->created_at?->getTimestamp(),
+        ];
+    }
+
+    /**
+     * Determine if the model should be searchable.
+     */
+    public function shouldBeSearchable(): bool
+    {
+        return !$this->trashed() && $this->status === self::STATUS_ACTIVE;
     }
 }

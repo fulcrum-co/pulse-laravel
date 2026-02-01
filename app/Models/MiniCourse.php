@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class MiniCourse extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Searchable;
 
     // Course types
     public const TYPE_INTERVENTION = 'intervention';
@@ -589,5 +590,52 @@ class MiniCourse extends Model
             self::TARGET_DEPARTMENT => 'Department',
             self::TARGET_CONTACT_LIST => 'Contact List',
         ];
+    }
+
+    /**
+     * Get the indexable data array for the model (Meilisearch).
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'org_id' => $this->org_id,
+            'title' => $this->title,
+            'description' => $this->description,
+            'objectives' => is_array($this->objectives) ? implode(' ', $this->objectives) : $this->objectives,
+            'rationale' => $this->rationale,
+            'course_type' => $this->course_type,
+            'creation_source' => $this->creation_source,
+            'status' => $this->status,
+            'target_grades' => $this->target_grades ?? [],
+            'target_risk_levels' => $this->target_risk_levels ?? [],
+            'target_needs' => $this->target_needs ?? [],
+            'is_template' => (bool) $this->is_template,
+            'is_public' => (bool) $this->is_public,
+            'approval_status' => $this->approval_status,
+            'estimated_duration_minutes' => $this->estimated_duration_minutes,
+            'calculated_duration_minutes' => $this->getCalculatedDuration(),
+            'created_at' => $this->created_at?->getTimestamp(),
+            'updated_at' => $this->updated_at?->getTimestamp(),
+        ];
+    }
+
+    /**
+     * Determine if the model should be searchable.
+     */
+    public function shouldBeSearchable(): bool
+    {
+        // Don't index deleted or draft courses (unless they're templates)
+        if ($this->trashed()) {
+            return false;
+        }
+
+        // Templates should be searchable even if draft
+        if ($this->is_template) {
+            return true;
+        }
+
+        // Only index active courses
+        return $this->status === self::STATUS_ACTIVE;
     }
 }

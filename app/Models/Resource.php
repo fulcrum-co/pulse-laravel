@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Resource extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Searchable;
 
     protected $fillable = [
         'org_id',
@@ -148,5 +149,36 @@ class Resource extends Model
     public function scopeForOrganization($query, int $orgId)
     {
         return $query->where('org_id', $orgId);
+    }
+
+    /**
+     * Get the indexable data array for the model (Meilisearch).
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'org_id' => $this->org_id,
+            'title' => $this->title,
+            'description' => $this->description,
+            'resource_type' => $this->resource_type,
+            'category' => $this->category,
+            'tags' => $this->tags ?? [],
+            'target_grades' => $this->target_grades ?? [],
+            'target_risk_levels' => $this->target_risk_levels ?? [],
+            'is_active' => (bool) $this->active,
+            'is_public' => (bool) $this->is_public,
+            'estimated_duration_minutes' => $this->estimated_duration_minutes,
+            'created_at' => $this->created_at?->getTimestamp(),
+            'updated_at' => $this->updated_at?->getTimestamp(),
+        ];
+    }
+
+    /**
+     * Determine if the model should be searchable.
+     */
+    public function shouldBeSearchable(): bool
+    {
+        return !$this->trashed() && $this->active;
     }
 }
