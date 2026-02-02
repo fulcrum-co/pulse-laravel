@@ -7,11 +7,20 @@ use App\Models\HelpCategory;
 use App\Models\PageHelpHint;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 #[Layout('components.layouts.dashboard')]
 class HelpAdminDashboard extends Component
 {
+    #[Url]
+    public string $view = 'grid';
+
+    public function setView(string $view): void
+    {
+        $this->view = $view;
+    }
+
     #[Computed]
     public function stats()
     {
@@ -51,6 +60,24 @@ class HelpAdminDashboard extends Component
             ->where('is_published', true)
             ->orderBy('view_count', 'desc')
             ->limit(5)
+            ->get();
+    }
+
+    #[Computed]
+    public function allArticles()
+    {
+        return HelpArticle::whereNull('org_id')
+            ->with('category')
+            ->orderBy('updated_at', 'desc')
+            ->get();
+    }
+
+    #[Computed]
+    public function categories()
+    {
+        return HelpCategory::whereNull('org_id')
+            ->withCount('articles')
+            ->orderBy('sort_order')
             ->get();
     }
 
