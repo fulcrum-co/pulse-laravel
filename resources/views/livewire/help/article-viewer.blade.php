@@ -1,0 +1,127 @@
+<div class="max-w-4xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6">
+        <ol class="flex items-center gap-2 text-sm">
+            <li>
+                <a href="{{ route('help.index') }}" class="text-gray-500 hover:text-purple-600">Help Center</a>
+            </li>
+            @if($article->category)
+            <li class="text-gray-400">/</li>
+            <li>
+                <a href="{{ route('help.category', $article->category->slug) }}" class="text-gray-500 hover:text-purple-600">
+                    {{ $article->category->name }}
+                </a>
+            </li>
+            @endif
+            <li class="text-gray-400">/</li>
+            <li class="text-gray-900 font-medium truncate">{{ $article->title }}</li>
+        </ol>
+    </nav>
+
+    <!-- Article Content -->
+    <article class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-8">
+            <!-- Header -->
+            <header class="mb-8">
+                @if($article->is_featured)
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 mb-3">
+                    Featured
+                </span>
+                @endif
+                <h1 class="text-3xl font-bold text-gray-900">{{ $article->title }}</h1>
+                <div class="mt-4 flex items-center gap-4 text-sm text-gray-500">
+                    <span class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {{ $article->getReadingTimeMinutes() }} min read
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        {{ number_format($article->view_count) }} views
+                    </span>
+                    @if($article->published_at)
+                    <span>Updated {{ $article->published_at->diffForHumans() }}</span>
+                    @endif
+                </div>
+            </header>
+
+            <!-- Video (if available) -->
+            @if($article->video_url)
+            <div class="mb-8 aspect-video rounded-lg overflow-hidden bg-gray-100">
+                <iframe
+                    src="{{ $article->video_url }}"
+                    class="w-full h-full"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                ></iframe>
+            </div>
+            @endif
+
+            <!-- Content -->
+            <div class="prose prose-purple max-w-none">
+                {!! \Illuminate\Support\Str::markdown($article->content) !!}
+            </div>
+        </div>
+
+        <!-- Feedback Section -->
+        <div class="border-t border-gray-200 px-8 py-6 bg-gray-50">
+            <div class="flex items-center justify-between">
+                <p class="text-sm text-gray-600">Was this article helpful?</p>
+                <div class="flex items-center gap-3">
+                    <button
+                        wire:click="markHelpful(true)"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-green-50 hover:border-green-300 hover:text-green-700 transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                        </svg>
+                        Yes ({{ $article->helpful_count }})
+                    </button>
+                    <button
+                        wire:click="markHelpful(false)"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
+                        </svg>
+                        No ({{ $article->not_helpful_count }})
+                    </button>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- Related Articles -->
+    @if($relatedArticles->isNotEmpty())
+    <section class="mt-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Related Articles</h2>
+        <div class="grid gap-4 md:grid-cols-3">
+            @foreach($relatedArticles as $related)
+            <a href="{{ route('help.article', $related->slug) }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-purple-300 transition-all">
+                <h3 class="font-medium text-gray-900 hover:text-purple-600">{{ $related->title }}</h3>
+                <p class="mt-1 text-sm text-gray-500 line-clamp-2">{{ $related->excerpt }}</p>
+            </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    <!-- Contact Support -->
+    <div class="mt-8 p-6 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl text-center">
+        <p class="text-gray-700">Still need help?</p>
+        <button
+            @click="$dispatch('open-support-modal', { context: 'help-article' })"
+            class="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
+        >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            Contact Support
+        </button>
+    </div>
+</div>

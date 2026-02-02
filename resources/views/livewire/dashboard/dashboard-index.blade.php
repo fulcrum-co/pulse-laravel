@@ -1,9 +1,9 @@
 <div>
     <!-- Dashboard Header -->
-    <div class="mb-6">
+    <div class="mb-6" data-help="dashboard-header">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <!-- Dashboard Selector -->
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3" data-help="dashboard-selector">
                 <div class="relative" x-data="{ open: false }">
                     <button
                         @click="open = !open"
@@ -79,9 +79,9 @@
             </div>
 
             <!-- Actions Bar -->
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2" data-help="dashboard-actions">
                 <!-- Date Range Picker -->
-                <div class="flex items-center gap-1 bg-white border border-gray-300 rounded-lg p-1">
+                <div class="flex items-center gap-1 bg-white border border-gray-300 rounded-lg p-1" data-help="date-range">
                     <button
                         wire:click="setDateRange('week')"
                         class="px-3 py-1.5 text-sm rounded-md {{ $dateRange === 'week' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100' }}"
@@ -171,7 +171,7 @@
     </div>
 
     <!-- Widgets Grid -->
-    <div class="grid grid-cols-12 gap-6">
+    <div class="grid grid-cols-12 gap-6" data-help="widgets-grid">
         @forelse($widgets as $widget)
             @php
                 $position = $widget->position ?? ['w' => 4, 'h' => 2];

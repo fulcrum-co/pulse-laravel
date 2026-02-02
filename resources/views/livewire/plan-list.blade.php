@@ -1,7 +1,7 @@
 <div>
     {{-- Search & Filters --}}
-    <div class="mb-4 flex items-center gap-2">
-        <div class="relative flex-1 max-w-xs">
+    <div class="mb-4 flex items-center gap-2" data-help="plan-filters">
+        <div class="relative flex-1 max-w-xs" data-help="search-plans">
             <x-icon name="search" class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input type="text" wire:model.live.debounce.300ms="search"
                 class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
@@ -64,7 +64,7 @@
 
     {{-- Grid View --}}
     @elseif($viewMode === 'grid')
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3" data-help="plan-list">
             @foreach($plans as $plan)
                 <a href="{{ route('plans.show', $plan) }}" class="block bg-white rounded border border-gray-200 p-3 hover:border-pulse-orange-300 hover:shadow-sm transition-all group">
                     <div class="flex items-start justify-between mb-2">
@@ -107,7 +107,7 @@
 
     {{-- List View --}}
     @else
-        <div class="bg-white rounded border border-gray-200 divide-y divide-gray-100">
+        <div class="bg-white rounded border border-gray-200 divide-y divide-gray-100" data-help="plan-list">
             @foreach($plans as $plan)
                 <a href="{{ route('plans.show', $plan) }}" class="flex items-center px-3 py-2.5 hover:bg-gray-50 transition-colors group">
                     <div class="flex-1 min-w-0">

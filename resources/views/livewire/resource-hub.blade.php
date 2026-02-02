@@ -1,8 +1,8 @@
 <div class="flex gap-6">
     {{-- Left Sidebar --}}
-    <div class="w-64 flex-shrink-0">
+    <div class="w-64 flex-shrink-0" data-help="resource-filters">
         {{-- Search --}}
-        <div class="relative mb-6">
+        <div class="relative mb-6" data-help="search-resources">
             <x-icon name="magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
                 type="text"
@@ -233,7 +233,7 @@
             </div>
         @else
             <!-- Category Cards (3-column layout to fit with sidebar) -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" data-help="resource-categories">
                 <!-- Content Card -->
                 <a href="{{ route('resources.content.index') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
                     <div class="flex flex-col items-center text-center gap-2">

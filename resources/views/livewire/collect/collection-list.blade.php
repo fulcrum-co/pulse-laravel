@@ -1,8 +1,8 @@
 <div class="space-y-4">
     <!-- Search, Filters & View Toggle -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" data-help="collection-filters">
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-1">
-            <div class="relative w-full sm:w-64">
+            <div class="relative w-full sm:w-64" data-help="search-collections">
                 <x-icon name="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                     type="text"
@@ -88,7 +88,7 @@
 
     <!-- Grid View -->
     @elseif($viewMode === 'grid')
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" data-help="collection-list">
             @foreach($collections as $collection)
                 @php
                     $statusColor = match($collection->status) {

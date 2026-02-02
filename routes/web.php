@@ -739,6 +739,26 @@ Route::middleware('auth')->group(function () {
         return view('settings.index');
     })->name('settings.index');
 
+    // Help Center
+    Route::prefix('help')->name('help.')->group(function () {
+        Route::get('/', App\Livewire\Help\KnowledgeBase::class)->name('index');
+        Route::get('/search', App\Livewire\Help\SearchResults::class)->name('search');
+        Route::get('/category/{slug}', App\Livewire\Help\CategoryBrowser::class)->name('category');
+        Route::get('/article/{slug}', App\Livewire\Help\ArticleViewer::class)->name('article');
+    });
+
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
+
+// Support Tickets API (works for both authenticated and guest users)
+Route::post('/api/support-tickets', [App\Http\Controllers\Api\SupportTicketController::class, 'store'])
+    ->middleware('web')
+    ->name('api.support-tickets.store');
+
+// Help Widget API (authenticated users)
+Route::prefix('api/help')->middleware(['web', 'auth'])->group(function () {
+    Route::get('/featured-articles', [App\Http\Controllers\Api\HelpController::class, 'featuredArticles']);
+    Route::get('/categories', [App\Http\Controllers\Api\HelpController::class, 'categories']);
+    Route::get('/search', [App\Http\Controllers\Api\HelpController::class, 'search']);
 });

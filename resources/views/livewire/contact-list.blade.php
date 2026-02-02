@@ -1,8 +1,8 @@
 <div class="space-y-4">
     <!-- Search & Filters -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" data-help="contact-filters">
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div class="relative w-full sm:w-64">
+            <div class="relative w-full sm:w-64" data-help="search-contacts">
                 <x-icon name="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                     type="text"
@@ -52,7 +52,7 @@
     </div>
 
     <!-- Contacts Table -->
-    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden" data-help="contact-list">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">

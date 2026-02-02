@@ -112,11 +112,11 @@
             </div>
 
             <!-- User Profile & Organization Switcher -->
-            <div x-show="!sidebarCollapsed" class="px-3 py-3 border-b border-gray-200 sidebar-content-transition">
+            <div x-show="!sidebarCollapsed" class="px-3 py-3 sidebar-content-transition">
                 <livewire:organization-switcher />
             </div>
             <!-- Collapsed User Avatar -->
-            <div x-show="sidebarCollapsed" class="px-3 py-3 border-b border-gray-200 flex justify-center">
+            <div x-show="sidebarCollapsed" class="px-3 py-3 flex justify-center">
                 <div @mouseenter="hoveredItem = 'user'" @mouseleave="hoveredItem = null" class="relative">
                     <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-pulse-orange-200 cursor-pointer">
                         @if(auth()->user()->avatar_url)
@@ -215,7 +215,6 @@
             <!-- Workspace Navigation -->
             <nav class="flex-1 py-3" :class="sidebarCollapsed ? 'px-2 overflow-visible' : 'px-3 overflow-y-auto'">
                 <p x-show="!sidebarCollapsed" class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-content-transition">Workspace</p>
-                <div x-show="sidebarCollapsed" class="mb-2 border-t border-gray-200"></div>
 
                 @if(RolePermissions::currentUserCanAccess('strategy'))
                 <!-- Plan -->
@@ -415,6 +414,9 @@
                     <!-- Header Notification Icons -->
                     <livewire:layouts.header-notifications />
 
+                    <!-- Contextual Help Button -->
+                    <x-contextual-help-button />
+
                     <!-- Divider -->
                     <div class="h-6 w-px bg-gray-200"></div>
                     @if(isset($actions) && $actions->isNotEmpty())
@@ -546,6 +548,17 @@
                             <x-icon name="plus" class="w-4 h-4 mr-2" />
                             Add Content
                         </a>
+                    @elseif(request()->is('help*'))
+                        <!-- Contact Us Button for Help Center -->
+                        <button
+                            @click="$dispatch('open-support-modal', { context: 'help-center' })"
+                            class="inline-flex items-center px-4 py-2 text-sm bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
+                        >
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            Contact Us
+                        </button>
                     @endif
                 </div>
             </header>
@@ -566,6 +579,18 @@
 
     <!-- Task Flow Bar (guided notification workflow) -->
     <x-task-flow-bar />
+
+    <!-- Support Ticket Modal -->
+    <x-support-ticket-modal />
+
+    <!-- Help Widget (bottom-right FAB) -->
+    <x-help-widget />
+
+    <!-- Page Help Overlay (contextual guided walkthrough) -->
+    <x-page-help-overlay />
+
+    <!-- Auto Help Beacons (pulsating dots at key page elements) -->
+    <x-auto-help-beacons />
 
     {{-- Livewire scripts auto-injected via config inject_assets=true --}}
     @stack('scripts')
