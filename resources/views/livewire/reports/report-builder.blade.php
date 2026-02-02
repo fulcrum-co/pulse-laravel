@@ -58,6 +58,35 @@
                 </button>
             </div>
 
+            <!-- Zoom Controls -->
+            <div class="flex items-center border-r border-gray-200 pr-2 mr-2">
+                <button
+                    wire:click="zoomOut"
+                    class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    title="Zoom Out"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"/>
+                    </svg>
+                </button>
+                <button
+                    wire:click="resetZoom"
+                    class="px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors min-w-[48px]"
+                    title="Reset Zoom"
+                >
+                    {{ number_format($canvasZoom * 100) }}%
+                </button>
+                <button
+                    wire:click="zoomIn"
+                    class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    title="Zoom In"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/>
+                    </svg>
+                </button>
+            </div>
+
             <!-- Save button -->
             <button
                 wire:click="save"
@@ -94,41 +123,90 @@
                 Preview
             </button>
 
-            <!-- Export PDF -->
-            <button
-                wire:click="$dispatch('exportPdf')"
-                class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                PDF
-            </button>
+            <!-- Share Dropdown -->
+            <div class="relative" x-data="{ open: false }">
+                <button
+                    @click="open = !open"
+                    @click.away="open = false"
+                    class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors"
+                >
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                    </svg>
+                    Share
+                    <svg class="w-4 h-4 ml-1.5 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
 
-            <!-- Push to Schools button -->
-            @if($canPush && $reportId)
-            <button
-                wire:click="openPushModal"
-                class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                title="Push to Schools"
-            >
-                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                </svg>
-                Push
-            </button>
-            @endif
+                <!-- Dropdown Menu -->
+                <div
+                    x-show="open"
+                    x-transition:enter="transition ease-out duration-100"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-75"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                    class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50"
+                    style="display: none;"
+                >
+                    <!-- Publish to Website -->
+                    <button
+                        wire:click="openPublishModal"
+                        @click="open = false"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                            </svg>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-medium">Publish to Web</div>
+                            <div class="text-xs text-gray-500">Create a shareable link</div>
+                        </div>
+                    </button>
 
-            <!-- Publish button -->
-            <button
-                wire:click="openPublishModal"
-                class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors"
-            >
-                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
-                </svg>
-                Publish
-            </button>
+                    <!-- Download PDF -->
+                    <button
+                        wire:click="$dispatch('exportPdf')"
+                        @click="open = false"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-medium">Download PDF</div>
+                            <div class="text-xs text-gray-500">Export for printing</div>
+                        </div>
+                    </button>
+
+                    @if($canPush && $reportId)
+                    <div class="border-t border-gray-100 my-1"></div>
+
+                    <!-- Push to Schools -->
+                    <button
+                        wire:click="openPushModal"
+                        @click="open = false"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-medium">Push to Schools</div>
+                            <div class="text-xs text-gray-500">Share with organizations</div>
+                        </div>
+                    </button>
+                    @endif
+                </div>
+            </div>
         </div>
     </header>
 
@@ -232,26 +310,16 @@
 
     <!-- Main Editor Area -->
     <div class="flex-1 flex overflow-hidden">
-        <!-- Left Sidebar - Elements -->
-        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
-            <!-- Tabs -->
-            <div class="flex border-b border-gray-200">
-                <button
-                    wire:click="$set('activeTab', 'elements')"
-                    class="flex-1 px-4 py-3 text-sm font-medium {{ $activeTab === 'elements' ? 'text-pulse-orange-600 border-b-2 border-pulse-orange-500' : 'text-gray-500 hover:text-gray-700' }}"
-                >
-                    Elements
-                </button>
-                <button
-                    wire:click="$set('activeTab', 'settings')"
-                    class="flex-1 px-4 py-3 text-sm font-medium {{ $activeTab === 'settings' ? 'text-pulse-orange-600 border-b-2 border-pulse-orange-500' : 'text-gray-500 hover:text-gray-700' }}"
-                >
-                    Settings
-                </button>
-            </div>
+        <!-- Canva-Style Sidebar -->
+        @include('livewire.reports.partials.canva-sidebar')
 
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
-                @if($activeTab === 'elements')
+        {{-- OLD SIDEBAR REMOVED - Keeping rest of file intact --}}
+        {{-- The new canva-sidebar partial replaces the old Elements/Settings tabs --}}
+
+        {{-- Hidden div to preserve the old code structure for elements that follow --}}
+        <div class="hidden">
+            {{-- Old sidebar content preserved for reference during migration --}}
+            @if(false && $activeTab === 'elements')
                     <!-- Element Types -->
                     <div class="space-y-4">
                         <div>
@@ -434,22 +502,32 @@
                         </div>
                     </div>
                 @endif
-            </div>
-        </aside>
+            {{-- End of old sidebar code preserved for reference --}}
+        </div>
+        {{-- End hidden div --}}
 
         <!-- Canvas Area -->
         <main class="flex-1 overflow-auto bg-gray-100 p-8" wire:click="selectElement(null)">
-            <div
-                data-report-canvas
-                class="bg-white shadow-lg mx-auto canvas-grid relative"
-                style="width: 800px; min-height: 1000px;"
-                wire:click.stop
-            >
+            <!-- Zoom container -->
+            <div class="canvas-zoom-container" style="transform: scale({{ $canvasZoom }}); transform-origin: top center; transition: transform 0.2s ease;">
+                <div
+                    data-report-canvas
+                    class="bg-white shadow-lg mx-auto canvas-grid relative"
+                    style="width: 800px; min-height: 1000px;"
+                    wire:click.stop
+                >
                 @foreach($elements as $element)
+                    @php
+                        $isLocked = $element['config']['locked'] ?? false;
+                        $isHidden = $element['config']['hidden'] ?? false;
+                    @endphp
+                    @if(!$isHidden)
                     <div
                         data-element-id="{{ $element['id'] }}"
+                        data-locked="{{ $isLocked ? 'true' : 'false' }}"
                         wire:click.stop="selectElement('{{ $element['id'] }}')"
-                        class="absolute cursor-move {{ $selectedElementId === $element['id'] ? 'element-selected' : '' }}"
+                        wire:click.shift.stop="toggleInSelection('{{ $element['id'] }}')"
+                        class="absolute {{ $isLocked ? 'element-locked' : 'cursor-move' }} {{ $selectedElementId === $element['id'] ? 'element-selected' : '' }} {{ in_array($element['id'], $selectedElementIds) ? 'multi-selected' : '' }}"
                         style="
                             transform: translate({{ $element['position']['x'] ?? 0 }}px, {{ $element['position']['y'] ?? 0 }}px);
                             width: {{ $element['size']['width'] ?? 200 }}px;
@@ -606,11 +684,12 @@
                                 </div>
                         @endswitch
 
-                        <!-- Resize handles (only show when selected) -->
-                        @if($selectedElementId === $element['id'])
+                        <!-- Resize handles (only show when selected and not locked) -->
+                        @if($selectedElementId === $element['id'] && !$isLocked)
                             <div class="resize-handle resize-handle-br"></div>
                         @endif
                     </div>
+                    @endif {{-- End hidden check --}}
                 @endforeach
 
                 @if(empty($elements))
@@ -630,6 +709,7 @@
                     </div>
                 @endif
             </div>
+            </div><!-- End zoom container -->
         </main>
 
         <!-- Right Sidebar - Properties -->
@@ -1021,68 +1101,231 @@
         @endif
     </div>
 
-    <!-- Template Gallery Modal -->
+    <!-- Enhanced Template Gallery Modal -->
     @if($showTemplateGallery)
-        <div class="fixed inset-0 z-50 overflow-y-auto" x-data x-init="$el.querySelector('input')?.focus()">
-            <div class="flex items-center justify-center min-h-screen px-4">
+        <div
+            class="fixed inset-0 z-50 overflow-y-auto"
+            x-data="{
+                activeCategory: 'all',
+                searchQuery: '',
+                get filteredTemplates() {
+                    return @js($templates).filter(t => {
+                        const matchesCategory = this.activeCategory === 'all' || t.category === this.activeCategory;
+                        const matchesSearch = !this.searchQuery ||
+                            t.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                            t.description.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        return matchesCategory && matchesSearch;
+                    });
+                }
+            }"
+            x-init="$el.querySelector('input[type=search]')?.focus()"
+        >
+            <div class="flex items-center justify-center min-h-screen px-4 py-8">
                 <div class="fixed inset-0 bg-black/50 transition-opacity" wire:click="$set('showTemplateGallery', false)"></div>
 
-                <div class="relative bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
-                    <div class="p-6 border-b border-gray-200">
-                        <div class="flex items-center justify-between">
-                            <h2 class="text-xl font-semibold text-gray-900">Choose a template</h2>
-                            <button wire:click="$set('showTemplateGallery', false)" class="p-2 text-gray-400 hover:text-gray-600 rounded-lg">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="relative bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[85vh] overflow-hidden flex flex-col">
+                    {{-- Header --}}
+                    <div class="p-6 border-b border-gray-200 flex-shrink-0">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900">Choose a Template</h2>
+                                <p class="text-sm text-gray-500 mt-1">Start with a pre-built template or create from scratch</p>
+                            </div>
+                            <button wire:click="$set('showTemplateGallery', false)" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
                             </button>
                         </div>
+
+                        {{-- Search and Filters --}}
+                        <div class="flex items-center gap-4">
+                            <div class="relative flex-1 max-w-md">
+                                <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                <input
+                                    type="search"
+                                    x-model="searchQuery"
+                                    placeholder="Search templates..."
+                                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
+                                >
+                            </div>
+
+                            <div class="flex items-center gap-1 p-1 bg-gray-100 rounded-xl">
+                                <button
+                                    @click="activeCategory = 'all'"
+                                    :class="activeCategory === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'"
+                                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                                >
+                                    All
+                                </button>
+                                <button
+                                    @click="activeCategory = 'student'"
+                                    :class="activeCategory === 'student' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+                                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                                >
+                                    Student
+                                </button>
+                                <button
+                                    @click="activeCategory = 'cohort'"
+                                    :class="activeCategory === 'cohort' ? 'bg-white shadow-sm text-green-600' : 'text-gray-500 hover:text-gray-700'"
+                                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                                >
+                                    Cohort
+                                </button>
+                                <button
+                                    @click="activeCategory = 'school'"
+                                    :class="activeCategory === 'school' ? 'bg-white shadow-sm text-purple-600' : 'text-gray-500 hover:text-gray-700'"
+                                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                                >
+                                    School
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="p-6 overflow-y-auto max-h-[60vh]">
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            @foreach($templates as $template)
+                    {{-- Content --}}
+                    <div class="flex-1 overflow-y-auto p-6">
+                        {{-- Quick Start --}}
+                        <div class="mb-8">
+                            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Quick Start</h3>
+                            <div class="grid grid-cols-4 gap-4">
+                                <button
+                                    wire:click="startBlank"
+                                    class="group flex flex-col items-center p-4 bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-300 hover:border-gray-400 rounded-xl transition-all"
+                                >
+                                    <div class="w-12 h-12 flex items-center justify-center mb-2">
+                                        <svg class="w-8 h-8 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-700">Blank Canvas</span>
+                                    <span class="text-xs text-gray-500 mt-1">Start from scratch</span>
+                                </button>
+
+                                @foreach(collect($templates)->where('category', 'student')->take(3) as $template)
                                 <button
                                     wire:click="loadTemplate('{{ $template['id'] }}')"
-                                    class="group text-left bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-pulse-orange-300 hover:shadow-lg transition-all"
+                                    class="group flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200 hover:border-blue-300 rounded-xl transition-all"
                                 >
-                                    <div class="aspect-video bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center">
-                                        @if($template['id'] === 'blank')
-                                            <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                            </svg>
-                                        @else
-                                            <svg class="w-12 h-12 text-gray-300 group-hover:text-pulse-orange-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                            </svg>
-                                        @endif
+                                    <div class="w-12 h-12 bg-white rounded-lg shadow-sm flex items-center justify-center mb-2 group-hover:shadow">
+                                        <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                        </svg>
                                     </div>
-                                    <div class="p-4">
-                                        <h3 class="font-medium text-gray-900 group-hover:text-pulse-orange-600 transition-colors">{{ $template['name'] }}</h3>
-                                        <p class="text-sm text-gray-500 mt-1">{{ $template['description'] }}</p>
-                                    </div>
+                                    <span class="text-sm font-medium text-gray-900 text-center">{{ $template['name'] }}</span>
                                 </button>
-                            @endforeach
+                                @endforeach
+                            </div>
                         </div>
 
-                        <!-- AI Generate option -->
-                        <div class="mt-6 p-4 bg-purple-50 rounded-xl border border-purple-200">
+                        {{-- All Templates Grid --}}
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                                <span x-text="activeCategory === 'all' ? 'All Templates' : (activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1) + ' Templates')"></span>
+                                <span class="text-gray-400 font-normal" x-text="'(' + filteredTemplates.length + ')'"></span>
+                            </h3>
+
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <template x-for="template in filteredTemplates" :key="template.id">
+                                    <button
+                                        @click="$wire.loadTemplate(template.id)"
+                                        class="group text-left bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-pulse-orange-300 hover:shadow-lg transition-all"
+                                    >
+                                        <div
+                                            class="aspect-video flex items-center justify-center relative"
+                                            :class="{
+                                                'bg-gradient-to-br from-blue-100 to-blue-50': template.category === 'student',
+                                                'bg-gradient-to-br from-green-100 to-green-50': template.category === 'cohort',
+                                                'bg-gradient-to-br from-purple-100 to-purple-50': template.category === 'school',
+                                                'bg-gradient-to-br from-gray-100 to-gray-50': template.category === 'custom'
+                                            }"
+                                        >
+                                            {{-- Category Badge --}}
+                                            <span
+                                                class="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-medium rounded-full"
+                                                :class="{
+                                                    'bg-blue-100 text-blue-700': template.category === 'student',
+                                                    'bg-green-100 text-green-700': template.category === 'cohort',
+                                                    'bg-purple-100 text-purple-700': template.category === 'school',
+                                                    'bg-gray-100 text-gray-700': template.category === 'custom'
+                                                }"
+                                                x-text="template.category.charAt(0).toUpperCase() + template.category.slice(1)"
+                                            ></span>
+
+                                            {{-- Template Icon --}}
+                                            <div x-show="template.id === 'blank'">
+                                                <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                                </svg>
+                                            </div>
+                                            <div x-show="template.id !== 'blank'" class="text-center">
+                                                <svg
+                                                    class="w-10 h-10 mx-auto transition-colors"
+                                                    :class="{
+                                                        'text-blue-400 group-hover:text-blue-500': template.category === 'student',
+                                                        'text-green-400 group-hover:text-green-500': template.category === 'cohort',
+                                                        'text-purple-400 group-hover:text-purple-500': template.category === 'school',
+                                                        'text-gray-400 group-hover:text-gray-500': template.category === 'custom'
+                                                    }"
+                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                >
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                </svg>
+                                            </div>
+
+                                            {{-- Hover overlay --}}
+                                            <div class="absolute inset-0 bg-pulse-orange-500/0 group-hover:bg-pulse-orange-500/5 flex items-center justify-center transition-colors">
+                                                <span class="opacity-0 group-hover:opacity-100 bg-pulse-orange-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow-lg transition-opacity">
+                                                    Use Template
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="p-4">
+                                            <h4 class="font-medium text-gray-900 group-hover:text-pulse-orange-600 transition-colors" x-text="template.name"></h4>
+                                            <p class="text-sm text-gray-500 mt-1 line-clamp-2" x-text="template.description"></p>
+                                        </div>
+                                    </button>
+                                </template>
+                            </div>
+
+                            {{-- Empty state --}}
+                            <div x-show="filteredTemplates.length === 0" class="text-center py-12">
+                                <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <p class="text-gray-500">No templates found matching your search.</p>
+                                <button @click="searchQuery = ''; activeCategory = 'all'" class="mt-2 text-pulse-orange-600 hover:text-pulse-orange-700 text-sm font-medium">
+                                    Clear filters
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- AI Generate Section --}}
+                        <div class="mt-8 p-5 bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 rounded-2xl border border-purple-200">
                             <div class="flex items-start gap-4">
-                                <div class="p-3 bg-purple-100 rounded-lg">
-                                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <h3 class="font-medium text-purple-900">Generate with AI</h3>
-                                    <p class="text-sm text-purple-700 mt-1">Describe the report you want and let AI create it for you.</p>
-                                    <div class="mt-3 flex gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="font-semibold text-gray-900">Generate with AI</h3>
+                                        <span class="px-2 py-0.5 text-[10px] font-semibold bg-purple-100 text-purple-700 rounded-full">Beta</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-1">Describe the report you need and AI will create a custom template for you.</p>
+                                    <div class="mt-4 flex gap-3">
                                         <input
                                             type="text"
-                                            placeholder="e.g., 'Quarterly progress report for 9th grade math students'"
-                                            class="flex-1 px-3 py-2 border border-purple-300 rounded-lg text-sm focus:ring-purple-500 focus:border-purple-500"
+                                            placeholder="e.g., 'Weekly attendance summary for 10th grade with trend charts'"
+                                            class="flex-1 px-4 py-3 border border-purple-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
                                         >
-                                        <button class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium">
+                                        <button class="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all text-sm font-semibold shadow-lg shadow-purple-500/25 flex items-center gap-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                            </svg>
                                             Generate
                                         </button>
                                     </div>
@@ -1094,6 +1337,181 @@
             </div>
         </div>
     @endif
+
+    <!-- Context Menu (Right-click) -->
+    <div
+        x-data="{
+            show: false,
+            x: 0,
+            y: 0,
+            elementId: null,
+            open(event, elementId = null) {
+                event.preventDefault();
+                this.x = event.clientX;
+                this.y = event.clientY;
+                this.elementId = elementId;
+                this.show = true;
+
+                // Ensure menu stays within viewport
+                this.$nextTick(() => {
+                    const menu = this.$refs.contextMenu;
+                    if (menu) {
+                        const rect = menu.getBoundingClientRect();
+                        if (this.x + rect.width > window.innerWidth) {
+                            this.x = window.innerWidth - rect.width - 10;
+                        }
+                        if (this.y + rect.height > window.innerHeight) {
+                            this.y = window.innerHeight - rect.height - 10;
+                        }
+                    }
+                });
+            },
+            close() {
+                this.show = false;
+                this.elementId = null;
+            }
+        }"
+        @contextmenu.window="if ($event.target.closest('[data-element-id]')) { open($event, $event.target.closest('[data-element-id]').dataset.elementId); } else if ($event.target.closest('[data-report-canvas]')) { open($event); }"
+        @click.window="close()"
+        @keydown.escape.window="close()"
+        class="fixed z-[100]"
+        x-show="show"
+        x-transition:enter="transition ease-out duration-100"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-75"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+        :style="`left: ${x}px; top: ${y}px;`"
+        x-cloak
+    >
+        <div
+            x-ref="contextMenu"
+            class="bg-white rounded-xl shadow-xl border border-gray-200 py-1 min-w-[180px] overflow-hidden"
+            @click.stop
+        >
+            {{-- Element actions (when element selected) --}}
+            <template x-if="elementId">
+                <div>
+                    <button
+                        @click="$wire.duplicateElement(elementId); close()"
+                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                    >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        <span>Duplicate</span>
+                        <span class="ml-auto text-xs text-gray-400">Ctrl+D</span>
+                    </button>
+                    <button
+                        @click="$wire.copySelected(); close()"
+                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                    >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                        </svg>
+                        <span>Copy</span>
+                        <span class="ml-auto text-xs text-gray-400">Ctrl+C</span>
+                    </button>
+                    <button
+                        @click="$wire.cutSelected(); close()"
+                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                    >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"/>
+                        </svg>
+                        <span>Cut</span>
+                        <span class="ml-auto text-xs text-gray-400">Ctrl+X</span>
+                    </button>
+
+                    <div class="border-t border-gray-100 my-1"></div>
+
+                    <button
+                        @click="$wire.bringToFront(); close()"
+                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                    >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7"/>
+                        </svg>
+                        <span>Bring to Front</span>
+                    </button>
+                    <button
+                        @click="$wire.sendToBack(); close()"
+                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                    >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"/>
+                        </svg>
+                        <span>Send to Back</span>
+                    </button>
+
+                    <div class="border-t border-gray-100 my-1"></div>
+
+                    <button
+                        @click="$wire.deleteElement(elementId); close()"
+                        class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
+                    >
+                        <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        <span>Delete</span>
+                        <span class="ml-auto text-xs text-gray-400">Del</span>
+                    </button>
+                </div>
+            </template>
+
+            {{-- Canvas actions (when no element selected) --}}
+            <template x-if="!elementId">
+                <div>
+                    <button
+                        @click="$wire.pasteFromClipboard(); close()"
+                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                    >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <span>Paste</span>
+                        <span class="ml-auto text-xs text-gray-400">Ctrl+V</span>
+                    </button>
+
+                    <div class="border-t border-gray-100 my-1"></div>
+
+                    <button
+                        @click="$wire.selectAll(); close()"
+                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                    >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                        </svg>
+                        <span>Select All</span>
+                        <span class="ml-auto text-xs text-gray-400">Ctrl+A</span>
+                    </button>
+
+                    <div class="border-t border-gray-100 my-1"></div>
+
+                    <button
+                        @click="$wire.toggleGrid(); close()"
+                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                    >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                        <span>{{ $showGrid ? 'Hide Grid' : 'Show Grid' }}</span>
+                    </button>
+
+                    <button
+                        @click="$wire.fitToScreen(); close()"
+                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                    >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                        </svg>
+                        <span>Fit to Screen</span>
+                    </button>
+                </div>
+            </template>
+        </div>
+    </div>
 
     <!-- Publish Modal -->
     @if($showPublishModal)
@@ -1224,4 +1642,491 @@
 
     <!-- Push Content Modal -->
     @livewire('push-content-modal')
+
+    <!-- Multi-Selection Count Badge -->
+    @if(count($selectedElementIds) > 1)
+    <div class="selection-count-badge">
+        <div class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>{{ count($selectedElementIds) }} elements selected</span>
+            <button
+                wire:click="clearSelection"
+                class="ml-2 text-blue-200 hover:text-white"
+                title="Clear selection"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    @endif
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- PHASE 6: WOW FACTOR COMPONENTS -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <!-- 6.1 Keyboard Shortcuts Modal (Press ?) -->
+    @if($showShortcutsModal)
+    <div
+        class="fixed inset-0 z-[100] overflow-y-auto"
+        x-data
+        x-init="$el.querySelector('button[data-close]').focus()"
+        @keydown.escape.window="$wire.set('showShortcutsModal', false)"
+    >
+        <div class="flex items-center justify-center min-h-screen px-4 py-8">
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" wire:click="$set('showShortcutsModal', false)"></div>
+
+            <div class="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden animate-modal-in">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-gray-900 to-gray-800 px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-semibold text-white">Keyboard Shortcuts</h2>
+                            <p class="text-sm text-gray-400">Work faster with these shortcuts</p>
+                        </div>
+                    </div>
+                    <button
+                        data-close
+                        wire:click="$set('showShortcutsModal', false)"
+                        class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Content -->
+                <div class="p-6 grid grid-cols-2 gap-6">
+                    <!-- Selection -->
+                    <div>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Selection</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Select element</span>
+                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Click</kbd>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Multi-select</span>
+                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Shift + Click</kbd>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Select all</span>
+                                <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">A</kbd>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Deselect</span>
+                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Esc</kbd>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Editing -->
+                    <div>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Editing</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Copy</span>
+                                <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">C</kbd>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Cut</span>
+                                <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">X</kbd>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Paste</span>
+                                <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">V</kbd>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Duplicate</span>
+                                <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">D</kbd>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Delete</span>
+                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Delete</kbd>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Canvas -->
+                    <div>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Canvas</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Zoom in</span>
+                                <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">+</kbd>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Zoom out</span>
+                                <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">-</kbd>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Nudge 1px</span>
+                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Arrow keys</kbd>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Nudge grid</span>
+                                <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Shift</kbd>
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">↑↓←→</kbd>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">History & Save</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Undo</span>
+                                <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Z</kbd>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Redo</span>
+                                <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⇧</kbd>
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Z</kbd>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Save</span>
+                                <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">S</kbd>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600">Show shortcuts</span>
+                                <kbd class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-mono">?</kbd>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
+                    <p class="text-xs text-gray-500 text-center">
+                        <span class="text-gray-400">Pro tip:</span> On Windows/Linux, use <kbd class="px-1.5 py-0.5 bg-gray-200 rounded text-xs">Ctrl</kbd> instead of <kbd class="px-1.5 py-0.5 bg-gray-200 rounded text-xs">⌘</kbd>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- 6.2 Floating Quick Actions Toolbar -->
+    @if($selectedElement && !$showShortcutsModal && !$showTemplateGallery)
+    <div
+        x-data="{
+            getPosition() {
+                const el = document.querySelector('[data-element-id=\'{{ $selectedElement['id'] }}\']');
+                if (!el) return { top: 0, left: 0, show: false };
+
+                const rect = el.getBoundingClientRect();
+                const canvas = document.querySelector('[data-report-canvas]');
+                const canvasRect = canvas ? canvas.getBoundingClientRect() : { left: 0, top: 0 };
+
+                // Position toolbar above the element
+                let top = rect.top - 48;
+                let left = rect.left + (rect.width / 2);
+
+                // If too close to top, show below
+                if (top < 60) {
+                    top = rect.bottom + 8;
+                }
+
+                return { top, left, show: true };
+            }
+        }"
+        x-init="$watch('$wire.selectedElementId', () => $nextTick(() => $el.style.opacity = '1'))"
+        class="fixed z-50 transition-all duration-150"
+        :style="`top: ${getPosition().top}px; left: ${getPosition().left}px; transform: translateX(-50%);`"
+        x-show="getPosition().show"
+        x-cloak
+    >
+        <div class="bg-gray-900 rounded-xl shadow-2xl px-1 py-1 flex items-center gap-0.5 quick-actions-toolbar">
+            <!-- Copy -->
+            <button
+                wire:click="copySelected"
+                class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                title="Copy (⌘C)"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+            </button>
+
+            <!-- Duplicate -->
+            <button
+                wire:click="duplicateElement('{{ $selectedElement['id'] }}')"
+                class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                title="Duplicate (⌘D)"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
+                </svg>
+            </button>
+
+            <div class="w-px h-5 bg-gray-700 mx-1"></div>
+
+            <!-- Bring Forward -->
+            <button
+                wire:click="bringToFront"
+                class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                title="Bring to Front"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7"/>
+                </svg>
+            </button>
+
+            <!-- Send Backward -->
+            <button
+                wire:click="sendToBack"
+                class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                title="Send to Back"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"/>
+                </svg>
+            </button>
+
+            <div class="w-px h-5 bg-gray-700 mx-1"></div>
+
+            <!-- Lock/Unlock -->
+            <button
+                wire:click="toggleElementLock('{{ $selectedElement['id'] }}')"
+                class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                title="{{ ($selectedElement['config']['locked'] ?? false) ? 'Unlock' : 'Lock' }}"
+            >
+                @if($selectedElement['config']['locked'] ?? false)
+                    <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                @else
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                    </svg>
+                @endif
+            </button>
+
+            <div class="w-px h-5 bg-gray-700 mx-1"></div>
+
+            <!-- Delete -->
+            <button
+                wire:click="deleteElement('{{ $selectedElement['id'] }}')"
+                class="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors"
+                title="Delete (Del)"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    @endif
+
+    <!-- 6.7 Onboarding Tooltips (First-Time Users) -->
+    <div
+        x-data="{
+            step: 0,
+            maxSteps: 4,
+            show: false,
+            init() {
+                // Check if user has seen onboarding
+                if (!localStorage.getItem('pulse_report_builder_onboarded')) {
+                    setTimeout(() => {
+                        this.show = true;
+                    }, 1000);
+                }
+            },
+            next() {
+                if (this.step < this.maxSteps - 1) {
+                    this.step++;
+                } else {
+                    this.complete();
+                }
+            },
+            skip() {
+                this.complete();
+            },
+            complete() {
+                this.show = false;
+                localStorage.setItem('pulse_report_builder_onboarded', 'true');
+            },
+            getStepContent() {
+                const steps = [
+                    {
+                        icon: '👋',
+                        title: 'Welcome to Report Builder!',
+                        description: 'Create beautiful, data-rich reports in minutes. Start by choosing a template or building from scratch.',
+                        position: 'center'
+                    },
+                    {
+                        icon: '🎨',
+                        title: 'Drag & Drop Elements',
+                        description: 'Use the sidebar to drag elements onto your canvas. Try text, charts, metrics, and more.',
+                        position: 'left'
+                    },
+                    {
+                        icon: '✨',
+                        title: 'Smart Blocks',
+                        description: 'Pre-built sections that auto-populate with real student data. Perfect for quick reports!',
+                        position: 'left'
+                    },
+                    {
+                        icon: '⌨️',
+                        title: 'Keyboard Shortcuts',
+                        description: 'Press ? anytime to see all shortcuts. Use ⌘C, ⌘V, arrows, and more to work faster.',
+                        position: 'center'
+                    }
+                ];
+                return steps[this.step];
+            }
+        }"
+        x-show="show"
+        x-cloak
+        class="fixed inset-0 z-[110] pointer-events-none"
+    >
+        <!-- Backdrop with spotlight effect -->
+        <div class="absolute inset-0 bg-black/40 pointer-events-auto" @click="skip()"></div>
+
+        <!-- Tooltip Card -->
+        <div
+            class="absolute pointer-events-auto"
+            :class="{
+                'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2': getStepContent().position === 'center',
+                'top-1/2 left-80 -translate-y-1/2': getStepContent().position === 'left'
+            }"
+        >
+            <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm animate-modal-in">
+                <!-- Icon -->
+                <div class="text-4xl mb-4" x-text="getStepContent().icon"></div>
+
+                <!-- Content -->
+                <h3 class="text-lg font-semibold text-gray-900 mb-2" x-text="getStepContent().title"></h3>
+                <p class="text-gray-600 text-sm mb-6" x-text="getStepContent().description"></p>
+
+                <!-- Progress dots -->
+                <div class="flex items-center justify-between">
+                    <div class="flex gap-1.5">
+                        <template x-for="i in maxSteps">
+                            <div
+                                class="w-2 h-2 rounded-full transition-colors"
+                                :class="i - 1 === step ? 'bg-pulse-orange-500' : 'bg-gray-200'"
+                            ></div>
+                        </template>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button
+                            @click="skip()"
+                            class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                        >
+                            Skip
+                        </button>
+                        <button
+                            @click="next()"
+                            class="px-4 py-1.5 text-sm font-medium text-white bg-pulse-orange-500 hover:bg-pulse-orange-600 rounded-lg transition-colors"
+                        >
+                            <span x-text="step === maxSteps - 1 ? 'Get Started' : 'Next'"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6.8 Canvas Minimap (Bottom Right) -->
+    @if(count($elements) > 3)
+    <div
+        x-data="{
+            expanded: false,
+            toggle() { this.expanded = !this.expanded; }
+        }"
+        class="fixed bottom-6 right-6 z-40"
+    >
+        <!-- Collapsed state - just a button -->
+        <button
+            x-show="!expanded"
+            @click="toggle()"
+            class="bg-white rounded-xl shadow-lg p-3 hover:shadow-xl transition-shadow border border-gray-200"
+            title="Show minimap"
+        >
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+            </svg>
+        </button>
+
+        <!-- Expanded minimap -->
+        <div
+            x-show="expanded"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            class="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
+        >
+            <div class="px-3 py-2 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                <span class="text-xs font-medium text-gray-600">Minimap</span>
+                <button @click="toggle()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-2">
+                <div class="w-40 h-28 bg-gray-100 rounded relative">
+                    @foreach($elements as $index => $element)
+                        @php
+                            // Scale down: 800px canvas -> 160px minimap = 0.2 scale
+                            $scale = 0.2;
+                            $x = ($element['position']['x'] ?? 0) * $scale;
+                            $y = ($element['position']['y'] ?? 0) * $scale;
+                            $w = max(4, ($element['size']['width'] ?? 100) * $scale);
+                            $h = max(2, ($element['size']['height'] ?? 50) * $scale);
+                        @endphp
+                        <div
+                            class="absolute rounded-sm {{ $selectedElementId === $element['id'] ? 'bg-blue-400' : 'bg-gray-400' }}"
+                            style="left: {{ $x }}px; top: {{ $y }}px; width: {{ $w }}px; height: {{ $h }}px; opacity: 0.6;"
+                        ></div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

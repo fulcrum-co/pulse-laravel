@@ -36,6 +36,10 @@ trait WithElementManagement
     {
         foreach ($this->elements as &$element) {
             if ($element['id'] === $elementId) {
+                // Don't update position if element is locked
+                if ($element['config']['locked'] ?? false) {
+                    return;
+                }
                 $element['position']['x'] = max(0, (int) $x);
                 $element['position']['y'] = max(0, (int) $y);
                 break;
@@ -157,5 +161,75 @@ trait WithElementManagement
         }
 
         return $maxY + 20;
+    }
+
+    /**
+     * Toggle element lock status
+     */
+    public function toggleElementLock(string $elementId): void
+    {
+        foreach ($this->elements as &$element) {
+            if ($element['id'] === $elementId) {
+                $element['config']['locked'] = ! ($element['config']['locked'] ?? false);
+                break;
+            }
+        }
+        $this->pushHistory();
+    }
+
+    /**
+     * Toggle element visibility (for layers panel)
+     */
+    public function toggleElementVisibility(string $elementId): void
+    {
+        foreach ($this->elements as &$element) {
+            if ($element['id'] === $elementId) {
+                $element['config']['hidden'] = ! ($element['config']['hidden'] ?? false);
+                break;
+            }
+        }
+        $this->pushHistory();
+    }
+
+    /**
+     * Reorder elements (for layers panel drag-drop)
+     */
+    public function reorderElements(array $orderedIds): void
+    {
+        $reordered = [];
+        foreach ($orderedIds as $id) {
+            $element = collect($this->elements)->firstWhere('id', $id);
+            if ($element) {
+                $reordered[] = $element;
+            }
+        }
+
+        // Only update if we have the same number of elements
+        if (count($reordered) === count($this->elements)) {
+            $this->elements = $reordered;
+            $this->pushHistory();
+        }
+    }
+
+    /**
+     * Get element display name for layers panel
+     */
+    public function getElementDisplayName(array $element): string
+    {
+        $type = $element['type'] ?? 'unknown';
+        $icons = [
+            'text' => '📝',
+            'chart' => '📊',
+            'metric_card' => '📈',
+            'table' => '📋',
+            'ai_text' => '✨',
+            'image' => '🖼️',
+            'spacer' => '↕️',
+        ];
+
+        $icon = $icons[$type] ?? '📦';
+        $title = $element['config']['title'] ?? $element['config']['label'] ?? ucfirst(str_replace('_', ' ', $type));
+
+        return $icon.' '.substr($title, 0, 20).(strlen($title) > 20 ? '...' : '');
     }
 }

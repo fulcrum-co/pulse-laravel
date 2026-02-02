@@ -14,7 +14,7 @@
         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
         x-transition:leave-end="opacity-0 scale-95 translate-y-4"
         @click.outside="isOpen = false"
-        class="absolute bottom-16 right-0 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
+        class="absolute bottom-14 right-0 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
     >
         {{-- Header --}}
         <div class="bg-gradient-to-r from-pulse-orange-500 to-orange-600 px-5 py-4 text-white">
@@ -215,15 +215,15 @@
     <button
         @click="isOpen = !isOpen"
         :class="isOpen ? 'bg-gray-700 hover:bg-gray-800' : 'bg-pulse-orange-500 hover:bg-pulse-orange-600'"
-        class="w-14 h-14 text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
+        class="w-11 h-11 text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
         :title="isOpen ? 'Close help' : 'Need help?'"
     >
         {{-- Question mark icon (when closed) --}}
-        <svg x-show="!isOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg x-show="!isOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         {{-- X icon (when open) --}}
-        <svg x-show="isOpen" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg x-show="isOpen" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
     </button>

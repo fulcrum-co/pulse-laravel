@@ -761,4 +761,11 @@ Route::prefix('api/help')->middleware(['web', 'auth'])->group(function () {
     Route::get('/featured-articles', [App\Http\Controllers\Api\HelpController::class, 'featuredArticles']);
     Route::get('/categories', [App\Http\Controllers\Api\HelpController::class, 'categories']);
     Route::get('/search', [App\Http\Controllers\Api\HelpController::class, 'search']);
+    Route::get('/page-hints', [App\Http\Controllers\Api\PageHelpController::class, 'allHints']);
+    Route::get('/page-hints/{context}', [App\Http\Controllers\Api\PageHelpController::class, 'pageHints']);
+});
+
+// Admin Routes (requires admin role)
+Route::prefix('admin')->middleware(['web', 'auth'])->name('admin.')->group(function () {
+    Route::get('/help-hints', App\Livewire\Admin\HelpHintManager::class)->name('help-hints');
 });

@@ -251,37 +251,126 @@ class ReportController extends Controller
     protected function getTemplates(): array
     {
         return [
+            // Student Reports
             [
                 'id' => 'student_progress',
                 'name' => 'Student Progress Report',
                 'description' => 'Individual student performance tracking with metrics over time',
                 'thumbnail' => '/images/templates/student-progress.png',
                 'type' => CustomReport::TYPE_STUDENT_PROGRESS,
+                'category' => 'student',
                 'layout' => $this->getStudentProgressLayout(),
             ],
+            [
+                'id' => 'student_quick_view',
+                'name' => 'Student Quick View',
+                'description' => 'One-page summary perfect for parent meetings',
+                'thumbnail' => '/images/templates/student-quick.png',
+                'type' => CustomReport::TYPE_STUDENT_PROGRESS,
+                'category' => 'student',
+                'layout' => $this->getStudentQuickViewLayout(),
+            ],
+            // Cohort Reports
             [
                 'id' => 'cohort_summary',
                 'name' => 'Cohort Summary',
                 'description' => 'Aggregate metrics for a group of students',
                 'thumbnail' => '/images/templates/cohort-summary.png',
                 'type' => CustomReport::TYPE_COHORT_SUMMARY,
+                'category' => 'cohort',
                 'layout' => $this->getCohortSummaryLayout(),
             ],
+            [
+                'id' => 'grade_level_overview',
+                'name' => 'Grade Level Overview',
+                'description' => 'Compare performance across a grade level',
+                'thumbnail' => '/images/templates/grade-overview.png',
+                'type' => CustomReport::TYPE_COHORT_SUMMARY,
+                'category' => 'cohort',
+                'layout' => $this->getCohortSummaryLayout(),
+            ],
+            // School Dashboards
             [
                 'id' => 'school_dashboard',
                 'name' => 'School Dashboard',
                 'description' => 'School-wide analytics and KPIs',
                 'thumbnail' => '/images/templates/school-dashboard.png',
                 'type' => CustomReport::TYPE_SCHOOL_DASHBOARD,
+                'category' => 'school',
                 'layout' => $this->getSchoolDashboardLayout(),
             ],
+            [
+                'id' => 'wellness_overview',
+                'name' => 'Wellness Overview',
+                'description' => 'School-wide wellness trends and insights',
+                'thumbnail' => '/images/templates/wellness-overview.png',
+                'type' => CustomReport::TYPE_SCHOOL_DASHBOARD,
+                'category' => 'school',
+                'layout' => $this->getSchoolDashboardLayout(),
+            ],
+            // Custom
             [
                 'id' => 'blank',
                 'name' => 'Blank Canvas',
                 'description' => 'Start from scratch with a blank report',
                 'thumbnail' => '/images/templates/blank.png',
                 'type' => CustomReport::TYPE_CUSTOM,
+                'category' => 'custom',
                 'layout' => [],
+            ],
+        ];
+    }
+
+    /**
+     * Get Student Quick View template layout - simplified one-pager.
+     */
+    protected function getStudentQuickViewLayout(): array
+    {
+        return [
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'text',
+                'position' => ['x' => 40, 'y' => 40],
+                'size' => ['width' => 720, 'height' => 50],
+                'config' => [
+                    'content' => '<h2 style="margin: 0;">Student Quick View</h2>',
+                ],
+                'styles' => [
+                    'backgroundColor' => 'transparent',
+                    'padding' => 8,
+                ],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'metric_card',
+                'position' => ['x' => 40, 'y' => 100],
+                'size' => ['width' => 350, 'height' => 100],
+                'config' => [
+                    'metric_key' => 'gpa',
+                    'label' => 'Current GPA',
+                    'show_trend' => true,
+                ],
+                'styles' => [
+                    'backgroundColor' => '#F0F9FF',
+                    'borderRadius' => 12,
+                    'padding' => 16,
+                ],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'metric_card',
+                'position' => ['x' => 410, 'y' => 100],
+                'size' => ['width' => 350, 'height' => 100],
+                'config' => [
+                    'metric_key' => 'attendance_rate',
+                    'label' => 'Attendance Rate',
+                    'show_trend' => true,
+                ],
+                'styles' => [
+                    'backgroundColor' => '#F0FDF4',
+                    'borderRadius' => 12,
+                    'padding' => 16,
+                ],
             ],
         ];
     }

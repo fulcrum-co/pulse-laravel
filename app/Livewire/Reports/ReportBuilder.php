@@ -2,11 +2,13 @@
 
 namespace App\Livewire\Reports;
 
+use App\Livewire\Reports\Concerns\WithCanvasInteraction;
 use App\Livewire\Reports\Concerns\WithChartData;
 use App\Livewire\Reports\Concerns\WithElementDefaults;
 use App\Livewire\Reports\Concerns\WithElementManagement;
 use App\Livewire\Reports\Concerns\WithHistory;
 use App\Livewire\Reports\Concerns\WithReportPersistence;
+use App\Livewire\Reports\Concerns\WithSmartBlocks;
 use App\Models\CustomReport;
 use App\Models\Student;
 use Illuminate\Support\Str;
@@ -15,11 +17,13 @@ use Livewire\Component;
 
 class ReportBuilder extends Component
 {
+    use WithCanvasInteraction;
     use WithChartData;
     use WithElementDefaults;
     use WithElementManagement;
     use WithHistory;
     use WithReportPersistence;
+    use WithSmartBlocks;
 
     protected $listeners = [
         'selectElement',
@@ -55,6 +59,14 @@ class ReportBuilder extends Component
     public bool $showFilterBar = false;
 
     public string $activeTab = 'elements';
+
+    // Canva-style sidebar panel state
+    public string $activeSidebarPanel = 'elements'; // templates, elements, data, smart_blocks, design, layers
+
+    public bool $sidebarExpanded = true;
+
+    // Phase 6: Wow factor modals
+    public bool $showShortcutsModal = false;
 
     // Available templates
     public array $templates = [];
