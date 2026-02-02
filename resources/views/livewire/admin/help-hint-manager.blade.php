@@ -2,8 +2,8 @@
     {{-- Header --}}
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Page Help Hints</h1>
-            <p class="mt-1 text-sm text-gray-500">Manage contextual help hints that appear on each page</p>
+            <h1 class="text-2xl font-bold text-gray-900">Tooltips</h1>
+            <p class="mt-1 text-sm text-gray-500">Manage contextual tooltips that appear on each page</p>
         </div>
         <button
             wire:click="openCreateModal"
@@ -45,8 +45,8 @@
                 <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                     <x-icon name="light-bulb" class="w-6 h-6 text-gray-400" />
                 </div>
-                <h3 class="text-sm font-medium text-gray-900 mb-1">No help hints yet</h3>
-                <p class="text-sm text-gray-500 mb-4">Add hints to guide users through the {{ $this->contexts[$selectedContext] }} page.</p>
+                <h3 class="text-sm font-medium text-gray-900 mb-1">No tooltips yet</h3>
+                <p class="text-sm text-gray-500 mb-4">Add tooltips to guide users through the {{ $this->contexts[$selectedContext] }} page.</p>
                 <button
                     wire:click="openCreateModal"
                     class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700"
@@ -126,12 +126,12 @@
                 <x-icon name="information-circle" class="w-5 h-5 text-blue-500" />
             </div>
             <div class="text-sm text-blue-700">
-                <p class="font-medium mb-1">How Help Hints Work</p>
+                <p class="font-medium mb-1">How Tooltips Work</p>
                 <ul class="list-disc list-inside space-y-1 text-blue-600">
                     <li><strong>Section:</strong> Unique identifier (lowercase, hyphens only) e.g., <code class="bg-blue-100 px-1 rounded">search-reports</code></li>
                     <li><strong>Selector:</strong> CSS selector targeting the element, e.g., <code class="bg-blue-100 px-1 rounded">[data-help="search-reports"]</code></li>
                     <li><strong>Position:</strong> Where the tooltip appears relative to the element</li>
-                    <li>Users enable hints via the Help menu → "Show Page Hints"</li>
+                    <li>Users enable tooltips via the Help menu → "Show Tooltips"</li>
                 </ul>
             </div>
         </div>
@@ -160,7 +160,7 @@
                     <div class="bg-white px-6 py-5">
                         <div class="flex items-center justify-between mb-5">
                             <h3 class="text-lg font-semibold text-gray-900">
-                                {{ $editMode ? 'Edit Help Hint' : 'Add Help Hint' }}
+                                {{ $editMode ? 'Edit Tooltip' : 'Add Tooltip' }}
                             </h3>
                             <button type="button" wire:click="closeModal" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                                 <x-icon name="x-mark" class="w-5 h-5" />

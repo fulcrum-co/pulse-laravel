@@ -1,5 +1,5 @@
 {{-- Auto Help Beacons - Pulsating help dots at elements matching helpTours selectors --}}
-{{-- Only shown when user enables "Show Page Hints" from the Help dropdown --}}
+{{-- Only shown when user enables "Show Tooltips" from the Help dropdown --}}
 <div
     x-data="autoHelpBeacons()"
     x-init="init()"

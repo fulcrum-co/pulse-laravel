@@ -45,7 +45,7 @@
         x-transition:leave-end="opacity-0 scale-95"
         class="absolute right-0 z-50 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-1 overflow-hidden"
     >
-        <!-- Page Hints Toggle -->
+        <!-- Tooltips Toggle -->
         <button
             @click="
                 hintsEnabled = !hintsEnabled;
@@ -67,7 +67,7 @@
                 </svg>
             </span>
             <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900" x-text="hintsEnabled ? 'Hide Page Hints' : 'Show Page Hints'"></p>
+                <p class="text-sm font-medium text-gray-900" x-text="hintsEnabled ? 'Hide Tooltips' : 'Show Tooltips'"></p>
                 <p class="text-xs text-gray-500">Interactive help dots on this page</p>
             </div>
             <span
