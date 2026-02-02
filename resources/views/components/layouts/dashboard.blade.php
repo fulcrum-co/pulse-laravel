@@ -563,6 +563,61 @@
                             <x-icon name="plus" class="w-4 h-4 mr-2" />
                             Add Content
                         </a>
+                    @elseif(request()->is('admin/help*'))
+                        <!-- Create Doc Dropdown for Help Center Admin -->
+                        <div x-data="{ open: false }" class="relative">
+                            <button
+                                @click="open = !open"
+                                class="inline-flex items-center px-4 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors"
+                            >
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Create Doc
+                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div
+                                x-show="open"
+                                @click.outside="open = false"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="transform opacity-0 scale-95"
+                                x-transition:enter-end="transform opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-75"
+                                x-transition:leave-start="transform opacity-100 scale-100"
+                                x-transition:leave-end="transform opacity-0 scale-95"
+                                class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
+                            >
+                                <a href="{{ route('admin.help-articles') }}?action=create" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                                    <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                                        <x-icon name="document-text" class="w-4 h-4 text-purple-600" />
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Article</p>
+                                        <p class="text-xs text-gray-500">Help documentation</p>
+                                    </div>
+                                </a>
+                                <a href="{{ route('admin.help-categories') }}?action=create" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                        <x-icon name="folder" class="w-4 h-4 text-blue-600" />
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Category</p>
+                                        <p class="text-xs text-gray-500">Organize articles</p>
+                                    </div>
+                                </a>
+                                <a href="{{ route('admin.help-hints') }}?action=create" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                                    <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                                        <x-icon name="cursor-arrow-rays" class="w-4 h-4 text-orange-600" />
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Tooltip</p>
+                                        <p class="text-xs text-gray-500">Contextual page tips</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
                     @elseif(request()->is('help*'))
                         <!-- Contact Us Button for Help Center -->
                         <button
