@@ -43,6 +43,21 @@ class PageHelpHint extends Model
     ];
 
     /**
+     * URL mapping for each page context (used by Visual Editor).
+     */
+    public const CONTEXT_URLS = [
+        'dashboard' => '/dashboard',
+        'reports' => '/reports',
+        'collect' => '/collect',
+        'distribute' => '/distribute',
+        'resources' => '/resources',
+        'contacts' => '/contacts',
+        'plans' => '/plans',
+        'surveys' => '/surveys',
+        'alerts' => '/alerts',
+    ];
+
+    /**
      * Available tooltip positions.
      */
     public const POSITIONS = [

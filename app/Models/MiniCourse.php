@@ -69,12 +69,18 @@ class MiniCourse extends Model
 
     public const TARGET_CONTACT_LIST = 'contact_list';
 
+    // Visibility statuses (for lead generation)
+    public const VISIBILITY_PUBLIC = 'public';
+    public const VISIBILITY_GATED = 'gated';
+    public const VISIBILITY_PRIVATE = 'private';
+
     protected $fillable = [
         'org_id',
         'source_course_id',
         'source_org_id',
         'current_version_id',
         'title',
+        'slug',
         'description',
         'objectives',
         'rationale',
@@ -109,6 +115,21 @@ class MiniCourse extends Model
         'template_id',
         'assigned_student_ids',
         'assigned_group_id',
+        // Lead generation fields
+        'visibility',
+        'requires_email',
+        'is_embeddable',
+        'allowed_embed_domains',
+        'meta_title',
+        'meta_description',
+        'meta_keywords',
+        'badge_enabled',
+        'badge_name',
+        'badge_image_url',
+        'certificate_enabled',
+        'certificate_template',
+        'public_view_count',
+        'lead_capture_count',
     ];
 
     protected $casts = [
@@ -125,6 +146,15 @@ class MiniCourse extends Model
         'auto_generated_at' => 'datetime',
         'approved_at' => 'datetime',
         'assigned_student_ids' => 'array',
+        // Lead generation casts
+        'requires_email' => 'boolean',
+        'is_embeddable' => 'boolean',
+        'allowed_embed_domains' => 'array',
+        'meta_keywords' => 'array',
+        'badge_enabled' => 'boolean',
+        'certificate_enabled' => 'boolean',
+        'public_view_count' => 'integer',
+        'lead_capture_count' => 'integer',
     ];
 
     protected $attributes = [
@@ -255,6 +285,30 @@ class MiniCourse extends Model
     }
 
     /**
+     * Cohorts running this course.
+     */
+    public function cohorts(): HasMany
+    {
+        return $this->hasMany(Cohort::class, 'mini_course_id');
+    }
+
+    /**
+     * Active cohorts.
+     */
+    public function activeCohorts(): HasMany
+    {
+        return $this->cohorts()->where('status', Cohort::STATUS_ACTIVE);
+    }
+
+    /**
+     * Certificates issued for this course.
+     */
+    public function certificates(): HasMany
+    {
+        return $this->hasMany(Certificate::class, 'mini_course_id');
+    }
+
+    /**
      * Approval workflow relationship.
      */
     public function approvalWorkflow(): \Illuminate\Database\Eloquent\Relations\HasOne
@@ -324,6 +378,38 @@ class MiniCourse extends Model
     public function scopePublic(Builder $query): Builder
     {
         return $query->where('is_public', true);
+    }
+
+    /**
+     * Scope by visibility status.
+     */
+    public function scopeWithVisibility(Builder $query, string $visibility): Builder
+    {
+        return $query->where('visibility', $visibility);
+    }
+
+    /**
+     * Scope to publicly visible courses (public or gated).
+     */
+    public function scopePubliclyVisible(Builder $query): Builder
+    {
+        return $query->whereIn('visibility', [self::VISIBILITY_PUBLIC, self::VISIBILITY_GATED]);
+    }
+
+    /**
+     * Scope to gated courses (require email).
+     */
+    public function scopeGated(Builder $query): Builder
+    {
+        return $query->where('visibility', self::VISIBILITY_GATED);
+    }
+
+    /**
+     * Scope to embeddable courses.
+     */
+    public function scopeEmbeddable(Builder $query): Builder
+    {
+        return $query->where('is_embeddable', true);
     }
 
     /**
@@ -758,5 +844,121 @@ class MiniCourse extends Model
     protected function getModerationTextFields(): array
     {
         return ['title', 'description', 'rationale', 'expected_experience', 'objectives'];
+    }
+
+    // Lead Generation Methods
+
+    /**
+     * Get visibility options.
+     */
+    public static function getVisibilityOptions(): array
+    {
+        return [
+            self::VISIBILITY_PUBLIC => 'Public (SEO indexed, no sign-up required)',
+            self::VISIBILITY_GATED => 'Gated (Email required for access)',
+            self::VISIBILITY_PRIVATE => 'Private (Enrolled members only)',
+        ];
+    }
+
+    /**
+     * Check if course is gated (requires email).
+     */
+    public function isGated(): bool
+    {
+        return $this->visibility === self::VISIBILITY_GATED || $this->requires_email;
+    }
+
+    /**
+     * Check if course is publicly visible.
+     */
+    public function isPubliclyVisible(): bool
+    {
+        return in_array($this->visibility, [self::VISIBILITY_PUBLIC, self::VISIBILITY_GATED]);
+    }
+
+    /**
+     * Check if embedding is allowed for a domain.
+     */
+    public function canEmbedOn(string $domain): bool
+    {
+        if (!$this->is_embeddable) {
+            return false;
+        }
+
+        if (empty($this->allowed_embed_domains)) {
+            return true; // Allow all if no restrictions
+        }
+
+        return in_array($domain, $this->allowed_embed_domains);
+    }
+
+    /**
+     * Increment public view count.
+     */
+    public function incrementViewCount(): void
+    {
+        $this->increment('public_view_count');
+    }
+
+    /**
+     * Increment lead capture count.
+     */
+    public function incrementLeadCapture(): void
+    {
+        $this->increment('lead_capture_count');
+    }
+
+    /**
+     * Generate a unique slug from title.
+     */
+    public function generateSlug(): string
+    {
+        $slug = \Illuminate\Support\Str::slug($this->title);
+        $originalSlug = $slug;
+        $count = 1;
+
+        while (static::where('org_id', $this->org_id)
+                     ->where('slug', $slug)
+                     ->where('id', '!=', $this->id)
+                     ->exists()) {
+            $slug = "{$originalSlug}-{$count}";
+            $count++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Get the public URL for this course.
+     */
+    public function getPublicUrlAttribute(): ?string
+    {
+        if (!$this->isPubliclyVisible() || !$this->slug) {
+            return null;
+        }
+
+        return route('courses.public.show', [
+            'org' => $this->organization->slug ?? $this->org_id,
+            'course' => $this->slug,
+        ]);
+    }
+
+    /**
+     * Get embed code for this course.
+     */
+    public function getEmbedCode(int $width = 800, int $height = 600): ?string
+    {
+        if (!$this->is_embeddable) {
+            return null;
+        }
+
+        $embedUrl = route('courses.embed', ['course' => $this->id]);
+
+        return sprintf(
+            '<iframe src="%s" width="%d" height="%d" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>',
+            $embedUrl,
+            $width,
+            $height
+        );
     }
 }

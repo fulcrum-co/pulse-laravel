@@ -61,7 +61,7 @@
     @if($reports->isEmpty())
         <x-card>
             <div class="text-center py-12">
-                <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-pulse-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                     <x-icon name="chart-pie" class="w-8 h-8 text-pulse-orange-500" />
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-1">Create your first report</h3>

@@ -62,6 +62,12 @@ class HelpHintManager extends Component
         return PageHelpHint::POSITIONS;
     }
 
+    #[Computed]
+    public function contextUrls()
+    {
+        return PageHelpHint::CONTEXT_URLS;
+    }
+
     public function selectContext(string $context): void
     {
         $this->selectedContext = $context;

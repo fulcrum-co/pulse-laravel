@@ -850,6 +850,28 @@
             }
         });
 
+        // Mouse wheel zoom (Cmd/Ctrl + scroll) and horizontal pan (Option/Alt + scroll)
+        document.addEventListener('wheel', (e) => {
+            // Only handle if over the canvas area
+            const canvas = e.target.closest('[data-canvas-wrapper]');
+            if (!canvas) return;
+
+            // Cmd/Ctrl + scroll = zoom in/out
+            if (e.metaKey || e.ctrlKey) {
+                e.preventDefault();
+                if (e.deltaY < 0) {
+                    Livewire.dispatch('zoomIn');
+                } else {
+                    Livewire.dispatch('zoomOut');
+                }
+            }
+            // Option/Alt + scroll = horizontal pan
+            else if (e.altKey) {
+                e.preventDefault();
+                canvas.scrollLeft += e.deltaY;
+            }
+        }, { passive: false });
+
         // Chart.js management
         const chartInstances = {};
 

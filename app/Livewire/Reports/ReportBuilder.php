@@ -37,6 +37,9 @@ class ReportBuilder extends Component
         'chartsUpdated' => '$refresh',
         'exportPdf',
         'chartImagesReady',
+        'zoomIn',
+        'zoomOut',
+        'resetZoom',
     ];
 
     // Global filters
@@ -67,6 +70,9 @@ class ReportBuilder extends Component
 
     // Phase 6: Wow factor modals
     public bool $showShortcutsModal = false;
+
+    // Inline text editing state
+    public ?string $editingTextElementId = null;
 
     // Available templates
     public array $templates = [];
@@ -159,6 +165,23 @@ class ReportBuilder extends Component
         $hasAssignedOrgs = $user->organizations()->count() > 0;
 
         return ($user->isAdmin() && $hasDownstream) || ($user->primary_role === 'consultant' && $hasAssignedOrgs);
+    }
+
+    /**
+     * Start inline text editing on canvas.
+     */
+    public function startEditingText(string $elementId): void
+    {
+        $this->editingTextElementId = $elementId;
+        $this->selectedElementId = $elementId;
+    }
+
+    /**
+     * Finish inline text editing.
+     */
+    public function finishEditingText(): void
+    {
+        $this->editingTextElementId = null;
     }
 
     public function render()

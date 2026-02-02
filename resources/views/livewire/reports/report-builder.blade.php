@@ -507,7 +507,7 @@
         {{-- End hidden div --}}
 
         <!-- Canvas Area -->
-        <main class="flex-1 overflow-auto bg-gray-100 p-8" wire:click="selectElement(null)">
+        <main class="flex-1 overflow-auto bg-gray-100 p-8" data-canvas-wrapper wire:click="selectElement(null)">
             <!-- Zoom container -->
             <div class="canvas-zoom-container" style="transform: scale({{ $canvasZoom }}); transform-origin: top center; transition: transform 0.2s ease;">
                 <div
@@ -544,9 +544,27 @@
                     >
                         @switch($element['type'])
                             @case('text')
-                                <div class="w-full h-full overflow-hidden prose prose-sm max-w-none">
-                                    {!! $element['config']['content'] ?? '<p>Enter text...</p>' !!}
-                                </div>
+                                @if($editingTextElementId === $element['id'])
+                                    {{-- Edit mode: inline textarea --}}
+                                    <textarea
+                                        x-data="{ content: @js($element['config']['content'] ?? '') }"
+                                        x-init="$nextTick(() => { $el.focus(); $el.select(); })"
+                                        x-model="content"
+                                        @blur="$wire.updateTextContent('{{ $element['id'] }}', content); $wire.finishEditingText();"
+                                        @keydown.escape.prevent="$wire.finishEditingText()"
+                                        @click.stop
+                                        @dblclick.stop
+                                        class="w-full h-full p-2 border-2 border-pulse-orange-500 rounded resize-none focus:outline-none text-sm bg-white"
+                                    ></textarea>
+                                @else
+                                    {{-- View mode --}}
+                                    <div
+                                        class="w-full h-full overflow-hidden prose prose-sm max-w-none cursor-text"
+                                        @dblclick.stop="$wire.startEditingText('{{ $element['id'] }}')"
+                                    >
+                                        {!! $element['config']['content'] ?? '<p class="text-gray-400">Double-click to edit...</p>' !!}
+                                    </div>
+                                @endif
                                 @break
 
                             @case('chart')

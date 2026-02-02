@@ -732,7 +732,28 @@ Route::middleware('auth')->group(function () {
         Route::get('/moderation/task-flow', App\Livewire\Admin\ModerationTaskFlow::class)->name('admin.moderation.task-flow');
         Route::get('/moderation/dashboard', App\Livewire\Admin\ModerationDashboard::class)->name('admin.moderation.dashboard');
         Route::get('/moderation/{result}/edit', App\Livewire\Admin\ModerationEdit::class)->name('admin.moderation.edit');
+
+        // Help Center Admin - Tooltips only (other Help Center components to be added later)
+        Route::get('/help', App\Livewire\Admin\HelpHintManager::class)->name('admin.help');
+        Route::get('/help/hints', App\Livewire\Admin\HelpHintManager::class)->name('admin.help-hints');
     });
+
+    // Help Center API routes
+    Route::prefix('api/help')->group(function () {
+        Route::get('/page-hints', [App\Http\Controllers\Api\PageHelpController::class, 'allHints']);
+        Route::get('/page-hints/{context}', [App\Http\Controllers\Api\PageHelpController::class, 'pageHints']);
+
+        // CRUD for visual editor (admin only)
+        Route::post('/hints', [App\Http\Controllers\Api\PageHelpController::class, 'store']);
+        Route::put('/hints/{id}', [App\Http\Controllers\Api\PageHelpController::class, 'update']);
+        Route::delete('/hints/{id}', [App\Http\Controllers\Api\PageHelpController::class, 'destroy']);
+        Route::post('/hints/batch-update', [App\Http\Controllers\Api\PageHelpController::class, 'batchUpdate']);
+    });
+
+    // Public Help Center (placeholder - redirect to admin for now)
+    Route::get('/help', function () {
+        return redirect()->route('admin.help');
+    })->name('help.index');
 
     // Settings (placeholder)
     Route::get('/settings', function () {
