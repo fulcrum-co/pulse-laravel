@@ -2,106 +2,104 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Check if an index exists on a table.
+     */
+    private function indexExists(string $table, string $indexName): bool
+    {
+        $result = DB::select("
+            SELECT 1 FROM pg_indexes
+            WHERE tablename = ?
+            AND indexname = ?
+        ", [$table, $indexName]);
+
+        return count($result) > 0;
+    }
+
     /**
      * Run the migrations.
      */
     public function up(): void
     {
         // Add indexes to mini_courses table
-        Schema::table('mini_courses', function (Blueprint $table) {
-            // Index on published_at for sorting/filtering by publication date
-            if (!Schema::hasColumn('mini_courses', 'published_at')) {
-                return;
+        if (Schema::hasTable('mini_courses')) {
+            if (Schema::hasColumn('mini_courses', 'published_at') && ! $this->indexExists('mini_courses', 'mini_courses_published_at_index')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
+                    $table->index('published_at');
+                });
             }
 
-            try {
-                $table->index('published_at');
-            } catch (\Exception $e) {
-                // Index might already exist, continue
+            if (! $this->indexExists('mini_courses', 'mini_courses_created_at_index')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
+                    $table->index('created_at');
+                });
             }
 
-            // Index on created_at for sorting/filtering by creation date
-            try {
-                $table->index('created_at');
-            } catch (\Exception $e) {
-                // Index might already exist, continue
+            if (Schema::hasColumn('mini_courses', 'difficulty_level') && ! $this->indexExists('mini_courses', 'mini_courses_difficulty_level_index')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
+                    $table->index('difficulty_level');
+                });
             }
 
-            // Index on difficulty_level for filtering courses by difficulty
-            try {
-                $table->index('difficulty_level');
-            } catch (\Exception $e) {
-                // Index might already exist, continue
+            if (Schema::hasColumn('mini_courses', 'course_type') && ! $this->indexExists('mini_courses', 'mini_courses_course_type_index')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
+                    $table->index('course_type');
+                });
             }
 
-            // Index on course_type for filtering courses by type
-            try {
-                $table->index('course_type');
-            } catch (\Exception $e) {
-                // Index might already exist, continue
+            if (! $this->indexExists('mini_courses', 'mini_courses_org_id_created_at_index')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
+                    $table->index(['org_id', 'created_at']);
+                });
             }
 
-            // Composite index on (org_id, created_at) for org-based filtering with date sorting
-            try {
-                $table->index(['org_id', 'created_at']);
-            } catch (\Exception $e) {
-                // Index might already exist, continue
+            if (! $this->indexExists('mini_courses', 'mini_courses_org_id_status_created_at_index')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
+                    $table->index(['org_id', 'status', 'created_at']);
+                });
             }
-
-            // Composite index on (org_id, status, created_at) for complex org queries
-            try {
-                $table->index(['org_id', 'status', 'created_at']);
-            } catch (\Exception $e) {
-                // Index might already exist, continue
-            }
-        });
+        }
 
         // Add indexes to content_moderation_results table
-        Schema::table('content_moderation_results', function (Blueprint $table) {
-            // Index on created_at for sorting/filtering by creation date
-            // Note: this index is already defined in the original migration, but adding it here ensures consistency
-            try {
-                $table->index('created_at');
-            } catch (\Exception $e) {
-                // Index might already exist, continue
+        if (Schema::hasTable('content_moderation_results')) {
+            if (! $this->indexExists('content_moderation_results', 'content_moderation_results_created_at_index')) {
+                Schema::table('content_moderation_results', function (Blueprint $table) {
+                    $table->index('created_at');
+                });
             }
 
-            // Composite index on (moderatable_type, moderatable_id) for polymorphic relationship queries
-            // Note: Original migration uses (moderatable_type, moderatable_id, status), but this adds the base composite
-            try {
-                $table->index(['moderatable_type', 'moderatable_id']);
-            } catch (\Exception $e) {
-                // Index might already exist, continue
+            if (! $this->indexExists('content_moderation_results', 'content_moderation_results_moderatable_type_moderatable_id_index')) {
+                Schema::table('content_moderation_results', function (Blueprint $table) {
+                    $table->index(['moderatable_type', 'moderatable_id']);
+                });
             }
 
-            // Index on status for filtering by moderation status
-            try {
-                $table->index('status');
-            } catch (\Exception $e) {
-                // Index might already exist, continue
+            if (! $this->indexExists('content_moderation_results', 'content_moderation_results_status_index')) {
+                Schema::table('content_moderation_results', function (Blueprint $table) {
+                    $table->index('status');
+                });
             }
-        });
+        }
 
         // Add indexes to resources table
-        Schema::table('resources', function (Blueprint $table) {
-            // Index on created_at for sorting/filtering by creation date
-            try {
-                $table->index('created_at');
-            } catch (\Exception $e) {
-                // Index might already exist, continue
+        if (Schema::hasTable('resources')) {
+            if (! $this->indexExists('resources', 'resources_created_at_index')) {
+                Schema::table('resources', function (Blueprint $table) {
+                    $table->index('created_at');
+                });
             }
 
-            // Composite index on (org_id, created_at) for org-based filtering with date sorting
-            try {
-                $table->index(['org_id', 'created_at']);
-            } catch (\Exception $e) {
-                // Index might already exist, continue
+            if (! $this->indexExists('resources', 'resources_org_id_created_at_index')) {
+                Schema::table('resources', function (Blueprint $table) {
+                    $table->index(['org_id', 'created_at']);
+                });
             }
-        });
+        }
     }
 
     /**
@@ -109,79 +107,68 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Drop indexes from mini_courses table
-        Schema::table('mini_courses', function (Blueprint $table) {
-            try {
-                $table->dropIndex('mini_courses_published_at_index');
-            } catch (\Exception $e) {
-                // Index doesn't exist, continue
+        if (Schema::hasTable('mini_courses')) {
+            if ($this->indexExists('mini_courses', 'mini_courses_published_at_index')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
+                    $table->dropIndex('mini_courses_published_at_index');
+                });
             }
+            if ($this->indexExists('mini_courses', 'mini_courses_created_at_index')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
+                    $table->dropIndex('mini_courses_created_at_index');
+                });
+            }
+            if ($this->indexExists('mini_courses', 'mini_courses_difficulty_level_index')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
+                    $table->dropIndex('mini_courses_difficulty_level_index');
+                });
+            }
+            if ($this->indexExists('mini_courses', 'mini_courses_course_type_index')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
+                    $table->dropIndex('mini_courses_course_type_index');
+                });
+            }
+            if ($this->indexExists('mini_courses', 'mini_courses_org_id_created_at_index')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
+                    $table->dropIndex('mini_courses_org_id_created_at_index');
+                });
+            }
+            if ($this->indexExists('mini_courses', 'mini_courses_org_id_status_created_at_index')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
+                    $table->dropIndex('mini_courses_org_id_status_created_at_index');
+                });
+            }
+        }
 
-            try {
-                $table->dropIndex('mini_courses_created_at_index');
-            } catch (\Exception $e) {
-                // Index doesn't exist, continue
+        if (Schema::hasTable('content_moderation_results')) {
+            if ($this->indexExists('content_moderation_results', 'content_moderation_results_created_at_index')) {
+                Schema::table('content_moderation_results', function (Blueprint $table) {
+                    $table->dropIndex('content_moderation_results_created_at_index');
+                });
             }
+            if ($this->indexExists('content_moderation_results', 'content_moderation_results_moderatable_type_moderatable_id_index')) {
+                Schema::table('content_moderation_results', function (Blueprint $table) {
+                    $table->dropIndex('content_moderation_results_moderatable_type_moderatable_id_index');
+                });
+            }
+            if ($this->indexExists('content_moderation_results', 'content_moderation_results_status_index')) {
+                Schema::table('content_moderation_results', function (Blueprint $table) {
+                    $table->dropIndex('content_moderation_results_status_index');
+                });
+            }
+        }
 
-            try {
-                $table->dropIndex('mini_courses_difficulty_level_index');
-            } catch (\Exception $e) {
-                // Index doesn't exist, continue
+        if (Schema::hasTable('resources')) {
+            if ($this->indexExists('resources', 'resources_created_at_index')) {
+                Schema::table('resources', function (Blueprint $table) {
+                    $table->dropIndex('resources_created_at_index');
+                });
             }
-
-            try {
-                $table->dropIndex('mini_courses_course_type_index');
-            } catch (\Exception $e) {
-                // Index doesn't exist, continue
+            if ($this->indexExists('resources', 'resources_org_id_created_at_index')) {
+                Schema::table('resources', function (Blueprint $table) {
+                    $table->dropIndex('resources_org_id_created_at_index');
+                });
             }
-
-            try {
-                $table->dropIndex('mini_courses_org_id_created_at_index');
-            } catch (\Exception $e) {
-                // Index doesn't exist, continue
-            }
-
-            try {
-                $table->dropIndex('mini_courses_org_id_status_created_at_index');
-            } catch (\Exception $e) {
-                // Index doesn't exist, continue
-            }
-        });
-
-        // Drop indexes from content_moderation_results table
-        Schema::table('content_moderation_results', function (Blueprint $table) {
-            try {
-                $table->dropIndex('content_moderation_results_created_at_index');
-            } catch (\Exception $e) {
-                // Index doesn't exist, continue
-            }
-
-            try {
-                $table->dropIndex('content_moderation_results_moderatable_type_moderatable_id_index');
-            } catch (\Exception $e) {
-                // Index doesn't exist, continue
-            }
-
-            try {
-                $table->dropIndex('content_moderation_results_status_index');
-            } catch (\Exception $e) {
-                // Index doesn't exist, continue
-            }
-        });
-
-        // Drop indexes from resources table
-        Schema::table('resources', function (Blueprint $table) {
-            try {
-                $table->dropIndex('resources_created_at_index');
-            } catch (\Exception $e) {
-                // Index doesn't exist, continue
-            }
-
-            try {
-                $table->dropIndex('resources_org_id_created_at_index');
-            } catch (\Exception $e) {
-                // Index doesn't exist, continue
-            }
-        });
+        }
     }
 };

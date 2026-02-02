@@ -2,11 +2,26 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Check if a foreign key constraint exists.
+     */
+    private function foreignKeyExists(string $table, string $constraintName): bool
+    {
+        $result = DB::select("
+            SELECT 1 FROM information_schema.table_constraints
+            WHERE constraint_name = ?
+            AND table_name = ?
+            AND constraint_type = 'FOREIGN KEY'
+        ", [$constraintName, $table]);
+
+        return count($result) > 0;
+    }
+
     /**
      * Run the migrations.
      */
@@ -14,18 +29,14 @@ return new class extends Migration
     {
         // Add foreign key: mini_courses.current_version_id -> mini_course_versions.id
         if (Schema::hasTable('mini_courses') && Schema::hasTable('mini_course_versions')) {
-            Schema::table('mini_courses', function (Blueprint $table) {
-                try {
-                    // Check if the foreign key already exists before adding it
+            if (! $this->foreignKeyExists('mini_courses', 'mini_courses_current_version_id_foreign')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
                     $table->foreign('current_version_id')
                         ->references('id')
                         ->on('mini_course_versions')
                         ->nullOnDelete();
-                } catch (\Exception $e) {
-                    // Foreign key may already exist, log and continue
-                    \Log::warning('Foreign key constraint may already exist: ' . $e->getMessage());
-                }
-            });
+                });
+            }
         }
     }
 
@@ -34,16 +45,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Drop the foreign key constraint if it exists
         if (Schema::hasTable('mini_courses')) {
-            Schema::table('mini_courses', function (Blueprint $table) {
-                try {
+            if ($this->foreignKeyExists('mini_courses', 'mini_courses_current_version_id_foreign')) {
+                Schema::table('mini_courses', function (Blueprint $table) {
                     $table->dropForeign(['current_version_id']);
-                } catch (\Exception $e) {
-                    // Foreign key may not exist, log and continue
-                    \Log::warning('Could not drop foreign key constraint: ' . $e->getMessage());
-                }
-            });
+                });
+            }
         }
     }
 };
