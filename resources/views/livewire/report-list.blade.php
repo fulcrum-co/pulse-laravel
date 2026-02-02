@@ -97,17 +97,17 @@
 
                         <!-- Preview placeholder (like dashboard widget grid) -->
                         <div class="grid grid-cols-4 gap-1 h-12 mb-2">
-                            <div class="bg-gradient-to-br from-gray-100 to-gray-50 rounded flex items-center justify-center">
-                                <x-icon name="chart-bar" class="w-3 h-3 text-gray-300" />
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded flex items-center justify-center">
+                                <x-icon name="chart-bar" class="w-3 h-3 text-blue-400" />
                             </div>
-                            <div class="bg-gradient-to-br from-gray-100 to-gray-50 rounded flex items-center justify-center">
-                                <x-icon name="document-text" class="w-3 h-3 text-gray-300" />
+                            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded flex items-center justify-center">
+                                <x-icon name="document-text" class="w-3 h-3 text-green-400" />
                             </div>
-                            <div class="bg-gradient-to-br from-gray-100 to-gray-50 rounded flex items-center justify-center">
-                                <x-icon name="table-cells" class="w-3 h-3 text-gray-300" />
+                            <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded flex items-center justify-center">
+                                <x-icon name="table-cells" class="w-3 h-3 text-purple-400" />
                             </div>
-                            <div class="bg-gradient-to-br from-gray-100 to-gray-50 rounded flex items-center justify-center">
-                                <x-icon name="chart-pie" class="w-3 h-3 text-gray-300" />
+                            <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded flex items-center justify-center">
+                                <x-icon name="chart-pie" class="w-3 h-3 text-orange-400" />
                             </div>
                         </div>
 

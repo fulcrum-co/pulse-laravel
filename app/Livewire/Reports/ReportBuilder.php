@@ -4,9 +4,12 @@ namespace App\Livewire\Reports;
 
 use App\Livewire\Reports\Concerns\WithCanvasInteraction;
 use App\Livewire\Reports\Concerns\WithChartData;
+use App\Livewire\Reports\Concerns\WithCollaboration;
+use App\Livewire\Reports\Concerns\WithComments;
 use App\Livewire\Reports\Concerns\WithElementDefaults;
 use App\Livewire\Reports\Concerns\WithElementManagement;
 use App\Livewire\Reports\Concerns\WithHistory;
+use App\Livewire\Reports\Concerns\WithMultiPageSupport;
 use App\Livewire\Reports\Concerns\WithReportPersistence;
 use App\Livewire\Reports\Concerns\WithSmartBlocks;
 use App\Models\CustomReport;
@@ -19,9 +22,12 @@ class ReportBuilder extends Component
 {
     use WithCanvasInteraction;
     use WithChartData;
+    use WithCollaboration;
+    use WithComments;
     use WithElementDefaults;
     use WithElementManagement;
     use WithHistory;
+    use WithMultiPageSupport;
     use WithReportPersistence;
     use WithSmartBlocks;
 
@@ -37,9 +43,23 @@ class ReportBuilder extends Component
         'chartsUpdated' => '$refresh',
         'exportPdf',
         'chartImagesReady',
+        // Zoom events
         'zoomIn',
         'zoomOut',
         'resetZoom',
+        // Multi-page events
+        'switchToPage',
+        'addPage',
+        'deletePage',
+        'duplicatePage',
+        'reorderPages',
+        // Collaboration events
+        'broadcastCursor',
+        'broadcastSelection',
+        // Comment events
+        'addComment',
+        'resolveComment',
+        'deleteComment',
     ];
 
     // Global filters
@@ -47,15 +67,24 @@ class ReportBuilder extends Component
         'date_range' => '6_months',
         'start_date' => null,
         'end_date' => null,
-        'scope' => 'individual',
-        'contact_type' => 'student',
+        'scope' => 'individual', // individual, contact_list, organization
+        'contact_type' => 'contact',
         'contact_id' => null,
+        'selected_contacts' => [], // Multi-select contacts for individual scope
+        'contact_list_id' => null, // Selected contact list for contact_list scope
         'grade_level' => null,
         'risk_level' => null,
     ];
 
+    // Contact search query for filtering
+    public string $contactSearchQuery = '';
+
     // UI state
     public bool $showTemplateGallery = false;
+
+    public bool $showCanvasSelector = false; // Step 1: Choose canvas type
+
+    public string $canvasMode = 'document'; // document or dashboard
 
     public bool $showBrandingPanel = false;
 
@@ -83,11 +112,57 @@ class ReportBuilder extends Component
 
         if ($report && $report->exists) {
             $this->loadReport($report);
+            // Initialize collaboration features
+            $this->initializeCollaboration();
+            $this->loadComments();
         } else {
-            $this->showTemplateGallery = true;
+            // Show canvas type selector first for new reports
+            $this->showCanvasSelector = true;
             $this->filters['start_date'] = now()->subMonths(6)->format('Y-m-d');
             $this->filters['end_date'] = now()->format('Y-m-d');
+            // Initialize with a blank page
+            $this->initializePages();
         }
+    }
+
+    public function selectCanvasMode(string $mode): void
+    {
+        $this->canvasMode = $mode;
+        $this->showCanvasSelector = false;
+        $this->showTemplateGallery = true;
+
+        // Set default page settings based on canvas mode
+        if ($mode === 'dashboard') {
+            // Dashboard: landscape, wider format
+            $this->pageSettings['orientation'] = 'landscape';
+            $this->pageSettings['size'] = 'letter';
+            // Update current page dimensions for dashboard
+            if (isset($this->pages[$this->currentPageIndex])) {
+                $this->pages[$this->currentPageIndex]['settings'] = [
+                    'width' => 1056, // Landscape
+                    'height' => 816,
+                ];
+            }
+        } else {
+            // Document: portrait, standard format
+            $this->pageSettings['orientation'] = 'portrait';
+            $this->pageSettings['size'] = 'letter';
+            if (isset($this->pages[$this->currentPageIndex])) {
+                $this->pages[$this->currentPageIndex]['settings'] = [
+                    'width' => 816, // Portrait
+                    'height' => 1056,
+                ];
+            }
+        }
+    }
+
+    /**
+     * Go back from template gallery to canvas type selector
+     */
+    public function backToCanvasSelector(): void
+    {
+        $this->showTemplateGallery = false;
+        $this->showCanvasSelector = true;
     }
 
     public function loadTemplate(string $templateId): void
@@ -95,14 +170,26 @@ class ReportBuilder extends Component
         $template = collect($this->templates)->firstWhere('id', $templateId);
 
         if ($template) {
-            $this->elements = $template['layout'] ?? [];
+            $elements = $template['layout'] ?? [];
             $this->reportType = $template['type'] ?? 'custom';
             $this->reportName = $template['name'] ?? 'Untitled Report';
             $this->showTemplateGallery = false;
 
-            foreach ($this->elements as &$element) {
+            foreach ($elements as &$element) {
                 $element['id'] = Str::uuid()->toString();
             }
+
+            // Initialize as single-page with template elements
+            $this->pages = [
+                [
+                    'id' => 'page-1',
+                    'name' => 'Page 1',
+                    'elements' => $elements,
+                    'settings' => ['width' => 816, 'height' => 1056],
+                ],
+            ];
+            $this->currentPageIndex = 0;
+            $this->elements = $elements;
 
             $this->pushHistory();
         }
@@ -113,6 +200,16 @@ class ReportBuilder extends Component
         $this->elements = [];
         $this->reportType = 'custom';
         $this->showTemplateGallery = false;
+        // Reset to single blank page
+        $this->pages = [
+            [
+                'id' => 'page-1',
+                'name' => 'Page 1',
+                'elements' => [],
+                'settings' => ['width' => 816, 'height' => 1056],
+            ],
+        ];
+        $this->currentPageIndex = 0;
         $this->pushHistory();
     }
 
@@ -126,9 +223,20 @@ class ReportBuilder extends Component
     {
         $user = auth()->user();
 
-        return Student::where('org_id', $user->org_id)
-            ->with('user')
-            ->limit(100)
+        $query = Student::where('org_id', $user->org_id)
+            ->with('user');
+
+        // Apply search filter if present
+        if (! empty($this->contactSearchQuery)) {
+            $search = $this->contactSearchQuery;
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->limit(100)
             ->get()
             ->map(fn ($s) => [
                 'id' => $s->id,
@@ -137,7 +245,57 @@ class ReportBuilder extends Component
             ->toArray();
     }
 
-    public function setContactFilter(?int $contactId, string $contactType = 'student'): void
+    #[Computed]
+    public function availableContactLists(): array
+    {
+        $user = auth()->user();
+
+        // Check if ContactList model exists, otherwise return empty
+        if (! class_exists(\App\Models\ContactList::class)) {
+            return [];
+        }
+
+        return \App\Models\ContactList::where('org_id', $user->org_id)
+            ->orderBy('name')
+            ->get()
+            ->map(fn ($list) => [
+                'id' => $list->id,
+                'name' => $list->name,
+                'count' => $list->contacts_count ?? $list->contacts()->count(),
+            ])
+            ->toArray();
+    }
+
+    public function createContactList(string $name): void
+    {
+        if (empty(trim($name))) {
+            $this->dispatch('notify', type: 'error', message: 'Please enter a list name');
+
+            return;
+        }
+
+        // Check if ContactList model exists
+        if (! class_exists(\App\Models\ContactList::class)) {
+            $this->dispatch('notify', type: 'error', message: 'Contact lists are not available');
+
+            return;
+        }
+
+        $user = auth()->user();
+
+        $list = \App\Models\ContactList::create([
+            'org_id' => $user->org_id,
+            'name' => trim($name),
+            'created_by' => $user->id,
+        ]);
+
+        // Select the newly created list
+        $this->filters['contact_list_id'] = $list->id;
+
+        $this->dispatch('notify', type: 'success', message: 'Contact list created');
+    }
+
+    public function setContactFilter(?int $contactId, string $contactType = 'contact'): void
     {
         $this->filters['contact_id'] = $contactId;
         $this->filters['contact_type'] = $contactType;

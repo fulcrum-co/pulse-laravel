@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('page_help_hints')) {
+            return;
+        }
+
         Schema::create('page_help_hints', function (Blueprint $table) {
             $table->id();
             $table->foreignId('org_id')->nullable()->constrained('organizations')->nullOnDelete();

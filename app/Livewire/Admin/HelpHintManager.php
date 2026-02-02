@@ -20,6 +20,7 @@ class HelpHintManager extends Component
     public string $selector = '';
     public string $title = '';
     public string $description = '';
+    public string $videoUrl = '';
     public string $position = 'bottom';
     public int $sortOrder = 0;
     public bool $isActive = true;
@@ -31,6 +32,7 @@ class HelpHintManager extends Component
             'selector' => 'required|string|max:255',
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
+            'videoUrl' => 'nullable|url|max:500',
             'position' => 'required|in:top,bottom,left,right',
             'sortOrder' => 'required|integer|min:0',
             'isActive' => 'boolean',
@@ -96,6 +98,7 @@ class HelpHintManager extends Component
         $this->selector = $hint->selector;
         $this->title = $hint->title;
         $this->description = $hint->description;
+        $this->videoUrl = $hint->video_url ?? '';
         $this->position = $hint->position;
         $this->sortOrder = $hint->sort_order;
         $this->isActive = $hint->is_active;
@@ -115,6 +118,7 @@ class HelpHintManager extends Component
             'selector' => $this->selector,
             'title' => $this->title,
             'description' => $this->description,
+            'video_url' => $this->videoUrl ?: null,
             'position' => $this->position,
             'sort_order' => $this->sortOrder,
             'is_active' => $this->isActive,
@@ -184,10 +188,24 @@ class HelpHintManager extends Component
         $this->selector = '';
         $this->title = '';
         $this->description = '';
+        $this->videoUrl = '';
         $this->position = 'bottom';
         $this->sortOrder = 0;
         $this->isActive = true;
         $this->resetValidation();
+    }
+
+    /**
+     * Receive selector from element picker window.
+     */
+    public function receiveSelector(string $selector, ?string $sectionId = null): void
+    {
+        $this->selector = $selector;
+
+        // Auto-generate section ID from selector if not in edit mode
+        if (! $this->editMode && $sectionId) {
+            $this->section = $sectionId;
+        }
     }
 
     public function render()

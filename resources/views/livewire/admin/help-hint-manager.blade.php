@@ -24,7 +24,7 @@
                 class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
             >
                 <x-icon name="plus" class="w-4 h-4" />
-                Add Hint
+                Add Tooltip
             </button>
         </div>
     </div>
@@ -67,7 +67,7 @@
                     class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700"
                 >
                     <x-icon name="plus" class="w-4 h-4" />
-                    Add your first hint
+                    Add your first tooltip
                 </button>
             </div>
         @else
@@ -91,7 +91,16 @@
                                 <code class="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">{{ $hint->section }}</code>
                             </td>
                             <td class="px-4 py-3">
-                                <div class="text-sm font-medium text-gray-900">{{ $hint->title }}</div>
+                                <div class="flex items-center gap-2">
+                                    <div class="text-sm font-medium text-gray-900">{{ $hint->title }}</div>
+                                    @if($hint->video_url)
+                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-purple-100 text-purple-600 text-xs rounded-full" title="Has video">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                                        </svg>
+                                    </span>
+                                    @endif
+                                </div>
                                 <div class="text-xs text-gray-500 truncate max-w-xs">{{ Str::limit($hint->description, 60) }}</div>
                             </td>
                             <td class="px-4 py-3">
@@ -156,7 +165,26 @@
     @if($showModal)
     <div
         class="fixed inset-0 z-50 overflow-y-auto"
-        x-data="{ open: true }"
+        x-data="{
+            open: true,
+            contextUrls: @js($this->contextUrls),
+            selectedContext: @js($selectedContext),
+
+            openElementPicker() {
+                const targetUrl = this.contextUrls[this.selectedContext] || '/';
+                const pickerUrl = targetUrl + (targetUrl.includes('?') ? '&' : '?') + 'picker=true';
+                window.open(pickerUrl, 'element-picker', 'width=1200,height=800');
+            },
+
+            init() {
+                window.addEventListener('message', (event) => {
+                    if (event.data.type === 'element-picker-selection') {
+                        @this.receiveSelector(event.data.selector, event.data.sectionId);
+                    }
+                });
+            }
+        }"
+        x-init="init()"
         x-show="open"
         x-transition:enter="ease-out duration-300"
         x-transition:enter-start="opacity-0"
@@ -200,13 +228,27 @@
                             {{-- Selector --}}
                             <div>
                                 <label for="selector" class="block text-sm font-medium text-gray-700 mb-1">CSS Selector</label>
-                                <input
-                                    type="text"
-                                    id="selector"
-                                    wire:model="selector"
-                                    placeholder='e.g., [data-help="search-reports"]'
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm font-mono"
-                                />
+                                <div class="flex gap-2">
+                                    <input
+                                        type="text"
+                                        id="selector"
+                                        wire:model="selector"
+                                        placeholder='e.g., [data-help="search-reports"]'
+                                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm font-mono"
+                                    />
+                                    <button
+                                        type="button"
+                                        @click="openElementPicker()"
+                                        class="px-3 py-2 bg-purple-100 text-purple-700 text-sm font-medium rounded-lg hover:bg-purple-200 transition-colors flex items-center gap-1.5"
+                                        title="Pick element visually"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                                        </svg>
+                                        Pick
+                                    </button>
+                                </div>
+                                <p class="mt-1 text-xs text-gray-500">Click "Pick" to visually select an element on the page</p>
                                 @error('selector') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                             </div>
 
@@ -234,6 +276,28 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm"
                                 ></textarea>
                                 @error('description') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            </div>
+
+                            {{-- Video URL --}}
+                            <div>
+                                <label for="videoUrl" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Video URL
+                                    <span class="text-gray-400 font-normal">(optional)</span>
+                                </label>
+                                <div class="relative">
+                                    <input
+                                        type="url"
+                                        id="videoUrl"
+                                        wire:model="videoUrl"
+                                        placeholder="Paste Loom, YouTube, or Vimeo URL"
+                                        class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm"
+                                    />
+                                    <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                @error('videoUrl') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Position & Sort Order --}}
@@ -289,7 +353,7 @@
                             type="submit"
                             class="px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
                         >
-                            {{ $editMode ? 'Save Changes' : 'Add Hint' }}
+                            {{ $editMode ? 'Save Changes' : 'Add Tooltip' }}
                         </button>
                     </div>
                 </form>

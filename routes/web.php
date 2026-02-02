@@ -784,6 +784,12 @@ Route::prefix('api/help')->middleware(['web', 'auth'])->group(function () {
     Route::get('/search', [App\Http\Controllers\Api\HelpController::class, 'search']);
     Route::get('/page-hints', [App\Http\Controllers\Api\PageHelpController::class, 'allHints']);
     Route::get('/page-hints/{context}', [App\Http\Controllers\Api\PageHelpController::class, 'pageHints']);
+
+    // Visual Editor CRUD routes (admin only)
+    Route::post('/hints', [App\Http\Controllers\Api\PageHelpController::class, 'store']);
+    Route::put('/hints/{id}', [App\Http\Controllers\Api\PageHelpController::class, 'update']);
+    Route::delete('/hints/{id}', [App\Http\Controllers\Api\PageHelpController::class, 'destroy']);
+    Route::post('/hints/batch-update', [App\Http\Controllers\Api\PageHelpController::class, 'batchUpdate']);
 });
 
 // Admin Routes (requires admin role)

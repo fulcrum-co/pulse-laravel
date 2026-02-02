@@ -6,6 +6,8 @@ use App\Models\CustomReport;
 
 trait WithReportPersistence
 {
+    public ?CustomReport $report = null;
+
     public ?string $reportId = null;
 
     public string $reportName = 'Untitled Report';
@@ -41,16 +43,31 @@ trait WithReportPersistence
 
     public function loadReport(CustomReport $report): void
     {
+        $this->report = $report;
         $this->reportId = (string) $report->id;
         $this->reportName = $report->report_name ?? 'Untitled Report';
         $this->reportDescription = $report->report_description ?? '';
         $this->reportType = $report->report_type ?? 'custom';
         $this->status = $report->status ?? 'draft';
-        $this->elements = $report->report_layout ?? [];
         $this->pageSettings = array_merge($this->pageSettings, $report->page_settings ?? []);
         $this->branding = array_merge($this->branding, $report->branding ?? []);
         $this->filters = array_merge($this->filters, $report->filters ?? []);
         $this->isLive = $report->is_live ?? true;
+
+        // Check for multi-page structure
+        $layout = $report->report_layout ?? [];
+        if (isset($layout['pages']) && is_array($layout['pages'])) {
+            // Multi-page report
+            if (method_exists($this, 'initializePages')) {
+                $this->initializePages();
+            }
+        } else {
+            // Legacy single-page report
+            $this->elements = $layout;
+            if (method_exists($this, 'initializePages')) {
+                $this->initializePages();
+            }
+        }
 
         $this->pushHistory();
     }
@@ -59,6 +76,15 @@ trait WithReportPersistence
     {
         $user = auth()->user();
 
+        // Get layout data - use multi-page structure if available
+        $layoutData = $this->elements;
+        if (method_exists($this, 'getPagesForSave') && ! empty($this->pages)) {
+            $layoutData = [
+                'pages' => $this->getPagesForSave(),
+                'currentPageIndex' => $this->currentPageIndex ?? 0,
+            ];
+        }
+
         $data = [
             'org_id' => $user->org_id,
             'created_by' => $user->id,
@@ -66,7 +92,7 @@ trait WithReportPersistence
             'report_name' => $this->reportName,
             'report_description' => $this->reportDescription,
             'report_type' => $this->reportType,
-            'report_layout' => $this->elements,
+            'report_layout' => $layoutData,
             'page_settings' => $this->pageSettings,
             'branding' => $this->branding,
             'filters' => $this->filters,
@@ -85,6 +111,7 @@ trait WithReportPersistence
             $data['status'] = CustomReport::STATUS_DRAFT;
             $report = CustomReport::create($data);
             $this->reportId = (string) $report->id;
+            $this->report = $report;
         }
 
         $this->dispatch('report-saved', reportId: $this->reportId);

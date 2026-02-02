@@ -124,6 +124,109 @@ class CustomReport extends Model
     }
 
     /**
+     * Get the collaborators for this report.
+     */
+    public function collaborators(): HasMany
+    {
+        return $this->hasMany(ReportCollaborator::class, 'custom_report_id');
+    }
+
+    /**
+     * Get the comments on this report.
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(ReportComment::class, 'custom_report_id');
+    }
+
+    /**
+     * Get active collaborators (seen in last 5 minutes).
+     */
+    public function activeCollaborators()
+    {
+        return $this->collaborators()->active()->with('user');
+    }
+
+    /**
+     * Get top-level comments (not replies).
+     */
+    public function topLevelComments()
+    {
+        return $this->comments()->topLevel()->with(['user', 'replies.user']);
+    }
+
+    /**
+     * Add a collaborator to this report.
+     */
+    public function addCollaborator(int $userId, string $role = 'editor', ?int $invitedBy = null): ReportCollaborator
+    {
+        return $this->collaborators()->firstOrCreate(
+            ['user_id' => $userId],
+            [
+                'role' => $role,
+                'invited_at' => now(),
+                'invited_by' => $invitedBy,
+            ]
+        );
+    }
+
+    /**
+     * Remove a collaborator from this report.
+     */
+    public function removeCollaborator(int $userId): bool
+    {
+        return $this->collaborators()->where('user_id', $userId)->delete() > 0;
+    }
+
+    /**
+     * Check if a user is a collaborator.
+     */
+    public function isCollaborator(int $userId): bool
+    {
+        return $this->collaborators()->where('user_id', $userId)->exists();
+    }
+
+    /**
+     * Check if a user can edit this report.
+     */
+    public function canUserEdit(int $userId): bool
+    {
+        // Creator can always edit
+        if ($this->created_by === $userId) {
+            return true;
+        }
+
+        // Check collaborator permissions
+        $collaborator = $this->collaborators()->where('user_id', $userId)->first();
+
+        return $collaborator && $collaborator->canEdit();
+    }
+
+    /**
+     * Check if a user can view this report.
+     */
+    public function canUserView(int $userId): bool
+    {
+        // Creator can always view
+        if ($this->created_by === $userId) {
+            return true;
+        }
+
+        // Check collaborator
+        if ($this->isCollaborator($userId)) {
+            return true;
+        }
+
+        // Check same organization
+        $user = User::find($userId);
+        if ($user && $user->org_id === $this->org_id) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Push this report to another organization.
      * Creates a copy as draft for the target org to review and customize.
      */

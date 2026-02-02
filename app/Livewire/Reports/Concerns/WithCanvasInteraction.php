@@ -7,11 +7,21 @@ trait WithCanvasInteraction
     // Canvas settings
     public int $gridSize = 20;
 
-    public bool $showGrid = true;
+    public bool $showGrid = false;
 
     public bool $snapToGrid = true;
 
     public float $canvasZoom = 1.0;
+
+    // Zoom presets for dropdown
+    public array $zoomPresets = [
+        ['value' => 0.5, 'label' => '50%'],
+        ['value' => 0.75, 'label' => '75%'],
+        ['value' => 1.0, 'label' => '100%'],
+        ['value' => 1.25, 'label' => '125%'],
+        ['value' => 1.5, 'label' => '150%'],
+        ['value' => 2.0, 'label' => '200%'],
+    ];
 
     // Multi-select support
     public array $selectedElementIds = [];

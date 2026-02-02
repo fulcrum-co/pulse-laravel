@@ -1,3 +1,4 @@
+@use('App\Services\RolePermissions')
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -69,6 +70,14 @@
     <style>
         [x-cloak] { display: none !important; }
 
+        /* Smooth sidebar transition */
+        .sidebar-transition {
+            transition: width 0.2s ease-in-out;
+        }
+        .sidebar-content-transition {
+            transition: opacity 0.15s ease-in-out;
+        }
+
         /* Canvas Grid - 20px spacing for better alignment */
         .canvas-grid {
             background-image:
@@ -76,6 +85,18 @@
                 linear-gradient(to bottom, #f1f5f9 1px, transparent 1px);
             background-size: 20px 20px;
             position: relative;
+        }
+
+        /* Clean canvas page styling (when grid is hidden) */
+        .canvas-page {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.08);
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .canvas-page:not(.canvas-grid) {
+            border: 1px solid #e5e7eb;
         }
 
         /* Enhanced selection styling */
@@ -381,8 +402,254 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 overflow-hidden">
-    <livewire:reports.report-builder :report="$report" :templates="$templates" />
+<body class="bg-gray-100 overflow-hidden {{ session('demo_role_override') && session('demo_role_override') !== 'actual' ? 'pt-10' : '' }}">
+    @php $inDemoMode = session('demo_role_override') && session('demo_role_override') !== 'actual'; @endphp
+
+    <div x-data="{
+            pulseNavCollapsed: localStorage.getItem('pulseNavCollapsed') === 'true' || true,
+            hoveredItem: null
+         }"
+         x-init="$watch('pulseNavCollapsed', val => localStorage.setItem('pulseNavCollapsed', val))"
+         class="flex h-screen">
+
+        <!-- Pulse Main Navigation Sidebar -->
+        <aside :class="pulseNavCollapsed ? 'w-16' : 'w-56'"
+               class="sidebar-transition flex flex-col flex-shrink-0 {{ $inDemoMode ? 'bg-purple-50 border-r-4 border-purple-400' : 'bg-white border-r border-gray-200' }} z-40">
+
+            <!-- Logo & Toggle -->
+            <div class="px-3 py-3 {{ $inDemoMode ? 'border-b border-purple-200' : 'border-b border-gray-200' }}">
+                <div class="flex items-center justify-between">
+                    <a href="/dashboard" class="flex items-center">
+                        <span class="text-xl font-bold {{ $inDemoMode ? 'text-purple-600' : 'text-pulse-orange-500' }}">
+                            <span x-show="!pulseNavCollapsed">Pulse</span>
+                            <span x-show="pulseNavCollapsed" class="text-lg">P</span>
+                        </span>
+                    </a>
+                    <button @click="pulseNavCollapsed = !pulseNavCollapsed"
+                            class="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg x-show="!pulseNavCollapsed" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+                        </svg>
+                        <svg x-show="pulseNavCollapsed" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
+                @if($inDemoMode)
+                <div x-show="!pulseNavCollapsed" class="mt-2 px-2 py-1 bg-purple-100 rounded text-xs text-purple-700 font-medium text-center">
+                    Viewing as: {{ ucfirst(str_replace('_', ' ', session('demo_role_override'))) }}
+                </div>
+                @endif
+            </div>
+
+            <!-- Quick Access -->
+            <div class="py-2 border-b border-gray-200">
+                <!-- Expanded: Compact Grid -->
+                <div x-show="!pulseNavCollapsed" class="px-2">
+                    <div class="grid grid-cols-2 gap-1">
+                        @if(RolePermissions::currentUserCanAccess('home'))
+                        <a href="/dashboard"
+                           class="flex flex-col items-center justify-center p-2 rounded-lg border transition-colors border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 text-xs">
+                            <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                            </svg>
+                            Home
+                        </a>
+                        @endif
+                        @if(RolePermissions::currentUserCanAccess('contacts'))
+                        <a href="/contacts"
+                           class="flex flex-col items-center justify-center p-2 rounded-lg border transition-colors border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 text-xs">
+                            <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                            Contacts
+                        </a>
+                        @endif
+                        @if(RolePermissions::currentUserCanAccess('surveys'))
+                        <a href="/surveys"
+                           class="flex flex-col items-center justify-center p-2 rounded-lg border transition-colors border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 text-xs">
+                            <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                            </svg>
+                            Surveys
+                        </a>
+                        @endif
+                        @if(RolePermissions::currentUserCanAccess('dashboards'))
+                        <a href="/dashboards"
+                           class="flex flex-col items-center justify-center p-2 rounded-lg border transition-colors border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 text-xs">
+                            <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                            </svg>
+                            Dashboards
+                        </a>
+                        @endif
+                    </div>
+                </div>
+                <!-- Collapsed: Vertical List -->
+                <div x-show="pulseNavCollapsed" class="px-2 space-y-1">
+                    @if(RolePermissions::currentUserCanAccess('home'))
+                    <a href="/dashboard" @mouseenter="hoveredItem = 'home'" @mouseleave="hoveredItem = null"
+                       class="relative flex items-center justify-center px-2 py-1.5 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                        <div x-show="hoveredItem === 'home'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Home</div>
+                    </a>
+                    @endif
+                    @if(RolePermissions::currentUserCanAccess('contacts'))
+                    <a href="/contacts" @mouseenter="hoveredItem = 'contacts'" @mouseleave="hoveredItem = null"
+                       class="relative flex items-center justify-center px-2 py-1.5 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        <div x-show="hoveredItem === 'contacts'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Contacts</div>
+                    </a>
+                    @endif
+                    @if(RolePermissions::currentUserCanAccess('surveys'))
+                    <a href="/surveys" @mouseenter="hoveredItem = 'surveys'" @mouseleave="hoveredItem = null"
+                       class="relative flex items-center justify-center px-2 py-1.5 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                        </svg>
+                        <div x-show="hoveredItem === 'surveys'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Surveys</div>
+                    </a>
+                    @endif
+                    @if(RolePermissions::currentUserCanAccess('dashboards'))
+                    <a href="/dashboards" @mouseenter="hoveredItem = 'dashboards'" @mouseleave="hoveredItem = null"
+                       class="relative flex items-center justify-center px-2 py-1.5 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                        </svg>
+                        <div x-show="hoveredItem === 'dashboards'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Dashboards</div>
+                    </a>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Workspace Navigation -->
+            <nav class="flex-1 py-2" :class="pulseNavCollapsed ? 'px-2 overflow-visible' : 'px-2 overflow-y-auto'">
+                <p x-show="!pulseNavCollapsed" class="px-2 mb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-content-transition">Workspace</p>
+
+                @if(RolePermissions::currentUserCanAccess('strategy'))
+                <!-- Plan -->
+                <div @mouseenter="hoveredItem = 'plan'" @mouseleave="hoveredItem = null" class="relative">
+                    <a href="/plans"
+                       :class="pulseNavCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-sm">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">Plan</span>
+                    </a>
+                    <div x-show="pulseNavCollapsed && hoveredItem === 'plan'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Plan</div>
+                </div>
+                @endif
+
+                @if(RolePermissions::currentUserCanAccess('reports'))
+                <!-- Reports (Current) -->
+                <div @mouseenter="hoveredItem = 'reports'" @mouseleave="hoveredItem = null" class="relative">
+                    <a href="/reports"
+                       :class="pulseNavCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors bg-pulse-orange-50 text-pulse-orange-600 text-sm">
+                        <svg class="w-5 h-5 flex-shrink-0 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">Reports</span>
+                    </a>
+                    <div x-show="pulseNavCollapsed && hoveredItem === 'reports'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Reports</div>
+                </div>
+                @endif
+
+                @if(RolePermissions::currentUserCanAccess('collect'))
+                <!-- Collect -->
+                <div @mouseenter="hoveredItem = 'collect'" @mouseleave="hoveredItem = null" class="relative">
+                    <a href="/collect"
+                       :class="pulseNavCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-sm">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">Collect</span>
+                    </a>
+                    <div x-show="pulseNavCollapsed && hoveredItem === 'collect'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Collect</div>
+                </div>
+                @endif
+
+                @if(RolePermissions::currentUserCanAccess('distribute'))
+                <!-- Distribute -->
+                <div @mouseenter="hoveredItem = 'distribute'" @mouseleave="hoveredItem = null" class="relative">
+                    <a href="/distribute"
+                       :class="pulseNavCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-sm">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                        </svg>
+                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">Distribute</span>
+                    </a>
+                    <div x-show="pulseNavCollapsed && hoveredItem === 'distribute'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute</div>
+                </div>
+                @endif
+
+                @if(RolePermissions::currentUserCanAccess('resources'))
+                <!-- Resource -->
+                <div @mouseenter="hoveredItem = 'resource'" @mouseleave="hoveredItem = null" class="relative">
+                    <a href="/resources"
+                       :class="pulseNavCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-sm">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">Resource</span>
+                    </a>
+                    <div x-show="pulseNavCollapsed && hoveredItem === 'resource'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Resource</div>
+                </div>
+                @endif
+
+                @if(RolePermissions::currentUserCanAccess('marketplace'))
+                <!-- Marketplace -->
+                <div @mouseenter="hoveredItem = 'marketplace'" @mouseleave="hoveredItem = null" class="relative">
+                    <a href="/marketplace"
+                       :class="pulseNavCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-sm">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">Marketplace</span>
+                    </a>
+                    <div x-show="pulseNavCollapsed && hoveredItem === 'marketplace'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace</div>
+                </div>
+                @endif
+            </nav>
+
+            @if(RolePermissions::currentUserCanAccess('settings'))
+            <!-- Settings -->
+            <div class="p-2 border-t border-gray-200">
+                <div @mouseenter="hoveredItem = 'settings'" @mouseleave="hoveredItem = null" class="relative">
+                    <a href="/settings"
+                       :class="pulseNavCollapsed ? 'justify-center' : ''"
+                       class="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-sm">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">Settings</span>
+                    </a>
+                    <div x-show="pulseNavCollapsed && hoveredItem === 'settings'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Settings</div>
+                </div>
+            </div>
+            @endif
+        </aside>
+
+        <!-- Report Builder Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <livewire:reports.report-builder :report="$report" :templates="$templates" />
+        </div>
+    </div>
+
+    <!-- Demo Role Switcher (for admins only) -->
+    @livewire('demo-role-switcher')
 
     @livewireScripts
 
@@ -400,6 +667,30 @@
 
                 this.initDragAndDrop();
                 this.initHoverEffects();
+                this.initZoomControls();
+            },
+
+            // Initialize mouse/keyboard zoom controls
+            initZoomControls() {
+                const canvas = document.querySelector('[data-canvas-wrapper]');
+                if (!canvas) return;
+
+                // Command + Scroll = Zoom in/out
+                // Option + Scroll = Pan left/right
+                canvas.addEventListener('wheel', (e) => {
+                    if (e.metaKey || e.ctrlKey) {
+                        e.preventDefault();
+                        if (e.deltaY < 0) {
+                            Livewire.dispatch('zoomIn');
+                        } else {
+                            Livewire.dispatch('zoomOut');
+                        }
+                    } else if (e.altKey) {
+                        e.preventDefault();
+                        // Horizontal scroll (pan left/right)
+                        canvas.scrollLeft += e.deltaY;
+                    }
+                }, { passive: false });
             },
 
             // Get all element boundaries for alignment

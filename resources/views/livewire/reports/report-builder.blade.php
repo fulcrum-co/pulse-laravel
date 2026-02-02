@@ -6,12 +6,16 @@
     <!-- Header -->
     <header class="h-14 bg-white border-b border-gray-200 px-4 flex items-center justify-between flex-shrink-0 z-50">
         <div class="flex items-center gap-4">
-            <!-- Back button -->
-            <a href="{{ route('reports.index') }}" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            <!-- Back to Reports Link -->
+            <a href="{{ route('reports.index') }}" class="flex items-center gap-2 px-2 py-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
+                <span class="text-sm font-medium">Reports</span>
             </a>
+
+            <!-- Divider -->
+            <div class="h-6 w-px bg-gray-200"></div>
 
             <!-- Report name (editable) -->
             <input
@@ -58,35 +62,6 @@
                 </button>
             </div>
 
-            <!-- Zoom Controls -->
-            <div class="flex items-center border-r border-gray-200 pr-2 mr-2">
-                <button
-                    wire:click="zoomOut"
-                    class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    title="Zoom Out"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"/>
-                    </svg>
-                </button>
-                <button
-                    wire:click="resetZoom"
-                    class="px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors min-w-[48px]"
-                    title="Reset Zoom"
-                >
-                    {{ number_format($canvasZoom * 100) }}%
-                </button>
-                <button
-                    wire:click="zoomIn"
-                    class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    title="Zoom In"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/>
-                    </svg>
-                </button>
-            </div>
-
             <!-- Save button -->
             <button
                 wire:click="save"
@@ -122,6 +97,46 @@
                 </svg>
                 Preview
             </button>
+
+            <!-- Comments Button (Purple - Prominent) -->
+            <button
+                wire:click="openCommentsPanel"
+                class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-pulse-purple-500 border border-pulse-purple-500 rounded-lg hover:bg-pulse-purple-600 transition-colors relative shadow-sm"
+            >
+                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                Comments
+                @if($this->getUnresolvedCount() > 0)
+                    <span class="absolute -top-1.5 -right-1.5 bg-white text-pulse-purple-600 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold border border-pulse-purple-300">
+                        {{ $this->getUnresolvedCount() }}
+                    </span>
+                @endif
+            </button>
+
+            <!-- Active Collaborators -->
+            @if(count($activeCollaborators) > 0)
+                <div class="flex items-center -space-x-2 ml-2">
+                    @foreach(array_slice($activeCollaborators, 0, 4) as $collaborator)
+                        <div
+                            class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-medium shadow-sm"
+                            style="background-color: {{ $collaborator['color'] }}"
+                            title="{{ $collaborator['name'] }}"
+                        >
+                            @if($collaborator['avatar'])
+                                <img src="{{ $collaborator['avatar'] }}" alt="{{ $collaborator['name'] }}" class="w-full h-full rounded-full object-cover">
+                            @else
+                                {{ strtoupper(substr($collaborator['name'], 0, 1)) }}
+                            @endif
+                        </div>
+                    @endforeach
+                    @if(count($activeCollaborators) > 4)
+                        <div class="w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-gray-600 text-xs font-medium shadow-sm">
+                            +{{ count($activeCollaborators) - 4 }}
+                        </div>
+                    @endif
+                </div>
+            @endif
 
             <!-- Share Dropdown -->
             <div class="relative" x-data="{ open: false }">
@@ -165,6 +180,23 @@
                         <div class="text-left">
                             <div class="font-medium">Publish to Web</div>
                             <div class="text-xs text-gray-500">Create a shareable link</div>
+                        </div>
+                    </button>
+
+                    <!-- Invite Collaborators -->
+                    <button
+                        wire:click="openShareModal"
+                        @click="open = false"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-medium">Invite Collaborators</div>
+                            <div class="text-xs text-gray-500">Work together in real-time</div>
                         </div>
                     </button>
 
@@ -220,55 +252,79 @@
                 class="border-0 bg-white shadow-sm rounded-lg px-3 py-1.5 text-sm focus:ring-pulse-orange-500"
             >
                 <option value="individual">Individual</option>
-                <option value="cohort">Cohort</option>
-                <option value="school">School-wide</option>
+                <option value="contact_list">Contact List</option>
+                <option value="organization">Organization-wide</option>
             </select>
         </div>
 
         <!-- Contact selector (only for individual scope) -->
         @if($filters['scope'] === 'individual')
+            <div class="flex items-center gap-2" x-data="{ showMultiSelect: false, selectedContacts: @entangle('filters.selected_contacts').live }">
+                <span class="text-sm text-gray-500">Contact:</span>
+                <div class="relative">
+                    <button
+                        @click="showMultiSelect = !showMultiSelect"
+                        class="border-0 bg-white shadow-sm rounded-lg px-3 py-1.5 text-sm focus:ring-pulse-orange-500 min-w-[200px] text-left flex items-center justify-between"
+                    >
+                        <span x-text="selectedContacts.length > 0 ? selectedContacts.length + ' contact(s) selected' : 'Select contact(s)...'" class="text-gray-700"></span>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    <!-- Multi-select dropdown -->
+                    <div
+                        x-show="showMultiSelect"
+                        @click.away="showMultiSelect = false"
+                        x-transition
+                        class="absolute left-0 top-full mt-1 w-72 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-64 overflow-y-auto"
+                    >
+                        <div class="p-2 border-b border-gray-100">
+                            <input
+                                type="text"
+                                placeholder="Search contacts..."
+                                class="w-full border border-gray-200 rounded px-2 py-1 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                                wire:model.live.debounce.300ms="contactSearchQuery"
+                            >
+                        </div>
+                        <div class="p-1">
+                            @foreach($this->availableStudents as $contact)
+                                <label class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        value="{{ $contact['id'] }}"
+                                        wire:model.live="filters.selected_contacts"
+                                        class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
+                                    >
+                                    <span class="text-sm text-gray-700">{{ $contact['name'] }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        @if(count($this->availableStudents) === 0)
+                            <div class="p-3 text-center text-sm text-gray-500">No contacts found</div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Contact List selector (only for contact_list scope) -->
+        @if($filters['scope'] === 'contact_list')
             <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500">Student:</span>
+                <span class="text-sm text-gray-500">Contact List:</span>
                 <select
-                    wire:model.live="filters.contact_id"
-                    wire:change="setContactFilter($event.target.value, 'student')"
+                    wire:model.live="filters.contact_list_id"
                     class="border-0 bg-white shadow-sm rounded-lg px-3 py-1.5 text-sm focus:ring-pulse-orange-500 min-w-[200px]"
                 >
-                    <option value="">Select a student...</option>
-                    @foreach($this->availableStudents as $student)
-                        <option value="{{ $student['id'] }}">{{ $student['name'] }}</option>
+                    <option value="">Select a list...</option>
+                    @foreach($this->availableContactLists ?? [] as $list)
+                        <option value="{{ $list['id'] }}">{{ $list['name'] }} ({{ $list['count'] ?? 0 }})</option>
                     @endforeach
                 </select>
             </div>
         @endif
 
-        <!-- Cohort filters (only for cohort scope) -->
-        @if($filters['scope'] === 'cohort')
-            <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500">Grade:</span>
-                <select
-                    wire:model.live="filters.grade_level"
-                    class="border-0 bg-white shadow-sm rounded-lg px-3 py-1.5 text-sm focus:ring-pulse-orange-500"
-                >
-                    <option value="">All Grades</option>
-                    @foreach(range(6, 12) as $grade)
-                        <option value="{{ $grade }}">Grade {{ $grade }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500">Risk:</span>
-                <select
-                    wire:model.live="filters.risk_level"
-                    class="border-0 bg-white shadow-sm rounded-lg px-3 py-1.5 text-sm focus:ring-pulse-orange-500"
-                >
-                    <option value="">All Levels</option>
-                    <option value="good">Good Standing</option>
-                    <option value="low">Low Risk</option>
-                    <option value="high">High Risk</option>
-                </select>
-            </div>
-        @endif
+        <!-- Organization-wide goes straight to period (no additional filters needed) -->
 
         <div class="h-6 w-px bg-gray-300"></div>
 
@@ -507,27 +563,113 @@
         {{-- End hidden div --}}
 
         <!-- Canvas Area -->
-        <main class="flex-1 overflow-auto bg-gray-100 p-8" data-canvas-wrapper wire:click="selectElement(null)">
+        <main class="flex-1 overflow-auto bg-gray-200 p-8" data-canvas-wrapper style="padding-bottom: {{ $showPageThumbnails ? '160px' : '80px' }};" wire:click="selectElement(null)">
+            <!-- Bottom-Left Zoom Controls (Canva-style) -->
+            <div class="fixed z-50 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200 px-3 py-2 flex items-center gap-2 transition-all duration-200"
+                 style="bottom: {{ $showPageThumbnails ? '168px' : '56px' }}; left: {{ $sidebarExpanded ? '328px' : '72px' }};"
+                 x-data="{ showPresets: false }"
+            >
+                <button
+                    wire:click="zoomOut"
+                    class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                    title="Zoom Out"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                    </svg>
+                </button>
+
+                <!-- Zoom Slider -->
+                <input
+                    type="range"
+                    min="25"
+                    max="200"
+                    step="5"
+                    value="{{ $canvasZoom * 100 }}"
+                    @input="$wire.setZoom($event.target.value / 100)"
+                    class="w-24 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pulse-orange-500"
+                >
+
+                <button
+                    wire:click="zoomIn"
+                    class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                    title="Zoom In"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                </button>
+
+                <!-- Zoom Percentage Dropdown -->
+                <div class="relative">
+                    <button
+                        @click="showPresets = !showPresets"
+                        class="px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors min-w-[52px] flex items-center gap-1"
+                    >
+                        {{ number_format($canvasZoom * 100) }}%
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    <!-- Presets Dropdown -->
+                    <div
+                        x-show="showPresets"
+                        @click.away="showPresets = false"
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        class="absolute bottom-full left-0 mb-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[100px]"
+                    >
+                        @foreach($zoomPresets as $preset)
+                            <button
+                                wire:click="setZoom({{ $preset['value'] }})"
+                                @click="showPresets = false"
+                                class="w-full px-3 py-1.5 text-left text-sm {{ $canvasZoom == $preset['value'] ? 'bg-pulse-orange-50 text-pulse-orange-700' : 'text-gray-700 hover:bg-gray-50' }}"
+                            >
+                                {{ $preset['label'] }}
+                            </button>
+                        @endforeach
+                        <hr class="my-1 border-gray-200">
+                        <button
+                            wire:click="fitToScreen"
+                            @click="showPresets = false"
+                            class="w-full px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                            Fit to screen
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
             <!-- Zoom container -->
             <div class="canvas-zoom-container" style="transform: scale({{ $canvasZoom }}); transform-origin: top center; transition: transform 0.2s ease;">
                 <div
                     data-report-canvas
-                    class="bg-white shadow-lg mx-auto canvas-grid relative"
-                    style="width: 800px; min-height: 1000px;"
+                    class="mx-auto canvas-page relative {{ $showGrid ? 'canvas-grid' : '' }} bg-white shadow-xl"
+                    style="width: 800px; min-height: 1000px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 20px 25px -5px rgba(0, 0, 0, 0.1);"
                     wire:click.stop
                 >
                 @foreach($elements as $element)
                     @php
                         $isLocked = $element['config']['locked'] ?? false;
                         $isHidden = $element['config']['hidden'] ?? false;
+                        $elementCommentCount = collect($comments ?? [])->filter(fn ($c) => ($c['element_id'] ?? null) === $element['id'])->count();
                     @endphp
                     @if(!$isHidden)
                     <div
+                        x-data="{ showCommentPopover: false, showCommentBubble: false }"
+                        @mouseenter="showCommentBubble = true"
+                        @mouseleave="if(!showCommentPopover) showCommentBubble = false"
                         data-element-id="{{ $element['id'] }}"
                         data-locked="{{ $isLocked ? 'true' : 'false' }}"
                         wire:click.stop="selectElement('{{ $element['id'] }}')"
                         wire:click.shift.stop="toggleInSelection('{{ $element['id'] }}')"
-                        class="absolute {{ $isLocked ? 'element-locked' : 'cursor-move' }} {{ $selectedElementId === $element['id'] ? 'element-selected' : '' }} {{ in_array($element['id'], $selectedElementIds) ? 'multi-selected' : '' }}"
+                        class="absolute {{ $isLocked ? 'element-locked' : 'cursor-move' }} {{ $selectedElementId === $element['id'] ? 'element-selected' : '' }} {{ in_array($element['id'], $selectedElementIds) ? 'multi-selected' : '' }} group/element"
                         style="
                             transform: translate({{ $element['position']['x'] ?? 0 }}px, {{ $element['position']['y'] ?? 0 }}px);
                             width: {{ $element['size']['width'] ?? 200 }}px;
@@ -542,6 +684,104 @@
                         data-x="{{ $element['position']['x'] ?? 0 }}"
                         data-y="{{ $element['position']['y'] ?? 0 }}"
                     >
+                        {{-- Comment Bubble (hover indicator) - Purple for prominence --}}
+                        <div
+                            x-show="showCommentBubble || showCommentPopover || {{ $elementCommentCount }} > 0"
+                            x-transition:enter="transition ease-out duration-100"
+                            x-transition:enter-start="opacity-0 scale-90"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            class="absolute -right-2 -top-2 z-20"
+                        >
+                            <button
+                                @click.stop="showCommentPopover = !showCommentPopover"
+                                class="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full shadow-lg transition-all
+                                       {{ $elementCommentCount > 0 ? 'bg-pulse-purple-500 text-white hover:bg-pulse-purple-600' : 'bg-pulse-purple-100 text-pulse-purple-700 hover:bg-pulse-purple-200 border border-pulse-purple-300' }}"
+                                title="Add comment"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                </svg>
+                                @if($elementCommentCount > 0)
+                                    <span>{{ $elementCommentCount }}</span>
+                                @endif
+                            </button>
+
+                            {{-- Comment Popover - Purple themed --}}
+                            <div
+                                x-show="showCommentPopover"
+                                x-transition:enter="transition ease-out duration-150"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-100"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95"
+                                @click.away="showCommentPopover = false; if(!$event.target.closest('[data-element-id]')) showCommentBubble = false"
+                                class="absolute right-0 top-full mt-2 w-72 bg-white rounded-lg shadow-xl border border-pulse-purple-200 z-50"
+                            >
+                                <div class="p-3">
+                                    {{-- Purple header --}}
+                                    <div class="flex items-center gap-2 mb-3 pb-2 border-b border-pulse-purple-100">
+                                        <div class="w-6 h-6 rounded-full bg-pulse-purple-100 flex items-center justify-center">
+                                            <svg class="w-3.5 h-3.5 text-pulse-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                            </svg>
+                                        </div>
+                                        <span class="text-sm font-medium text-pulse-purple-700">Add comment</span>
+                                    </div>
+
+                                    {{-- Existing comments on this element --}}
+                                    @php
+                                        $elementComments = collect($comments ?? [])->filter(fn ($c) => ($c['element_id'] ?? null) === $element['id'])->values();
+                                    @endphp
+
+                                    @if($elementComments->count() > 0)
+                                        <div class="space-y-2 mb-3 max-h-40 overflow-y-auto">
+                                            @foreach($elementComments as $comment)
+                                                <div class="bg-pulse-purple-50 rounded-lg p-2 border border-pulse-purple-100">
+                                                    <div class="flex items-center gap-2 mb-1">
+                                                        @if($comment['user']['avatar'] ?? null)
+                                                            <img src="{{ $comment['user']['avatar'] }}" class="w-5 h-5 rounded-full">
+                                                        @else
+                                                            <div class="w-5 h-5 rounded-full bg-pulse-purple-500 flex items-center justify-center text-white text-[10px] font-medium">
+                                                                {{ substr($comment['user']['name'] ?? 'U', 0, 1) }}
+                                                            </div>
+                                                        @endif
+                                                        <span class="text-xs font-medium text-gray-700">{{ $comment['user']['name'] ?? 'Unknown' }}</span>
+                                                        <span class="text-xs text-gray-400">{{ $comment['created_at_human'] ?? '' }}</span>
+                                                    </div>
+                                                    <p class="text-xs text-gray-600">{!! $comment['formatted_content'] ?? $comment['content'] ?? '' !!}</p>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        <hr class="border-pulse-purple-100 mb-3">
+                                    @endif
+
+                                    {{-- Comment input --}}
+                                    <div x-data="{ content: '' }">
+                                        <textarea
+                                            x-model="content"
+                                            placeholder="Add a comment... Use @ to mention someone"
+                                            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-pulse-purple-500 focus:border-pulse-purple-500 resize-none"
+                                            rows="2"
+                                            @keydown.meta.enter="if(content.trim()) { $wire.set('commentingOnElement', '{{ $element['id'] }}'); $wire.set('newCommentContent', content); $wire.addComment(); content = ''; showCommentPopover = false; }"
+                                            @keydown.ctrl.enter="if(content.trim()) { $wire.set('commentingOnElement', '{{ $element['id'] }}'); $wire.set('newCommentContent', content); $wire.addComment(); content = ''; showCommentPopover = false; }"
+                                        ></textarea>
+
+                                        <div class="flex items-center justify-between mt-2">
+                                            <span class="text-xs text-gray-400">Cmd+Enter to post</span>
+                                            <button
+                                                @click="if(content.trim()) { $wire.set('commentingOnElement', '{{ $element['id'] }}'); $wire.set('newCommentContent', content); $wire.addComment(); content = ''; showCommentPopover = false; }"
+                                                class="px-3 py-1 text-sm font-medium text-white bg-pulse-purple-500 hover:bg-pulse-purple-600 rounded-lg transition-colors disabled:opacity-50"
+                                                :disabled="!content.trim()"
+                                            >
+                                                Post
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         @switch($element['type'])
                             @case('text')
                                 @if($editingTextElementId === $element['id'])
@@ -728,6 +968,215 @@
                 @endif
             </div>
             </div><!-- End zoom container -->
+
+            <!-- Page Footer Bar (Canva-style collapsible) -->
+            <div class="fixed bottom-0 right-0 bg-white border-t border-gray-200 z-40 transition-all duration-300"
+                 style="left: {{ $sidebarExpanded ? '320px' : '64px' }};"
+                 x-data="{ showContextMenu: false, contextMenuX: 0, contextMenuY: 0, contextPageIndex: null }"
+                 @click.away="showContextMenu = false">
+
+                <!-- Collapsed Bar (always visible) -->
+                <div class="h-12 px-4 flex items-center justify-between">
+                    <!-- Pages Toggle -->
+                    <button
+                        wire:click="togglePageThumbnails"
+                        class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Pages
+                        <svg class="w-4 h-4 transition-transform {{ $showPageThumbnails ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                        </svg>
+                    </button>
+
+                    <!-- Page Navigation -->
+                    <div class="flex items-center gap-3">
+                        <button
+                            wire:click="previousPage"
+                            class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            {{ $currentPageIndex === 0 ? 'disabled' : '' }}
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <span class="text-sm text-gray-600 min-w-[60px] text-center">{{ $currentPageIndex + 1 }} / {{ count($pages) }}</span>
+                        <button
+                            wire:click="nextPage"
+                            class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            {{ $currentPageIndex >= count($pages) - 1 ? 'disabled' : '' }}
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Add Page Button -->
+                    <button
+                        wire:click="addPage"
+                        class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700 hover:bg-pulse-orange-50 rounded-lg transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Add page
+                    </button>
+                </div>
+
+                <!-- Expanded Thumbnails Panel -->
+                @if($showPageThumbnails)
+                    <div class="border-t border-gray-200 bg-gray-50 px-4 py-3 transition-all duration-300">
+                        <div class="flex items-center gap-3 overflow-x-auto custom-scrollbar pb-1">
+                            <!-- Page Thumbnails -->
+                            @foreach($pages as $index => $page)
+                                <div
+                                    wire:click="switchToPage({{ $index }})"
+                                    @contextmenu.prevent="showContextMenu = true; contextMenuX = $event.clientX; contextMenuY = $event.clientY; contextPageIndex = {{ $index }};"
+                                    class="relative flex-shrink-0 cursor-pointer group transition-all duration-150
+                                           {{ $currentPageIndex === $index ? 'ring-2 ring-pulse-orange-500 ring-offset-2 ring-offset-gray-50' : 'hover:ring-2 hover:ring-gray-300 hover:ring-offset-2 hover:ring-offset-gray-50' }}"
+                                >
+                                    <!-- Thumbnail Preview -->
+                                    <div class="w-16 h-20 bg-white rounded border border-gray-200 shadow-sm overflow-hidden relative">
+                                        <!-- Mini element representations -->
+                                        @foreach(array_slice($page['elements'] ?? [], 0, 5) as $el)
+                                            <div
+                                                class="absolute bg-gray-200 rounded-sm"
+                                                style="
+                                                    left: {{ (($el['position']['x'] ?? 0) / 816) * 100 }}%;
+                                                    top: {{ (($el['position']['y'] ?? 0) / 1056) * 100 }}%;
+                                                    width: {{ (($el['size']['width'] ?? 100) / 816) * 100 }}%;
+                                                    height: {{ (($el['size']['height'] ?? 50) / 1056) * 100 }}%;
+                                                "
+                                            ></div>
+                                        @endforeach
+
+                                        @if(empty($page['elements']))
+                                            <div class="absolute inset-0 flex items-center justify-center">
+                                                <span class="text-[6px] text-gray-400">Empty</span>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <!-- Page Number -->
+                                    <div class="text-center mt-1">
+                                        <span class="text-xs text-gray-500">{{ $index + 1 }}</span>
+                                    </div>
+
+                                    <!-- Hover Controls -->
+                                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 bg-black/30 rounded">
+                                        @if($index > 0)
+                                            <button
+                                                wire:click.stop="movePageUp({{ $index }})"
+                                                class="w-5 h-5 bg-white text-gray-700 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-100"
+                                                title="Move left"
+                                            >
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                                </svg>
+                                            </button>
+                                        @endif
+                                        @if($index < count($pages) - 1)
+                                            <button
+                                                wire:click.stop="movePageDown({{ $index }})"
+                                                class="w-5 h-5 bg-white text-gray-700 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-100"
+                                                title="Move right"
+                                            >
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                                </svg>
+                                            </button>
+                                        @endif
+                                    </div>
+
+                                    <!-- Delete button (hover) -->
+                                    @if(count($pages) > 1)
+                                        <button
+                                            wire:click.stop="deletePage({{ $index }})"
+                                            class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-sm"
+                                            title="Delete page"
+                                        >
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
+                            @endforeach
+
+                            <!-- Add Page Button (in expanded view) -->
+                            <button
+                                wire:click="addPage"
+                                class="flex-shrink-0 w-16 h-20 bg-white hover:bg-gray-50 border-2 border-dashed border-gray-300 hover:border-pulse-orange-400 rounded flex flex-col items-center justify-center transition-colors"
+                            >
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Context Menu -->
+                <div
+                    x-show="showContextMenu"
+                    x-transition:enter="transition ease-out duration-100"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-75"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                    :style="'position: fixed; left: ' + contextMenuX + 'px; top: ' + contextMenuY + 'px;'"
+                    class="bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[160px] z-50"
+                    @click.away="showContextMenu = false"
+                >
+                    <button
+                        @click="$wire.duplicatePage(contextPageIndex); showContextMenu = false;"
+                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        Duplicate page
+                    </button>
+                    <button
+                        @click="$wire.movePageUp(contextPageIndex); showContextMenu = false;"
+                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        :class="{ 'opacity-50 cursor-not-allowed': contextPageIndex === 0 }"
+                        :disabled="contextPageIndex === 0"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+                        </svg>
+                        Move left
+                    </button>
+                    <button
+                        @click="$wire.movePageDown(contextPageIndex); showContextMenu = false;"
+                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        :class="{ 'opacity-50 cursor-not-allowed': contextPageIndex >= {{ count($pages) - 1 }} }"
+                        :disabled="contextPageIndex >= {{ count($pages) - 1 }}"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+                        </svg>
+                        Move right
+                    </button>
+                    <hr class="my-1 border-gray-200">
+                    <button
+                        @click="if({{ count($pages) }} > 1) { $wire.deletePage(contextPageIndex); showContextMenu = false; }"
+                        class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                        :class="{ 'opacity-50 cursor-not-allowed': {{ count($pages) }} <= 1 }"
+                        :disabled="{{ count($pages) }} <= 1"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Delete page
+                    </button>
+                </div>
+            </div>
         </main>
 
         <!-- Right Sidebar - Properties -->
@@ -1119,6 +1568,130 @@
         @endif
     </div>
 
+    <!-- Canvas Type Selector Modal (Step 1) -->
+    @if($showCanvasSelector)
+        <div class="fixed inset-0 z-50 overflow-y-auto">
+            <div class="flex items-center justify-center min-h-screen px-4 py-8">
+                <div class="fixed inset-0 bg-black/50 transition-opacity"></div>
+
+                <div class="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden">
+                    {{-- Header --}}
+                    <div class="p-8 text-center border-b border-gray-100">
+                        <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">What would you like to create?</h2>
+                        <p class="text-gray-500 mt-2">Choose the format that best fits your needs</p>
+                    </div>
+
+                    {{-- Options --}}
+                    <div class="p-8">
+                        <div class="grid grid-cols-2 gap-6">
+                            {{-- Document Report Option --}}
+                            <button
+                                wire:click="selectCanvasMode('document')"
+                                class="group relative flex flex-col items-center p-8 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-2 border-blue-200 hover:border-blue-400 rounded-2xl transition-all text-left"
+                            >
+                                <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium">Select</span>
+                                </div>
+
+                                {{-- Document Preview --}}
+                                <div class="w-24 h-32 bg-white rounded-lg shadow-lg border border-gray-200 mb-4 p-2 relative overflow-hidden">
+                                    <div class="h-2 w-16 bg-blue-200 rounded mb-2"></div>
+                                    <div class="h-1.5 w-full bg-gray-100 rounded mb-1"></div>
+                                    <div class="h-1.5 w-full bg-gray-100 rounded mb-1"></div>
+                                    <div class="h-1.5 w-3/4 bg-gray-100 rounded mb-3"></div>
+                                    <div class="h-8 w-full bg-blue-50 rounded mb-2"></div>
+                                    <div class="h-1.5 w-full bg-gray-100 rounded mb-1"></div>
+                                    <div class="h-1.5 w-2/3 bg-gray-100 rounded"></div>
+                                </div>
+
+                                <h3 class="text-lg font-semibold text-gray-900 mb-1">Document Report</h3>
+                                <p class="text-sm text-gray-600 text-center">
+                                    Portrait format, ideal for printable reports, progress reports, and detailed contact analysis
+                                </p>
+
+                                <div class="flex items-center gap-2 mt-4 text-xs text-blue-600">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    <span>8.5" × 11" Portrait</span>
+                                </div>
+                            </button>
+
+                            {{-- Dashboard Option --}}
+                            <button
+                                wire:click="selectCanvasMode('dashboard')"
+                                class="group relative flex flex-col items-center p-8 bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-2 border-purple-200 hover:border-purple-400 rounded-2xl transition-all text-left"
+                            >
+                                <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span class="bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-medium">Select</span>
+                                </div>
+
+                                {{-- Dashboard Preview --}}
+                                <div class="w-36 h-24 bg-white rounded-lg shadow-lg border border-gray-200 mb-4 p-2 relative overflow-hidden">
+                                    <div class="grid grid-cols-3 gap-1 h-full">
+                                        <div class="col-span-2 grid grid-rows-2 gap-1">
+                                            <div class="bg-purple-50 rounded flex items-center justify-center">
+                                                <div class="w-full h-2/3 flex items-end justify-around px-1">
+                                                    <div class="w-1 h-1/3 bg-purple-300 rounded-t"></div>
+                                                    <div class="w-1 h-2/3 bg-purple-400 rounded-t"></div>
+                                                    <div class="w-1 h-1/2 bg-purple-300 rounded-t"></div>
+                                                    <div class="w-1 h-full bg-purple-500 rounded-t"></div>
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-1">
+                                                <div class="bg-green-50 rounded p-1">
+                                                    <div class="h-1 w-full bg-green-200 rounded mb-0.5"></div>
+                                                    <div class="text-[6px] font-bold text-green-600">85%</div>
+                                                </div>
+                                                <div class="bg-blue-50 rounded p-1">
+                                                    <div class="h-1 w-full bg-blue-200 rounded mb-0.5"></div>
+                                                    <div class="text-[6px] font-bold text-blue-600">92%</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="bg-orange-50 rounded flex items-center justify-center">
+                                            <div class="w-6 h-6 rounded-full border-2 border-orange-300 border-t-orange-500"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h3 class="text-lg font-semibold text-gray-900 mb-1">Dashboard</h3>
+                                <p class="text-sm text-gray-600 text-center">
+                                    Landscape format, perfect for data dashboards, overview screens, and presentations
+                                </p>
+
+                                <div class="flex items-center gap-2 mt-4 text-xs text-purple-600">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    <span>11" × 8.5" Landscape</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Footer --}}
+                    <div class="px-8 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                        <p class="text-sm text-gray-500">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            You can change this later in design settings
+                        </p>
+                        <a href="{{ route('reports.index') }}" class="text-sm text-gray-500 hover:text-gray-700">
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Enhanced Template Gallery Modal -->
     @if($showTemplateGallery)
         <div
@@ -1145,9 +1718,39 @@
                     {{-- Header --}}
                     <div class="p-6 border-b border-gray-200 flex-shrink-0">
                         <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <h2 class="text-2xl font-bold text-gray-900">Choose a Template</h2>
-                                <p class="text-sm text-gray-500 mt-1">Start with a pre-built template or create from scratch</p>
+                            <div class="flex items-center gap-4">
+                                {{-- Back Button --}}
+                                <button
+                                    wire:click="backToCanvasSelector"
+                                    class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title="Back to canvas selection"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                                    </svg>
+                                </button>
+                                <div>
+                                    <div class="flex items-center gap-3">
+                                        <h2 class="text-2xl font-bold text-gray-900">Choose a Template</h2>
+                                        {{-- Canvas Mode Badge --}}
+                                        @if($canvasMode === 'document')
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                </svg>
+                                                Document Report
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                                                </svg>
+                                                Dashboard
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-1">Start with a pre-built template or create from scratch</p>
+                                </div>
                             </div>
                             <button wire:click="$set('showTemplateGallery', false)" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1179,25 +1782,25 @@
                                     All
                                 </button>
                                 <button
-                                    @click="activeCategory = 'student'"
-                                    :class="activeCategory === 'student' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+                                    @click="activeCategory = 'contact'"
+                                    :class="activeCategory === 'contact' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'"
                                     class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
                                 >
-                                    Student
+                                    Contact
                                 </button>
                                 <button
-                                    @click="activeCategory = 'cohort'"
-                                    :class="activeCategory === 'cohort' ? 'bg-white shadow-sm text-green-600' : 'text-gray-500 hover:text-gray-700'"
+                                    @click="activeCategory = 'contact_list'"
+                                    :class="activeCategory === 'contact_list' ? 'bg-white shadow-sm text-green-600' : 'text-gray-500 hover:text-gray-700'"
                                     class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
                                 >
-                                    Cohort
+                                    Contact List
                                 </button>
                                 <button
-                                    @click="activeCategory = 'school'"
-                                    :class="activeCategory === 'school' ? 'bg-white shadow-sm text-purple-600' : 'text-gray-500 hover:text-gray-700'"
+                                    @click="activeCategory = 'organization'"
+                                    :class="activeCategory === 'organization' ? 'bg-white shadow-sm text-purple-600' : 'text-gray-500 hover:text-gray-700'"
                                     class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
                                 >
-                                    School
+                                    Organization
                                 </button>
                             </div>
                         </div>
@@ -1222,7 +1825,7 @@
                                     <span class="text-xs text-gray-500 mt-1">Start from scratch</span>
                                 </button>
 
-                                @foreach(collect($templates)->where('category', 'student')->take(3) as $template)
+                                @foreach(collect($templates)->whereIn('category', ['contact', 'student'])->take(3) as $template)
                                 <button
                                     wire:click="loadTemplate('{{ $template['id'] }}')"
                                     class="group flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200 hover:border-blue-300 rounded-xl transition-all"
@@ -1254,9 +1857,9 @@
                                         <div
                                             class="aspect-video flex items-center justify-center relative"
                                             :class="{
-                                                'bg-gradient-to-br from-blue-100 to-blue-50': template.category === 'student',
-                                                'bg-gradient-to-br from-green-100 to-green-50': template.category === 'cohort',
-                                                'bg-gradient-to-br from-purple-100 to-purple-50': template.category === 'school',
+                                                'bg-gradient-to-br from-blue-100 to-blue-50': template.category === 'contact' || template.category === 'student',
+                                                'bg-gradient-to-br from-green-100 to-green-50': template.category === 'contact_list' || template.category === 'cohort',
+                                                'bg-gradient-to-br from-purple-100 to-purple-50': template.category === 'organization' || template.category === 'school',
                                                 'bg-gradient-to-br from-gray-100 to-gray-50': template.category === 'custom'
                                             }"
                                         >
@@ -1264,12 +1867,12 @@
                                             <span
                                                 class="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-medium rounded-full"
                                                 :class="{
-                                                    'bg-blue-100 text-blue-700': template.category === 'student',
-                                                    'bg-green-100 text-green-700': template.category === 'cohort',
-                                                    'bg-purple-100 text-purple-700': template.category === 'school',
+                                                    'bg-blue-100 text-blue-700': template.category === 'contact' || template.category === 'student',
+                                                    'bg-green-100 text-green-700': template.category === 'contact_list' || template.category === 'cohort',
+                                                    'bg-purple-100 text-purple-700': template.category === 'organization' || template.category === 'school',
                                                     'bg-gray-100 text-gray-700': template.category === 'custom'
                                                 }"
-                                                x-text="template.category.charAt(0).toUpperCase() + template.category.slice(1)"
+                                                x-text="template.category === 'contact_list' ? 'Contact List' : (template.category === 'student' ? 'Contact' : (template.category === 'cohort' ? 'Contact List' : (template.category === 'school' ? 'Organization' : (template.category.charAt(0).toUpperCase() + template.category.slice(1)))))"
                                             ></span>
 
                                             {{-- Template Icon --}}
@@ -1282,9 +1885,9 @@
                                                 <svg
                                                     class="w-10 h-10 mx-auto transition-colors"
                                                     :class="{
-                                                        'text-blue-400 group-hover:text-blue-500': template.category === 'student',
-                                                        'text-green-400 group-hover:text-green-500': template.category === 'cohort',
-                                                        'text-purple-400 group-hover:text-purple-500': template.category === 'school',
+                                                        'text-blue-400 group-hover:text-blue-500': template.category === 'contact' || template.category === 'student',
+                                                        'text-green-400 group-hover:text-green-500': template.category === 'contact_list' || template.category === 'cohort',
+                                                        'text-purple-400 group-hover:text-purple-500': template.category === 'organization' || template.category === 'school',
                                                         'text-gray-400 group-hover:text-gray-500': template.category === 'custom'
                                                     }"
                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -2023,7 +2626,7 @@
                     {
                         icon: '✨',
                         title: 'Smart Blocks',
-                        description: 'Pre-built sections that auto-populate with real student data. Perfect for quick reports!',
+                        description: 'Pre-built sections that auto-populate with real contact data. Perfect for quick reports!',
                         position: 'left'
                     },
                     {
@@ -2144,6 +2747,315 @@
                     @endforeach
                 </div>
             </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Share/Invite Collaborators Modal (Canva-style) -->
+    @if($showShareModal)
+    <div class="fixed inset-0 z-50 overflow-y-auto" x-data="{ copied: false }" x-init="$el.querySelector('input[type=email]')?.focus()">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" wire:click="closeShareModal"></div>
+
+            <div class="inline-block w-full max-w-md p-0 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl animate-modal-in">
+                {{-- Header --}}
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-900">Share this report</h3>
+                    <button wire:click="closeShareModal" class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="px-6 py-4">
+                    {{-- Add Collaborator Form --}}
+                    <form wire:submit="addCollaborator" class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Invite by email</label>
+                        <div class="flex gap-2">
+                            <div class="flex-1 relative">
+                                <input
+                                    type="email"
+                                    wire:model="collaboratorEmail"
+                                    placeholder="name@example.com"
+                                    class="w-full rounded-lg border-gray-300 focus:border-pulse-orange-500 focus:ring-pulse-orange-500 text-sm pl-10"
+                                >
+                                <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <select wire:model="collaboratorRole" class="rounded-lg border-gray-300 text-sm pr-8">
+                                <option value="editor">Can edit</option>
+                                <option value="viewer">Can view</option>
+                            </select>
+                            <button type="submit" class="px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 text-sm font-medium transition-colors">
+                                Invite
+                            </button>
+                        </div>
+                        @error('collaboratorEmail')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </form>
+
+                    {{-- People with access --}}
+                    <div class="mb-6">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">People with access</h4>
+                        <div class="space-y-2 max-h-48 overflow-y-auto">
+                            @forelse($this->getAllCollaborators() as $collab)
+                                <div class="flex items-center justify-between py-2 px-3 rounded-lg {{ $collab['role'] === 'owner' ? 'bg-pulse-orange-50' : 'hover:bg-gray-50' }}">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600 overflow-hidden">
+                                            @if($collab['avatar'])
+                                                <img src="{{ $collab['avatar'] }}" class="w-full h-full object-cover">
+                                            @else
+                                                {{ strtoupper(substr($collab['name'], 0, 1)) }}
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">
+                                                {{ $collab['name'] }}
+                                                @if($collab['id'] === auth()->id())
+                                                    <span class="text-gray-400">(you)</span>
+                                                @endif
+                                            </div>
+                                            <div class="text-xs text-gray-500">{{ $collab['email'] }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        @if($collab['role'] === 'owner')
+                                            <span class="text-xs font-medium text-pulse-orange-600 px-2.5 py-1 bg-pulse-orange-100 rounded-full">Owner</span>
+                                        @else
+                                            <select
+                                                wire:change="updateCollaboratorRole({{ $collab['id'] }}, $event.target.value)"
+                                                class="text-xs border-gray-200 rounded-lg bg-white focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                                            >
+                                                <option value="editor" {{ $collab['role'] === 'editor' ? 'selected' : '' }}>Can edit</option>
+                                                <option value="viewer" {{ $collab['role'] === 'viewer' ? 'selected' : '' }}>Can view</option>
+                                            </select>
+                                            <button
+                                                wire:click="removeCollaborator({{ $collab['id'] }})"
+                                                class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Remove access"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-center py-6">
+                                    <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                    <p class="text-sm text-gray-500">No collaborators yet</p>
+                                    <p class="text-xs text-gray-400">Invite someone to work together</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    {{-- Divider --}}
+                    <div class="border-t border-gray-100 my-4"></div>
+
+                    {{-- Copy Link Section --}}
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700">Collaboration link</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <input
+                                type="text"
+                                value="{{ $reportId ? route('reports.builder', ['report' => $reportId]) : '#' }}"
+                                readonly
+                                class="flex-1 rounded-lg border-gray-200 bg-gray-50 text-sm text-gray-600"
+                            >
+                            <button
+                                @click="navigator.clipboard.writeText('{{ $reportId ? route('reports.builder', ['report' => $reportId]) : '' }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                class="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors flex items-center gap-2"
+                            >
+                                <template x-if="!copied">
+                                    <span class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                        </svg>
+                                        Copy
+                                    </span>
+                                </template>
+                                <template x-if="copied">
+                                    <span class="flex items-center gap-1.5 text-green-600">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        Copied!
+                                    </span>
+                                </template>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">Only people added above can access this report</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Comments Panel (Slide-over) -->
+    @if($showCommentsPanel)
+    <div class="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50 flex flex-col" x-data="{ editingComment: null }">
+        <!-- Header -->
+        <div class="p-4 border-b flex items-center justify-between">
+            <div>
+                <h3 class="font-semibold text-gray-900">Comments</h3>
+                <p class="text-xs text-gray-500">{{ $this->getUnresolvedCount() }} unresolved</p>
+            </div>
+            <button wire:click="closeCommentsPanel" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="px-4 py-2 border-b flex gap-2">
+            <button
+                wire:click="setCommentFilter('all')"
+                class="px-3 py-1 text-sm rounded-full {{ $commentFilter === 'all' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
+            >
+                All
+            </button>
+            <button
+                wire:click="setCommentFilter('unresolved')"
+                class="px-3 py-1 text-sm rounded-full {{ $commentFilter === 'unresolved' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
+            >
+                Open
+            </button>
+            <button
+                wire:click="setCommentFilter('resolved')"
+                class="px-3 py-1 text-sm rounded-full {{ $commentFilter === 'resolved' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
+            >
+                Resolved
+            </button>
+        </div>
+
+        <!-- Comments List -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            @forelse($comments as $comment)
+                <div class="border rounded-lg p-3 {{ $comment['resolved'] ? 'bg-gray-50 opacity-75' : '' }}">
+                    <!-- Comment Header -->
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium">
+                                @if($comment['user']['avatar'])
+                                    <img src="{{ $comment['user']['avatar'] }}" class="w-full h-full rounded-full object-cover">
+                                @else
+                                    {{ strtoupper(substr($comment['user']['name'], 0, 1)) }}
+                                @endif
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-900">{{ $comment['user']['name'] }}</span>
+                                <span class="text-xs text-gray-500 ml-1">{{ $comment['created_at_human'] }}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            @if(!$comment['resolved'])
+                                <button wire:click="resolveComment({{ $comment['id'] }})" class="text-gray-400 hover:text-green-500" title="Resolve">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </button>
+                            @else
+                                <button wire:click="unresolveComment({{ $comment['id'] }})" class="text-green-500 hover:text-gray-400" title="Reopen">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                    </svg>
+                                </button>
+                            @endif
+                            @if($comment['user']['id'] === auth()->id())
+                                <button wire:click="deleteComment({{ $comment['id'] }})" class="text-gray-400 hover:text-red-500" title="Delete">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Comment Content -->
+                    <div class="text-sm text-gray-700 prose prose-sm max-w-none">
+                        {!! $comment['formatted_content'] !!}
+                    </div>
+
+                    <!-- Position/Element Info -->
+                    @if($comment['element_id'] || $comment['position'])
+                        <div class="mt-2 text-xs text-gray-400">
+                            @if($comment['element_id'])
+                                On element
+                            @elseif($comment['position'])
+                                At position ({{ round($comment['position']['x']) }}, {{ round($comment['position']['y']) }})
+                            @endif
+                            - Page {{ $comment['page_index'] + 1 }}
+                        </div>
+                    @endif
+
+                    <!-- Replies -->
+                    @if(count($comment['replies']) > 0)
+                        <div class="mt-3 pl-4 border-l-2 border-gray-200 space-y-2">
+                            @foreach($comment['replies'] as $reply)
+                                <div class="text-sm">
+                                    <span class="font-medium text-gray-900">{{ $reply['user']['name'] }}</span>
+                                    <span class="text-gray-500 text-xs ml-1">{{ $reply['created_at_human'] }}</span>
+                                    <div class="text-gray-700 mt-0.5">{!! $reply['formatted_content'] !!}</div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <!-- Reply Button -->
+                    <button
+                        wire:click="startReply({{ $comment['id'] }})"
+                        class="mt-2 text-xs text-gray-500 hover:text-pulse-orange-500"
+                    >
+                        Reply
+                    </button>
+                </div>
+            @empty
+                <div class="text-center py-8 text-gray-500">
+                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    <p class="text-sm">No comments yet</p>
+                    <p class="text-xs mt-1">Be the first to leave feedback!</p>
+                </div>
+            @endforelse
+        </div>
+
+        <!-- New Comment Form -->
+        <div class="p-4 border-t bg-gray-50">
+            @if($replyingToComment)
+                <div class="mb-2 text-xs text-gray-500 flex items-center justify-between">
+                    <span>Replying to comment...</span>
+                    <button wire:click="cancelComment" class="text-gray-400 hover:text-gray-600">Cancel</button>
+                </div>
+            @endif
+            <form wire:submit="addComment" class="flex gap-2">
+                <textarea
+                    wire:model="newCommentContent"
+                    placeholder="Add a comment... Use @ to mention someone"
+                    rows="2"
+                    class="flex-1 rounded-lg border-gray-300 focus:border-pulse-orange-500 focus:ring-pulse-orange-500 text-sm resize-none"
+                ></textarea>
+                <button
+                    type="submit"
+                    class="self-end px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 text-sm font-medium"
+                >
+                    Post
+                </button>
+            </form>
         </div>
     </div>
     @endif

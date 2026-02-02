@@ -660,6 +660,19 @@
     <!-- Auto Help Beacons (pulsating dots at key page elements) -->
     <x-auto-help-beacons />
 
+    <!-- Element Picker Overlay (for admin tooltip creation) -->
+    <x-element-picker-overlay />
+
+    <!-- Tooltip Visual Editor (for admin WYSIWYG tooltip management) -->
+    <x-tooltip-visual-editor />
+
+    <!-- Inline Tooltip Creator (admin clicks on elements to add tooltips) -->
+    @auth
+        @if(auth()->user()->isAdmin())
+            <x-inline-tooltip-creator />
+        @endif
+    @endauth
+
     {{-- Livewire scripts auto-injected via config inject_assets=true --}}
     @stack('scripts')
 </body>

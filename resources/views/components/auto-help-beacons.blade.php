@@ -97,6 +97,11 @@
                                 </svg>
                             </span>
                             <h4 class="text-sm font-semibold text-gray-900" x-text="beacon.title"></h4>
+                            <span x-show="beacon.video_url" class="px-1.5 py-0.5 bg-purple-100 text-purple-600 text-xs rounded-full flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                                </svg>
+                            </span>
                         </div>
                         <button
                             @click.stop="expandedBeacon = null"
@@ -112,9 +117,36 @@
                     <div class="p-4">
                         <p class="text-sm text-gray-600 leading-relaxed mb-4" x-text="beacon.description"></p>
 
+                        <!-- Video Embed (if available) -->
+                        <div x-show="beacon.video_url && showingVideo === beacon.section" x-cloak class="mb-4">
+                            <div class="relative w-full rounded-lg overflow-hidden bg-gray-900" style="padding-top: 56.25%;">
+                                <iframe
+                                    :src="getEmbedUrl(beacon.video_url)"
+                                    class="absolute inset-0 w-full h-full"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                ></iframe>
+                            </div>
+                        </div>
+
                         <!-- Action Buttons -->
                         <div class="flex items-center gap-2">
+                            <!-- Watch Video button (if video URL exists) -->
                             <button
+                                x-show="beacon.video_url"
+                                @click.stop="toggleVideo(beacon.section)"
+                                :class="showingVideo === beacon.section ? 'bg-purple-100 text-purple-700' : 'bg-purple-600 text-white hover:bg-purple-700'"
+                                class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors"
+                            >
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                                </svg>
+                                <span x-text="showingVideo === beacon.section ? 'Hide Video' : 'Watch Video'"></span>
+                            </button>
+                            <!-- Start Walkthrough button (if no video) -->
+                            <button
+                                x-show="!beacon.video_url"
                                 @click.stop="startWalkthrough(beacon.section)"
                                 class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors"
                             >
@@ -165,6 +197,7 @@ function autoHelpBeacons() {
         hintsEnabled: false,
         hoveredBeacon: null,
         expandedBeacon: null,
+        showingVideo: null,
         resizeObserver: null,
         mutationObserver: null,
         dismissedPages: [],
@@ -425,6 +458,7 @@ function autoHelpBeacons() {
             this.hintsEnabled = false;
             this.expandedBeacon = null;
             this.hoveredBeacon = null;
+            this.showingVideo = null;
             this.activeBeacons = [];
             this.cleanupObservers();
         },
@@ -442,6 +476,51 @@ function autoHelpBeacons() {
                 detail: { section: section },
                 bubbles: true
             }));
+        },
+
+        toggleVideo(section) {
+            if (this.showingVideo === section) {
+                this.showingVideo = null;
+            } else {
+                this.showingVideo = section;
+            }
+        },
+
+        getEmbedUrl(url) {
+            if (!url) return '';
+
+            // Loom
+            if (url.includes('loom.com')) {
+                const loomMatch = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
+                if (loomMatch) {
+                    return `https://www.loom.com/embed/${loomMatch[1]}`;
+                }
+            }
+
+            // YouTube
+            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                let videoId = '';
+                if (url.includes('youtu.be')) {
+                    videoId = url.split('youtu.be/')[1]?.split('?')[0];
+                } else {
+                    const urlParams = new URLSearchParams(url.split('?')[1]);
+                    videoId = urlParams.get('v');
+                }
+                if (videoId) {
+                    return `https://www.youtube.com/embed/${videoId}`;
+                }
+            }
+
+            // Vimeo
+            if (url.includes('vimeo.com')) {
+                const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+                if (vimeoMatch) {
+                    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+                }
+            }
+
+            // Return original URL as fallback
+            return url;
         },
 
         dismissBeaconLocal(section) {
@@ -500,8 +579,9 @@ function autoHelpBeacons() {
                     section: step.section,
                     title: step.title,
                     description: step.description,
-                    top: position.top,
-                    left: position.left,
+                    video_url: step.video_url || null,
+                    top: position.top + (step.offset_y || 0),
+                    left: position.left + (step.offset_x || 0),
                     tooltipPosition: this.getTooltipPosition(step.position)
                 });
             });

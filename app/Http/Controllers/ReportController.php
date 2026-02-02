@@ -206,7 +206,9 @@ class ReportController extends Controller
     {
         $user = auth()->user();
 
-        if ($report->org_id !== $user->org_id) {
+        // Check if user has access to the report's organization
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
+        if (!in_array($report->org_id, $accessibleOrgIds)) {
             abort(403);
         }
 

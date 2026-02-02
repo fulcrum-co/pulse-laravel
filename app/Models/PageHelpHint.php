@@ -17,14 +17,34 @@ class PageHelpHint extends Model
         'selector',
         'title',
         'description',
+        'video_url',
         'position',
+        'offset_x',
+        'offset_y',
         'sort_order',
         'is_active',
+    ];
+
+    /**
+     * URL mapping for each page context.
+     */
+    public const CONTEXT_URLS = [
+        'dashboard' => '/dashboard',
+        'reports' => '/reports',
+        'collect' => '/collect',
+        'distribute' => '/distribute',
+        'resources' => '/resources',
+        'contacts' => '/contacts',
+        'plans' => '/plans',
+        'surveys' => '/surveys',
+        'alerts' => '/alerts',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'sort_order' => 'integer',
+        'offset_x' => 'integer',
+        'offset_y' => 'integer',
     ];
 
     /**
@@ -40,21 +60,6 @@ class PageHelpHint extends Model
         'plans' => 'Plans',
         'surveys' => 'Surveys',
         'alerts' => 'Alerts',
-    ];
-
-    /**
-     * URL mapping for each page context (used by Visual Editor).
-     */
-    public const CONTEXT_URLS = [
-        'dashboard' => '/dashboard',
-        'reports' => '/reports',
-        'collect' => '/collect',
-        'distribute' => '/distribute',
-        'resources' => '/resources',
-        'contacts' => '/contacts',
-        'plans' => '/plans',
-        'surveys' => '/surveys',
-        'alerts' => '/alerts',
     ];
 
     /**
@@ -115,11 +120,15 @@ class PageHelpHint extends Model
             ->orderBy('sort_order')
             ->get()
             ->map(fn ($hint) => [
+                'id' => $hint->id,
                 'section' => $hint->section,
                 'selector' => $hint->selector,
                 'title' => $hint->title,
                 'description' => $hint->description,
+                'video_url' => $hint->video_url,
                 'position' => $hint->position,
+                'offset_x' => $hint->offset_x ?? 0,
+                'offset_y' => $hint->offset_y ?? 0,
             ])
             ->toArray();
     }
@@ -141,11 +150,15 @@ class PageHelpHint extends Model
                 $grouped[$hint->page_context] = [];
             }
             $grouped[$hint->page_context][] = [
+                'id' => $hint->id,
                 'section' => $hint->section,
                 'selector' => $hint->selector,
                 'title' => $hint->title,
                 'description' => $hint->description,
+                'video_url' => $hint->video_url,
                 'position' => $hint->position,
+                'offset_x' => $hint->offset_x ?? 0,
+                'offset_y' => $hint->offset_y ?? 0,
             ];
         }
 

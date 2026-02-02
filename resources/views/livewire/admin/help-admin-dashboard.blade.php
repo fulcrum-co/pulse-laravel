@@ -81,7 +81,7 @@
     @if($view === 'list')
         <div class="divide-y divide-gray-100">
             @forelse($this->allArticles as $article)
-                <div class="px-6 py-3 flex items-center justify-between hover:bg-gray-50">
+                <a href="{{ route('help.article', $article->slug) }}" class="px-6 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors block">
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium text-gray-900 truncate">{{ $article->title }}</p>
                         <div class="flex items-center gap-2 mt-1">
@@ -102,7 +102,7 @@
                             <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">Draft</span>
                         @endif
                     </div>
-                </div>
+                </a>
             @empty
                 <div class="px-6 py-12 text-center text-gray-500">
                     <x-icon name="document-text" class="w-12 h-12 mx-auto text-gray-300 mb-3" />
@@ -125,7 +125,7 @@
             @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     @foreach($this->allArticles as $article)
-                        <div class="group relative border border-gray-200 rounded-lg p-4 hover:border-gray-300 hover:shadow-sm transition-all">
+                        <a href="{{ route('help.article', $article->slug) }}" class="group relative border border-gray-200 rounded-lg p-4 hover:border-gray-300 hover:shadow-sm transition-all block">
                             <div class="flex items-start justify-between mb-2">
                                 @if($article->is_published)
                                     <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded">Published</span>
@@ -136,7 +136,7 @@
                                     <x-icon name="star" class="w-4 h-4 text-yellow-500" />
                                 @endif
                             </div>
-                            <h3 class="font-medium text-gray-900 mb-1 line-clamp-2">{{ $article->title }}</h3>
+                            <h3 class="font-medium text-gray-900 mb-1 line-clamp-2 group-hover:text-purple-600 transition-colors">{{ $article->title }}</h3>
                             @if($article->excerpt)
                                 <p class="text-sm text-gray-500 line-clamp-2 mb-3">{{ $article->excerpt }}</p>
                             @endif
@@ -156,7 +156,7 @@
                                     </span>
                                 </div>
                             @endif
-                        </div>
+                        </a>
                     @endforeach
                 </div>
             @endif
@@ -179,7 +179,10 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($this->allArticles as $article)
-                        <tr class="hover:bg-gray-50">
+                        <tr
+                            @click="window.location.href = '{{ route('help.article', $article->slug) }}'"
+                            class="hover:bg-gray-50 cursor-pointer transition-colors"
+                        >
                             <td class="px-6 py-3 whitespace-nowrap">
                                 <div class="flex items-center gap-2">
                                     <span class="text-sm font-medium text-gray-900">{{ $article->title }}</span>
@@ -240,11 +243,11 @@
         @if($this->categories->isNotEmpty())
             <div class="mt-3 flex flex-wrap gap-2">
                 @foreach($this->categories as $category)
-                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs">
+                    <a href="{{ route('help.category', $category->slug) }}" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs hover:border-purple-300 hover:bg-purple-50 transition-colors">
                         <x-icon :name="$category->icon" class="w-3.5 h-3.5 text-gray-400" />
                         <span class="font-medium text-gray-600">{{ $category->name }}</span>
                         <span class="text-gray-400">({{ $category->articles_count }})</span>
-                    </div>
+                    </a>
                 @endforeach
             </div>
         @endif

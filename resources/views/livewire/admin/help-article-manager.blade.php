@@ -90,7 +90,10 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($this->articles as $article)
-                        <tr class="hover:bg-gray-50 transition-colors">
+                        <tr
+                            @click="window.location.href = '{{ route('help.article', $article->slug) }}'"
+                            class="hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
                             <td class="px-4 py-3">
                                 <div class="flex items-start gap-3">
                                     @if($article->is_featured)
@@ -115,7 +118,7 @@
                             <td class="px-4 py-3 text-center">
                                 <span class="text-sm text-gray-600">{{ number_format($article->view_count) }}</span>
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td class="px-4 py-3 text-center" @click.stop>
                                 <div class="flex items-center justify-center gap-2">
                                     <button
                                         wire:click="togglePublished({{ $article->id }})"
@@ -136,7 +139,7 @@
                                     </button>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-right">
+                            <td class="px-4 py-3 text-right" @click.stop>
                                 <div class="flex items-center justify-end gap-1">
                                     <a
                                         href="/help/article/{{ $article->slug }}"
