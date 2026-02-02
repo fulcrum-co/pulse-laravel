@@ -1,4 +1,27 @@
 <div class="max-w-4xl mx-auto">
+    {{-- Admin Edit Bar --}}
+    @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->role === 'admin'))
+    <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
+        <div class="flex items-center gap-2 text-amber-800">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-sm font-medium">Admin View</span>
+            <span class="text-sm text-amber-600">·</span>
+            <span class="text-sm text-amber-600">Article ID: {{ $article->id }}</span>
+        </div>
+        <a
+            href="{{ route('admin.help-articles') }}?edit={{ $article->id }}"
+            class="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors"
+        >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit Article
+        </a>
+    </div>
+    @endif
+
     <!-- Breadcrumb -->
     <nav class="mb-6">
         <ol class="flex items-center gap-2 text-sm">

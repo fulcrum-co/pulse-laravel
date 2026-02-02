@@ -25,6 +25,12 @@ class HelpArticleManager extends Component
     #[Url]
     public string $statusFilter = '';
 
+    #[Url]
+    public string $action = '';
+
+    #[Url]
+    public ?int $edit = null;
+
     public bool $showModal = false;
     public bool $editMode = false;
 
@@ -60,6 +66,18 @@ class HelpArticleManager extends Component
     protected $messages = [
         'slug.regex' => 'Slug must be lowercase with hyphens only',
     ];
+
+    public function mount(): void
+    {
+        // Auto-open edit modal if edit parameter is provided
+        if ($this->edit) {
+            $this->openEditModal($this->edit);
+        }
+        // Auto-open create modal if action=create
+        elseif ($this->action === 'create') {
+            $this->openCreateModal();
+        }
+    }
 
     #[Computed]
     public function articles()
