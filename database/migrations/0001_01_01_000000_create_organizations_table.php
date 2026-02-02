@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('organizations')) {
+            return;
+        }
+
         Schema::create('organizations', function (Blueprint $table) {
             $table->id();
             $table->string('org_type')->default('district'); // consultant, district, school, department
