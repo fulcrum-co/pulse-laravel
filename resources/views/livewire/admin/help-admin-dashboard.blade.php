@@ -2,7 +2,7 @@
     {{-- Header --}}
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Help Center Admin</h1>
+            <h1 class="text-2xl font-bold text-gray-900">Help Center</h1>
             <p class="mt-1 text-sm text-gray-500">Manage help articles, categories, and page hints</p>
         </div>
     </div>
