@@ -10,15 +10,65 @@
             <span class="text-sm text-amber-600">·</span>
             <span class="text-sm text-amber-600">Article ID: {{ $article->id }}</span>
         </div>
-        <a
-            href="{{ route('admin.help-articles') }}?edit={{ $article->id }}"
-            class="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Edit Article
-        </a>
+        <div class="flex items-center gap-2">
+            {{-- Share Dropdown --}}
+            <div x-data="{ open: false, copied: false }" class="relative">
+                <button
+                    @click="open = !open"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-amber-300 hover:bg-amber-50 text-amber-700 text-sm font-medium rounded-lg transition-colors"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    Share
+                </button>
+                <div
+                    x-show="open"
+                    @click.outside="open = false"
+                    x-transition
+                    class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+                >
+                    <div class="px-3 py-2 border-b border-gray-100">
+                        <p class="text-xs font-medium text-gray-500 uppercase">Share this article</p>
+                    </div>
+                    <button
+                        @click="
+                            navigator.clipboard.writeText('{{ route('help.article', $article->slug) }}');
+                            copied = true;
+                            setTimeout(() => copied = false, 2000);
+                        "
+                        class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                        <span x-text="copied ? 'Copied!' : 'Copy link'"></span>
+                    </button>
+                    <a
+                        href="mailto:?subject={{ urlencode($article->title) }}&body={{ urlencode('Check out this help article: ' . route('help.article', $article->slug)) }}"
+                        class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        Email link
+                    </a>
+                    <div class="px-3 py-2 border-t border-gray-100 mt-1">
+                        <p class="text-xs text-gray-400 truncate">{{ route('help.article', $article->slug) }}</p>
+                    </div>
+                </div>
+            </div>
+            {{-- Edit Button --}}
+            <a
+                href="{{ route('admin.help-articles') }}?edit={{ $article->id }}"
+                class="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit
+            </a>
+        </div>
     </div>
     @endif
 
