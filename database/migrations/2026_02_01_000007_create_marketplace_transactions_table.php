@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Skip if table already exists (idempotent migration)
+        if (Schema::hasTable('marketplace_transactions')) {
+            return;
+        }
+
         Schema::create('marketplace_transactions', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();

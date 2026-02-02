@@ -12,6 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if table already exists (idempotent migration)
+        if (Schema::hasTable('resource_distributions')) {
+            return;
+        }
+
         // Add source tracking to surveys
         Schema::table('surveys', function (Blueprint $table) {
             $table->foreignId('source_survey_id')->nullable()->after('org_id')

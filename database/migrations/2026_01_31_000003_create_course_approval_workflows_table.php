@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Skip if table already exists (idempotent migration)
+        if (Schema::hasTable('course_approval_workflows')) {
+            return;
+        }
+
         Schema::create('course_approval_workflows', function (Blueprint $table) {
             $table->id();
             $table->foreignId('mini_course_id')->constrained()->cascadeOnDelete();

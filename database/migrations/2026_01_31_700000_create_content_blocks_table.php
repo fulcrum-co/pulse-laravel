@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Skip if table already exists (idempotent migration)
+        if (Schema::hasTable('content_blocks')) {
+            return;
+        }
+
         Schema::create('content_blocks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('org_id')->nullable()->constrained('organizations')->cascadeOnDelete();

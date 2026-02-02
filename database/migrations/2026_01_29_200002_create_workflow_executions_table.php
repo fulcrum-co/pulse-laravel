@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if table already exists (idempotent migration)
+        if (Schema::hasTable('workflow_executions')) {
+            return;
+        }
+
         Schema::create('workflow_executions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('workflow_id')->constrained('workflows')->onDelete('cascade');

@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Skip if table already exists (idempotent migration)
+        if (Schema::hasTable('resource_assignments')) {
+            return;
+        }
+
         Schema::create('resource_assignments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('resource_id')->constrained()->cascadeOnDelete();

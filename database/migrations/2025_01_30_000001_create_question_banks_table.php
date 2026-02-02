@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Skip if table already exists (idempotent migration)
+        if (Schema::hasTable('question_banks')) {
+            return;
+        }
+
         Schema::create('question_banks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('org_id')->nullable()->constrained('organizations')->nullOnDelete();

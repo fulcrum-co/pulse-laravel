@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Skip if table already exists (idempotent migration)
+        if (Schema::hasTable('moderation_workflows')) {
+            return;
+        }
+
         // Moderation workflows - extends base workflows with moderation-specific config
         Schema::create('moderation_workflows', function (Blueprint $table) {
             $table->id();

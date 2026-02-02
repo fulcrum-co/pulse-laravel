@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Skip if table already exists (idempotent migration)
+        if (Schema::hasTable('mini_course_versions')) {
+            return;
+        }
+
         Schema::create('mini_course_versions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('mini_course_id')->constrained('mini_courses')->cascadeOnDelete();

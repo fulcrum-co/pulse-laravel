@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Skip if table already exists (idempotent migration)
+        if (Schema::hasTable('collection_reminders')) {
+            return;
+        }
+
         Schema::create('collection_reminders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('collection_id')->constrained()->onDelete('cascade');

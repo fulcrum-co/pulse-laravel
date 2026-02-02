@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Skip if table already exists (idempotent migration)
+        if (Schema::hasTable('marketplace_purchases')) {
+            return;
+        }
+
         Schema::create('marketplace_purchases', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaction_id')->constrained('marketplace_transactions')->cascadeOnDelete();

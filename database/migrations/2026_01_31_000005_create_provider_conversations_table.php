@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Skip if table already exists (idempotent migration)
+        if (Schema::hasTable('provider_conversations')) {
+            return;
+        }
+
         Schema::create('provider_conversations', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
