@@ -767,5 +767,9 @@ Route::prefix('api/help')->middleware(['web', 'auth'])->group(function () {
 
 // Admin Routes (requires admin role)
 Route::prefix('admin')->middleware(['web', 'auth'])->name('admin.')->group(function () {
-    Route::get('/help-hints', App\Livewire\Admin\HelpHintManager::class)->name('help-hints');
+    // Help Center Admin
+    Route::get('/help', App\Livewire\Admin\HelpAdminDashboard::class)->name('help');
+    Route::get('/help/articles', App\Livewire\Admin\HelpArticleManager::class)->name('help-articles');
+    Route::get('/help/categories', App\Livewire\Admin\HelpCategoryManager::class)->name('help-categories');
+    Route::get('/help/hints', App\Livewire\Admin\HelpHintManager::class)->name('help-hints');
 });

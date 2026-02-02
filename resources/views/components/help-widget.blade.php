@@ -207,7 +207,7 @@
 
                             @if(auth()->user()?->isAdmin() || auth()->user()?->role === 'admin')
                             <a
-                                href="{{ route('admin.help-hints') }}"
+                                href="{{ route('admin.help') }}"
                                 class="flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors border-t border-gray-100 mt-2 pt-3"
                             >
                                 <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
@@ -217,8 +217,8 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="text-sm font-medium text-gray-900">Manage Help Hints</span>
-                                    <p class="text-xs text-gray-500">Admin settings</p>
+                                    <span class="text-sm font-medium text-gray-900">Help Admin</span>
+                                    <p class="text-xs text-gray-500">Manage articles & hints</p>
                                 </div>
                             </a>
                             @endif
