@@ -168,8 +168,9 @@ function autoHelpBeacons() {
         resizeObserver: null,
         mutationObserver: null,
         dismissedPages: [],
+        hintsLoaded: false,
 
-        // Help tours config for different pages
+        // Help tours config for different pages (fallback data, overridden by API)
         helpTours: {
             'dashboard': [
                 {
@@ -375,6 +376,9 @@ function autoHelpBeacons() {
                 this.dismissedPages = [];
             }
 
+            // Load hints from API (with fallback to static data)
+            this.loadHintsFromApi();
+
             // Listen for help overlay activation to hide beacons
             window.addEventListener('start-page-help', () => {
                 this.hintsEnabled = false;
@@ -387,6 +391,28 @@ function autoHelpBeacons() {
             window.addEventListener('help-overlay-closed', () => {
                 // Hints stay off - user must re-enable from menu
             });
+        },
+
+        async loadHintsFromApi() {
+            try {
+                const response = await fetch('/api/help/page-hints', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.hints && Object.keys(data.hints).length > 0) {
+                        this.helpTours = data.hints;
+                    }
+                }
+            } catch (e) {
+                // Fallback to static data (already loaded)
+                console.debug('Using fallback help hints');
+            }
+            this.hintsLoaded = true;
         },
 
         enableHints() {

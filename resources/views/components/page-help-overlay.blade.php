@@ -112,8 +112,9 @@ function pageHelpOverlay() {
         currentStep: null,
         targetElement: null,
         tooltipPosition: 'bottom',
+        hintsLoaded: false,
 
-        // Define help tours for different pages (each step has a section identifier)
+        // Define help tours for different pages (fallback data, overridden by API)
         helpTours: {
             'dashboard': [
                 {
@@ -402,7 +403,12 @@ function pageHelpOverlay() {
             ]
         },
 
-        startHelp(context = null, section = null) {
+        async startHelp(context = null, section = null) {
+            // Load hints from API if not already loaded
+            if (!this.hintsLoaded) {
+                await this.loadHintsFromApi();
+            }
+
             const pageContext = context || this.detectContext();
             this.steps = this.helpTours[pageContext] || this.helpTours['general'];
 
@@ -419,6 +425,37 @@ function pageHelpOverlay() {
             this.setCurrentStep(this.steps[startIndex]);
             this.active = true;
             document.body.style.overflow = 'hidden';
+        },
+
+        async loadHintsFromApi() {
+            try {
+                const response = await fetch('/api/help/page-hints', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.hints && Object.keys(data.hints).length > 0) {
+                        // Merge API hints with existing tours (API data extends static data)
+                        for (const [context, hints] of Object.entries(data.hints)) {
+                            if (this.helpTours[context]) {
+                                // Add intro step if it exists, then API hints
+                                const intro = this.helpTours[context].find(s => s.section === 'intro');
+                                this.helpTours[context] = intro ? [intro, ...hints] : hints;
+                            } else {
+                                this.helpTours[context] = hints;
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                // Fallback to static data (already loaded)
+                console.debug('Using fallback help tours');
+            }
+            this.hintsLoaded = true;
         },
 
         detectContext() {
