@@ -27,6 +27,8 @@ class DatabaseSeeder extends Seeder
             MiniCourseSeeder::class,
             AdaptiveTriggerSeeder::class,
             MarketplaceSeeder::class,
+            // Reports
+            ReportSeeder::class,
         ]);
     }
 }
