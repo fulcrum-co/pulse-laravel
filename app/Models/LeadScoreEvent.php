@@ -2,20 +2,23 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class LeadScoreEvent extends Model
 {
-    public const EVENT_MODULE_COMPLETED = 'module_completed';
-    public const EVENT_CERTIFICATION_EARNED = 'certification_earned';
-    public const EVENT_LOGIN = 'login';
-    public const EVENT_DECAY = 'decay';
-    public const EVENT_COURSE_STARTED = 'course_started';
-    public const EVENT_COURSE_COMPLETED = 'course_completed';
-    public const EVENT_MANUAL_ADJUSTMENT = 'manual_adjustment';
+    use HasFactory;
+
+    // Event types
+    public const TYPE_LOGIN = 'login';
+    public const TYPE_MODULE_COMPLETED = 'module_completed';
+    public const TYPE_COURSE_COMPLETED = 'course_completed';
+    public const TYPE_CERTIFICATION_EARNED = 'certification_earned';
+    public const TYPE_COURSE_STARTED = 'course_started';
+    public const TYPE_DECAY = 'decay';
+    public const TYPE_MANUAL_ADJUSTMENT = 'manual_adjustment';
 
     protected $fillable = [
         'lead_score_id',
@@ -40,48 +43,44 @@ class LeadScoreEvent extends Model
         return $this->morphTo();
     }
 
-    // Scopes
-    public function scopeOfType(Builder $query, string $type): Builder
+    /**
+     * Get human-readable event type label.
+     */
+    public function getTypeLabel(): string
+    {
+        return match ($this->event_type) {
+            self::TYPE_LOGIN => 'Login',
+            self::TYPE_MODULE_COMPLETED => 'Module Completed',
+            self::TYPE_COURSE_COMPLETED => 'Course Completed',
+            self::TYPE_CERTIFICATION_EARNED => 'Certification Earned',
+            self::TYPE_COURSE_STARTED => 'Course Started',
+            self::TYPE_DECAY => 'Inactivity Decay',
+            self::TYPE_MANUAL_ADJUSTMENT => 'Manual Adjustment',
+            default => ucwords(str_replace('_', ' ', $this->event_type)),
+        };
+    }
+
+    /**
+     * Scope to filter by event type.
+     */
+    public function scopeOfType($query, string $type)
     {
         return $query->where('event_type', $type);
     }
 
-    public function scopePositive(Builder $query): Builder
+    /**
+     * Scope to get positive point events.
+     */
+    public function scopePositive($query)
     {
         return $query->where('points', '>', 0);
     }
 
-    public function scopeNegative(Builder $query): Builder
+    /**
+     * Scope to get negative point events (decay).
+     */
+    public function scopeNegative($query)
     {
         return $query->where('points', '<', 0);
-    }
-
-    public function scopeRecent(Builder $query, int $days = 30): Builder
-    {
-        return $query->where('created_at', '>=', now()->subDays($days));
-    }
-
-    // Helper methods
-    public static function getEventTypes(): array
-    {
-        return [
-            self::EVENT_MODULE_COMPLETED => 'Module Completed',
-            self::EVENT_CERTIFICATION_EARNED => 'Certification Earned',
-            self::EVENT_LOGIN => 'Login',
-            self::EVENT_DECAY => 'Score Decay',
-            self::EVENT_COURSE_STARTED => 'Course Started',
-            self::EVENT_COURSE_COMPLETED => 'Course Completed',
-            self::EVENT_MANUAL_ADJUSTMENT => 'Manual Adjustment',
-        ];
-    }
-
-    public function isPositive(): bool
-    {
-        return $this->points > 0;
-    }
-
-    public function isNegative(): bool
-    {
-        return $this->points < 0;
     }
 }

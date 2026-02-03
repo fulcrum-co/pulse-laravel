@@ -816,3 +816,14 @@ Route::prefix('admin')->middleware(['web', 'auth'])->name('admin.')->group(funct
     Route::get('/help/categories', App\Livewire\Admin\HelpCategoryManager::class)->name('help-categories');
     Route::get('/help/hints', App\Livewire\Admin\HelpHintManager::class)->name('help-hints');
 });
+
+// Public Certificate Verification (no auth required)
+Route::get('/verify/{uuid}', [App\Http\Controllers\CertificateController::class, 'verify'])->name('certificates.verify');
+
+// Authenticated Certificate Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/certificates', [App\Http\Controllers\CertificateController::class, 'index'])->name('certificates.index');
+    Route::get('/certificates/{uuid}', [App\Http\Controllers\CertificateController::class, 'show'])->name('certificates.show');
+    Route::get('/certificates/{uuid}/download', [App\Http\Controllers\CertificateController::class, 'download'])->name('certificates.download');
+    Route::get('/certificates/{uuid}/linkedin', [App\Http\Controllers\CertificateController::class, 'linkedinShare'])->name('certificates.linkedin');
+});
