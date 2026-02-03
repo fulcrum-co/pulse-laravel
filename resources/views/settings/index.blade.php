@@ -27,6 +27,14 @@
                     <x-icon name="shield-check" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
                     Security
                 </button>
+                <button
+                    @click="activeTab = 'terminology'"
+                    :class="activeTab === 'terminology' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                >
+                    <x-icon name="tag" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
+                    Terminology
+                </button>
             </nav>
         </div>
 
@@ -53,6 +61,10 @@
                     <p class="text-gray-400 text-sm mt-1">Password and two-factor authentication options will be available here.</p>
                 </div>
             </x-card>
+        </div>
+
+        <div x-show="activeTab === 'terminology'" x-cloak>
+            <livewire:admin.terminology-settings />
         </div>
     </div>
 </x-layouts.dashboard>
