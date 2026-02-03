@@ -310,17 +310,174 @@
 
         <!-- Contact List selector (only for contact_list scope) -->
         @if($filters['scope'] === 'contact_list')
-            <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500">Contact List:</span>
-                <select
-                    wire:model.live="filters.contact_list_id"
-                    class="border-0 bg-white shadow-sm rounded-lg px-3 py-1.5 text-sm focus:ring-pulse-orange-500 min-w-[200px]"
-                >
-                    <option value="">Select a list...</option>
-                    @foreach($this->availableContactLists ?? [] as $list)
-                        <option value="{{ $list['id'] }}">{{ $list['name'] }} ({{ $list['count'] ?? 0 }})</option>
-                    @endforeach
-                </select>
+            <div class="flex items-center gap-3" x-data="{
+                showListADropdown: false,
+                showListBDropdown: false,
+                showCreateForm: false,
+                newListName: '',
+                createForSlot: null
+            }">
+                {{-- Mode Toggle --}}
+                <div class="flex items-center bg-gray-100 rounded-lg p-0.5">
+                    <button
+                        wire:click="$set('filters.list_mode', 'single')"
+                        class="px-2.5 py-1 text-xs font-medium rounded-md transition-colors {{ ($filters['list_mode'] ?? 'single') === 'single' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
+                    >
+                        Single
+                    </button>
+                    <button
+                        wire:click="$set('filters.list_mode', 'compare')"
+                        class="px-2.5 py-1 text-xs font-medium rounded-md transition-colors {{ ($filters['list_mode'] ?? 'single') === 'compare' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
+                        title="Compare two lists side-by-side"
+                    >
+                        <span class="flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            Compare
+                        </span>
+                    </button>
+                </div>
+
+                @if(($filters['list_mode'] ?? 'single') === 'single')
+                    {{-- Single List Mode --}}
+                    <div class="relative">
+                        <span class="text-sm text-gray-500 mr-1">List:</span>
+                        <button @click="showListADropdown = !showListADropdown" type="button"
+                            class="border-0 bg-white shadow-sm rounded-lg px-3 py-1.5 text-sm focus:ring-pulse-orange-500 min-w-[180px] text-left inline-flex items-center justify-between gap-2">
+                            @php $selectedList = collect($this->availableContactLists ?? [])->firstWhere('id', $filters['list_id']); @endphp
+                            <span>{{ $selectedList['name'] ?? 'Select a list...' }}</span>
+                            <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+
+                        <div x-show="showListADropdown" @click.outside="showListADropdown = false" x-transition
+                            class="absolute z-50 mt-1 w-64 bg-white rounded-lg shadow-lg border border-gray-200 max-h-64 overflow-hidden">
+                            <div class="p-2 border-b border-gray-100">
+                                <button @click="showCreateForm = true; createForSlot = 'single'"
+                                    class="w-full flex items-center gap-2 px-3 py-2 text-sm text-pulse-orange-600 hover:bg-pulse-orange-50 rounded-lg">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Create new list
+                                </button>
+                            </div>
+                            <div class="p-2 max-h-48 overflow-y-auto">
+                                @forelse($this->availableContactLists ?? [] as $list)
+                                    <button
+                                        wire:click="$set('filters.list_id', {{ $list['id'] }})"
+                                        @click="showListADropdown = false"
+                                        class="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg text-left {{ ($filters['list_id'] ?? null) == $list['id'] ? 'bg-pulse-orange-50' : '' }}">
+                                        <span class="text-sm text-gray-700">{{ $list['name'] }}</span>
+                                        <span class="text-xs text-gray-400">({{ $list['count'] ?? 0 }})</span>
+                                    </button>
+                                @empty
+                                    <p class="px-3 py-2 text-sm text-gray-500">No lists yet</p>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    {{-- Compare Mode - Two list selectors --}}
+                    <div class="flex items-center gap-2">
+                        {{-- List A (Left side) --}}
+                        <div class="relative">
+                            <span class="text-xs font-medium text-blue-600 mr-1">A:</span>
+                            <button @click="showListADropdown = !showListADropdown" type="button"
+                                class="border-0 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 text-sm min-w-[140px] text-left inline-flex items-center justify-between gap-2">
+                                @php $listA = collect($this->availableContactLists ?? [])->firstWhere('id', $filters['list_a_id']); @endphp
+                                <span class="text-blue-700">{{ $listA['name'] ?? 'Select list...' }}</span>
+                                <svg class="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+
+                            <div x-show="showListADropdown" @click.outside="showListADropdown = false" x-transition
+                                class="absolute z-50 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 max-h-64 overflow-hidden">
+                                <div class="p-2 max-h-48 overflow-y-auto">
+                                    @forelse($this->availableContactLists ?? [] as $list)
+                                        <button
+                                            wire:click="$set('filters.list_a_id', {{ $list['id'] }})"
+                                            @click="showListADropdown = false"
+                                            class="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg text-left {{ ($filters['list_a_id'] ?? null) == $list['id'] ? 'bg-blue-50' : '' }}">
+                                            <span class="text-sm text-gray-700">{{ $list['name'] }}</span>
+                                            <span class="text-xs text-gray-400">({{ $list['count'] ?? 0 }})</span>
+                                        </button>
+                                    @empty
+                                        <p class="px-3 py-2 text-sm text-gray-500">No lists yet</p>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </div>
+
+                        <span class="text-gray-400 text-sm font-medium">vs</span>
+
+                        {{-- List B (Right side) --}}
+                        <div class="relative">
+                            <span class="text-xs font-medium text-purple-600 mr-1">B:</span>
+                            <button @click="showListBDropdown = !showListBDropdown" type="button"
+                                class="border-0 bg-purple-50 border border-purple-200 rounded-lg px-3 py-1.5 text-sm min-w-[140px] text-left inline-flex items-center justify-between gap-2">
+                                @php $listB = collect($this->availableContactLists ?? [])->firstWhere('id', $filters['list_b_id']); @endphp
+                                <span class="text-purple-700">{{ $listB['name'] ?? 'Select list...' }}</span>
+                                <svg class="w-4 h-4 text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+
+                            <div x-show="showListBDropdown" @click.outside="showListBDropdown = false" x-transition
+                                class="absolute z-50 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 max-h-64 overflow-hidden">
+                                <div class="p-2 max-h-48 overflow-y-auto">
+                                    @forelse($this->availableContactLists ?? [] as $list)
+                                        <button
+                                            wire:click="$set('filters.list_b_id', {{ $list['id'] }})"
+                                            @click="showListBDropdown = false"
+                                            class="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg text-left {{ ($filters['list_b_id'] ?? null) == $list['id'] ? 'bg-purple-50' : '' }}">
+                                            <span class="text-sm text-gray-700">{{ $list['name'] }}</span>
+                                            <span class="text-xs text-gray-400">({{ $list['count'] ?? 0 }})</span>
+                                        </button>
+                                    @empty
+                                        <p class="px-3 py-2 text-sm text-gray-500">No lists yet</p>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Comparison indicator --}}
+                    @if($filters['list_a_id'] && $filters['list_b_id'])
+                        <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full flex items-center gap-1">
+                            <svg class="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Comparative mode
+                        </span>
+                    @endif
+                @endif
+
+                {{-- Create List Modal (shared) --}}
+                <template x-if="showCreateForm">
+                    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/30" @click.self="showCreateForm = false">
+                        <div class="bg-white rounded-xl shadow-xl p-4 w-80">
+                            <h3 class="text-sm font-semibold text-gray-900 mb-3">Create New List</h3>
+                            <input x-model="newListName" type="text" placeholder="List name..."
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                                @keydown.enter="$wire.createContactList(newListName); newListName = ''; showCreateForm = false;"
+                                x-ref="createListInput"
+                                x-init="$watch('showCreateForm', value => { if(value) setTimeout(() => $refs.createListInput?.focus(), 50) })">
+                            <div class="flex gap-2 mt-3">
+                                <button @click="showCreateForm = false; newListName = ''"
+                                    class="flex-1 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">
+                                    Cancel
+                                </button>
+                                <button @click="$wire.createContactList(newListName); newListName = ''; showCreateForm = false;"
+                                    class="flex-1 px-3 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600">
+                                    Create
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
             </div>
         @endif
 
@@ -647,11 +804,16 @@
 
 
             <!-- Zoom container -->
+            @php
+                $currentPageSettings = $pages[$currentPageIndex]['settings'] ?? ['width' => 816, 'height' => 1056];
+                $canvasWidth = $currentPageSettings['width'] ?? 816;
+                $canvasHeight = $currentPageSettings['height'] ?? 1056;
+            @endphp
             <div class="canvas-zoom-container" style="transform: scale({{ $canvasZoom }}); transform-origin: top center; transition: transform 0.2s ease;">
                 <div
                     data-report-canvas
                     class="mx-auto canvas-page relative {{ $showGrid ? 'canvas-grid' : '' }} bg-white shadow-xl"
-                    style="width: 800px; min-height: 1000px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 20px 25px -5px rgba(0, 0, 0, 0.1);"
+                    style="width: {{ $canvasWidth }}px; min-height: {{ $canvasHeight }}px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 20px 25px -5px rgba(0, 0, 0, 0.1);"
                     wire:click.stop
                 >
                 @foreach($elements as $element)
@@ -756,16 +918,108 @@
                                         <hr class="border-pulse-purple-100 mb-3">
                                     @endif
 
-                                    {{-- Comment input --}}
-                                    <div x-data="{ content: '' }">
-                                        <textarea
-                                            x-model="content"
-                                            placeholder="Add a comment... Use @ to mention someone"
-                                            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-pulse-purple-500 focus:border-pulse-purple-500 resize-none"
-                                            rows="2"
-                                            @keydown.meta.enter="if(content.trim()) { $wire.set('commentingOnElement', '{{ $element['id'] }}'); $wire.set('newCommentContent', content); $wire.addComment(); content = ''; showCommentPopover = false; }"
-                                            @keydown.ctrl.enter="if(content.trim()) { $wire.set('commentingOnElement', '{{ $element['id'] }}'); $wire.set('newCommentContent', content); $wire.addComment(); content = ''; showCommentPopover = false; }"
-                                        ></textarea>
+                                    {{-- Comment input with @mention autocomplete --}}
+                                    <div x-data="{
+                                        content: '',
+                                        showMentions: false,
+                                        mentionSearch: '',
+                                        mentionableUsers: @js($this->getMentionableUsers()),
+                                        selectedMentionIndex: 0,
+                                        mentionStartPos: null,
+
+                                        get filteredUsers() {
+                                            if (!this.mentionSearch) return this.mentionableUsers.slice(0, 5);
+                                            const search = this.mentionSearch.toLowerCase();
+                                            return this.mentionableUsers.filter(u => u.name.toLowerCase().includes(search)).slice(0, 5);
+                                        },
+
+                                        handleInput(e) {
+                                            const textarea = e.target;
+                                            const cursorPos = textarea.selectionStart;
+                                            const textBefore = this.content.substring(0, cursorPos);
+
+                                            // Check if we're in a mention context
+                                            const lastAtPos = textBefore.lastIndexOf('@');
+                                            if (lastAtPos !== -1) {
+                                                const textAfterAt = textBefore.substring(lastAtPos + 1);
+                                                // Only show dropdown if no space after @ or still typing the name
+                                                if (!textAfterAt.includes(' ') && !textAfterAt.includes('\n')) {
+                                                    this.mentionSearch = textAfterAt;
+                                                    this.mentionStartPos = lastAtPos;
+                                                    this.showMentions = true;
+                                                    this.selectedMentionIndex = 0;
+                                                    return;
+                                                }
+                                            }
+                                            this.showMentions = false;
+                                            this.mentionSearch = '';
+                                        },
+
+                                        selectMention(user) {
+                                            const beforeMention = this.content.substring(0, this.mentionStartPos);
+                                            const afterMention = this.content.substring(this.mentionStartPos + 1 + this.mentionSearch.length);
+                                            this.content = beforeMention + '@[' + user.name + '](user:' + user.id + ')' + afterMention + ' ';
+                                            this.showMentions = false;
+                                            this.mentionSearch = '';
+                                            this.$nextTick(() => this.$refs.textarea.focus());
+                                        },
+
+                                        handleKeydown(e) {
+                                            if (!this.showMentions) return;
+                                            if (e.key === 'ArrowDown') {
+                                                e.preventDefault();
+                                                this.selectedMentionIndex = Math.min(this.selectedMentionIndex + 1, this.filteredUsers.length - 1);
+                                            } else if (e.key === 'ArrowUp') {
+                                                e.preventDefault();
+                                                this.selectedMentionIndex = Math.max(this.selectedMentionIndex - 1, 0);
+                                            } else if (e.key === 'Enter' && !e.metaKey && !e.ctrlKey) {
+                                                e.preventDefault();
+                                                if (this.filteredUsers[this.selectedMentionIndex]) {
+                                                    this.selectMention(this.filteredUsers[this.selectedMentionIndex]);
+                                                }
+                                            } else if (e.key === 'Escape') {
+                                                this.showMentions = false;
+                                            }
+                                        }
+                                    }">
+                                        <div class="relative">
+                                            <textarea
+                                                x-ref="textarea"
+                                                x-model="content"
+                                                @input="handleInput($event)"
+                                                @keydown="handleKeydown($event)"
+                                                placeholder="Add a comment... Type @ to mention someone"
+                                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-pulse-purple-500 focus:border-pulse-purple-500 resize-none"
+                                                rows="2"
+                                                @keydown.meta.enter="if(content.trim() && !showMentions) { $wire.set('commentingOnElement', '{{ $element['id'] }}'); $wire.set('newCommentContent', content); $wire.addComment(); content = ''; showCommentPopover = false; }"
+                                                @keydown.ctrl.enter="if(content.trim() && !showMentions) { $wire.set('commentingOnElement', '{{ $element['id'] }}'); $wire.set('newCommentContent', content); $wire.addComment(); content = ''; showCommentPopover = false; }"
+                                            ></textarea>
+
+                                            {{-- Mention autocomplete dropdown --}}
+                                            <div
+                                                x-show="showMentions && filteredUsers.length > 0"
+                                                x-transition
+                                                @click.away="showMentions = false"
+                                                class="absolute bottom-full left-0 mb-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-48 overflow-y-auto z-50"
+                                            >
+                                                <template x-for="(user, index) in filteredUsers" :key="user.id">
+                                                    <button
+                                                        type="button"
+                                                        @click="selectMention(user)"
+                                                        class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                                                        :class="{ 'bg-pulse-purple-50': selectedMentionIndex === index }"
+                                                    >
+                                                        <div class="w-6 h-6 rounded-full bg-pulse-purple-100 flex items-center justify-center flex-shrink-0">
+                                                            <span class="text-xs font-medium text-pulse-purple-600" x-text="user.name.charAt(0).toUpperCase()"></span>
+                                                        </div>
+                                                        <span class="text-gray-700" x-text="user.name"></span>
+                                                    </button>
+                                                </template>
+                                                <div x-show="filteredUsers.length === 0" class="px-3 py-2 text-sm text-gray-500">
+                                                    No users found
+                                                </div>
+                                            </div>
+                                        </div>
 
                                         <div class="flex items-center justify-between mt-2">
                                             <span class="text-xs text-gray-400">Cmd+Enter to post</span>
@@ -1568,121 +1822,272 @@
         @endif
     </div>
 
-    <!-- Canvas Type Selector Modal (Step 1) -->
+    <!-- Canvas Type Selector Modal (2-Step Flow) -->
     @if($showCanvasSelector)
         <div class="fixed inset-0 z-50 overflow-y-auto">
             <div class="flex items-center justify-center min-h-screen px-4 py-8">
                 <div class="fixed inset-0 bg-black/50 transition-opacity"></div>
 
-                <div class="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden">
+                <div class="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden">
                     {{-- Header --}}
-                    <div class="p-8 text-center border-b border-gray-100">
-                        <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="p-6 text-center border-b border-gray-100">
+                        <div class="w-14 h-14 bg-gradient-to-br from-pulse-orange-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-7 h-7 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-900">What would you like to create?</h2>
-                        <p class="text-gray-500 mt-2">Choose the format that best fits your needs</p>
+                        <h2 class="text-xl font-bold text-gray-900">
+                            @if($canvasSelectorStep === 1)
+                                What would you like to create?
+                            @else
+                                Choose a size
+                            @endif
+                        </h2>
+                        <p class="text-gray-500 mt-1 text-sm">
+                            @if($canvasSelectorStep === 1)
+                                Select the type that best fits your needs
+                            @else
+                                Select the dimensions for your {{ $canvasMode === 'document' ? 'document' : ($canvasMode === 'widget' ? 'widget' : ($canvasMode === 'social' ? 'social post' : 'design')) }}
+                            @endif
+                        </p>
                     </div>
 
-                    {{-- Options --}}
-                    <div class="p-8">
-                        <div class="grid grid-cols-2 gap-6">
-                            {{-- Document Report Option --}}
-                            <button
-                                wire:click="selectCanvasMode('document')"
-                                class="group relative flex flex-col items-center p-8 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-2 border-blue-200 hover:border-blue-400 rounded-2xl transition-all text-left"
-                            >
-                                <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium">Select</span>
-                                </div>
+                    {{-- Step 1: Type Selection --}}
+                    @if($canvasSelectorStep === 1)
+                        <div class="p-6">
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                {{-- Document Option --}}
+                                <button
+                                    wire:click="selectCanvasType('document')"
+                                    class="group flex flex-col items-center p-5 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-2 border-blue-200 hover:border-blue-400 rounded-xl transition-all"
+                                >
+                                    <div class="w-16 h-20 bg-white rounded-lg shadow border border-gray-200 mb-3 p-1.5 relative overflow-hidden">
+                                        <div class="h-1.5 w-10 bg-blue-200 rounded mb-1.5"></div>
+                                        <div class="h-1 w-full bg-gray-100 rounded mb-0.5"></div>
+                                        <div class="h-1 w-full bg-gray-100 rounded mb-0.5"></div>
+                                        <div class="h-1 w-3/4 bg-gray-100 rounded mb-2"></div>
+                                        <div class="h-5 w-full bg-blue-50 rounded mb-1"></div>
+                                        <div class="h-1 w-full bg-gray-100 rounded"></div>
+                                    </div>
+                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">Document</h3>
+                                    <p class="text-xs text-gray-500 text-center">Printable reports & PDFs</p>
+                                </button>
 
-                                {{-- Document Preview --}}
-                                <div class="w-24 h-32 bg-white rounded-lg shadow-lg border border-gray-200 mb-4 p-2 relative overflow-hidden">
-                                    <div class="h-2 w-16 bg-blue-200 rounded mb-2"></div>
-                                    <div class="h-1.5 w-full bg-gray-100 rounded mb-1"></div>
-                                    <div class="h-1.5 w-full bg-gray-100 rounded mb-1"></div>
-                                    <div class="h-1.5 w-3/4 bg-gray-100 rounded mb-3"></div>
-                                    <div class="h-8 w-full bg-blue-50 rounded mb-2"></div>
-                                    <div class="h-1.5 w-full bg-gray-100 rounded mb-1"></div>
-                                    <div class="h-1.5 w-2/3 bg-gray-100 rounded"></div>
-                                </div>
-
-                                <h3 class="text-lg font-semibold text-gray-900 mb-1">Document Report</h3>
-                                <p class="text-sm text-gray-600 text-center">
-                                    Portrait format, ideal for printable reports, progress reports, and detailed contact analysis
-                                </p>
-
-                                <div class="flex items-center gap-2 mt-4 text-xs text-blue-600">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                    <span>8.5" × 11" Portrait</span>
-                                </div>
-                            </button>
-
-                            {{-- Dashboard Option --}}
-                            <button
-                                wire:click="selectCanvasMode('dashboard')"
-                                class="group relative flex flex-col items-center p-8 bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-2 border-purple-200 hover:border-purple-400 rounded-2xl transition-all text-left"
-                            >
-                                <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span class="bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-medium">Select</span>
-                                </div>
-
-                                {{-- Dashboard Preview --}}
-                                <div class="w-36 h-24 bg-white rounded-lg shadow-lg border border-gray-200 mb-4 p-2 relative overflow-hidden">
-                                    <div class="grid grid-cols-3 gap-1 h-full">
-                                        <div class="col-span-2 grid grid-rows-2 gap-1">
-                                            <div class="bg-purple-50 rounded flex items-center justify-center">
-                                                <div class="w-full h-2/3 flex items-end justify-around px-1">
-                                                    <div class="w-1 h-1/3 bg-purple-300 rounded-t"></div>
-                                                    <div class="w-1 h-2/3 bg-purple-400 rounded-t"></div>
-                                                    <div class="w-1 h-1/2 bg-purple-300 rounded-t"></div>
-                                                    <div class="w-1 h-full bg-purple-500 rounded-t"></div>
-                                                </div>
+                                {{-- Website Widget Option --}}
+                                <button
+                                    wire:click="selectCanvasType('widget')"
+                                    class="group flex flex-col items-center p-5 bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border-2 border-green-200 hover:border-green-400 rounded-xl transition-all"
+                                >
+                                    <div class="w-20 h-16 bg-white rounded-lg shadow border border-gray-200 mb-3 p-1.5 relative overflow-hidden flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="w-6 h-6 mx-auto bg-green-100 rounded mb-1 flex items-center justify-center">
+                                                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                                </svg>
                                             </div>
-                                            <div class="grid grid-cols-2 gap-1">
-                                                <div class="bg-green-50 rounded p-1">
-                                                    <div class="h-1 w-full bg-green-200 rounded mb-0.5"></div>
-                                                    <div class="text-[6px] font-bold text-green-600">85%</div>
-                                                </div>
-                                                <div class="bg-blue-50 rounded p-1">
-                                                    <div class="h-1 w-full bg-blue-200 rounded mb-0.5"></div>
-                                                    <div class="text-[6px] font-bold text-blue-600">92%</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="bg-orange-50 rounded flex items-center justify-center">
-                                            <div class="w-6 h-6 rounded-full border-2 border-orange-300 border-t-orange-500"></div>
+                                            <div class="h-1 w-10 bg-gray-200 rounded mx-auto"></div>
                                         </div>
                                     </div>
-                                </div>
+                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">Website Widget</h3>
+                                    <p class="text-xs text-gray-500 text-center">Embed on your site</p>
+                                </button>
 
-                                <h3 class="text-lg font-semibold text-gray-900 mb-1">Dashboard</h3>
-                                <p class="text-sm text-gray-600 text-center">
-                                    Landscape format, perfect for data dashboards, overview screens, and presentations
-                                </p>
+                                {{-- Social Post Option --}}
+                                <button
+                                    wire:click="selectCanvasType('social')"
+                                    class="group flex flex-col items-center p-5 bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-2 border-purple-200 hover:border-purple-400 rounded-xl transition-all"
+                                >
+                                    <div class="w-16 h-16 bg-white rounded-lg shadow border border-gray-200 mb-3 p-1.5 relative overflow-hidden">
+                                        <div class="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 rounded flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">Social Post</h3>
+                                    <p class="text-xs text-gray-500 text-center">Instagram, Facebook, etc.</p>
+                                </button>
 
-                                <div class="flex items-center gap-2 mt-4 text-xs text-purple-600">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                                    </svg>
-                                    <span>11" × 8.5" Landscape</span>
-                                </div>
-                            </button>
+                                {{-- Custom Option --}}
+                                <button
+                                    wire:click="selectCanvasType('custom')"
+                                    class="group flex flex-col items-center p-5 bg-gradient-to-br from-gray-50 to-slate-50 hover:from-gray-100 hover:to-slate-100 border-2 border-gray-200 hover:border-gray-400 rounded-xl transition-all"
+                                >
+                                    <div class="w-14 h-14 bg-white rounded-lg shadow border border-dashed border-gray-300 mb-3 flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">Custom</h3>
+                                    <p class="text-xs text-gray-500 text-center">Set your own size</p>
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    @endif
+
+                    {{-- Step 2: Size Selection --}}
+                    @if($canvasSelectorStep === 2)
+                        <div class="p-6">
+                            {{-- Document Sizes --}}
+                            @if($canvasMode === 'document')
+                                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <button wire:click="selectCanvasSize('letter')" class="flex flex-col items-center p-4 bg-white hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-400 rounded-xl transition-all">
+                                        <div class="w-12 h-16 bg-blue-50 rounded border border-blue-200 mb-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">Letter</span>
+                                        <span class="text-xs text-gray-500">8.5" × 11"</span>
+                                    </button>
+                                    <button wire:click="selectCanvasSize('a4')" class="flex flex-col items-center p-4 bg-white hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-400 rounded-xl transition-all">
+                                        <div class="w-11 h-16 bg-blue-50 rounded border border-blue-200 mb-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">A4</span>
+                                        <span class="text-xs text-gray-500">210 × 297mm</span>
+                                    </button>
+                                    <button wire:click="selectCanvasSize('legal')" class="flex flex-col items-center p-4 bg-white hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-400 rounded-xl transition-all">
+                                        <div class="w-10 h-16 bg-blue-50 rounded border border-blue-200 mb-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">Legal</span>
+                                        <span class="text-xs text-gray-500">8.5" × 14"</span>
+                                    </button>
+                                    <button wire:click="selectCanvasSize('tabloid')" class="flex flex-col items-center p-4 bg-white hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-400 rounded-xl transition-all">
+                                        <div class="w-10 h-14 bg-blue-50 rounded border border-blue-200 mb-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">Tabloid</span>
+                                        <span class="text-xs text-gray-500">11" × 17"</span>
+                                    </button>
+                                </div>
+                            @endif
+
+                            {{-- Widget Sizes --}}
+                            @if($canvasMode === 'widget')
+                                <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <button wire:click="selectCanvasSize('small')" class="flex flex-col items-center p-4 bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-400 rounded-xl transition-all">
+                                        <div class="w-16 h-12 bg-green-50 rounded border border-green-200 mb-2 flex items-center justify-center text-xs text-green-600">300×250</div>
+                                        <span class="text-sm font-medium text-gray-900">Medium Rectangle</span>
+                                        <span class="text-xs text-gray-500">300 × 250px</span>
+                                    </button>
+                                    <button wire:click="selectCanvasSize('medium')" class="flex flex-col items-center p-4 bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-400 rounded-xl transition-all">
+                                        <div class="w-24 h-6 bg-green-50 rounded border border-green-200 mb-2 flex items-center justify-center text-xs text-green-600">728×90</div>
+                                        <span class="text-sm font-medium text-gray-900">Leaderboard</span>
+                                        <span class="text-xs text-gray-500">728 × 90px</span>
+                                    </button>
+                                    <button wire:click="selectCanvasSize('large')" class="flex flex-col items-center p-4 bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-400 rounded-xl transition-all">
+                                        <div class="w-28 h-8 bg-green-50 rounded border border-green-200 mb-2 flex items-center justify-center text-xs text-green-600">970×250</div>
+                                        <span class="text-sm font-medium text-gray-900">Billboard</span>
+                                        <span class="text-xs text-gray-500">970 × 250px</span>
+                                    </button>
+                                    <button wire:click="selectCanvasSize('skyscraper')" class="flex flex-col items-center p-4 bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-400 rounded-xl transition-all">
+                                        <div class="w-6 h-20 bg-green-50 rounded border border-green-200 mb-2 flex items-center justify-center text-[8px] text-green-600 writing-mode-vertical">160×600</div>
+                                        <span class="text-sm font-medium text-gray-900">Skyscraper</span>
+                                        <span class="text-xs text-gray-500">160 × 600px</span>
+                                    </button>
+                                    <button wire:click="selectCanvasSize('square')" class="flex flex-col items-center p-4 bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-400 rounded-xl transition-all">
+                                        <div class="w-12 h-12 bg-green-50 rounded border border-green-200 mb-2 flex items-center justify-center text-xs text-green-600">300</div>
+                                        <span class="text-sm font-medium text-gray-900">Square</span>
+                                        <span class="text-xs text-gray-500">300 × 300px</span>
+                                    </button>
+                                </div>
+                            @endif
+
+                            {{-- Social Post Sizes --}}
+                            @if($canvasMode === 'social')
+                                <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <button wire:click="selectCanvasSize('instagram_post')" class="flex flex-col items-center p-4 bg-white hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-xl transition-all">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded border border-purple-200 mb-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">Instagram Post</span>
+                                        <span class="text-xs text-gray-500">1080 × 1080px</span>
+                                    </button>
+                                    <button wire:click="selectCanvasSize('instagram_story')" class="flex flex-col items-center p-4 bg-white hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-xl transition-all">
+                                        <div class="w-8 h-14 bg-gradient-to-br from-purple-100 to-pink-100 rounded border border-purple-200 mb-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">Instagram Story</span>
+                                        <span class="text-xs text-gray-500">1080 × 1920px</span>
+                                    </button>
+                                    <button wire:click="selectCanvasSize('facebook_post')" class="flex flex-col items-center p-4 bg-white hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-xl transition-all">
+                                        <div class="w-16 h-8 bg-blue-100 rounded border border-blue-200 mb-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">Facebook Post</span>
+                                        <span class="text-xs text-gray-500">1200 × 630px</span>
+                                    </button>
+                                    <button wire:click="selectCanvasSize('twitter')" class="flex flex-col items-center p-4 bg-white hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-xl transition-all">
+                                        <div class="w-16 h-9 bg-sky-100 rounded border border-sky-200 mb-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">X / Twitter</span>
+                                        <span class="text-xs text-gray-500">1600 × 900px</span>
+                                    </button>
+                                    <button wire:click="selectCanvasSize('linkedin')" class="flex flex-col items-center p-4 bg-white hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-xl transition-all">
+                                        <div class="w-16 h-8 bg-blue-100 rounded border border-blue-200 mb-2"></div>
+                                        <span class="text-sm font-medium text-gray-900">LinkedIn</span>
+                                        <span class="text-xs text-gray-500">1200 × 627px</span>
+                                    </button>
+                                    <button wire:click="selectCanvasSize('youtube_thumbnail')" class="flex flex-col items-center p-4 bg-white hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-xl transition-all">
+                                        <div class="w-16 h-9 bg-red-100 rounded border border-red-200 mb-2 flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-900">YouTube Thumbnail</span>
+                                        <span class="text-xs text-gray-500">1280 × 720px</span>
+                                    </button>
+                                </div>
+                            @endif
+
+                            {{-- Custom Size --}}
+                            @if($canvasMode === 'custom')
+                                <div class="max-w-md mx-auto">
+                                    <div class="bg-gray-50 rounded-xl p-6">
+                                        <div class="grid grid-cols-2 gap-4 mb-6">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Width (px)</label>
+                                                <input
+                                                    type="number"
+                                                    wire:model="customWidth"
+                                                    min="100"
+                                                    max="2000"
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                                                    placeholder="800"
+                                                >
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Height (px)</label>
+                                                <input
+                                                    type="number"
+                                                    wire:model="customHeight"
+                                                    min="100"
+                                                    max="2000"
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                                                    placeholder="600"
+                                                >
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-center">
+                                            <div
+                                                class="bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-xs"
+                                                style="width: {{ min(200, $customWidth / 5) }}px; height: {{ min(150, $customHeight / 5) }}px;"
+                                            >
+                                                {{ $customWidth }} × {{ $customHeight }}
+                                            </div>
+                                        </div>
+                                        <button
+                                            wire:click="selectCustomSize"
+                                            class="w-full mt-6 px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 font-medium"
+                                        >
+                                            Create Custom Canvas
+                                        </button>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
 
                     {{-- Footer --}}
-                    <div class="px-8 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                        <p class="text-sm text-gray-500">
-                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            You can change this later in design settings
-                        </p>
+                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                        @if($canvasSelectorStep === 2)
+                            <button wire:click="backToCanvasTypeSelector" class="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                                Back
+                            </button>
+                        @else
+                            <p class="text-sm text-gray-500">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                You can change this later in design settings
+                            </p>
+                        @endif
                         <a href="{{ route('reports.index') }}" class="text-sm text-gray-500 hover:text-gray-700">
                             Cancel
                         </a>
@@ -3034,7 +3439,7 @@
             @endforelse
         </div>
 
-        <!-- New Comment Form -->
+        <!-- New Comment Form with @mention autocomplete -->
         <div class="p-4 border-t bg-gray-50">
             @if($replyingToComment)
                 <div class="mb-2 text-xs text-gray-500 flex items-center justify-between">
@@ -3042,20 +3447,122 @@
                     <button wire:click="cancelComment" class="text-gray-400 hover:text-gray-600">Cancel</button>
                 </div>
             @endif
-            <form wire:submit="addComment" class="flex gap-2">
-                <textarea
-                    wire:model="newCommentContent"
-                    placeholder="Add a comment... Use @ to mention someone"
-                    rows="2"
-                    class="flex-1 rounded-lg border-gray-300 focus:border-pulse-orange-500 focus:ring-pulse-orange-500 text-sm resize-none"
-                ></textarea>
-                <button
-                    type="submit"
-                    class="self-end px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 text-sm font-medium"
-                >
-                    Post
-                </button>
-            </form>
+            <div x-data="{
+                content: @entangle('newCommentContent'),
+                showMentions: false,
+                mentionSearch: '',
+                mentionableUsers: @js($this->getMentionableUsers()),
+                selectedMentionIndex: 0,
+                mentionStartPos: null,
+
+                get filteredUsers() {
+                    if (!this.mentionSearch) return this.mentionableUsers.slice(0, 5);
+                    const search = this.mentionSearch.toLowerCase();
+                    return this.mentionableUsers.filter(u => u.name.toLowerCase().includes(search)).slice(0, 5);
+                },
+
+                handleInput(e) {
+                    const textarea = e.target;
+                    const cursorPos = textarea.selectionStart;
+                    const textBefore = this.content.substring(0, cursorPos);
+
+                    const lastAtPos = textBefore.lastIndexOf('@');
+                    if (lastAtPos !== -1) {
+                        const textAfterAt = textBefore.substring(lastAtPos + 1);
+                        if (!textAfterAt.includes(' ') && !textAfterAt.includes('\n')) {
+                            this.mentionSearch = textAfterAt;
+                            this.mentionStartPos = lastAtPos;
+                            this.showMentions = true;
+                            this.selectedMentionIndex = 0;
+                            return;
+                        }
+                    }
+                    this.showMentions = false;
+                    this.mentionSearch = '';
+                },
+
+                selectMention(user) {
+                    const beforeMention = this.content.substring(0, this.mentionStartPos);
+                    const afterMention = this.content.substring(this.mentionStartPos + 1 + this.mentionSearch.length);
+                    this.content = beforeMention + '@[' + user.name + '](user:' + user.id + ')' + afterMention + ' ';
+                    this.showMentions = false;
+                    this.mentionSearch = '';
+                    this.$nextTick(() => this.$refs.textarea.focus());
+                },
+
+                handleKeydown(e) {
+                    if (!this.showMentions) return;
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        this.selectedMentionIndex = Math.min(this.selectedMentionIndex + 1, this.filteredUsers.length - 1);
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        this.selectedMentionIndex = Math.max(this.selectedMentionIndex - 1, 0);
+                    } else if (e.key === 'Enter' && !e.metaKey && !e.ctrlKey) {
+                        e.preventDefault();
+                        if (this.filteredUsers[this.selectedMentionIndex]) {
+                            this.selectMention(this.filteredUsers[this.selectedMentionIndex]);
+                        }
+                    } else if (e.key === 'Escape') {
+                        this.showMentions = false;
+                    }
+                },
+
+                submitComment() {
+                    if (this.content.trim() && !this.showMentions) {
+                        $wire.addComment();
+                    }
+                }
+            }" class="relative">
+                <div class="flex gap-2">
+                    <div class="relative flex-1">
+                        <textarea
+                            x-ref="textarea"
+                            x-model="content"
+                            @input="handleInput($event)"
+                            @keydown="handleKeydown($event)"
+                            @keydown.meta.enter="submitComment()"
+                            @keydown.ctrl.enter="submitComment()"
+                            placeholder="Add a comment... Type @ to mention someone"
+                            rows="2"
+                            class="w-full rounded-lg border-gray-300 focus:border-pulse-orange-500 focus:ring-pulse-orange-500 text-sm resize-none"
+                        ></textarea>
+
+                        {{-- Mention autocomplete dropdown --}}
+                        <div
+                            x-show="showMentions && filteredUsers.length > 0"
+                            x-transition
+                            @click.away="showMentions = false"
+                            class="absolute bottom-full left-0 mb-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-48 overflow-y-auto z-50"
+                        >
+                            <template x-for="(user, index) in filteredUsers" :key="user.id">
+                                <button
+                                    type="button"
+                                    @click="selectMention(user)"
+                                    class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                                    :class="{ 'bg-pulse-orange-50': selectedMentionIndex === index }"
+                                >
+                                    <div class="w-6 h-6 rounded-full bg-pulse-orange-100 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-xs font-medium text-pulse-orange-600" x-text="user.name.charAt(0).toUpperCase()"></span>
+                                    </div>
+                                    <span class="text-gray-700" x-text="user.name"></span>
+                                </button>
+                            </template>
+                            <div x-show="filteredUsers.length === 0" class="px-3 py-2 text-sm text-gray-500">
+                                No users found
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        @click="submitComment()"
+                        class="self-end px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 text-sm font-medium disabled:opacity-50"
+                        :disabled="!content.trim()"
+                    >
+                        Post
+                    </button>
+                </div>
+                <p class="text-xs text-gray-400 mt-1">Ctrl+Enter to post</p>
+            </div>
         </div>
     </div>
     @endif

@@ -249,6 +249,7 @@ trait WithCollaboration
                     'avatar' => $c->user?->profile_photo_url,
                     'role' => $c->role,
                     'lastSeen' => $c->last_seen_at,
+                    'color' => $this->getCollaboratorColor($c->user_id),
                 ])
                 ->toArray();
         } else {
@@ -274,6 +275,7 @@ trait WithCollaboration
                     'avatar' => $report->creator?->profile_photo_url,
                     'role' => 'owner',
                     'isOwner' => true,
+                    'color' => $this->getCollaboratorColor($report->created_by),
                 ];
             }
         }

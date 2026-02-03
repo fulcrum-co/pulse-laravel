@@ -120,7 +120,6 @@ class TerminologySettings extends Component
 
     public function render()
     {
-        return view('livewire.admin.terminology-settings')
-            ->layout('components.layouts.dashboard');
+        return view('livewire.admin.terminology-settings');
     }
 }

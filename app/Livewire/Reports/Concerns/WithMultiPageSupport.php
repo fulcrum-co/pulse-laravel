@@ -298,4 +298,22 @@ trait WithMultiPageSupport
             $this->pushHistory();
         }
     }
+
+    /**
+     * Move page up (toward beginning of list).
+     * Alias for movePageBackward.
+     */
+    public function movePageUp(int $index): void
+    {
+        $this->movePageBackward($index);
+    }
+
+    /**
+     * Move page down (toward end of list).
+     * Alias for movePageForward.
+     */
+    public function movePageDown(int $index): void
+    {
+        $this->movePageForward($index);
+    }
 }

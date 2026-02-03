@@ -71,7 +71,11 @@ class ReportBuilder extends Component
         'contact_type' => 'contact',
         'contact_id' => null,
         'selected_contacts' => [], // Multi-select contacts for individual scope
-        'contact_list_id' => null, // Selected contact list for contact_list scope
+        // List comparison mode (single = one list, compare = side-by-side analysis)
+        'list_mode' => 'single', // 'single' or 'compare'
+        'list_id' => null, // Single list mode
+        'list_a_id' => null, // Compare mode - left side
+        'list_b_id' => null, // Compare mode - right side
         'grade_level' => null,
         'risk_level' => null,
     ];
@@ -84,9 +88,16 @@ class ReportBuilder extends Component
 
     public bool $showCanvasSelector = false; // Step 1: Choose canvas type
 
-    public string $canvasMode = 'document'; // document or dashboard
+    public int $canvasSelectorStep = 1; // 1 = type selection, 2 = size selection
+
+    public string $canvasMode = 'document'; // document, widget, social, custom
 
     public bool $showBrandingPanel = false;
+
+    // Custom dimensions for custom canvas mode
+    public int $customWidth = 800;
+
+    public int $customHeight = 600;
 
     public bool $showFilterBar = false;
 
@@ -125,35 +136,103 @@ class ReportBuilder extends Component
         }
     }
 
+    /**
+     * Step 1: Select canvas type and move to step 2
+     */
+    public function selectCanvasType(string $type): void
+    {
+        $this->canvasMode = $type;
+        $this->canvasSelectorStep = 2;
+    }
+
+    /**
+     * Step 2: Select size and finalize canvas setup
+     */
+    public function selectCanvasSize(string $size): void
+    {
+        $dimensions = $this->getCanvasDimensions($this->canvasMode, $size);
+
+        $this->pageSettings['orientation'] = $dimensions['width'] > $dimensions['height'] ? 'landscape' : 'portrait';
+        $this->pageSettings['size'] = $size;
+
+        if (isset($this->pages[$this->currentPageIndex])) {
+            $this->pages[$this->currentPageIndex]['settings'] = [
+                'width' => $dimensions['width'],
+                'height' => $dimensions['height'],
+            ];
+        }
+
+        $this->showCanvasSelector = false;
+        $this->canvasSelectorStep = 1;
+        $this->showTemplateGallery = true;
+    }
+
+    /**
+     * Select custom dimensions
+     */
+    public function selectCustomSize(): void
+    {
+        if (isset($this->pages[$this->currentPageIndex])) {
+            $this->pages[$this->currentPageIndex]['settings'] = [
+                'width' => max(100, min(2000, $this->customWidth)),
+                'height' => max(100, min(2000, $this->customHeight)),
+            ];
+        }
+
+        $this->pageSettings['orientation'] = $this->customWidth > $this->customHeight ? 'landscape' : 'portrait';
+        $this->pageSettings['size'] = 'custom';
+
+        $this->showCanvasSelector = false;
+        $this->canvasSelectorStep = 1;
+        $this->showTemplateGallery = true;
+    }
+
+    /**
+     * Go back to step 1
+     */
+    public function backToCanvasTypeSelector(): void
+    {
+        $this->canvasSelectorStep = 1;
+    }
+
+    /**
+     * Get canvas dimensions based on type and size
+     */
+    protected function getCanvasDimensions(string $type, string $size): array
+    {
+        $sizes = [
+            'document' => [
+                'letter' => ['width' => 816, 'height' => 1056],      // 8.5" × 11" at 96dpi
+                'a4' => ['width' => 794, 'height' => 1123],          // 210mm × 297mm at 96dpi
+                'legal' => ['width' => 816, 'height' => 1344],       // 8.5" × 14" at 96dpi
+                'tabloid' => ['width' => 1056, 'height' => 1632],    // 11" × 17" at 96dpi
+            ],
+            'widget' => [
+                'small' => ['width' => 300, 'height' => 250],        // Medium Rectangle
+                'medium' => ['width' => 728, 'height' => 90],        // Leaderboard
+                'large' => ['width' => 970, 'height' => 250],        // Billboard
+                'skyscraper' => ['width' => 160, 'height' => 600],   // Wide Skyscraper
+                'square' => ['width' => 300, 'height' => 300],       // Square
+            ],
+            'social' => [
+                'instagram_post' => ['width' => 1080, 'height' => 1080],
+                'instagram_story' => ['width' => 1080, 'height' => 1920],
+                'facebook_post' => ['width' => 1200, 'height' => 630],
+                'twitter' => ['width' => 1600, 'height' => 900],
+                'linkedin' => ['width' => 1200, 'height' => 627],
+                'youtube_thumbnail' => ['width' => 1280, 'height' => 720],
+            ],
+        ];
+
+        return $sizes[$type][$size] ?? ['width' => 800, 'height' => 600];
+    }
+
+    /**
+     * Legacy method for backward compatibility
+     */
     public function selectCanvasMode(string $mode): void
     {
-        $this->canvasMode = $mode;
-        $this->showCanvasSelector = false;
-        $this->showTemplateGallery = true;
-
-        // Set default page settings based on canvas mode
-        if ($mode === 'dashboard') {
-            // Dashboard: landscape, wider format
-            $this->pageSettings['orientation'] = 'landscape';
-            $this->pageSettings['size'] = 'letter';
-            // Update current page dimensions for dashboard
-            if (isset($this->pages[$this->currentPageIndex])) {
-                $this->pages[$this->currentPageIndex]['settings'] = [
-                    'width' => 1056, // Landscape
-                    'height' => 816,
-                ];
-            }
-        } else {
-            // Document: portrait, standard format
-            $this->pageSettings['orientation'] = 'portrait';
-            $this->pageSettings['size'] = 'letter';
-            if (isset($this->pages[$this->currentPageIndex])) {
-                $this->pages[$this->currentPageIndex]['settings'] = [
-                    'width' => 816, // Portrait
-                    'height' => 1056,
-                ];
-            }
-        }
+        $this->selectCanvasType($mode);
     }
 
     /**
@@ -261,7 +340,7 @@ class ReportBuilder extends Component
             ->map(fn ($list) => [
                 'id' => $list->id,
                 'name' => $list->name,
-                'count' => $list->contacts_count ?? $list->contacts()->count(),
+                'count' => $list->member_count,
             ])
             ->toArray();
     }
@@ -289,8 +368,8 @@ class ReportBuilder extends Component
             'created_by' => $user->id,
         ]);
 
-        // Select the newly created list
-        $this->filters['contact_list_id'] = $list->id;
+        // Add the newly created list to selection
+        $this->filters['selected_list_ids'][] = $list->id;
 
         $this->dispatch('notify', type: 'success', message: 'Contact list created');
     }
