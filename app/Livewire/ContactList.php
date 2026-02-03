@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Student;
+use App\Models\Learner;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -54,7 +54,7 @@ class ContactList extends Component
         // Get all organization IDs this user can access (includes assigned orgs for consultants)
         $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        $contacts = Student::with('user')
+        $contacts = Learner::with('user')
             ->whereIn('org_id', $accessibleOrgIds)
             ->when($this->search, function ($query) {
                 $query->whereHas('user', function ($q) {

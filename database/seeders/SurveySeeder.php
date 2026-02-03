@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Organization;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\Survey;
 use App\Models\SurveyAttempt;
 use App\Models\User;
@@ -13,14 +13,14 @@ class SurveySeeder extends Seeder
 {
     public function run(): void
     {
-        $school = Organization::where('org_type', 'school')->first();
-        $admin = User::where('primary_role', 'admin')->where('org_id', $school->id)->first();
+        $organization = Organization::where('org_type', 'organization')->first();
+        $admin = User::where('primary_role', 'admin')->where('org_id', $organization->id)->first();
 
         // Create wellness check-in survey
         $wellnessSurvey = Survey::create([
-            'org_id' => $school->id,
+            'org_id' => $organization->id,
             'title' => 'Weekly Wellness Check-In',
-            'description' => 'A quick check-in to see how students are feeling this week.',
+            'description' => 'A quick check-in to see how learners are feeling this week.',
             'survey_type' => 'wellness',
             'questions' => [
                 [
@@ -42,7 +42,7 @@ class SurveySeeder extends Seeder
                 [
                     'id' => 'q3',
                     'type' => 'scale',
-                    'question' => 'How stressed do you feel about school?',
+                    'question' => 'How stressed do you feel about organization?',
                     'min' => 1,
                     'max' => 5,
                     'labels' => ['Very Stressed', 'Stressed', 'Somewhat', 'Relaxed', 'Very Relaxed'],
@@ -64,9 +64,9 @@ class SurveySeeder extends Seeder
 
         // Create academic stress survey
         Survey::create([
-            'org_id' => $school->id,
+            'org_id' => $organization->id,
             'title' => 'Academic Stress Assessment',
-            'description' => 'Understanding how academic pressures affect student wellbeing.',
+            'description' => 'Understanding how academic pressures affect learner wellbeing.',
             'survey_type' => 'wellness',
             'questions' => [
                 [
@@ -92,10 +92,10 @@ class SurveySeeder extends Seeder
         ]);
 
         // Create some survey attempts for the wellness survey
-        $students = Student::where('org_id', $school->id)->take(15)->get();
+        $learners = Learner::where('org_id', $organization->id)->take(15)->get();
 
-        foreach ($students as $student) {
-            $overallScore = match ($student->risk_level) {
+        foreach ($learners as $learner) {
+            $overallScore = match ($learner->risk_level) {
                 'good' => rand(70, 100) / 10,
                 'low' => rand(40, 70) / 10,
                 'high' => rand(20, 50) / 10,
@@ -103,8 +103,8 @@ class SurveySeeder extends Seeder
 
             SurveyAttempt::create([
                 'survey_id' => $wellnessSurvey->id,
-                'student_id' => $student->id,
-                'user_id' => $student->user_id,
+                'learner_id' => $learner->id,
+                'user_id' => $learner->user_id,
                 'status' => 'completed',
                 'responses' => [
                     'q1' => rand(1, 5),
@@ -113,7 +113,7 @@ class SurveySeeder extends Seeder
                     'q4' => null,
                 ],
                 'overall_score' => $overallScore,
-                'risk_level' => $student->risk_level,
+                'risk_level' => $learner->risk_level,
                 'started_at' => now()->subDays(rand(1, 14)),
                 'completed_at' => now()->subDays(rand(0, 13)),
                 'duration_seconds' => rand(120, 600),

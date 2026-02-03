@@ -7,20 +7,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use MongoDB\Laravel\Eloquent\Model;
 use MongoDB\Laravel\Eloquent\SoftDeletes;
 
-class Student extends Model
+class Learner extends Model
 {
     use SoftDeletes;
 
     protected $connection = 'mongodb';
 
-    protected $collection = 'students';
+    protected $collection = 'learners';
 
     protected $fillable = [
         'user_id',
         'org_id',
         'district_id',
         'consultant_id',
-        'student_number',
+        'learner_number',
         'grade_level',
         'graduation_year',
         'current_classrooms',
@@ -70,15 +70,15 @@ class Student extends Model
     }
 
     /**
-     * Get the student's school (organization).
+     * Get the learner's organization (organization).
      */
-    public function school(): BelongsTo
+    public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class, 'org_id');
     }
 
     /**
-     * Get the student's district.
+     * Get the learner's district.
      */
     public function district(): BelongsTo
     {
@@ -86,7 +86,7 @@ class Student extends Model
     }
 
     /**
-     * Get survey attempts about this student.
+     * Get survey attempts about this learner.
      */
     public function surveyAttempts(): HasMany
     {
@@ -94,7 +94,7 @@ class Student extends Model
     }
 
     /**
-     * Get resource assignments for this student.
+     * Get resource assignments for this learner.
      */
     public function resourceAssignments(): HasMany
     {
@@ -102,11 +102,11 @@ class Student extends Model
     }
 
     /**
-     * Get the student's full name from user.
+     * Get the learner's full name from user.
      */
     public function getFullNameAttribute(): string
     {
-        return $this->user?->full_name ?? 'Unknown Student';
+        return $this->user?->full_name ?? 'Unknown Learner';
     }
 
     /**
@@ -135,7 +135,7 @@ class Student extends Model
     }
 
     /**
-     * Scope to filter active students.
+     * Scope to filter active learners.
      */
     public function scopeActive($query)
     {
@@ -151,7 +151,7 @@ class Student extends Model
     }
 
     /**
-     * Scope to filter students with IEP.
+     * Scope to filter learners with IEP.
      */
     public function scopeWithIep($query)
     {

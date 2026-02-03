@@ -34,18 +34,18 @@
         {{-- Step 1: Basic Info --}}
         @if($currentStep === 1)
             <div>
-                <h2 class="text-xl font-semibold text-gray-900 mb-1">Basic Information</h2>
-                <p class="text-gray-500 text-sm mb-6">Give your collection a name and choose its type.</p>
+                <h2 class="text-xl font-semibold text-gray-900 mb-1">@term('basic_information_label')</h2>
+                <p class="text-gray-500 text-sm mb-6">@term('give_collection_name_label')</p>
 
                 <div class="space-y-6">
                     <!-- Title -->
                     <div>
-                        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">@term('title_label')</label>
                         <input
                             type="text"
                             id="title"
                             wire:model="title"
-                            placeholder="e.g., Weekly Wellness Check-in"
+                            placeholder="{{ app(\App\Services\TerminologyService::class)->get('survey_title_example_label') }}"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                         />
                         @error('title') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -53,19 +53,19 @@
 
                     <!-- Description -->
                     <div>
-                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">@term('description_optional_label')</label>
                         <textarea
                             id="description"
                             wire:model="description"
                             rows="3"
-                            placeholder="What is this collection for?"
+                            placeholder="{{ app(\App\Services\TerminologyService::class)->get('what_collection_for_label') }}"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                         ></textarea>
                     </div>
 
                     <!-- Collection Type -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Collection Type</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">@term('collection_type_label')</label>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             @foreach($this->collectionTypes as $type => $info)
                                 <button
@@ -92,8 +92,8 @@
         {{-- Step 2: Data Source --}}
         @elseif($currentStep === 2)
             <div>
-                <h2 class="text-xl font-semibold text-gray-900 mb-1">Data Source</h2>
-                <p class="text-gray-500 text-sm mb-6">Choose where your questions come from.</p>
+                <h2 class="text-xl font-semibold text-gray-900 mb-1">@term('data_source_label')</h2>
+                <p class="text-gray-500 text-sm mb-6">@term('data_source_body')</p>
 
                 <div class="space-y-6">
                     <!-- Data Source Type -->
@@ -117,7 +117,7 @@
                     <!-- Survey Selection (if survey or hybrid) -->
                     @if(in_array($dataSource, ['survey', 'hybrid']))
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Select Survey</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">@term('select_survey_label')</label>
                             @if(count($availableSurveys) > 0)
                                 <div class="space-y-2 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-2">
                                     @foreach($availableSurveys as $survey)
@@ -129,7 +129,7 @@
                                         >
                                             <div class="font-medium text-gray-900">{{ $survey['title'] }}</div>
                                             <div class="text-sm text-gray-500 mt-1">
-                                                {{ count($survey['questions'] ?? []) }} questions
+                                                {{ count($survey['questions'] ?? []) }} @term('questions_label')
                                                 <span class="mx-1">&middot;</span>
                                                 {{ ucfirst($survey['survey_type']) }}
                                             </div>
@@ -139,8 +139,8 @@
                             @else
                                 <div class="text-center py-8 bg-gray-50 rounded-lg">
                                     <x-icon name="clipboard-document-list" class="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                                    <p class="text-gray-500">No active surveys available.</p>
-                                    <a href="{{ route('surveys.create') }}" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">Create a survey first</a>
+                                    <p class="text-gray-500">@term('no_active_surveys_label')</p>
+                                    <a href="{{ route('surveys.create') }}" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">@term('create_survey_first_label')</a>
                                 </div>
                             @endif
                             @error('surveyId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -152,14 +152,14 @@
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <label class="block text-sm font-medium text-gray-700">
-                                    {{ $dataSource === 'hybrid' ? 'Additional Questions' : 'Questions' }}
+                                    {{ $dataSource === 'hybrid' ? app(\App\Services\TerminologyService::class)->get('additional_questions_label') : app(\App\Services\TerminologyService::class)->get('questions_label') }}
                                 </label>
                                 <button
                                     type="button"
                                     wire:click="openQuestionEditor"
                                     class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700 font-medium"
                                 >
-                                    + Add Question
+                                    + @term('add_question_label')
                                 </button>
                             </div>
 
@@ -186,8 +186,8 @@
                             @else
                                 <div class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
                                     <x-icon name="plus-circle" class="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                                    <p class="text-gray-500">No questions added yet.</p>
-                                    <button wire:click="openQuestionEditor" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700 mt-1">Add your first question</button>
+                                    <p class="text-gray-500">@term('no_questions_added_label')</p>
+                                    <button wire:click="openQuestionEditor" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700 mt-1">@term('add_first_question_label')</button>
                                 </div>
                             @endif
                             @error('inlineQuestions') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -199,8 +199,8 @@
         {{-- Step 3: Format Mode --}}
         @elseif($currentStep === 3)
             <div>
-                <h2 class="text-xl font-semibold text-gray-900 mb-1">Format Mode</h2>
-                <p class="text-gray-500 text-sm mb-6">How should data be collected?</p>
+                <h2 class="text-xl font-semibold text-gray-900 mb-1">@term('format_mode_label')</h2>
+                <p class="text-gray-500 text-sm mb-6">@term('format_collect_body')</p>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     @foreach($this->formatModes as $mode => $info)
@@ -223,19 +223,19 @@
         {{-- Step 4: Schedule Configuration --}}
         @elseif($currentStep === 4)
             <div>
-                <h2 class="text-xl font-semibold text-gray-900 mb-1">Schedule Configuration</h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-1">@term('schedule_configuration_label')</h2>
                 <p class="text-gray-500 text-sm mb-6">
                     @if($collectionType === 'one_time')
-                        This is a one-time collection. Set when it should start.
+                        @term('schedule_one_time_label')
                     @else
-                        Configure when data collection should occur.
+                        @term('schedule_configure_label')
                     @endif
                 </p>
 
                 @if($collectionType !== 'one_time')
                     <!-- Schedule Type -->
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Schedule Type</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">@term('schedule_type_label')</label>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             @foreach($this->scheduleTypes as $type => $info)
                                 <button
@@ -255,7 +255,7 @@
                     @if($scheduleType === 'interval')
                         <div class="grid grid-cols-2 gap-4 mb-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Every</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">@term('every_label')</label>
                                 <input
                                     type="number"
                                     wire:model="intervalValue"
@@ -264,14 +264,14 @@
                                 />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Period</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">@term('period_label')</label>
                                 <select
                                     wire:model="intervalType"
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                 >
-                                    <option value="daily">Day(s)</option>
-                                    <option value="weekly">Week(s)</option>
-                                    <option value="monthly">Month(s)</option>
+                                    <option value="daily">@term('day_plural_label')</option>
+                                    <option value="weekly">@term('week_plural_label')</option>
+                                    <option value="monthly">@term('month_plural_label')</option>
                                 </select>
                             </div>
                         </div>
@@ -280,7 +280,7 @@
                     <!-- Custom Days -->
                     @if($scheduleType === 'custom')
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-3">Select Days</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">@term('select_days_label')</label>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($this->daysOfWeek as $day)
                                     <button
@@ -300,15 +300,15 @@
                     <!-- Event Trigger -->
                     @if($scheduleType === 'event')
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Trigger Event</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('trigger_event_label')</label>
                             <select
                                 wire:model="eventTrigger"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                             >
-                                <option value="">Select an event...</option>
-                                <option value="survey_completed">Survey Completed</option>
-                                <option value="metric_threshold">Metric Threshold Reached</option>
-                                <option value="flag_raised">Flag Raised</option>
+                                <option value="">@term('select_event_label')</option>
+                                <option value="survey_completed">@term('survey_completed_label')</option>
+                                <option value="metric_threshold">@term('metric_threshold_label')</option>
+                                <option value="flag_raised">@term('flag_raised_label')</option>
                             </select>
                         </div>
                     @endif
@@ -316,8 +316,8 @@
                     <!-- Times -->
                     <div class="mb-6">
                         <div class="flex items-center justify-between mb-2">
-                            <label class="block text-sm font-medium text-gray-700">Collection Times</label>
-                            <button type="button" wire:click="addTime" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">+ Add Time</button>
+                            <label class="block text-sm font-medium text-gray-700">@term('collection_times_label')</label>
+                            <button type="button" wire:click="addTime" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">+ @term('add_time_label')</button>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             @foreach($customTimes as $index => $time)
@@ -341,7 +341,7 @@
                 <!-- Date Range -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('start_date_label')</label>
                         <input
                             type="date"
                             wire:model="startDate"
@@ -351,7 +351,7 @@
                     </div>
                     @if($collectionType !== 'one_time')
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">End Date (optional)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('end_date_optional_label')</label>
                             <input
                                 type="date"
                                 wire:model="endDate"
@@ -365,21 +365,21 @@
         {{-- Step 5: Contact Scope --}}
         @elseif($currentStep === 5)
             <div>
-                <h2 class="text-xl font-semibold text-gray-900 mb-1">Contact Scope</h2>
-                <p class="text-gray-500 text-sm mb-6">Who should be included in this collection?</p>
+                <h2 class="text-xl font-semibold text-gray-900 mb-1">@term('contact_scope_label')</h2>
+                <p class="text-gray-500 text-sm mb-6">@term('contact_scope_body')</p>
 
                 <!-- Target Type -->
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-3">Target Type</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">@term('target_type_label')</label>
                     <div class="flex gap-4">
                         <button
                             type="button"
-                            wire:click="$set('targetType', 'students')"
+                            wire:click="$set('targetType', 'learners')"
                             class="flex-1 p-4 rounded-lg border-2 text-center transition-all
-                                {{ $targetType === 'students' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
+                                {{ $targetType === 'learners' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
                         >
-                            <x-icon name="academic-cap" class="w-8 h-8 mx-auto mb-2 {{ $targetType === 'students' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
-                            <span class="font-medium {{ $targetType === 'students' ? 'text-pulse-orange-600' : 'text-gray-900' }}">Students</span>
+                            <x-icon name="academic-cap" class="w-8 h-8 mx-auto mb-2 {{ $targetType === 'learners' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
+                            <span class="font-medium {{ $targetType === 'learners' ? 'text-pulse-orange-600' : 'text-gray-900' }}">@term('learner_plural')</span>
                         </button>
                         <button
                             type="button"
@@ -388,16 +388,16 @@
                                 {{ $targetType === 'users' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
                         >
                             <x-icon name="users" class="w-8 h-8 mx-auto mb-2 {{ $targetType === 'users' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
-                            <span class="font-medium {{ $targetType === 'users' ? 'text-pulse-orange-600' : 'text-gray-900' }}">Staff/Parents</span>
+                            <span class="font-medium {{ $targetType === 'users' ? 'text-pulse-orange-600' : 'text-gray-900' }}">@term('staff_parents_label')</span>
                         </button>
                     </div>
                 </div>
 
-                @if($targetType === 'students')
+                @if($targetType === 'learners')
                     <!-- Grades Filter -->
                     @if(count($availableGrades) > 0)
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Grade (optional)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">@term('filter_by_grade_label')</label>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($availableGrades as $grade)
                                     <button
@@ -416,7 +416,7 @@
                     <!-- Classrooms Filter -->
                     @if(count($availableClassrooms) > 0)
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Classroom (optional)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">@term('filter_by_classroom_label')</label>
                             <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2 space-y-1">
                                 @foreach($availableClassrooms as $classroom)
                                     <button
@@ -439,7 +439,7 @@
                 @else
                     <!-- Role Filter -->
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Role (optional)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">@term('filter_by_role_label')</label>
                         <div class="flex flex-wrap gap-2">
                             @foreach(['teacher', 'counselor', 'admin', 'parent'] as $role)
                                 <button
@@ -461,9 +461,9 @@
                         <x-icon name="information-circle" class="w-5 h-5 text-blue-600" />
                         <span class="text-sm text-blue-800">
                             <strong>{{ $this->estimatedContactCount }}</strong>
-                            {{ $targetType === 'students' ? 'students' : 'users' }} match your current filters.
+                            {{ $targetType === 'learners' ? app(\App\Services\TerminologyService::class)->get('learner_plural') : app(\App\Services\TerminologyService::class)->get('user_plural') }} @term('match_filters_label')
                             @if(empty($selectedGrades) && empty($selectedClassrooms))
-                                <span class="text-blue-600">(All {{ $targetType }})</span>
+                                <span class="text-blue-600">(@term('all_label') {{ $targetType }})</span>
                             @endif
                         </span>
                     </div>
@@ -473,8 +473,8 @@
         {{-- Step 6: Reminder Settings --}}
         @elseif($currentStep === 6)
             <div>
-                <h2 class="text-xl font-semibold text-gray-900 mb-1">Reminder Settings</h2>
-                <p class="text-gray-500 text-sm mb-6">Configure how users will be reminded to complete collections.</p>
+                <h2 class="text-xl font-semibold text-gray-900 mb-1">@term('reminder_settings_label')</h2>
+                <p class="text-gray-500 text-sm mb-6">@term('reminder_settings_body')</p>
 
                 <!-- Enable Reminders Toggle -->
                 <div class="mb-6">
@@ -484,14 +484,14 @@
                             wire:model.live="enableReminders"
                             class="w-5 h-5 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
                         />
-                        <span class="font-medium text-gray-900">Enable Reminders</span>
+                        <span class="font-medium text-gray-900">@term('enable_reminders_label')</span>
                     </label>
                 </div>
 
                 @if($enableReminders)
                     <!-- Reminder Channels -->
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Reminder Channels</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">@term('reminder_channels_label')</label>
                         <div class="flex gap-4">
                             @foreach(['email' => 'Email', 'sms' => 'SMS', 'whatsapp' => 'WhatsApp'] as $channel => $label)
                                 <button
@@ -510,7 +510,7 @@
 
                     <!-- Lead Time -->
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Send reminder before session</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('send_reminder_before_label')</label>
                         <select
                             wire:model="reminderLeadTime"
                             class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
@@ -531,12 +531,12 @@
                                 wire:model.live="enableFollowUp"
                                 class="w-5 h-5 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
                             />
-                            <span class="font-medium text-gray-900">Send follow-up reminders for incomplete responses</span>
+                            <span class="font-medium text-gray-900">@term('follow_up_label')</span>
                         </label>
 
                         @if($enableFollowUp)
                             <div class="ml-8">
-                                <label class="block text-sm text-gray-600 mb-1">Follow-up after</label>
+                                <label class="block text-sm text-gray-600 mb-1">@term('follow_up_after_label')</label>
                                 <select
                                     wire:model="followUpDelay"
                                     class="w-full md:w-64 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
@@ -552,7 +552,7 @@
                 @else
                     <div class="text-center py-8 bg-gray-50 rounded-lg">
                         <x-icon name="bell-slash" class="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                        <p class="text-gray-500">Reminders are disabled for this collection.</p>
+                        <p class="text-gray-500">@term('reminders_disabled_label')</p>
                     </div>
                 @endif
             </div>
@@ -560,33 +560,33 @@
         {{-- Step 7: Review --}}
         @elseif($currentStep === 7)
             <div>
-                <h2 class="text-xl font-semibold text-gray-900 mb-1">Review & Create</h2>
-                <p class="text-gray-500 text-sm mb-6">Review your collection settings before creating.</p>
+                <h2 class="text-xl font-semibold text-gray-900 mb-1">@term('review_create_label')</h2>
+                <p class="text-gray-500 text-sm mb-6">@term('review_settings_label')</p>
 
                 <div class="space-y-4">
                     <!-- Basic Info -->
                     <div class="p-4 bg-gray-50 rounded-lg">
-                        <h3 class="font-medium text-gray-900 mb-2">Basic Info</h3>
+                        <h3 class="font-medium text-gray-900 mb-2">@term('basic_info_label')</h3>
                         <dl class="grid grid-cols-2 gap-2 text-sm">
-                            <dt class="text-gray-500">Title</dt>
+                            <dt class="text-gray-500">@term('title_label')</dt>
                             <dd class="text-gray-900">{{ $title }}</dd>
-                            <dt class="text-gray-500">Type</dt>
+                            <dt class="text-gray-500">@term('type_label')</dt>
                             <dd class="text-gray-900">{{ $this->collectionTypes[$collectionType]['label'] }}</dd>
                         </dl>
                     </div>
 
                     <!-- Data Source -->
                     <div class="p-4 bg-gray-50 rounded-lg">
-                        <h3 class="font-medium text-gray-900 mb-2">Data Source</h3>
+                        <h3 class="font-medium text-gray-900 mb-2">@term('data_source_label')</h3>
                         <dl class="grid grid-cols-2 gap-2 text-sm">
-                            <dt class="text-gray-500">Source</dt>
+                            <dt class="text-gray-500">@term('source_label')</dt>
                             <dd class="text-gray-900">{{ $this->dataSources[$dataSource]['label'] }}</dd>
-                            <dt class="text-gray-500">Questions</dt>
+                            <dt class="text-gray-500">@term('questions_label')</dt>
                             <dd class="text-gray-900">
                                 @if($dataSource === 'survey' && $surveyId)
-                                    {{ collect($availableSurveys)->firstWhere('id', $surveyId)['title'] ?? 'Selected survey' }}
+                                    {{ collect($availableSurveys)->firstWhere('id', $surveyId)['title'] ?? app(\App\Services\TerminologyService::class)->get('survey_singular') }}
                                 @else
-                                    {{ count($inlineQuestions) }} inline question(s)
+                                    {{ count($inlineQuestions) }} @term('inline_questions_label')
                                 @endif
                             </dd>
                         </dl>
@@ -594,25 +594,25 @@
 
                     <!-- Format -->
                     <div class="p-4 bg-gray-50 rounded-lg">
-                        <h3 class="font-medium text-gray-900 mb-2">Format</h3>
+                        <h3 class="font-medium text-gray-900 mb-2">@term('format_label')</h3>
                         <p class="text-sm text-gray-900">{{ $this->formatModes[$formatMode]['label'] }}</p>
                     </div>
 
                     <!-- Schedule -->
                     @if($collectionType !== 'one_time')
                         <div class="p-4 bg-gray-50 rounded-lg">
-                            <h3 class="font-medium text-gray-900 mb-2">Schedule</h3>
+                            <h3 class="font-medium text-gray-900 mb-2">@term('schedule_label')</h3>
                             <dl class="grid grid-cols-2 gap-2 text-sm">
-                                <dt class="text-gray-500">Type</dt>
+                                <dt class="text-gray-500">@term('type_label')</dt>
                                 <dd class="text-gray-900">{{ $this->scheduleTypes[$scheduleType]['label'] }}</dd>
                                 @if($scheduleType === 'interval')
-                                    <dt class="text-gray-500">Frequency</dt>
-                                    <dd class="text-gray-900">Every {{ $intervalValue }} {{ $intervalType }}</dd>
+                                    <dt class="text-gray-500">@term('every_label')</dt>
+                                    <dd class="text-gray-900">{{ $intervalValue }} {{ $intervalType }}</dd>
                                 @elseif($scheduleType === 'custom')
-                                    <dt class="text-gray-500">Days</dt>
+                                    <dt class="text-gray-500">@term('select_days_label')</dt>
                                     <dd class="text-gray-900">{{ implode(', ', array_map('ucfirst', $customDays)) }}</dd>
                                 @endif
-                                <dt class="text-gray-500">Times</dt>
+                                <dt class="text-gray-500">@term('collection_times_label')</dt>
                                 <dd class="text-gray-900">{{ implode(', ', $customTimes) }}</dd>
                             </dl>
                         </div>
@@ -620,23 +620,23 @@
 
                     <!-- Contacts -->
                     <div class="p-4 bg-gray-50 rounded-lg">
-                        <h3 class="font-medium text-gray-900 mb-2">Contacts</h3>
+                        <h3 class="font-medium text-gray-900 mb-2">@term('contacts_label')</h3>
                         <dl class="grid grid-cols-2 gap-2 text-sm">
-                            <dt class="text-gray-500">Target</dt>
+                            <dt class="text-gray-500">@term('target_type_label')</dt>
                             <dd class="text-gray-900">{{ ucfirst($targetType) }}</dd>
-                            <dt class="text-gray-500">Estimated Count</dt>
+                            <dt class="text-gray-500">@term('estimated_count_label')</dt>
                             <dd class="text-gray-900">{{ $this->estimatedContactCount }} {{ $targetType }}</dd>
                         </dl>
                     </div>
 
                     <!-- Reminders -->
                     <div class="p-4 bg-gray-50 rounded-lg">
-                        <h3 class="font-medium text-gray-900 mb-2">Reminders</h3>
+                        <h3 class="font-medium text-gray-900 mb-2">@term('reminders_label')</h3>
                         <p class="text-sm text-gray-900">
                             @if($enableReminders)
-                                Enabled via {{ implode(', ', array_map('ucfirst', $reminderChannels)) }}
+                                @term('enabled_via_label') {{ implode(', ', array_map('ucfirst', $reminderChannels)) }}
                             @else
-                                Disabled
+                                @term('disabled_label')
                             @endif
                         </p>
                     </div>
@@ -654,11 +654,11 @@
                     wire:click="previousStep"
                     class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
-                    Back
+                    @term('back_label')
                 </button>
             @else
                 <a href="{{ route('collect.index') }}" class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 inline-block">
-                    Cancel
+                    @term('cancel_action')
                 </a>
             @endif
         </div>
@@ -670,14 +670,14 @@
                     wire:click="save(false)"
                     class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
-                    Save as Draft
+                    @term('save_draft_label')
                 </button>
                 <button
                     type="button"
                     wire:click="save(true)"
                     class="px-4 py-2 text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
                 >
-                    Create & Activate
+                    @term('create_activate_label')
                 </button>
             @else
                 <button
@@ -685,7 +685,7 @@
                     wire:click="nextStep"
                     class="px-4 py-2 text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
                 >
-                    Continue
+                    @term('continue_action')
                 </button>
             @endif
         </div>
@@ -699,25 +699,25 @@
 
                 <div class="relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                        {{ $editingQuestionIndex !== null ? 'Edit Question' : 'Add Question' }}
+                        {{ $editingQuestionIndex !== null ? app(\App\Services\TerminologyService::class)->get('edit_question_title_label') : app(\App\Services\TerminologyService::class)->get('add_question_title_label') }}
                     </h3>
 
                     <div class="space-y-4">
                         <!-- Question Text -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Question</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('question_singular')</label>
                             <textarea
                                 wire:model="questionForm.question"
                                 rows="2"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                                placeholder="Enter your question..."
+                                placeholder="{{ app(\App\Services\TerminologyService::class)->get('enter_question_label') }}"
                             ></textarea>
                             @error('questionForm.question') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                         </div>
 
                         <!-- Question Type -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('type_label')</label>
                             <select
                                 wire:model.live="questionForm.type"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
@@ -732,8 +732,8 @@
                         @if(($questionForm['type'] ?? 'scale') === 'multiple_choice')
                             <div>
                                 <div class="flex items-center justify-between mb-2">
-                                    <label class="block text-sm font-medium text-gray-700">Options</label>
-                                    <button type="button" wire:click="addOption" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">+ Add Option</button>
+                                    <label class="block text-sm font-medium text-gray-700">@term('options_label')</label>
+                                    <button type="button" wire:click="addOption" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">+ @term('add_option_label')</button>
                                 </div>
                                 <div class="space-y-2">
                                     @foreach($questionForm['options'] ?? [] as $index => $option)
@@ -742,7 +742,7 @@
                                                 type="text"
                                                 wire:model="questionForm.options.{{ $index }}"
                                                 class="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                                                placeholder="Option {{ $index + 1 }}"
+                                                placeholder="{{ app(\App\Services\TerminologyService::class)->get('option_singular') }} {{ $index + 1 }}"
                                             />
                                             @if(count($questionForm['options'] ?? []) > 2)
                                                 <button type="button" wire:click="removeOption({{ $index }})" class="p-1 text-gray-400 hover:text-red-500">
@@ -763,7 +763,7 @@
                                     wire:model="questionForm.required"
                                     class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
                                 />
-                                <span class="text-sm text-gray-700">Required question</span>
+                                <span class="text-sm text-gray-700">@term('required_question_label')</span>
                             </label>
                         </div>
                     </div>
@@ -774,14 +774,14 @@
                             wire:click="closeQuestionEditor"
                             class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                         >
-                            Cancel
+                            @term('cancel_action')
                         </button>
                         <button
                             type="button"
                             wire:click="saveQuestion"
                             class="px-4 py-2 text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
                         >
-                            Save Question
+                            @term('save_action') @term('question_singular')
                         </button>
                     </div>
                 </div>

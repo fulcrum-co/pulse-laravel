@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
-use App\Models\Goal;
 use App\Models\ProgressSummary;
 use App\Models\StrategicPlan;
-use Carbon\Carbon;
+use App\Services\Domain\PlanProgressDomainService;
 use Illuminate\Support\Facades\Log;
 
 class PlanProgressService
 {
     public function __construct(
-        protected ClaudeService $claude
+        protected ClaudeService $claude,
+        protected PlanProgressDomainService $domainService
     ) {}
 
     /**
@@ -64,58 +66,7 @@ class PlanProgressService
      */
     public function calculatePlanProgress(StrategicPlan $plan): array
     {
-        // For OKR-style plans, use goals
-        if ($plan->isOkrStyle()) {
-            $goals = $plan->goals()->with('keyResults')->get();
-            $goalProgress = $goals->isEmpty() ? 0 : $goals->avg(fn ($g) => $g->calculateProgress());
-
-            return [
-                'progress' => round($goalProgress, 1),
-                'source' => 'goals',
-                'details' => [
-                    'total_goals' => $goals->count(),
-                    'completed' => $goals->where('status', Goal::STATUS_COMPLETED)->count(),
-                    'in_progress' => $goals->where('status', Goal::STATUS_IN_PROGRESS)->count(),
-                    'at_risk' => $goals->where('status', Goal::STATUS_AT_RISK)->count(),
-                    'not_started' => $goals->where('status', Goal::STATUS_NOT_STARTED)->count(),
-                ],
-            ];
-        }
-
-        // For traditional plans, use focus areas/objectives/activities
-        $focusAreas = $plan->focusAreas()->with('objectives.activities')->get();
-        $totalActivities = 0;
-        $completedActivities = 0;
-        $statusCounts = [
-            'on_track' => 0,
-            'at_risk' => 0,
-            'off_track' => 0,
-            'not_started' => 0,
-        ];
-
-        foreach ($focusAreas as $fa) {
-            foreach ($fa->objectives as $obj) {
-                foreach ($obj->activities as $act) {
-                    $totalActivities++;
-                    $statusCounts[$act->status] = ($statusCounts[$act->status] ?? 0) + 1;
-                    if (in_array($act->status, ['on_track', 'completed'])) {
-                        $completedActivities++;
-                    }
-                }
-            }
-        }
-
-        $progress = $totalActivities > 0 ? ($completedActivities / $totalActivities) * 100 : 0;
-
-        return [
-            'progress' => round($progress, 1),
-            'source' => 'activities',
-            'details' => [
-                'total_activities' => $totalActivities,
-                'completed' => $completedActivities,
-                'status_breakdown' => $statusCounts,
-            ],
-        ];
+        return $this->domainService->calculatePlanProgress($plan);
     }
 
     /**
@@ -123,19 +74,7 @@ class PlanProgressService
      */
     public function getUpcomingMilestones(StrategicPlan $plan, int $days = 14): array
     {
-        return $plan->milestones()
-            ->upcoming($days)
-            ->with('goal')
-            ->get()
-            ->map(fn ($m) => [
-                'id' => $m->id,
-                'title' => $m->title,
-                'due_date' => $m->due_date->format('M j, Y'),
-                'days_until' => $m->due_date->diffInDays(now()),
-                'goal' => $m->goal?->title,
-                'status' => $m->status,
-            ])
-            ->toArray();
+        return $this->domainService->getUpcomingMilestones($plan, $days);
     }
 
     /**
@@ -143,31 +82,7 @@ class PlanProgressService
      */
     public function getOverdueItems(StrategicPlan $plan): array
     {
-        $overdueMilestones = $plan->milestones()
-            ->overdue()
-            ->get()
-            ->map(fn ($m) => [
-                'type' => 'milestone',
-                'id' => $m->id,
-                'title' => $m->title,
-                'due_date' => $m->due_date->format('M j, Y'),
-                'days_overdue' => now()->diffInDays($m->due_date),
-            ]);
-
-        $overdueGoals = $plan->allGoals()
-            ->whereNotNull('due_date')
-            ->where('due_date', '<', now())
-            ->whereNotIn('status', [Goal::STATUS_COMPLETED])
-            ->get()
-            ->map(fn ($g) => [
-                'type' => 'goal',
-                'id' => $g->id,
-                'title' => $g->title,
-                'due_date' => $g->due_date->format('M j, Y'),
-                'days_overdue' => now()->diffInDays($g->due_date),
-            ]);
-
-        return $overdueMilestones->merge($overdueGoals)->sortByDesc('days_overdue')->values()->toArray();
+        return $this->domainService->getOverdueItems($plan);
     }
 
     /**
@@ -175,66 +90,15 @@ class PlanProgressService
      */
     protected function getPeriodDates(string $periodType): array
     {
-        return match ($periodType) {
-            ProgressSummary::PERIOD_WEEKLY => [
-                'start' => Carbon::now()->startOfWeek(),
-                'end' => Carbon::now()->endOfWeek(),
-            ],
-            ProgressSummary::PERIOD_MONTHLY => [
-                'start' => Carbon::now()->startOfMonth(),
-                'end' => Carbon::now()->endOfMonth(),
-            ],
-            ProgressSummary::PERIOD_QUARTERLY => [
-                'start' => Carbon::now()->firstOfQuarter(),
-                'end' => Carbon::now()->lastOfQuarter(),
-            ],
-            default => [
-                'start' => Carbon::now()->startOfWeek(),
-                'end' => Carbon::now()->endOfWeek(),
-            ],
-        };
+        return $this->domainService->getPeriodDates($periodType);
     }
 
     /**
      * Gather data for a specific period.
      */
-    protected function gatherPeriodData(StrategicPlan $plan, Carbon $start, Carbon $end): array
+    protected function gatherPeriodData(StrategicPlan $plan, \Carbon\Carbon $start, \Carbon\Carbon $end): array
     {
-        return [
-            'updates' => $plan->progressUpdates()
-                ->whereBetween('created_at', [$start, $end])
-                ->with('creator', 'goal', 'keyResult', 'milestone')
-                ->get()
-                ->map(fn ($u) => [
-                    'content' => $u->content,
-                    'type' => $u->update_type,
-                    'context' => $u->context_label,
-                    'created_by' => $u->creator?->full_name ?? 'System',
-                    'created_at' => $u->created_at->format('M j, Y'),
-                ]),
-            'goals' => $plan->allGoals()
-                ->with('keyResults')
-                ->get()
-                ->map(fn ($g) => [
-                    'title' => $g->title,
-                    'status' => $g->status,
-                    'progress' => $g->calculateProgress(),
-                    'key_results_count' => $g->keyResults->count(),
-                ]),
-            'milestones' => $plan->milestones()
-                ->where(function ($q) use ($start, $end) {
-                    $q->whereBetween('due_date', [$start, $end])
-                        ->orWhereBetween('completed_at', [$start, $end]);
-                })
-                ->get()
-                ->map(fn ($m) => [
-                    'title' => $m->title,
-                    'status' => $m->status,
-                    'due_date' => $m->due_date->format('M j'),
-                    'completed' => $m->status === 'completed',
-                ]),
-            'progress' => $this->calculatePlanProgress($plan),
-        ];
+        return $this->domainService->gatherPeriodData($plan, $start, $end);
     }
 
     /**
@@ -273,43 +137,7 @@ PROMPT;
      */
     protected function buildSummaryPrompt(StrategicPlan $plan, array $data, string $periodType): string
     {
-        $periodLabel = match ($periodType) {
-            ProgressSummary::PERIOD_WEEKLY => 'this week',
-            ProgressSummary::PERIOD_MONTHLY => 'this month',
-            ProgressSummary::PERIOD_QUARTERLY => 'this quarter',
-            default => 'this period',
-        };
-
-        $updatesText = $data['updates']->isEmpty()
-            ? 'No updates recorded.'
-            : $data['updates']->map(fn ($u) => "- {$u['content']} ({$u['context']} - {$u['created_by']})")->join("\n");
-
-        $goalsText = $data['goals']->isEmpty()
-            ? 'No goals defined.'
-            : $data['goals']->map(fn ($g) => "- {$g['title']}: {$g['status']} ({$g['progress']}% complete)")->join("\n");
-
-        $milestonesText = $data['milestones']->isEmpty()
-            ? 'No milestones this period.'
-            : $data['milestones']->map(fn ($m) => "- {$m['title']}: {$m['status']} (due {$m['due_date']})")->join("\n");
-
-        return <<<PROMPT
-Generate a progress summary for {$periodLabel} for the following plan:
-
-Plan: {$plan->title}
-Type: {$plan->plan_type}
-Overall Progress: {$data['progress']['progress']}%
-
-PROGRESS UPDATES:
-{$updatesText}
-
-GOALS STATUS:
-{$goalsText}
-
-MILESTONES:
-{$milestonesText}
-
-Please analyze this data and provide a JSON summary.
-PROMPT;
+        return $this->domainService->buildSummaryPrompt($plan, $data, $periodType);
     }
 
     /**

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 class CohortMember extends Model
 {
     // Roles
-    public const ROLE_STUDENT = 'student';
+    public const ROLE_STUDENT = 'learner';
     public const ROLE_MENTOR = 'mentor';
     public const ROLE_FACILITATOR = 'facilitator';
     public const ROLE_ADMIN = 'admin';
@@ -100,7 +100,7 @@ class CohortMember extends Model
     }
 
     // Scopes
-    public function scopeStudents(Builder $query): Builder
+    public function scopeLearners(Builder $query): Builder
     {
         return $query->where('role', self::ROLE_STUDENT);
     }
@@ -139,7 +139,7 @@ class CohortMember extends Model
     public static function getRoleOptions(): array
     {
         return [
-            self::ROLE_STUDENT => 'Student',
+            self::ROLE_STUDENT => 'Learner',
             self::ROLE_MENTOR => 'Mentor',
             self::ROLE_FACILITATOR => 'Facilitator',
             self::ROLE_ADMIN => 'Admin',
@@ -167,7 +167,7 @@ class CohortMember extends Model
         ];
     }
 
-    public function isStudent(): bool
+    public function isLearner(): bool
     {
         return $this->role === self::ROLE_STUDENT;
     }

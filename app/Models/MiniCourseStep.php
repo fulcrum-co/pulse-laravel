@@ -86,7 +86,7 @@ class MiniCourseStep extends Model
             ],
             self::TYPE_REFLECTION => [
                 'label' => 'Reflection',
-                'description' => 'Prompt for student reflection',
+                'description' => 'Prompt for learner reflection',
                 'icon' => 'chat-bubble-left-ellipsis',
             ],
             self::TYPE_ACTION => [

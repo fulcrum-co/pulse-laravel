@@ -7,19 +7,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Find the school and admin
-        $school = DB::table('organizations')->where('org_type', 'school')->first();
+        // Find the organization and admin
+        $organization = DB::table('organizations')->where('org_type', 'organization')->first();
         $admin = DB::table('users')
             ->where('primary_role', 'admin')
-            ->where('org_id', $school?->id)
+            ->where('org_id', $organization?->id)
             ->first();
 
-        if (! $school || ! $admin) {
+        if (! $organization || ! $admin) {
             return;
         }
 
         // Check if resources already exist
-        $existingCount = DB::table('resources')->where('org_id', $school->id)->count();
+        $existingCount = DB::table('resources')->where('org_id', $organization->id)->count();
         if ($existingCount > 0) {
             return; // Already seeded
         }
@@ -35,7 +35,7 @@ return new class extends Migration
                 'target_risk_levels' => json_encode(['low', 'high']),
             ],
             [
-                'title' => 'Mindfulness for Students',
+                'title' => 'Mindfulness for Learners',
                 'description' => 'A guided introduction to mindfulness practices for teens.',
                 'resource_type' => 'video',
                 'category' => 'stress',
@@ -54,7 +54,7 @@ return new class extends Migration
             ],
             [
                 'title' => 'Dealing with Social Pressure',
-                'description' => 'Understanding and navigating peer pressure in high school.',
+                'description' => 'Understanding and navigating peer pressure in high organization.',
                 'resource_type' => 'worksheet',
                 'category' => 'social',
                 'tags' => json_encode(['peer pressure', 'social skills', 'decision making']),
@@ -101,7 +101,7 @@ return new class extends Migration
 
         foreach ($resources as $resourceData) {
             DB::table('resources')->insert([
-                'org_id' => $school->id,
+                'org_id' => $organization->id,
                 'title' => $resourceData['title'],
                 'description' => $resourceData['description'],
                 'resource_type' => $resourceData['resource_type'],
@@ -120,9 +120,9 @@ return new class extends Migration
 
     public function down(): void
     {
-        $school = DB::table('organizations')->where('org_type', 'school')->first();
-        if ($school) {
-            DB::table('resources')->where('org_id', $school->id)->delete();
+        $organization = DB::table('organizations')->where('org_type', 'organization')->first();
+        if ($organization) {
+            DB::table('resources')->where('org_id', $organization->id)->delete();
         }
     }
 };

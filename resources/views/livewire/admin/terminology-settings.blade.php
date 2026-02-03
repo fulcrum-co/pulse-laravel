@@ -43,7 +43,7 @@
                 <h3 class="text-sm font-medium text-blue-800">Customize Your Platform</h3>
                 <p class="mt-1 text-sm text-blue-700">
                     Change how terms appear across your platform. For example, rename "Semester" to "Quarter" for corporate training,
-                    or "Learner" to "Student" for education. Changes apply immediately after saving.
+                    or "Learner" to "Learner" for education. Changes apply immediately after saving.
                 </p>
             </div>
         </div>

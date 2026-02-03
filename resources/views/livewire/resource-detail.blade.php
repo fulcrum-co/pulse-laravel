@@ -45,7 +45,7 @@
                 <button
                     wire:click="openPushModal"
                     class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                    title="Push to Schools"
+                    title="Push to Organizations"
                 >
                     <x-icon name="arrow-up-on-square" class="w-4 h-4 mr-2" />
                     Push
@@ -236,13 +236,13 @@
             <!-- Quick Assign -->
             <div class="bg-white rounded-xl border border-gray-200 p-6">
                 <h2 class="text-sm font-medium text-gray-900 mb-3">Quick Assign</h2>
-                <p class="text-xs text-gray-500 mb-4">Assign this resource to students or a contact list.</p>
+                <p class="text-xs text-gray-500 mb-4">Assign this resource to learners or a contact list.</p>
                 <button
                     wire:click="openAssignModal"
                     class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-pulse-orange-600 bg-pulse-orange-50 rounded-lg hover:bg-pulse-orange-100"
                 >
                     <x-icon name="user-plus" class="w-4 h-4 mr-2" />
-                    Assign to Students
+                    Assign to Learners
                 </button>
             </div>
 
@@ -308,19 +308,19 @@
                 </div>
 
                 <p class="text-sm text-gray-500 mb-4">
-                    Assign "{{ $resource->title }}" to a student or contact list.
+                    Assign "{{ $resource->title }}" to a learner or contact list.
                 </p>
 
                 <!-- Assignment Type Toggle -->
                 <div class="flex gap-2 mb-4">
                     <button
                         type="button"
-                        wire:click="$set('assignType', 'student')"
+                        wire:click="$set('assignType', 'learner')"
                         class="flex-1 p-3 rounded-lg border-2 text-center transition-all
-                            {{ $assignType === 'student' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
+                            {{ $assignType === 'learner' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
                     >
-                        <x-icon name="user" class="w-5 h-5 mx-auto mb-1 {{ $assignType === 'student' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
-                        <span class="text-sm font-medium {{ $assignType === 'student' ? 'text-pulse-orange-600' : 'text-gray-700' }}">Individual</span>
+                        <x-icon name="user" class="w-5 h-5 mx-auto mb-1 {{ $assignType === 'learner' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
+                        <span class="text-sm font-medium {{ $assignType === 'learner' ? 'text-pulse-orange-600' : 'text-gray-700' }}">Individual</span>
                     </button>
                     <button
                         type="button"
@@ -334,19 +334,19 @@
                 </div>
 
                 <div class="space-y-4">
-                    @if($assignType === 'student')
+                    @if($assignType === 'learner')
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Student</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Learner</label>
                         <select
-                            wire:model="selectedStudentId"
+                            wire:model="selectedLearnerId"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                         >
-                            <option value="">Choose a student...</option>
-                            @foreach($this->students as $student)
-                                <option value="{{ $student->id }}">{{ $student->full_name }} ({{ $student->grade_level }})</option>
+                            <option value="">Choose a learner...</option>
+                            @foreach($this->learners as $learner)
+                                <option value="{{ $learner->id }}">{{ $learner->full_name }} ({{ $learner->grade_level }})</option>
                             @endforeach
                         </select>
-                        @error('selectedStudentId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        @error('selectedLearnerId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     @else
                     <div>
@@ -357,7 +357,7 @@
                         >
                             <option value="">Choose a list...</option>
                             @foreach($this->contactLists as $list)
-                                <option value="{{ $list->id }}">{{ $list->name }} ({{ $list->member_count }} students)</option>
+                                <option value="{{ $list->id }}">{{ $list->name }} ({{ $list->member_count }} learners)</option>
                             @endforeach
                         </select>
                         @error('selectedListId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -370,7 +370,7 @@
                             wire:model="assignNote"
                             rows="2"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                            placeholder="Add a note for the student..."
+                            placeholder="Add a note for the learner..."
                         ></textarea>
                     </div>
                 </div>

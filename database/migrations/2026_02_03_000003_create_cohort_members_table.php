@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('cohort_id')->constrained('cohorts')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('role')->default('student'); // student, mentor, facilitator, admin
+            $table->string('role')->default('learner'); // learner, mentor, facilitator, admin
             $table->string('status')->default('enrolled'); // enrolled, active, completed, withdrawn, paused
             $table->unsignedTinyInteger('progress_percent')->default(0);
             $table->foreignId('current_step_id')->nullable()->constrained('mini_course_steps')->nullOnDelete();

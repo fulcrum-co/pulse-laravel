@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
@@ -16,7 +18,7 @@ class CourseContentAIService
     public function generateCompleteCourse(array $params): array
     {
         $topic = $params['topic'] ?? '';
-        $audience = $params['audience'] ?? 'students';
+        $audience = $params['audience'] ?? 'learners';
         $gradeLevel = $params['grade_level'] ?? null;
         $courseType = $params['course_type'] ?? 'skill_building';
         $duration = $params['duration_minutes'] ?? 30;
@@ -113,7 +115,7 @@ Return a JSON object with:
 PROMPT;
 
         $courseType = $context['course_type'] ?? 'skill_building';
-        $audience = $context['audience'] ?? 'students';
+        $audience = $context['audience'] ?? 'learners';
         $gradeLevel = $context['grade_level'] ?? null;
 
         $userMessage = "Create an introduction for a {$courseType} course about: {$topic}\n";
@@ -406,7 +408,7 @@ Return a JSON object with:
 PROMPT;
 
         $courseType = $context['course_type'] ?? 'skill_building';
-        $audience = $context['audience'] ?? 'students';
+        $audience = $context['audience'] ?? 'learners';
 
         $userMessage = "Complete this {$fieldType} text for a {$courseType} course aimed at {$audience}:\n\n";
         $userMessage .= "Partial text: \"{$partial}\"";
@@ -461,7 +463,7 @@ Return a JSON object with:
 PROMPT;
 
         $courseType = $params['course_type'] ?? null;
-        $audience = $params['audience'] ?? 'students';
+        $audience = $params['audience'] ?? 'learners';
         $gradeLevel = $params['grade_level'] ?? null;
 
         $userMessage = "Convert this document into a mini-course structure:\n\n";

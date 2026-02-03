@@ -30,6 +30,7 @@ class CategoryBrowser extends Component
     {
         $user = auth()->user();
         $orgId = $user?->org_id;
+        $terminology = app(\App\Services\TerminologyService::class);
 
         $articles = HelpArticle::forOrganization($orgId)
             ->published()
@@ -50,6 +51,6 @@ class CategoryBrowser extends Component
         return view('livewire.help.category-browser', [
             'articles' => $articles,
             'subcategories' => $subcategories,
-        ])->title($this->category->name . ' - Help Center');
+        ])->title($this->category->name . ' - ' . $terminology->get('help_center_label'));
     }
 }

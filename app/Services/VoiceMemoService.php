@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Jobs\ProcessVoiceMemo;
 use App\Models\ContactNote;
 use App\Models\VoiceMemoJob;
+use App\Services\Domain\VoiceMemoExtractionService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -12,7 +15,8 @@ class VoiceMemoService
 {
     public function __construct(
         protected ClaudeService $claudeService,
-        protected TranscriptionService $transcriptionService
+        protected TranscriptionService $transcriptionService,
+        protected VoiceMemoExtractionService $extractionService
     ) {}
 
     /**
@@ -73,7 +77,7 @@ class VoiceMemoService
         if ($extracted['success']) {
             $note->update([
                 'structured_data' => $extracted['data'],
-                'content' => $this->generateNoteSummary($transcription, $extracted['data']),
+                'content' => $this->extractionService->generateNoteSummary($transcription, $extracted['data']),
                 'raw_content' => $transcription,
             ]);
         } else {
@@ -90,26 +94,12 @@ class VoiceMemoService
      */
     public function extractStructuredData(string $transcription, ContactNote $note): array
     {
-        $systemPrompt = <<<'PROMPT'
-You are analyzing a voice memo from an educator about a student or contact. Extract structured information from the transcription.
-
-Return a JSON object with:
-- summary: A 1-2 sentence summary of the key points
-- concerns: Array of any concerns or issues mentioned
-- positives: Array of positive observations or achievements
-- action_items: Array of any follow-up actions mentioned
-- topics: Array of main topics discussed (e.g., "academic progress", "behavior", "attendance", "social-emotional")
-- sentiment: Overall sentiment (positive, neutral, negative, mixed)
-- urgency: Level of urgency if any concerns (none, low, medium, high)
-
-Only return valid JSON, no other text.
-PROMPT;
-
-        $userMessage = "Analyze this voice memo transcription:\n\n{$transcription}";
+        $systemPrompt = $this->extractionService->buildExtractionPrompt();
+        $userMessage = $this->extractionService->buildExtractionMessage($transcription);
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
-        if (! $response['success']) {
+        if (!$response['success']) {
             return ['success' => false, 'error' => $response['error']];
         }
 
@@ -118,7 +108,7 @@ PROMPT;
             if (json_last_error() !== JSON_ERROR_NONE) {
                 // Try to extract JSON from response
                 preg_match('/\{.*\}/s', $response['content'], $matches);
-                if (! empty($matches[0])) {
+                if (!empty($matches[0])) {
                     $data = json_decode($matches[0], true);
                 }
             }
@@ -127,39 +117,6 @@ PROMPT;
         } catch (\Exception $e) {
             return ['success' => false, 'error' => $e->getMessage()];
         }
-    }
-
-    /**
-     * Generate a note summary from transcription and extracted data.
-     */
-    private function generateNoteSummary(string $transcription, array $data): string
-    {
-        $summary = '';
-
-        if (! empty($data['summary'])) {
-            $summary = $data['summary']."\n\n";
-        }
-
-        if (! empty($data['concerns'])) {
-            $summary .= '**Concerns:** '.implode(', ', $data['concerns'])."\n";
-        }
-
-        if (! empty($data['positives'])) {
-            $summary .= '**Positives:** '.implode(', ', $data['positives'])."\n";
-        }
-
-        if (! empty($data['action_items'])) {
-            $summary .= '**Action Items:** '.implode(', ', $data['action_items'])."\n";
-        }
-
-        if (empty($summary)) {
-            // Use first 500 characters of transcription
-            $summary = strlen($transcription) > 500
-                ? substr($transcription, 0, 500).'...'
-                : $transcription;
-        }
-
-        return trim($summary);
     }
 
     /**

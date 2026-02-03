@@ -4,14 +4,14 @@ namespace App\Livewire\Course;
 
 use App\Models\MiniCourse;
 use App\Models\MiniCourseSuggestion;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
 use App\Services\AutoCourseGenerationService;
 use Livewire\Component;
 
 class CourseSuggestionsPanel extends Component
 {
-    public string $entityType; // 'student' or 'teacher'
+    public string $entityType; // 'learner' or 'teacher'
 
     public int $entityId;
 
@@ -36,10 +36,10 @@ class CourseSuggestionsPanel extends Component
         try {
             $service = app(AutoCourseGenerationService::class);
 
-            if ($this->entityType === 'student') {
-                $student = Student::findOrFail($this->entityId);
-                $course = $service->generateForStudent(
-                    $student,
+            if ($this->entityType === 'learner') {
+                $learner = Learner::findOrFail($this->entityId);
+                $course = $service->generateForLearner(
+                    $learner,
                     MiniCourse::TRIGGER_MANUAL,
                     [],
                     auth()->id()
@@ -88,7 +88,7 @@ class CourseSuggestionsPanel extends Component
      */
     public function getSuggestionsProperty()
     {
-        return MiniCourseSuggestion::where('student_id', $this->entityId)
+        return MiniCourseSuggestion::where('learner_id', $this->entityId)
             ->where('status', 'pending')
             ->with('miniCourse')
             ->orderByDesc('created_at')
@@ -101,10 +101,10 @@ class CourseSuggestionsPanel extends Component
      */
     public function getActiveEnrollmentsProperty()
     {
-        if ($this->entityType === 'student') {
-            $student = Student::find($this->entityId);
-            if ($student) {
-                return $student->enrollments()
+        if ($this->entityType === 'learner') {
+            $learner = Learner::find($this->entityId);
+            if ($learner) {
+                return $learner->enrollments()
                     ->whereIn('status', ['active', 'in_progress'])
                     ->with('course')
                     ->get();
@@ -128,10 +128,10 @@ class CourseSuggestionsPanel extends Component
                 'reviewed_by' => auth()->id(),
             ]);
 
-            // Enroll the student if it's a student suggestion
-            if ($this->entityType === 'student' && $suggestion->miniCourse) {
+            // Enroll the learner if it's a learner suggestion
+            if ($this->entityType === 'learner' && $suggestion->miniCourse) {
                 $suggestion->miniCourse->enrollments()->create([
-                    'student_id' => $this->entityId,
+                    'learner_id' => $this->entityId,
                     'enrolled_by' => auth()->id(),
                     'status' => 'active',
                     'enrolled_at' => now(),
@@ -140,7 +140,7 @@ class CourseSuggestionsPanel extends Component
 
             $this->dispatch('notify', [
                 'type' => 'success',
-                'message' => 'Suggestion accepted and student enrolled.',
+                'message' => 'Suggestion accepted and learner enrolled.',
             ]);
         }
     }

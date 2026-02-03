@@ -6,7 +6,7 @@ use App\Models\MiniCourse;
 use App\Models\MiniCourseEnrollment;
 use App\Models\MiniCourseStep;
 use App\Models\MiniCourseStepProgress;
-use App\Models\Student;
+use App\Models\Learner;
 use Livewire\Component;
 
 class MiniCourseViewer extends Component
@@ -21,19 +21,19 @@ class MiniCourseViewer extends Component
 
     public bool $previewMode = false;
 
-    // For staff viewing student progress
-    public ?int $viewingStudentId = null;
+    // For staff viewing learner progress
+    public ?int $viewingLearnerId = null;
 
-    public function mount(MiniCourse $course, ?int $studentId = null): void
+    public function mount(MiniCourse $course, ?int $learnerId = null): void
     {
         $this->course = $course->load(['steps' => fn ($q) => $q->orderBy('sort_order'), 'creator']);
-        $this->viewingStudentId = $studentId;
+        $this->viewingLearnerId = $learnerId;
 
         // Check if current user has an enrollment
         $user = auth()->user();
-        if ($user && $user->student) {
+        if ($user && $user->learner) {
             $this->enrollment = MiniCourseEnrollment::where('mini_course_id', $course->id)
-                ->where('student_id', $user->student->id)
+                ->where('learner_id', $user->learner->id)
                 ->first();
 
             if ($this->enrollment) {
@@ -41,10 +41,10 @@ class MiniCourseViewer extends Component
             }
         }
 
-        // If viewing as staff for a specific student
-        if ($studentId) {
+        // If viewing as staff for a specific learner
+        if ($learnerId) {
             $this->enrollment = MiniCourseEnrollment::where('mini_course_id', $course->id)
-                ->where('student_id', $studentId)
+                ->where('learner_id', $learnerId)
                 ->first();
         }
 
@@ -134,8 +134,8 @@ class MiniCourseViewer extends Component
             return;
         }
 
-        // For staff users without a student account, enable preview mode
-        if (! $user->student) {
+        // For staff users without a learner account, enable preview mode
+        if (! $user->learner) {
             $this->previewMode = true;
             $this->currentStep = $this->course->steps->first();
             $this->dispatch('notify', [
@@ -149,7 +149,7 @@ class MiniCourseViewer extends Component
         $this->enrollment = MiniCourseEnrollment::create([
             'mini_course_id' => $this->course->id,
             'mini_course_version_id' => $this->course->current_version_id,
-            'student_id' => $user->student->id,
+            'learner_id' => $user->learner->id,
             'enrolled_by' => $user->id,
             'enrollment_source' => MiniCourseEnrollment::SOURCE_SELF_ENROLLED,
             'status' => MiniCourseEnrollment::STATUS_IN_PROGRESS,

@@ -82,11 +82,11 @@ class Organization extends Model
     }
 
     /**
-     * Get all students in this organization.
+     * Get all learners in this organization.
      */
-    public function students(): HasMany
+    public function learners(): HasMany
     {
-        return $this->hasMany(Student::class, 'org_id');
+        return $this->hasMany(Learner::class, 'org_id');
     }
 
     /**

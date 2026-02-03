@@ -220,7 +220,7 @@ class DashboardIndex extends Component
     {
         return match ($type) {
             Dashboard::WIDGET_METRIC_CARD => [
-                'data_source' => 'students_total',
+                'data_source' => 'learners_total',
                 'color' => 'blue',
             ],
             Dashboard::WIDGET_BAR_CHART => [

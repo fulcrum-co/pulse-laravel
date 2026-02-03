@@ -3,23 +3,23 @@
 namespace Database\Seeders;
 
 use App\Models\Organization;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class StudentSeeder extends Seeder
+class LearnerSeeder extends Seeder
 {
     public function run(): void
     {
-        $school = Organization::where('org_type', 'school')->first();
-        $studentUsers = User::where('primary_role', 'student')->where('org_id', $school->id)->get();
-        $counselor = User::where('primary_role', 'admin')->where('org_id', $school->id)->where('email', 'like', '%rodriguez%')->first();
+        $organization = Organization::where('org_type', 'organization')->first();
+        $learnerUsers = User::where('primary_role', 'learner')->where('org_id', $organization->id)->get();
+        $counselor = User::where('primary_role', 'admin')->where('org_id', $organization->id)->where('email', 'like', '%rodriguez%')->first();
 
         $grades = ['9', '10', '11', '12'];
         $genders = ['male', 'female', 'non-binary'];
         $riskLevels = ['good', 'good', 'good', 'good', 'good', 'low', 'low', 'high']; // Weighted distribution
 
-        foreach ($studentUsers as $index => $user) {
+        foreach ($learnerUsers as $index => $user) {
             $riskLevel = $riskLevels[array_rand($riskLevels)];
             $riskScore = match ($riskLevel) {
                 'good' => rand(0, 30) / 10,
@@ -27,10 +27,10 @@ class StudentSeeder extends Seeder
                 'high' => rand(61, 100) / 10,
             };
 
-            Student::create([
+            Learner::create([
                 'user_id' => $user->id,
-                'org_id' => $school->id,
-                'student_number' => 'STU'.str_pad($index + 1, 5, '0', STR_PAD_LEFT),
+                'org_id' => $organization->id,
+                'learner_number' => 'STU'.str_pad($index + 1, 5, '0', STR_PAD_LEFT),
                 'grade_level' => $grades[array_rand($grades)],
                 'date_of_birth' => now()->subYears(rand(14, 18))->subDays(rand(0, 365)),
                 'gender' => $genders[array_rand($genders)],
@@ -50,7 +50,7 @@ class StudentSeeder extends Seeder
     private function generateTags(string $riskLevel): array
     {
         $allTags = [
-            'good' => ['Honor Roll', 'Athletics', 'Student Council', 'Drama Club', 'Music'],
+            'good' => ['Honor Roll', 'Athletics', 'Learner Council', 'Drama Club', 'Music'],
             'low' => ['Tutoring', 'Study Group', 'Mentorship'],
             'high' => ['Priority Support', 'Weekly Check-in', 'Parent Contact'],
         ];

@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Student;
+use App\Models\Learner;
 use App\Services\ContactMetricService;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -35,10 +35,10 @@ class ContactOverviewCharts extends Component
 
     protected function loadAvailableMetrics()
     {
-        $type = $this->contactType === Student::class ? 'student' : 'teacher';
+        $type = $this->contactType === Learner::class ? 'learner' : 'teacher';
 
         $this->availableMetrics = match ($type) {
-            'student' => [
+            'learner' => [
                 ['key' => 'gpa', 'label' => 'GPA', 'color' => '#3b82f6'],
                 ['key' => 'wellness_score', 'label' => 'Health & Wellness', 'color' => '#22c55e'],
                 ['key' => 'emotional_wellbeing', 'label' => 'Emotional Well-Being', 'color' => '#a855f7'],
@@ -48,7 +48,7 @@ class ContactOverviewCharts extends Component
             ],
             'teacher' => [
                 ['key' => 'classroom_performance', 'label' => 'Classroom Performance', 'color' => '#3b82f6'],
-                ['key' => 'student_growth', 'label' => 'Student Growth', 'color' => '#22c55e'],
+                ['key' => 'learner_growth', 'label' => 'Learner Growth', 'color' => '#22c55e'],
                 ['key' => 'pd_progress', 'label' => 'PD Progress', 'color' => '#a855f7'],
             ],
             default => [],

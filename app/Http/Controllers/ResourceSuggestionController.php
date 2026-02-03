@@ -21,7 +21,7 @@ class ResourceSuggestionController extends Controller
     {
         // Map shorthand contact type to full class name
         $typeMap = [
-            'student' => 'App\\Models\\Student',
+            'learner' => 'App\\Models\\Learner',
             'user' => 'App\\Models\\User',
         ];
         $fullType = $typeMap[$contactType] ?? $contactType;
@@ -40,7 +40,7 @@ class ResourceSuggestionController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'contact_type' => 'required|string|in:student,user,App\\Models\\Student,App\\Models\\User',
+            'contact_type' => 'required|string|in:learner,user,App\\Models\\Learner,App\\Models\\User',
             'contact_id' => 'required|integer',
             'resource_id' => 'required|exists:resources,id',
             'notes' => 'nullable|string',
@@ -50,7 +50,7 @@ class ResourceSuggestionController extends Controller
 
         // Map shorthand contact type to full class name
         $typeMap = [
-            'student' => 'App\\Models\\Student',
+            'learner' => 'App\\Models\\Learner',
             'user' => 'App\\Models\\User',
         ];
         $contactType = $typeMap[$validated['contact_type']] ?? $validated['contact_type'];
@@ -109,17 +109,17 @@ class ResourceSuggestionController extends Controller
     public function generate(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'contact_type' => 'required|string|in:student',
-            'contact_id' => 'required|integer|exists:students,id',
+            'contact_type' => 'required|string|in:learner',
+            'contact_id' => 'required|integer|exists:learners,id',
         ]);
 
-        $student = \App\Models\Student::findOrFail($validated['contact_id']);
+        $learner = \App\Models\Learner::findOrFail($validated['contact_id']);
 
         // Check if AI suggestions are enabled
         if (config('pulse.contact_view.ai_suggestions.enabled', false)) {
-            $suggestions = $this->suggestionService->generateAiSuggestions($student);
+            $suggestions = $this->suggestionService->generateAiSuggestions($learner);
         } else {
-            $suggestions = $this->suggestionService->generateRuleBasedSuggestions($student);
+            $suggestions = $this->suggestionService->generateRuleBasedSuggestions($learner);
         }
 
         return response()->json([

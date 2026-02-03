@@ -3,12 +3,12 @@
         <div class="flex items-center gap-3">
             <a href="{{ route('surveys.edit', $survey) }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
                 <x-icon name="pencil" class="w-4 h-4 mr-2" />
-                Edit
+                @term('edit_action')
             </a>
             @if($survey->status === 'active')
                 <a href="{{ route('surveys.deliver.form', $survey) }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
                     <x-icon name="paper-airplane" class="w-4 h-4 mr-2" />
-                    Send Survey
+                    @term('send_action') @term('survey_singular')
                 </a>
             @endif
             @if($survey->status === 'draft')
@@ -16,7 +16,7 @@
                     @csrf
                     <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
                         <x-icon name="play" class="w-4 h-4 mr-2" />
-                        Activate
+                        @term('activate_action')
                     </button>
                 </form>
             @else
@@ -24,7 +24,7 @@
                     @csrf
                     <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
                         <x-icon name="pause" class="w-4 h-4 mr-2" />
-                        {{ $survey->status === 'active' ? 'Pause' : 'Resume' }}
+                        {{ $survey->status === 'active' ? app(\App\Services\TerminologyService::class)->get('pause_action') : app(\App\Services\TerminologyService::class)->get('resume_action') }}
                     </button>
                 </form>
             @endif
@@ -35,7 +35,7 @@
     <div class="mb-6">
         <a href="{{ route('surveys.index') }}" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700">
             <x-icon name="arrow-left" class="w-4 h-4 mr-1" />
-            Back to Surveys
+            @term('back_to_label') @term('survey_plural')
         </a>
     </div>
 
@@ -82,7 +82,7 @@
 
             <!-- Questions Card -->
             <x-card>
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Questions</h2>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">@term('questions_label')</h2>
 
                 <div class="space-y-4">
                     @foreach($survey->questions ?? [] as $index => $question)
@@ -96,14 +96,14 @@
                                     <div class="flex items-center gap-2 mt-2">
                                         <x-badge color="gray">{{ ucfirst(str_replace('_', ' ', $question['type'] ?? 'scale')) }}</x-badge>
                                         @if($question['required'] ?? true)
-                                            <x-badge color="red">Required</x-badge>
+                                            <x-badge color="red">@term('required_label')</x-badge>
                                         @endif
                                     </div>
 
                                     @if(($question['type'] ?? 'scale') === 'scale' && isset($question['options']))
                                         <div class="mt-3 flex items-center gap-4 text-sm text-gray-500">
-                                            <span>1 = {{ $question['options']['1'] ?? 'Low' }}</span>
-                                            <span>5 = {{ $question['options']['5'] ?? 'High' }}</span>
+                                            <span>1 = {{ $question['options']['1'] ?? app(\App\Services\TerminologyService::class)->get('scale_low_label') }}</span>
+                                            <span>5 = {{ $question['options']['5'] ?? app(\App\Services\TerminologyService::class)->get('scale_high_label') }}</span>
                                         </div>
                                     @elseif(($question['type'] ?? 'scale') === 'multiple_choice' && isset($question['options']))
                                         <div class="mt-3 space-y-1">
@@ -125,8 +125,8 @@
             <!-- Recent Responses Card -->
             <x-card>
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900">Recent Responses</h2>
-                    <span class="text-sm text-gray-500">{{ $survey->attempts()->completed()->count() }} total</span>
+                    <h2 class="text-lg font-semibold text-gray-900">@term('recent_label') @term('responses_label')</h2>
+                    <span class="text-sm text-gray-500">{{ $survey->attempts()->completed()->count() }} @term('total_label')</span>
                 </div>
 
                 @if($survey->attempts->count() > 0)
@@ -135,11 +135,11 @@
                             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                 <div>
                                     @if($survey->is_anonymous)
-                                        <span class="text-gray-600">Anonymous Response</span>
+                                        <span class="text-gray-600">@term('anonymous_label') @term('responses_label')</span>
                                     @else
-                                        <span class="font-medium text-gray-900">{{ $attempt->student?->name ?? 'Unknown' }}</span>
+                                        <span class="font-medium text-gray-900">{{ $attempt->learner?->name ?? 'Unknown' }}</span>
                                     @endif
-                                    <div class="text-sm text-gray-500">{{ $attempt->completed_at?->diffForHumans() ?? 'In progress' }}</div>
+                                    <div class="text-sm text-gray-500">{{ $attempt->completed_at?->diffForHumans() ?? app(\App\Services\TerminologyService::class)->get('in_progress_label') }}</div>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     @if($attempt->risk_level)
@@ -160,8 +160,8 @@
                 @else
                     <div class="text-center py-8">
                         <x-icon name="clipboard-document" class="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                        <p class="text-gray-500">No responses yet</p>
-                        <p class="text-sm text-gray-400">Responses will appear here once students complete the survey</p>
+                        <p class="text-gray-500">@term('no_label') @term('responses_label') yet</p>
+                        <p class="text-sm text-gray-400">@term('responses_label') will appear here once @term('learner_plural') @term('complete_action') the @term('survey_singular')</p>
                     </div>
                 @endif
             </x-card>
@@ -171,19 +171,19 @@
         <div class="space-y-6">
             <!-- Stats Card -->
             <x-card>
-                <h3 class="font-semibold text-gray-900 mb-4">Statistics</h3>
+                <h3 class="font-semibold text-gray-900 mb-4">@term('statistics_label')</h3>
 
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
-                        <span class="text-gray-600">Total Responses</span>
+                        <span class="text-gray-600">@term('total_label') @term('responses_label')</span>
                         <span class="text-2xl font-bold text-gray-900">{{ $survey->attempts()->completed()->count() }}</span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-gray-600">In Progress</span>
+                        <span class="text-gray-600">@term('in_progress_label')</span>
                         <span class="text-lg font-medium text-gray-700">{{ $survey->attempts()->where('status', 'in_progress')->count() }}</span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-gray-600">Completion Rate</span>
+                        <span class="text-gray-600">@term('completion_rate_label')</span>
                         @php
                             $total = $survey->attempts()->count();
                             $completed = $survey->attempts()->completed()->count();
@@ -196,7 +196,7 @@
 
             <!-- Delivery Channels Card -->
             <x-card>
-                <h3 class="font-semibold text-gray-900 mb-4">Delivery Channels</h3>
+                <h3 class="font-semibold text-gray-900 mb-4">@term('delivery_label') @term('channel_plural')</h3>
 
                 <div class="space-y-2">
                     @foreach($survey->delivery_channels ?? ['web'] as $channel)
@@ -209,10 +209,10 @@
                                 default => 'device-phone-mobile',
                             } }}" class="w-5 h-5 text-gray-400" />
                             <span>{{ match($channel) {
-                                'web' => 'Web Link',
-                                'sms' => 'SMS',
-                                'voice_call' => 'Voice Call',
-                                'whatsapp' => 'WhatsApp',
+                                'web' => app(\App\Services\TerminologyService::class)->get('web_link_label'),
+                                'sms' => app(\App\Services\TerminologyService::class)->get('sms_label'),
+                                'voice_call' => app(\App\Services\TerminologyService::class)->get('voice_call_label'),
+                                'whatsapp' => app(\App\Services\TerminologyService::class)->get('whatsapp_label'),
                                 default => ucfirst($channel),
                             } }}</span>
                         </div>
@@ -225,32 +225,32 @@
                         class="mt-4 w-full px-4 py-2 text-sm font-medium text-pulse-orange-600 bg-pulse-orange-50 rounded-lg hover:bg-pulse-orange-100"
                     >
                         <x-icon name="paper-airplane" class="w-4 h-4 inline mr-1" />
-                        Send Survey
+                        @term('send_action') @term('survey_singular')
                     </button>
                 @endif
             </x-card>
 
             <!-- Settings Card -->
             <x-card>
-                <h3 class="font-semibold text-gray-900 mb-4">Settings</h3>
+                <h3 class="font-semibold text-gray-900 mb-4">@term('settings_label')</h3>
 
                 <div class="space-y-3 text-sm">
                     <div class="flex items-center justify-between">
-                        <span class="text-gray-600">Anonymous</span>
+                        <span class="text-gray-600">@term('anonymous_label')</span>
                         <span class="font-medium {{ $survey->is_anonymous ? 'text-green-600' : 'text-gray-500' }}">
-                            {{ $survey->is_anonymous ? 'Yes' : 'No' }}
+                            {{ $survey->is_anonymous ? app(\App\Services\TerminologyService::class)->get('yes_label') : app(\App\Services\TerminologyService::class)->get('no_label') }}
                         </span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-gray-600">AI Follow-up</span>
+                        <span class="text-gray-600">@term('ai_follow_up_label')</span>
                         <span class="font-medium {{ $survey->ai_follow_up_enabled ? 'text-green-600' : 'text-gray-500' }}">
-                            {{ $survey->ai_follow_up_enabled ? 'Enabled' : 'Disabled' }}
+                            {{ $survey->ai_follow_up_enabled ? app(\App\Services\TerminologyService::class)->get('enabled_label') : app(\App\Services\TerminologyService::class)->get('disabled_label') }}
                         </span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-gray-600">Voice Responses</span>
+                        <span class="text-gray-600">@term('voice_responses_label')</span>
                         <span class="font-medium {{ $survey->allow_voice_responses ? 'text-green-600' : 'text-gray-500' }}">
-                            {{ $survey->allow_voice_responses ? 'Allowed' : 'Disabled' }}
+                            {{ $survey->allow_voice_responses ? app(\App\Services\TerminologyService::class)->get('allowed_label') : app(\App\Services\TerminologyService::class)->get('disabled_label') }}
                         </span>
                     </div>
                 </div>
@@ -272,22 +272,22 @@
                             class="w-full px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 flex items-center justify-center gap-2"
                         >
                             <x-icon name="arrow-up-on-square" class="w-4 h-4" />
-                            Push to Schools
+                            @term('push_label') to @term('organization_plural')
                         </button>
                     @endif
                     <form action="{{ route('surveys.duplicate', $survey) }}" method="POST">
                         @csrf
                         <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2">
                             <x-icon name="document-duplicate" class="w-4 h-4" />
-                            Duplicate Survey
+                            @term('duplicate_action') @term('survey_singular')
                         </button>
                     </form>
-                    <form action="{{ route('surveys.destroy', $survey) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this survey?')">
+                    <form action="{{ route('surveys.destroy', $survey) }}" method="POST" onsubmit="return confirm('{{ app(\App\Services\TerminologyService::class)->get('confirm_delete_survey_label') }}')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 flex items-center justify-center gap-2">
                             <x-icon name="trash" class="w-4 h-4" />
-                            Delete Survey
+                            @term('delete_action') @term('survey_singular')
                         </button>
                     </form>
                 </div>
@@ -301,13 +301,13 @@
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75" onclick="document.getElementById('deliveryModal').classList.add('hidden')"></div>
 
             <div class="relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Send Survey</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">@term('send_action') @term('survey_singular')</h3>
 
                 <form action="{{ route('surveys.deliver', $survey) }}" method="POST" id="deliveryForm">
                     @csrf
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Delivery Channel</label>
+                            <label class="block text-sm font-medium text-gray-700">@term('delivery_label') @term('channel_singular')</label>
                             <select name="channel" class="mt-1 block w-full rounded-lg border-gray-300">
                                 @foreach($survey->delivery_channels ?? ['web'] as $channel)
                                     <option value="{{ $channel }}">{{ ucfirst(str_replace('_', ' ', $channel)) }}</option>
@@ -316,7 +316,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Phone Number (for SMS/Voice)</label>
+                            <label class="block text-sm font-medium text-gray-700">@term('phone_number_label') (for SMS/Voice)</label>
                             <input
                                 type="tel"
                                 name="phone_number"
@@ -326,7 +326,7 @@
                         </div>
 
                         <div class="text-sm text-gray-500">
-                            This will send the survey to the specified recipient via the selected channel.
+                            This will @term('send_action') the @term('survey_singular') to the specified @term('recipient_singular') via the selected @term('channel_singular').
                         </div>
                     </div>
 
@@ -336,13 +336,13 @@
                             onclick="document.getElementById('deliveryModal').classList.add('hidden')"
                             class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
                         >
-                            Cancel
+                            @term('cancel_action')
                         </button>
                         <button
                             type="submit"
                             class="px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
                         >
-                            Send Survey
+                            @term('send_action') @term('survey_singular')
                         </button>
                     </div>
                 </form>

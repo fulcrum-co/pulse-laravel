@@ -14,24 +14,24 @@ class MarketplaceSeeder extends Seeder
 {
     public function run(): void
     {
-        $school = Organization::where('org_type', 'school')->first();
-        if (! $school) {
-            $school = Organization::first();
+        $organization = Organization::where('org_type', 'organization')->first();
+        if (! $organization) {
+            $organization = Organization::first();
         }
-        if (! $school) {
+        if (! $organization) {
             $this->log('No organization found. Please seed organizations first.', 'error');
 
             return;
         }
 
         // Create seller profiles
-        $sellers = $this->createSellerProfiles($school);
+        $sellers = $this->createSellerProfiles($organization);
 
         // Create marketplace items
-        $items = $this->createMarketplaceItems($sellers, $school);
+        $items = $this->createMarketplaceItems($sellers, $organization);
 
         // Create reviews for items
-        $this->createReviews($items, $school);
+        $this->createReviews($items, $organization);
 
         $this->log('Marketplace seeded successfully!');
         $this->log('- '.count($sellers).' seller profiles created');
@@ -45,12 +45,12 @@ class MarketplaceSeeder extends Seeder
         }
     }
 
-    private function createSellerProfiles(Organization $school): array
+    private function createSellerProfiles(Organization $organization): array
     {
         $sellers = [];
 
         // Use existing users as sellers
-        $existingUsers = User::where('org_id', $school->id)
+        $existingUsers = User::where('org_id', $organization->id)
             ->whereIn('primary_role', ['admin', 'teacher'])
             ->limit(3)
             ->get();
@@ -58,9 +58,9 @@ class MarketplaceSeeder extends Seeder
         foreach ($existingUsers as $index => $user) {
             $sellers[] = SellerProfile::create([
                 'user_id' => $user->id,
-                'org_id' => $school->id,
+                'org_id' => $organization->id,
                 'display_name' => $user->first_name.' '.$user->last_name,
-                'bio' => 'Passionate educator sharing resources to help students succeed.',
+                'bio' => 'Passionate educator sharing resources to help learners succeed.',
                 'avatar_url' => $user->avatar_url,
                 'expertise_areas' => $this->getRandomExpertise(),
                 'credentials' => $this->getRandomCredentials(),
@@ -81,7 +81,7 @@ class MarketplaceSeeder extends Seeder
         $externalSellers = [
             [
                 'display_name' => 'Dr. Rachel Martinez',
-                'bio' => 'Clinical psychologist and SEL curriculum developer. 20+ years working with K-12 students on social-emotional learning and mental health.',
+                'bio' => 'Clinical psychologist and SEL curriculum developer. 20+ years working with K-12 learners on social-emotional learning and mental health.',
                 'avatar_url' => 'https://randomuser.me/api/portraits/women/68.jpg',
                 'expertise_areas' => ['SEL', 'Mental Health', 'Anxiety', 'Counseling'],
                 'credentials' => [
@@ -110,7 +110,7 @@ class MarketplaceSeeder extends Seeder
             ],
             [
                 'display_name' => 'Marcus Johnson',
-                'bio' => 'High school math teacher sharing differentiated resources that make algebra accessible for all learners.',
+                'bio' => 'High organization math teacher sharing differentiated resources that make algebra accessible for all learners.',
                 'avatar_url' => 'https://randomuser.me/api/portraits/men/75.jpg',
                 'expertise_areas' => ['Mathematics', 'Algebra', 'Differentiation', 'Special Education'],
                 'credentials' => [
@@ -125,7 +125,7 @@ class MarketplaceSeeder extends Seeder
             ],
             [
                 'display_name' => 'Emma Wilson',
-                'bio' => 'Elementary school teacher passionate about making reading fun! Creator of engaging literacy resources for K-3.',
+                'bio' => 'Elementary organization teacher passionate about making reading fun! Creator of engaging literacy resources for K-3.',
                 'avatar_url' => 'https://randomuser.me/api/portraits/women/42.jpg',
                 'expertise_areas' => ['Literacy', 'Reading', 'Phonics', 'Early Childhood'],
                 'credentials' => [
@@ -138,8 +138,8 @@ class MarketplaceSeeder extends Seeder
                 'total_sales' => 340,
             ],
             [
-                'display_name' => 'Mindful Schools Initiative',
-                'bio' => 'Nonprofit organization providing mindfulness-based SEL programs for schools nationwide.',
+                'display_name' => 'Mindful Organizations Initiative',
+                'bio' => 'Nonprofit organization providing mindfulness-based SEL programs for organizations nationwide.',
                 'avatar_url' => 'https://ui-avatars.com/api/?name=MS&background=10b981&color=fff&size=200',
                 'expertise_areas' => ['Mindfulness', 'SEL', 'Wellness', 'Stress Management'],
                 'credentials' => [
@@ -178,16 +178,16 @@ class MarketplaceSeeder extends Seeder
         return $sellers;
     }
 
-    private function createMarketplaceItems(array $sellers, Organization $school): array
+    private function createMarketplaceItems(array $sellers, Organization $organization): array
     {
         $items = [];
 
         // Survey items
         $surveyItems = [
             [
-                'title' => 'Weekly Student Wellness Check-In',
-                'short_description' => 'A quick 5-question wellness check for monitoring student mental health.',
-                'description' => "A research-validated weekly check-in survey designed to quickly assess student wellness across five key dimensions: emotional state, stress level, sleep quality, social connections, and academic confidence.\n\n**What's Included:**\n- 5 carefully crafted questions with visual response scales\n- Automatic scoring and interpretation guide\n- Trend tracking recommendations\n- Spanish and Chinese translations\n\n**Best For:** K-12 homeroom teachers, counselors, and wellness coordinators",
+                'title' => 'Weekly Learner Wellness Check-In',
+                'short_description' => 'A quick 5-question wellness check for monitoring learner mental health.',
+                'description' => "A research-validated weekly check-in survey designed to quickly assess learner wellness across five key dimensions: emotional state, stress level, sleep quality, social connections, and academic confidence.\n\n**What's Included:**\n- 5 carefully crafted questions with visual response scales\n- Automatic scoring and interpretation guide\n- Trend tracking recommendations\n- Spanish and Chinese translations\n\n**Best For:** K-12 homeroom teachers, counselors, and wellness coordinators",
                 'tags' => ['wellness', 'mental health', 'check-in', 'SEL'],
                 'target_grades' => ['3-5', '6-8', '9-12'],
                 'pricing_type' => MarketplaceItem::PRICING_FREE,
@@ -196,7 +196,7 @@ class MarketplaceSeeder extends Seeder
             [
                 'title' => 'Comprehensive Anxiety Screening Tool',
                 'short_description' => 'Evidence-based 15-question anxiety assessment for adolescents.',
-                'description' => "A comprehensive anxiety screening instrument based on the GAD-7 and adapted for school settings. Includes detailed interpretation guidelines and recommended interventions.\n\n**Clinical Features:**\n- Validated against clinical gold standards\n- Age-appropriate language for grades 6-12\n- Scoring rubric with cutoff thresholds\n- Parent notification letter templates\n- Counselor intervention flowchart\n\n**Best For:** School counselors, psychologists, and mental health teams",
+                'description' => "A comprehensive anxiety screening instrument based on the GAD-7 and adapted for organization settings. Includes detailed interpretation guidelines and recommended interventions.\n\n**Clinical Features:**\n- Validated against clinical gold standards\n- Age-appropriate language for grades 6-12\n- Scoring rubric with cutoff thresholds\n- Parent notification letter templates\n- Counselor intervention flowchart\n\n**Best For:** Organization counselors, psychologists, and mental health teams",
                 'tags' => ['anxiety', 'mental health', 'assessment', 'screening'],
                 'target_grades' => ['6-8', '9-12'],
                 'pricing_type' => MarketplaceItem::PRICING_ONE_TIME,
@@ -204,9 +204,9 @@ class MarketplaceSeeder extends Seeder
             ],
             [
                 'title' => 'Classroom Climate Survey Bundle',
-                'short_description' => 'Complete set of surveys to assess classroom environment and student belonging.',
-                'description' => "A comprehensive bundle of three classroom climate surveys designed to measure student sense of belonging, safety, and engagement.\n\n**Bundle Includes:**\n1. Student Belonging Scale (10 questions)\n2. Classroom Safety Perception Survey (8 questions)\n3. Engagement & Motivation Assessment (12 questions)\n\n**Features:**\n- Pre/post comparison tools\n- Class-level aggregate reports\n- Action planning templates\n- Staff reflection guides",
-                'tags' => ['classroom climate', 'belonging', 'engagement', 'school culture'],
+                'short_description' => 'Complete set of surveys to assess classroom environment and learner belonging.',
+                'description' => "A comprehensive bundle of three classroom climate surveys designed to measure learner sense of belonging, safety, and engagement.\n\n**Bundle Includes:**\n1. Learner Belonging Scale (10 questions)\n2. Classroom Safety Perception Survey (8 questions)\n3. Engagement & Motivation Assessment (12 questions)\n\n**Features:**\n- Pre/post comparison tools\n- Class-level aggregate reports\n- Action planning templates\n- Staff reflection guides",
+                'tags' => ['classroom climate', 'belonging', 'engagement', 'organization culture'],
                 'target_grades' => ['3-5', '6-8', '9-12'],
                 'pricing_type' => MarketplaceItem::PRICING_ONE_TIME,
                 'price' => 39.99,
@@ -223,7 +223,7 @@ class MarketplaceSeeder extends Seeder
             [
                 'title' => 'Social-Emotional Learning Pre/Post Assessment',
                 'short_description' => 'Measure SEL growth with this CASEL-aligned assessment tool.',
-                'description' => "Assess student growth in all five CASEL competencies with this validated pre/post assessment tool.\n\n**Competencies Measured:**\n- Self-Awareness\n- Self-Management\n- Social Awareness\n- Relationship Skills\n- Responsible Decision-Making\n\n**Features:**\n- Student self-report form\n- Teacher observation form\n- Growth comparison report template\n- Data visualization dashboard",
+                'description' => "Assess learner growth in all five CASEL competencies with this validated pre/post assessment tool.\n\n**Competencies Measured:**\n- Self-Awareness\n- Self-Management\n- Social Awareness\n- Relationship Skills\n- Responsible Decision-Making\n\n**Features:**\n- Learner self-report form\n- Teacher observation form\n- Growth comparison report template\n- Data visualization dashboard",
                 'tags' => ['SEL', 'CASEL', 'assessment', 'growth'],
                 'target_grades' => ['3-5', '6-8'],
                 'pricing_type' => MarketplaceItem::PRICING_ONE_TIME,
@@ -237,7 +237,7 @@ class MarketplaceSeeder extends Seeder
             [
                 'title' => 'Calm Down Corner Complete Curriculum',
                 'short_description' => 'Everything you need to create and manage a classroom calm down space.',
-                'description' => "A comprehensive curriculum for implementing calm down corners in K-5 classrooms.\n\n**Includes:**\n- Setup guide with material list\n- 20 calm-down strategy cards\n- Student self-regulation log\n- Teacher introduction script\n- Parent communication letter\n- Progress monitoring forms\n\n**Outcomes:** Students learn to identify emotions, select coping strategies, and self-regulate independently.",
+                'description' => "A comprehensive curriculum for implementing calm down corners in K-5 classrooms.\n\n**Includes:**\n- Setup guide with material list\n- 20 calm-down strategy cards\n- Learner self-regulation log\n- Teacher introduction script\n- Parent communication letter\n- Progress monitoring forms\n\n**Outcomes:** Learners learn to identify emotions, select coping strategies, and self-regulate independently.",
                 'tags' => ['calm down', 'self-regulation', 'emotions', 'classroom management'],
                 'target_grades' => ['K-2', '3-5'],
                 'pricing_type' => MarketplaceItem::PRICING_ONE_TIME,
@@ -246,8 +246,8 @@ class MarketplaceSeeder extends Seeder
             ],
             [
                 'title' => 'Growth Mindset 6-Week Unit',
-                'short_description' => 'Complete lesson plans and activities to develop student growth mindset.',
-                'description' => "Transform student attitudes about learning with this engaging 6-week growth mindset curriculum.\n\n**Weekly Themes:**\n1. Introduction to Growth Mindset\n2. The Power of Yet\n3. Embracing Challenges\n4. Learning from Mistakes\n5. Effort & Persistence\n6. Celebrating Growth\n\n**Each Week Includes:**\n- 45-minute lesson plan\n- Discussion questions\n- Interactive activity\n- Reflection journal page\n- Parent connection activity",
+                'short_description' => 'Complete lesson plans and activities to develop learner growth mindset.',
+                'description' => "Transform learner attitudes about learning with this engaging 6-week growth mindset curriculum.\n\n**Weekly Themes:**\n1. Introduction to Growth Mindset\n2. The Power of Yet\n3. Embracing Challenges\n4. Learning from Mistakes\n5. Effort & Persistence\n6. Celebrating Growth\n\n**Each Week Includes:**\n- 45-minute lesson plan\n- Discussion questions\n- Interactive activity\n- Reflection journal page\n- Parent connection activity",
                 'tags' => ['growth mindset', 'motivation', 'resilience', 'SEL'],
                 'target_grades' => ['3-5', '6-8'],
                 'pricing_type' => MarketplaceItem::PRICING_ONE_TIME,
@@ -255,8 +255,8 @@ class MarketplaceSeeder extends Seeder
             ],
             [
                 'title' => 'Test Anxiety Intervention Program',
-                'short_description' => 'Evidence-based 4-session intervention for students with test anxiety.',
-                'description' => "A structured intervention program to help students overcome test anxiety using cognitive-behavioral techniques.\n\n**4 Sessions:**\n1. Understanding Test Anxiety\n2. Relaxation & Breathing Techniques\n3. Cognitive Restructuring\n4. Test-Taking Strategies\n\n**Materials:**\n- Facilitator guide\n- Student workbook\n- Parent handout\n- Pre/post assessment\n- Progress tracking form",
+                'short_description' => 'Evidence-based 4-session intervention for learners with test anxiety.',
+                'description' => "A structured intervention program to help learners overcome test anxiety using cognitive-behavioral techniques.\n\n**4 Sessions:**\n1. Understanding Test Anxiety\n2. Relaxation & Breathing Techniques\n3. Cognitive Restructuring\n4. Test-Taking Strategies\n\n**Materials:**\n- Facilitator guide\n- Learner workbook\n- Parent handout\n- Pre/post assessment\n- Progress tracking form",
                 'tags' => ['test anxiety', 'stress', 'intervention', 'CBT'],
                 'target_grades' => ['6-8', '9-12'],
                 'pricing_type' => MarketplaceItem::PRICING_ONE_TIME,
@@ -265,7 +265,7 @@ class MarketplaceSeeder extends Seeder
             [
                 'title' => 'Executive Function Skill Builders',
                 'short_description' => 'Interactive activities to develop planning, organization, and self-monitoring skills.',
-                'description' => "Help students develop crucial executive function skills with this collection of engaging activities and tools.\n\n**Skills Addressed:**\n- Task initiation\n- Planning & prioritizing\n- Organization\n- Time management\n- Self-monitoring\n- Flexible thinking\n\n**Includes:**\n- 30 activity cards\n- Student planning templates\n- Visual schedules\n- Self-monitoring checklists\n- Teacher implementation guide",
+                'description' => "Help learners develop crucial executive function skills with this collection of engaging activities and tools.\n\n**Skills Addressed:**\n- Task initiation\n- Planning & prioritizing\n- Organization\n- Time management\n- Self-monitoring\n- Flexible thinking\n\n**Includes:**\n- 30 activity cards\n- Learner planning templates\n- Visual schedules\n- Self-monitoring checklists\n- Teacher implementation guide",
                 'tags' => ['executive function', 'organization', 'ADHD', 'study skills'],
                 'target_grades' => ['6-8', '9-12'],
                 'pricing_type' => MarketplaceItem::PRICING_RECURRING,
@@ -286,7 +286,7 @@ class MarketplaceSeeder extends Seeder
             [
                 'title' => 'Emotion Identification Poster Set',
                 'short_description' => 'Colorful posters featuring diverse children expressing 12 core emotions.',
-                'description' => "Help students build emotional vocabulary with this beautiful poster set featuring diverse children.\n\n**Includes:**\n- 12 emotion posters (11x17\")\n- Happy, Sad, Angry, Scared, Surprised, Disgusted\n- Anxious, Excited, Frustrated, Calm, Proud, Confused\n\n**Features:**\n- Diverse representation (skin tones, abilities, genders)\n- Child-friendly illustrations\n- Emotion words in English and Spanish\n- Printable PDF and high-res PNG files",
+                'description' => "Help learners build emotional vocabulary with this beautiful poster set featuring diverse children.\n\n**Includes:**\n- 12 emotion posters (11x17\")\n- Happy, Sad, Angry, Scared, Surprised, Disgusted\n- Anxious, Excited, Frustrated, Calm, Proud, Confused\n\n**Features:**\n- Diverse representation (skin tones, abilities, genders)\n- Child-friendly illustrations\n- Emotion words in English and Spanish\n- Printable PDF and high-res PNG files",
                 'tags' => ['emotions', 'posters', 'classroom decor', 'SEL'],
                 'target_grades' => ['K-2', '3-5'],
                 'pricing_type' => MarketplaceItem::PRICING_ONE_TIME,
@@ -294,8 +294,8 @@ class MarketplaceSeeder extends Seeder
             ],
             [
                 'title' => 'Anxiety Coping Skills Workbook',
-                'short_description' => 'Student workbook with 30 anxiety management activities.',
-                'description' => "A comprehensive student workbook filled with engaging activities to help manage anxiety.\n\n**Sections:**\n1. Understanding Anxiety (psychoeducation)\n2. Body Awareness (recognizing physical symptoms)\n3. Breathing & Relaxation\n4. Thought Challenging\n5. Coping Strategies\n6. Building Confidence\n\n**Features:**\n- 30 printable activity pages\n- Journal prompts\n- Coping cards to cut out\n- Progress tracker\n- Parent guide",
+                'short_description' => 'Learner workbook with 30 anxiety management activities.',
+                'description' => "A comprehensive learner workbook filled with engaging activities to help manage anxiety.\n\n**Sections:**\n1. Understanding Anxiety (psychoeducation)\n2. Body Awareness (recognizing physical symptoms)\n3. Breathing & Relaxation\n4. Thought Challenging\n5. Coping Strategies\n6. Building Confidence\n\n**Features:**\n- 30 printable activity pages\n- Journal prompts\n- Coping cards to cut out\n- Progress tracker\n- Parent guide",
                 'tags' => ['anxiety', 'coping skills', 'workbook', 'CBT'],
                 'target_grades' => ['6-8', '9-12'],
                 'pricing_type' => MarketplaceItem::PRICING_ONE_TIME,
@@ -305,7 +305,7 @@ class MarketplaceSeeder extends Seeder
             [
                 'title' => 'Conflict Resolution Role Play Scenarios',
                 'short_description' => '25 realistic scenarios for practicing conflict resolution skills.',
-                'description' => "Engage students in practicing conflict resolution with these realistic, age-appropriate scenarios.\n\n**Includes:**\n- 25 scenario cards\n- Discussion questions for each\n- Role play guidelines\n- De-escalation strategies poster\n- Reflection worksheet\n\n**Scenario Topics:**\n- Peer disagreements\n- Group project conflicts\n- Social media issues\n- Rumors and gossip\n- Competition and jealousy",
+                'description' => "Engage learners in practicing conflict resolution with these realistic, age-appropriate scenarios.\n\n**Includes:**\n- 25 scenario cards\n- Discussion questions for each\n- Role play guidelines\n- De-escalation strategies poster\n- Reflection worksheet\n\n**Scenario Topics:**\n- Peer disagreements\n- Group project conflicts\n- Social media issues\n- Rumors and gossip\n- Competition and jealousy",
                 'tags' => ['conflict resolution', 'social skills', 'role play', 'SEL'],
                 'target_grades' => ['6-8', '9-12'],
                 'pricing_type' => MarketplaceItem::PRICING_ONE_TIME,
@@ -323,7 +323,7 @@ class MarketplaceSeeder extends Seeder
             [
                 'title' => 'Self-Esteem Building Video Series',
                 'short_description' => '10 animated videos teaching positive self-talk and self-worth.',
-                'description' => "Help students develop healthy self-esteem with this engaging animated video series.\n\n**Videos (5-7 minutes each):**\n1. What is Self-Esteem?\n2. Your Inner Voice\n3. Positive Self-Talk\n4. Celebrating Strengths\n5. Handling Mistakes\n6. Setting Boundaries\n7. Comparison Trap\n8. Building Confidence\n9. Asking for Help\n10. Loving Yourself\n\n**Includes:**\n- Streaming access\n- Discussion guides\n- Student reflection sheets\n- Parent companion guide",
+                'description' => "Help learners develop healthy self-esteem with this engaging animated video series.\n\n**Videos (5-7 minutes each):**\n1. What is Self-Esteem?\n2. Your Inner Voice\n3. Positive Self-Talk\n4. Celebrating Strengths\n5. Handling Mistakes\n6. Setting Boundaries\n7. Comparison Trap\n8. Building Confidence\n9. Asking for Help\n10. Loving Yourself\n\n**Includes:**\n- Streaming access\n- Discussion guides\n- Learner reflection sheets\n- Parent companion guide",
                 'tags' => ['self-esteem', 'video', 'positive thinking', 'SEL'],
                 'target_grades' => ['3-5', '6-8'],
                 'pricing_type' => MarketplaceItem::PRICING_RECURRING,
@@ -332,7 +332,7 @@ class MarketplaceSeeder extends Seeder
             [
                 'title' => 'Trauma-Informed Classroom Strategies Guide',
                 'short_description' => 'Practical strategies for creating trauma-sensitive learning environments.',
-                'description' => "Essential guide for educators working with students who have experienced trauma.\n\n**Covers:**\n- Understanding trauma and its effects\n- Creating safe classroom environments\n- Recognizing trauma responses\n- De-escalation techniques\n- Building trusting relationships\n- Self-care for educators\n\n**Formats:**\n- 45-page PDF guide\n- Quick reference cards\n- Poster of calming strategies\n- Staff training presentation",
+                'description' => "Essential guide for educators working with learners who have experienced trauma.\n\n**Covers:**\n- Understanding trauma and its effects\n- Creating safe classroom environments\n- Recognizing trauma responses\n- De-escalation techniques\n- Building trusting relationships\n- Self-care for educators\n\n**Formats:**\n- 45-page PDF guide\n- Quick reference cards\n- Poster of calming strategies\n- Staff training presentation",
                 'tags' => ['trauma-informed', 'classroom management', 'safety', 'professional development'],
                 'target_grades' => ['K-2', '3-5', '6-8', '9-12'],
                 'pricing_type' => MarketplaceItem::PRICING_FREE,
@@ -343,9 +343,9 @@ class MarketplaceSeeder extends Seeder
         // Provider service items
         $providerItems = [
             [
-                'title' => 'Virtual Therapy Services for Schools',
-                'short_description' => 'Licensed therapists providing teletherapy for K-12 students.',
-                'description' => "Connect your students with licensed mental health professionals through our virtual therapy platform.\n\n**Services:**\n- Individual therapy sessions\n- Group counseling\n- Crisis intervention\n- Parent consultations\n- Teacher consultations\n\n**Features:**\n- HIPAA-compliant platform\n- Flexible scheduling\n- Progress reports to school\n- Bilingual therapists available\n- Insurance accepted\n\n**Pricing:** Per-student monthly subscription or per-session options available.",
+                'title' => 'Virtual Therapy Services for Organizations',
+                'short_description' => 'Licensed therapists providing teletherapy for K-12 learners.',
+                'description' => "Connect your learners with licensed mental health professionals through our virtual therapy platform.\n\n**Services:**\n- Individual therapy sessions\n- Group counseling\n- Crisis intervention\n- Parent consultations\n- Teacher consultations\n\n**Features:**\n- HIPAA-compliant platform\n- Flexible scheduling\n- Progress reports to organization\n- Bilingual therapists available\n- Insurance accepted\n\n**Pricing:** Per-learner monthly subscription or per-session options available.",
                 'tags' => ['therapy', 'teletherapy', 'mental health', 'counseling'],
                 'target_grades' => ['K-2', '3-5', '6-8', '9-12'],
                 'pricing_type' => MarketplaceItem::PRICING_RECURRING,
@@ -353,8 +353,8 @@ class MarketplaceSeeder extends Seeder
             ],
             [
                 'title' => 'Executive Function Coaching Program',
-                'short_description' => 'One-on-one coaching for students with executive function challenges.',
-                'description' => "Personalized coaching to help students develop crucial executive function skills.\n\n**Program Includes:**\n- Initial assessment\n- Personalized coaching plan\n- Weekly 30-minute sessions\n- Parent/teacher check-ins\n- Progress monitoring\n- Strategy toolkit\n\n**Focus Areas:**\n- Organization\n- Time management\n- Task initiation\n- Planning & prioritizing\n- Emotional regulation",
+                'short_description' => 'One-on-one coaching for learners with executive function challenges.',
+                'description' => "Personalized coaching to help learners develop crucial executive function skills.\n\n**Program Includes:**\n- Initial assessment\n- Personalized coaching plan\n- Weekly 30-minute sessions\n- Parent/teacher check-ins\n- Progress monitoring\n- Strategy toolkit\n\n**Focus Areas:**\n- Organization\n- Time management\n- Task initiation\n- Planning & prioritizing\n- Emotional regulation",
                 'tags' => ['executive function', 'coaching', 'ADHD', 'organization'],
                 'target_grades' => ['6-8', '9-12'],
                 'pricing_type' => MarketplaceItem::PRICING_RECURRING,
@@ -363,7 +363,7 @@ class MarketplaceSeeder extends Seeder
             [
                 'title' => 'SEL Curriculum Implementation Support',
                 'short_description' => 'Expert consultants to help implement SEL programs district-wide.',
-                'description' => "Partner with experienced SEL consultants to successfully implement social-emotional learning across your district.\n\n**Services Include:**\n- Needs assessment\n- Curriculum selection guidance\n- Staff training workshops\n- Implementation coaching\n- Fidelity monitoring\n- Data analysis and reporting\n\n**Our Team:**\n- Former school counselors\n- SEL curriculum developers\n- Data analysts\n- Professional development specialists",
+                'description' => "Partner with experienced SEL consultants to successfully implement social-emotional learning across your district.\n\n**Services Include:**\n- Needs assessment\n- Curriculum selection guidance\n- Staff training workshops\n- Implementation coaching\n- Fidelity monitoring\n- Data analysis and reporting\n\n**Our Team:**\n- Former organization counselors\n- SEL curriculum developers\n- Data analysts\n- Professional development specialists",
                 'tags' => ['SEL', 'consulting', 'professional development', 'implementation'],
                 'target_grades' => ['K-2', '3-5', '6-8', '9-12'],
                 'pricing_type' => MarketplaceItem::PRICING_ONE_TIME,
@@ -371,7 +371,7 @@ class MarketplaceSeeder extends Seeder
             ],
             [
                 'title' => 'Crisis Response Team Training',
-                'short_description' => 'Comprehensive training for school crisis response teams.',
+                'short_description' => 'Comprehensive training for organization crisis response teams.',
                 'description' => "Prepare your crisis response team with evidence-based training and protocols.\n\n**Training Covers:**\n- Crisis identification and assessment\n- Intervention protocols\n- Communication procedures\n- Post-crisis support\n- Documentation requirements\n- Self-care for responders\n\n**Delivery Options:**\n- On-site training (1-2 days)\n- Virtual training modules\n- Hybrid format\n\n**Includes:**\n- Training materials\n- Crisis response manual\n- Template documents\n- Ongoing consultation",
                 'tags' => ['crisis', 'training', 'safety', 'professional development'],
                 'target_grades' => ['K-2', '3-5', '6-8', '9-12'],
@@ -480,21 +480,21 @@ class MarketplaceSeeder extends Seeder
         return $items;
     }
 
-    private function createReviews(array $items, Organization $school): void
+    private function createReviews(array $items, Organization $organization): void
     {
         $reviewTexts = [
             5 => [
-                'Exactly what I was looking for! My students love it.',
+                'Exactly what I was looking for! My learners love it.',
                 'Incredible resource. Well worth the price.',
                 'This has transformed my classroom. Highly recommend!',
                 'Comprehensive and easy to implement. Five stars!',
-                'My students showed immediate improvement after using this.',
+                'My learners showed immediate improvement after using this.',
                 'Perfect for differentiation. Works great for all learners.',
                 'The quality is outstanding. Very professional materials.',
             ],
             4 => [
                 'Great resource overall. Minor improvements could be made.',
-                'Very helpful for my students. Solid purchase.',
+                'Very helpful for my learners. Solid purchase.',
                 'Good value for the price. Would recommend.',
                 'Works well, though I made some modifications for my class.',
                 'Nice addition to my teaching toolkit.',
@@ -507,14 +507,14 @@ class MarketplaceSeeder extends Seeder
         ];
 
         $sellerResponses = [
-            "Thank you so much for your feedback! We're thrilled it's working well for your students.",
+            "Thank you so much for your feedback! We're thrilled it's working well for your learners.",
             'We appreciate your review! Let us know if you have any questions.',
             'Thanks for the kind words! We love hearing success stories from educators.',
             null,
             null,
         ];
 
-        $reviewers = User::where('org_id', $school->id)->limit(10)->get();
+        $reviewers = User::where('org_id', $organization->id)->limit(10)->get();
 
         foreach ($items as $item) {
             $numReviews = rand(0, 5);
@@ -527,7 +527,7 @@ class MarketplaceSeeder extends Seeder
                 MarketplaceReview::create([
                     'marketplace_item_id' => $item->id,
                     'user_id' => $reviewer->id,
-                    'org_id' => $school->id,
+                    'org_id' => $organization->id,
                     'rating' => $rating,
                     'review_text' => $texts[array_rand($texts)],
                     'status' => MarketplaceReview::STATUS_PUBLISHED,

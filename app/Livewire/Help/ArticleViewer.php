@@ -39,8 +39,10 @@ class ArticleViewer extends Component
             ->limit(3)
             ->get();
 
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return view('livewire.help.article-viewer', [
             'relatedArticles' => $relatedArticles,
-        ])->title($this->article->title . ' - Help Center');
+        ])->title($this->article->title . ' - ' . $terminology->get('help_center_label'));
     }
 }

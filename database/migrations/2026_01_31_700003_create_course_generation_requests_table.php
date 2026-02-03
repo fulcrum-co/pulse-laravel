@@ -24,11 +24,11 @@ return new class extends Migration
 
             // Target assignment
             $table->string('assignment_type'); // individual, group
-            $table->json('target_student_ids')->nullable(); // Array of student IDs
-            $table->unsignedBigInteger('target_group_id')->nullable(); // Reference to a student group/contact list
+            $table->json('target_learner_ids')->nullable(); // Array of learner IDs
+            $table->unsignedBigInteger('target_group_id')->nullable(); // Reference to a learner group/contact list
 
             // Context data used for generation
-            $table->json('student_context');
+            $table->json('learner_context');
             /*
              * Example:
              * {

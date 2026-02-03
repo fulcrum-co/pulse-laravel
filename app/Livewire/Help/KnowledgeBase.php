@@ -40,10 +40,12 @@ class KnowledgeBase extends Component
             ->limit(10)
             ->get();
 
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return view('livewire.help.knowledge-base', [
             'categories' => $categories,
             'featuredArticles' => $featuredArticles,
             'popularArticles' => $popularArticles,
-        ])->title('Help Center');
+        ])->title($terminology->get('help_center_label'));
     }
 }

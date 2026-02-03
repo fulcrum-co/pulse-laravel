@@ -2,15 +2,15 @@
 
 namespace App\Livewire;
 
-use App\Models\Student;
+use App\Models\Learner;
 use App\Services\ContactMetricService;
 use Livewire\Component;
 
-class StudentPlanHeatMap extends Component
+class LearnerPlanHeatMap extends Component
 {
-    public Student $student;
+    public Learner $learner;
 
-    public string $schoolYear;
+    public string $organizationYear;
 
     protected ContactMetricService $metricService;
 
@@ -19,37 +19,37 @@ class StudentPlanHeatMap extends Component
         $this->metricService = $metricService;
     }
 
-    public function mount(Student $student, ?string $schoolYear = null)
+    public function mount(Learner $learner, ?string $organizationYear = null)
     {
-        $this->student = $student;
-        $this->schoolYear = $schoolYear ?? $this->metricService->getCurrentSchoolYear();
+        $this->learner = $learner;
+        $this->organizationYear = $organizationYear ?? $this->metricService->getCurrentOrganizationYear();
     }
 
     public function previousYear()
     {
-        $parts = explode('-', $this->schoolYear);
+        $parts = explode('-', $this->organizationYear);
         if (count($parts) === 2) {
             $startYear = (int) $parts[0] - 1;
             $endYear = (int) $parts[1] - 1;
-            $this->schoolYear = $startYear.'-'.$endYear;
+            $this->organizationYear = $startYear.'-'.$endYear;
         }
     }
 
     public function nextYear()
     {
-        $parts = explode('-', $this->schoolYear);
+        $parts = explode('-', $this->organizationYear);
         if (count($parts) === 2) {
             $startYear = (int) $parts[0] + 1;
             $endYear = (int) $parts[1] + 1;
-            $this->schoolYear = $startYear.'-'.$endYear;
+            $this->organizationYear = $startYear.'-'.$endYear;
         }
     }
 
     public function getHeatMapDataProperty()
     {
         return $this->metricService->getHeatMapData(
-            $this->student,
-            $this->schoolYear,
+            $this->learner,
+            $this->organizationYear,
             ['academics', 'attendance', 'behavior', 'life_skills']
         );
     }
@@ -76,7 +76,7 @@ class StudentPlanHeatMap extends Component
 
     public function render()
     {
-        return view('livewire.student-plan-heat-map', [
+        return view('livewire.learner-plan-heat-map', [
             'heatMapData' => $this->heatMapData,
             'categories' => $this->categories,
             'quarters' => $this->quarters,

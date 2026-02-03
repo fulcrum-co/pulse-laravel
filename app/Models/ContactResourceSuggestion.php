@@ -49,7 +49,7 @@ class ContactResourceSuggestion extends Model
     public const STATUS_ASSIGNED = 'assigned';
 
     /**
-     * Get the contact (Student or User).
+     * Get the contact (Learner or User).
      */
     public function contact(): MorphTo
     {
@@ -127,7 +127,7 @@ class ContactResourceSuggestion extends Model
     {
         $assignment = ResourceAssignment::create([
             'resource_id' => $this->resource_id,
-            'student_id' => $this->contact_type === Student::class ? $this->contact_id : null,
+            'learner_id' => $this->contact_type === Learner::class ? $this->contact_id : null,
             'assigned_by' => $userId,
             'assigned_at' => now(),
             'status' => 'assigned',

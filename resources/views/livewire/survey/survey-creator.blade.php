@@ -2,8 +2,8 @@
     {{-- Mode Selection --}}
     @if($mode === 'select')
         <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold text-gray-900">Create Survey</h1>
-            <p class="text-gray-500 mt-1">Choose how you want to build your survey</p>
+            <h1 class="text-2xl font-bold text-gray-900">@term('create_action') @term('survey_singular')</h1>
+            <p class="text-gray-500 mt-1">@term('choose_how_label')</p>
         </div>
 
         <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -17,30 +17,30 @@
                     <div class="w-14 h-14 rounded-xl bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors mb-4">
                         <x-icon name="chat-bubble-left-right" class="w-7 h-7 text-indigo-600" />
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">AI Chat Builder</h3>
-                    <p class="text-sm text-gray-500 mt-2">Describe your survey in plain language and let AI create questions for you.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">@term('ai_chat_builder_label')</h3>
+                    <p class="text-sm text-gray-500 mt-2">@term('ai_chat_builder_body')</p>
                     <ul class="mt-4 space-y-1 text-xs text-gray-500">
                         <li class="flex items-center gap-1.5">
                             <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
-                            Natural conversation
+                            @term('natural_conversation_label')
                         </li>
                         <li class="flex items-center gap-1.5">
                             <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
-                            AI suggestions
+                            @term('ai_suggestions_label')
                         </li>
                         <li class="flex items-center gap-1.5">
                             <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
-                            Quick refinement
+                            @term('quick_refinement_label')
                         </li>
                     </ul>
                 </div>
                 @if($serviceStatus['claude'] ?? false)
                     <div class="absolute top-3 right-3 text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
-                        AI-Powered
+                        @term('ai_powered_label')
                     </div>
                 @else
                     <div class="absolute top-3 right-3 text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-full">
-                        Not Configured
+                        @term('not_configured_label')
                     </div>
                 @endif
             </button>
@@ -55,26 +55,26 @@
                     <div class="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors mb-4">
                         <x-icon name="microphone" class="w-7 h-7 text-purple-600" />
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Voice Builder</h3>
-                    <p class="text-sm text-gray-500 mt-2">Speak your questions naturally and we'll transcribe them into a survey.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">@term('voice_builder_label')</h3>
+                    <p class="text-sm text-gray-500 mt-2">@term('voice_builder_body')</p>
                     <ul class="mt-4 space-y-1 text-xs text-gray-500">
                         <li class="flex items-center gap-1.5">
                             <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
-                            Hands-free creation
+                            @term('hands_free_label')
                         </li>
                         <li class="flex items-center gap-1.5">
                             <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
-                            Audio transcription
+                            @term('audio_transcription_label')
                         </li>
                         <li class="flex items-center gap-1.5">
                             <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
-                            Easy editing
+                            @term('easy_editing_label')
                         </li>
                     </ul>
                 </div>
                 @if(!($serviceStatus['transcription'] ?? false))
                     <div class="absolute top-3 right-3 text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-full">
-                        Not Configured
+                        @term('not_configured_label')
                     </div>
                 @endif
             </button>
@@ -88,25 +88,25 @@
                     <div class="w-14 h-14 rounded-xl bg-pulse-orange-100 flex items-center justify-center group-hover:bg-pulse-orange-200 transition-colors mb-4">
                         <x-icon name="clipboard-document-list" class="w-7 h-7 text-pulse-orange-600" />
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">Form Builder</h3>
-                    <p class="text-sm text-gray-500 mt-2">Build your survey manually with full control over every question.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 group-hover:text-pulse-orange-600 transition-colors">@term('form_builder_label')</h3>
+                    <p class="text-sm text-gray-500 mt-2">@term('form_builder_body')</p>
                     <ul class="mt-4 space-y-1 text-xs text-gray-500">
                         <li class="flex items-center gap-1.5">
                             <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
-                            Full control
+                            @term('full_control_label')
                         </li>
                         <li class="flex items-center gap-1.5">
                             <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
-                            Question bank
+                            @term('question_bank_label')
                         </li>
                         <li class="flex items-center gap-1.5">
                             <x-icon name="check" class="w-3.5 h-3.5 text-green-500" />
-                            Advanced options
+                            @term('advanced_options_label')
                         </li>
                     </ul>
                 </div>
                 <div class="absolute top-3 right-3 text-xs font-medium text-pulse-orange-600 bg-pulse-orange-50 px-2 py-1 rounded-full">
-                    Classic
+                    @term('classic_label')
                 </div>
             </button>
         </div>
@@ -114,9 +114,9 @@
         <!-- Templates Section -->
         <div class="mt-12 max-w-4xl mx-auto">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-gray-900">Start from Template</h2>
+                <h2 class="text-lg font-semibold text-gray-900">@term('start_from_template_label')</h2>
                 <button wire:click="$set('showTemplates', true)" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">
-                    View All Templates
+                    @term('view_all_templates_label')
                 </button>
             </div>
 
@@ -132,12 +132,12 @@
                                 <p class="text-sm text-gray-500 mt-1">{{ Str::limit($template->description, 60) }}</p>
                             </div>
                             @if($template->is_featured)
-                                <x-badge color="yellow">Featured</x-badge>
+                                <x-badge color="yellow">@term('featured_label')</x-badge>
                             @endif
                         </div>
                         <div class="flex items-center gap-3 mt-3 text-xs text-gray-400">
-                            <span>{{ count($template->questions ?? []) }} questions</span>
-                            <span>{{ $template->usage_count }} uses</span>
+                            <span>{{ count($template->questions ?? []) }} @term('questions_label')</span>
+                            <span>{{ $template->usage_count }} @term('uses_label')</span>
                         </div>
                     </button>
                 @endforeach
@@ -146,7 +146,7 @@
 
         <div class="text-center mt-8">
             <a href="{{ route('surveys.index') }}" class="text-sm text-gray-500 hover:text-gray-700">
-                Cancel
+                @term('cancel_action')
             </a>
         </div>
 
@@ -162,8 +162,8 @@
                                 <x-icon name="sparkles" class="w-5 h-5 text-indigo-600" />
                             </div>
                             <div>
-                                <h2 class="font-semibold text-gray-900">AI Survey Assistant</h2>
-                                <p class="text-xs text-gray-500">Describe your survey needs</p>
+                                <h2 class="font-semibold text-gray-900">@term('ai_assistant_label')</h2>
+                                <p class="text-xs text-gray-500">@term('describe_needs_label')</p>
                             </div>
                         </div>
                         @if(count($questions) > 0)
@@ -171,7 +171,7 @@
                                 wire:click="finishChatAndEdit"
                                 class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
                             >
-                                Finish & Edit
+                                @term('finish_edit_label')
                             </button>
                         @endif
                     </div>
@@ -206,7 +206,7 @@
                         <input
                             type="text"
                             wire:model="chatInput"
-                            placeholder="Describe your survey or ask for changes..."
+                            placeholder="{{ app(\App\Services\TerminologyService::class)->get('describe_needs_label') }}..."
                             class="flex-1 rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
                             @disabled($isProcessing)
                         />
@@ -223,13 +223,13 @@
 
             <!-- Preview Panel -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 class="font-semibold text-gray-900 mb-4">Survey Preview</h3>
+                <h3 class="font-semibold text-gray-900 mb-4">@term('survey_preview_label')</h3>
 
                 @if(empty($questions))
                     <div class="text-center py-12">
                         <x-icon name="document-text" class="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                        <p class="text-gray-500">No questions yet</p>
-                        <p class="text-sm text-gray-400">Start chatting to create questions</p>
+                        <p class="text-gray-500">@term('no_questions_yet_label')</p>
+                        <p class="text-sm text-gray-400">@term('start_chatting_label')</p>
                     </div>
                 @else
                     <div class="space-y-4">
@@ -254,7 +254,7 @@
         <div class="text-center mt-6">
             <button wire:click="$set('mode', 'select')" class="text-sm text-gray-500 hover:text-gray-700">
                 <x-icon name="arrow-left" class="w-4 h-4 inline mr-1" />
-                Back to Mode Selection
+                @term('back_to_mode_selection_label')
             </button>
         </div>
 
@@ -262,8 +262,8 @@
     @elseif($mode === 'voice')
         <div class="max-w-2xl mx-auto">
             <div class="text-center mb-8">
-                <h1 class="text-2xl font-bold text-gray-900">Voice Survey Builder</h1>
-                <p class="text-gray-500 mt-1">Speak your survey questions and we'll transcribe them</p>
+                <h1 class="text-2xl font-bold text-gray-900">@term('voice_survey_builder_label')</h1>
+                <p class="text-gray-500 mt-1">@term('voice_survey_builder_body')</p>
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
@@ -274,8 +274,8 @@
                         </div>
 
                         <p class="text-gray-600 mb-6">
-                            Click the button below and speak your survey questions clearly.<br>
-                            For example: "How are you feeling today? How well did you sleep?"
+                            @term('start_speaking_label')<br>
+                            @term('example_prompt_label')
                         </p>
 
                         <div
@@ -288,33 +288,33 @@
                                 :class="isRecording ? 'bg-red-600 hover:bg-red-700' : (isTranscribing ? 'bg-gray-400 cursor-wait' : 'bg-purple-600 hover:bg-purple-700')"
                                 class="px-6 py-3 text-white rounded-lg font-medium transition-colors disabled:opacity-75"
                             >
-                                <span x-show="!isRecording && !isTranscribing">Start Recording</span>
-                                <span x-show="isRecording">Stop Recording</span>
+                                <span x-show="!isRecording && !isTranscribing">@term('start_recording_label')</span>
+                                <span x-show="isRecording">@term('stop_recording_label')</span>
                                 <span x-show="isTranscribing" class="flex items-center gap-2">
                                     <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    Transcribing...
+                                    @term('transcribing_label')
                                 </span>
                             </button>
 
                             <p x-show="isRecording" class="mt-4 text-sm text-gray-500 animate-pulse">
-                                Recording... Speak now
+                                @term('recording_instruction_label')
                             </p>
                             <p x-show="isTranscribing" class="mt-4 text-sm text-purple-600 animate-pulse">
-                                Processing your audio with AI...
+                                @term('processing_instruction_label')
                             </p>
                         </div>
                     </div>
                 @else
                     <div>
-                        <h3 class="font-medium text-gray-900 mb-2">Transcription</h3>
+                        <h3 class="font-medium text-gray-900 mb-2">@term('transcription_label')</h3>
                         <div class="p-4 bg-gray-50 rounded-lg mb-6">
                             <p class="text-gray-700">{{ $transcription }}</p>
                         </div>
 
-                        <h3 class="font-medium text-gray-900 mb-2">Extracted Questions</h3>
+                        <h3 class="font-medium text-gray-900 mb-2">@term('extracted_questions_label')</h3>
                         @if(count($questions) > 0)
                             <div class="space-y-2 mb-6">
                                 @foreach($questions as $index => $question)
@@ -328,7 +328,7 @@
                                 @endforeach
                             </div>
                         @else
-                            <p class="text-gray-500 mb-6">No questions detected. Try speaking more clearly.</p>
+                            <p class="text-gray-500 mb-6">@term('no_questions_detected_label')</p>
                         @endif
 
                         <div class="flex gap-3">
@@ -336,13 +336,13 @@
                                 wire:click="$set('transcription', null)"
                                 class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
                             >
-                                Record Again
+                                @term('record_again_label')
                             </button>
                             <button
                                 wire:click="$set('mode', 'form')"
                                 class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
                             >
-                                Continue to Editor
+                                @term('continue_to_editor_label')
                             </button>
                         </div>
                     </div>
@@ -352,7 +352,7 @@
             <div class="text-center mt-6">
                 <button wire:click="$set('mode', 'select')" class="text-sm text-gray-500 hover:text-gray-700">
                     <x-icon name="arrow-left" class="w-4 h-4 inline mr-1" />
-                    Back to Mode Selection
+                    @term('back_to_mode_selection_label')
                 </button>
             </div>
         </div>
@@ -363,9 +363,9 @@
         <div class="mb-6">
             <a href="{{ route('surveys.index') }}" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-4">
                 <x-icon name="arrow-left" class="w-4 h-4 mr-1" />
-                Back to Surveys
+                @term('back_to_label') @term('survey_plural')
             </a>
-            <h1 class="text-2xl font-bold text-gray-900">{{ $surveyId ? 'Edit Survey' : 'Create Survey' }}</h1>
+            <h1 class="text-2xl font-bold text-gray-900">{{ $surveyId ? app(\App\Services\TerminologyService::class)->get('edit_action') : app(\App\Services\TerminologyService::class)->get('create_action') }} {{ app(\App\Services\TerminologyService::class)->get('survey_singular') }}</h1>
         </div>
 
         <div class="grid lg:grid-cols-3 gap-6">
@@ -373,34 +373,34 @@
             <div class="lg:col-span-2 space-y-6">
                 <!-- Basic Info Card -->
                 <x-card>
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">@term('basic_information_label')</h2>
 
                     <div class="space-y-4">
                         <div>
-                            <label for="title" class="block text-sm font-medium text-gray-700">Survey Title *</label>
+                            <label for="title" class="block text-sm font-medium text-gray-700">@term('survey_title_label') *</label>
                             <input
                                 type="text"
                                 id="title"
                                 wire:model="title"
                                 class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-pulse-orange-500 focus:ring-pulse-orange-500"
-                                placeholder="e.g., Weekly Wellness Check-In"
+                                placeholder="{{ app(\App\Services\TerminologyService::class)->get('survey_title_example_label') }}"
                             />
                             @error('title') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                         </div>
 
                         <div>
-                            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                            <label for="description" class="block text-sm font-medium text-gray-700">@term('description_label')</label>
                             <textarea
                                 id="description"
                                 wire:model="description"
                                 rows="2"
                                 class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-pulse-orange-500 focus:ring-pulse-orange-500"
-                                placeholder="Brief description of your survey..."
+                                placeholder="{{ app(\App\Services\TerminologyService::class)->get('description_example_label') }}"
                             ></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Survey Type</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">@term('survey_type_label')</label>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($this->surveyTypes as $type => $info)
                                     <button
@@ -418,21 +418,21 @@
                 <!-- Questions Card -->
                 <x-card>
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-semibold text-gray-900">Questions</h2>
+                        <h2 class="text-lg font-semibold text-gray-900">@term('questions_label')</h2>
                         <div class="flex gap-2">
                             <button
                                 wire:click="$set('showQuestionBank', true)"
                                 class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
                             >
                                 <x-icon name="archive-box" class="w-4 h-4 mr-1" />
-                                Question Bank
+                                @term('question_bank_button_label')
                             </button>
                             <button
                                 wire:click="openQuestionEditor"
                                 class="inline-flex items-center text-sm text-pulse-orange-600 hover:text-pulse-orange-700"
                             >
                                 <x-icon name="plus" class="w-4 h-4 mr-1" />
-                                Add Question
+                                @term('add_question_label')
                             </button>
                         </div>
                     </div>
@@ -440,12 +440,12 @@
                     @if(empty($questions))
                         <div class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                             <x-icon name="question-mark-circle" class="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                            <p class="text-gray-500">No questions added yet</p>
+                            <p class="text-gray-500">@term('no_questions_added_label')</p>
                             <button
                                 wire:click="openQuestionEditor"
                                 class="mt-3 text-sm text-pulse-orange-600 hover:text-pulse-orange-700"
                             >
-                                Add your first question
+                                @term('add_first_question_label')
                             </button>
                         </div>
                     @else
@@ -482,10 +482,10 @@
                                         <div class="flex items-center gap-2 mt-2">
                                             <x-badge color="gray">{{ $this->questionTypes[$question['type']]['label'] ?? $question['type'] }}</x-badge>
                                             @if($question['required'] ?? true)
-                                                <x-badge color="red">Required</x-badge>
+                                                <x-badge color="red">@term('required_label')</x-badge>
                                             @endif
                                             @if(($question['type'] ?? 'scale') === 'multiple_choice' && !empty($question['options']))
-                                                <span class="text-xs text-gray-400">{{ count($question['options']) }} options</span>
+                                                <span class="text-xs text-gray-400">{{ count($question['options']) }} @term('options_label')</span>
                                             @endif
                                         </div>
                                     </div>
@@ -509,13 +509,13 @@
             <div class="space-y-6">
                 <!-- Settings Card -->
                 <x-card>
-                    <h3 class="font-semibold text-gray-900 mb-4">Settings</h3>
+                <h3 class="font-semibold text-gray-900 mb-4">@term('settings_label')</h3>
 
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
                             <div>
-                                <label class="text-sm font-medium text-gray-700">Anonymous Responses</label>
-                                <p class="text-xs text-gray-500">Hide respondent identity</p>
+                                <label class="text-sm font-medium text-gray-700">@term('anonymous_label') @term('responses_label')</label>
+                                <p class="text-xs text-gray-500">@term('hide_identity_label')</p>
                             </div>
                             <button
                                 wire:click="$toggle('isAnonymous')"
@@ -527,8 +527,8 @@
 
                         <div class="flex items-center justify-between">
                             <div>
-                                <label class="text-sm font-medium text-gray-700">AI Follow-up</label>
-                                <p class="text-xs text-gray-500">Dynamic questions based on answers</p>
+                                <label class="text-sm font-medium text-gray-700">@term('ai_follow_up_label')</label>
+                                <p class="text-xs text-gray-500">@term('dynamic_questions_label')</p>
                             </div>
                             <button
                                 wire:click="$toggle('aiFollowUpEnabled')"
@@ -539,7 +539,7 @@
                         </div>
 
                         <div>
-                            <label class="text-sm font-medium text-gray-700">Estimated Duration</label>
+                            <label class="text-sm font-medium text-gray-700">@term('estimated_duration_label')</label>
                             <div class="flex items-center gap-2 mt-1">
                                 <input
                                     type="number"
@@ -548,7 +548,7 @@
                                     max="60"
                                     class="w-20 rounded-lg border-gray-300 text-sm"
                                 />
-                                <span class="text-sm text-gray-500">minutes</span>
+                                <span class="text-sm text-gray-500">@term('minutes_label')</span>
                             </div>
                         </div>
                     </div>
@@ -556,14 +556,14 @@
 
                 <!-- Delivery Channels Card -->
                 <x-card>
-                    <h3 class="font-semibold text-gray-900 mb-4">Delivery Channels</h3>
+                <h3 class="font-semibold text-gray-900 mb-4">@term('delivery_channels_label')</h3>
 
                     <div class="space-y-3">
                         @foreach([
-                            'web' => ['label' => 'Web Link', 'icon' => 'globe-alt'],
-                            'sms' => ['label' => 'SMS', 'icon' => 'chat-bubble-left'],
-                            'voice_call' => ['label' => 'Voice Call', 'icon' => 'phone'],
-                            'whatsapp' => ['label' => 'WhatsApp', 'icon' => 'chat-bubble-oval-left'],
+                            'web' => ['label' => app(\App\Services\TerminologyService::class)->get('web_link_label'), 'icon' => 'globe-alt'],
+                            'sms' => ['label' => app(\App\Services\TerminologyService::class)->get('sms_label'), 'icon' => 'chat-bubble-left'],
+                            'voice_call' => ['label' => app(\App\Services\TerminologyService::class)->get('voice_call_label'), 'icon' => 'phone'],
+                            'whatsapp' => ['label' => app(\App\Services\TerminologyService::class)->get('whatsapp_label'), 'icon' => 'chat-bubble-oval-left'],
                         ] as $channel => $info)
                             <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors {{ in_array($channel, $deliveryChannels) ? 'border-pulse-orange-300 bg-pulse-orange-50' : '' }}">
                                 <input
@@ -587,14 +587,14 @@
                             class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2"
                         >
                             <x-icon name="eye" class="w-4 h-4" />
-                            Preview Survey
+                            @term('preview_survey_label')
                         </button>
 
                         <button
                             wire:click="save(false)"
                             class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                         >
-                            Save as Draft
+                            @term('save_as_draft_label')
                         </button>
 
                         <button
@@ -602,7 +602,7 @@
                             class="w-full px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 flex items-center justify-center gap-2"
                         >
                             <x-icon name="rocket-launch" class="w-4 h-4" />
-                            Save & Activate
+                            @term('save_activate_label')
                         </button>
                     </div>
                 </x-card>
@@ -618,12 +618,12 @@
 
             <div class="relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                    {{ $editingQuestionIndex !== null ? 'Edit Question' : 'Add Question' }}
+                    {{ $editingQuestionIndex !== null ? app(\App\Services\TerminologyService::class)->get('edit_question_title_label') : app(\App\Services\TerminologyService::class)->get('add_question_title_label') }}
                 </h3>
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">@term('question_type_label')</label>
                         <div class="grid grid-cols-2 gap-2">
                             @foreach($this->questionTypes as $type => $info)
                                 <button
@@ -641,37 +641,37 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Question Text *</label>
+                        <label class="block text-sm font-medium text-gray-700">@term('question_text_label') *</label>
                         <textarea
                             wire:model="questionForm.question"
                             rows="2"
                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-pulse-orange-500 focus:ring-pulse-orange-500"
-                            placeholder="Enter your question..."
+                            placeholder="{{ app(\App\Services\TerminologyService::class)->get('enter_question_label') }}"
                         ></textarea>
                         @error('questionForm.question') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
 
                     @if(in_array($questionForm['type'] ?? 'scale', ['scale', 'multiple_choice']))
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Options</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">@term('options_label')</label>
                             @if(($questionForm['type'] ?? 'scale') === 'scale')
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label class="text-xs text-gray-500">Low label (1)</label>
+                                        <label class="text-xs text-gray-500">@term('low_label_suffix')</label>
                                         <input
                                             type="text"
                                             wire:model="questionForm.options.1"
                                             class="mt-1 block w-full rounded-lg border-gray-300 text-sm"
-                                            placeholder="e.g., Not at all"
+                                            placeholder="{{ app(\App\Services\TerminologyService::class)->get('low_label_example') }}"
                                         />
                                     </div>
                                     <div>
-                                        <label class="text-xs text-gray-500">High label (5)</label>
+                                        <label class="text-xs text-gray-500">@term('high_label_suffix')</label>
                                         <input
                                             type="text"
                                             wire:model="questionForm.options.5"
                                             class="mt-1 block w-full rounded-lg border-gray-300 text-sm"
-                                            placeholder="e.g., Very much"
+                                            placeholder="{{ app(\App\Services\TerminologyService::class)->get('high_label_example') }}"
                                         />
                                     </div>
                                 </div>
@@ -694,14 +694,14 @@
                                                 type="text"
                                                 wire:model.live="questionForm.options.{{ $index }}"
                                                 class="flex-1 rounded-lg border-gray-300 text-sm focus:border-pulse-orange-500 focus:ring-pulse-orange-500"
-                                                placeholder="Enter option..."
+                                                placeholder="{{ app(\App\Services\TerminologyService::class)->get('enter_option_label') }}"
                                             />
                                             @if(count($options) > 2)
                                                 <button
                                                     wire:click="removeOption({{ $index }})"
                                                     type="button"
                                                     class="p-1.5 text-gray-400 hover:text-red-500 rounded transition-colors"
-                                                    title="Remove option"
+                                                    title="{{ app(\App\Services\TerminologyService::class)->get('remove_option_label') }}"
                                                 >
                                                     <x-icon name="x-mark" class="w-4 h-4" />
                                                 </button>
@@ -715,7 +715,7 @@
                                         class="flex items-center gap-1.5 text-sm text-pulse-orange-600 hover:text-pulse-orange-700 mt-2 transition-colors"
                                     >
                                         <x-icon name="plus-circle" class="w-4 h-4" />
-                                        Add Option
+                                        @term('add_option_label')
                                     </button>
 
                                     @error('questionForm.options')
@@ -733,7 +733,7 @@
                             wire:model="questionForm.required"
                             class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
                         />
-                        <label for="required" class="text-sm text-gray-700">Required question</label>
+                        <label for="required" class="text-sm text-gray-700">@term('required_question_label')</label>
                     </div>
                 </div>
 
@@ -742,13 +742,13 @@
                         wire:click="closeQuestionEditor"
                         class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
                     >
-                        Cancel
+                        @term('cancel_action')
                     </button>
                     <button
                         wire:click="saveQuestion"
                         class="px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
                     >
-                        {{ $editingQuestionIndex !== null ? 'Update' : 'Add' }} Question
+                        {{ $editingQuestionIndex !== null ? app(\App\Services\TerminologyService::class)->get('update_action') : app(\App\Services\TerminologyService::class)->get('add_action') }} @term('question_singular')
                     </button>
                 </div>
             </div>
@@ -764,7 +764,7 @@
 
             <div class="relative bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Question Bank</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">@term('question_bank_modal_label')</h3>
                     <button wire:click="$set('showQuestionBank', false)" class="text-gray-400 hover:text-gray-600">
                         <x-icon name="x-mark" class="w-5 h-5" />
                     </button>
@@ -782,7 +782,7 @@
                                     <p class="text-gray-900">{{ $question->question_text }}</p>
                                     <div class="flex items-center gap-2 mt-2">
                                         <x-badge color="gray">{{ ucfirst(str_replace('_', ' ', $question->question_type)) }}</x-badge>
-                                        <span class="text-xs text-gray-400">Used {{ $question->usage_count }} times</span>
+                                        <span class="text-xs text-gray-400">@term('used_times_label') {{ $question->usage_count }} @term('used_times_suffix_label')</span>
                                     </div>
                                 </button>
                             @endforeach
@@ -793,7 +793,7 @@
                 @if($this->questionBank->isEmpty())
                     <div class="text-center py-8">
                         <x-icon name="archive-box" class="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                        <p class="text-gray-500">No questions in the bank yet</p>
+                        <p class="text-gray-500">@term('no_questions_bank_label')</p>
                     </div>
                 @endif
             </div>
@@ -809,7 +809,7 @@
 
             <div class="relative bg-white rounded-xl shadow-xl max-w-3xl w-full p-6 max-h-[80vh] overflow-y-auto">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Survey Templates</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">@term('survey_templates_label')</h3>
                     <button wire:click="$set('showTemplates', false)" class="text-gray-400 hover:text-gray-600">
                         <x-icon name="x-mark" class="w-5 h-5" />
                     </button>
@@ -824,14 +824,14 @@
                             <div class="flex items-start justify-between">
                                 <h4 class="font-medium text-gray-900">{{ $template->name }}</h4>
                                 @if($template->is_featured)
-                                    <x-badge color="yellow">Featured</x-badge>
+                                    <x-badge color="yellow">@term('featured_label')</x-badge>
                                 @endif
                             </div>
                             <p class="text-sm text-gray-500 mt-1">{{ $template->description }}</p>
                             <div class="flex items-center gap-3 mt-3 text-xs text-gray-400">
-                                <span>{{ count($template->questions ?? []) }} questions</span>
+                                <span>{{ count($template->questions ?? []) }} @term('questions_label')</span>
                                 <span>{{ ucfirst($template->template_type) }}</span>
-                                <span>{{ $template->usage_count }} uses</span>
+                                <span>{{ $template->usage_count }} @term('uses_label')</span>
                             </div>
                         </button>
                     @endforeach
@@ -849,14 +849,14 @@
 
             <div class="relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6 max-h-[80vh] overflow-y-auto">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Survey Preview</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">@term('survey_preview_label')</h3>
                     <button wire:click="$set('showPreview', false)" class="text-gray-400 hover:text-gray-600">
                         <x-icon name="x-mark" class="w-5 h-5" />
                     </button>
                 </div>
 
                 <div class="border-b border-gray-200 pb-4 mb-6">
-                    <h2 class="text-xl font-bold text-gray-900">{{ $title ?: 'Untitled Survey' }}</h2>
+                    <h2 class="text-xl font-bold text-gray-900">{{ $title ?: app(\App\Services\TerminologyService::class)->get('untitled_survey_label') }}</h2>
                     @if($description)
                         <p class="text-gray-600 mt-2">{{ $description }}</p>
                     @endif
@@ -897,7 +897,7 @@
                                     @endforeach
                                 </div>
                             @elseif(($question['type'] ?? 'scale') === 'text')
-                                <textarea class="w-full rounded-lg border-gray-300" rows="2" disabled placeholder="Your answer..."></textarea>
+                                <textarea class="w-full rounded-lg border-gray-300" rows="2" disabled placeholder="{{ app(\App\Services\TerminologyService::class)->get('your_answer_label') }}"></textarea>
                             @endif
                         </div>
                     @endforeach
@@ -905,7 +905,7 @@
 
                 @if(count($questions) === 0)
                     <div class="text-center py-8">
-                        <p class="text-gray-500">No questions to preview</p>
+                        <p class="text-gray-500">@term('no_questions_preview_label')</p>
                     </div>
                 @endif
             </div>

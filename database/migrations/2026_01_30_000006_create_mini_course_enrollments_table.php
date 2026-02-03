@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('mini_course_id')->constrained('mini_courses')->cascadeOnDelete();
             $table->foreignId('mini_course_version_id')->nullable()->constrained('mini_course_versions')->nullOnDelete();
-            $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
+            $table->foreignId('learner_id')->constrained('learners')->cascadeOnDelete();
             $table->foreignId('enrolled_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('enrollment_source')->default('manual'); // manual, ai_suggested, rule_triggered, self_enrolled
             $table->unsignedBigInteger('suggestion_id')->nullable(); // FK added after suggestions table
@@ -28,14 +28,14 @@ return new class extends Migration
             $table->timestamp('completed_at')->nullable();
             $table->date('expected_completion_date')->nullable();
             $table->text('notes')->nullable();
-            $table->json('feedback')->nullable(); // Student feedback collection
+            $table->json('feedback')->nullable(); // Learner feedback collection
             $table->json('analytics_data')->nullable(); // Engagement metrics
             $table->timestamps();
 
             // Indexes
-            $table->index(['student_id', 'status']);
+            $table->index(['learner_id', 'status']);
             $table->index(['mini_course_id', 'status']);
-            $table->unique(['mini_course_id', 'student_id']); // One enrollment per student per course
+            $table->unique(['mini_course_id', 'learner_id']); // One enrollment per learner per course
         });
     }
 

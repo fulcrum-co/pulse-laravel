@@ -8,7 +8,7 @@ class DemoRoleController extends Controller
 {
     public function switch(Request $request, string $role)
     {
-        $validRoles = ['actual', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher', 'student', 'parent'];
+        $validRoles = ['actual', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher', 'learner', 'parent'];
 
         if (! in_array($role, $validRoles)) {
             abort(404);

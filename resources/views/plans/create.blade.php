@@ -30,7 +30,7 @@
                         class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
                         <option value="organizational" {{ ($type ?? old('plan_type')) === 'organizational' ? 'selected' : '' }}>Organizational Plan</option>
                         <option value="teacher" {{ ($type ?? old('plan_type')) === 'teacher' ? 'selected' : '' }}>Teacher Improvement Plan</option>
-                        <option value="student" {{ ($type ?? old('plan_type')) === 'student' ? 'selected' : '' }}>Student Improvement Plan</option>
+                        <option value="learner" {{ ($type ?? old('plan_type')) === 'learner' ? 'selected' : '' }}>Learner Improvement Plan</option>
                         <option value="department" {{ ($type ?? old('plan_type')) === 'department' ? 'selected' : '' }}>Department Plan</option>
                         <option value="grade" {{ ($type ?? old('plan_type')) === 'grade' ? 'selected' : '' }}>Grade Level Plan</option>
                     </select>

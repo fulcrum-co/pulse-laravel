@@ -8,7 +8,7 @@ use App\Models\Objective;
 use App\Models\Organization;
 use App\Models\StrategicPlan;
 use App\Models\StrategyCollaborator;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -17,19 +17,19 @@ class StrategySeeder extends Seeder
 {
     public function run(): void
     {
-        // Get the first school organization
-        $school = Organization::where('org_type', 'school')->first();
+        // Get the first organization organization
+        $organization = Organization::where('org_type', 'organization')->first();
 
-        if (! $school) {
-            $this->command->warn('No school organization found. Please run OrganizationSeeder first.');
+        if (! $organization) {
+            $this->command->warn('No organization organization found. Please run OrganizationSeeder first.');
 
             return;
         }
 
         // Get users
-        $admin = User::where('org_id', $school->id)->where('primary_role', 'admin')->first();
-        $teachers = User::where('org_id', $school->id)->where('primary_role', 'teacher')->get();
-        $students = Student::where('org_id', $school->id)->get();
+        $admin = User::where('org_id', $organization->id)->where('primary_role', 'admin')->first();
+        $teachers = User::where('org_id', $organization->id)->where('primary_role', 'teacher')->get();
+        $learners = Learner::where('org_id', $organization->id)->get();
 
         if (! $admin) {
             $this->command->warn('No admin user found. Please run UserSeeder first.');
@@ -39,9 +39,9 @@ class StrategySeeder extends Seeder
 
         // Create a 5-Year Strategic Plan
         $fiveYearPlan = StrategicPlan::create([
-            'org_id' => $school->id,
-            'title' => 'Lincoln High School 5-Year Strategic Plan',
-            'description' => 'Comprehensive strategic plan to improve student wellness and academic outcomes over the next five years.',
+            'org_id' => $organization->id,
+            'title' => 'Lincoln High Organization 5-Year Strategic Plan',
+            'description' => 'Comprehensive strategic plan to improve learner wellness and academic outcomes over the next five years.',
             'plan_type' => 'organizational',
             'status' => 'active',
             'start_date' => Carbon::now()->startOfYear(),
@@ -65,11 +65,11 @@ class StrategySeeder extends Seeder
             ]);
         }
 
-        // Focus Area 1: Student Mental Health & Wellness
+        // Focus Area 1: Learner Mental Health & Wellness
         $fa1 = FocusArea::create([
             'strategic_plan_id' => $fiveYearPlan->id,
-            'title' => 'Student Mental Health & Wellness',
-            'description' => 'Improve overall student mental health and create a supportive school environment.',
+            'title' => 'Learner Mental Health & Wellness',
+            'description' => 'Improve overall learner mental health and create a supportive organization environment.',
             'sort_order' => 0,
             'status' => 'on_track',
         ]);
@@ -77,7 +77,7 @@ class StrategySeeder extends Seeder
         $obj1_1 = Objective::create([
             'focus_area_id' => $fa1->id,
             'title' => 'Implement universal mental health screening',
-            'description' => 'Screen all students for mental health concerns twice per year.',
+            'description' => 'Screen all learners for mental health concerns twice per year.',
             'start_date' => Carbon::now(),
             'end_date' => Carbon::now()->addMonths(6),
             'sort_order' => 0,
@@ -143,7 +143,7 @@ class StrategySeeder extends Seeder
         $fa2 = FocusArea::create([
             'strategic_plan_id' => $fiveYearPlan->id,
             'title' => 'Academic Achievement',
-            'description' => 'Improve academic outcomes for all students.',
+            'description' => 'Improve academic outcomes for all learners.',
             'sort_order' => 1,
             'status' => 'at_risk',
         ]);
@@ -151,7 +151,7 @@ class StrategySeeder extends Seeder
         $obj2_1 = Objective::create([
             'focus_area_id' => $fa2->id,
             'title' => 'Reduce achievement gaps',
-            'description' => 'Close achievement gaps between student populations.',
+            'description' => 'Close achievement gaps between learner populations.',
             'start_date' => Carbon::now(),
             'end_date' => Carbon::now()->addYears(2),
             'sort_order' => 0,
@@ -169,7 +169,7 @@ class StrategySeeder extends Seeder
 
         Activity::create([
             'objective_id' => $obj2_1->id,
-            'title' => 'Expand after-school academic support',
+            'title' => 'Expand after-organization academic support',
             'start_date' => Carbon::now()->addMonths(3),
             'end_date' => Carbon::now()->addMonths(8),
             'sort_order' => 1,
@@ -214,8 +214,8 @@ class StrategySeeder extends Seeder
 
         // Create a shorter Annual Plan
         $annualPlan = StrategicPlan::create([
-            'org_id' => $school->id,
-            'title' => '2025-2026 School Year Plan',
+            'org_id' => $organization->id,
+            'title' => '2025-2026 Organization Year Plan',
             'description' => 'Annual implementation plan for key wellness initiatives.',
             'plan_type' => 'organizational',
             'status' => 'draft',
@@ -239,7 +239,7 @@ class StrategySeeder extends Seeder
 
         Objective::create([
             'focus_area_id' => $fa_annual->id,
-            'title' => 'Monthly wellness surveys for all students',
+            'title' => 'Monthly wellness surveys for all learners',
             'start_date' => Carbon::create(2025, 9, 1),
             'end_date' => Carbon::create(2026, 5, 31),
             'sort_order' => 0,
@@ -249,9 +249,9 @@ class StrategySeeder extends Seeder
         // Create Teacher Improvement Plans
         if ($teachers->count() >= 2) {
             $teacherPlan = StrategicPlan::create([
-                'org_id' => $school->id,
+                'org_id' => $organization->id,
                 'title' => 'Professional Growth Plan - '.$teachers[0]->first_name.' '.$teachers[0]->last_name,
-                'description' => 'Individual improvement plan for classroom management and student engagement.',
+                'description' => 'Individual improvement plan for classroom management and learner engagement.',
                 'plan_type' => 'teacher',
                 'target_type' => 'App\\Models\\User',
                 'target_id' => $teachers[0]->id,
@@ -308,18 +308,18 @@ class StrategySeeder extends Seeder
             ]);
         }
 
-        // Create Student Improvement Plans
-        if ($students->count() >= 3) {
-            // High-risk student plan
-            $highRiskStudent = $students->where('risk_level', 'high')->first() ?? $students->first();
+        // Create Learner Improvement Plans
+        if ($learners->count() >= 3) {
+            // High-risk learner plan
+            $highRiskLearner = $learners->where('risk_level', 'high')->first() ?? $learners->first();
 
-            $studentPlan = StrategicPlan::create([
-                'org_id' => $school->id,
-                'title' => 'Student Support Plan - '.$highRiskStudent->user->first_name.' '.$highRiskStudent->user->last_name,
+            $learnerPlan = StrategicPlan::create([
+                'org_id' => $organization->id,
+                'title' => 'Learner Support Plan - '.$highRiskLearner->user->first_name.' '.$highRiskLearner->user->last_name,
                 'description' => 'Individualized support plan addressing social-emotional needs.',
-                'plan_type' => 'student',
-                'target_type' => 'App\\Models\\Student',
-                'target_id' => $highRiskStudent->id,
+                'plan_type' => 'learner',
+                'target_type' => 'App\\Models\\Learner',
+                'target_id' => $highRiskLearner->id,
                 'status' => 'active',
                 'start_date' => Carbon::now(),
                 'end_date' => Carbon::now()->addMonths(4),
@@ -327,28 +327,28 @@ class StrategySeeder extends Seeder
             ]);
 
             StrategyCollaborator::create([
-                'strategic_plan_id' => $studentPlan->id,
+                'strategic_plan_id' => $learnerPlan->id,
                 'user_id' => $admin->id,
                 'role' => 'owner',
             ]);
 
             if ($teachers->count() > 0) {
                 StrategyCollaborator::create([
-                    'strategic_plan_id' => $studentPlan->id,
+                    'strategic_plan_id' => $learnerPlan->id,
                     'user_id' => $teachers[0]->id,
                     'role' => 'collaborator',
                 ]);
             }
 
-            $fa_student = FocusArea::create([
-                'strategic_plan_id' => $studentPlan->id,
+            $fa_learner = FocusArea::create([
+                'strategic_plan_id' => $learnerPlan->id,
                 'title' => 'Emotional Regulation',
                 'sort_order' => 0,
                 'status' => 'at_risk',
             ]);
 
-            $obj_student = Objective::create([
-                'focus_area_id' => $fa_student->id,
+            $obj_learner = Objective::create([
+                'focus_area_id' => $fa_learner->id,
                 'title' => 'Develop coping strategies',
                 'start_date' => Carbon::now(),
                 'end_date' => Carbon::now()->addMonths(2),
@@ -357,7 +357,7 @@ class StrategySeeder extends Seeder
             ]);
 
             Activity::create([
-                'objective_id' => $obj_student->id,
+                'objective_id' => $obj_learner->id,
                 'title' => 'Weekly counseling sessions',
                 'start_date' => Carbon::now(),
                 'end_date' => Carbon::now()->addMonths(2),
@@ -366,7 +366,7 @@ class StrategySeeder extends Seeder
             ]);
 
             Activity::create([
-                'objective_id' => $obj_student->id,
+                'objective_id' => $obj_learner->id,
                 'title' => 'Mindfulness practice training',
                 'start_date' => Carbon::now()->addWeeks(2),
                 'end_date' => Carbon::now()->addMonths(2),
@@ -374,15 +374,15 @@ class StrategySeeder extends Seeder
                 'status' => 'at_risk',
             ]);
 
-            $fa_student2 = FocusArea::create([
-                'strategic_plan_id' => $studentPlan->id,
+            $fa_learner2 = FocusArea::create([
+                'strategic_plan_id' => $learnerPlan->id,
                 'title' => 'Academic Support',
                 'sort_order' => 1,
                 'status' => 'not_started',
             ]);
 
-            $obj_student2 = Objective::create([
-                'focus_area_id' => $fa_student2->id,
+            $obj_learner2 = Objective::create([
+                'focus_area_id' => $fa_learner2->id,
                 'title' => 'Improve homework completion',
                 'start_date' => Carbon::now()->addMonths(1),
                 'end_date' => Carbon::now()->addMonths(3),
@@ -391,8 +391,8 @@ class StrategySeeder extends Seeder
             ]);
 
             Activity::create([
-                'objective_id' => $obj_student2->id,
-                'title' => 'Set up after-school study sessions',
+                'objective_id' => $obj_learner2->id,
+                'title' => 'Set up after-organization study sessions',
                 'start_date' => Carbon::now()->addMonths(1),
                 'end_date' => Carbon::now()->addMonths(2),
                 'sort_order' => 0,
@@ -401,6 +401,6 @@ class StrategySeeder extends Seeder
         }
 
         $this->command->info('Strategic plans seeded successfully!');
-        $this->command->info('Created: 1 5-year plan, 1 annual plan, 1 teacher plan, 1 student plan');
+        $this->command->info('Created: 1 5-year plan, 1 annual plan, 1 teacher plan, 1 learner plan');
     }
 }

@@ -1,8 +1,8 @@
-<x-layouts.dashboard title="Dashboard">
+<x-layouts.dashboard title="{{ app(\App\Services\TerminologyService::class)->get('dashboard_singular') }}">
     <x-slot name="actions">
         <x-button variant="primary">
             <x-icon name="plus" class="w-4 h-4 mr-2" />
-            Add Entry
+            @term('add_action') @term('entry_singular')
         </x-button>
     </x-slot>
 
@@ -11,10 +11,10 @@
         <x-card>
             <div class="flex items-start justify-between mb-6">
                 <div>
-                    <div class="text-sm text-gray-600 mb-1">Student Overview</div>
+                    <div class="text-sm text-gray-600 mb-1">@term('learner_singular') @term('overview_label')</div>
                     <div class="flex items-baseline gap-2">
-                        <span class="text-4xl font-semibold text-gray-900">{{ $studentMetrics['total'] }}</span>
-                        <span class="text-sm text-green-600 font-medium">Total Students</span>
+                        <span class="text-4xl font-semibold text-gray-900">{{ $learnerMetrics['total'] }}</span>
+                        <span class="text-sm text-green-600 font-medium">@term('total_label') @term('learner_plural')</span>
                     </div>
                 </div>
 
@@ -22,7 +22,7 @@
                     <x-button variant="secondary" size="small">
                         {{ now()->startOfWeek()->format('M d') }} - {{ now()->endOfWeek()->format('M d, Y') }}
                     </x-button>
-                    <x-button variant="secondary" size="small">Week</x-button>
+                    <x-button variant="secondary" size="small">@term('week_label')</x-button>
                 </div>
             </div>
 
@@ -31,25 +31,25 @@
         </x-card>
     </div>
 
-    <!-- Student Metrics -->
+    <!-- Learner Metrics -->
     <div class="mb-8">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Student Metrics</h2>
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">@term('learner_singular') @term('metrics_label')</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <x-metric-card
-                label="Students in Good Standing"
-                :value="$studentMetrics['good']"
+                label="{{ app(\App\Services\TerminologyService::class)->get('learner_plural') }} in {{ app(\App\Services\TerminologyService::class)->get('good_standing_label') }}"
+                :value="$learnerMetrics['good']"
                 color="green"
             />
 
             <x-metric-card
-                label="Students at Low Risk"
-                :value="$studentMetrics['low']"
+                label="{{ app(\App\Services\TerminologyService::class)->get('learner_plural') }} at {{ app(\App\Services\TerminologyService::class)->get('low_risk_label') }}"
+                :value="$learnerMetrics['low']"
                 color="yellow"
             />
 
             <x-metric-card
-                label="Students at High Risk"
-                :value="$studentMetrics['high']"
+                label="{{ app(\App\Services\TerminologyService::class)->get('learner_plural') }} at {{ app(\App\Services\TerminologyService::class)->get('high_risk_label') }}"
+                :value="$learnerMetrics['high']"
                 color="red"
             />
         </div>
@@ -57,13 +57,13 @@
 
     <!-- Survey Metrics -->
     <div class="mb-8">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Survey Activity</h2>
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">@term('survey_singular') @term('activity_label')</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <x-card>
                 <div class="flex items-start justify-between">
                     <div>
-                        <div class="text-sm font-medium text-gray-600 mb-1">Active Surveys</div>
-                        <div class="text-sm text-gray-500">Currently running surveys</div>
+                        <div class="text-sm font-medium text-gray-600 mb-1">@term('active_label') @term('survey_plural')</div>
+                        <div class="text-sm text-gray-500">@term('currently_running_label') @term('survey_plural')</div>
                     </div>
                     <span class="text-4xl font-semibold text-gray-900">{{ $surveyMetrics['active'] }}</span>
                 </div>
@@ -72,8 +72,8 @@
             <x-card>
                 <div class="flex items-start justify-between">
                     <div>
-                        <div class="text-sm font-medium text-gray-600 mb-1">Completed This Week</div>
-                        <div class="text-sm text-gray-500">Survey responses received</div>
+                        <div class="text-sm font-medium text-gray-600 mb-1">@term('completed_this_week_label')</div>
+                        <div class="text-sm text-gray-500">@term('survey_singular') @term('responses_received_label')</div>
                     </div>
                     <span class="text-4xl font-semibold text-gray-900">{{ $surveyMetrics['completed_this_week'] }}</span>
                 </div>
@@ -85,9 +85,9 @@
     <x-card>
         <div class="flex items-start justify-between">
             <div>
-                <div class="text-sm font-medium text-gray-900 mb-1">Suggested Resources</div>
+                <div class="text-sm font-medium text-gray-900 mb-1">@term('suggested_label') @term('resource_plural')</div>
                 <div class="text-sm text-gray-600">
-                    <span class="text-green-600 font-medium">{{ $suggestedResourcesCount }}</span> resources available for assignment
+                    <span class="text-green-600 font-medium">{{ $suggestedResourcesCount }}</span> @term('resource_plural') @term('available_label') for @term('assignment_singular')
                 </div>
             </div>
             <span class="text-5xl font-semibold text-gray-900">{{ $suggestedResourcesCount }}</span>

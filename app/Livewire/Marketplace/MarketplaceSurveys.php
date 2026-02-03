@@ -130,7 +130,7 @@ class MarketplaceSurveys extends Component
             'wellness' => 'Wellness & SEL',
             'academic' => 'Academic',
             'behavioral' => 'Behavioral',
-            'climate' => 'School Climate',
+            'climate' => 'Organization Climate',
             'diagnostic' => 'Diagnostic',
             'screening' => 'Screening',
         ];

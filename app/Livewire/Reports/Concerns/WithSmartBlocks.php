@@ -10,10 +10,10 @@ trait WithSmartBlocks
      * Smart Block definitions - pre-built composite components
      */
     protected array $smartBlockDefinitions = [
-        'student_header' => [
-            'name' => 'Student Profile Header',
+        'learner_header' => [
+            'name' => 'Learner Profile Header',
             'description' => 'Name, photo, grade, and key identifiers',
-            'category' => 'student',
+            'category' => 'learner',
             'size' => ['width' => 720, 'height' => 120],
         ],
         'metrics_row' => [
@@ -32,7 +32,7 @@ trait WithSmartBlocks
         'risk_banner' => [
             'name' => 'Risk Indicator Banner',
             'description' => 'Color-coded risk status with explanation',
-            'category' => 'student',
+            'category' => 'learner',
             'size' => ['width' => 720, 'height' => 80],
         ],
         'comparison_chart' => [
@@ -63,7 +63,7 @@ trait WithSmartBlocks
 
         // Generate elements based on block type
         $elements = match ($blockType) {
-            'student_header' => $this->generateStudentHeaderBlock($baseY),
+            'learner_header' => $this->generateLearnerHeaderBlock($baseY),
             'metrics_row' => $this->generateMetricsRowBlock($baseY),
             'trend_section' => $this->generateTrendSectionBlock($baseY),
             'risk_banner' => $this->generateRiskBannerBlock($baseY),
@@ -86,10 +86,10 @@ trait WithSmartBlocks
     }
 
     /**
-     * Generate Student Header block elements
+     * Generate Learner Header block elements
      * Note: Uses getNextY() from WithElementManagement trait
      */
-    protected function generateStudentHeaderBlock(int $baseY): array
+    protected function generateLearnerHeaderBlock(int $baseY): array
     {
         $elements = [];
 
@@ -100,7 +100,7 @@ trait WithSmartBlocks
             'position' => ['x' => 40, 'y' => $baseY],
             'size' => ['width' => 500, 'height' => 50],
             'config' => [
-                'content' => '<h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #111827;">Student Progress Report</h2>',
+                'content' => '<h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #111827;">Learner Progress Report</h2>',
             ],
             'styles' => [
                 'backgroundColor' => 'transparent',
@@ -109,14 +109,14 @@ trait WithSmartBlocks
             ],
         ];
 
-        // Subtitle with student placeholder
+        // Subtitle with learner placeholder
         $elements[] = [
             'id' => Str::uuid()->toString(),
             'type' => 'text',
             'position' => ['x' => 40, 'y' => $baseY + 50],
             'size' => ['width' => 400, 'height' => 30],
             'config' => [
-                'content' => '<p style="margin: 0; font-size: 14px; color: #6B7280;">Select a student from the filter bar above to populate this report</p>',
+                'content' => '<p style="margin: 0; font-size: 14px; color: #6B7280;">Select a learner from the filter bar above to populate this report</p>',
             ],
             'styles' => [
                 'backgroundColor' => 'transparent',
@@ -230,7 +230,7 @@ trait WithSmartBlocks
             'position' => ['x' => 500, 'y' => $baseY + 50],
             'size' => ['width' => 240, 'height' => 280],
             'config' => [
-                'prompt' => 'Analyze the student performance trends and provide 3-4 key insights about their progress, areas of improvement, and any concerns.',
+                'prompt' => 'Analyze the learner performance trends and provide 3-4 key insights about their progress, areas of improvement, and any concerns.',
                 'format' => 'bullets',
                 'context_metrics' => ['gpa', 'attendance_rate', 'wellness_score', 'engagement_score'],
                 'generated_content' => null,
@@ -261,7 +261,7 @@ trait WithSmartBlocks
             'position' => ['x' => 40, 'y' => $baseY],
             'size' => ['width' => 720, 'height' => 70],
             'config' => [
-                'content' => '<div style="display: flex; align-items: center; gap: 12px;"><div style="font-size: 24px;">📊</div><div><p style="margin: 0; font-size: 14px; font-weight: 600; color: #1F2937;">Risk Status</p><p style="margin: 4px 0 0 0; font-size: 13px; color: #6B7280;">Select a student to view their risk assessment</p></div></div>',
+                'content' => '<div style="display: flex; align-items: center; gap: 12px;"><div style="font-size: 24px;">📊</div><div><p style="margin: 0; font-size: 14px; font-weight: 600; color: #1F2937;">Risk Status</p><p style="margin: 4px 0 0 0; font-size: 13px; color: #6B7280;">Select a learner to view their risk assessment</p></div></div>',
             ],
             'styles' => [
                 'backgroundColor' => '#F3F4F6',
@@ -289,7 +289,7 @@ trait WithSmartBlocks
             'position' => ['x' => 40, 'y' => $baseY],
             'size' => ['width' => 400, 'height' => 40],
             'config' => [
-                'content' => '<h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">Comparison: Student vs. Cohort Average</h3>',
+                'content' => '<h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">Comparison: Learner vs. Cohort Average</h3>',
             ],
             'styles' => [
                 'backgroundColor' => 'transparent',
@@ -351,7 +351,7 @@ trait WithSmartBlocks
             'position' => ['x' => 40, 'y' => $baseY + 50],
             'size' => ['width' => 480, 'height' => 200],
             'config' => [
-                'prompt' => 'Write a brief executive summary of this student\'s overall performance. Include their strengths, areas for growth, and recommended next steps for parents and teachers.',
+                'prompt' => 'Write a brief executive summary of this learner\'s overall performance. Include their strengths, areas for growth, and recommended next steps for parents and teachers.',
                 'format' => 'executive_summary',
                 'context_metrics' => ['gpa', 'attendance_rate', 'wellness_score', 'engagement_score', 'plan_progress'],
                 'generated_content' => null,

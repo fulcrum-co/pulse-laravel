@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $district = Organization::where('org_type', 'district')->first();
-        $school = Organization::where('org_type', 'school')->first();
+        $organization = Organization::where('org_type', 'organization')->first();
 
         // Create superintendent at district level - Dr. Margaret Chen
         // An experienced educator in her late 50s who oversees the entire district
@@ -20,33 +20,33 @@ class UserSeeder extends Seeder
             'org_id' => $district->id,
             'first_name' => 'Margaret',
             'last_name' => 'Chen',
-            'email' => 'mchen@lincolnschools.edu',
+            'email' => 'mchen@lincolnorganizations.edu',
             'password' => Hash::make('password'),
             'primary_role' => 'consultant', // Consultant role to see sub-organizations
             'phone' => '(555) 123-4567',
-            'bio' => 'Superintendent of Lincoln County School District. 30+ years in education. Passionate about data-driven student success.',
+            'bio' => 'Superintendent of Lincoln County Organization District. 30+ years in education. Passionate about data-driven learner success.',
             'avatar_url' => 'https://randomuser.me/api/portraits/women/79.jpg',
             'active' => true,
             'suspended' => false,
         ]);
 
-        // Assign consultant access to Lincoln High School (can view and push content)
-        $superintendent->organizations()->attach($school->id, [
+        // Assign consultant access to Lincoln High Organization (can view and push content)
+        $superintendent->organizations()->attach($organization->id, [
             'role' => 'consultant',
             'is_primary' => false,
             'can_manage' => true,
         ]);
 
-        // Create admin user at school level - Principal Michael Torres
+        // Create admin user at organization level - Principal Michael Torres
         User::create([
-            'org_id' => $school->id,
+            'org_id' => $organization->id,
             'first_name' => 'Michael',
             'last_name' => 'Torres',
             'email' => 'mtorres@lincolnhigh.edu',
             'password' => Hash::make('password'),
             'primary_role' => 'admin',
             'phone' => '(555) 234-5678',
-            'bio' => 'Principal of Lincoln High School. Dedicated to fostering academic excellence and student well-being.',
+            'bio' => 'Principal of Lincoln High Organization. Dedicated to fostering academic excellence and learner well-being.',
             'avatar_url' => 'https://randomuser.me/api/portraits/men/52.jpg',
             'active' => true,
             'suspended' => false,
@@ -54,7 +54,7 @@ class UserSeeder extends Seeder
 
         // Create counselor
         $counselor = User::create([
-            'org_id' => $school->id,
+            'org_id' => $organization->id,
             'first_name' => 'Emily',
             'last_name' => 'Rodriguez',
             'email' => 'erodriguez@lincolnhigh.edu',
@@ -76,7 +76,7 @@ class UserSeeder extends Seeder
 
         foreach ($teachers as $teacher) {
             User::create([
-                'org_id' => $school->id,
+                'org_id' => $organization->id,
                 'first_name' => $teacher['first_name'],
                 'last_name' => $teacher['last_name'],
                 'email' => $teacher['email'],
@@ -88,9 +88,9 @@ class UserSeeder extends Seeder
             ]);
         }
 
-        // Create student users (these will be linked to Student records)
+        // Create learner users (these will be linked to Learner records)
         // Using randomuser.me portraits - reliable static URLs
-        $studentData = [
+        $learnerData = [
             ['first_name' => 'Alex', 'last_name' => 'Johnson', 'gender' => 'men', 'img' => 1],
             ['first_name' => 'Emma', 'last_name' => 'Williams', 'gender' => 'women', 'img' => 1],
             ['first_name' => 'Liam', 'last_name' => 'Brown', 'gender' => 'men', 'img' => 2],
@@ -118,16 +118,16 @@ class UserSeeder extends Seeder
             ['first_name' => 'Daniel', 'last_name' => 'King', 'gender' => 'men', 'img' => 13],
         ];
 
-        foreach ($studentData as $student) {
-            $email = strtolower($student['first_name'][0].$student['last_name']).'@student.lincolnhigh.edu';
-            $avatarUrl = 'https://randomuser.me/api/portraits/'.$student['gender'].'/'.$student['img'].'.jpg';
+        foreach ($learnerData as $learner) {
+            $email = strtolower($learner['first_name'][0].$learner['last_name']).'@learner.lincolnhigh.edu';
+            $avatarUrl = 'https://randomuser.me/api/portraits/'.$learner['gender'].'/'.$learner['img'].'.jpg';
             User::create([
-                'org_id' => $school->id,
-                'first_name' => $student['first_name'],
-                'last_name' => $student['last_name'],
+                'org_id' => $organization->id,
+                'first_name' => $learner['first_name'],
+                'last_name' => $learner['last_name'],
                 'email' => $email,
                 'password' => Hash::make('password'),
-                'primary_role' => 'student',
+                'primary_role' => 'learner',
                 'avatar_url' => $avatarUrl,
                 'active' => true,
                 'suspended' => false,

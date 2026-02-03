@@ -64,7 +64,7 @@ class SeedDemoResources extends Command
                 'target_risk_levels' => ['low', 'moderate', 'high'],
             ],
             [
-                'title' => 'Mindfulness for Students',
+                'title' => 'Mindfulness for Learners',
                 'description' => 'A guided introduction to mindfulness practices for teens. Includes 5-minute exercises that can be done anywhere.',
                 'resource_type' => 'video',
                 'category' => 'wellness',
@@ -82,7 +82,7 @@ class SeedDemoResources extends Command
             ],
             [
                 'title' => 'Dealing with Social Pressure',
-                'description' => 'Understanding and navigating peer pressure in high school. Interactive exercises to build confidence.',
+                'description' => 'Understanding and navigating peer pressure in high organization. Interactive exercises to build confidence.',
                 'resource_type' => 'worksheet',
                 'category' => 'social',
                 'tags' => ['peer pressure', 'social skills', 'decision making'],
@@ -99,7 +99,7 @@ class SeedDemoResources extends Command
             ],
             [
                 'title' => 'Coping with Change',
-                'description' => 'Resources for dealing with major life transitions like moving, family changes, or starting a new school.',
+                'description' => 'Resources for dealing with major life transitions like moving, family changes, or starting a new organization.',
                 'resource_type' => 'article',
                 'category' => 'stress',
                 'tags' => ['transitions', 'coping', 'resilience'],
@@ -157,7 +157,7 @@ class SeedDemoResources extends Command
             [
                 'name' => 'Marcus Williams, LCSW',
                 'provider_type' => 'counselor',
-                'bio' => 'School-based social worker with expertise in family counseling and crisis intervention.',
+                'bio' => 'Organization-based social worker with expertise in family counseling and crisis intervention.',
                 'contact_email' => 'marcus.w@example.com',
                 'specialties' => ['family counseling', 'crisis intervention', 'behavioral'],
                 'serves_remote' => true,
@@ -177,7 +177,7 @@ class SeedDemoResources extends Command
             [
                 'name' => 'Coach Mike Thompson',
                 'provider_type' => 'coach',
-                'bio' => 'Life skills coach helping students build resilience, goal-setting abilities, and leadership skills.',
+                'bio' => 'Life skills coach helping learners build resilience, goal-setting abilities, and leadership skills.',
                 'contact_email' => 'mike.t@example.com',
                 'specialties' => ['leadership', 'goal setting', 'resilience'],
                 'serves_remote' => true,
@@ -215,7 +215,7 @@ class SeedDemoResources extends Command
         $programs = [
             [
                 'name' => 'Anxiety Support Group',
-                'description' => 'Weekly peer support group for students experiencing anxiety. Facilitated by licensed counselors.',
+                'description' => 'Weekly peer support group for learners experiencing anxiety. Facilitated by licensed counselors.',
                 'program_type' => 'support_group',
                 'duration_weeks' => 8,
                 'max_participants' => 12,
@@ -225,7 +225,7 @@ class SeedDemoResources extends Command
                 'schedule' => 'Tuesdays 3:00-4:00 PM',
             ],
             [
-                'name' => 'After-School Tutoring',
+                'name' => 'After-Organization Tutoring',
                 'description' => 'Free academic tutoring in math, science, and English. Available Monday through Thursday.',
                 'program_type' => 'academic',
                 'duration_weeks' => null,
@@ -237,7 +237,7 @@ class SeedDemoResources extends Command
             ],
             [
                 'name' => 'Peer Mentorship Program',
-                'description' => 'Connect with trained peer mentors for academic and social support throughout the school year.',
+                'description' => 'Connect with trained peer mentors for academic and social support throughout the organization year.',
                 'program_type' => 'mentorship',
                 'duration_weeks' => 36,
                 'max_participants' => 50,
@@ -289,9 +289,9 @@ class SeedDemoResources extends Command
         $courses = [
             [
                 'title' => 'Managing Test Anxiety',
-                'description' => 'A 5-step course to help students understand and manage test anxiety using proven techniques.',
+                'description' => 'A 5-step course to help learners understand and manage test anxiety using proven techniques.',
                 'course_type' => 'intervention',
-                'target_audience' => 'students',
+                'target_audience' => 'learners',
                 'objectives' => [
                     'Understand what causes test anxiety',
                     'Learn breathing techniques for calming',
@@ -310,7 +310,7 @@ class SeedDemoResources extends Command
                 'title' => 'Building Study Skills',
                 'description' => 'Learn essential study skills including note-taking, time management, and active reading strategies.',
                 'course_type' => 'skill_building',
-                'target_audience' => 'students',
+                'target_audience' => 'learners',
                 'objectives' => [
                     'Master effective note-taking methods',
                     'Create a study schedule',
@@ -327,7 +327,7 @@ class SeedDemoResources extends Command
                 'title' => 'Mindfulness Basics',
                 'description' => 'Introduction to mindfulness meditation for stress reduction and focus improvement.',
                 'course_type' => 'wellness',
-                'target_audience' => 'students',
+                'target_audience' => 'learners',
                 'objectives' => [
                     'Understand what mindfulness is',
                     'Practice basic meditation',

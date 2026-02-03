@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Classroom;
 use App\Models\ContactList;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -28,7 +28,7 @@ class ContactListManager extends Component
 
     public string $listDescription = '';
 
-    public string $listType = 'student';
+    public string $listType = 'learner';
 
     public bool $isDynamic = false;
 
@@ -97,7 +97,7 @@ class ContactListManager extends Component
         $this->editingList = null;
         $this->listName = '';
         $this->listDescription = '';
-        $this->listType = 'student';
+        $this->listType = 'learner';
         $this->isDynamic = false;
         $this->filterCriteria = [];
         $this->previewCount = 0;
@@ -107,7 +107,7 @@ class ContactListManager extends Component
     {
         $this->validate([
             'listName' => 'required|string|max:255',
-            'listType' => 'required|in:student,teacher,mixed',
+            'listType' => 'required|in:learner,teacher,mixed',
         ]);
 
         $user = auth()->user();
@@ -218,7 +218,7 @@ class ContactListManager extends Component
 
     public function openMembersModal(int $listId): void
     {
-        $this->viewingList = ContactList::with(['students.user', 'users'])->find($listId);
+        $this->viewingList = ContactList::with(['learners.user', 'users'])->find($listId);
 
         if ($this->viewingList) {
             $this->showMembersModal = true;
@@ -242,19 +242,19 @@ class ContactListManager extends Component
         }
 
         $user = auth()->user();
-        $studentIds = [];
+        $learnerIds = [];
         $userIds = [];
 
         foreach ($this->selectedMembers as $member) {
             [$type, $id] = explode(':', $member);
-            if ($type === 'student') {
-                $studentIds[] = (int) $id;
+            if ($type === 'learner') {
+                $learnerIds[] = (int) $id;
             } else {
                 $userIds[] = (int) $id;
             }
         }
 
-        $this->viewingList->addContacts($studentIds, $userIds, $user->id);
+        $this->viewingList->addContacts($learnerIds, $userIds, $user->id);
         $this->viewingList->refresh();
         $this->selectedMembers = [];
 
@@ -270,10 +270,10 @@ class ContactListManager extends Component
             return;
         }
 
-        if ($type === 'student') {
-            $student = Student::find($id);
-            if ($student) {
-                $this->viewingList->removeStudent($student);
+        if ($type === 'learner') {
+            $learner = Learner::find($id);
+            if ($learner) {
+                $this->viewingList->removeLearner($learner);
             }
         } else {
             $user = User::find($id);
@@ -319,7 +319,7 @@ class ContactListManager extends Component
     {
         $user = auth()->user();
 
-        return Student::where('org_id', $user->org_id)
+        return Learner::where('org_id', $user->org_id)
             ->whereNotNull('grade_level')
             ->distinct()
             ->pluck('grade_level')
@@ -352,7 +352,7 @@ class ContactListManager extends Component
         $search = $this->memberSearch;
 
         if ($this->viewingList->list_type === ContactList::TYPE_STUDENT || $this->viewingList->list_type === ContactList::TYPE_MIXED) {
-            $students = Student::where('org_id', $user->org_id)
+            $learners = Learner::where('org_id', $user->org_id)
                 ->whereNull('deleted_at')
                 ->when($search, function ($q) use ($search) {
                     $q->whereHas('user', function ($uq) use ($search) {
@@ -364,15 +364,15 @@ class ContactListManager extends Component
                 ->limit(20)
                 ->get()
                 ->map(fn ($s) => [
-                    'key' => 'student:'.$s->id,
-                    'type' => 'student',
+                    'key' => 'learner:'.$s->id,
+                    'type' => 'learner',
                     'id' => $s->id,
                     'name' => $s->full_name,
                     'meta' => 'Grade '.$s->grade_level,
                 ]);
 
             if ($this->viewingList->list_type === ContactList::TYPE_STUDENT) {
-                return $students;
+                return $learners;
             }
         }
 
@@ -398,7 +398,7 @@ class ContactListManager extends Component
             }
 
             // Mixed - combine both
-            return collect($students ?? [])->merge($users);
+            return collect($learners ?? [])->merge($users);
         }
 
         return collect();

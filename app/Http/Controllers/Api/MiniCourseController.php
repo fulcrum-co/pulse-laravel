@@ -229,19 +229,19 @@ class MiniCourseController extends Controller
     public function generate(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
+            'learner_id' => 'required|exists:learners,id',
             'signals' => 'nullable|array',
         ]);
 
-        $student = \App\Models\Student::findOrFail($validated['student_id']);
+        $learner = \App\Models\Learner::findOrFail($validated['learner_id']);
 
         // Verify org access
-        if ($student->org_id !== auth()->user()->org_id) {
+        if ($learner->org_id !== auth()->user()->org_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $course = $this->generationService->generateFromContext(
-            $student,
+            $learner,
             $validated['signals'] ?? []
         );
 
@@ -252,7 +252,7 @@ class MiniCourseController extends Controller
             ], 500);
         }
 
-        AuditLog::log('create', $course, null, ['source' => 'ai_generated', 'student_id' => $student->id]);
+        AuditLog::log('create', $course, null, ['source' => 'ai_generated', 'learner_id' => $learner->id]);
 
         return response()->json([
             'success' => true,
@@ -267,12 +267,12 @@ class MiniCourseController extends Controller
     {
         $this->authorize('update', $course);
 
-        $student = null;
-        if ($request->has('student_id')) {
-            $student = \App\Models\Student::find($request->student_id);
+        $learner = null;
+        if ($request->has('learner_id')) {
+            $learner = \App\Models\Learner::find($request->learner_id);
         }
 
-        $suggestions = $this->generationService->suggestCourseEdits($course, $student);
+        $suggestions = $this->generationService->suggestCourseEdits($course, $learner);
 
         return response()->json($suggestions);
     }

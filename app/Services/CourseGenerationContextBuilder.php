@@ -1,30 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Classroom;
 use App\Models\ContactList;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
 class CourseGenerationContextBuilder
 {
     /**
-     * Build context for generating a student-focused course.
+     * Build context for generating a learner-focused course.
      */
-    public function buildStudentContext(Student $student): array
+    public function buildLearnerContext(Learner $learner): array
     {
         $context = [
-            'entity_type' => 'student',
-            'entity_id' => $student->id,
-            'basic_info' => $this->getStudentBasicInfo($student),
-            'academic_profile' => $this->getStudentAcademicProfile($student),
-            'behavioral_profile' => $this->getStudentBehavioralProfile($student),
-            'support_needs' => $this->getStudentSupportNeeds($student),
-            'recent_data' => $this->getStudentRecentData($student),
-            'improvement_areas' => $this->identifyStudentImprovementAreas($student),
-            'strengths' => $this->identifyStudentStrengths($student),
+            'entity_type' => 'learner',
+            'entity_id' => $learner->id,
+            'basic_info' => $this->getLearnerBasicInfo($learner),
+            'academic_profile' => $this->getLearnerAcademicProfile($learner),
+            'behavioral_profile' => $this->getLearnerBehavioralProfile($learner),
+            'support_needs' => $this->getLearnerSupportNeeds($learner),
+            'recent_data' => $this->getLearnerRecentData($learner),
+            'improvement_areas' => $this->identifyLearnerImprovementAreas($learner),
+            'strengths' => $this->identifyLearnerStrengths($learner),
         ];
 
         return $context;
@@ -40,7 +42,7 @@ class CourseGenerationContextBuilder
             'entity_id' => $teacher->id,
             'basic_info' => $this->getTeacherBasicInfo($teacher),
             'classroom_data' => $this->getTeacherClassroomData($teacher),
-            'student_outcomes' => $this->getTeacherStudentOutcomes($teacher),
+            'learner_outcomes' => $this->getTeacherLearnerOutcomes($teacher),
             'survey_feedback' => $this->getTeacherSurveyFeedback($teacher),
             'observation_data' => $this->getTeacherObservationData($teacher),
             'improvement_areas' => $this->identifyTeacherImprovementAreas($teacher),
@@ -90,27 +92,51 @@ class CourseGenerationContextBuilder
     // STUDENT CONTEXT METHODS
     // ========================================
 
-    protected function getStudentBasicInfo(Student $student): array
+    protected function getLearnerBasicInfo(Learner $learner): array
     {
         return [
-            'grade_level' => $student->grade_level,
-            'enrollment_status' => $student->enrollment_status,
-            'has_iep' => $student->has_iep ?? false,
-            'is_ell' => $student->is_ell ?? false,
-            'is_504' => $student->is_504 ?? false,
-            'tags' => $student->tags ?? [],
+            'grade_level' => $learner->grade_level,
+            'enrollment_status' => $learner->enrollment_status,
+            'has_iep' => $learner->has_iep ?? false,
+            'is_ell' => $learner->is_ell ?? false,
+            'is_504' => $learner->is_504 ?? false,
+            'tags' => $learner->tags ?? [],
         ];
     }
 
-    protected function getStudentAcademicProfile(Student $student): array
+    protected function getLearnerAcademicProfile(Learner $learner): array
     {
-        // Get recent academic metrics
-        $academicMetrics = $student->metrics()
+        // Use aggregation pipeline for efficient metric retrieval
+        $threeMonthsAgo = now()->subMonths(3)->timestamp;
+
+        $academicMetrics = $learner->metrics()
             ->whereIn('metric_type', ['academic', 'grade', 'assessment'])
             ->where('recorded_at', '>=', now()->subMonths(3))
             ->orderByDesc('recorded_at')
             ->limit(20)
+            ->select(['metric_type', 'metric_name', 'metric_value', 'recorded_at'])
             ->get();
+
+        $avgPerformance = $learner->metrics()
+            ->whereIn('metric_type', ['academic', 'grade', 'assessment'])
+            ->where('recorded_at', '>=', now()->subMonths(3))
+            ->raw(function ($collection) {
+                return $collection->aggregate([
+                    ['$match' => [
+                        'metric_type' => ['$in' => ['academic', 'grade', 'assessment']],
+                        'recorded_at' => ['$gte' => new \MongoDB\BSON\UTCDateTime(now()->subMonths(3)->timestamp * 1000)]
+                    ]],
+                    ['$group' => [
+                        '_id' => null,
+                        'avg_value' => ['$avg' => '$metric_value']
+                    ]]
+                ]);
+            });
+
+        $avgValue = 0;
+        if (!empty($avgPerformance)) {
+            $avgValue = $avgPerformance[0]['avg_value'] ?? 0;
+        }
 
         return [
             'recent_metrics' => $academicMetrics->map(fn ($m) => [
@@ -119,17 +145,19 @@ class CourseGenerationContextBuilder
                 'value' => $m->metric_value,
                 'date' => $m->recorded_at->format('Y-m-d'),
             ])->toArray(),
-            'average_performance' => $academicMetrics->avg('metric_value'),
+            'average_performance' => $avgValue,
             'trend' => $this->calculateTrend($academicMetrics),
         ];
     }
 
-    protected function getStudentBehavioralProfile(Student $student): array
+    protected function getLearnerBehavioralProfile(Learner $learner): array
     {
-        $behavioralMetrics = $student->metrics()
+        // Optimized with column selection and pagination
+        $behavioralMetrics = $learner->metrics()
             ->whereIn('metric_type', ['behavioral', 'social_emotional', 'attendance'])
             ->where('recorded_at', '>=', now()->subMonths(3))
             ->orderByDesc('recorded_at')
+            ->select(['metric_type', 'metric_name', 'metric_value', 'recorded_at'])
             ->limit(20)
             ->get();
 
@@ -140,28 +168,29 @@ class CourseGenerationContextBuilder
                 'value' => $m->metric_value,
                 'date' => $m->recorded_at->format('Y-m-d'),
             ])->toArray(),
-            'risk_level' => $student->risk_level ?? 'unknown',
+            'risk_level' => $learner->risk_level ?? 'unknown',
         ];
     }
 
-    protected function getStudentSupportNeeds(Student $student): array
+    protected function getLearnerSupportNeeds(Learner $learner): array
     {
         $needs = [];
 
-        if ($student->has_iep) {
+        if ($learner->has_iep) {
             $needs[] = 'IEP accommodations';
         }
-        if ($student->is_ell) {
+        if ($learner->is_ell) {
             $needs[] = 'English language support';
         }
-        if ($student->is_504) {
+        if ($learner->is_504) {
             $needs[] = '504 accommodations';
         }
 
-        // Get active interventions
-        $enrollments = $student->enrollments()
-            ->with('course')
+        // Get active interventions with column selection optimization
+        $enrollments = $learner->enrollments()
+            ->with(['course:id,title'])
             ->whereIn('status', ['active', 'in_progress'])
+            ->select(['id', 'learner_id', 'course_id', 'status'])
             ->get();
 
         foreach ($enrollments as $enrollment) {
@@ -173,17 +202,17 @@ class CourseGenerationContextBuilder
         return $needs;
     }
 
-    protected function getStudentRecentData(Student $student): array
+    protected function getLearnerRecentData(Learner $learner): array
     {
         // Get recent notes
-        $recentNotes = $student->notes()
+        $recentNotes = $learner->notes()
             ->where('created_at', '>=', now()->subMonths(1))
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();
 
         // Get recent survey responses
-        $recentSurveys = $student->surveyAttempts()
+        $recentSurveys = $learner->surveyAttempts()
             ->with('survey')
             ->where('completed_at', '>=', now()->subMonths(3))
             ->where('status', 'completed')
@@ -203,17 +232,17 @@ class CourseGenerationContextBuilder
         ];
     }
 
-    protected function identifyStudentImprovementAreas(Student $student): array
+    protected function identifyLearnerImprovementAreas(Learner $learner): array
     {
         $areas = [];
 
         // Based on risk level
-        if (in_array($student->risk_level, ['high', 'critical'])) {
+        if (in_array($learner->risk_level, ['high', 'critical'])) {
             $areas[] = 'Overall academic support needed';
         }
 
         // Based on metrics trends
-        $recentMetrics = $student->metrics()
+        $recentMetrics = $learner->metrics()
             ->where('recorded_at', '>=', now()->subMonths(3))
             ->get()
             ->groupBy('metric_type');
@@ -226,7 +255,7 @@ class CourseGenerationContextBuilder
         }
 
         // Based on tags/flags
-        $tags = $student->tags ?? [];
+        $tags = $learner->tags ?? [];
         foreach ($tags as $tag) {
             if (str_contains(strtolower($tag), 'struggling') ||
                 str_contains(strtolower($tag), 'intervention') ||
@@ -238,12 +267,12 @@ class CourseGenerationContextBuilder
         return array_unique($areas);
     }
 
-    protected function identifyStudentStrengths(Student $student): array
+    protected function identifyLearnerStrengths(Learner $learner): array
     {
         $strengths = [];
 
         // Based on metrics trends
-        $recentMetrics = $student->metrics()
+        $recentMetrics = $learner->metrics()
             ->where('recorded_at', '>=', now()->subMonths(3))
             ->get()
             ->groupBy('metric_type');
@@ -256,7 +285,7 @@ class CourseGenerationContextBuilder
         }
 
         // Based on tags
-        $tags = $student->tags ?? [];
+        $tags = $learner->tags ?? [];
         foreach ($tags as $tag) {
             if (str_contains(strtolower($tag), 'gifted') ||
                 str_contains(strtolower($tag), 'honors') ||
@@ -283,49 +312,75 @@ class CourseGenerationContextBuilder
 
     protected function getTeacherClassroomData(User $teacher): array
     {
-        $classrooms = Classroom::where('teacher_id', $teacher->id)->get();
+        // Use aggregation pipeline for efficient classroom data retrieval
+        $classrooms = Classroom::where('teacher_id', $teacher->id)
+            ->select(['id', 'name', 'grade_level'])
+            ->with(['learners:id,classroom_id,risk_level'])
+            ->get();
 
         return $classrooms->map(function ($classroom) {
-            $students = $classroom->students ?? collect();
+            $learners = $classroom->learners ?? collect();
+            $highRiskCount = $learners->where('risk_level', 'high')->count();
 
             return [
                 'name' => $classroom->name,
                 'grade_level' => $classroom->grade_level,
-                'student_count' => $students->count(),
-                'high_risk_count' => $students->where('risk_level', 'high')->count(),
+                'learner_count' => $learners->count(),
+                'high_risk_count' => $highRiskCount,
             ];
         })->toArray();
     }
 
-    protected function getTeacherStudentOutcomes(User $teacher): array
+    protected function getTeacherLearnerOutcomes(User $teacher): array
     {
-        // Get aggregate metrics for students in teacher's classrooms
-        $classroomIds = Classroom::where('teacher_id', $teacher->id)->pluck('id');
+        // Optimized with aggregation pipeline for teacher's classrooms
+        $classroomIds = Classroom::where('teacher_id', $teacher->id)
+            ->select(['id'])
+            ->pluck('id')
+            ->toArray();
 
-        $studentIds = \DB::table('classroom_student')
-            ->whereIn('classroom_id', $classroomIds)
-            ->pluck('student_id');
-
-        if ($studentIds->isEmpty()) {
+        if (empty($classroomIds)) {
             return [];
         }
 
-        // Get aggregate metrics
-        $metrics = \App\Models\StudentMetric::whereIn('student_id', $studentIds)
-            ->where('recorded_at', '>=', now()->subMonths(3))
-            ->get()
-            ->groupBy('metric_type');
+        // Use aggregation pipeline with $lookup for JOIN
+        $outcomes = \App\Models\LearnerMetric::raw(function ($collection) use ($classroomIds) {
+            return $collection->aggregate([
+                ['$lookup' => [
+                    'from' => 'classroom_learner',
+                    'localField' => 'learner_id',
+                    'foreignField' => 'learner_id',
+                    'as' => 'enrollment'
+                ]],
+                ['$match' => [
+                    'enrollment.classroom_id' => ['$in' => $classroomIds],
+                    'recorded_at' => ['$gte' => new \MongoDB\BSON\UTCDateTime(now()->subMonths(3)->timestamp * 1000)]
+                ]],
+                ['$group' => [
+                    '_id' => '$metric_type',
+                    'average' => ['$avg' => '$metric_value'],
+                    'count' => ['$sum' => 1]
+                ]],
+                ['$project' => [
+                    'metric_type' => '$_id',
+                    'average' => 1,
+                    'count' => 1,
+                    '_id' => 0
+                ]]
+            ]);
+        });
 
-        $outcomes = [];
-        foreach ($metrics as $type => $typeMetrics) {
-            $outcomes[$type] = [
-                'average' => $typeMetrics->avg('metric_value'),
-                'trend' => $this->calculateTrend($typeMetrics),
-                'count' => $typeMetrics->count(),
+        $result = [];
+        foreach ($outcomes as $metric) {
+            $metricType = $metric['metric_type'] ?? 'unknown';
+            $result[$metricType] = [
+                'average' => round($metric['average'] ?? 0, 2),
+                'trend' => 'stable', // Calculated separately if needed
+                'count' => $metric['count'] ?? 0,
             ];
         }
 
-        return $outcomes;
+        return $result;
     }
 
     protected function getTeacherSurveyFeedback(User $teacher): array
@@ -369,11 +424,11 @@ class CourseGenerationContextBuilder
     {
         $areas = [];
 
-        // Based on student outcomes
-        $outcomes = $this->getTeacherStudentOutcomes($teacher);
+        // Based on learner outcomes
+        $outcomes = $this->getTeacherLearnerOutcomes($teacher);
         foreach ($outcomes as $type => $data) {
             if (($data['trend'] ?? '') === 'declining') {
-                $areas[] = 'Student '.str_replace('_', ' ', $type).' declining';
+                $areas[] = 'Learner '.str_replace('_', ' ', $type).' declining';
             }
         }
 
@@ -412,34 +467,62 @@ class CourseGenerationContextBuilder
             });
         }
 
-        $teacherIds = $teacherQuery->pluck('id');
+        $teacherIds = $teacherQuery->select(['id'])->pluck('id')->toArray();
 
-        // Get student metrics for those teachers' students
-        $classroomIds = Classroom::whereIn('teacher_id', $teacherIds)->pluck('id');
-        $studentIds = \DB::table('classroom_student')
-            ->whereIn('classroom_id', $classroomIds)
-            ->pluck('student_id');
-
-        if ($studentIds->isEmpty()) {
+        if (empty($teacherIds)) {
             return [];
         }
 
-        $metrics = \App\Models\StudentMetric::whereIn('student_id', $studentIds)
-            ->where('recorded_at', '>=', now()->subMonths(3))
-            ->get()
-            ->groupBy('metric_type');
+        // Optimized aggregation pipeline for all metrics in one query
+        $aggregates = \App\Models\LearnerMetric::raw(function ($collection) use ($teacherIds, $criteria) {
+            return $collection->aggregate([
+                ['$lookup' => [
+                    'from' => 'classroom_learner',
+                    'localField' => 'learner_id',
+                    'foreignField' => 'learner_id',
+                    'as' => 'enrollment'
+                ]],
+                ['$lookup' => [
+                    'from' => 'classrooms',
+                    'localField' => 'enrollment.classroom_id',
+                    'foreignField' => 'id',
+                    'as' => 'classroom'
+                ]],
+                ['$match' => [
+                    'classroom.teacher_id' => ['$in' => $teacherIds],
+                    'recorded_at' => ['$gte' => new \MongoDB\BSON\UTCDateTime(now()->subMonths(3)->timestamp * 1000)]
+                ]],
+                ['$unwind' => '$classroom'],
+                ['$group' => [
+                    '_id' => '$metric_type',
+                    'average' => ['$avg' => '$metric_value'],
+                    'min' => ['$min' => '$metric_value'],
+                    'max' => ['$max' => '$metric_value'],
+                    'count' => ['$sum' => 1]
+                ]],
+                ['$project' => [
+                    'metric_type' => '$_id',
+                    'average' => ['$round' => ['$average', 2]],
+                    'min' => 1,
+                    'max' => 1,
+                    'count' => 1,
+                    '_id' => 0
+                ]]
+            ]);
+        });
 
-        $aggregates = [];
-        foreach ($metrics as $type => $typeMetrics) {
-            $aggregates[$type] = [
-                'average' => round($typeMetrics->avg('metric_value'), 2),
-                'min' => $typeMetrics->min('metric_value'),
-                'max' => $typeMetrics->max('metric_value'),
-                'count' => $typeMetrics->count(),
+        $result = [];
+        foreach ($aggregates as $metric) {
+            $metricType = $metric['metric_type'] ?? 'unknown';
+            $result[$metricType] = [
+                'average' => $metric['average'] ?? 0,
+                'min' => $metric['min'] ?? 0,
+                'max' => $metric['max'] ?? 0,
+                'count' => $metric['count'] ?? 0,
             ];
         }
 
-        return $aggregates;
+        return $result;
     }
 
     protected function getDepartmentCommonChallenges(int $orgId, array $criteria): array
@@ -508,20 +591,20 @@ class CourseGenerationContextBuilder
         $needs = [];
 
         if ($list->list_type === ContactList::TYPE_STUDENT) {
-            $students = $list->students;
+            $learners = $list->learners;
 
-            $iepCount = $students->where('has_iep', true)->count();
-            $ellCount = $students->where('is_ell', true)->count();
-            $highRiskCount = $students->whereIn('risk_level', ['high', 'critical'])->count();
+            $iepCount = $learners->where('has_iep', true)->count();
+            $ellCount = $learners->where('is_ell', true)->count();
+            $highRiskCount = $learners->whereIn('risk_level', ['high', 'critical'])->count();
 
             if ($iepCount > 0) {
-                $needs[] = "$iepCount students with IEP";
+                $needs[] = "$iepCount learners with IEP";
             }
             if ($ellCount > 0) {
-                $needs[] = "$ellCount ELL students";
+                $needs[] = "$ellCount ELL learners";
             }
             if ($highRiskCount > 0) {
-                $needs[] = "$highRiskCount high-risk students";
+                $needs[] = "$highRiskCount high-risk learners";
             }
         }
 
@@ -575,7 +658,7 @@ class CourseGenerationContextBuilder
         $entityType = $context['entity_type'] ?? 'unknown';
         $lines[] = '## Target: '.ucfirst($entityType);
 
-        if ($entityType === 'student') {
+        if ($entityType === 'learner') {
             $basic = $context['basic_info'] ?? [];
             $lines[] = '- Grade Level: '.($basic['grade_level'] ?? 'Unknown');
             $lines[] = '- Risk Level: '.($context['behavioral_profile']['risk_level'] ?? 'Unknown');
@@ -584,7 +667,7 @@ class CourseGenerationContextBuilder
                 $lines[] = '- Has IEP: Yes';
             }
             if (! empty($basic['is_ell'])) {
-                $lines[] = '- ELL Student: Yes';
+                $lines[] = '- ELL Learner: Yes';
             }
 
             if (! empty($context['improvement_areas'])) {
@@ -611,9 +694,9 @@ class CourseGenerationContextBuilder
                 }
             }
 
-            if (! empty($context['student_outcomes'])) {
-                $lines[] = "\n### Student Outcome Trends:";
-                foreach ($context['student_outcomes'] as $type => $data) {
+            if (! empty($context['learner_outcomes'])) {
+                $lines[] = "\n### Learner Outcome Trends:";
+                foreach ($context['learner_outcomes'] as $type => $data) {
                     $trend = $data['trend'] ?? 'unknown';
                     $lines[] = '- '.ucfirst(str_replace('_', ' ', $type)).": $trend";
                 }

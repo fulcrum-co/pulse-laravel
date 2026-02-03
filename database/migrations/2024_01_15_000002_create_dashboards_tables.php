@@ -31,7 +31,7 @@ return new class extends Migration
         Schema::create('dashboard_widgets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('dashboard_id')->constrained()->cascadeOnDelete();
-            $table->string('widget_type'); // metric_card, bar_chart, line_chart, student_list, survey_summary, alert_feed
+            $table->string('widget_type'); // metric_card, bar_chart, line_chart, learner_list, survey_summary, alert_feed
             $table->string('title');
             $table->json('config')->nullable(); // Data source, filters, display options
             $table->json('position')->nullable(); // x, y, width, height for grid

@@ -1,28 +1,42 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Provider;
 use App\Models\ProviderConversation;
+use App\Services\Domain\NotificationFormatterService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Str;
 
 class ProviderNotificationService
 {
     protected SinchService $sinchService;
 
-    public function __construct(SinchService $sinchService)
-    {
+    protected NotificationFormatterService $formatter;
+
+    public function __construct(
+        SinchService $sinchService,
+        NotificationFormatterService $formatter
+    ) {
         $this->sinchService = $sinchService;
+        $this->formatter = $formatter;
     }
 
     /**
      * Notify provider of a new message.
+     *
+     * PERFORMANCE: Uses eager loading to prevent N+1 queries on provider and account relationships.
      */
     public function notifyNewMessage(ProviderConversation $conversation, array $message): void
     {
+        // Performance optimization: eager load relationships instead of lazy loading
+        if (! $conversation->relationLoaded('provider')) {
+            $conversation->load('provider.account');
+        }
+
         $provider = $conversation->provider;
         $account = $provider->account;
 
@@ -50,10 +64,10 @@ class ProviderNotificationService
 
         // Get sender name
         $initiator = $conversation->initiator;
-        $senderName = $initiator ? ($initiator->full_name ?? $initiator->first_name ?? 'Someone') : 'Someone';
+        $senderName = $this->formatter->getSenderName($initiator);
 
         // Get message preview
-        $messagePreview = Str::limit($message['text'] ?? 'New message', 100);
+        $messagePreview = $this->formatter->limitMessagePreview($message['text'] ?? 'New message', 100);
 
         // Send via preferred channels
         $notificationPrefs = $account?->notification_preferences ?? ['email' => true, 'sms' => true];
@@ -155,13 +169,8 @@ class ProviderNotificationService
             return;
         }
 
-        // Create short message for SMS
-        $message = "New message from {$senderName}: \"{$messagePreview}\"\n\nReply at: {$replyLink}";
-
-        // Truncate if too long
-        if (strlen($message) > 160) {
-            $message = Str::limit($message, 157).'...';
-        }
+        // Format message for SMS delivery
+        $message = $this->formatter->formatSmsNotification($senderName, $messagePreview, $replyLink);
 
         try {
             $this->sinchService->sendSms($phone, $message);
@@ -283,10 +292,10 @@ class ProviderNotificationService
             return;
         }
 
-        $studentName = $bookingDetails['student_name'] ?? 'a student';
+        $learnerName = $bookingDetails['learner_name'] ?? 'a learner';
         $time = $bookingDetails['scheduled_time'] ?? 'tomorrow';
 
-        $message = "Reminder: You have an appointment with {$studentName} {$time}. Log in to Pulse for details.";
+        $message = $this->formatter->formatBookingReminderSms($learnerName, $time);
 
         try {
             $this->sinchService->sendSms($phone, $message);

@@ -155,7 +155,7 @@ class MiniCoursePolicy
     }
 
     /**
-     * Determine whether the user can enroll students in the mini course.
+     * Determine whether the user can enroll learners in the mini course.
      */
     public function enroll(User $user, MiniCourse $course): bool
     {
@@ -169,7 +169,7 @@ class MiniCoursePolicy
             return false;
         }
 
-        // Admins, consultants, teachers, counselors can enroll students
+        // Admins, consultants, teachers, counselors can enroll learners
         return $user->isAdmin() || in_array($user->primary_role, ['consultant', 'teacher', 'counselor']);
     }
 

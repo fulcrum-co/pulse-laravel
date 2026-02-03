@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Survey;
 
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\Survey;
 use App\Models\User;
 use App\Services\SurveyDeliveryService;
@@ -16,7 +16,7 @@ class DeliveryManager extends Component
     // Delivery Configuration
     public string $channel = 'web';
 
-    public string $recipientType = 'student';
+    public string $recipientType = 'learner';
 
     public array $selectedRecipients = [];
 
@@ -177,8 +177,8 @@ class DeliveryManager extends Component
         $user = auth()->user();
         $recipients = [];
 
-        if ($this->recipientType === 'student') {
-            $query = Student::where('org_id', $user->org_id);
+        if ($this->recipientType === 'learner') {
+            $query = Learner::where('org_id', $user->org_id);
 
             if ($this->search) {
                 $query->where(function ($q) {
@@ -188,16 +188,16 @@ class DeliveryManager extends Component
                 });
             }
 
-            $students = $query->limit(50)->get();
+            $learners = $query->limit(50)->get();
 
-            foreach ($students as $student) {
+            foreach ($learners as $learner) {
                 $recipients[] = [
-                    'type' => 'student',
-                    'id' => $student->id,
-                    'name' => $student->full_name,
-                    'email' => $student->email,
-                    'phone' => $student->phone,
-                    'grade' => $student->grade,
+                    'type' => 'learner',
+                    'id' => $learner->id,
+                    'name' => $learner->full_name,
+                    'email' => $learner->email,
+                    'phone' => $learner->phone,
+                    'grade' => $learner->grade,
                 ];
             }
         } else {

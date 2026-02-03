@@ -24,7 +24,7 @@ class StrategyAssignment extends Model
     }
 
     /**
-     * Get the assignable entity (User, Department, Classroom, Student).
+     * Get the assignable entity (User, Department, Classroom, Learner).
      */
     public function assignable(): MorphTo
     {
@@ -54,7 +54,7 @@ class StrategyAssignment extends Model
             return $assignable->first_name.' '.$assignable->last_name;
         }
 
-        if ($assignable instanceof Student) {
+        if ($assignable instanceof Learner) {
             return $assignable->user->first_name.' '.$assignable->user->last_name;
         }
 

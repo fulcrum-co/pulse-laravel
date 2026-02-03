@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Contact Lists</h1>
-            <p class="text-sm text-gray-500">Create and manage lists of students and teachers for targeting courses and collections</p>
+            <p class="text-sm text-gray-500">Create and manage lists of learners and teachers for targeting courses and collections</p>
         </div>
         <button
             wire:click="openCreateModal"
@@ -35,7 +35,7 @@
             class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
         >
             <option value="">All Types</option>
-            <option value="student">Students</option>
+            <option value="learner">Learners</option>
             <option value="teacher">Teachers</option>
             <option value="mixed">Mixed</option>
         </select>
@@ -56,7 +56,7 @@
         <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
             <div class="flex items-start justify-between mb-3">
                 <div class="flex items-center gap-2">
-                    @if($list->list_type === 'student')
+                    @if($list->list_type === 'learner')
                     <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
                         <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
@@ -186,13 +186,13 @@
                         <div class="grid grid-cols-3 gap-2">
                             <button
                                 type="button"
-                                wire:click="$set('listType', 'student')"
-                                class="p-3 rounded-lg border-2 text-center transition-all {{ $listType === 'student' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
+                                wire:click="$set('listType', 'learner')"
+                                class="p-3 rounded-lg border-2 text-center transition-all {{ $listType === 'learner' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
                             >
-                                <svg class="w-5 h-5 mx-auto mb-1 {{ $listType === 'student' ? 'text-pulse-orange-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 mx-auto mb-1 {{ $listType === 'learner' ? 'text-pulse-orange-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                                 </svg>
-                                <span class="text-xs font-medium {{ $listType === 'student' ? 'text-pulse-orange-600' : 'text-gray-700' }}">Students</span>
+                                <span class="text-xs font-medium {{ $listType === 'learner' ? 'text-pulse-orange-600' : 'text-gray-700' }}">Learners</span>
                             </button>
                             <button
                                 type="button"
@@ -232,8 +232,8 @@
                         </button>
                     </div>
 
-                    <!-- Dynamic Filters (only for student lists) -->
-                    @if($isDynamic && $listType === 'student')
+                    <!-- Dynamic Filters (only for learner lists) -->
+                    @if($isDynamic && $listType === 'learner')
                     <div class="border border-gray-200 rounded-lg p-4 space-y-3">
                         <h4 class="text-sm font-medium text-gray-900">Filter Criteria</h4>
 
@@ -414,15 +414,15 @@
                             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">
-                                        {{ substr($member instanceof \App\Models\Student ? $member->full_name : $member->first_name, 0, 1) }}
+                                        {{ substr($member instanceof \App\Models\Learner ? $member->full_name : $member->first_name, 0, 1) }}
                                     </div>
                                     <div>
                                         <p class="text-sm font-medium text-gray-900">
-                                            {{ $member instanceof \App\Models\Student ? $member->full_name : $member->full_name }}
+                                            {{ $member instanceof \App\Models\Learner ? $member->full_name : $member->full_name }}
                                         </p>
                                         <p class="text-xs text-gray-500">
-                                            @if($member instanceof \App\Models\Student)
-                                            Student - Grade {{ $member->grade_level }}
+                                            @if($member instanceof \App\Models\Learner)
+                                            Learner - Grade {{ $member->grade_level }}
                                             @else
                                             {{ ucfirst($member->role) }}
                                             @endif
@@ -432,7 +432,7 @@
 
                                 @if(!$viewingList->is_dynamic)
                                 <button
-                                    wire:click="removeMember('{{ $member instanceof \App\Models\Student ? 'student' : 'user' }}', {{ $member->id }})"
+                                    wire:click="removeMember('{{ $member instanceof \App\Models\Learner ? 'learner' : 'user' }}', {{ $member->id }})"
                                     class="p-1 text-gray-400 hover:text-red-500"
                                 >
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

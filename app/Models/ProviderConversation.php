@@ -15,7 +15,7 @@ class ProviderConversation extends Model
         'provider_id',
         'initiator_type',
         'initiator_id',
-        'student_id',
+        'learner_id',
         'stream_channel_id',
         'stream_channel_type',
         'status',
@@ -69,7 +69,7 @@ class ProviderConversation extends Model
     }
 
     /**
-     * Get the initiator (User or Student).
+     * Get the initiator (User or Learner).
      */
     public function initiator(): MorphTo
     {
@@ -77,11 +77,11 @@ class ProviderConversation extends Model
     }
 
     /**
-     * Get the student being discussed (if any).
+     * Get the learner being discussed (if any).
      */
-    public function student(): BelongsTo
+    public function learner(): BelongsTo
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Learner::class);
     }
 
     /**
@@ -163,7 +163,7 @@ class ProviderConversation extends Model
      */
     public function generateStreamChannelId(): string
     {
-        $initiatorPrefix = $this->initiator_type === 'App\\Models\\User' ? 'user' : 'student';
+        $initiatorPrefix = $this->initiator_type === 'App\\Models\\User' ? 'user' : 'learner';
 
         return "provider_{$this->provider_id}_{$initiatorPrefix}_{$this->initiator_id}";
     }

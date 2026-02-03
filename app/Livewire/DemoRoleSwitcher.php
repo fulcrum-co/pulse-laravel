@@ -12,12 +12,12 @@ class DemoRoleSwitcher extends Component
 
     public array $availableRoles = [
         'actual' => ['label' => 'My Actual Role', 'icon' => 'user-circle', 'description' => 'Use your real account permissions'],
-        'consultant' => ['label' => 'District Consultant', 'icon' => 'academic-cap', 'description' => 'District-level oversight, can push content to schools'],
+        'consultant' => ['label' => 'District Consultant', 'icon' => 'academic-cap', 'description' => 'District-level oversight, can push content to organizations'],
         'superintendent' => ['label' => 'Superintendent', 'icon' => 'building-library', 'description' => 'District administrator with full access'],
-        'school_admin' => ['label' => 'School Administrator', 'icon' => 'building-office-2', 'description' => 'Principal or school-level admin'],
-        'counselor' => ['label' => 'School Counselor', 'icon' => 'heart', 'description' => 'Student support and intervention access'],
-        'teacher' => ['label' => 'Teacher', 'icon' => 'user-group', 'description' => 'Classroom view with student roster'],
-        'student' => ['label' => 'Student', 'icon' => 'face-smile', 'description' => 'Student portal experience'],
+        'organization_admin' => ['label' => 'Organization Administrator', 'icon' => 'building-office-2', 'description' => 'Principal or organization-level admin'],
+        'counselor' => ['label' => 'Organization Counselor', 'icon' => 'heart', 'description' => 'Learner support and intervention access'],
+        'teacher' => ['label' => 'Teacher', 'icon' => 'user-group', 'description' => 'Classroom view with learner roster'],
+        'learner' => ['label' => 'Learner', 'icon' => 'face-smile', 'description' => 'Learner portal experience'],
         'parent' => ['label' => 'Parent/Guardian', 'icon' => 'home', 'description' => 'Parent portal with child info'],
     ];
 

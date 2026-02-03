@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Resource;
 use App\Models\ResourceAssignment;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\Survey;
 use App\Models\SurveyAttempt;
 use Illuminate\Http\Request;
@@ -16,12 +16,12 @@ class DashboardController extends Controller
         $user = $request->user();
         $orgId = $user->org_id;
 
-        // Get student metrics
-        $studentMetrics = [
-            'good' => Student::forOrganization($orgId)->riskLevel('good')->count(),
-            'low' => Student::forOrganization($orgId)->riskLevel('low')->count(),
-            'high' => Student::forOrganization($orgId)->riskLevel('high')->count(),
-            'total' => Student::forOrganization($orgId)->count(),
+        // Get learner metrics
+        $learnerMetrics = [
+            'good' => Learner::forOrganization($orgId)->riskLevel('good')->count(),
+            'low' => Learner::forOrganization($orgId)->riskLevel('low')->count(),
+            'high' => Learner::forOrganization($orgId)->riskLevel('high')->count(),
+            'total' => Learner::forOrganization($orgId)->count(),
         ];
 
         // Get survey metrics
@@ -36,12 +36,12 @@ class DashboardController extends Controller
         $suggestedResourcesCount = Resource::forOrganization($orgId)->active()->count();
 
         // Get resource assignments pending
-        $pendingAssignments = ResourceAssignment::whereHas('student', function ($q) use ($orgId) {
+        $pendingAssignments = ResourceAssignment::whereHas('learner', function ($q) use ($orgId) {
             $q->where('org_id', $orgId);
         })->where('status', 'assigned')->count();
 
         return view('dashboard.index', compact(
-            'studentMetrics',
+            'learnerMetrics',
             'surveyMetrics',
             'suggestedResourcesCount',
             'pendingAssignments'

@@ -75,7 +75,7 @@ class ModerationWorkflowSeeder extends Seeder
     {
         // Find eligible moderators
         $moderators = User::where('org_id', $org->id)
-            ->whereIn('primary_role', ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor'])
+            ->whereIn('primary_role', ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor'])
             ->get();
 
         if ($moderators->isEmpty()) {
@@ -133,7 +133,7 @@ class ModerationWorkflowSeeder extends Seeder
             ];
         }
 
-        // School admins - academic and career focus
+        // Organization admins - academic and career focus
         return [
             ModerationTeamSetting::SPEC_ACADEMIC,
             ModerationTeamSetting::SPEC_CAREER,
@@ -152,7 +152,7 @@ class ModerationWorkflowSeeder extends Seeder
             return 10;
         }
 
-        // School admins - lower capacity (have other duties)
+        // Organization admins - lower capacity (have other duties)
         return 5;
     }
 }

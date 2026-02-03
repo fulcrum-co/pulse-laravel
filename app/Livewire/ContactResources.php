@@ -10,7 +10,7 @@ use App\Models\Program;
 use App\Models\Provider;
 use App\Models\Resource;
 use App\Models\ResourceAssignment;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Services\ProviderMatchingService;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -99,7 +99,7 @@ class ContactResources extends Component
 
         $assignment = ResourceAssignment::create([
             'resource_id' => $this->selectedResourceId,
-            'student_id' => $this->contactId,
+            'learner_id' => $this->contactId,
             'assigned_by' => $user->id,
             'status' => 'pending',
             'notes' => $this->assignmentNotes ?: null,
@@ -200,7 +200,7 @@ class ContactResources extends Component
 
     public function getAssignmentsProperty()
     {
-        $query = ResourceAssignment::where('student_id', $this->contactId)
+        $query = ResourceAssignment::where('learner_id', $this->contactId)
             ->with(['resource', 'assigner'])
             ->orderByDesc('assigned_at');
 
@@ -258,7 +258,7 @@ class ContactResources extends Component
 
         // Check if already enrolled
         $existingEnrollment = MiniCourseEnrollment::where('mini_course_id', $course->id)
-            ->where('student_id', $this->contactId)
+            ->where('learner_id', $this->contactId)
             ->whereIn('status', [
                 MiniCourseEnrollment::STATUS_ENROLLED,
                 MiniCourseEnrollment::STATUS_IN_PROGRESS,
@@ -268,7 +268,7 @@ class ContactResources extends Component
         if ($existingEnrollment) {
             $this->dispatch('notify', [
                 'type' => 'error',
-                'message' => 'Student is already enrolled in this course.',
+                'message' => 'Learner is already enrolled in this course.',
             ]);
 
             return;
@@ -277,7 +277,7 @@ class ContactResources extends Component
         $enrollment = MiniCourseEnrollment::create([
             'mini_course_id' => $course->id,
             'mini_course_version_id' => $course->current_version_id,
-            'student_id' => $this->contactId,
+            'learner_id' => $this->contactId,
             'enrolled_by' => $user->id,
             'enrollment_source' => MiniCourseEnrollment::SOURCE_MANUAL,
             'status' => MiniCourseEnrollment::STATUS_ENROLLED,
@@ -289,7 +289,7 @@ class ContactResources extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Student enrolled in course successfully.',
+            'message' => 'Learner enrolled in course successfully.',
         ]);
     }
 
@@ -353,7 +353,7 @@ class ContactResources extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Student withdrawn from course.',
+            'message' => 'Learner withdrawn from course.',
         ]);
     }
 
@@ -365,7 +365,7 @@ class ContactResources extends Component
 
     public function getEnrollmentsProperty()
     {
-        $query = MiniCourseEnrollment::where('student_id', $this->contactId)
+        $query = MiniCourseEnrollment::where('learner_id', $this->contactId)
             ->with(['miniCourse', 'currentStep', 'stepProgress'])
             ->orderByDesc('created_at');
 
@@ -409,7 +409,7 @@ class ContactResources extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Suggestion accepted and student enrolled.',
+            'message' => 'Suggestion accepted and learner enrolled.',
         ]);
     }
 
@@ -430,7 +430,7 @@ class ContactResources extends Component
 
     public function getCourseSuggestionsProperty()
     {
-        return MiniCourseSuggestion::where('contact_type', Student::class)
+        return MiniCourseSuggestion::where('contact_type', Learner::class)
             ->where('contact_id', $this->contactId)
             ->where('status', MiniCourseSuggestion::STATUS_PENDING)
             ->with(['miniCourse'])
@@ -444,18 +444,18 @@ class ContactResources extends Component
 
     public function getProviderRecommendationsProperty()
     {
-        if ($this->contactType !== 'student') {
+        if ($this->contactType !== 'learner') {
             return collect();
         }
 
-        $student = Student::find($this->contactId);
-        if (! $student) {
+        $learner = Learner::find($this->contactId);
+        if (! $learner) {
             return collect();
         }
 
         $service = app(ProviderMatchingService::class);
 
-        return $service->findMatchingProviders($student, [], 5);
+        return $service->findMatchingProviders($learner, [], 5);
     }
 
     // ========================================
@@ -464,18 +464,18 @@ class ContactResources extends Component
 
     public function getProgramRecommendationsProperty()
     {
-        if ($this->contactType !== 'student') {
+        if ($this->contactType !== 'learner') {
             return collect();
         }
 
-        $student = Student::find($this->contactId);
-        if (! $student) {
+        $learner = Learner::find($this->contactId);
+        if (! $learner) {
             return collect();
         }
 
         $service = app(ProviderMatchingService::class);
 
-        return $service->findMatchingPrograms($student, [], 5);
+        return $service->findMatchingPrograms($learner, [], 5);
     }
 
     public function render()

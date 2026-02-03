@@ -7,7 +7,7 @@
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search distributions..."
+                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('search_distributions_placeholder') }}"
                     class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 />
             </div>
@@ -16,7 +16,7 @@
                 wire:model.live="statusFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">All Statuses</option>
+                <option value="">@term('all_statuses_label')</option>
                 @foreach($statuses as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
@@ -26,7 +26,7 @@
                 wire:model.live="channelFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">All Channels</option>
+                <option value="">@term('all_channels_label')</option>
                 @foreach($channels as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
@@ -37,7 +37,7 @@
                 wire:click="clearFilters"
                 class="text-sm text-gray-500 hover:text-gray-700"
             >
-                Clear
+                @term('clear_label')
             </button>
             @endif
         </div>
@@ -47,21 +47,21 @@
             <button
                 wire:click="setViewMode('grid')"
                 class="p-1.5 rounded {{ $viewMode === 'grid' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="Grid view"
+                title="{{ app(\App\Services\TerminologyService::class)->get('grid_view_label') }}"
             >
                 <x-icon name="squares-2x2" class="w-4 h-4" />
             </button>
             <button
                 wire:click="setViewMode('list')"
                 class="p-1.5 rounded {{ $viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="List view"
+                title="{{ app(\App\Services\TerminologyService::class)->get('list_view_label') }}"
             >
                 <x-icon name="list-bullet" class="w-4 h-4" />
             </button>
             <button
                 wire:click="setViewMode('table')"
                 class="p-1.5 rounded {{ $viewMode === 'table' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="Table view"
+                title="{{ app(\App\Services\TerminologyService::class)->get('table_view_label') }}"
             >
                 <x-icon name="table-cells" class="w-4 h-4" />
             </button>
@@ -75,13 +75,13 @@
                 <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                     <x-icon name="paper-airplane" class="w-8 h-8 text-pulse-orange-500 transform -rotate-45" />
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">Create your first distribution</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">@term('distribution_empty_title')</h3>
                 <p class="text-gray-500 mb-4 max-w-sm mx-auto text-sm">
-                    Send reports and messages to targeted groups via email or SMS. Set up one-time or recurring campaigns.
+                    @term('distribution_empty_body')
                 </p>
                 <a href="{{ route('distribute.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
                     <x-icon name="plus" class="w-4 h-4 mr-1" />
-                    Create Distribution
+                    @term('create_distribution_label')
                 </a>
             </div>
         </x-card>
@@ -118,14 +118,14 @@
                                 {{ ucfirst($distribution->channel) }}
                             </span>
                             <span class="inline-flex items-center text-gray-500">
-                                {{ $distribution->isRecurring() ? 'Recurring' : 'One-time' }}
+                                {{ $distribution->isRecurring() ? app(\App\Services\TerminologyService::class)->get('recurring_label') : app(\App\Services\TerminologyService::class)->get('one_time_label') }}
                             </span>
                         </div>
 
                         <div class="flex items-center justify-between text-xs mb-3">
                             <div>
                                 <span class="font-semibold text-gray-900">{{ number_format($distribution->deliveries_count ?? 0) }}</span>
-                                <span class="text-gray-500 ml-1">deliveries</span>
+                                <span class="text-gray-500 ml-1">@term('deliveries_label')</span>
                             </div>
                             @if($distribution->contactList)
                             <div class="text-gray-500 truncate max-w-[50%]" title="{{ $distribution->contactList->name }}">
@@ -138,16 +138,16 @@
                         @if($distribution->schedule && $distribution->schedule->next_scheduled_at)
                             <div class="flex items-center text-xs text-gray-500">
                                 <x-icon name="clock" class="w-3 h-3 mr-1" />
-                                Next: {{ $distribution->schedule->next_scheduled_at->format('M j, g:i A') }}
+                                @term('next_send_label'): {{ $distribution->schedule->next_scheduled_at->format('M j, g:i A') }}
                             </div>
                         @elseif($distribution->scheduled_for)
                             <div class="flex items-center text-xs text-blue-600">
                                 <x-icon name="calendar" class="w-3 h-3 mr-1" />
-                                Scheduled: {{ $distribution->scheduled_for->format('M j, g:i A') }}
+                                @term('scheduled_label'): {{ $distribution->scheduled_for->format('M j, g:i A') }}
                             </div>
                         @else
                             <div class="text-xs text-gray-400">
-                                Updated {{ $distribution->updated_at->diffForHumans(null, true) }} ago
+                                @term('updated_label') {{ $distribution->updated_at->diffForHumans(null, true) }} @term('ago_label')
                             </div>
                         @endif
                     </div>
@@ -159,24 +159,24 @@
                                 <button wire:click="toggleStatus({{ $distribution->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                     <x-icon name="{{ $distribution->status === 'active' ? 'pause' : 'play' }}" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $distribution->status === 'active' ? 'Pause' : 'Activate' }}</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $distribution->status === 'active' ? app(\App\Services\TerminologyService::class)->get('pause_action') : app(\App\Services\TerminologyService::class)->get('activate_action') }}</span>
                             </div>
                             @endif
                             <div class="relative group">
                                 <button wire:click="duplicate({{ $distribution->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                     <x-icon name="document-duplicate" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">@term('duplicate_action')</span>
                             </div>
                             <div class="relative group">
                                 <button wire:click="confirmDelete({{ $distribution->id }})" class="p-1.5 text-gray-400 hover:text-red-500 rounded">
                                     <x-icon name="trash" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Delete</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">@term('delete_action')</span>
                             </div>
                         </div>
                         <a href="{{ route('distribute.show', $distribution) }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                            View
+                            @term('view_action')
                         </a>
                     </div>
                 </div>
@@ -213,17 +213,17 @@
                             </span>
                         </div>
                         <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                            <span>{{ $distribution->deliveries_count ?? 0 }} deliveries</span>
+                            <span>{{ $distribution->deliveries_count ?? 0 }} @term('deliveries_label')</span>
                             @if($distribution->contactList)
-                            <span>To: {{ $distribution->contactList->name }}</span>
+                            <span>@term('to_label'): {{ $distribution->contactList->name }}</span>
                             @endif
                             @if($distribution->schedule && $distribution->schedule->next_scheduled_at)
                                 <span class="flex items-center">
                                     <x-icon name="clock" class="w-3 h-3 mr-1" />
-                                    Next: {{ $distribution->schedule->next_scheduled_at->format('M j') }}
+                                    @term('next_send_label'): {{ $distribution->schedule->next_scheduled_at->format('M j') }}
                                 </span>
                             @else
-                                <span>Updated {{ $distribution->updated_at->diffForHumans() }}</span>
+                                <span>@term('updated_label') {{ $distribution->updated_at->diffForHumans() }}</span>
                             @endif
                         </div>
                     </div>
@@ -233,23 +233,23 @@
                             <button wire:click="toggleStatus({{ $distribution->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                 <x-icon name="{{ $distribution->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $distribution->status === 'active' ? 'Pause' : 'Activate' }}</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $distribution->status === 'active' ? app(\App\Services\TerminologyService::class)->get('pause_action') : app(\App\Services\TerminologyService::class)->get('activate_action') }}</span>
                         </div>
                         @endif
                         <div class="relative group">
                             <button wire:click="duplicate({{ $distribution->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                 <x-icon name="document-duplicate" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">@term('duplicate_action')</span>
                         </div>
                         <div class="relative group">
                             <button wire:click="confirmDelete({{ $distribution->id }})" class="p-1.5 text-gray-400 hover:text-red-500 rounded">
                                 <x-icon name="trash" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Delete</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">@term('delete_action')</span>
                         </div>
                         <a href="{{ route('distribute.show', $distribution) }}" class="ml-2 px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600">
-                            View
+                            @term('view_action')
                         </a>
                     </div>
                 </div>
@@ -262,13 +262,13 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Distribution</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Channel</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recipients</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deliveries</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Next Send</th>
-                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('distribution_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('channel_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('status_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('recipients_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('deliveries_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('next_send_label')</th>
+                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">@term('actions_label')</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -291,7 +291,7 @@
                                 <div class="flex items-center gap-2">
                                     <span class="text-sm font-medium text-gray-900">{{ $distribution->title }}</span>
                                     @if($distribution->usesReport())
-                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">Report</span>
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">@term('report_singular')</span>
                                     @endif
                                 </div>
                             </td>
@@ -310,7 +310,7 @@
                                 @if($distribution->contactList)
                                     {{ $distribution->contactList->name }}
                                 @elseif($distribution->recipient_ids)
-                                    {{ count($distribution->recipient_ids) }} individuals
+                                    {{ count($distribution->recipient_ids) }} @term('individuals_label')
                                 @else
                                     <span class="text-gray-400">-</span>
                                 @endif
@@ -334,23 +334,23 @@
                                         <button wire:click="toggleStatus({{ $distribution->id }})" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                                             <x-icon name="{{ $distribution->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
                                         </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">{{ $distribution->status === 'active' ? 'Pause' : 'Activate' }}</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">{{ $distribution->status === 'active' ? app(\App\Services\TerminologyService::class)->get('pause_action') : app(\App\Services\TerminologyService::class)->get('activate_action') }}</span>
                                     </div>
                                     @endif
                                     <div class="relative group">
                                         <button wire:click="duplicate({{ $distribution->id }})" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                                             <x-icon name="document-duplicate" class="w-4 h-4" />
                                         </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Duplicate</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">@term('duplicate_action')</span>
                                     </div>
                                     <div class="relative group">
                                         <button wire:click="confirmDelete({{ $distribution->id }})" class="p-1 text-gray-400 hover:text-red-500 rounded">
                                             <x-icon name="trash" class="w-4 h-4" />
                                         </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Delete</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">@term('delete_action')</span>
                                     </div>
                                     <a href="{{ route('distribute.show', $distribution) }}" class="ml-1 px-2 py-1 text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                                        View
+                                        @term('view_action')
                                     </a>
                                 </div>
                             </td>
@@ -381,15 +381,15 @@
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                         <h3 class="text-base font-medium text-gray-900">Delete Distribution</h3>
-                        <p class="mt-1 text-sm text-gray-500">Are you sure? This will also delete all delivery history. This cannot be undone.</p>
+                        <p class="mt-1 text-sm text-gray-500">@term('delete_distribution_confirm_label')</p>
                     </div>
                 </div>
                 <div class="mt-4 sm:flex sm:flex-row-reverse gap-2">
                     <button wire:click="deleteDistribution" class="w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                        Delete
+                        @term('delete_action')
                     </button>
                     <button wire:click="cancelDelete" class="mt-2 sm:mt-0 w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
+                        @term('cancel_action')
                     </button>
                 </div>
             </div>

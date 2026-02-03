@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('strategy_assignments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('strategic_plan_id')->constrained('strategic_plans')->cascadeOnDelete();
-            $table->string('assignable_type'); // App\Models\User, App\Models\Department, App\Models\Classroom, App\Models\Student
+            $table->string('assignable_type'); // App\Models\User, App\Models\Department, App\Models\Classroom, App\Models\Learner
             $table->unsignedBigInteger('assignable_id');
             $table->foreignId('assigned_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();

@@ -121,7 +121,7 @@ function pageHelpOverlay() {
                     section: 'intro',
                     selector: null,
                     title: 'Welcome to your Dashboard',
-                    description: 'This is your central hub for monitoring student wellness across your organization. Let me show you around.',
+                    description: 'This is your central hub for monitoring learner wellness across your organization. Let me show you around.',
                     position: 'center'
                 },
                 {
@@ -161,7 +161,7 @@ function pageHelpOverlay() {
                     section: 'intro',
                     selector: null,
                     title: 'Surveys & Assessments',
-                    description: 'Create and manage wellness surveys to check in with your students. This is where you\'ll build, distribute, and analyze survey results.',
+                    description: 'Create and manage wellness surveys to check in with your learners. This is where you\'ll build, distribute, and analyze survey results.',
                     position: 'center'
                 },
                 {
@@ -185,7 +185,7 @@ function pageHelpOverlay() {
                     section: 'intro',
                     selector: null,
                     title: 'Alert Management',
-                    description: 'Alerts help you identify students who may need support. This system monitors survey responses and flags concerning patterns.',
+                    description: 'Alerts help you identify learners who may need support. This system monitors survey responses and flags concerning patterns.',
                     position: 'center'
                 },
                 {
@@ -199,7 +199,7 @@ function pageHelpOverlay() {
                     section: 'list',
                     selector: '[data-help="alert-list"], .alert-list, [class*="alert-item"]',
                     title: 'Alert Details',
-                    description: 'Each alert shows the student, the trigger, and recommended actions. Click to view more details.',
+                    description: 'Each alert shows the learner, the trigger, and recommended actions. Click to view more details.',
                     tip: 'Prioritize high-severity alerts first.',
                     position: 'top'
                 }
@@ -209,7 +209,7 @@ function pageHelpOverlay() {
                     section: 'intro',
                     selector: null,
                     title: 'Contact Management',
-                    description: 'View and manage all contacts including students, teachers, and parents. Track their information and engagement.',
+                    description: 'View and manage all contacts including learners, teachers, and parents. Track their information and engagement.',
                     position: 'center'
                 },
                 {
@@ -294,7 +294,7 @@ function pageHelpOverlay() {
                     section: 'intro',
                     selector: null,
                     title: 'Data Collections',
-                    description: 'Set up recurring data collection to systematically gather progress monitoring data, check-ins, and insights from students, staff, or parents.',
+                    description: 'Set up recurring data collection to systematically gather progress monitoring data, check-ins, and insights from learners, staff, or parents.',
                     position: 'center'
                 },
                 {
@@ -463,7 +463,7 @@ function pageHelpOverlay() {
             if (path.includes('/plans')) return 'plans';
             if (path.includes('/surveys')) return 'surveys';
             if (path.includes('/alerts')) return 'alerts';
-            if (path.includes('/students') || path.includes('/contacts')) return 'contacts';
+            if (path.includes('/learners') || path.includes('/contacts')) return 'contacts';
             if (path.includes('/resources')) return 'resources';
             if (path.includes('/collect')) return 'collect';
             if (path.includes('/distribute')) return 'distribute';

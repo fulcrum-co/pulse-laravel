@@ -4,6 +4,22 @@
         open: false,
         hintsEnabled: false,
         tooltipCreatorMode: false,
+        labels: @js([
+            'help_options' => app(\App\Services\TerminologyService::class)->get('help_options_label'),
+            'help' => app(\App\Services\TerminologyService::class)->get('help_label'),
+            'hide_tooltips' => app(\App\Services\TerminologyService::class)->get('hide_tooltips_label'),
+            'show_tooltips' => app(\App\Services\TerminologyService::class)->get('show_tooltips_label'),
+            'help_hints_description' => app(\App\Services\TerminologyService::class)->get('help_hints_description_label'),
+            'start_page_tour' => app(\App\Services\TerminologyService::class)->get('start_page_tour_label'),
+            'tooltips_step_through' => app(\App\Services\TerminologyService::class)->get('tooltips_step_through_label'),
+            'help_center' => app(\App\Services\TerminologyService::class)->get('help_center_label'),
+            'browse_articles_guides' => app(\App\Services\TerminologyService::class)->get('browse_articles_guides_label'),
+            'exit_creator_mode' => app(\App\Services\TerminologyService::class)->get('exit_creator_mode_label'),
+            'create_tooltips' => app(\App\Services\TerminologyService::class)->get('create_tooltips_label'),
+            'help_tips_description' => app(\App\Services\TerminologyService::class)->get('help_tips_description_label'),
+            'manage_tooltips' => app(\App\Services\TerminologyService::class)->get('manage_tooltips_label'),
+            'view_edit_tooltips' => app(\App\Services\TerminologyService::class)->get('view_edit_tooltips_label'),
+        ]),
         init() {
             // Check if hints are enabled GLOBALLY (persists across all pages until toggled off)
             this.hintsEnabled = localStorage.getItem('helpHintsEnabled') === 'true';
@@ -30,12 +46,12 @@
         @click="open = !open"
         class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
         :class="hintsEnabled ? 'text-purple-600 bg-purple-50' : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'"
-        title="Help options"
+        :title="labels.help_options"
     >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
         </svg>
-        Help
+        <span x-text="labels.help"></span>
         <svg class="w-3 h-3 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
@@ -74,8 +90,8 @@
                 </svg>
             </span>
             <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900" x-text="hintsEnabled ? 'Hide Tooltips' : 'Show Tooltips'"></p>
-                <p class="text-xs text-gray-500">Interactive help dots on this page</p>
+                <p class="text-sm font-medium text-gray-900" x-text="hintsEnabled ? labels.hide_tooltips : labels.show_tooltips"></p>
+                <p class="text-xs text-gray-500" x-text="labels.help_hints_description"></p>
             </div>
             <span
                 class="w-9 h-5 rounded-full transition-colors relative"
@@ -105,8 +121,8 @@
                 </svg>
             </span>
             <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">Start Page Tour</p>
-                <p class="text-xs text-gray-500">Step through all tooltips one-by-one</p>
+                <p class="text-sm font-medium text-gray-900" x-text="labels.start_page_tour"></p>
+                <p class="text-xs text-gray-500" x-text="labels.tooltips_step_through"></p>
             </div>
         </button>
 
@@ -124,8 +140,8 @@
                 </svg>
             </span>
             <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">Help Center</p>
-                <p class="text-xs text-gray-500">Browse articles and guides</p>
+                <p class="text-sm font-medium text-gray-900" x-text="labels.help_center"></p>
+                <p class="text-xs text-gray-500" x-text="labels.browse_articles_guides"></p>
             </div>
             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -156,8 +172,8 @@
                 </svg>
             </span>
             <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900" x-text="tooltipCreatorMode ? 'Exit Creator Mode' : 'Create Tooltips'"></p>
-                <p class="text-xs text-gray-500">Click on elements to add help tips</p>
+                <p class="text-sm font-medium text-gray-900" x-text="tooltipCreatorMode ? labels.exit_creator_mode : labels.create_tooltips"></p>
+                <p class="text-xs text-gray-500" x-text="labels.help_tips_description"></p>
             </div>
             <span
                 class="w-9 h-5 rounded-full transition-colors relative"
@@ -183,8 +199,8 @@
                 </svg>
             </span>
             <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">Manage Tooltips</p>
-                <p class="text-xs text-gray-500">View and edit all tooltips</p>
+                <p class="text-sm font-medium text-gray-900" x-text="labels.manage_tooltips"></p>
+                <p class="text-xs text-gray-500" x-text="labels.view_edit_tooltips"></p>
             </div>
             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

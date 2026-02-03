@@ -1,6 +1,29 @@
 {{-- Help Widget - Bottom right FAB with expandable help panel --}}
+@php
+    $helpWidgetLabels = [
+        'help_center' => app(\App\Services\TerminologyService::class)->get('help_center_label'),
+        'search_help_articles' => app(\App\Services\TerminologyService::class)->get('search_help_articles_placeholder'),
+        'search_results' => app(\App\Services\TerminologyService::class)->get('search_results_label'),
+        'view_all_results' => app(\App\Services\TerminologyService::class)->get('view_all_results_label'),
+        'no_articles_found' => app(\App\Services\TerminologyService::class)->get('no_articles_found_label'),
+        'try_advanced_search' => app(\App\Services\TerminologyService::class)->get('try_advanced_search_label'),
+        'popular_articles' => app(\App\Services\TerminologyService::class)->get('popular_articles_label'),
+        'browse_by_topic' => app(\App\Services\TerminologyService::class)->get('browse_by_topic_label'),
+        'quick_links' => app(\App\Services\TerminologyService::class)->get('quick_links_label'),
+        'browse_all_articles' => app(\App\Services\TerminologyService::class)->get('browse_all_articles_label'),
+        'page_tour' => app(\App\Services\TerminologyService::class)->get('page_tour_label'),
+        'guided_walkthrough' => app(\App\Services\TerminologyService::class)->get('guided_walkthrough_label'),
+        'contact_support' => app(\App\Services\TerminologyService::class)->get('contact_support_label'),
+        'send_us_message' => app(\App\Services\TerminologyService::class)->get('send_us_message_label'),
+        'help_admin' => app(\App\Services\TerminologyService::class)->get('help_admin_label'),
+        'manage_articles_hints' => app(\App\Services\TerminologyService::class)->get('manage_articles_hints_label'),
+        'close_help' => app(\App\Services\TerminologyService::class)->get('close_help_label'),
+        'need_help' => app(\App\Services\TerminologyService::class)->get('need_help_label'),
+        'general' => app(\App\Services\TerminologyService::class)->get('general_label'),
+    ];
+@endphp
 <div
-    x-data="helpWidget()"
+    x-data="helpWidget(@js($helpWidgetLabels))"
     x-init="init()"
     class="fixed bottom-4 right-4 z-40"
 >
@@ -19,7 +42,7 @@
         {{-- Header --}}
         <div class="bg-gradient-to-r from-pulse-orange-500 to-orange-600 px-5 py-4 text-white">
             <div class="flex items-center justify-between mb-3">
-                <h3 class="text-lg font-semibold">Help Center</h3>
+                <h3 class="text-lg font-semibold">{{ $helpWidgetLabels['help_center'] }}</h3>
                 <button @click="isOpen = false" class="p-1 hover:bg-white/20 rounded-lg transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -37,7 +60,7 @@
                     x-model="searchQuery"
                     @input.debounce.300ms="searchArticles()"
                     @keydown.enter="goToSearch()"
-                    placeholder="Search help articles..."
+                    placeholder="{{ $helpWidgetLabels['search_help_articles'] }}"
                     class="w-full pl-10 pr-4 py-2.5 bg-white/20 text-white placeholder-white/60 rounded-lg border border-white/30 focus:border-white focus:outline-none focus:ring-2 focus:ring-white/30 text-sm"
                 >
             </div>
@@ -48,7 +71,7 @@
             {{-- Search Results --}}
             <template x-if="searchQuery && searchResults.length > 0">
                 <div class="p-4 border-b border-gray-100">
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Search Results</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3" x-text="labels.search_results"></h4>
                     <div class="space-y-2">
                         <template x-for="article in searchResults" :key="article.id">
                             <a
@@ -71,7 +94,7 @@
                         :href="`/help/search?q=${encodeURIComponent(searchQuery)}`"
                         class="block mt-3 text-center text-sm text-pulse-orange-600 hover:text-pulse-orange-700 font-medium"
                     >
-                        View all results &rarr;
+                        <span x-text="labels.view_all_results"></span> &rarr;
                     </a>
                 </div>
             </template>
@@ -82,12 +105,12 @@
                     <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <p class="text-sm text-gray-500">No articles found</p>
+                    <p class="text-sm text-gray-500" x-text="labels.no_articles_found"></p>
                     <a
                         :href="`/help/search?q=${encodeURIComponent(searchQuery)}`"
                         class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700"
                     >
-                        Try advanced search
+                        <span x-text="labels.try_advanced_search"></span>
                     </a>
                 </div>
             </template>
@@ -97,7 +120,7 @@
                 <div>
                     {{-- Featured Articles --}}
                     <div class="p-4 border-b border-gray-100" x-show="featuredArticles.length > 0">
-                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Popular Articles</h4>
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3" x-text="labels.popular_articles"></h4>
                         <div class="space-y-2">
                             <template x-for="article in featuredArticles" :key="article.id">
                                 <a
@@ -111,7 +134,7 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h5 class="text-sm font-medium text-gray-900 truncate" x-text="article.title"></h5>
-                                        <p class="text-xs text-gray-500" x-text="article.category?.name || 'General'"></p>
+                                        <p class="text-xs text-gray-500" x-text="article.category?.name || labels.general"></p>
                                     </div>
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -123,7 +146,7 @@
 
                     {{-- Categories --}}
                     <div class="p-4 border-b border-gray-100" x-show="categories.length > 0">
-                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Browse by Topic</h4>
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3" x-text="labels.browse_by_topic"></h4>
                         <div class="grid grid-cols-2 gap-2">
                             <template x-for="category in categories" :key="category.id">
                                 <a
@@ -157,7 +180,7 @@
 
                     {{-- Quick Links --}}
                     <div class="p-4">
-                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Quick Links</h4>
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3" x-text="labels.quick_links"></h4>
                         <div class="space-y-1">
                             <a href="/help" class="flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors">
                                 <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
@@ -166,8 +189,8 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="text-sm font-medium text-gray-900">Help Center</span>
-                                    <p class="text-xs text-gray-500">Browse all articles</p>
+                                    <span class="text-sm font-medium text-gray-900" x-text="labels.help_center"></span>
+                                    <p class="text-xs text-gray-500" x-text="labels.browse_all_articles"></p>
                                 </div>
                                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -185,8 +208,8 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="text-sm font-medium text-gray-900">Page Tour</span>
-                                    <p class="text-xs text-gray-500">Guided walkthrough</p>
+                                    <span class="text-sm font-medium text-gray-900" x-text="labels.page_tour"></span>
+                                    <p class="text-xs text-gray-500" x-text="labels.guided_walkthrough"></p>
                                 </div>
                             </button>
 
@@ -200,8 +223,8 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="text-sm font-medium text-gray-900">Contact Support</span>
-                                    <p class="text-xs text-gray-500">Send us a message</p>
+                                    <span class="text-sm font-medium text-gray-900" x-text="labels.contact_support"></span>
+                                    <p class="text-xs text-gray-500" x-text="labels.send_us_message"></p>
                                 </div>
                             </button>
 
@@ -217,8 +240,8 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="text-sm font-medium text-gray-900">Help Admin</span>
-                                    <p class="text-xs text-gray-500">Manage articles & hints</p>
+                                    <span class="text-sm font-medium text-gray-900" x-text="labels.help_admin"></span>
+                                    <p class="text-xs text-gray-500" x-text="labels.manage_articles_hints"></p>
                                 </div>
                             </a>
                             @endif
@@ -234,7 +257,7 @@
         @click="isOpen = !isOpen"
         :class="isOpen ? 'bg-gray-700 hover:bg-gray-800' : 'bg-pulse-orange-500 hover:bg-pulse-orange-600'"
         class="w-11 h-11 text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
-        :title="isOpen ? 'Close help' : 'Need help?'"
+        :title="isOpen ? labels.close_help : labels.need_help"
     >
         {{-- Question mark icon (when closed) --}}
         <svg x-show="!isOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,8 +271,9 @@
 </div>
 
 <script>
-function helpWidget() {
+function helpWidget(labels) {
     return {
+        labels,
         isOpen: false,
         searchQuery: '',
         searchResults: [],
@@ -271,12 +295,7 @@ function helpWidget() {
                     this.featuredArticles = data.articles || [];
                 }
             } catch (e) {
-                // Use fallback static data if API fails
-                this.featuredArticles = [
-                    { id: 1, title: 'Getting Started with Pulse', slug: 'getting-started', excerpt: 'Learn the basics of using Pulse', category: { name: 'Getting Started' } },
-                    { id: 2, title: 'Creating Your First Survey', slug: 'creating-surveys', excerpt: 'Step-by-step guide to surveys', category: { name: 'Surveys' } },
-                    { id: 3, title: 'Understanding Dashboard Widgets', slug: 'dashboard-widgets', excerpt: 'Customize your dashboard view', category: { name: 'Dashboard' } },
-                ];
+                this.featuredArticles = [];
             }
 
             try {
@@ -287,13 +306,7 @@ function helpWidget() {
                     this.categories = data.categories || [];
                 }
             } catch (e) {
-                // Use fallback static data if API fails
-                this.categories = [
-                    { id: 1, name: 'Getting Started', slug: 'getting-started', icon: 'academic-cap' },
-                    { id: 2, name: 'Surveys', slug: 'surveys', icon: 'chart-bar' },
-                    { id: 3, name: 'Contacts', slug: 'contacts', icon: 'users' },
-                    { id: 4, name: 'Alerts', slug: 'alerts', icon: 'bell' },
-                ];
+                this.categories = [];
             }
         },
 

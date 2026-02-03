@@ -278,10 +278,10 @@ class User extends Authenticatable
         $labels = [
             'consultant' => 'District Consultant',
             'superintendent' => 'Superintendent',
-            'school_admin' => 'School Administrator',
-            'counselor' => 'School Counselor',
+            'organization_admin' => 'Organization Administrator',
+            'counselor' => 'Organization Counselor',
             'teacher' => 'Teacher',
-            'student' => 'Student',
+            'learner' => 'Learner',
             'parent' => 'Parent/Guardian',
         ];
 

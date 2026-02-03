@@ -16,7 +16,7 @@ class ProviderBooking extends Model
         'conversation_id',
         'booked_by_type',
         'booked_by_id',
-        'student_id',
+        'learner_id',
         'booking_type',
         'status',
         'scheduled_at',
@@ -104,7 +104,7 @@ class ProviderBooking extends Model
     }
 
     /**
-     * Get who booked (User or Student).
+     * Get who booked (User or Learner).
      */
     public function bookedBy(): MorphTo
     {
@@ -112,11 +112,11 @@ class ProviderBooking extends Model
     }
 
     /**
-     * Get the student receiving the service.
+     * Get the learner receiving the service.
      */
-    public function student(): BelongsTo
+    public function learner(): BelongsTo
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Learner::class);
     }
 
     /**
@@ -289,11 +289,11 @@ class ProviderBooking extends Model
     }
 
     /**
-     * Scope: for a specific student.
+     * Scope: for a specific learner.
      */
-    public function scopeForStudent($query, int $studentId)
+    public function scopeForLearner($query, int $learnerId)
     {
-        return $query->where('student_id', $studentId);
+        return $query->where('learner_id', $learnerId);
     }
 
     /**

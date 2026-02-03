@@ -12,17 +12,17 @@ class ModerationDemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $school = Organization::where('org_type', 'school')->first();
-        if (! $school) {
-            $school = Organization::first();
+        $organization = Organization::where('org_type', 'organization')->first();
+        if (! $organization) {
+            $organization = Organization::first();
         }
-        if (! $school) {
+        if (! $organization) {
             $this->command->error('No organization found. Please seed organizations first.');
 
             return;
         }
 
-        $admin = User::where('org_id', $school->id)->first();
+        $admin = User::where('org_id', $organization->id)->first();
         if (! $admin) {
             $admin = User::first();
         }
@@ -33,8 +33,8 @@ class ModerationDemoSeeder extends Seeder
         }
 
         // Get eligible moderators for assignment demo
-        $moderators = User::where('org_id', $school->id)
-            ->whereIn('primary_role', ['admin', 'counselor', 'school_admin'])
+        $moderators = User::where('org_id', $organization->id)
+            ->whereIn('primary_role', ['admin', 'counselor', 'organization_admin'])
             ->limit(3)
             ->get();
 
@@ -52,7 +52,7 @@ class ModerationDemoSeeder extends Seeder
             ],
             [
                 'title' => 'Building Healthy Friendships',
-                'description' => 'Discover how to build meaningful relationships, set boundaries, and be a supportive friend. Perfect for students navigating social dynamics.',
+                'description' => 'Discover how to build meaningful relationships, set boundaries, and be a supportive friend. Perfect for learners navigating social dynamics.',
                 'status' => ContentModerationResult::STATUS_PASSED,
                 'score' => 0.92,
                 'flags' => [],
@@ -79,7 +79,7 @@ class ModerationDemoSeeder extends Seeder
             ],
             [
                 'title' => 'Understanding Your Emotions',
-                'description' => 'A foundational course on emotional intelligence, helping students identify, understand, and express their feelings appropriately.',
+                'description' => 'A foundational course on emotional intelligence, helping learners identify, understand, and express their feelings appropriately.',
                 'status' => ContentModerationResult::STATUS_REJECTED,
                 'score' => 0.35,
                 'flags' => [
@@ -91,14 +91,14 @@ class ModerationDemoSeeder extends Seeder
             ],
             [
                 'title' => 'Time Management Essentials',
-                'description' => 'Master the art of managing your time effectively. Learn prioritization, scheduling, and how to balance school, activities, and rest.',
+                'description' => 'Master the art of managing your time effectively. Learn prioritization, scheduling, and how to balance organization, activities, and rest.',
                 'status' => ContentModerationResult::STATUS_PASSED,
                 'score' => 0.95,
                 'flags' => [],
                 'priority' => 'low',
             ],
             [
-                'title' => 'Mindfulness for Students',
+                'title' => 'Mindfulness for Learners',
                 'description' => 'Introduction to mindfulness practices including breathing exercises, body scans, and present-moment awareness techniques.',
                 'status' => ContentModerationResult::STATUS_FLAGGED,
                 'score' => 0.78,
@@ -107,7 +107,7 @@ class ModerationDemoSeeder extends Seeder
             ],
             [
                 'title' => 'Navigating Family Changes',
-                'description' => 'Support for students dealing with family transitions like divorce, moving, or new siblings. Focuses on emotional processing and adaptation.',
+                'description' => 'Support for learners dealing with family transitions like divorce, moving, or new siblings. Focuses on emotional processing and adaptation.',
                 'status' => ContentModerationResult::STATUS_FLAGGED,
                 'score' => 0.65,
                 'flags' => [
@@ -154,7 +154,7 @@ class ModerationDemoSeeder extends Seeder
         foreach ($demoCourses as $index => $courseData) {
             // Create the MiniCourse
             $course = MiniCourse::create([
-                'org_id' => $school->id,
+                'org_id' => $organization->id,
                 'title' => $courseData['title'],
                 'description' => $courseData['description'],
                 'objectives' => [
@@ -162,7 +162,7 @@ class ModerationDemoSeeder extends Seeder
                     'Practice practical techniques',
                     'Develop personal action plan',
                 ],
-                'rationale' => 'AI-generated course based on student needs assessment data.',
+                'rationale' => 'AI-generated course based on learner needs assessment data.',
                 'expected_experience' => 'Interactive learning with reflections and practice exercises.',
                 'course_type' => MiniCourse::TYPE_WELLNESS,
                 'creation_source' => MiniCourse::SOURCE_AI_GENERATED,
@@ -179,7 +179,7 @@ class ModerationDemoSeeder extends Seeder
 
             // Create the moderation result
             $result = ContentModerationResult::create([
-                'org_id' => $school->id,
+                'org_id' => $organization->id,
                 'moderatable_type' => MiniCourse::class,
                 'moderatable_id' => $course->id,
                 'status' => $courseData['status'],

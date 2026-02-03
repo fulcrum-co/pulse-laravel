@@ -21,41 +21,41 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <!-- Left Column -->
         <div class="space-y-8">
-            <!-- Linked Students -->
+            <!-- Linked Learners -->
             <x-card>
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Linked Students</h3>
-                @if($linkedStudents && $linkedStudents->count() > 0)
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Linked Learners</h3>
+                @if($linkedLearners && $linkedLearners->count() > 0)
                 <div class="space-y-4">
-                    @foreach($linkedStudents as $student)
-                    <a href="{{ route('contacts.show', $student) }}" class="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    @foreach($linkedLearners as $learner)
+                    <a href="{{ route('contacts.show', $learner) }}" class="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                                 <span class="text-blue-600 font-semibold">
-                                    {{ substr($student->first_name ?? 'S', 0, 1) }}{{ substr($student->last_name ?? '', 0, 1) }}
+                                    {{ substr($learner->first_name ?? 'S', 0, 1) }}{{ substr($learner->last_name ?? '', 0, 1) }}
                                 </span>
                             </div>
                             <div class="flex-1">
-                                <div class="font-medium text-gray-900">{{ $student->first_name }} {{ $student->last_name }}</div>
-                                <div class="text-sm text-gray-500">Grade {{ $student->grade_level }} - Student #{{ $student->student_number }}</div>
+                                <div class="font-medium text-gray-900">{{ $learner->first_name }} {{ $learner->last_name }}</div>
+                                <div class="text-sm text-gray-500">Grade {{ $learner->grade_level }} - Learner #{{ $learner->learner_number }}</div>
                             </div>
-                            @if($student->risk_level)
+                            @if($learner->risk_level)
                             @php
-                                $riskColor = match($student->risk_level) {
+                                $riskColor = match($learner->risk_level) {
                                     'good' => 'green',
                                     'low' => 'yellow',
                                     'high' => 'red',
                                     default => 'gray',
                                 };
                             @endphp
-                            <x-badge :color="$riskColor">{{ ucfirst($student->risk_level) }}</x-badge>
+                            <x-badge :color="$riskColor">{{ ucfirst($learner->risk_level) }}</x-badge>
                             @endif
                         </div>
 
-                        @if($student->metrics && $student->metrics->count() > 0)
+                        @if($learner->metrics && $learner->metrics->count() > 0)
                         <div class="mt-3 pt-3 border-t border-gray-100">
                             <div class="text-xs text-gray-500 mb-2">Recent Metrics</div>
                             <div class="flex flex-wrap gap-2">
-                                @foreach($student->metrics->take(3) as $metric)
+                                @foreach($learner->metrics->take(3) as $metric)
                                 <span class="text-xs px-2 py-1 bg-gray-100 rounded">
                                     {{ ucfirst(str_replace('_', ' ', $metric->metric_key)) }}: {{ $metric->numeric_value ?? $metric->text_value }}
                                 </span>
@@ -67,7 +67,7 @@
                     @endforeach
                 </div>
                 @else
-                <p class="text-gray-500 text-sm">No linked students found.</p>
+                <p class="text-gray-500 text-sm">No linked learners found.</p>
                 @endif
             </x-card>
 

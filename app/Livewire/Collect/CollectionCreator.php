@@ -4,7 +4,7 @@ namespace App\Livewire\Collect;
 
 use App\Models\Classroom;
 use App\Models\Collection;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\Survey;
 use App\Services\CollectionService;
 use Illuminate\Support\Str;
@@ -59,7 +59,7 @@ class CollectionCreator extends Component
     public ?string $endDate = null;
 
     // Step 5: Contact Scope
-    public string $targetType = 'students'; // students, users
+    public string $targetType = 'learners'; // learners, users
 
     public array $selectedGrades = [];
 
@@ -118,7 +118,7 @@ class CollectionCreator extends Component
             ->toArray();
 
         // Load available grades
-        $this->availableGrades = Student::where('org_id', $user->org_id)
+        $this->availableGrades = Learner::where('org_id', $user->org_id)
             ->whereNotNull('grade_level')
             ->distinct()
             ->pluck('grade_level')
@@ -235,8 +235,8 @@ class CollectionCreator extends Component
 
     protected function validateStep5(): bool
     {
-        if ($this->targetType === 'students') {
-            // At least one filter should be set, or all students
+        if ($this->targetType === 'learners') {
+            // At least one filter should be set, or all learners
             return true;
         }
 
@@ -387,7 +387,7 @@ class CollectionCreator extends Component
             'target_type' => $this->targetType,
         ];
 
-        if ($this->targetType === 'students') {
+        if ($this->targetType === 'learners') {
             if (! empty($this->selectedGrades)) {
                 $contactScope['grades'] = $this->selectedGrades;
             }
@@ -526,7 +526,7 @@ class CollectionCreator extends Component
     public function getEstimatedContactCountProperty(): int
     {
         $user = auth()->user();
-        $query = Student::where('org_id', $user->org_id)->whereNull('deleted_at');
+        $query = Learner::where('org_id', $user->org_id)->whereNull('deleted_at');
 
         if (! empty($this->selectedGrades)) {
             $query->whereIn('grade', $this->selectedGrades);

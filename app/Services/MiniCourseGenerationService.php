@@ -1,39 +1,45 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\MiniCourse;
 use App\Models\MiniCourseStep;
 use App\Models\MiniCourseSuggestion;
-use App\Models\Student;
+use App\Models\Learner;
+use App\Services\Domain\AIResponseParserService;
+use App\Services\Domain\LearnerNeedsInferenceService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 class MiniCourseGenerationService
 {
     public function __construct(
-        protected ClaudeService $claudeService
+        protected ClaudeService $claudeService,
+        protected LearnerNeedsInferenceService $needsInference,
+        protected AIResponseParserService $aiResponseParser
     ) {}
 
     /**
-     * Generate a course from student context via AI.
+     * Generate a course from learner context via AI.
      */
-    public function generateFromContext(Student $student, array $signals = []): ?MiniCourse
+    public function generateFromContext(Learner $learner, array $signals = []): ?MiniCourse
     {
-        $context = $this->buildStudentContext($student, $signals);
+        $context = $this->buildLearnerContext($learner, $signals);
 
         // Generate course structure with AI
         $courseData = $this->generateCourseStructure($context);
 
         if (! $courseData) {
-            Log::warning('Failed to generate course structure', ['student_id' => $student->id]);
+            Log::warning('Failed to generate course structure', ['learner_id' => $learner->id]);
 
             return null;
         }
 
         // Create the course
         $course = MiniCourse::create([
-            'org_id' => $student->org_id,
+            'org_id' => $learner->org_id,
             'title' => $courseData['title'],
             'description' => $courseData['description'],
             'objectives' => $courseData['objectives'] ?? [],
@@ -42,12 +48,12 @@ class MiniCourseGenerationService
             'course_type' => $courseData['course_type'] ?? MiniCourse::TYPE_INTERVENTION,
             'creation_source' => MiniCourse::SOURCE_AI_GENERATED,
             'ai_generation_context' => [
-                'student_id' => $student->id,
+                'learner_id' => $learner->id,
                 'signals' => $signals,
                 'generated_at' => now()->toISOString(),
             ],
-            'target_grades' => [$student->grade_level],
-            'target_risk_levels' => [$student->risk_level],
+            'target_grades' => [$learner->grade_level],
+            'target_risk_levels' => [$learner->risk_level],
             'target_needs' => $courseData['target_needs'] ?? [],
             'estimated_duration_minutes' => $courseData['estimated_duration_minutes'] ?? 30,
             'status' => MiniCourse::STATUS_DRAFT,
@@ -88,11 +94,11 @@ class MiniCourseGenerationService
             $newCourse->title = $customizations['title'];
         }
 
-        if (! empty($customizations['target_student'])) {
-            $student = Student::find($customizations['target_student']);
-            if ($student) {
-                $newCourse->target_grades = [$student->grade_level];
-                $newCourse->target_risk_levels = [$student->risk_level];
+        if (! empty($customizations['target_learner'])) {
+            $learner = Learner::find($customizations['target_learner']);
+            if ($learner) {
+                $newCourse->target_grades = [$learner->grade_level];
+                $newCourse->target_risk_levels = [$learner->risk_level];
             }
         }
 
@@ -107,7 +113,7 @@ class MiniCourseGenerationService
     /**
      * Get AI-assisted editing suggestions for a course.
      */
-    public function suggestCourseEdits(MiniCourse $course, ?Student $student = null): array
+    public function suggestCourseEdits(MiniCourse $course, ?Learner $learner = null): array
     {
         $context = [
             'course' => [
@@ -123,17 +129,17 @@ class MiniCourseGenerationService
             ],
         ];
 
-        if ($student) {
-            $context['student'] = [
-                'grade_level' => $student->grade_level,
-                'risk_level' => $student->risk_level,
-                'tags' => $student->tags,
+        if ($learner) {
+            $context['learner'] = [
+                'grade_level' => $learner->grade_level,
+                'risk_level' => $learner->risk_level,
+                'tags' => $learner->tags,
             ];
         }
 
         $systemPrompt = <<<'PROMPT'
 You are an educational course designer. Analyze the given course and suggest improvements.
-Consider the student context if provided.
+Consider the learner context if provided.
 
 Return a JSON object with:
 - suggestions: Array of improvement suggestions, each with:
@@ -167,14 +173,14 @@ PROMPT;
     }
 
     /**
-     * Generate a course suggestion for a student.
+     * Generate a course suggestion for a learner.
      */
-    public function generateCourseSuggestion(Student $student, array $signals = []): ?MiniCourseSuggestion
+    public function generateCourseSuggestion(Learner $learner, array $signals = []): ?MiniCourseSuggestion
     {
-        $context = $this->buildStudentContext($student, $signals);
+        $context = $this->buildLearnerContext($learner, $signals);
 
         // First check for existing courses that match
-        $existingCourses = MiniCourse::where('org_id', $student->org_id)
+        $existingCourses = MiniCourse::where('org_id', $learner->org_id)
             ->where('status', MiniCourse::STATUS_ACTIVE)
             ->get();
 
@@ -183,9 +189,9 @@ PROMPT;
 
             if ($match && $match['score'] >= 70) {
                 return MiniCourseSuggestion::create([
-                    'org_id' => $student->org_id,
-                    'contact_type' => Student::class,
-                    'contact_id' => $student->id,
+                    'org_id' => $learner->org_id,
+                    'contact_type' => Learner::class,
+                    'contact_id' => $learner->id,
                     'mini_course_id' => $match['course']->id,
                     'suggestion_source' => MiniCourseSuggestion::SOURCE_AI_RECOMMENDED,
                     'relevance_score' => $match['score'] / 100,
@@ -206,35 +212,39 @@ PROMPT;
     }
 
     /**
-     * Build context about a student for AI generation.
+     * Build context about a learner for AI generation.
      */
-    protected function buildStudentContext(Student $student, array $signals = []): array
+    protected function buildLearnerContext(Learner $learner, array $signals = []): array
     {
-        $metrics = $student->metrics()
+        $metrics = $learner->metrics()
             ->where('period_start', '>=', now()->subMonths(3))
             ->get();
 
-        $recentNotes = $student->notes()
+        $recentNotes = $learner->notes()
             ->where('created_at', '>=', now()->subMonths(1))
             ->limit(5)
             ->get();
 
-        $recentSurveys = $student->surveyAttempts()
+        $recentSurveys = $learner->surveyAttempts()
             ->where('status', 'completed')
             ->where('created_at', '>=', now()->subMonths(3))
             ->with('survey')
             ->limit(3)
             ->get();
 
+        // Use LearnerNeedsInferenceService to identify needs from learner data
+        $inferredNeeds = $this->needsInference->inferNeeds($learner);
+
         return [
-            'student' => [
-                'grade_level' => $student->grade_level,
-                'risk_level' => $student->risk_level,
-                'iep_status' => $student->iep_status,
-                'ell_status' => $student->ell_status,
-                'tags' => $student->tags ?? [],
+            'learner' => [
+                'grade_level' => $learner->grade_level,
+                'risk_level' => $learner->risk_level,
+                'iep_status' => $learner->iep_status,
+                'ell_status' => $learner->ell_status,
+                'tags' => $learner->tags ?? [],
             ],
             'signals' => $signals,
+            'inferred_needs' => $inferredNeeds,
             'metrics' => $metrics->map(fn ($m) => [
                 'category' => $m->metric_category,
                 'key' => $m->metric_key,
@@ -259,15 +269,15 @@ PROMPT;
     protected function generateCourseStructure(array $context): ?array
     {
         $systemPrompt = <<<'PROMPT'
-You are an educational intervention designer creating personalized mini-courses for students.
-Based on the student context provided, design a short, focused intervention course.
+You are an educational intervention designer creating personalized mini-courses for learners.
+Based on the learner context provided, design a short, focused intervention course.
 
 Return a JSON object with:
-- title: Course title (engaging, student-friendly)
+- title: Course title (engaging, learner-friendly)
 - description: Brief description (2-3 sentences)
 - objectives: Array of 3-5 learning objectives
-- rationale: Why this course was created for this student (for staff/parents)
-- expected_experience: What the student will do (written for the student)
+- rationale: Why this course was created for this learner (for staff/parents)
+- expected_experience: What the learner will do (written for the learner)
 - course_type: One of: intervention, enrichment, skill_building, wellness, academic, behavioral
 - target_needs: Array of needs this addresses
 - estimated_duration_minutes: Total estimated time (15-60 minutes)
@@ -276,7 +286,7 @@ Return a JSON object with:
   - step_type: One of: content, reflection, action, practice, human_connection, assessment, checkpoint
   - content_type: One of: text, video, document, link, embedded, interactive
   - description: What this step covers
-  - instructions: Instructions for the student
+  - instructions: Instructions for the learner
   - content_data: Object with relevant content (body text, prompts, etc.)
   - duration: Estimated minutes
   - is_required: Boolean
@@ -291,7 +301,7 @@ Focus on:
 PROMPT;
 
         $response = $this->claudeService->sendMessage(
-            "Generate a personalized mini-course for this student:\n\n".json_encode($context, JSON_PRETTY_PRINT),
+            "Generate a personalized mini-course for this learner:\n\n".json_encode($context, JSON_PRETTY_PRINT),
             $systemPrompt
         );
 
@@ -307,7 +317,7 @@ PROMPT;
     }
 
     /**
-     * Find best matching existing course for a student.
+     * Find best matching existing course for a learner.
      */
     protected function findBestMatchingCourse(Collection $courses, array $context): ?array
     {
@@ -323,18 +333,18 @@ PROMPT;
         ])->toArray();
 
         $systemPrompt = <<<'PROMPT'
-You are matching a student to existing courses. Find the best match based on the student's needs and context.
+You are matching a learner to existing courses. Find the best match based on the learner's needs and context.
 
 Return a JSON object with:
 - course_id: ID of the best matching course (or null if no good match)
 - score: Match quality 0-100
 - reason: Brief explanation of why this is a good match
 - factors: Array of factors that led to this match
-- intended_outcomes: What outcomes this course should produce for this student
+- intended_outcomes: What outcomes this course should produce for this learner
 PROMPT;
 
         $response = $this->claudeService->sendMessage(
-            "Student context:\n".json_encode($context, JSON_PRETTY_PRINT).
+            "Learner context:\n".json_encode($context, JSON_PRETTY_PRINT).
             "\n\nAvailable courses:\n".json_encode($courseList, JSON_PRETTY_PRINT),
             $systemPrompt
         );
@@ -362,26 +372,11 @@ PROMPT;
     }
 
     /**
-     * Parse JSON from AI response.
+     * Parse JSON from AI response using domain service.
      */
     protected function parseJsonResponse(string $content, ?array $default = null): ?array
     {
-        // Try to extract JSON from response
-        if (preg_match('/\{[\s\S]*\}/', $content, $matches)) {
-            try {
-                $data = json_decode($matches[0], true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    return $data;
-                }
-            } catch (\Exception $e) {
-                Log::warning('Failed to parse AI JSON response', [
-                    'content' => $content,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-
-        return $default;
+        return $this->aiResponseParser->parseJsonResponse($content, $default);
     }
 
     /**
@@ -391,7 +386,7 @@ PROMPT;
     {
         $prompts = [
             MiniCourseStep::TYPE_CONTENT => "Create educational content about: {$topic}",
-            MiniCourseStep::TYPE_REFLECTION => "Create reflection prompts for students to think about: {$topic}",
+            MiniCourseStep::TYPE_REFLECTION => "Create reflection prompts for learners to think about: {$topic}",
             MiniCourseStep::TYPE_ACTION => "Create an action plan template for: {$topic}",
             MiniCourseStep::TYPE_PRACTICE => "Create a practice exercise for: {$topic}",
             MiniCourseStep::TYPE_ASSESSMENT => "Create a brief self-assessment quiz for: {$topic}",

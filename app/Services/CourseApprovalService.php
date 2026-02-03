@@ -1,21 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\CourseApprovalWorkflow;
 use App\Models\MiniCourse;
-use App\Models\Organization;
+use App\Services\Domain\CourseApprovalRuleService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 class CourseApprovalService
 {
+    public function __construct(
+        protected CourseApprovalRuleService $approvalRules
+    ) {}
     /**
      * Submit a course for approval.
      */
     public function submitForApproval(MiniCourse $course, int $userId): CourseApprovalWorkflow
     {
-        $settings = $this->getOrgSettings($course->org_id);
+        $settings = $this->approvalRules->getOrgSettings($course->org_id);
         $mode = $settings['approval_mode'] ?? CourseApprovalWorkflow::MODE_CREATE_APPROVE;
 
         // Check if workflow already exists
@@ -119,10 +124,7 @@ class CourseApprovalService
      */
     public function shouldAutoActivate(MiniCourse $course): bool
     {
-        $settings = $this->getOrgSettings($course->org_id);
-        $mode = $settings['approval_mode'] ?? CourseApprovalWorkflow::MODE_CREATE_APPROVE;
-
-        return $mode === CourseApprovalWorkflow::MODE_AUTO_ACTIVATE;
+        return $this->approvalRules->shouldAutoActivate($course->org_id);
     }
 
     /**
@@ -235,36 +237,6 @@ class CourseApprovalService
         return $results;
     }
 
-    /**
-     * Get organization settings.
-     */
-    protected function getOrgSettings(int $orgId): array
-    {
-        $org = Organization::find($orgId);
-
-        if (! $org) {
-            return $this->getDefaultSettings();
-        }
-
-        $settings = $org->settings ?? [];
-
-        return $settings['ai_course_settings'] ?? $this->getDefaultSettings();
-    }
-
-    /**
-     * Get default settings.
-     */
-    protected function getDefaultSettings(): array
-    {
-        return [
-            'approval_mode' => CourseApprovalWorkflow::MODE_CREATE_APPROVE,
-            'auto_generate_enabled' => false,
-            'generation_triggers' => ['manual'],
-            'notification_recipients' => ['admin'],
-            'max_auto_courses_per_day' => 10,
-            'require_review_for_ai_generated' => true,
-        ];
-    }
 
     /**
      * Notify reviewers about pending course.

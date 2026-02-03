@@ -13,7 +13,7 @@ class ContactList extends Model
     use SoftDeletes;
 
     // List types
-    const TYPE_STUDENT = 'student';
+    const TYPE_STUDENT = 'learner';
 
     const TYPE_TEACHER = 'teacher';
 
@@ -51,11 +51,11 @@ class ContactList extends Model
     }
 
     /**
-     * Get all students in this list.
+     * Get all learners in this list.
      */
-    public function students(): MorphToMany
+    public function learners(): MorphToMany
     {
-        return $this->morphedByMany(Student::class, 'contact', 'contact_list_members')
+        return $this->morphedByMany(Learner::class, 'contact', 'contact_list_members')
             ->withPivot('added_at', 'added_by')
             ->withTimestamps();
     }
@@ -79,11 +79,11 @@ class ContactList extends Model
             return $this->getContactsQuery()->count();
         }
 
-        return $this->students()->count() + $this->users()->count();
+        return $this->learners()->count() + $this->users()->count();
     }
 
     /**
-     * Get all contacts (students and/or users based on list type).
+     * Get all contacts (learners and/or users based on list type).
      */
     public function getAllMembers(): \Illuminate\Support\Collection
     {
@@ -94,7 +94,7 @@ class ContactList extends Model
         $members = collect();
 
         if (in_array($this->list_type, [self::TYPE_STUDENT, self::TYPE_MIXED])) {
-            $members = $members->merge($this->students);
+            $members = $members->merge($this->learners);
         }
 
         if (in_array($this->list_type, [self::TYPE_TEACHER, self::TYPE_MIXED])) {
@@ -112,21 +112,21 @@ class ContactList extends Model
         $criteria = $this->filter_criteria ?? [];
 
         if ($this->list_type === self::TYPE_STUDENT) {
-            return $this->buildStudentQuery($criteria);
+            return $this->buildLearnerQuery($criteria);
         } elseif ($this->list_type === self::TYPE_TEACHER) {
             return $this->buildTeacherQuery($criteria);
         }
 
         // For mixed, we'd need to handle differently
-        return Student::where('org_id', $this->org_id);
+        return Learner::where('org_id', $this->org_id);
     }
 
     /**
-     * Build student query from filter criteria.
+     * Build learner query from filter criteria.
      */
-    protected function buildStudentQuery(array $criteria): Builder
+    protected function buildLearnerQuery(array $criteria): Builder
     {
-        $query = Student::where('org_id', $this->org_id)
+        $query = Learner::where('org_id', $this->org_id)
             ->whereNull('deleted_at');
 
         // Grade level filter
@@ -216,16 +216,16 @@ class ContactList extends Model
     }
 
     /**
-     * Add a student to the list.
+     * Add a learner to the list.
      */
-    public function addStudent(Student $student, ?int $addedBy = null): void
+    public function addLearner(Learner $learner, ?int $addedBy = null): void
     {
         if ($this->list_type === self::TYPE_TEACHER) {
-            throw new \InvalidArgumentException('Cannot add student to teacher-only list');
+            throw new \InvalidArgumentException('Cannot add learner to teacher-only list');
         }
 
-        $this->students()->syncWithoutDetaching([
-            $student->id => [
+        $this->learners()->syncWithoutDetaching([
+            $learner->id => [
                 'added_at' => now(),
                 'added_by' => $addedBy,
             ],
@@ -238,7 +238,7 @@ class ContactList extends Model
     public function addUser(User $user, ?int $addedBy = null): void
     {
         if ($this->list_type === self::TYPE_STUDENT) {
-            throw new \InvalidArgumentException('Cannot add teacher to student-only list');
+            throw new \InvalidArgumentException('Cannot add teacher to learner-only list');
         }
 
         $this->users()->syncWithoutDetaching([
@@ -250,11 +250,11 @@ class ContactList extends Model
     }
 
     /**
-     * Remove a student from the list.
+     * Remove a learner from the list.
      */
-    public function removeStudent(Student $student): void
+    public function removeLearner(Learner $learner): void
     {
-        $this->students()->detach($student->id);
+        $this->learners()->detach($learner->id);
     }
 
     /**
@@ -268,14 +268,14 @@ class ContactList extends Model
     /**
      * Add multiple contacts at once.
      */
-    public function addContacts(array $studentIds = [], array $userIds = [], ?int $addedBy = null): void
+    public function addContacts(array $learnerIds = [], array $userIds = [], ?int $addedBy = null): void
     {
-        if (! empty($studentIds) && $this->list_type !== self::TYPE_TEACHER) {
+        if (! empty($learnerIds) && $this->list_type !== self::TYPE_TEACHER) {
             $syncData = [];
-            foreach ($studentIds as $id) {
+            foreach ($learnerIds as $id) {
                 $syncData[$id] = ['added_at' => now(), 'added_by' => $addedBy];
             }
-            $this->students()->syncWithoutDetaching($syncData);
+            $this->learners()->syncWithoutDetaching($syncData);
         }
 
         if (! empty($userIds) && $this->list_type !== self::TYPE_STUDENT) {
@@ -292,12 +292,12 @@ class ContactList extends Model
      */
     public function hasContact($contact): bool
     {
-        if ($contact instanceof Student) {
+        if ($contact instanceof Learner) {
             if ($this->is_dynamic) {
                 return $this->getContactsQuery()->where('id', $contact->id)->exists();
             }
 
-            return $this->students()->where('students.id', $contact->id)->exists();
+            return $this->learners()->where('learners.id', $contact->id)->exists();
         }
 
         if ($contact instanceof User) {

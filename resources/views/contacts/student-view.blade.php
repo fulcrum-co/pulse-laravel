@@ -1,4 +1,4 @@
-<x-layouts.dashboard :title="$student->user->first_name . ' ' . $student->user->last_name">
+<x-layouts.dashboard :title="$learner->user->first_name . ' ' . $learner->user->last_name">
     <x-slot name="actions">
         <x-button variant="secondary">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -9,14 +9,14 @@
     </x-slot>
 
     <!-- Contact Header (Compact) -->
-    <livewire:contact-header :contact="$student" />
+    <livewire:contact-header :contact="$learner" />
 
     <!-- Quick Stats Bar -->
     @php
-        $gpaMetric = $student->metrics()->where('metric_key', 'gpa')->latest('recorded_at')->first();
-        $attendanceMetric = $student->metrics()->where('metric_key', 'attendance')->latest('recorded_at')->first();
-        $wellnessMetric = $student->metrics()->where('metric_key', 'wellness_score')->latest('recorded_at')->first();
-        $latestSurvey = $student->surveyAttempts?->where('status', 'completed')->sortByDesc('completed_at')->first();
+        $gpaMetric = $learner->metrics()->where('metric_key', 'gpa')->latest('recorded_at')->first();
+        $attendanceMetric = $learner->metrics()->where('metric_key', 'attendance')->latest('recorded_at')->first();
+        $wellnessMetric = $learner->metrics()->where('metric_key', 'wellness_score')->latest('recorded_at')->first();
+        $latestSurvey = $learner->surveyAttempts?->where('status', 'completed')->sortByDesc('completed_at')->first();
     @endphp
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-lg border border-gray-200 p-4">
@@ -50,7 +50,7 @@
             </div>
         </div>
         <div class="bg-white rounded-lg border border-gray-200 p-4">
-            <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Last Survey</div>
+            <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">@term('last_label') @term('survey_singular')</div>
             <div class="text-lg font-semibold text-gray-900">
                 @if($latestSurvey && $latestSurvey->completed_at)
                     {{ $latestSurvey->completed_at->diffForHumans() }}
@@ -65,8 +65,8 @@
     <div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
         <h3 class="text-sm font-semibold text-gray-900 mb-4">Performance Trends</h3>
         <livewire:contact-overview-charts
-            :contact-type="\App\Models\Student::class"
-            :contact-id="$student->id"
+            :contact-type="\App\Models\Learner::class"
+            :contact-id="$learner->id"
         />
     </div>
 
@@ -98,13 +98,13 @@
                             <svg class="w-4 h-4 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                             </svg>
-                            Assign Resource
+                            @term('assign_action') @term('resource_singular')
                         </button>
                         <a href="{{ route('surveys.index') }}" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                             <svg class="w-4 h-4 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
-                            Send Survey
+                            @term('send_action') @term('survey_singular')
                         </a>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
             <!-- Suggested Resources -->
             <div x-data="{ open: true }" class="bg-white rounded-lg border border-gray-200">
                 <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left">
-                    <h3 class="text-sm font-semibold text-gray-900">Suggested Resources</h3>
+                    <h3 class="text-sm font-semibold text-gray-900">@term('suggested_label') @term('resource_plural')</h3>
                     <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
@@ -121,17 +121,17 @@
                 <div x-show="open" x-collapse class="px-4 pb-4 border-t border-gray-100">
                     <div class="pt-3">
                         <livewire:resource-suggestions
-                            contact-type="student"
-                            :contact-id="$student->id"
+                            contact-type="learner"
+                            :contact-id="$learner->id"
                         />
                     </div>
                 </div>
             </div>
 
-            <!-- Student Details -->
+            <!-- Learner Details -->
             <div x-data="{ open: false }" class="bg-white rounded-lg border border-gray-200">
                 <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left">
-                    <h3 class="text-sm font-semibold text-gray-900">Student Details</h3>
+                    <h3 class="text-sm font-semibold text-gray-900">@term('learner_singular') @term('details_label')</h3>
                     <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
@@ -139,30 +139,30 @@
                 <div x-show="open" x-collapse class="px-4 pb-4 border-t border-gray-100">
                     <dl class="space-y-2 pt-3 text-sm">
                         <div class="flex justify-between">
-                            <dt class="text-gray-500">DOB</dt>
-                            <dd class="text-gray-900">{{ $student->date_of_birth?->format('M d, Y') ?? 'N/A' }}</dd>
+                            <dt class="text-gray-500">@term('date_of_birth_label')</dt>
+                            <dd class="text-gray-900">{{ $learner->date_of_birth?->format('M d, Y') ?? 'N/A' }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-gray-500">Gender</dt>
-                            <dd class="text-gray-900 capitalize">{{ $student->gender ?? 'N/A' }}</dd>
+                            <dt class="text-gray-500">@term('gender_label')</dt>
+                            <dd class="text-gray-900 capitalize">{{ $learner->gender ?? 'N/A' }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-gray-500">Enrolled</dt>
-                            <dd class="text-gray-900">{{ $student->enrollment_date?->format('M d, Y') ?? 'N/A' }}</dd>
+                            <dt class="text-gray-500">@term('enrolled_label')</dt>
+                            <dd class="text-gray-900">{{ $learner->enrollment_date?->format('M d, Y') ?? 'N/A' }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-gray-500">IEP</dt>
-                            <dd class="text-gray-900">{{ $student->iep_status ? 'Yes' : 'No' }}</dd>
+                            <dt class="text-gray-500">@term('iep_status_label')</dt>
+                            <dd class="text-gray-900">{{ $learner->iep_status ? app(\App\Services\TerminologyService::class)->get('yes_label') : app(\App\Services\TerminologyService::class)->get('no_label') }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-gray-500">ELL</dt>
-                            <dd class="text-gray-900">{{ $student->ell_status ? 'Yes' : 'No' }}</dd>
+                            <dt class="text-gray-500">@term('ell_status_label')</dt>
+                            <dd class="text-gray-900">{{ $learner->ell_status ? app(\App\Services\TerminologyService::class)->get('yes_label') : app(\App\Services\TerminologyService::class)->get('no_label') }}</dd>
                         </div>
                     </dl>
-                    @if($student->tags && count($student->tags) > 0)
+                    @if($learner->tags && count($learner->tags) > 0)
                     <div class="mt-3 pt-3 border-t border-gray-100">
                         <div class="flex flex-wrap gap-1">
-                            @foreach($student->tags as $tag)
+                            @foreach($learner->tags as $tag)
                             <span class="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $tag }}</span>
                             @endforeach
                         </div>
@@ -172,12 +172,12 @@
             </div>
 
             <!-- Strategic Plans -->
-            @if($student->strategicPlans && $student->strategicPlans->count() > 0)
+            @if($learner->strategicPlans && $learner->strategicPlans->count() > 0)
             <div x-data="{ open: false }" class="bg-white rounded-lg border border-gray-200">
                 <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left">
                     <div class="flex items-center gap-2">
-                        <h3 class="text-sm font-semibold text-gray-900">Strategic Plans</h3>
-                        <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $student->strategicPlans->count() }}</span>
+                        <h3 class="text-sm font-semibold text-gray-900">@term('strategic_label') @term('plan_plural')</h3>
+                        <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $learner->strategicPlans->count() }}</span>
                     </div>
                     <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -185,11 +185,11 @@
                 </button>
                 <div x-show="open" x-collapse class="border-t border-gray-100">
                     <div class="divide-y divide-gray-100">
-                        @foreach($student->strategicPlans as $plan)
+                        @foreach($learner->strategicPlans as $plan)
                         <a href="{{ route('plans.show', $plan) }}" class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors">
                             <div>
                                 <div class="text-sm font-medium text-gray-900">{{ $plan->title }}</div>
-                                <div class="text-xs text-gray-500">{{ $plan->school_year }}</div>
+                                <div class="text-xs text-gray-500">{{ $plan->organization_year }}</div>
                             </div>
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -211,27 +211,27 @@
                         <button @click="activeTab = 'timeline'" data-tab="timeline"
                                 :class="activeTab === 'timeline' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                                 class="px-4 py-3 text-sm font-medium border-b-2 transition-colors">
-                            Timeline
+                            @term('timeline_label')
                         </button>
                         <button @click="activeTab = 'notes'" data-tab="notes"
                                 :class="activeTab === 'notes' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                                 class="px-4 py-3 text-sm font-medium border-b-2 transition-colors">
-                            Notes
+                            @term('notes_label')
                         </button>
                         <button @click="activeTab = 'surveys'" data-tab="surveys"
                                 :class="activeTab === 'surveys' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                                 class="px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-1">
-                            Surveys
-                            @if($student->surveyAttempts && $student->surveyAttempts->count() > 0)
-                            <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $student->surveyAttempts->count() }}</span>
+                            @term('survey_plural')
+                            @if($learner->surveyAttempts && $learner->surveyAttempts->count() > 0)
+                            <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $learner->surveyAttempts->count() }}</span>
                             @endif
                         </button>
                         <button @click="activeTab = 'resources'" data-tab="resources"
                                 :class="activeTab === 'resources' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                                 class="px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-1">
-                            Resources
-                            @if($student->resourceAssignments && $student->resourceAssignments->count() > 0)
-                            <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $student->resourceAssignments->count() }}</span>
+                            @term('resource_plural')
+                            @if($learner->resourceAssignments && $learner->resourceAssignments->count() > 0)
+                            <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $learner->resourceAssignments->count() }}</span>
                             @endif
                         </button>
                     </nav>
@@ -305,7 +305,7 @@
                             $timelineItems = collect();
 
                             // Add notes
-                            foreach($student->notes ?? [] as $note) {
+                            foreach($learner->notes ?? [] as $note) {
                                 $timelineItems->push([
                                     'id' => 'note-' . $note->id,
                                     'model_id' => $note->id,
@@ -322,28 +322,28 @@
                             }
 
                             // Add survey attempts
-                            foreach($student->surveyAttempts ?? [] as $attempt) {
+                            foreach($learner->surveyAttempts ?? [] as $attempt) {
                                 $timelineItems->push([
                                     'id' => 'survey-' . $attempt->id,
                                     'model_id' => $attempt->id,
                                     'type' => 'survey',
                                     'icon' => 'clipboard',
                                     'color' => $attempt->status === 'completed' ? 'green' : 'yellow',
-                                    'title' => ($attempt->survey->title ?? 'Survey') . ' - ' . ucfirst($attempt->status),
+                                    'title' => ($attempt->survey->title ?? app(\App\Services\TerminologyService::class)->get('survey_singular')) . ' - ' . ucfirst($attempt->status),
                                     'content' => $attempt->overall_score ? "Score: {$attempt->overall_score}" : null,
                                     'date' => $attempt->completed_at ?? $attempt->created_at,
                                     'author' => null,
                                     'status' => $attempt->status,
                                     'overall_score' => $attempt->overall_score,
                                     'risk_level' => $attempt->risk_level,
-                                    'survey_title' => $attempt->survey->title ?? 'Unknown Survey',
+                                    'survey_title' => $attempt->survey->title ?? (app(\App\Services\TerminologyService::class)->get('unknown_label') . ' ' . app(\App\Services\TerminologyService::class)->get('survey_singular')),
                                     'responses' => $attempt->responses ?? [],
                                     'questions' => $attempt->survey->questions ?? [],
                                 ]);
                             }
 
                             // Add resource assignments
-                            foreach($student->resourceAssignments ?? [] as $assignment) {
+                            foreach($learner->resourceAssignments ?? [] as $assignment) {
                                 $timelineItems->push([
                                     'id' => 'resource-' . $assignment->id,
                                     'model_id' => $assignment->id,
@@ -460,7 +460,7 @@
                                                             @click.stop="document.querySelector('[data-tab=notes]').click()"
                                                             class="text-xs text-gray-500 hover:text-gray-700"
                                                         >
-                                                            View in Notes Tab
+                                                            @term('view_in_label') @term('notes_label') @term('tab_label')
                                                         </button>
                                                     </div>
                                                 </div>
@@ -547,14 +547,14 @@
                                                             @click.stop="openSurveyEdit({{ $item['model_id'] }})"
                                                             class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700 font-medium"
                                                         >
-                                                            View & Edit Survey
+                                                            @term('view_action') & @term('edit_action') @term('survey_singular')
                                                         </button>
                                                         @endif
                                                         <button
                                                             onclick="document.querySelector('[data-tab=surveys]').click()"
                                                             class="text-xs text-gray-500 hover:text-gray-700"
                                                         >
-                                                            View in Surveys Tab
+                                                            @term('view_in_label') @term('survey_plural') @term('tab_label')
                                                         </button>
                                                     </div>
                                                 </div>
@@ -578,7 +578,7 @@
                                                 @endif
                                                 @if($item['notes'])
                                                 <div class="p-2 bg-white rounded border border-gray-100">
-                                                    <p class="text-xs font-medium text-gray-500 mb-1">Notes</p>
+                                                    <p class="text-xs font-medium text-gray-500 mb-1">@term('notes_label')</p>
                                                     <p class="text-sm text-gray-700">{{ $item['notes'] }}</p>
                                                 </div>
                                                 @endif
@@ -586,13 +586,13 @@
                                                     <span class="text-xs text-gray-500">{{ $item['date']?->format('M d, Y h:i A') }}</span>
                                                     <div class="flex items-center gap-3">
                                                         @if($item['resource_url'])
-                                                        <a href="{{ $item['resource_url'] }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-700">Open Resource</a>
+                                                        <a href="{{ $item['resource_url'] }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-700">@term('open_action') @term('resource_singular')</a>
                                                         @endif
                                                         <button
                                                             onclick="document.querySelector('[data-tab=resources]').click()"
                                                             class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700"
                                                         >
-                                                            View in Resources Tab
+                                                            @term('view_in_label') @term('resource_plural') @term('tab_label')
                                                         </button>
                                                     </div>
                                                 </div>
@@ -609,7 +609,7 @@
                             <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            <p class="text-sm text-gray-500">No activity yet</p>
+                            <p class="text-sm text-gray-500">@term('no_label') @term('activity_label') yet</p>
                         </div>
                         @endif
                     </div>
@@ -617,24 +617,24 @@
                     <!-- Notes Tab -->
                     <div x-show="activeTab === 'notes'" x-cloak>
                         <livewire:contact-notes
-                            contact-type="student"
-                            :contact-id="$student->id"
+                            contact-type="learner"
+                            :contact-id="$learner->id"
                         />
                     </div>
 
                     <!-- Surveys Tab -->
                     <div x-show="activeTab === 'surveys'" x-cloak>
                         <livewire:contact-surveys
-                            contact-type="student"
-                            :contact-id="$student->id"
+                            contact-type="learner"
+                            :contact-id="$learner->id"
                         />
                     </div>
 
                     <!-- Resources Tab -->
                     <div x-show="activeTab === 'resources'" x-cloak>
                         <livewire:contact-resources
-                            contact-type="student"
-                            :contact-id="$student->id"
+                            contact-type="learner"
+                            :contact-id="$learner->id"
                         />
                     </div>
                 </div>

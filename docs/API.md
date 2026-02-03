@@ -528,7 +528,7 @@ POST /api/collections
 Content-Type: application/json
 
 {
-  "name": "Math Resources for Middle School",
+  "name": "Math Resources for Middle Organization",
   "description": "Curated collection of math resources",
   "type": "curated",
   "is_public": true
@@ -612,7 +612,7 @@ GET /api/user
     "role": "admin",
     "organization": {
       "id": 1,
-      "name": "Example School District"
+      "name": "Example Organization District"
     },
     "created_at": "2026-01-01T00:00:00Z"
   }
@@ -663,7 +663,7 @@ Pulse can send webhooks for various events.
 | `course.archived` | Course archived |
 | `moderation.completed` | Moderation decision made |
 | `enrollment.created` | New enrollment |
-| `enrollment.completed` | Student completed course |
+| `enrollment.completed` | Learner completed course |
 
 ### Webhook Security
 

@@ -13,7 +13,7 @@ use App\Livewire\Reports\Concerns\WithMultiPageSupport;
 use App\Livewire\Reports\Concerns\WithReportPersistence;
 use App\Livewire\Reports\Concerns\WithSmartBlocks;
 use App\Models\CustomReport;
-use App\Models\Student;
+use App\Models\Learner;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -298,11 +298,11 @@ class ReportBuilder extends Component
     }
 
     #[Computed]
-    public function availableStudents(): array
+    public function availableLearners(): array
     {
         $user = auth()->user();
 
-        $query = Student::where('org_id', $user->org_id)
+        $query = Learner::where('org_id', $user->org_id)
             ->with('user');
 
         // Apply search filter if present

@@ -34,7 +34,7 @@ class Dashboard extends Model
 
     public const WIDGET_LINE_CHART = 'line_chart';
 
-    public const WIDGET_STUDENT_LIST = 'student_list';
+    public const WIDGET_STUDENT_LIST = 'learner_list';
 
     public const WIDGET_SURVEY_SUMMARY = 'survey_summary';
 
@@ -64,8 +64,8 @@ class Dashboard extends Model
                 'icon' => 'arrow-trending-up',
             ],
             self::WIDGET_STUDENT_LIST => [
-                'label' => 'Student List',
-                'description' => 'Display filtered student records',
+                'label' => 'Learner List',
+                'description' => 'Display filtered learner records',
                 'icon' => 'users',
             ],
             self::WIDGET_SURVEY_SUMMARY => [
@@ -205,15 +205,15 @@ class Dashboard extends Model
         // Row 1: 4 metric cards across
         $dashboard->addWidget(
             self::WIDGET_METRIC_CARD,
-            'Total Students',
-            ['data_source' => 'students_total', 'color' => 'blue'],
+            'Total Learners',
+            ['data_source' => 'learners_total', 'color' => 'blue'],
             ['x' => 0, 'y' => 0, 'w' => 3, 'h' => 2]
         );
 
         $dashboard->addWidget(
             self::WIDGET_METRIC_CARD,
-            'At-Risk Students',
-            ['data_source' => 'students_at_risk', 'color' => 'red'],
+            'At-Risk Learners',
+            ['data_source' => 'learners_at_risk', 'color' => 'red'],
             ['x' => 3, 'y' => 0, 'w' => 3, 'h' => 2]
         );
 
@@ -227,7 +227,7 @@ class Dashboard extends Model
         $dashboard->addWidget(
             self::WIDGET_METRIC_CARD,
             'Need Attention',
-            ['data_source' => 'students_need_attention', 'color' => 'orange'],
+            ['data_source' => 'learners_need_attention', 'color' => 'orange'],
             ['x' => 9, 'y' => 0, 'w' => 3, 'h' => 2]
         );
 

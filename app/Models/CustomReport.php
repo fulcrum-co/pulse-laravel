@@ -21,11 +21,11 @@ class CustomReport extends Model
     public const STATUS_ARCHIVED = 'archived';
 
     // Report types
-    public const TYPE_STUDENT_PROGRESS = 'student_progress';
+    public const TYPE_STUDENT_PROGRESS = 'learner_progress';
 
     public const TYPE_COHORT_SUMMARY = 'cohort_summary';
 
-    public const TYPE_SCHOOL_DASHBOARD = 'school_dashboard';
+    public const TYPE_SCHOOL_DASHBOARD = 'organization_dashboard';
 
     public const TYPE_CUSTOM = 'custom';
 

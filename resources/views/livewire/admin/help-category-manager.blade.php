@@ -6,8 +6,8 @@
                 <x-icon name="arrow-left" class="w-5 h-5" />
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Help Categories</h1>
-                <p class="mt-1 text-sm text-gray-500">Organize your help articles into categories</p>
+                <h1 class="text-2xl font-bold text-gray-900">@term('help_center_label') @term('categories_label')</h1>
+                <p class="mt-1 text-sm text-gray-500">@term('create_categories_help_label')</p>
             </div>
         </div>
         <button
@@ -15,7 +15,7 @@
             class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
         >
             <x-icon name="plus" class="w-4 h-4" />
-            Add Category
+            @term('add_action') @term('category_singular')
         </button>
     </div>
 
@@ -26,26 +26,26 @@
                 <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                     <x-icon name="folder" class="w-6 h-6 text-gray-400" />
                 </div>
-                <h3 class="text-sm font-medium text-gray-900 mb-1">No categories yet</h3>
-                <p class="text-sm text-gray-500 mb-4">Create categories to organize your help articles.</p>
+                <h3 class="text-sm font-medium text-gray-900 mb-1">@term('no_categories_yet_label')</h3>
+                <p class="text-sm text-gray-500 mb-4">@term('create_categories_help_label')</p>
                 <button
                     wire:click="openCreateModal"
                     class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700"
                 >
                     <x-icon name="plus" class="w-4 h-4" />
-                    Create your first category
+                    @term('create_first_category_label')
                 </button>
             </div>
         @else
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
-                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent</th>
-                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Articles</th>
-                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('category_label')</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('slug_label')</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('parent_label')</th>
+                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">@term('articles_label')</th>
+                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">@term('status_label')</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">@term('actions_label')</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -82,7 +82,7 @@
                                         ? 'bg-green-100 text-green-700 hover:bg-green-200'
                                         : 'bg-gray-100 text-gray-500 hover:bg-gray-200' }}"
                                 >
-                                    {{ $category->is_active ? 'Active' : 'Inactive' }}
+                                    {{ $category->is_active ? app(\App\Services\TerminologyService::class)->get('active_label') : app(\App\Services\TerminologyService::class)->get('inactive_label') }}
                                 </button>
                             </td>
                             <td class="px-4 py-3 text-right">
@@ -90,15 +90,15 @@
                                     <button
                                         wire:click="openEditModal({{ $category->id }})"
                                         class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
-                                        title="Edit"
+                                        title="{{ app(\App\Services\TerminologyService::class)->get('edit_action') }}"
                                     >
                                         <x-icon name="pencil" class="w-4 h-4" />
                                     </button>
                                     <button
                                         wire:click="delete({{ $category->id }})"
-                                        wire:confirm="Are you sure you want to delete this category?"
+                                        wire:confirm="{{ app(\App\Services\TerminologyService::class)->get('confirm_delete_category_label') }}"
                                         class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                                        title="Delete"
+                                        title="{{ app(\App\Services\TerminologyService::class)->get('delete_action') }}"
                                     >
                                         <x-icon name="trash" class="w-4 h-4" />
                                     </button>
@@ -122,7 +122,7 @@
                     <div class="bg-white px-6 py-5">
                         <div class="flex items-center justify-between mb-5">
                             <h3 class="text-lg font-semibold text-gray-900">
-                                {{ $editMode ? 'Edit Category' : 'Add Category' }}
+                                {{ $editMode ? app(\App\Services\TerminologyService::class)->get('edit_action') . ' ' . app(\App\Services\TerminologyService::class)->get('category_singular') : app(\App\Services\TerminologyService::class)->get('add_action') . ' ' . app(\App\Services\TerminologyService::class)->get('category_singular') }}
                             </h3>
                             <button type="button" wire:click="closeModal" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                                 <x-icon name="x-mark" class="w-5 h-5" />
@@ -132,12 +132,12 @@
                         <div class="space-y-4">
                             {{-- Name --}}
                             <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">@term('name_label')</label>
                                 <input
                                     type="text"
                                     id="name"
                                     wire:model.live="name"
-                                    placeholder="Getting Started"
+                                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('category_name_placeholder') }}"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm"
                                 />
                                 @error('name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
@@ -145,12 +145,12 @@
 
                             {{-- Slug --}}
                             <div>
-                                <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">Slug</label>
+                                <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">@term('slug_label')</label>
                                 <input
                                     type="text"
                                     id="slug"
                                     wire:model="slug"
-                                    placeholder="getting-started"
+                                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('category_slug_placeholder') }}"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm font-mono"
                                 />
                                 @error('slug') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
@@ -158,12 +158,12 @@
 
                             {{-- Description --}}
                             <div>
-                                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">@term('description_label')</label>
                                 <textarea
                                     id="description"
                                     wire:model="description"
                                     rows="2"
-                                    placeholder="Brief description of this category..."
+                                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('category_description_placeholder') }}"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm"
                                 ></textarea>
                                 @error('description') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
@@ -172,7 +172,7 @@
                             {{-- Icon & Parent --}}
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label for="icon" class="block text-sm font-medium text-gray-700 mb-1">Icon</label>
+                                    <label for="icon" class="block text-sm font-medium text-gray-700 mb-1">@term('icon_label')</label>
                                     <select
                                         id="icon"
                                         wire:model="icon"
@@ -184,13 +184,13 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label for="parentId" class="block text-sm font-medium text-gray-700 mb-1">Parent Category</label>
+                                    <label for="parentId" class="block text-sm font-medium text-gray-700 mb-1">@term('parent_category_label')</label>
                                     <select
                                         id="parentId"
                                         wire:model="parentId"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm"
                                     >
-                                        <option value="">None (Top Level)</option>
+                                        <option value="">@term('none_top_level_label')</option>
                                         @foreach($this->parentCategories as $parent)
                                             <option value="{{ $parent->id }}">{{ $parent->name }}</option>
                                         @endforeach
@@ -201,7 +201,7 @@
                             {{-- Sort Order & Active --}}
                             <div class="flex items-center gap-6">
                                 <div class="flex-1">
-                                    <label for="sortOrder" class="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
+                                    <label for="sortOrder" class="block text-sm font-medium text-gray-700 mb-1">@term('sort_order_label')</label>
                                     <input
                                         type="number"
                                         id="sortOrder"
@@ -219,7 +219,7 @@
                                     >
                                         <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $isActive ? 'translate-x-5' : 'translate-x-0' }}"></span>
                                     </button>
-                                    <label class="text-sm text-gray-700">Active</label>
+                                    <label class="text-sm text-gray-700">@term('active_label')</label>
                                 </div>
                             </div>
                         </div>
@@ -231,13 +231,13 @@
                             wire:click="closeModal"
                             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                         >
-                            Cancel
+                            @term('cancel_action')
                         </button>
                         <button
                             type="submit"
                             class="px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
                         >
-                            {{ $editMode ? 'Save Changes' : 'Create Category' }}
+                            {{ $editMode ? app(\App\Services\TerminologyService::class)->get('save_changes_label') : app(\App\Services\TerminologyService::class)->get('create_action') . ' ' . app(\App\Services\TerminologyService::class)->get('category_singular') }}
                         </button>
                     </div>
                 </form>

@@ -74,8 +74,8 @@
                         </svg>
                         @endif
                     </div>
-                    @if($conv->student)
-                    <p class="text-xs text-blue-600 mb-1 truncate">Re: {{ $conv->student->name }}</p>
+                    @if($conv->learner)
+                    <p class="text-xs text-blue-600 mb-1 truncate">Re: {{ $conv->learner->name }}</p>
                     @endif
                     @if($conv->last_message_preview)
                     <p class="text-sm text-gray-600 truncate">{{ $conv->last_message_preview }}</p>

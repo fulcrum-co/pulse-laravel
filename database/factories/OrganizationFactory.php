@@ -19,7 +19,7 @@ class OrganizationFactory extends Factory
      */
     public function definition(): array
     {
-        $types = ['district', 'school', 'pulse_admin'];
+        $types = ['district', 'organization', 'pulse_admin'];
 
         return [
             'name' => $this->faker->company(),
@@ -41,12 +41,12 @@ class OrganizationFactory extends Factory
     }
 
     /**
-     * Indicate that the organization is a school.
+     * Indicate that the organization is a organization.
      */
-    public function school(): static
+    public function organization(): static
     {
         return $this->state(fn (array $attributes) => [
-            'type' => 'school',
+            'type' => 'organization',
         ]);
     }
 
@@ -61,7 +61,7 @@ class OrganizationFactory extends Factory
     }
 
     /**
-     * Set the parent organization (for schools under districts).
+     * Set the parent organization (for organizations under districts).
      */
     public function withParent(Organization $parent): static
     {

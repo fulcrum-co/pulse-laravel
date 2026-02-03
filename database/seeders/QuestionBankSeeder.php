@@ -27,7 +27,7 @@ class QuestionBankSeeder extends Seeder
                     'high_concern' => ['max' => 2],
                     'moderate_concern' => ['min' => 3, 'max' => 3],
                     'low_concern' => ['min' => 4],
-                    'ai_prompt' => 'Scores of 1-2 indicate the student may need immediate support. Consider follow-up with counselor.',
+                    'ai_prompt' => 'Scores of 1-2 indicate the learner may need immediate support. Consider follow-up with counselor.',
                 ],
                 'tags' => ['daily-check', 'mood', 'general-wellness'],
                 'is_public' => true,
@@ -112,7 +112,7 @@ class QuestionBankSeeder extends Seeder
                 ],
                 'interpretation_rules' => [
                     'high_concern' => ['values' => ['Rarely', 'No, never']],
-                    'ai_prompt' => 'Lack of support system is a risk factor. Consider connecting student with peer support or counselor.',
+                    'ai_prompt' => 'Lack of support system is a risk factor. Consider connecting learner with peer support or counselor.',
                 ],
                 'tags' => ['support', 'social', 'mental-health'],
                 'is_public' => true,
@@ -121,7 +121,7 @@ class QuestionBankSeeder extends Seeder
             [
                 'category' => 'wellness',
                 'subcategory' => 'safety',
-                'question_text' => 'Do you feel safe at school?',
+                'question_text' => 'Do you feel safe at organization?',
                 'question_type' => 'scale',
                 'options' => [
                     'min' => 1,
@@ -132,7 +132,7 @@ class QuestionBankSeeder extends Seeder
                     'high_concern' => ['max' => 2],
                     'ai_prompt' => 'Safety concerns require immediate attention. Follow up to understand specific issues.',
                 ],
-                'tags' => ['safety', 'school-climate', 'bullying'],
+                'tags' => ['safety', 'organization-climate', 'bullying'],
                 'is_public' => true,
                 'is_validated' => true,
             ],
@@ -246,7 +246,7 @@ class QuestionBankSeeder extends Seeder
             [
                 'category' => 'academic',
                 'subcategory' => 'help-seeking',
-                'question_text' => 'When you\'re struggling with schoolwork, do you ask for help?',
+                'question_text' => 'When you\'re struggling with organizationwork, do you ask for help?',
                 'question_type' => 'multiple_choice',
                 'options' => [
                     'choices' => ['Always', 'Usually', 'Sometimes', 'Rarely', 'Never'],
@@ -281,7 +281,7 @@ class QuestionBankSeeder extends Seeder
             [
                 'category' => 'sel',
                 'subcategory' => 'relationships',
-                'question_text' => 'How would you describe your relationships with other students?',
+                'question_text' => 'How would you describe your relationships with other learners?',
                 'question_type' => 'scale',
                 'options' => [
                     'min' => 1,
@@ -299,7 +299,7 @@ class QuestionBankSeeder extends Seeder
             [
                 'category' => 'sel',
                 'subcategory' => 'belonging',
-                'question_text' => 'Do you feel like you belong at this school?',
+                'question_text' => 'Do you feel like you belong at this organization?',
                 'question_type' => 'scale',
                 'options' => [
                     'min' => 1,
@@ -310,7 +310,7 @@ class QuestionBankSeeder extends Seeder
                     'high_concern' => ['max' => 2],
                     'ai_prompt' => 'Low sense of belonging is associated with disengagement and dropout risk.',
                 ],
-                'tags' => ['belonging', 'school-climate', 'engagement'],
+                'tags' => ['belonging', 'organization-climate', 'engagement'],
                 'is_public' => true,
                 'is_validated' => true,
             ],
@@ -369,7 +369,7 @@ class QuestionBankSeeder extends Seeder
             [
                 'category' => 'behavioral',
                 'subcategory' => 'attendance',
-                'question_text' => 'How do you feel about coming to school each day?',
+                'question_text' => 'How do you feel about coming to organization each day?',
                 'question_type' => 'scale',
                 'options' => [
                     'min' => 1,
@@ -403,7 +403,7 @@ class QuestionBankSeeder extends Seeder
             [
                 'category' => 'behavioral',
                 'subcategory' => 'conflict',
-                'question_text' => 'How often do you get into conflicts or arguments with other students?',
+                'question_text' => 'How often do you get into conflicts or arguments with other learners?',
                 'question_type' => 'multiple_choice',
                 'options' => [
                     'choices' => ['Never', 'Rarely', 'Sometimes', 'Often', 'Very Often'],

@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
 use Livewire\Component;
 
@@ -15,12 +15,12 @@ class ContactHeader extends Component
     public function mount($contact)
     {
         $this->contact = $contact;
-        $this->contactType = $contact instanceof Student ? 'student' : 'user';
+        $this->contactType = $contact instanceof Learner ? 'learner' : 'user';
     }
 
     public function getDisplayNameProperty()
     {
-        if ($this->contact instanceof Student) {
+        if ($this->contact instanceof Learner) {
             return $this->contact->full_name ?? $this->contact->first_name.' '.$this->contact->last_name;
         }
 
@@ -29,8 +29,8 @@ class ContactHeader extends Component
 
     public function getAvatarUrlProperty()
     {
-        // For students, avatar is on the related User model
-        if ($this->contact instanceof Student && $this->contact->user?->avatar_url) {
+        // For learners, avatar is on the related User model
+        if ($this->contact instanceof Learner && $this->contact->user?->avatar_url) {
             return $this->contact->user->avatar_url;
         }
 
@@ -51,8 +51,8 @@ class ContactHeader extends Component
 
     public function getRoleDisplayProperty()
     {
-        if ($this->contact instanceof Student) {
-            return 'Student';
+        if ($this->contact instanceof Learner) {
+            return 'Learner';
         }
 
         if (method_exists($this->contact, 'getRoleNames')) {
@@ -69,14 +69,14 @@ class ContactHeader extends Component
     {
         $info = [];
 
-        if ($this->contact instanceof Student) {
+        if ($this->contact instanceof Learner) {
             if ($this->contact->grade_level) {
                 $info[] = ['label' => 'Grade', 'value' => $this->contact->grade_level];
             }
-            if ($this->contact->student_number) {
-                $info[] = ['label' => 'ID', 'value' => $this->contact->student_number];
+            if ($this->contact->learner_number) {
+                $info[] = ['label' => 'ID', 'value' => $this->contact->learner_number];
             }
-            // For students, email/phone are on the User model
+            // For learners, email/phone are on the User model
             $user = $this->contact->user;
             if ($user?->email) {
                 $info[] = ['label' => 'Email', 'value' => $user->email];
@@ -99,7 +99,7 @@ class ContactHeader extends Component
 
     public function getRiskLevelProperty()
     {
-        if ($this->contact instanceof Student) {
+        if ($this->contact instanceof Learner) {
             return $this->contact->risk_level;
         }
 

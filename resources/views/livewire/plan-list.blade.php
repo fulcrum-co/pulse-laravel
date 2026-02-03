@@ -13,7 +13,7 @@
             <option value="all">All Types</option>
             <option value="organizational">Organizational</option>
             <option value="teacher">Teacher</option>
-            <option value="student">Student</option>
+            <option value="learner">Learner</option>
             <option value="department">Department</option>
             <option value="improvement">PIP</option>
             <option value="growth">Growth</option>

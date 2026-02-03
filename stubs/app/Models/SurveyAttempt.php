@@ -60,11 +60,11 @@ class SurveyAttempt extends Model
     }
 
     /**
-     * Get the surveyee (student being surveyed about).
+     * Get the surveyee (learner being surveyed about).
      */
     public function surveyee(): BelongsTo
     {
-        return $this->belongsTo(Student::class, 'surveyee_id', 'user_id');
+        return $this->belongsTo(Learner::class, 'surveyee_id', 'user_id');
     }
 
     /**

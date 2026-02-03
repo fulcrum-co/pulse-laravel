@@ -5,7 +5,7 @@ namespace App\Livewire;
 use App\Models\ContactList;
 use App\Models\Resource;
 use App\Models\ResourceAssignment;
-use App\Models\Student;
+use App\Models\Learner;
 use Livewire\Component;
 
 class ResourceDetail extends Component
@@ -15,9 +15,9 @@ class ResourceDetail extends Component
     // Assign modal state
     public bool $showAssignModal = false;
 
-    public string $assignType = 'student'; // student or list
+    public string $assignType = 'learner'; // learner or list
 
-    public ?int $selectedStudentId = null;
+    public ?int $selectedLearnerId = null;
 
     public ?int $selectedListId = null;
 
@@ -47,8 +47,8 @@ class ResourceDetail extends Component
 
     protected function resetAssignForm(): void
     {
-        $this->assignType = 'student';
-        $this->selectedStudentId = null;
+        $this->assignType = 'learner';
+        $this->selectedLearnerId = null;
         $this->selectedListId = null;
         $this->assignNote = '';
     }
@@ -57,14 +57,14 @@ class ResourceDetail extends Component
     {
         $user = auth()->user();
 
-        if ($this->assignType === 'student') {
+        if ($this->assignType === 'learner') {
             $this->validate([
-                'selectedStudentId' => 'required|exists:students,id',
+                'selectedLearnerId' => 'required|exists:learners,id',
             ]);
 
             ResourceAssignment::create([
                 'resource_id' => $this->resource->id,
-                'student_id' => $this->selectedStudentId,
+                'learner_id' => $this->selectedLearnerId,
                 'assigned_by' => $user->id,
                 'notes' => $this->assignNote ?: null,
                 'assigned_at' => now(),
@@ -73,7 +73,7 @@ class ResourceDetail extends Component
 
             $this->dispatch('notify', [
                 'type' => 'success',
-                'message' => 'Resource assigned to student successfully.',
+                'message' => 'Resource assigned to learner successfully.',
             ]);
 
         } elseif ($this->assignType === 'list') {
@@ -82,19 +82,19 @@ class ResourceDetail extends Component
             ]);
 
             $list = ContactList::find($this->selectedListId);
-            $students = $list->students;
+            $learners = $list->learners;
             $count = 0;
 
-            foreach ($students as $student) {
+            foreach ($learners as $learner) {
                 // Avoid duplicate assignments
                 $exists = ResourceAssignment::where('resource_id', $this->resource->id)
-                    ->where('student_id', $student->id)
+                    ->where('learner_id', $learner->id)
                     ->exists();
 
                 if (! $exists) {
                     ResourceAssignment::create([
                         'resource_id' => $this->resource->id,
-                        'student_id' => $student->id,
+                        'learner_id' => $learner->id,
                         'assigned_by' => $user->id,
                         'notes' => $this->assignNote ?: null,
                         'assigned_at' => now(),
@@ -106,7 +106,7 @@ class ResourceDetail extends Component
 
             $this->dispatch('notify', [
                 'type' => 'success',
-                'message' => "Resource assigned to {$count} students from the list.",
+                'message' => "Resource assigned to {$count} learners from the list.",
             ]);
         }
 
@@ -140,14 +140,14 @@ class ResourceDetail extends Component
         return $this->resource->assignments()->count();
     }
 
-    public function getStudentsProperty()
+    public function getLearnersProperty()
     {
         $accessibleOrgIds = auth()->user()->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        return Student::whereIn('org_id', $accessibleOrgIds)
+        return Learner::whereIn('org_id', $accessibleOrgIds)
             ->with('user')
             ->get()
-            ->sortBy(fn ($student) => $student->user?->name ?? '')
+            ->sortBy(fn ($learner) => $learner->user?->name ?? '')
             ->values();
     }
 
@@ -156,7 +156,7 @@ class ResourceDetail extends Component
         $accessibleOrgIds = auth()->user()->getAccessibleOrganizations()->pluck('id')->toArray();
 
         return ContactList::whereIn('org_id', $accessibleOrgIds)
-            ->whereIn('list_type', ['student', 'mixed'])
+            ->whereIn('list_type', ['learner', 'mixed'])
             ->orderBy('name')
             ->get();
     }

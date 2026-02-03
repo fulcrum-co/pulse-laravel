@@ -9,7 +9,7 @@
                     class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
                 >
                     <x-icon name="bell" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
-                    Notifications
+                    @term('notifications_label')
                 </button>
                 <button
                     @click="activeTab = 'profile'"
@@ -17,7 +17,7 @@
                     class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
                 >
                     <x-icon name="user" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
-                    Profile
+                    @term('profile_label')
                 </button>
                 <button
                     @click="activeTab = 'security'"
@@ -25,7 +25,7 @@
                     class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
                 >
                     <x-icon name="shield-check" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
-                    Security
+                    @term('security_label')
                 </button>
                 <button
                     @click="activeTab = 'terminology'"
@@ -33,7 +33,7 @@
                     class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
                 >
                     <x-icon name="tag" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
-                    Terminology
+                    @term('terminology_label')
                 </button>
             </nav>
         </div>

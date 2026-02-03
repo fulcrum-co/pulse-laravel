@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\AdaptiveTrigger;
@@ -7,7 +9,7 @@ use App\Models\ContactMetric;
 use App\Models\MiniCourse;
 use App\Models\MiniCourseEnrollment;
 use App\Models\MiniCourseSuggestion;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
@@ -20,15 +22,17 @@ class AdaptiveTriggerService
     ) {}
 
     /**
-     * Evaluate all active triggers for a student.
+     * Evaluate all active triggers for a learner.
      */
-    public function evaluateTriggersForStudent(Student $student): array
+    public function evaluateTriggersForLearner(Learner $learner): array
     {
-        $triggers = AdaptiveTrigger::where('org_id', $student->org_id)
+        $triggers = AdaptiveTrigger::query()
+            ->where('org_id', $learner->org_id)
             ->where('active', true)
+            ->select(['id', 'org_id', 'name', 'active', 'cooldown_hours', 'last_triggered_at', 'triggered_count', 'conditions', 'ai_interpretation_enabled', 'ai_prompt_context', 'output_action', 'output_config'])
             ->get();
 
-        $signals = $this->gatherInputSignals($student);
+        $signals = $this->gatherInputSignals($learner);
         $results = [];
 
         foreach ($triggers as $trigger) {
@@ -44,7 +48,7 @@ class AdaptiveTriggerService
                 // If AI interpretation is enabled, get AI analysis
                 $aiAnalysis = null;
                 if ($trigger->ai_interpretation_enabled) {
-                    $aiAnalysis = $this->getAiInterpretation($trigger, $student, $signals);
+                    $aiAnalysis = $this->getAiInterpretation($trigger, $learner, $signals);
 
                     // AI can veto the trigger if conditions are met but context suggests otherwise
                     if ($aiAnalysis && isset($aiAnalysis['should_proceed']) && ! $aiAnalysis['should_proceed']) {
@@ -53,7 +57,7 @@ class AdaptiveTriggerService
                 }
 
                 // Execute the trigger action
-                $result = $this->executeTrigger($trigger, $student, $signals, $aiAnalysis);
+                $result = $this->executeTrigger($trigger, $learner, $signals, $aiAnalysis);
                 $results[] = $result;
 
                 // Update trigger stats
@@ -68,26 +72,26 @@ class AdaptiveTriggerService
     }
 
     /**
-     * Gather all input signals for a student.
+     * Gather all input signals for a learner.
      */
-    public function gatherInputSignals(Student $student): array
+    public function gatherInputSignals(Learner $learner): array
     {
         $signals = [
             'timestamp' => now()->toISOString(),
-            'student_id' => $student->id,
+            'learner_id' => $learner->id,
         ];
 
         // Quantitative signals
-        $signals['quantitative'] = $this->gatherQuantitativeSignals($student);
+        $signals['quantitative'] = $this->gatherQuantitativeSignals($learner);
 
         // Qualitative signals
-        $signals['qualitative'] = $this->gatherQualitativeSignals($student);
+        $signals['qualitative'] = $this->gatherQualitativeSignals($learner);
 
         // Behavioral signals
-        $signals['behavioral'] = $this->gatherBehavioralSignals($student);
+        $signals['behavioral'] = $this->gatherBehavioralSignals($learner);
 
         // Explicit signals
-        $signals['explicit'] = $this->gatherExplicitSignals($student);
+        $signals['explicit'] = $this->gatherExplicitSignals($learner);
 
         return $signals;
     }
@@ -95,37 +99,62 @@ class AdaptiveTriggerService
     /**
      * Gather quantitative signals (metrics, grades, attendance).
      */
-    protected function gatherQuantitativeSignals(Student $student): array
+    protected function gatherQuantitativeSignals(Learner $learner): array
     {
-        $metrics = $student->metrics()
-            ->where('period_start', '>=', now()->subMonths(3))
+        $threeMonthsAgo = now()->subMonths(3);
+        $oneMonthAgo = now()->subMonths(1);
+
+        // Fetch all required metrics in a single query with optimized filtering
+        $metrics = $learner->metrics()
+            ->where('period_start', '>=', $threeMonthsAgo)
+            ->select(['id', 'learner_id', 'metric_category', 'metric_key', 'numeric_value', 'status', 'period_start', 'period_end'])
+            ->orderByDesc('period_start')
             ->get();
 
         $signals = [
-            'risk_level' => $student->risk_level,
-            'risk_score' => $student->risk_score,
-            'grade_level' => $student->grade_level,
+            'risk_level' => $learner->risk_level,
+            'risk_score' => $learner->risk_score,
+            'grade_level' => $learner->grade_level,
         ];
 
-        // Extract specific metrics
+        // Index metrics by key for O(1) lookups
+        $metricsByKey = [];
+        $metricsByKeyAndDate = [];
+
+        // Extract specific metrics with indexing for better performance
         foreach ($metrics as $metric) {
             $key = "{$metric->metric_category}_{$metric->metric_key}";
-            $signals[$key] = $metric->numeric_value;
-            $signals["{$key}_status"] = $metric->status;
+            // Store the first (most recent) occurrence due to orderByDesc
+            if (!isset($metricsByKey[$key])) {
+                $signals[$key] = $metric->numeric_value;
+                $signals["{$key}_status"] = $metric->status;
+                $metricsByKey[$key] = $metric;
+            }
+
+            // Index for derived metrics
+            $metricsByKeyAndDate[$metric->metric_key][] = $metric;
         }
 
-        // Calculate derived metrics
-        $gpa = $metrics->where('metric_key', 'gpa')->first();
-        $previousGpa = $metrics->where('metric_key', 'gpa')
-            ->where('period_start', '<=', now()->subMonths(1))
-            ->first();
+        // Calculate derived metrics - now O(1) instead of O(n)
+        if (isset($metricsByKeyAndDate['gpa']) && count($metricsByKeyAndDate['gpa']) > 0) {
+            $gpa = $metricsByKeyAndDate['gpa'][0]; // Most recent
 
-        if ($gpa && $previousGpa) {
-            $signals['gpa_change'] = $gpa->numeric_value - $previousGpa->numeric_value;
+            // Find previous GPA - already filtered in query
+            $previousGpa = null;
+            foreach ($metricsByKeyAndDate['gpa'] as $metric) {
+                if ($metric->period_start <= $oneMonthAgo) {
+                    $previousGpa = $metric;
+                    break;
+                }
+            }
+
+            if ($previousGpa) {
+                $signals['gpa_change'] = $gpa->numeric_value - $previousGpa->numeric_value;
+            }
         }
 
-        $attendanceMetric = $metrics->where('metric_key', 'attendance_rate')->first();
-        if ($attendanceMetric) {
+        if (isset($metricsByKeyAndDate['attendance_rate'])) {
+            $attendanceMetric = $metricsByKeyAndDate['attendance_rate'][0];
             $signals['attendance_rate_30d'] = $attendanceMetric->numeric_value;
         }
 
@@ -135,15 +164,19 @@ class AdaptiveTriggerService
     /**
      * Gather qualitative signals (notes, survey responses).
      */
-    protected function gatherQualitativeSignals(Student $student): array
+    protected function gatherQualitativeSignals(Learner $learner): array
     {
         $signals = [];
+        $twoWeeksAgo = now()->subWeeks(2);
+        $oneMonthAgo = now()->subMonths(1);
 
-        // Recent notes
-        $recentNotes = $student->notes()
-            ->where('created_at', '>=', now()->subWeeks(2))
+        // Fetch recent notes with optimized query
+        $recentNotes = $learner->notes()
+            ->where('created_at', '>=', $twoWeeksAgo)
+            ->select(['id', 'learner_id', 'note_type', 'content', 'created_at'])
             ->get();
 
+        // Use collection methods efficiently with pre-fetched data
         $signals['recent_notes_count'] = $recentNotes->count();
         $signals['concern_notes_count'] = $recentNotes->where('note_type', 'concern')->count();
         $signals['follow_up_notes_count'] = $recentNotes->where('note_type', 'follow_up')->count();
@@ -152,11 +185,12 @@ class AdaptiveTriggerService
         $noteContents = $recentNotes->pluck('content')->filter()->join(' ');
         $signals['note_themes'] = $this->extractThemes($noteContents);
 
-        // Recent survey responses
-        $recentSurvey = $student->surveyAttempts()
+        // Recent survey responses - eager load survey relationship
+        $recentSurvey = $learner->surveyAttempts()
             ->where('status', 'completed')
-            ->where('created_at', '>=', now()->subMonths(1))
+            ->where('created_at', '>=', $oneMonthAgo)
             ->with('survey')
+            ->select(['id', 'learner_id', 'survey_id', 'overall_score', 'responses', 'completed_at', 'created_at', 'status'])
             ->latest()
             ->first();
 
@@ -178,36 +212,43 @@ class AdaptiveTriggerService
     /**
      * Gather behavioral signals (login patterns, resource completion).
      */
-    protected function gatherBehavioralSignals(Student $student): array
+    protected function gatherBehavioralSignals(Learner $learner): array
     {
         $signals = [];
+        $oneMonthAgo = now()->subMonths(1);
+        $thirtyDaysAgo = now()->subDays(30);
 
-        // Resource assignment completion
-        $assignments = $student->resourceAssignments()
-            ->where('created_at', '>=', now()->subMonths(1))
+        // Optimize: Use select to get only needed columns and defer processing
+        $assignments = $learner->resourceAssignments()
+            ->where('created_at', '>=', $oneMonthAgo)
+            ->select(['id', 'learner_id', 'status', 'created_at'])
             ->get();
 
-        $signals['resource_assignments_count'] = $assignments->count();
+        $assignmentCount = $assignments->count();
+        $signals['resource_assignments_count'] = $assignmentCount;
         $signals['resources_completed_count'] = $assignments->where('status', 'completed')->count();
         $signals['resources_in_progress_count'] = $assignments->where('status', 'in_progress')->count();
 
-        if ($assignments->count() > 0) {
-            $signals['resource_completion_rate'] = ($assignments->where('status', 'completed')->count() / $assignments->count()) * 100;
+        if ($assignmentCount > 0) {
+            $signals['resource_completion_rate'] = ($assignments->where('status', 'completed')->count() / $assignmentCount) * 100;
         }
 
-        // Course enrollments
-        $enrollments = $student->miniCourseEnrollments()
-            ->where('created_at', '>=', now()->subMonths(1))
+        // Course enrollments - eager load to prevent additional queries
+        $enrollments = $learner->miniCourseEnrollments()
+            ->where('created_at', '>=', $oneMonthAgo)
+            ->select(['id', 'learner_id', 'mini_course_id', 'status', 'created_at'])
             ->get();
 
-        $signals['course_enrollments_count'] = $enrollments->count();
+        $enrollmentCount = $enrollments->count();
+        $signals['course_enrollments_count'] = $enrollmentCount;
         $signals['courses_completed_count'] = $enrollments->where('status', 'completed')->count();
         $signals['courses_in_progress_count'] = $enrollments->where('status', 'in_progress')->count();
 
-        // Behavioral incidents (if tracked in metrics)
-        $behaviorMetrics = $student->metrics()
+        // Behavioral incidents - fetch behavior metrics separately without N+1
+        $behaviorMetrics = $learner->metrics()
             ->where('metric_category', ContactMetric::CATEGORY_BEHAVIOR)
-            ->where('period_start', '>=', now()->subDays(30))
+            ->where('period_start', '>=', $thirtyDaysAgo)
+            ->select(['id', 'learner_id', 'numeric_value', 'metric_category', 'period_start'])
             ->get();
 
         $signals['behavior_incidents_30d'] = $behaviorMetrics->sum('numeric_value');
@@ -218,19 +259,19 @@ class AdaptiveTriggerService
     /**
      * Gather explicit signals (flags, IEP status, counselor notes).
      */
-    protected function gatherExplicitSignals(Student $student): array
+    protected function gatherExplicitSignals(Learner $learner): array
     {
         return [
-            'iep_status' => $student->iep_status,
-            'ell_status' => $student->ell_status,
-            'free_reduced_lunch' => $student->free_reduced_lunch,
-            'enrollment_status' => $student->enrollment_status,
-            'days_since_enrollment' => $student->enrollment_date
-                ? now()->diffInDays($student->enrollment_date)
+            'iep_status' => $learner->iep_status,
+            'ell_status' => $learner->ell_status,
+            'free_reduced_lunch' => $learner->free_reduced_lunch,
+            'enrollment_status' => $learner->enrollment_status,
+            'days_since_enrollment' => $learner->enrollment_date
+                ? now()->diffInDays($learner->enrollment_date)
                 : null,
-            'tags' => $student->tags ?? [],
-            'has_counselor' => $student->counselor_user_id !== null,
-            'custom_fields' => $student->custom_fields ?? [],
+            'tags' => $learner->tags ?? [],
+            'has_counselor' => $learner->counselor_user_id !== null,
+            'custom_fields' => $learner->custom_fields ?? [],
         ];
     }
 
@@ -335,10 +376,10 @@ class AdaptiveTriggerService
     /**
      * Get AI interpretation of the situation.
      */
-    protected function getAiInterpretation(AdaptiveTrigger $trigger, Student $student, array $signals): ?array
+    protected function getAiInterpretation(AdaptiveTrigger $trigger, Learner $learner, array $signals): ?array
     {
         $systemPrompt = <<<'PROMPT'
-You are analyzing a student's situation to determine if an intervention trigger should proceed.
+You are analyzing a learner's situation to determine if an intervention trigger should proceed.
 Consider the full context, not just the individual metrics that triggered the alert.
 
 Return a JSON object with:
@@ -378,12 +419,12 @@ PROMPT;
     /**
      * Execute a trigger action.
      */
-    public function executeTrigger(AdaptiveTrigger $trigger, Student $student, array $signals, ?array $aiAnalysis = null): array
+    public function executeTrigger(AdaptiveTrigger $trigger, Learner $learner, array $signals, ?array $aiAnalysis = null): array
     {
         $result = [
             'trigger_id' => $trigger->id,
             'trigger_name' => $trigger->name,
-            'student_id' => $student->id,
+            'learner_id' => $learner->id,
             'action' => $trigger->output_action,
             'success' => false,
             'details' => [],
@@ -392,29 +433,29 @@ PROMPT;
         try {
             switch ($trigger->output_action) {
                 case AdaptiveTrigger::ACTION_SUGGEST_FOR_REVIEW:
-                    $result['details'] = $this->createSuggestion($trigger, $student, $signals, $aiAnalysis);
+                    $result['details'] = $this->createSuggestion($trigger, $learner, $signals, $aiAnalysis);
                     $result['success'] = true;
                     break;
 
                 case AdaptiveTrigger::ACTION_AUTO_CREATE:
-                    $result['details'] = $this->autoCreateCourse($trigger, $student, $signals);
+                    $result['details'] = $this->autoCreateCourse($trigger, $learner, $signals);
                     $result['success'] = isset($result['details']['course_id']);
                     break;
 
                 case AdaptiveTrigger::ACTION_AUTO_ENROLL:
-                    $result['details'] = $this->autoEnrollStudent($trigger, $student, $signals);
+                    $result['details'] = $this->autoEnrollLearner($trigger, $learner, $signals);
                     $result['success'] = isset($result['details']['enrollment_id']);
                     break;
 
                 case AdaptiveTrigger::ACTION_NOTIFY:
-                    $result['details'] = $this->sendNotification($trigger, $student, $signals, $aiAnalysis);
+                    $result['details'] = $this->sendNotification($trigger, $learner, $signals, $aiAnalysis);
                     $result['success'] = true;
                     break;
             }
         } catch (\Exception $e) {
             Log::error('Trigger execution failed', [
                 'trigger_id' => $trigger->id,
-                'student_id' => $student->id,
+                'learner_id' => $learner->id,
                 'error' => $e->getMessage(),
             ]);
             $result['error'] = $e->getMessage();
@@ -426,27 +467,27 @@ PROMPT;
     /**
      * Create a course/provider suggestion for review.
      */
-    protected function createSuggestion(AdaptiveTrigger $trigger, Student $student, array $signals, ?array $aiAnalysis): array
+    protected function createSuggestion(AdaptiveTrigger $trigger, Learner $learner, array $signals, ?array $aiAnalysis): array
     {
         $config = $trigger->output_config ?? [];
 
         // Find or generate a suitable course
-        $suggestion = $this->courseGenerationService->generateCourseSuggestion($student, $signals);
+        $suggestion = $this->courseGenerationService->generateCourseSuggestion($learner, $signals);
 
         if (! $suggestion) {
             // No matching course found, create a placeholder suggestion
             $courseTypes = $config['course_types'] ?? [MiniCourse::TYPE_INTERVENTION];
 
-            $matchingCourse = MiniCourse::where('org_id', $student->org_id)
+            $matchingCourse = MiniCourse::where('org_id', $learner->org_id)
                 ->where('status', MiniCourse::STATUS_ACTIVE)
                 ->whereIn('course_type', $courseTypes)
                 ->first();
 
             if ($matchingCourse) {
                 $suggestion = MiniCourseSuggestion::create([
-                    'org_id' => $student->org_id,
-                    'contact_type' => Student::class,
-                    'contact_id' => $student->id,
+                    'org_id' => $learner->org_id,
+                    'contact_type' => Learner::class,
+                    'contact_id' => $learner->id,
                     'mini_course_id' => $matchingCourse->id,
                     'suggestion_source' => MiniCourseSuggestion::SOURCE_RULE_BASED,
                     'relevance_score' => 0.7,
@@ -464,11 +505,11 @@ PROMPT;
     }
 
     /**
-     * Auto-create a new course for the student.
+     * Auto-create a new course for the learner.
      */
-    protected function autoCreateCourse(AdaptiveTrigger $trigger, Student $student, array $signals): array
+    protected function autoCreateCourse(AdaptiveTrigger $trigger, Learner $learner, array $signals): array
     {
-        $course = $this->courseGenerationService->generateFromContext($student, $signals);
+        $course = $this->courseGenerationService->generateFromContext($learner, $signals);
 
         return [
             'course_id' => $course?->id,
@@ -477,15 +518,15 @@ PROMPT;
     }
 
     /**
-     * Auto-enroll student in a suitable course.
+     * Auto-enroll learner in a suitable course.
      */
-    protected function autoEnrollStudent(AdaptiveTrigger $trigger, Student $student, array $signals): array
+    protected function autoEnrollLearner(AdaptiveTrigger $trigger, Learner $learner, array $signals): array
     {
         $config = $trigger->output_config ?? [];
         $courseTags = $config['course_tags'] ?? [];
 
         // Find a suitable course
-        $query = MiniCourse::where('org_id', $student->org_id)
+        $query = MiniCourse::where('org_id', $learner->org_id)
             ->where('status', MiniCourse::STATUS_ACTIVE);
 
         if ($config['auto_enroll_template_courses'] ?? false) {
@@ -508,7 +549,7 @@ PROMPT;
 
         // Check if already enrolled
         $existingEnrollment = MiniCourseEnrollment::where('mini_course_id', $course->id)
-            ->where('student_id', $student->id)
+            ->where('learner_id', $learner->id)
             ->whereIn('status', [
                 MiniCourseEnrollment::STATUS_ENROLLED,
                 MiniCourseEnrollment::STATUS_IN_PROGRESS,
@@ -526,7 +567,7 @@ PROMPT;
         $enrollment = MiniCourseEnrollment::create([
             'mini_course_id' => $course->id,
             'mini_course_version_id' => $course->current_version_id,
-            'student_id' => $student->id,
+            'learner_id' => $learner->id,
             'enrollment_source' => MiniCourseEnrollment::SOURCE_RULE_TRIGGERED,
             'status' => MiniCourseEnrollment::STATUS_ENROLLED,
         ]);
@@ -541,7 +582,7 @@ PROMPT;
     /**
      * Send notification about the trigger.
      */
-    protected function sendNotification(AdaptiveTrigger $trigger, Student $student, array $signals, ?array $aiAnalysis): array
+    protected function sendNotification(AdaptiveTrigger $trigger, Learner $learner, array $signals, ?array $aiAnalysis): array
     {
         $config = $trigger->output_config ?? [];
         $recipients = $config['notification_recipients'] ?? ['counselor'];
@@ -550,11 +591,11 @@ PROMPT;
 
         foreach ($recipients as $recipientType) {
             $user = match ($recipientType) {
-                'counselor' => $student->counselor,
-                'admin' => User::where('org_id', $student->org_id)
+                'counselor' => $learner->counselor,
+                'admin' => User::where('org_id', $learner->org_id)
                     ->where('primary_role', 'admin')
                     ->first(),
-                'assigned_teacher' => $student->homeroomClassroom?->teacher,
+                'assigned_teacher' => $learner->homeroomClassroom?->teacher,
                 default => null,
             };
 
@@ -563,7 +604,7 @@ PROMPT;
                 // For now, we'll log it
                 Log::info('Trigger notification', [
                     'trigger' => $trigger->name,
-                    'student' => $student->full_name,
+                    'learner' => $learner->full_name,
                     'recipient' => $user->email,
                     'ai_analysis' => $aiAnalysis,
                 ]);
@@ -609,28 +650,34 @@ PROMPT;
     }
 
     /**
-     * Run triggers for all students in an organization (batch processing).
+     * Run triggers for all learners in an organization (batch processing).
      */
     public function runBatchTriggerEvaluation(int $orgId, ?array $triggerIds = null): array
     {
-        $students = Student::where('org_id', $orgId)
+        // Optimize: Use select to fetch only required columns for batch processing
+        $learners = Learner::where('org_id', $orgId)
             ->where('enrollment_status', 'active')
+            ->select([
+                'id', 'org_id', 'risk_level', 'risk_score', 'grade_level',
+                'iep_status', 'ell_status', 'free_reduced_lunch', 'enrollment_status',
+                'enrollment_date', 'tags', 'counselor_user_id', 'custom_fields',
+            ])
             ->get();
 
         $results = [
-            'students_evaluated' => 0,
+            'learners_evaluated' => 0,
             'triggers_fired' => 0,
             'errors' => [],
         ];
 
-        foreach ($students as $student) {
+        foreach ($learners as $learner) {
             try {
-                $studentResults = $this->evaluateTriggersForStudent($student);
-                $results['students_evaluated']++;
-                $results['triggers_fired'] += count($studentResults);
+                $learnerResults = $this->evaluateTriggersForLearner($learner);
+                $results['learners_evaluated']++;
+                $results['triggers_fired'] += count($learnerResults);
             } catch (\Exception $e) {
                 $results['errors'][] = [
-                    'student_id' => $student->id,
+                    'learner_id' => $learner->id,
                     'error' => $e->getMessage(),
                 ];
             }

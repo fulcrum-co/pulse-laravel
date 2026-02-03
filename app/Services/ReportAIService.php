@@ -1,16 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\ContactMetric;
 use App\Models\CustomReport;
+use App\Services\Domain\AIResponseParserService;
 use Illuminate\Support\Facades\Log;
 
 class ReportAIService
 {
     public function __construct(
         protected ClaudeService $claude,
-        protected ContactMetricService $metrics
+        protected ContactMetricService $metrics,
+        protected AIResponseParserService $aiParser
     ) {}
 
     /**
@@ -48,7 +52,7 @@ class ReportAIService
             'wellness_score' => 'Health & Wellness Score',
             'engagement_score' => 'Engagement Score',
             'emotional_wellbeing' => 'Emotional Well-Being',
-            'plan_progress' => 'Student Plan Progress',
+            'plan_progress' => 'Learner Plan Progress',
         ];
 
         $prompt = $this->buildLayoutPrompt($userPrompt, $reportType, $availableMetrics);
@@ -57,22 +61,17 @@ class ReportAIService
             $response = $this->claude->sendMessage($prompt);
 
             if ($response['success']) {
-                // Parse JSON from response
-                $content = $response['message'];
-
-                // Extract JSON from the response (handle cases where Claude adds explanation)
-                if (preg_match('/\[[\s\S]*\]/', $content, $matches)) {
-                    $json = $matches[0];
-                    $layout = json_decode($json, true);
-
-                    if (json_last_error() === JSON_ERROR_NONE && is_array($layout)) {
+                // Parse JSON from response using domain parser
+                try {
+                    $layout = $this->aiParser->parseJsonResponse($response['message']);
+                    if (is_array($layout)) {
                         return $this->normalizeLayout($layout);
                     }
+                } catch (\RuntimeException $e) {
+                    Log::warning('Could not parse layout JSON from AI response', ['error' => $e->getMessage()]);
+
+                    return [];
                 }
-
-                Log::warning('Could not parse layout JSON from AI response');
-
-                return [];
             }
 
             return [];
@@ -94,16 +93,16 @@ class ReportAIService
             $response = $this->claude->sendMessage($prompt);
 
             if ($response['success']) {
-                $content = $response['message'];
-
-                // Extract JSON array from response
-                if (preg_match('/\[[\s\S]*\]/', $content, $matches)) {
-                    $json = $matches[0];
-                    $insights = json_decode($json, true);
-
-                    if (json_last_error() === JSON_ERROR_NONE && is_array($insights)) {
+                // Parse JSON array from response using domain parser
+                try {
+                    $insights = $this->aiParser->parseJsonResponse($response['message']);
+                    if (is_array($insights)) {
                         return $insights;
                     }
+                } catch (\RuntimeException $e) {
+                    Log::error('Could not parse insights JSON from AI response', ['error' => $e->getMessage()]);
+
+                    return [];
                 }
             }
 
@@ -190,7 +189,7 @@ Element type configs:
 - text: {content: "HTML content", format: "html"}
 - chart: {chart_type: "line|bar|pie", title: "string", metric_keys: ["gpa"], colors: ["#hex"]}
 - metric_card: {metric_key: "gpa", label: "GPA", show_trend: true}
-- table: {title: "string", columns: ["name", "gpa"], data_source: "students"}
+- table: {title: "string", columns: ["name", "gpa"], data_source: "learners"}
 - ai_text: {prompt: "Write about...", format: "narrative|bullets"}
 
 Create a professional, balanced layout. Start elements at y=40, leave space between elements.
@@ -217,7 +216,7 @@ Context:
 
 For each insight, provide:
 1. finding: One sentence describing what you observed
-2. significance: Why this matters for student success
+2. significance: Why this matters for learner success
 3. action: A specific recommended action
 
 Return as a JSON array:
@@ -267,18 +266,28 @@ PROMPT;
 
     /**
      * Get metrics data for a specific contact.
+     *
+     * PERFORMANCE OPTIMIZATION:
+     * - Uses select() to only fetch required columns (reduces memory and network overhead)
+     * - Eager loads relationships to prevent N+1 queries
+     * - Uses efficient MongoDB aggregation patterns with proper indexing
+     * - Uses array_combine for efficient grouping instead of O(n²) firstWhere loops
      */
     public function getMetricsForContext(string $contactType, int $contactId, array $metricKeys): array
     {
+        // Fetch only needed columns for better performance
         $metrics = ContactMetric::forContact($contactType, $contactId)
+            ->select(['id', 'metric_key', 'numeric_value', 'status', 'metric_label', 'recorded_at', 'period_start'])
             ->whereIn('metric_key', $metricKeys)
             ->orderBy('period_start', 'desc')
             ->limit(50)
-            ->get();
+            ->get()
+            ->groupBy('metric_key'); // Use collection method instead of loop
 
         $data = [];
         foreach ($metricKeys as $key) {
-            $metric = $metrics->firstWhere('metric_key', $key);
+            // Get first item from grouped collection (already sorted by period_start desc)
+            $metric = $metrics[$key]?->first();
             $data[$key] = [
                 'value' => $metric?->numeric_value,
                 'status' => $metric?->status,

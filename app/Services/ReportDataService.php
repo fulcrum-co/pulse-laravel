@@ -1,16 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\ContactMetric;
 use App\Models\CustomReport;
-use App\Models\Student;
-use Carbon\Carbon;
+use App\Models\Learner;
+use App\Services\Domain\ReportAggregatorService;
 
 class ReportDataService
 {
     public function __construct(
-        protected ContactMetricService $metricService
+        protected ContactMetricService $metricService,
+        protected ReportAggregatorService $aggregator
     ) {}
 
     /**
@@ -45,8 +48,8 @@ class ReportDataService
             case 'cohort':
                 $data = $this->resolveCohortData($report, $data, $neededMetrics, $dateRange);
                 break;
-            case 'school':
-                $data = $this->resolveSchoolData($report, $data, $neededMetrics, $dateRange);
+            case 'organization':
+                $data = $this->resolveOrganizationData($report, $data, $neededMetrics, $dateRange);
                 break;
         }
 
@@ -80,34 +83,32 @@ class ReportDataService
             ->whereIn('metric_key', $metricKeys)
             ->forPeriod($dateRange['start'], $dateRange['end']);
 
-        // Apply filters
-        if (! empty($filters['grade_level'])) {
-            // Would need to join with students table
-            // For now, we'll skip this filter
+        // Extract and apply learner filters using domain service
+        $learnerFilters = $this->aggregator->extractLearnerFilters($filters);
+
+        // Filter by learner criteria if needed
+        if (! empty($learnerFilters)) {
+            $learnerIds = Learner::where('org_id', $orgId)
+                ->when(isset($learnerFilters['grade_level']), function ($q) use ($learnerFilters) {
+                    return $q->where('grade_level', $learnerFilters['grade_level']);
+                })
+                ->when(isset($learnerFilters['risk_level']), function ($q) use ($learnerFilters) {
+                    return $q->where('risk_level', $learnerFilters['risk_level']);
+                })
+                ->pluck('id');
+
+            if ($learnerIds->isNotEmpty()) {
+                $query->where(function ($q) use ($learnerIds) {
+                    $q->whereIn('contact_id', $learnerIds->toArray())
+                        ->orWhereNotIn('contact_type', [Learner::class]);
+                });
+            }
         }
 
-        if (! empty($filters['risk_level'])) {
-            // Would need to join with students table
-        }
+        // Get metrics and delegate aggregation to domain service
+        $metrics = $query->select('metric_key', 'numeric_value', 'recorded_at')->get();
 
-        $metrics = $query->get();
-
-        // Calculate aggregates
-        $aggregates = [];
-        foreach ($metricKeys as $key) {
-            $keyMetrics = $metrics->where('metric_key', $key);
-            $values = $keyMetrics->pluck('numeric_value')->filter();
-
-            $aggregates[$key] = [
-                'average' => $values->isNotEmpty() ? round($values->avg(), 2) : null,
-                'min' => $values->isNotEmpty() ? $values->min() : null,
-                'max' => $values->isNotEmpty() ? $values->max() : null,
-                'count' => $values->count(),
-                'latest' => $keyMetrics->sortByDesc('recorded_at')->first()?->numeric_value,
-            ];
-        }
-
-        return $aggregates;
+        return $this->aggregator->aggregateMetrics($metrics, $metricKeys);
     }
 
     /**
@@ -118,7 +119,7 @@ class ReportDataService
         $dateRange = $this->getDateRange($filters['date_range'] ?? '6_months');
         $groupBy = $filters['group_by'] ?? 'week';
 
-        $contactType = $filters['contact_type'] ?? Student::class;
+        $contactType = $filters['contact_type'] ?? Learner::class;
         $contactId = $filters['contact_id'] ?? null;
 
         if ($contactId) {
@@ -132,47 +133,27 @@ class ReportDataService
             );
         }
 
-        // School-wide aggregation
+        // Organization-wide aggregation
         $metrics = ContactMetric::where('org_id', $orgId)
             ->whereIn('metric_key', $metricKeys)
             ->forPeriod($dateRange['start'], $dateRange['end'])
+            ->select('metric_key', 'numeric_value', 'period_start')
             ->orderBy('period_start')
             ->get();
 
-        // Group by period
-        $grouped = $metrics->groupBy(function ($metric) use ($groupBy) {
-            return match ($groupBy) {
-                'day' => $metric->period_start->format('Y-m-d'),
-                'week' => $metric->period_start->startOfWeek()->format('Y-m-d'),
-                'month' => $metric->period_start->format('Y-m'),
-                default => $metric->period_start->format('Y-m-d'),
-            };
-        });
-
-        $result = [];
-        foreach ($metricKeys as $key) {
-            $result[$key] = $grouped->map(function ($group, $period) use ($key) {
-                $values = $group->where('metric_key', $key)->pluck('numeric_value')->filter();
-
-                return [
-                    'period' => $period,
-                    'value' => $values->isNotEmpty() ? round($values->avg(), 2) : null,
-                ];
-            })->values()->toArray();
-        }
-
-        return $result;
+        // Delegate grouping and transformation to domain service
+        return $this->aggregator->groupByPeriod($metrics, $metricKeys, $groupBy);
     }
 
     /**
-     * Get students data for tables.
+     * Get learners data for tables.
      */
-    public function getStudentsTableData(int $orgId, array $columns, array $filters): array
+    public function getLearnersTableData(int $orgId, array $columns, array $filters, int $pageSize = 100, int $page = 1): array
     {
-        $query = Student::where('org_id', $orgId)
-            ->with('user');
+        $query = Learner::where('org_id', $orgId)
+            ->select('id', 'user_id', 'org_id', 'grade_level', 'risk_level');
 
-        // Apply filters
+        // Apply filters early
         if (! empty($filters['grade_level'])) {
             $query->where('grade_level', $filters['grade_level']);
         }
@@ -181,27 +162,53 @@ class ReportDataService
             $query->where('risk_level', $filters['risk_level']);
         }
 
-        $students = $query->limit(100)->get();
+        // Calculate pagination offsets using domain service
+        $offsets = $this->aggregator->calculatePaginationOffsets($page, $pageSize);
+        $learners = $query->skip($offsets['skip'])->take($offsets['take'])->get();
 
-        $data = [];
-        foreach ($students as $student) {
-            $row = [];
+        if ($learners->isEmpty()) {
+            return [];
+        }
 
-            foreach ($columns as $column) {
-                $row[$column] = match ($column) {
-                    'name' => $student->user?->full_name ?? 'Unknown',
-                    'email' => $student->user?->email,
-                    'grade_level' => $student->grade_level,
-                    'risk_level' => $student->risk_level,
-                    'gpa' => $this->getLatestMetric($student, 'gpa'),
-                    'attendance' => $this->getLatestMetric($student, 'attendance_rate'),
-                    'attendance_rate' => $this->getLatestMetric($student, 'attendance_rate'),
-                    'wellness_score' => $this->getLatestMetric($student, 'wellness_score'),
-                    'engagement_score' => $this->getLatestMetric($student, 'engagement_score'),
-                    default => null,
-                };
+        // Load user data only for learners we're displaying
+        $learnerIds = $learners->pluck('id')->toArray();
+        $userMap = [];
+        if (! empty($learnerIds)) {
+            // Only load users if needed
+            if (in_array('name', $columns) || in_array('email', $columns)) {
+                $userMap = Learner::whereIn('id', $learnerIds)
+                    ->with('user:id,email,first_name,last_name')
+                    ->get()
+                    ->reduce(function ($carry, $learner) {
+                        $carry[$learner->id] = $learner->user;
+                        return $carry;
+                    }, []);
             }
+        }
 
+        // Determine which metrics we need using domain service
+        $metricKeys = $this->aggregator->getMetricColumnsNeeded($columns);
+
+        // Load all required metrics in a single query using aggregation
+        $latestMetrics = [];
+        if (! empty($metricKeys)) {
+            $latestMetrics = ContactMetric::whereIn('contact_id', $learnerIds)
+                ->where('contact_type', Learner::class)
+                ->whereIn('metric_key', $metricKeys)
+                ->select('contact_id', 'metric_key', 'numeric_value', 'recorded_at')
+                ->orderBy('contact_id')
+                ->orderBy('recorded_at', 'desc')
+                ->get()
+                ->groupBy('contact_id')
+                ->map(function ($group) {
+                    return $group->unique('metric_key')->keyBy('metric_key');
+                });
+        }
+
+        // Build result rows using domain service
+        $data = [];
+        foreach ($learners as $learner) {
+            $row = $this->aggregator->buildLearnerTableRow($learner, $columns, $userMap, $latestMetrics);
             $data[] = $row;
         }
 
@@ -214,7 +221,7 @@ class ReportDataService
     protected function resolveIndividualData(CustomReport $report, array $data, array $neededMetrics, array $dateRange): array
     {
         $filters = $report->filters ?? [];
-        $contactType = $filters['contact_type'] ?? Student::class;
+        $contactType = $filters['contact_type'] ?? Learner::class;
         $contactId = $filters['contact_id'] ?? null;
 
         if (! $contactId) {
@@ -272,22 +279,24 @@ class ReportDataService
     }
 
     /**
-     * Resolve school-wide data.
+     * Resolve organization-wide data.
      */
-    protected function resolveSchoolData(CustomReport $report, array $data, array $neededMetrics, array $dateRange): array
+    protected function resolveOrganizationData(CustomReport $report, array $data, array $neededMetrics, array $dateRange): array
     {
-        // Get school-wide aggregates
+        // Get organization-wide aggregates
         $data['aggregates'] = $this->getAggregatedData(
             $report->org_id,
-            'school',
+            'organization',
             $report->filters ?? [],
             $neededMetrics
         );
 
-        // Get student counts
-        $data['student_count'] = Student::where('org_id', $report->org_id)->count();
-        $data['good_standing_count'] = Student::where('org_id', $report->org_id)->where('risk_level', 'good')->count();
-        $data['at_risk_count'] = Student::where('org_id', $report->org_id)->whereIn('risk_level', ['low', 'high'])->count();
+        // Get learner counts and risk distribution using domain service
+        $learnerAggregates = $this->aggregator->getLearnerCountAggregates($report->org_id);
+        $data['learner_count'] = $learnerAggregates['total'];
+        $data['good_standing_count'] = $learnerAggregates['good_standing'];
+        $data['at_risk_count'] = $learnerAggregates['at_risk'];
+        $data['risk_distribution'] = $learnerAggregates['risk_distribution'];
 
         // Get time series
         $data['charts'] = $this->getTimeSeriesData(
@@ -295,13 +304,6 @@ class ReportDataService
             $neededMetrics,
             $report->filters ?? []
         );
-
-        // Get risk distribution
-        $data['risk_distribution'] = Student::where('org_id', $report->org_id)
-            ->selectRaw('risk_level, count(*) as count')
-            ->groupBy('risk_level')
-            ->pluck('count', 'risk_level')
-            ->toArray();
 
         return $data;
     }
@@ -311,28 +313,7 @@ class ReportDataService
      */
     protected function collectNeededMetrics(array $elements): array
     {
-        $metrics = [];
-
-        foreach ($elements as $element) {
-            $type = $element['type'] ?? '';
-            $config = $element['config'] ?? [];
-
-            switch ($type) {
-                case 'chart':
-                    $metrics = array_merge($metrics, $config['metric_keys'] ?? []);
-                    break;
-                case 'metric_card':
-                    if (isset($config['metric_key'])) {
-                        $metrics[] = $config['metric_key'];
-                    }
-                    break;
-                case 'ai_text':
-                    $metrics = array_merge($metrics, $config['context_metrics'] ?? []);
-                    break;
-            }
-        }
-
-        return array_unique($metrics);
+        return $this->aggregator->collectNeededMetrics($elements);
     }
 
     /**
@@ -358,12 +339,14 @@ class ReportDataService
     }
 
     /**
-     * Get latest metric value for a student.
+     * Get latest metric value for a learner.
+     * Use sparingly - prefer bulk loading via getLearnersTableData for multiple learners.
      */
-    protected function getLatestMetric(Student $student, string $metricKey): ?float
+    protected function getLatestMetric(Learner $learner, string $metricKey): ?float
     {
-        $metric = ContactMetric::forContact(Student::class, $student->id)
+        $metric = ContactMetric::forContact(Learner::class, $learner->id)
             ->where('metric_key', $metricKey)
+            ->select('numeric_value', 'recorded_at')
             ->orderBy('recorded_at', 'desc')
             ->first();
 

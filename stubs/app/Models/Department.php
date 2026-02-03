@@ -23,21 +23,21 @@ class Department extends Model
         'department_head_id',
         'strategy_ids',
         'teacher_ids',
-        'student_count',
+        'learner_count',
         'active',
     ];
 
     protected $casts = [
         'strategy_ids' => 'array',
         'teacher_ids' => 'array',
-        'student_count' => 'integer',
+        'learner_count' => 'integer',
         'active' => 'boolean',
     ];
 
     /**
-     * Get the school (organization).
+     * Get the organization (organization).
      */
-    public function school(): BelongsTo
+    public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class, 'org_id');
     }

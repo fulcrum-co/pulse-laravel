@@ -1,8 +1,8 @@
 <div class="bg-white rounded-xl border border-gray-200">
     {{-- Header --}}
     <div class="px-6 py-5 border-b border-gray-200">
-        <h1 class="text-xl font-bold text-gray-900">Help Center</h1>
-        <p class="mt-1 text-sm text-gray-500">Manage help articles, categories, and tooltips</p>
+        <h1 class="text-xl font-bold text-gray-900">@term('help_center_label')</h1>
+        <p class="mt-1 text-sm text-gray-500">@term('manage_articles_hints_label')</p>
     </div>
 
     {{-- Stats Row --}}
@@ -13,12 +13,12 @@
             </div>
             <div>
                 <p class="text-lg font-bold text-gray-900">{{ $this->stats['articles']['total'] }}</p>
-                <p class="text-xs text-gray-500">Articles</p>
+                <p class="text-xs text-gray-500">@term('articles_label')</p>
             </div>
             <div class="ml-2 flex items-center gap-1.5 text-xs">
-                <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded">{{ $this->stats['articles']['published'] }}</span>
+                <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded">{{ $this->stats['articles']['published'] }} @term('published_label')</span>
                 @if($this->stats['articles']['draft'] > 0)
-                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded">{{ $this->stats['articles']['draft'] }}</span>
+                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded">{{ $this->stats['articles']['draft'] }} @term('draft_label')</span>
                 @endif
             </div>
         </a>
@@ -31,7 +31,7 @@
             </div>
             <div>
                 <p class="text-lg font-bold text-gray-900">{{ $this->stats['categories']['total'] }}</p>
-                <p class="text-xs text-gray-500">Categories</p>
+                <p class="text-xs text-gray-500">@term('categories_label')</p>
             </div>
         </a>
 
@@ -43,15 +43,15 @@
             </div>
             <div>
                 <p class="text-lg font-bold text-gray-900">{{ $this->stats['hints']['total'] }}</p>
-                <p class="text-xs text-gray-500">Tooltips</p>
+                <p class="text-xs text-gray-500">@term('tooltips_label')</p>
             </div>
-            <span class="ml-2 text-xs text-gray-400">{{ $this->stats['hints']['pages'] }} pages</span>
+            <span class="ml-2 text-xs text-gray-400">{{ $this->stats['hints']['pages'] }} @term('pages_label')</span>
         </a>
     </div>
 
     {{-- View Toggle & Content --}}
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h2 class="font-semibold text-gray-900">All Articles</h2>
+        <h2 class="font-semibold text-gray-900">@term('all_articles_label')</h2>
         <div class="flex items-center gap-2">
             {{-- View Toggle --}}
             <div class="flex items-center bg-gray-100 rounded-lg p-1">
@@ -97,17 +97,17 @@
                             <x-icon name="star" class="w-4 h-4 text-yellow-500" />
                         @endif
                         @if($article->is_published)
-                            <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded">Published</span>
+                            <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded">@term('published_label')</span>
                         @else
-                            <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">Draft</span>
+                            <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">@term('draft_label')</span>
                         @endif
                     </div>
                 </a>
             @empty
                 <div class="px-6 py-12 text-center text-gray-500">
                     <x-icon name="document-text" class="w-12 h-12 mx-auto text-gray-300 mb-3" />
-                    <p class="text-sm">No articles yet</p>
-                    <a href="{{ route('admin.help-articles') }}?action=create" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">Create your first article</a>
+                    <p class="text-sm">@term('no_articles_yet_label')</p>
+                    <a href="{{ route('admin.help-articles') }}?action=create" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">@term('create_first_article_label')</a>
                 </div>
             @endforelse
         </div>
@@ -119,8 +119,8 @@
             @if($this->allArticles->isEmpty())
                 <div class="py-12 text-center text-gray-500">
                     <x-icon name="document-text" class="w-12 h-12 mx-auto text-gray-300 mb-3" />
-                    <p class="text-sm">No articles yet</p>
-                    <a href="{{ route('admin.help-articles') }}?action=create" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">Create your first article</a>
+                    <p class="text-sm">@term('no_articles_yet_label')</p>
+                    <a href="{{ route('admin.help-articles') }}?action=create" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">@term('create_first_article_label')</a>
                 </div>
             @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -128,9 +128,9 @@
                         <a href="{{ route('help.article', $article->slug) }}" class="group relative border border-gray-200 rounded-lg p-4 hover:border-gray-300 hover:shadow-sm transition-all block">
                             <div class="flex items-start justify-between mb-2">
                                 @if($article->is_published)
-                                    <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded">Published</span>
+                                    <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded">@term('published_label')</span>
                                 @else
-                                    <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">Draft</span>
+                                    <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">@term('draft_label')</span>
                                 @endif
                                 @if($article->is_featured)
                                     <x-icon name="star" class="w-4 h-4 text-yellow-500" />
@@ -141,7 +141,7 @@
                                 <p class="text-sm text-gray-500 line-clamp-2 mb-3">{{ $article->excerpt }}</p>
                             @endif
                             <div class="flex items-center justify-between text-xs text-gray-400">
-                                <span>{{ $article->category?->name ?? 'Uncategorized' }}</span>
+                                <span>{{ $article->category?->name ?? app(\App\Services\TerminologyService::class)->get('uncategorized_label') }}</span>
                                 <span>{{ $article->updated_at->diffForHumans() }}</span>
                             </div>
                             @if($article->view_count > 0)
@@ -169,12 +169,12 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feedback</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('title_label')</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('category_label')</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('status_label')</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('views_label')</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('feedback_label')</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('updated_label')</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -196,9 +196,9 @@
                             </td>
                             <td class="px-6 py-3 whitespace-nowrap">
                                 @if($article->is_published)
-                                    <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded">Published</span>
+                                    <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded">@term('published_label')</span>
                                 @else
-                                    <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">Draft</span>
+                                    <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">@term('draft_label')</span>
                                 @endif
                             </td>
                             <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
@@ -224,8 +224,8 @@
                         <tr>
                             <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                                 <x-icon name="document-text" class="w-12 h-12 mx-auto text-gray-300 mb-3" />
-                                <p class="text-sm">No articles yet</p>
-                                <a href="{{ route('admin.help-articles') }}?action=create" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">Create your first article</a>
+                                <p class="text-sm">@term('no_articles_yet_label')</p>
+                                <a href="{{ route('admin.help-articles') }}?action=create" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">@term('create_first_article_label')</a>
                             </td>
                         </tr>
                     @endforelse
@@ -237,8 +237,8 @@
     {{-- Categories Footer --}}
     <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl">
         <div class="flex items-center justify-between">
-            <h3 class="text-sm font-medium text-gray-700">Categories</h3>
-            <a href="{{ route('admin.help-categories') }}" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">Manage →</a>
+            <h3 class="text-sm font-medium text-gray-700">@term('categories_label')</h3>
+            <a href="{{ route('admin.help-categories') }}" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">@term('manage_label') →</a>
         </div>
         @if($this->categories->isNotEmpty())
             <div class="mt-3 flex flex-wrap gap-2">

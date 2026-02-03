@@ -117,7 +117,7 @@ class ContactSurveys extends Component
 
     public function getAttemptsProperty()
     {
-        $query = SurveyAttempt::where('student_id', $this->contactId)
+        $query = SurveyAttempt::where('learner_id', $this->contactId)
             ->with(['survey'])
             ->orderByDesc('created_at');
 

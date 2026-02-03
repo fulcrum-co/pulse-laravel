@@ -7,7 +7,7 @@ use App\Models\MiniCourse;
 use App\Models\Program;
 use App\Models\Provider;
 use App\Models\Resource;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Services\Embeddings\EmbeddingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -150,22 +150,22 @@ class VectorSearchService
     }
 
     /**
-     * Get resource recommendations for a student based on their profile.
+     * Get resource recommendations for a learner based on their profile.
      *
-     * @param  Student  $student  The student to get recommendations for
+     * @param  Learner  $learner  The learner to get recommendations for
      * @param  int  $limit  Maximum results
      */
-    public function getRecommendationsForStudent(Student $student, int $limit = 10): Collection
+    public function getRecommendationsForLearner(Learner $learner, int $limit = 10): Collection
     {
-        // Build context text from student profile
-        $context = $this->buildStudentContext($student);
+        // Build context text from learner profile
+        $context = $this->buildLearnerContext($learner);
 
         if (empty($context)) {
             return collect();
         }
 
         try {
-            // Generate embedding for student context
+            // Generate embedding for learner context
             $result = $this->embeddingService->generateEmbedding($context);
             $contextEmbedding = '['.implode(',', $result['embedding']).']';
 
@@ -173,7 +173,7 @@ class VectorSearchService
             $resources = Resource::query()
                 ->whereNotNull('embedding')
                 ->where('active', true)
-                ->where('org_id', $student->org_id)
+                ->where('org_id', $learner->org_id)
                 ->selectRaw('*, 1 - (embedding <=> ?) as similarity, ? as type', [$contextEmbedding, 'resource'])
                 ->having('similarity', '>=', 0.3)
                 ->orderByDesc('similarity')
@@ -182,7 +182,7 @@ class VectorSearchService
             $courses = MiniCourse::query()
                 ->whereNotNull('embedding')
                 ->where('status', MiniCourse::STATUS_ACTIVE)
-                ->where('org_id', $student->org_id)
+                ->where('org_id', $learner->org_id)
                 ->selectRaw('*, 1 - (embedding <=> ?) as similarity, ? as type', [$contextEmbedding, 'course'])
                 ->having('similarity', '>=', 0.3)
                 ->orderByDesc('similarity')
@@ -195,8 +195,8 @@ class VectorSearchService
                 ->take($limit)
                 ->values();
         } catch (\Exception $e) {
-            Log::error('Failed to get student recommendations', [
-                'student_id' => $student->id,
+            Log::error('Failed to get learner recommendations', [
+                'learner_id' => $learner->id,
                 'error' => $e->getMessage(),
             ]);
 
@@ -205,40 +205,40 @@ class VectorSearchService
     }
 
     /**
-     * Build context text from student profile for recommendations.
+     * Build context text from learner profile for recommendations.
      */
-    protected function buildStudentContext(Student $student): string
+    protected function buildLearnerContext(Learner $learner): string
     {
         $parts = [];
 
         // Grade level
-        if ($student->grade_level) {
-            $parts[] = "Grade {$student->grade_level} student";
+        if ($learner->grade_level) {
+            $parts[] = "Grade {$learner->grade_level} learner";
         }
 
         // Risk level
-        if ($student->risk_level) {
-            $parts[] = "Risk level: {$student->risk_level}";
+        if ($learner->risk_level) {
+            $parts[] = "Risk level: {$learner->risk_level}";
         }
 
         // Tags/needs
-        if (! empty($student->tags)) {
-            $tags = is_array($student->tags) ? $student->tags : json_decode($student->tags, true);
+        if (! empty($learner->tags)) {
+            $tags = is_array($learner->tags) ? $learner->tags : json_decode($learner->tags, true);
             if (! empty($tags)) {
                 $parts[] = 'Needs: '.implode(', ', $tags);
             }
         }
 
         // IEP/ELL status
-        if ($student->iep_status) {
+        if ($learner->iep_status) {
             $parts[] = 'Has IEP';
         }
-        if ($student->ell_status) {
+        if ($learner->ell_status) {
             $parts[] = 'English Language Learner';
         }
 
         // Recent survey data could be added here
-        // $parts[] = $this->getRecentSurveyInsights($student);
+        // $parts[] = $this->getRecentSurveyInsights($learner);
 
         return implode('. ', $parts);
     }

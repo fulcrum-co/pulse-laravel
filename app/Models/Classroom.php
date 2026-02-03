@@ -22,7 +22,7 @@ class Classroom extends Model
         'subject',
         'period',
         'room_number',
-        'school_year',
+        'organization_year',
         'term',
         'active',
     ];
@@ -32,7 +32,7 @@ class Classroom extends Model
     ];
 
     /**
-     * Get the organization (school).
+     * Get the organization (organization).
      */
     public function organization(): BelongsTo
     {
@@ -56,19 +56,19 @@ class Classroom extends Model
     }
 
     /**
-     * Get the students in this classroom.
+     * Get the learners in this classroom.
      */
-    public function students(): BelongsToMany
+    public function learners(): BelongsToMany
     {
-        return $this->belongsToMany(Student::class)->withTimestamps();
+        return $this->belongsToMany(Learner::class)->withTimestamps();
     }
 
     /**
-     * Get the student count.
+     * Get the learner count.
      */
-    public function getStudentCountAttribute(): int
+    public function getLearnerCountAttribute(): int
     {
-        return $this->students()->count();
+        return $this->learners()->count();
     }
 
     /**

@@ -9,7 +9,7 @@ class ProgramEnrollment extends Model
 {
     protected $fillable = [
         'program_id',
-        'student_id',
+        'learner_id',
         'enrolled_by',
         'status',
         'notes',
@@ -36,11 +36,11 @@ class ProgramEnrollment extends Model
     }
 
     /**
-     * Get the student.
+     * Get the learner.
      */
-    public function student(): BelongsTo
+    public function learner(): BelongsTo
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Learner::class);
     }
 
     /**

@@ -48,7 +48,7 @@ class StrategicPlan extends Model
 
     public const TYPE_TEACHER = 'teacher';
 
-    public const TYPE_STUDENT = 'student';
+    public const TYPE_STUDENT = 'learner';
 
     public const TYPE_DEPARTMENT = 'department';
 

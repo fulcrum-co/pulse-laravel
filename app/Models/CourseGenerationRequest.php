@@ -46,9 +46,9 @@ class CourseGenerationRequest extends Model
         'triggered_by_user_id',
         'workflow_execution_id',
         'assignment_type',
-        'target_student_ids',
+        'target_learner_ids',
         'target_group_id',
-        'student_context',
+        'learner_context',
         'template_id',
         'generation_strategy',
         'generation_params',
@@ -64,8 +64,8 @@ class CourseGenerationRequest extends Model
     ];
 
     protected $casts = [
-        'target_student_ids' => 'array',
-        'student_context' => 'array',
+        'target_learner_ids' => 'array',
+        'learner_context' => 'array',
         'generation_params' => 'array',
         'generation_log' => 'array',
         'requires_approval' => 'boolean',
@@ -97,8 +97,8 @@ class CourseGenerationRequest extends Model
     public static function getAssignmentTypes(): array
     {
         return [
-            self::ASSIGNMENT_INDIVIDUAL => 'Individual Student(s)',
-            self::ASSIGNMENT_GROUP => 'Student Group',
+            self::ASSIGNMENT_INDIVIDUAL => 'Individual Learner(s)',
+            self::ASSIGNMENT_GROUP => 'Learner Group',
         ];
     }
 
@@ -353,26 +353,26 @@ class CourseGenerationRequest extends Model
     }
 
     /**
-     * Get risk signals from student context.
+     * Get risk signals from learner context.
      */
     public function getRiskSignalsAttribute(): array
     {
-        return $this->student_context['risk_signals'] ?? [];
+        return $this->learner_context['risk_signals'] ?? [];
     }
 
     /**
-     * Get demographics from student context.
+     * Get demographics from learner context.
      */
     public function getDemographicsAttribute(): array
     {
-        return $this->student_context['demographics'] ?? [];
+        return $this->learner_context['demographics'] ?? [];
     }
 
     /**
-     * Get target student count.
+     * Get target learner count.
      */
-    public function getStudentCountAttribute(): int
+    public function getLearnerCountAttribute(): int
     {
-        return count($this->target_student_ids ?? []);
+        return count($this->target_learner_ids ?? []);
     }
 }

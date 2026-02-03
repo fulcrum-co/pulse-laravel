@@ -15,7 +15,7 @@ class SurveyTemplateSeeder extends Seeder
             // =====================================
             [
                 'name' => 'Weekly Wellness Check-In',
-                'description' => 'A quick 5-question survey to check in on student wellbeing. Covers mood, sleep, stress, safety, and open feedback. Ideal for weekly homeroom or advisory periods.',
+                'description' => 'A quick 5-question survey to check in on learner wellbeing. Covers mood, sleep, stress, safety, and open feedback. Ideal for weekly homeroom or advisory periods.',
                 'template_type' => 'wellness_check',
                 'questions' => [
                     [
@@ -55,7 +55,7 @@ class SurveyTemplateSeeder extends Seeder
                     [
                         'id' => 'q4',
                         'type' => 'scale',
-                        'question' => 'Do you feel safe at school?',
+                        'question' => 'Do you feel safe at organization?',
                         'min' => 1,
                         'max' => 5,
                         'labels' => ['Never', 'Rarely', 'Sometimes', 'Usually', 'Always'],
@@ -99,7 +99,7 @@ class SurveyTemplateSeeder extends Seeder
             // =====================================
             [
                 'name' => 'Academic Stress Assessment',
-                'description' => 'Comprehensive assessment of academic-related stress, workload, confidence, and support needs. Helps identify students who may need academic intervention or support.',
+                'description' => 'Comprehensive assessment of academic-related stress, workload, confidence, and support needs. Helps identify learners who may need academic intervention or support.',
                 'template_type' => 'academic_stress',
                 'questions' => [
                     [
@@ -144,7 +144,7 @@ class SurveyTemplateSeeder extends Seeder
                     [
                         'id' => 'q5',
                         'type' => 'multiple_choice',
-                        'question' => 'When you\'re struggling with schoolwork, do you ask for help?',
+                        'question' => 'When you\'re struggling with organizationwork, do you ask for help?',
                         'options' => ['Always', 'Usually', 'Sometimes', 'Rarely', 'Never'],
                         'interpretation_rules' => [
                             'high_concern' => ['values' => ['Rarely', 'Never']],
@@ -219,7 +219,7 @@ class SurveyTemplateSeeder extends Seeder
                     [
                         'id' => 'q2',
                         'type' => 'scale',
-                        'question' => 'How would you describe your relationships with other students?',
+                        'question' => 'How would you describe your relationships with other learners?',
                         'min' => 1,
                         'max' => 5,
                         'labels' => ['Very Poor', 'Poor', 'Okay', 'Good', 'Excellent'],
@@ -231,7 +231,7 @@ class SurveyTemplateSeeder extends Seeder
                     [
                         'id' => 'q3',
                         'type' => 'scale',
-                        'question' => 'Do you feel like you belong at this school?',
+                        'question' => 'Do you feel like you belong at this organization?',
                         'min' => 1,
                         'max' => 5,
                         'labels' => ['Not at All', 'A Little', 'Somewhat', 'Mostly', 'Completely'],
@@ -278,7 +278,7 @@ class SurveyTemplateSeeder extends Seeder
                     [
                         'id' => 'q8',
                         'type' => 'multiple_choice',
-                        'question' => 'How often do you get into conflicts or arguments with other students?',
+                        'question' => 'How often do you get into conflicts or arguments with other learners?',
                         'options' => ['Never', 'Rarely', 'Sometimes', 'Often', 'Very Often'],
                         'category' => 'relationship_skills',
                         'interpretation_rules' => [

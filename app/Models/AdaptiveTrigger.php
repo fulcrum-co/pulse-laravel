@@ -80,7 +80,7 @@ class AdaptiveTrigger extends Model
         return [
             self::TYPE_COURSE_SUGGESTION => [
                 'label' => 'Course Suggestion',
-                'description' => 'Suggest a mini-course to a student',
+                'description' => 'Suggest a mini-course to a learner',
             ],
             self::TYPE_COURSE_EDIT => [
                 'label' => 'Course Edit',
@@ -113,7 +113,7 @@ class AdaptiveTrigger extends Model
             ],
             self::ACTION_AUTO_ENROLL => [
                 'label' => 'Auto Enroll',
-                'description' => 'Automatically enroll student',
+                'description' => 'Automatically enroll learner',
             ],
             self::ACTION_NOTIFY => [
                 'label' => 'Notify Only',

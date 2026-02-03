@@ -532,7 +532,7 @@ class ResourceLibrary extends Component
         $user = auth()->user();
 
         return in_array($user->effective_role, [
-            'admin', 'consultant', 'superintendent', 'school_admin',
+            'admin', 'consultant', 'superintendent', 'organization_admin',
         ]);
     }
 

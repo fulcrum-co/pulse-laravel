@@ -24,8 +24,8 @@ return new class extends Migration
                 ->nullOnDelete();
 
             // Assignment tracking for group/individual courses
-            $table->json('assigned_student_ids')->nullable()->after('template_id');
-            $table->unsignedBigInteger('assigned_group_id')->nullable()->after('assigned_student_ids');
+            $table->json('assigned_learner_ids')->nullable()->after('template_id');
+            $table->unsignedBigInteger('assigned_group_id')->nullable()->after('assigned_learner_ids');
 
             // Indexes
             $table->index('generation_request_id');
@@ -46,7 +46,7 @@ return new class extends Migration
             $table->dropColumn([
                 'generation_request_id',
                 'template_id',
-                'assigned_student_ids',
+                'assigned_learner_ids',
                 'assigned_group_id',
             ]);
         });

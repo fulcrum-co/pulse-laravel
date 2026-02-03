@@ -2,17 +2,17 @@
 
 namespace Database\Factories;
 
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\Organization;
 use App\Models\Classroom;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Student>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Learner>
  */
-class StudentFactory extends Factory
+class LearnerFactory extends Factory
 {
-    protected $model = Student::class;
+    protected $model = Learner::class;
 
     /**
      * Define the model's default state.
@@ -25,7 +25,7 @@ class StudentFactory extends Factory
 
         return [
             'org_id' => Organization::factory(),
-            'student_id' => $this->faker->unique()->numerify('STU-######'),
+            'learner_id' => $this->faker->unique()->numerify('STU-######'),
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'email' => $this->faker->unique()->safeEmail(),
@@ -37,7 +37,7 @@ class StudentFactory extends Factory
     }
 
     /**
-     * Indicate that the student is inactive.
+     * Indicate that the learner is inactive.
      */
     public function inactive(): static
     {
@@ -78,7 +78,7 @@ class StudentFactory extends Factory
     }
 
     /**
-     * Make the student elementary age (K-5).
+     * Make the learner elementary age (K-5).
      */
     public function elementary(): static
     {
@@ -89,9 +89,9 @@ class StudentFactory extends Factory
     }
 
     /**
-     * Make the student middle school age (6-8).
+     * Make the learner middle organization age (6-8).
      */
-    public function middleSchool(): static
+    public function middleOrganization(): static
     {
         return $this->state(fn (array $attributes) => [
             'grade_level' => $this->faker->randomElement(['6', '7', '8']),
@@ -100,9 +100,9 @@ class StudentFactory extends Factory
     }
 
     /**
-     * Make the student high school age (9-12).
+     * Make the learner high organization age (9-12).
      */
-    public function highSchool(): static
+    public function highOrganization(): static
     {
         return $this->state(fn (array $attributes) => [
             'grade_level' => $this->faker->randomElement(['9', '10', '11', '12']),

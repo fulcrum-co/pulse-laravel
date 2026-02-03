@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\MiniCourseSuggestion;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Services\AdaptiveTriggerService;
 use App\Services\MiniCourseGenerationService;
 use App\Services\ProviderMatchingService;
@@ -21,7 +21,7 @@ class CourseSuggestionController extends Controller
     ) {}
 
     /**
-     * Get suggestions for a contact (student).
+     * Get suggestions for a contact (learner).
      */
     public function index(Request $request, string $contactType, int $contactId): JsonResponse
     {
@@ -29,7 +29,7 @@ class CourseSuggestionController extends Controller
 
         // Map contact type
         $fullContactType = match ($contactType) {
-            'student' => Student::class,
+            'learner' => Learner::class,
             default => $contactType,
         };
 
@@ -52,25 +52,25 @@ class CourseSuggestionController extends Controller
     }
 
     /**
-     * Generate new suggestions for a student.
+     * Generate new suggestions for a learner.
      */
-    public function generate(Request $request, Student $student): JsonResponse
+    public function generate(Request $request, Learner $learner): JsonResponse
     {
         // Verify org access
-        if ($student->org_id !== auth()->user()->org_id) {
+        if ($learner->org_id !== auth()->user()->org_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $signals = $request->input('signals', []);
 
         // Generate course suggestions
-        $courseSuggestion = $this->courseGenerationService->generateCourseSuggestion($student, $signals);
+        $courseSuggestion = $this->courseGenerationService->generateCourseSuggestion($learner, $signals);
 
         // Also get provider recommendations
-        $providerRecommendations = $this->providerMatchingService->findMatchingProviders($student, [], 3);
+        $providerRecommendations = $this->providerMatchingService->findMatchingProviders($learner, [], 3);
 
         // Get program recommendations
-        $programRecommendations = $this->providerMatchingService->findMatchingPrograms($student, [], 3);
+        $programRecommendations = $this->providerMatchingService->findMatchingPrograms($learner, [], 3);
 
         return response()->json([
             'success' => true,
@@ -81,16 +81,16 @@ class CourseSuggestionController extends Controller
     }
 
     /**
-     * Evaluate triggers for a student.
+     * Evaluate triggers for a learner.
      */
-    public function evaluateTriggers(Student $student): JsonResponse
+    public function evaluateTriggers(Learner $learner): JsonResponse
     {
         // Verify org access
-        if ($student->org_id !== auth()->user()->org_id) {
+        if ($learner->org_id !== auth()->user()->org_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $results = $this->triggerService->evaluateTriggersForStudent($student);
+        $results = $this->triggerService->evaluateTriggersForLearner($learner);
 
         return response()->json([
             'success' => true,
@@ -143,12 +143,12 @@ class CourseSuggestionController extends Controller
     }
 
     /**
-     * Get AI provider recommendations for a student.
+     * Get AI provider recommendations for a learner.
      */
-    public function providerRecommendations(Request $request, Student $student): JsonResponse
+    public function providerRecommendations(Request $request, Learner $learner): JsonResponse
     {
         // Verify org access
-        if ($student->org_id !== auth()->user()->org_id) {
+        if ($learner->org_id !== auth()->user()->org_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -157,25 +157,25 @@ class CourseSuggestionController extends Controller
             'preferences' => $request->input('preferences', []),
         ];
 
-        $recommendations = $this->providerMatchingService->getAiProviderRecommendations($student, $context);
+        $recommendations = $this->providerMatchingService->getAiProviderRecommendations($learner, $context);
 
         return response()->json($recommendations);
     }
 
     /**
-     * Get student signals (for debugging/transparency).
+     * Get learner signals (for debugging/transparency).
      */
-    public function signals(Student $student): JsonResponse
+    public function signals(Learner $learner): JsonResponse
     {
         // Verify org access
-        if ($student->org_id !== auth()->user()->org_id) {
+        if ($learner->org_id !== auth()->user()->org_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $signals = $this->triggerService->gatherInputSignals($student);
+        $signals = $this->triggerService->gatherInputSignals($learner);
 
         return response()->json([
-            'student_id' => $student->id,
+            'learner_id' => $learner->id,
             'signals' => $signals,
         ]);
     }

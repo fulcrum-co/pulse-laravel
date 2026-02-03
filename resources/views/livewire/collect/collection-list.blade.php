@@ -7,7 +7,7 @@
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search collections..."
+                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('search_action') }} {{ strtolower(app(\App\Services\TerminologyService::class)->get('collection_plural')) }}..."
                     class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 />
             </div>
@@ -16,7 +16,7 @@
                 wire:model.live="statusFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">All Statuses</option>
+                <option value="">{{ app(\App\Services\TerminologyService::class)->get('all_label') }} {{ app(\App\Services\TerminologyService::class)->get('status_label') }}es</option>
                 @foreach($statuses as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
@@ -26,7 +26,7 @@
                 wire:model.live="typeFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">All Types</option>
+                <option value="">{{ app(\App\Services\TerminologyService::class)->get('all_label') }} {{ app(\App\Services\TerminologyService::class)->get('type_label') }}s</option>
                 @foreach($collectionTypes as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
@@ -37,7 +37,7 @@
                 wire:click="clearFilters"
                 class="text-sm text-gray-500 hover:text-gray-700"
             >
-                Clear
+                @term('clear_label')
             </button>
             @endif
         </div>
@@ -47,21 +47,21 @@
             <button
                 wire:click="setViewMode('grid')"
                 class="p-1.5 rounded {{ $viewMode === 'grid' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="Grid view"
+                title="{{ app(\App\Services\TerminologyService::class)->get('grid_view_label') }}"
             >
                 <x-icon name="squares-2x2" class="w-4 h-4" />
             </button>
             <button
                 wire:click="setViewMode('list')"
                 class="p-1.5 rounded {{ $viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="List view"
+                title="{{ app(\App\Services\TerminologyService::class)->get('list_view_label') }}"
             >
                 <x-icon name="list-bullet" class="w-4 h-4" />
             </button>
             <button
                 wire:click="setViewMode('table')"
                 class="p-1.5 rounded {{ $viewMode === 'table' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="Table view"
+                title="{{ app(\App\Services\TerminologyService::class)->get('table_view_label') }}"
             >
                 <x-icon name="table-cells" class="w-4 h-4" />
             </button>
@@ -75,13 +75,13 @@
                 <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                     <x-icon name="arrow-path" class="w-8 h-8 text-pulse-orange-500" />
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">Create your first data collection</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">@term('collection_empty_title')</h3>
                 <p class="text-gray-500 mb-4 max-w-sm mx-auto text-sm">
-                    Set up recurring data collection to systematically gather progress monitoring data, check-ins, and insights from students, staff, or parents.
+                    @term('collection_empty_body')
                 </p>
                 <a href="{{ route('collect.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
                     <x-icon name="plus" class="w-4 h-4 mr-1" />
-                    Create Data Collection
+                    @term('create_data_collection_label')
                 </a>
             </div>
         </x-card>
@@ -134,27 +134,27 @@
                         <div class="flex items-center justify-between text-xs mb-3">
                             <div>
                                 <span class="font-semibold text-gray-900">{{ number_format($collection->sessions_count ?? 0) }}</span>
-                                <span class="text-gray-500 ml-1">sessions</span>
+                                <span class="text-gray-500 ml-1">@term('sessions_label')</span>
                             </div>
                             <div>
                                 <span class="font-semibold text-gray-900">{{ number_format($collection->entries_count ?? 0) }}</span>
-                                <span class="text-gray-500 ml-1">entries</span>
+                                <span class="text-gray-500 ml-1">@term('entries_label')</span>
                             </div>
                         </div>
 
                         @if($activeSchedule && $activeSchedule->next_scheduled_at)
                             <div class="flex items-center text-xs text-gray-500">
                                 <x-icon name="clock" class="w-3 h-3 mr-1" />
-                                Next: {{ $activeSchedule->next_scheduled_at->format('M j, g:i A') }}
+                                @term('next_label'): {{ $activeSchedule->next_scheduled_at->format('M j, g:i A') }}
                             </div>
                         @elseif($collection->data_source === 'survey' && $collection->survey_id)
                             <div class="flex items-center text-xs text-indigo-600">
                                 <x-icon name="link" class="w-3 h-3 mr-1" />
-                                Linked to survey
+                                @term('linked_to_survey_label')
                             </div>
                         @else
                             <div class="text-xs text-gray-400">
-                                Updated {{ $collection->updated_at->diffForHumans(null, true) }} ago
+                                @term('updated_label') {{ $collection->updated_at->diffForHumans(null, true) }} ago
                             </div>
                         @endif
                     </div>
@@ -165,23 +165,23 @@
                                 <button wire:click="toggleStatus({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                     <x-icon name="{{ $collection->status === 'active' ? 'pause' : 'play' }}" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $collection->status === 'active' ? 'Pause' : 'Activate' }}</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $collection->status === 'active' ? app(\App\Services\TerminologyService::class)->get('pause_action') : app(\App\Services\TerminologyService::class)->get('activate_action') }}</span>
                             </div>
                             <div class="relative group">
                                 <button wire:click="duplicate({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                     <x-icon name="document-duplicate" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">@term('duplicate_action')</span>
                             </div>
                             <div class="relative group">
                                 <button wire:click="confirmDelete({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-red-500 rounded">
                                     <x-icon name="trash" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Delete</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">@term('delete_action')</span>
                             </div>
                         </div>
                         <a href="{{ route('collect.show', $collection) }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                            View
+                            @term('view_action')
                         </a>
                     </div>
                 </div>
@@ -220,15 +220,15 @@
                             </span>
                         </div>
                         <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                            <span>{{ $collection->sessions_count ?? 0 }} sessions</span>
-                            <span>{{ $collection->entries_count ?? 0 }} entries</span>
+                            <span>{{ $collection->sessions_count ?? 0 }} @term('sessions_label')</span>
+                            <span>{{ $collection->entries_count ?? 0 }} @term('entries_label')</span>
                             @if($activeSchedule && $activeSchedule->next_scheduled_at)
                                 <span class="flex items-center">
                                     <x-icon name="clock" class="w-3 h-3 mr-1" />
-                                    Next: {{ $activeSchedule->next_scheduled_at->format('M j') }}
+                                    @term('next_label'): {{ $activeSchedule->next_scheduled_at->format('M j') }}
                                 </span>
                             @else
-                                <span>Updated {{ $collection->updated_at->diffForHumans() }}</span>
+                                <span>@term('updated_label') {{ $collection->updated_at->diffForHumans() }}</span>
                             @endif
                         </div>
                     </div>
@@ -237,22 +237,22 @@
                             <button wire:click="toggleStatus({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                 <x-icon name="{{ $collection->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $collection->status === 'active' ? 'Pause' : 'Activate' }}</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $collection->status === 'active' ? app(\App\Services\TerminologyService::class)->get('pause_action') : app(\App\Services\TerminologyService::class)->get('activate_action') }}</span>
                         </div>
                         <div class="relative group">
                             <button wire:click="duplicate({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                 <x-icon name="document-duplicate" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">@term('duplicate_action')</span>
                         </div>
                         <div class="relative group">
                             <button wire:click="confirmDelete({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-red-500 rounded">
                                 <x-icon name="trash" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Delete</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">@term('delete_action')</span>
                         </div>
                         <a href="{{ route('collect.show', $collection) }}" class="ml-2 px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600">
-                            View
+                            @term('view_action')
                         </a>
                     </div>
                 </div>
@@ -265,14 +265,14 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Collection</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Format</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sessions</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entries</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Next Run</th>
-                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('collection_singular')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('type_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('status_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('format_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('sessions_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('entries_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('next_label')</th>
+                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">@term('actions_label')</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -298,7 +298,7 @@
                                 <div class="flex items-center gap-2">
                                     <span class="text-sm font-medium text-gray-900">{{ $collection->title }}</span>
                                     @if($collection->data_source === 'survey')
-                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">Survey</span>
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">@term('survey_singular')</span>
                                     @endif
                                 </div>
                             </td>
@@ -334,22 +334,22 @@
                                         <button wire:click="toggleStatus({{ $collection->id }})" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                                             <x-icon name="{{ $collection->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
                                         </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">{{ $collection->status === 'active' ? 'Pause' : 'Activate' }}</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">{{ $collection->status === 'active' ? app(\App\Services\TerminologyService::class)->get('pause_action') : app(\App\Services\TerminologyService::class)->get('activate_action') }}</span>
                                     </div>
                                     <div class="relative group">
                                         <button wire:click="duplicate({{ $collection->id }})" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                                             <x-icon name="document-duplicate" class="w-4 h-4" />
                                         </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Duplicate</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">@term('duplicate_action')</span>
                                     </div>
                                     <div class="relative group">
                                         <button wire:click="confirmDelete({{ $collection->id }})" class="p-1 text-gray-400 hover:text-red-500 rounded">
                                             <x-icon name="trash" class="w-4 h-4" />
                                         </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Delete</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">@term('delete_action')</span>
                                     </div>
                                     <a href="{{ route('collect.show', $collection) }}" class="ml-1 px-2 py-1 text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                                        View
+                                        @term('view_action')
                                     </a>
                                 </div>
                             </td>
@@ -379,16 +379,16 @@
                         <x-icon name="exclamation-triangle" class="h-5 w-5 text-red-600" />
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-base font-medium text-gray-900">Delete Collection</h3>
-                        <p class="mt-1 text-sm text-gray-500">Are you sure? This will also delete all sessions and entries. This cannot be undone.</p>
+                        <h3 class="text-base font-medium text-gray-900">@term('delete_collection_label')</h3>
+                        <p class="mt-1 text-sm text-gray-500">@term('delete_collection_confirm_label')</p>
                     </div>
                 </div>
                 <div class="mt-4 sm:flex sm:flex-row-reverse gap-2">
                     <button wire:click="deleteCollection" class="w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                        Delete
+                        @term('delete_action')
                     </button>
                     <button wire:click="cancelDelete" class="mt-2 sm:mt-0 w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
+                        @term('cancel_action')
                     </button>
                 </div>
             </div>

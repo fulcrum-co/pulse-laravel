@@ -1,13 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
+use App\Services\Domain\TranscriptionProviderService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class TranscriptionService
 {
+    public function __construct(
+        protected TranscriptionProviderService $providerService
+    ) {}
     protected string $openaiApiKey;
 
     protected string $assemblyAiApiKey;
@@ -52,7 +58,7 @@ class TranscriptionService
         try {
             $fileContent = Storage::disk($disk)->get($filePath);
             $fileName = basename($filePath);
-            $mimeType = $this->getMimeType($filePath);
+            $mimeType = $this->providerService->getMimeType($filePath);
 
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$this->openaiApiKey,
@@ -191,21 +197,4 @@ class TranscriptionService
         }
     }
 
-    /**
-     * Get MIME type from file path.
-     */
-    private function getMimeType(string $filePath): string
-    {
-        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
-
-        return match ($extension) {
-            'mp3' => 'audio/mpeg',
-            'wav' => 'audio/wav',
-            'm4a' => 'audio/mp4',
-            'ogg' => 'audio/ogg',
-            'webm' => 'audio/webm',
-            'flac' => 'audio/flac',
-            default => 'audio/mpeg',
-        };
-    }
 }

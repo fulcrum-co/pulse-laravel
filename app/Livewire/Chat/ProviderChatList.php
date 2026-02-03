@@ -67,7 +67,7 @@ class ProviderChatList extends Component
         $user = auth()->user();
 
         $query = ProviderConversation::query()
-            ->with(['provider', 'student'])
+            ->with(['provider', 'learner'])
             ->where('initiator_type', get_class($user))
             ->where('initiator_id', $user->id)
             ->active()

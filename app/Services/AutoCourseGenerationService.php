@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\ContactList;
@@ -7,7 +9,7 @@ use App\Models\CourseApprovalWorkflow;
 use App\Models\MiniCourse;
 use App\Models\MiniCourseStep;
 use App\Models\Organization;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
@@ -26,27 +28,27 @@ class AutoCourseGenerationService
     }
 
     /**
-     * Generate a personalized course for a student.
+     * Generate a personalized course for a learner.
      */
-    public function generateForStudent(
-        Student $student,
+    public function generateForLearner(
+        Learner $learner,
         string $trigger = MiniCourse::TRIGGER_MANUAL,
         array $signals = [],
         ?int $requestedBy = null
     ): ?MiniCourse {
         try {
             // Build context
-            $context = $this->contextBuilder->buildStudentContext($student);
+            $context = $this->contextBuilder->buildLearnerContext($learner);
             $promptContext = $this->contextBuilder->buildPromptContext($context);
 
             // Determine course focus based on context
-            $focus = $this->determineStudentCourseFocus($context);
+            $focus = $this->determineLearnerCourseFocus($context);
 
             // Generate course content
             $result = $this->aiService->generateCompleteCourse([
                 'topic' => $focus['topic'],
-                'audience' => 'students',
-                'grade_level' => $this->gradeToRange($student->grade_level),
+                'audience' => 'learners',
+                'grade_level' => $this->gradeToRange($learner->grade_level),
                 'course_type' => $focus['course_type'],
                 'duration_minutes' => $focus['duration'],
                 'objectives' => $focus['objectives'],
@@ -54,8 +56,8 @@ class AutoCourseGenerationService
             ]);
 
             if (! $result['success']) {
-                Log::error('Failed to generate course for student', [
-                    'student_id' => $student->id,
+                Log::error('Failed to generate course for learner', [
+                    'learner_id' => $learner->id,
                     'error' => $result['error'] ?? 'Unknown error',
                 ]);
 
@@ -65,12 +67,12 @@ class AutoCourseGenerationService
             // Create the course
             $course = $this->createCourseFromResult(
                 $result['course'],
-                $student->org_id,
+                $learner->org_id,
                 $requestedBy ?? auth()->id(),
                 [
                     'trigger' => $trigger,
                     'target_type' => MiniCourse::TARGET_STUDENT,
-                    'target_id' => $student->id,
+                    'target_id' => $learner->id,
                     'signals' => $signals,
                 ]
             );
@@ -78,16 +80,16 @@ class AutoCourseGenerationService
             // Handle approval workflow
             $this->handleApprovalWorkflow($course);
 
-            Log::info('Auto-generated course for student', [
+            Log::info('Auto-generated course for learner', [
                 'course_id' => $course->id,
-                'student_id' => $student->id,
+                'learner_id' => $learner->id,
                 'trigger' => $trigger,
             ]);
 
             return $course;
         } catch (\Exception $e) {
-            Log::error('Exception generating course for student', [
-                'student_id' => $student->id,
+            Log::error('Exception generating course for learner', [
+                'learner_id' => $learner->id,
                 'error' => $e->getMessage(),
             ]);
 
@@ -252,8 +254,8 @@ class AutoCourseGenerationService
         foreach ($members as $member) {
             $course = null;
 
-            if ($member instanceof Student) {
-                $course = $this->generateForStudent(
+            if ($member instanceof Learner) {
+                $course = $this->generateForLearner(
                     $member,
                     $trigger,
                     ['contact_list_id' => $list->id],
@@ -297,7 +299,7 @@ class AutoCourseGenerationService
     public function runBatchGeneration(int $orgId, array $options = []): array
     {
         $results = [
-            'students' => ['success' => 0, 'failed' => 0],
+            'learners' => ['success' => 0, 'failed' => 0],
             'teachers' => ['success' => 0, 'failed' => 0],
         ];
 
@@ -305,9 +307,9 @@ class AutoCourseGenerationService
         $maxCourses = $options['max_courses'] ?? $settings['max_auto_courses_per_day'] ?? 10;
         $coursesCreated = 0;
 
-        // Generate for high-risk students
-        if ($options['include_students'] ?? true) {
-            $students = Student::where('org_id', $orgId)
+        // Generate for high-risk learners
+        if ($options['include_learners'] ?? true) {
+            $learners = Learner::where('org_id', $orgId)
                 ->whereIn('risk_level', ['high', 'critical'])
                 ->whereDoesntHave('enrollments', function ($q) {
                     $q->whereIn('status', ['active', 'in_progress'])
@@ -316,27 +318,27 @@ class AutoCourseGenerationService
                 ->limit($maxCourses - $coursesCreated)
                 ->get();
 
-            foreach ($students as $student) {
+            foreach ($learners as $learner) {
                 if ($coursesCreated >= $maxCourses) {
                     break;
                 }
 
-                $course = $this->generateForStudent(
-                    $student,
+                $course = $this->generateForLearner(
+                    $learner,
                     MiniCourse::TRIGGER_SCHEDULED,
                     ['batch_run' => true]
                 );
 
                 if ($course) {
-                    $results['students']['success']++;
+                    $results['learners']['success']++;
                     $coursesCreated++;
                 } else {
-                    $results['students']['failed']++;
+                    $results['learners']['failed']++;
                 }
             }
         }
 
-        // Generate for teachers with declining student outcomes
+        // Generate for teachers with declining learner outcomes
         if (($options['include_teachers'] ?? true) && $coursesCreated < $maxCourses) {
             $teachers = User::where('org_id', $orgId)
                 ->where('role', 'teacher')
@@ -352,9 +354,9 @@ class AutoCourseGenerationService
                     break;
                 }
 
-                // Check if teacher has declining student outcomes
+                // Check if teacher has declining learner outcomes
                 $context = $this->contextBuilder->buildTeacherContext($teacher);
-                $hasDecline = collect($context['student_outcomes'] ?? [])
+                $hasDecline = collect($context['learner_outcomes'] ?? [])
                     ->contains(fn ($o) => ($o['trend'] ?? '') === 'declining');
 
                 if (! $hasDecline) {
@@ -402,8 +404,8 @@ class AutoCourseGenerationService
 
         switch ($signalType) {
             case 'risk_level_change':
-                if ($entity instanceof Student && in_array($entity->risk_level, ['high', 'critical'])) {
-                    $this->generateForStudent($entity, MiniCourse::TRIGGER_SIGNAL, [
+                if ($entity instanceof Learner && in_array($entity->risk_level, ['high', 'critical'])) {
+                    $this->generateForLearner($entity, MiniCourse::TRIGGER_SIGNAL, [
                         'signal_type' => $signalType,
                         'signal_data' => $data,
                     ]);
@@ -412,10 +414,10 @@ class AutoCourseGenerationService
 
             case 'survey_completed':
                 // Generate course based on survey results
-                if (isset($data['student_id'])) {
-                    $student = Student::find($data['student_id']);
-                    if ($student) {
-                        $this->generateForStudent($student, MiniCourse::TRIGGER_SIGNAL, [
+                if (isset($data['learner_id'])) {
+                    $learner = Learner::find($data['learner_id']);
+                    if ($learner) {
+                        $this->generateForLearner($learner, MiniCourse::TRIGGER_SIGNAL, [
                             'signal_type' => $signalType,
                             'survey_id' => $data['survey_id'] ?? null,
                         ]);
@@ -425,8 +427,8 @@ class AutoCourseGenerationService
 
             case 'metric_threshold':
                 // Generate course when metric drops below threshold
-                if ($entity instanceof Student) {
-                    $this->generateForStudent($entity, MiniCourse::TRIGGER_SIGNAL, [
+                if ($entity instanceof Learner) {
+                    $this->generateForLearner($entity, MiniCourse::TRIGGER_SIGNAL, [
                         'signal_type' => $signalType,
                         'signal_data' => $data,
                     ]);
@@ -574,9 +576,9 @@ class AutoCourseGenerationService
     }
 
     /**
-     * Determine course focus for a student based on context.
+     * Determine course focus for a learner based on context.
      */
-    protected function determineStudentCourseFocus(array $context): array
+    protected function determineLearnerCourseFocus(array $context): array
     {
         $improvementAreas = $context['improvement_areas'] ?? [];
         $riskLevel = $context['behavioral_profile']['risk_level'] ?? 'unknown';
@@ -629,7 +631,7 @@ class AutoCourseGenerationService
                 break;
             }
             if (str_contains(strtolower($area), 'attendance')) {
-                $topic = 'Making School Matter: Building Your Path to Success';
+                $topic = 'Making Organization Matter: Building Your Path to Success';
                 $courseType = MiniCourse::TYPE_INTERVENTION;
                 $objectives = [
                     'Understand the value of consistent attendance',
@@ -654,10 +656,10 @@ class AutoCourseGenerationService
     protected function determineTeacherCourseFocus(array $context): array
     {
         $improvementAreas = $context['improvement_areas'] ?? [];
-        $studentOutcomes = $context['student_outcomes'] ?? [];
+        $learnerOutcomes = $context['learner_outcomes'] ?? [];
 
         // Default focus
-        $topic = 'Enhancing Student Engagement and Achievement';
+        $topic = 'Enhancing Learner Engagement and Achievement';
         $courseType = MiniCourse::TYPE_SKILL_BUILDING;
         $objectives = [
             'Implement evidence-based engagement strategies',
@@ -666,21 +668,21 @@ class AutoCourseGenerationService
         ];
         $duration = 45;
 
-        // Customize based on student outcomes
-        foreach ($studentOutcomes as $type => $data) {
+        // Customize based on learner outcomes
+        foreach ($learnerOutcomes as $type => $data) {
             if (($data['trend'] ?? '') === 'declining') {
                 if (str_contains($type, 'behavioral') || str_contains($type, 'social')) {
                     $topic = 'Building a Positive Classroom Environment';
                     $courseType = MiniCourse::TYPE_BEHAVIORAL;
                     $objectives = [
                         'Implement proactive classroom management strategies',
-                        'Build positive student-teacher relationships',
+                        'Build positive learner-teacher relationships',
                         'Address challenging behaviors constructively',
                     ];
                     break;
                 }
                 if (str_contains($type, 'academic') || str_contains($type, 'grade')) {
-                    $topic = 'Strategies for Improving Student Academic Performance';
+                    $topic = 'Strategies for Improving Learner Academic Performance';
                     $courseType = MiniCourse::TYPE_ACADEMIC;
                     $objectives = [
                         'Identify root causes of academic struggles',
@@ -730,13 +732,13 @@ class AutoCourseGenerationService
                 $objectives = [
                     'Establish consistent behavior expectations',
                     'Implement department-wide PBIS strategies',
-                    'Support each other with challenging students',
+                    'Support each other with challenging learners',
                 ];
             } elseif (str_contains(strtolower($primaryChallenge), 'academic')) {
                 $topic = "$department Department: Raising Academic Standards Together";
                 $courseType = MiniCourse::TYPE_ACADEMIC;
                 $objectives = [
-                    'Analyze student performance data as a team',
+                    'Analyze learner performance data as a team',
                     'Develop targeted intervention strategies',
                     'Monitor progress and adjust approaches',
                 ];

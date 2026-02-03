@@ -4,10 +4,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
             <div class="text-center">
                 <h1 class="text-4xl md:text-6xl font-bold mb-6">
-                    Understanding Student Wellness
+                    Understanding Learner Wellness
                 </h1>
                 <p class="text-xl md:text-2xl text-orange-100 mb-8 max-w-3xl mx-auto">
-                    Pulse uses AI-powered conversations to help schools understand and support student mental health and well-being.
+                    Pulse uses AI-powered conversations to help organizations understand and support learner mental health and well-being.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <a href="/register" class="bg-white text-pulse-orange-600 px-8 py-3 rounded-lg font-semibold hover:bg-orange-50 transition text-lg">
@@ -29,7 +29,7 @@
                     How Pulse Works
                 </h2>
                 <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-                    A comprehensive platform for understanding and supporting student wellness
+                    A comprehensive platform for understanding and supporting learner wellness
                 </p>
             </div>
 
@@ -43,7 +43,7 @@
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-3">AI Conversations</h3>
                     <p class="text-gray-600">
-                        Students engage in natural, supportive conversations powered by advanced AI that understands context and emotion.
+                        Learners engage in natural, supportive conversations powered by advanced AI that understands context and emotion.
                     </p>
                 </div>
 
@@ -69,7 +69,7 @@
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-3">Early Intervention</h3>
                     <p class="text-gray-600">
-                        Automated triggers alert counselors and staff when students need additional support.
+                        Automated triggers alert counselors and staff when learners need additional support.
                     </p>
                 </div>
             </div>
@@ -82,11 +82,11 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
                 <div>
                     <div class="text-4xl font-bold mb-2">10K+</div>
-                    <div class="text-orange-100">Students Supported</div>
+                    <div class="text-orange-100">Learners Supported</div>
                 </div>
                 <div>
                     <div class="text-4xl font-bold mb-2">500+</div>
-                    <div class="text-orange-100">Schools</div>
+                    <div class="text-orange-100">Organizations</div>
                 </div>
                 <div>
                     <div class="text-4xl font-bold mb-2">50K+</div>
@@ -104,10 +104,10 @@
     <div class="py-24 bg-gray-50">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Ready to Support Your Students?
+                Ready to Support Your Learners?
             </h2>
             <p class="text-xl text-gray-600 mb-8">
-                Join hundreds of schools already using Pulse to understand and support student wellness.
+                Join hundreds of organizations already using Pulse to understand and support learner wellness.
             </p>
             <a href="/register" class="inline-block bg-pulse-orange-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-pulse-orange-600 transition text-lg">
                 Start Your Free Trial

@@ -29,7 +29,7 @@ class ContactMetric extends Model
         'period_start',
         'period_end',
         'period_type',
-        'school_year',
+        'organization_year',
         'quarter',
         'recorded_by_user_id',
         'recorded_at',
@@ -48,7 +48,7 @@ class ContactMetric extends Model
         'requires_consent' => 'boolean',
     ];
 
-    // Metric categories for students
+    // Metric categories for learners
     public const CATEGORY_ACADEMICS = 'academics';
 
     public const CATEGORY_ATTENDANCE = 'attendance';
@@ -87,7 +87,7 @@ class ContactMetric extends Model
     public const STATUS_NOT_STARTED = 'not_started';
 
     /**
-     * Get the contact (Student or User).
+     * Get the contact (Learner or User).
      */
     public function contact(): MorphTo
     {
@@ -127,11 +127,11 @@ class ContactMetric extends Model
     }
 
     /**
-     * Scope for filtering by school year.
+     * Scope for filtering by organization year.
      */
-    public function scopeForSchoolYear($query, string $year)
+    public function scopeForOrganizationYear($query, string $year)
     {
-        return $query->where('school_year', $year);
+        return $query->where('organization_year', $year);
     }
 
     /**

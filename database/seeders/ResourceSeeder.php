@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Organization;
 use App\Models\Resource;
 use App\Models\ResourceAssignment;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -13,8 +13,8 @@ class ResourceSeeder extends Seeder
 {
     public function run(): void
     {
-        $school = Organization::where('org_type', 'school')->first();
-        $admin = User::where('primary_role', 'admin')->where('org_id', $school->id)->first();
+        $organization = Organization::where('org_type', 'organization')->first();
+        $admin = User::where('primary_role', 'admin')->where('org_id', $organization->id)->first();
 
         $resources = [
             [
@@ -27,7 +27,7 @@ class ResourceSeeder extends Seeder
                 'target_risk_levels' => ['low', 'high'],
             ],
             [
-                'title' => 'Mindfulness for Students',
+                'title' => 'Mindfulness for Learners',
                 'description' => 'A guided introduction to mindfulness practices for teens.',
                 'resource_type' => 'video',
                 'category' => 'stress',
@@ -46,7 +46,7 @@ class ResourceSeeder extends Seeder
             ],
             [
                 'title' => 'Dealing with Social Pressure',
-                'description' => 'Understanding and navigating peer pressure in high school.',
+                'description' => 'Understanding and navigating peer pressure in high organization.',
                 'resource_type' => 'worksheet',
                 'category' => 'social',
                 'tags' => ['peer pressure', 'social skills', 'decision making'],
@@ -93,7 +93,7 @@ class ResourceSeeder extends Seeder
 
         foreach ($resources as $resourceData) {
             Resource::create([
-                'org_id' => $school->id,
+                'org_id' => $organization->id,
                 'title' => $resourceData['title'],
                 'description' => $resourceData['description'],
                 'resource_type' => $resourceData['resource_type'],
@@ -107,20 +107,20 @@ class ResourceSeeder extends Seeder
             ]);
         }
 
-        // Assign some resources to high-risk students
-        $highRiskStudents = Student::where('org_id', $school->id)->where('risk_level', 'high')->get();
-        $supportResources = Resource::where('org_id', $school->id)
+        // Assign some resources to high-risk learners
+        $highRiskLearners = Learner::where('org_id', $organization->id)->where('risk_level', 'high')->get();
+        $supportResources = Resource::where('org_id', $organization->id)
             ->whereJsonContains('target_risk_levels', 'high')
             ->get();
 
-        foreach ($highRiskStudents as $student) {
-            // Assign 2-3 random resources to each high-risk student
+        foreach ($highRiskLearners as $learner) {
+            // Assign 2-3 random resources to each high-risk learner
             $assignedResources = $supportResources->random(min(rand(2, 3), $supportResources->count()));
 
             foreach ($assignedResources as $resource) {
                 ResourceAssignment::create([
                     'resource_id' => $resource->id,
-                    'student_id' => $student->id,
+                    'learner_id' => $learner->id,
                     'assigned_by' => $admin->id,
                     'status' => collect(['assigned', 'in_progress', 'completed'])->random(),
                     'assigned_at' => now()->subDays(rand(1, 14)),

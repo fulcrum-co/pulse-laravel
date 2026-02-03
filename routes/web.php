@@ -220,38 +220,38 @@ Route::get('/seed-district-temp', function () {
         if (! $district) {
             $district = \App\Models\Organization::create([
                 'org_type' => 'district',
-                'org_name' => 'Lincoln County School District',
-                'primary_contact_email' => 'admin@lincolnschools.edu',
+                'org_name' => 'Lincoln County Organization District',
+                'primary_contact_email' => 'admin@lincolnorganizations.edu',
                 'timezone' => 'America/Los_Angeles',
                 'subscription_plan' => 'enterprise',
                 'subscription_status' => 'active',
                 'active' => true,
             ]);
-            $output[] = 'Created district: Lincoln County School District';
+            $output[] = 'Created district: Lincoln County Organization District';
         } else {
             $output[] = 'Found existing district: '.$district->org_name;
         }
 
-        // Find existing schools and link them to district
-        $schools = \App\Models\Organization::where('org_type', 'school')
+        // Find existing organizations and link them to district
+        $organizations = \App\Models\Organization::where('org_type', 'organization')
             ->whereNull('parent_org_id')
             ->get();
 
-        if ($schools->isEmpty()) {
+        if ($organizations->isEmpty()) {
             $output[] = '';
-            $output[] = 'No schools found. Creating sample schools...';
+            $output[] = 'No organizations found. Creating sample organizations...';
 
-            // Create sample schools
-            $schoolData = [
-                ['org_name' => 'Lincoln High School', 'primary_contact_email' => 'admin@lincolnhs.edu'],
-                ['org_name' => 'Washington Middle School', 'primary_contact_email' => 'admin@washingtonms.edu'],
+            // Create sample organizations
+            $organizationData = [
+                ['org_name' => 'Lincoln High Organization', 'primary_contact_email' => 'admin@lincolnhs.edu'],
+                ['org_name' => 'Washington Middle Organization', 'primary_contact_email' => 'admin@washingtonms.edu'],
                 ['org_name' => 'Jefferson Elementary', 'primary_contact_email' => 'admin@jeffersonelem.edu'],
                 ['org_name' => 'Roosevelt Elementary', 'primary_contact_email' => 'admin@rooseveltelem.edu'],
             ];
 
-            foreach ($schoolData as $data) {
-                $school = \App\Models\Organization::create([
-                    'org_type' => 'school',
+            foreach ($organizationData as $data) {
+                $organization = \App\Models\Organization::create([
+                    'org_type' => 'organization',
                     'org_name' => $data['org_name'],
                     'parent_org_id' => $district->id,
                     'primary_contact_email' => $data['primary_contact_email'],
@@ -259,23 +259,23 @@ Route::get('/seed-district-temp', function () {
                     'subscription_status' => 'active',
                     'active' => true,
                 ]);
-                $output[] = 'Created school: '.$school->org_name;
+                $output[] = 'Created organization: '.$organization->org_name;
             }
         } else {
-            foreach ($schools as $school) {
-                $school->update(['parent_org_id' => $district->id]);
-                $output[] = 'Linked school to district: '.$school->org_name;
+            foreach ($organizations as $organization) {
+                $organization->update(['parent_org_id' => $district->id]);
+                $output[] = 'Linked organization to district: '.$organization->org_name;
             }
         }
 
         // Create consultant user at district level
-        $consultant = \App\Models\User::where('email', 'superintendent@lincolnschools.edu')->first();
+        $consultant = \App\Models\User::where('email', 'superintendent@lincolnorganizations.edu')->first();
         if (! $consultant) {
             $consultant = \App\Models\User::create([
                 'org_id' => $district->id,
                 'first_name' => 'Margaret',
                 'last_name' => 'Chen',
-                'email' => 'superintendent@lincolnschools.edu',
+                'email' => 'superintendent@lincolnorganizations.edu',
                 'password' => \Illuminate\Support\Facades\Hash::make('password'),
                 'primary_role' => 'consultant',
                 'avatar_url' => 'https://randomuser.me/api/portraits/women/79.jpg',
@@ -283,7 +283,7 @@ Route::get('/seed-district-temp', function () {
                 'suspended' => false,
             ]);
             $output[] = '';
-            $output[] = 'Created consultant: superintendent@lincolnschools.edu';
+            $output[] = 'Created consultant: superintendent@lincolnorganizations.edu';
         } else {
             // Update existing consultant to district level
             $consultant->update([
@@ -300,10 +300,10 @@ Route::get('/seed-district-temp', function () {
         $output[] = '=== VERIFICATION ===';
         $childCount = \App\Models\Organization::where('parent_org_id', $district->id)->count();
         $output[] = 'District: '.$district->org_name.' (ID: '.$district->id.')';
-        $output[] = 'Child schools: '.$childCount;
+        $output[] = 'Child organizations: '.$childCount;
 
-        $childSchools = \App\Models\Organization::where('parent_org_id', $district->id)->get();
-        foreach ($childSchools as $child) {
+        $childOrganizations = \App\Models\Organization::where('parent_org_id', $district->id)->get();
+        foreach ($childOrganizations as $child) {
             $output[] = '  - '.$child->org_name.' (ID: '.$child->id.')';
         }
 
@@ -311,10 +311,10 @@ Route::get('/seed-district-temp', function () {
         $output[] = '=== SUCCESS ===';
         $output[] = '';
         $output[] = 'Login as consultant:';
-        $output[] = '  Email: superintendent@lincolnschools.edu';
+        $output[] = '  Email: superintendent@lincolnorganizations.edu';
         $output[] = '  Password: password';
         $output[] = '';
-        $output[] = 'The consultant can switch between schools using the dropdown';
+        $output[] = 'The consultant can switch between organizations using the dropdown';
         $output[] = 'in the bottom-left of the sidebar after logging in.';
 
     } catch (\Exception $e) {
@@ -345,11 +345,11 @@ Route::get('/seed-marketplace-temp', function () {
         }
         $output[] = '';
 
-        $school = \App\Models\Organization::where('org_type', 'school')->first();
-        if (! $school) {
-            $school = \App\Models\Organization::first();
+        $organization = \App\Models\Organization::where('org_type', 'organization')->first();
+        if (! $organization) {
+            $organization = \App\Models\Organization::first();
         }
-        if (! $school) {
+        if (! $organization) {
             return '<pre>No organization found. Please seed organizations first.</pre>';
         }
 
@@ -432,9 +432,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/cohort/{cohort}', App\Livewire\Cohorts\CohortViewer::class)->name('learn.cohort');
     });
 
-    // Contacts (Students, Teachers, Parents)
+    // Contacts (Learners, Teachers, Parents)
     Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
-    Route::get('/contacts/students/{student}', [ContactController::class, 'show'])->name('contacts.show');
+    Route::get('/contacts/learners/{learner}', [ContactController::class, 'show'])->name('contacts.show');
     Route::get('/contacts/teachers/{teacher}', [ContactController::class, 'showTeacher'])->name('contacts.teacher');
     Route::get('/contacts/parents/{parent}', [ContactController::class, 'showParent'])->name('contacts.parent');
 
@@ -451,14 +451,14 @@ Route::middleware('auth')->group(function () {
     // Contact Metrics API
     Route::post('/api/metrics/time-series', [ContactMetricController::class, 'timeSeries'])->name('api.metrics.timeSeries');
     Route::post('/api/metrics', [ContactMetricController::class, 'store'])->name('api.metrics.store');
-    Route::get('/api/metrics/heat-map/{student}', [ContactMetricController::class, 'heatMap'])->name('api.metrics.heatMap');
+    Route::get('/api/metrics/heat-map/{learner}', [ContactMetricController::class, 'heatMap'])->name('api.metrics.heatMap');
     Route::get('/api/metrics/available', [ContactMetricController::class, 'available'])->name('api.metrics.available');
 
     // Resource Suggestions API
     Route::get('/api/suggestions/{contactType}/{contactId}', [ResourceSuggestionController::class, 'index'])->name('api.suggestions.index');
     Route::post('/api/suggestions', [ResourceSuggestionController::class, 'store'])->name('api.suggestions.store');
     Route::put('/api/suggestions/{suggestion}/review', [ResourceSuggestionController::class, 'review'])->name('api.suggestions.review');
-    Route::post('/api/suggestions/generate/{student}', [ResourceSuggestionController::class, 'generate'])->name('api.suggestions.generate');
+    Route::post('/api/suggestions/generate/{learner}', [ResourceSuggestionController::class, 'generate'])->name('api.suggestions.generate');
 
     // Surveys
     Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');
@@ -602,7 +602,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/{course}/steps/{step}/generate-content', [App\Http\Controllers\Api\MiniCourseStepController::class, 'generateContent'])->name('api.mini-course-steps.generate-content');
 
         // Enrollments
-        Route::post('/{course}/enroll/{student}', [App\Http\Controllers\Api\EnrollmentController::class, 'enroll'])->name('api.mini-courses.enroll');
+        Route::post('/{course}/enroll/{learner}', [App\Http\Controllers\Api\EnrollmentController::class, 'enroll'])->name('api.mini-courses.enroll');
         Route::get('/{course}/enrollments', [App\Http\Controllers\Api\EnrollmentController::class, 'indexByCourse'])->name('api.mini-courses.enrollments');
     });
 
@@ -619,16 +619,16 @@ Route::middleware('auth')->group(function () {
     // Course Suggestions API
     Route::prefix('api/suggestions')->group(function () {
         Route::get('/{contactType}/{contactId}/courses', [App\Http\Controllers\Api\CourseSuggestionController::class, 'index'])->name('api.suggestions.courses.index');
-        Route::post('/courses/generate/{student}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'generate'])->name('api.suggestions.courses.generate');
+        Route::post('/courses/generate/{learner}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'generate'])->name('api.suggestions.courses.generate');
         Route::post('/courses/{suggestion}/accept', [App\Http\Controllers\Api\CourseSuggestionController::class, 'accept'])->name('api.suggestions.courses.accept');
         Route::post('/courses/{suggestion}/decline', [App\Http\Controllers\Api\CourseSuggestionController::class, 'decline'])->name('api.suggestions.courses.decline');
-        Route::post('/triggers/evaluate/{student}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'evaluateTriggers'])->name('api.suggestions.triggers.evaluate');
-        Route::get('/providers/{student}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'providerRecommendations'])->name('api.suggestions.providers');
-        Route::get('/signals/{student}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'signals'])->name('api.suggestions.signals');
+        Route::post('/triggers/evaluate/{learner}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'evaluateTriggers'])->name('api.suggestions.triggers.evaluate');
+        Route::get('/providers/{learner}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'providerRecommendations'])->name('api.suggestions.providers');
+        Route::get('/signals/{learner}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'signals'])->name('api.suggestions.signals');
     });
 
-    // Student Enrollments API
-    Route::get('/api/students/{student}/enrollments', [App\Http\Controllers\Api\EnrollmentController::class, 'indexByStudent'])->name('api.students.enrollments');
+    // Learner Enrollments API
+    Route::get('/api/learners/{learner}/enrollments', [App\Http\Controllers\Api\EnrollmentController::class, 'indexByLearner'])->name('api.learners.enrollments');
 
     // Collect
     Route::get('/collect', App\Livewire\Collect\CollectionList::class)->name('collect.index');

@@ -263,7 +263,7 @@ function autoHelpBeacons() {
                     section: 'list',
                     selector: '[data-help="alert-list"], .alert-list, [class*="alert-item"]',
                     title: 'Alert List',
-                    description: 'Each alert shows the student, the trigger, and recommended actions. Click to view more details.',
+                    description: 'Each alert shows the learner, the trigger, and recommended actions. Click to view more details.',
                     position: 'top'
                 }
             ],
@@ -543,7 +543,7 @@ function autoHelpBeacons() {
             if (path.includes('/plans')) return 'plans';
             if (path.includes('/surveys')) return 'surveys';
             if (path.includes('/alerts')) return 'alerts';
-            if (path.includes('/students') || path.includes('/contacts')) return 'contacts';
+            if (path.includes('/learners') || path.includes('/contacts')) return 'contacts';
             if (path.includes('/resources')) return 'resources';
             if (path.includes('/collect')) return 'collect';
             if (path.includes('/distribute')) return 'distribute';

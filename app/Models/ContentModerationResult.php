@@ -534,7 +534,7 @@ class ContentModerationResult extends Model
     protected function canUserModerate(User $user): bool
     {
         return in_array($user->effective_role, [
-            'admin', 'consultant', 'superintendent', 'school_admin',
+            'admin', 'consultant', 'superintendent', 'organization_admin',
         ]);
     }
 

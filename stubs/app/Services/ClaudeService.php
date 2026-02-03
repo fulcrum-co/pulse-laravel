@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\Survey;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -89,22 +89,22 @@ class ClaudeService
     /**
      * Start a conversational survey session.
      */
-    public function startConversationalSurvey(Survey $survey, array $students): array
+    public function startConversationalSurvey(Survey $survey, array $learners): array
     {
-        $studentNames = collect($students)->pluck('full_name')->join(', ');
+        $learnerNames = collect($learners)->pluck('full_name')->join(', ');
 
         $systemPrompt = $survey->llm_system_prompt ?: config('pulse.prompts.conversational_survey');
-        $systemPrompt .= "\n\nStudents to discuss: {$studentNames}";
+        $systemPrompt .= "\n\nLearners to discuss: {$learnerNames}";
 
-        $initialMessage = "Hello! I'm ready to help you complete your check-in for your students. ".
-            "We'll go through each student one at a time. Let's start with the first student. ".
+        $initialMessage = "Hello! I'm ready to help you complete your check-in for your learners. ".
+            "We'll go through each learner one at a time. Let's start with the first learner. ".
             'How has their week been academically?';
 
         return [
             'system_prompt' => $systemPrompt,
             'initial_message' => $initialMessage,
-            'students' => $students,
-            'current_student_index' => 0,
+            'learners' => $learners,
+            'current_learner_index' => 0,
             'conversation_history' => [],
         ];
     }
@@ -144,12 +144,12 @@ class ClaudeService
     /**
      * Extract structured data from conversation transcript.
      */
-    public function extractStructuredData(string $transcript, Student $student): array
+    public function extractStructuredData(string $transcript, Learner $learner): array
     {
         $systemPrompt = config('pulse.prompts.data_extraction');
 
-        $userMessage = "Student: {$student->full_name}\n".
-            "Grade: {$student->grade_level}\n\n".
+        $userMessage = "Learner: {$learner->full_name}\n".
+            "Grade: {$learner->grade_level}\n\n".
             "Conversation transcript:\n{$transcript}\n\n".
             'Extract the structured data as JSON.';
 
@@ -219,7 +219,7 @@ class ClaudeService
     }
 
     /**
-     * Rank resources for a student's needs.
+     * Rank resources for a learner's needs.
      */
     public function rankResources(array $resources, string $needDescription): array
     {
@@ -234,10 +234,10 @@ class ClaudeService
         })->toArray();
 
         $systemPrompt = 'You are an educational resource specialist. '.
-            "Rank the following resources by relevance to the student's needs. ".
+            "Rank the following resources by relevance to the learner's needs. ".
             'Return a JSON array of indices in order of relevance (most relevant first).';
 
-        $userMessage = "Student need: {$needDescription}\n\n".
+        $userMessage = "Learner need: {$needDescription}\n\n".
             "Resources:\n".json_encode($resourceList, JSON_PRETTY_PRINT)."\n\n".
             'Return only a JSON array of indices, e.g., [2, 0, 3, 1]';
 

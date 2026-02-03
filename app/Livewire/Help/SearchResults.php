@@ -34,6 +34,7 @@ class SearchResults extends Component
     {
         $user = auth()->user();
         $orgId = $user?->org_id;
+        $terminology = app(\App\Services\TerminologyService::class);
 
         $query = HelpArticle::forOrganization($orgId)
             ->published()
@@ -65,6 +66,6 @@ class SearchResults extends Component
         return view('livewire.help.search-results', [
             'articles' => $articles,
             'categories' => $categories,
-        ])->title('Search Results - Help Center');
+        ])->title($terminology->get('search_results_label') . ' - ' . $terminology->get('help_center_label'));
     }
 }

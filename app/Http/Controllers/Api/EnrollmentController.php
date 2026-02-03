@@ -8,24 +8,24 @@ use App\Models\MiniCourse;
 use App\Models\MiniCourseEnrollment;
 use App\Models\MiniCourseStep;
 use App\Models\MiniCourseStepProgress;
-use App\Models\Student;
+use App\Models\Learner;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class EnrollmentController extends Controller
 {
     /**
-     * List enrollments for a student.
+     * List enrollments for a learner.
      */
-    public function indexByStudent(Request $request, Student $student): JsonResponse
+    public function indexByLearner(Request $request, Learner $learner): JsonResponse
     {
         $user = auth()->user();
 
-        if ($student->org_id !== $user->org_id) {
+        if ($learner->org_id !== $user->org_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $query = $student->miniCourseEnrollments()
+        $query = $learner->miniCourseEnrollments()
             ->with(['miniCourse', 'currentStep']);
 
         if ($request->has('status')) {
@@ -45,7 +45,7 @@ class EnrollmentController extends Controller
         $this->authorize('view', $course);
 
         $query = $course->enrollments()
-            ->with(['student.user', 'currentStep']);
+            ->with(['learner.user', 'currentStep']);
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -57,14 +57,14 @@ class EnrollmentController extends Controller
     }
 
     /**
-     * Enroll a student in a course.
+     * Enroll a learner in a course.
      */
-    public function enroll(Request $request, MiniCourse $course, Student $student): JsonResponse
+    public function enroll(Request $request, MiniCourse $course, Learner $learner): JsonResponse
     {
         $user = auth()->user();
 
         // Verify access
-        if ($course->org_id !== $user->org_id || $student->org_id !== $user->org_id) {
+        if ($course->org_id !== $user->org_id || $learner->org_id !== $user->org_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -78,7 +78,7 @@ class EnrollmentController extends Controller
 
         // Check for existing active enrollment
         $existing = MiniCourseEnrollment::where('mini_course_id', $course->id)
-            ->where('student_id', $student->id)
+            ->where('learner_id', $learner->id)
             ->whereIn('status', [
                 MiniCourseEnrollment::STATUS_ENROLLED,
                 MiniCourseEnrollment::STATUS_IN_PROGRESS,
@@ -88,7 +88,7 @@ class EnrollmentController extends Controller
         if ($existing) {
             return response()->json([
                 'success' => false,
-                'error' => 'Student is already enrolled in this course.',
+                'error' => 'Learner is already enrolled in this course.',
                 'enrollment' => $existing,
             ], 422);
         }
@@ -96,7 +96,7 @@ class EnrollmentController extends Controller
         $enrollment = MiniCourseEnrollment::create([
             'mini_course_id' => $course->id,
             'mini_course_version_id' => $course->current_version_id,
-            'student_id' => $student->id,
+            'learner_id' => $learner->id,
             'enrolled_by' => $user->id,
             'enrollment_source' => $request->input('source', MiniCourseEnrollment::SOURCE_MANUAL),
             'status' => MiniCourseEnrollment::STATUS_ENROLLED,
@@ -106,7 +106,7 @@ class EnrollmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'enrollment' => $enrollment->load(['miniCourse', 'student.user']),
+            'enrollment' => $enrollment->load(['miniCourse', 'learner.user']),
         ], 201);
     }
 
@@ -118,7 +118,7 @@ class EnrollmentController extends Controller
         $user = auth()->user();
 
         // Load relationships and check access
-        $enrollment->load(['miniCourse', 'student', 'currentStep', 'stepProgress']);
+        $enrollment->load(['miniCourse', 'learner', 'currentStep', 'stepProgress']);
 
         if ($enrollment->miniCourse->org_id !== $user->org_id) {
             return response()->json(['error' => 'Unauthorized'], 403);

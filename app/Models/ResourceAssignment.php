@@ -9,7 +9,7 @@ class ResourceAssignment extends Model
 {
     protected $fillable = [
         'resource_id',
-        'student_id',
+        'learner_id',
         'assigned_by',
         'status',
         'notes',
@@ -36,11 +36,11 @@ class ResourceAssignment extends Model
     }
 
     /**
-     * Get the student.
+     * Get the learner.
      */
-    public function student(): BelongsTo
+    public function learner(): BelongsTo
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Learner::class);
     }
 
     /**

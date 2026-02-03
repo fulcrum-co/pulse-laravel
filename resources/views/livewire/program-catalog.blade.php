@@ -443,7 +443,7 @@
                     </button>
                 @else
                     <h3 class="text-lg font-medium text-gray-900 mb-1">No programs yet</h3>
-                    <p class="text-gray-500 mb-4">Add intervention programs, support groups, and other services for students.</p>
+                    <p class="text-gray-500 mb-4">Add intervention programs, support groups, and other services for learners.</p>
                     <button
                         wire:click="$dispatch('openAddResourceModal')"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"

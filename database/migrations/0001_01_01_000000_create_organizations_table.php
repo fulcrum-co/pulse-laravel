@@ -17,7 +17,7 @@ return new class extends Migration
 
         Schema::create('organizations', function (Blueprint $table) {
             $table->id();
-            $table->string('org_type')->default('district'); // consultant, district, school, department
+            $table->string('org_type')->default('district'); // consultant, district, organization, department
             $table->string('org_name');
             $table->foreignId('parent_org_id')->nullable()->constrained('organizations')->nullOnDelete();
             $table->string('primary_contact_name')->nullable();

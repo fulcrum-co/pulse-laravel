@@ -30,7 +30,7 @@ return new class extends Migration
             $table->boolean('is_required')->default(true);
             $table->json('completion_criteria')->nullable(); // What constitutes completion
             $table->json('branching_logic')->nullable(); // For adaptive paths
-            $table->text('feedback_prompt')->nullable(); // Prompt for student feedback
+            $table->text('feedback_prompt')->nullable(); // Prompt for learner feedback
             $table->timestamps();
             $table->softDeletes();
 

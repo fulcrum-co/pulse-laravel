@@ -11,17 +11,17 @@ class AdaptiveTriggerSeeder extends Seeder
 {
     public function run(): void
     {
-        $school = Organization::where('org_type', 'school')->first();
-        if (! $school) {
-            $school = Organization::first();
+        $organization = Organization::where('org_type', 'organization')->first();
+        if (! $organization) {
+            $organization = Organization::first();
         }
-        if (! $school) {
+        if (! $organization) {
             $this->command->error('No organization found. Please seed organizations first.');
 
             return;
         }
 
-        $admin = User::where('org_id', $school->id)->first();
+        $admin = User::where('org_id', $organization->id)->first();
         if (! $admin) {
             $admin = User::first();
         }
@@ -34,7 +34,7 @@ class AdaptiveTriggerSeeder extends Seeder
         $triggers = [
             [
                 'name' => 'High Risk Wellness Alert',
-                'description' => 'Automatically suggests wellness courses when a student\'s risk level increases to high and recent survey scores indicate stress or anxiety.',
+                'description' => 'Automatically suggests wellness courses when a learner\'s risk level increases to high and recent survey scores indicate stress or anxiety.',
                 'trigger_type' => AdaptiveTrigger::TYPE_COURSE_SUGGESTION,
                 'input_sources' => [
                     AdaptiveTrigger::INPUT_QUANTITATIVE,
@@ -47,7 +47,7 @@ class AdaptiveTriggerSeeder extends Seeder
                     ],
                 ],
                 'ai_interpretation_enabled' => true,
-                'ai_prompt_context' => 'Analyze the student\'s survey responses and behavioral patterns to determine if they would benefit from a stress management or wellness intervention. Consider any recent life changes or expressed concerns.',
+                'ai_prompt_context' => 'Analyze the learner\'s survey responses and behavioral patterns to determine if they would benefit from a stress management or wellness intervention. Consider any recent life changes or expressed concerns.',
                 'output_action' => AdaptiveTrigger::ACTION_SUGGEST_FOR_REVIEW,
                 'output_config' => [
                     'course_types' => ['wellness', 'intervention'],
@@ -95,7 +95,7 @@ class AdaptiveTriggerSeeder extends Seeder
                     ],
                 ],
                 'ai_interpretation_enabled' => true,
-                'ai_prompt_context' => 'Review the student\'s attendance patterns, any documented reasons for absences, and correlate with other data points (grades, behavior) to recommend appropriate interventions.',
+                'ai_prompt_context' => 'Review the learner\'s attendance patterns, any documented reasons for absences, and correlate with other data points (grades, behavior) to recommend appropriate interventions.',
                 'output_action' => AdaptiveTrigger::ACTION_NOTIFY,
                 'output_config' => [
                     'notification_recipients' => ['counselor', 'admin'],
@@ -132,7 +132,7 @@ class AdaptiveTriggerSeeder extends Seeder
             ],
             [
                 'name' => 'Positive Progress Recognition',
-                'description' => 'Suggests enrichment opportunities when students show sustained improvement.',
+                'description' => 'Suggests enrichment opportunities when learners show sustained improvement.',
                 'trigger_type' => AdaptiveTrigger::TYPE_COURSE_SUGGESTION,
                 'input_sources' => [
                     AdaptiveTrigger::INPUT_QUANTITATIVE,
@@ -151,14 +151,14 @@ class AdaptiveTriggerSeeder extends Seeder
                     'course_types' => ['enrichment', 'skill_building'],
                     'notification_recipients' => ['counselor'],
                     'priority' => 'low',
-                    'message_template' => 'Consider offering enrichment opportunities to recognize this student\'s positive progress.',
+                    'message_template' => 'Consider offering enrichment opportunities to recognize this learner\'s positive progress.',
                 ],
                 'cooldown_hours' => 720, // 30 days
                 'active' => true,
             ],
             [
-                'name' => 'New Student Onboarding',
-                'description' => 'Automatically suggests orientation and goal-setting courses for newly enrolled students.',
+                'name' => 'New Learner Onboarding',
+                'description' => 'Automatically suggests orientation and goal-setting courses for newly enrolled learners.',
                 'trigger_type' => AdaptiveTrigger::TYPE_COURSE_SUGGESTION,
                 'input_sources' => [
                     AdaptiveTrigger::INPUT_EXPLICIT,
@@ -177,7 +177,7 @@ class AdaptiveTriggerSeeder extends Seeder
                     'send_welcome_notification' => true,
                 ],
                 'cooldown_hours' => 8760, // 1 year (essentially once per enrollment)
-                'active' => false, // Disabled by default - school must opt-in
+                'active' => false, // Disabled by default - organization must opt-in
             ],
             [
                 'name' => 'Survey Response Follow-up',
@@ -195,7 +195,7 @@ class AdaptiveTriggerSeeder extends Seeder
                     ],
                 ],
                 'ai_interpretation_enabled' => true,
-                'ai_prompt_context' => 'Review the student\'s full survey responses to understand context. Determine urgency level and recommend appropriate courses or interventions. Flag any responses that require immediate counselor attention.',
+                'ai_prompt_context' => 'Review the learner\'s full survey responses to understand context. Determine urgency level and recommend appropriate courses or interventions. Flag any responses that require immediate counselor attention.',
                 'output_action' => AdaptiveTrigger::ACTION_SUGGEST_FOR_REVIEW,
                 'output_config' => [
                     'course_types' => ['wellness', 'intervention'],
@@ -208,7 +208,7 @@ class AdaptiveTriggerSeeder extends Seeder
             ],
             [
                 'name' => 'Provider Recommendation Engine',
-                'description' => 'Recommends appropriate providers when student needs match provider specialties.',
+                'description' => 'Recommends appropriate providers when learner needs match provider specialties.',
                 'trigger_type' => AdaptiveTrigger::TYPE_PROVIDER_RECOMMENDATION,
                 'input_sources' => [
                     AdaptiveTrigger::INPUT_QUANTITATIVE,
@@ -223,7 +223,7 @@ class AdaptiveTriggerSeeder extends Seeder
                     ],
                 ],
                 'ai_interpretation_enabled' => true,
-                'ai_prompt_context' => 'Match student needs with available providers based on specialty areas, availability, insurance acceptance, and location preferences. Prioritize providers with high ratings and relevant experience.',
+                'ai_prompt_context' => 'Match learner needs with available providers based on specialty areas, availability, insurance acceptance, and location preferences. Prioritize providers with high ratings and relevant experience.',
                 'output_action' => AdaptiveTrigger::ACTION_SUGGEST_FOR_REVIEW,
                 'output_config' => [
                     'max_provider_suggestions' => 3,
@@ -237,7 +237,7 @@ class AdaptiveTriggerSeeder extends Seeder
 
         foreach ($triggers as $triggerData) {
             AdaptiveTrigger::create([
-                'org_id' => $school->id,
+                'org_id' => $organization->id,
                 'name' => $triggerData['name'],
                 'description' => $triggerData['description'],
                 'trigger_type' => $triggerData['trigger_type'],

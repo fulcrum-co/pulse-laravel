@@ -76,7 +76,7 @@ class CourseGenerationRequestObserver
                 'notifiable_id' => $request->id,
                 'metadata' => [
                     'trigger_type' => $request->trigger_type,
-                    'student_count' => $request->student_count,
+                    'learner_count' => $request->learner_count,
                     'generation_strategy' => $request->generation_strategy,
                 ],
             ]
@@ -206,8 +206,8 @@ class CourseGenerationRequestObserver
         };
         $parts[] = $triggerLabel;
 
-        if ($request->student_count > 0) {
-            $parts[] = "Target: {$request->student_count} students";
+        if ($request->learner_count > 0) {
+            $parts[] = "Target: {$request->learner_count} learners";
         }
 
         return implode('. ', $parts).'.';

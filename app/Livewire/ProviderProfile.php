@@ -6,7 +6,7 @@ use App\Models\ContactList;
 use App\Models\Provider;
 use App\Models\ProviderAssignment;
 use App\Models\ProviderConversation;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Services\StreamChatService;
 use Livewire\Component;
 
@@ -17,9 +17,9 @@ class ProviderProfile extends Component
     // Assign modal state
     public bool $showAssignModal = false;
 
-    public string $assignType = 'student'; // student or list
+    public string $assignType = 'learner'; // learner or list
 
-    public ?int $selectedStudentId = null;
+    public ?int $selectedLearnerId = null;
 
     public ?int $selectedListId = null;
 
@@ -78,46 +78,46 @@ class ProviderProfile extends Component
      */
     protected function resetAssignForm(): void
     {
-        $this->assignType = 'student';
-        $this->selectedStudentId = null;
+        $this->assignType = 'learner';
+        $this->selectedLearnerId = null;
         $this->selectedListId = null;
         $this->assignNote = '';
     }
 
     /**
-     * Assign this provider to a student or list.
+     * Assign this provider to a learner or list.
      */
     public function assignProvider(): void
     {
         $user = auth()->user();
 
-        if ($this->assignType === 'student') {
+        if ($this->assignType === 'learner') {
             $this->validate([
-                'selectedStudentId' => 'required|exists:students,id',
+                'selectedLearnerId' => 'required|exists:learners,id',
             ]);
 
             // Check for existing assignment
             $exists = ProviderAssignment::where('provider_id', $this->provider->id)
-                ->where('student_id', $this->selectedStudentId)
+                ->where('learner_id', $this->selectedLearnerId)
                 ->whereIn('status', ['assigned', 'active'])
                 ->exists();
 
             if ($exists) {
-                session()->flash('error', 'This provider is already assigned to this student.');
+                session()->flash('error', 'This provider is already assigned to this learner.');
 
                 return;
             }
 
             ProviderAssignment::create([
                 'provider_id' => $this->provider->id,
-                'student_id' => $this->selectedStudentId,
+                'learner_id' => $this->selectedLearnerId,
                 'assigned_by' => $user->id,
                 'notes' => $this->assignNote ?: null,
                 'assigned_at' => now(),
                 'status' => 'assigned',
             ]);
 
-            session()->flash('success', 'Provider assigned to student successfully.');
+            session()->flash('success', 'Provider assigned to learner successfully.');
 
         } elseif ($this->assignType === 'list') {
             $this->validate([
@@ -125,20 +125,20 @@ class ProviderProfile extends Component
             ]);
 
             $list = ContactList::find($this->selectedListId);
-            $students = $list->students;
+            $learners = $list->learners;
             $count = 0;
 
-            foreach ($students as $student) {
+            foreach ($learners as $learner) {
                 // Avoid duplicate assignments
                 $exists = ProviderAssignment::where('provider_id', $this->provider->id)
-                    ->where('student_id', $student->id)
+                    ->where('learner_id', $learner->id)
                     ->whereIn('status', ['assigned', 'active'])
                     ->exists();
 
                 if (! $exists) {
                     ProviderAssignment::create([
                         'provider_id' => $this->provider->id,
-                        'student_id' => $student->id,
+                        'learner_id' => $learner->id,
                         'assigned_by' => $user->id,
                         'notes' => $this->assignNote ?: null,
                         'assigned_at' => now(),
@@ -148,23 +148,23 @@ class ProviderProfile extends Component
                 }
             }
 
-            session()->flash('success', "Provider assigned to {$count} students from the list.");
+            session()->flash('success', "Provider assigned to {$count} learners from the list.");
         }
 
         $this->closeAssignModal();
     }
 
     /**
-     * Get accessible students for assignment.
+     * Get accessible learners for assignment.
      */
-    public function getStudentsProperty()
+    public function getLearnersProperty()
     {
         $accessibleOrgIds = auth()->user()->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        return Student::whereIn('org_id', $accessibleOrgIds)
+        return Learner::whereIn('org_id', $accessibleOrgIds)
             ->with('user')
             ->get()
-            ->sortBy(fn ($student) => $student->user?->name ?? '')
+            ->sortBy(fn ($learner) => $learner->user?->name ?? '')
             ->values();
     }
 
@@ -176,7 +176,7 @@ class ProviderProfile extends Component
         $accessibleOrgIds = auth()->user()->getAccessibleOrganizations()->pluck('id')->toArray();
 
         return ContactList::whereIn('org_id', $accessibleOrgIds)
-            ->whereIn('list_type', ['student', 'mixed'])
+            ->whereIn('list_type', ['learner', 'mixed'])
             ->orderBy('name')
             ->get();
     }
@@ -242,7 +242,7 @@ class ProviderProfile extends Component
     {
         return view('livewire.provider-profile', [
             'canPush' => $this->canPush,
-            'students' => $this->students,
+            'learners' => $this->learners,
             'contactLists' => $this->contactLists,
             'assignmentCount' => $this->assignmentCount,
         ])->layout('layouts.dashboard', ['title' => $this->provider->name]);

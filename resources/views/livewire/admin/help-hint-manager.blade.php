@@ -2,8 +2,8 @@
     {{-- Header --}}
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Tooltips</h1>
-            <p class="mt-1 text-sm text-gray-500">Manage contextual tooltips that appear on each page</p>
+            <h1 class="text-2xl font-bold text-gray-900">@term('tooltips_label')</h1>
+            <p class="mt-1 text-sm text-gray-500">@term('manage_tooltips_page_label')</p>
         </div>
         <div class="flex items-center gap-3">
             {{-- Visual Editor Button --}}
@@ -11,20 +11,20 @@
                 href="{{ $this->contextUrls[$selectedContext] ?? '/' }}?tooltip_editor=true"
                 target="_blank"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors"
-                title="Open visual editor for {{ $this->contexts[$selectedContext] ?? 'this page' }}"
+                title="{{ app(\App\Services\TerminologyService::class)->get('open_visual_editor_label') }} {{ $this->contexts[$selectedContext] ?? app(\App\Services\TerminologyService::class)->get('this_page_label') }}"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                Visual Editor
+                @term('visual_editor_label')
             </a>
             <button
                 wire:click="openCreateModal"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
             >
                 <x-icon name="plus" class="w-4 h-4" />
-                Add Tooltip
+                @term('add_action') @term('tooltip_singular')
             </button>
         </div>
     </div>
@@ -60,14 +60,14 @@
                 <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                     <x-icon name="light-bulb" class="w-6 h-6 text-gray-400" />
                 </div>
-                <h3 class="text-sm font-medium text-gray-900 mb-1">No tooltips yet</h3>
-                <p class="text-sm text-gray-500 mb-4">Add tooltips to guide users through the {{ $this->contexts[$selectedContext] }} page.</p>
+                <h3 class="text-sm font-medium text-gray-900 mb-1">@term('no_tooltips_yet_label')</h3>
+                <p class="text-sm text-gray-500 mb-4">{{ str_replace(':page', $this->contexts[$selectedContext], app(\App\Services\TerminologyService::class)->get('add_tooltips_help_label')) }}</p>
                 <button
                     wire:click="openCreateModal"
                     class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700"
                 >
                     <x-icon name="plus" class="w-4 h-4" />
-                    Add your first tooltip
+                    @term('add_first_tooltip_label')
                 </button>
             </div>
         @else
@@ -75,12 +75,12 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">#</th>
-                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
-                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Selector</th>
-                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
-                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('section_label')</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('title_label')</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('selector_label')</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('position_label')</th>
+                        <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">@term('status_label')</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">@term('actions_label')</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -94,7 +94,7 @@
                                 <div class="flex items-center gap-2">
                                     <div class="text-sm font-medium text-gray-900">{{ $hint->title }}</div>
                                     @if($hint->video_url)
-                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-purple-100 text-purple-600 text-xs rounded-full" title="Has video">
+                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-purple-100 text-purple-600 text-xs rounded-full" title="{{ app(\App\Services\TerminologyService::class)->get('has_video_label') }}">
                                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
                                         </svg>
@@ -114,7 +114,7 @@
                                         ? 'bg-green-100 text-green-700 hover:bg-green-200'
                                         : 'bg-gray-100 text-gray-500 hover:bg-gray-200' }}"
                                 >
-                                    {{ $hint->is_active ? 'Active' : 'Inactive' }}
+                                    {{ $hint->is_active ? app(\App\Services\TerminologyService::class)->get('active_label') : app(\App\Services\TerminologyService::class)->get('inactive_label') }}
                                 </button>
                             </td>
                             <td class="px-4 py-3 text-right">
@@ -122,15 +122,15 @@
                                     <button
                                         wire:click="openEditModal({{ $hint->id }})"
                                         class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
-                                        title="Edit"
+                                        title="{{ app(\App\Services\TerminologyService::class)->get('edit_action') }}"
                                     >
                                         <x-icon name="pencil" class="w-4 h-4" />
                                     </button>
                                     <button
                                         wire:click="delete({{ $hint->id }})"
-                                        wire:confirm="Are you sure you want to delete this hint?"
+                                        wire:confirm="{{ app(\App\Services\TerminologyService::class)->get('confirm_delete_tooltip_label') }}"
                                         class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                                        title="Delete"
+                                        title="{{ app(\App\Services\TerminologyService::class)->get('delete_action') }}"
                                     >
                                         <x-icon name="trash" class="w-4 h-4" />
                                     </button>
@@ -150,12 +150,12 @@
                 <x-icon name="information-circle" class="w-5 h-5 text-blue-500" />
             </div>
             <div class="text-sm text-blue-700">
-                <p class="font-medium mb-1">How Tooltips Work</p>
+                <p class="font-medium mb-1">@term('how_tooltips_work_label')</p>
                 <ul class="list-disc list-inside space-y-1 text-blue-600">
-                    <li><strong>Section:</strong> Unique identifier (lowercase, hyphens only) e.g., <code class="bg-blue-100 px-1 rounded">search-reports</code></li>
-                    <li><strong>Selector:</strong> CSS selector targeting the element, e.g., <code class="bg-blue-100 px-1 rounded">[data-help="search-reports"]</code></li>
-                    <li><strong>Position:</strong> Where the tooltip appears relative to the element</li>
-                    <li>Users enable tooltips via the Help menu → "Show Tooltips"</li>
+                    <li><strong>@term('section_label'):</strong> @term('section_help_label') <code class="bg-blue-100 px-1 rounded">search-reports</code></li>
+                    <li><strong>@term('selector_label'):</strong> @term('selector_help_label') <code class="bg-blue-100 px-1 rounded">[data-help="search-reports"]</code></li>
+                    <li><strong>@term('position_label'):</strong> @term('position_help_label')</li>
+                    <li>@term('enable_tooltips_help_label')</li>
                 </ul>
             </div>
         </div>
@@ -203,7 +203,7 @@
                     <div class="bg-white px-6 py-5">
                         <div class="flex items-center justify-between mb-5">
                             <h3 class="text-lg font-semibold text-gray-900">
-                                {{ $editMode ? 'Edit Tooltip' : 'Add Tooltip' }}
+                                {{ $editMode ? app(\App\Services\TerminologyService::class)->get('edit_action') . ' ' . app(\App\Services\TerminologyService::class)->get('tooltip_singular') : app(\App\Services\TerminologyService::class)->get('add_action') . ' ' . app(\App\Services\TerminologyService::class)->get('tooltip_singular') }}
                             </h3>
                             <button type="button" wire:click="closeModal" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                                 <x-icon name="x-mark" class="w-5 h-5" />
@@ -213,12 +213,12 @@
                         <div class="space-y-4">
                             {{-- Section --}}
                             <div>
-                                <label for="section" class="block text-sm font-medium text-gray-700 mb-1">Section ID</label>
+                                <label for="section" class="block text-sm font-medium text-gray-700 mb-1">@term('section_id_label')</label>
                                 <input
                                     type="text"
                                     id="section"
                                     wire:model="section"
-                                    placeholder="e.g., search-reports"
+                                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('section_id_placeholder') }}"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm font-mono"
                                     {{ $editMode ? 'disabled' : '' }}
                                 />
@@ -227,39 +227,39 @@
 
                             {{-- Selector --}}
                             <div>
-                                <label for="selector" class="block text-sm font-medium text-gray-700 mb-1">CSS Selector</label>
+                                <label for="selector" class="block text-sm font-medium text-gray-700 mb-1">@term('css_selector_label')</label>
                                 <div class="flex gap-2">
                                     <input
                                         type="text"
                                         id="selector"
                                         wire:model="selector"
-                                        placeholder='e.g., [data-help="search-reports"]'
+                                        placeholder="{{ app(\App\Services\TerminologyService::class)->get('selector_placeholder') }}"
                                         class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm font-mono"
                                     />
                                     <button
                                         type="button"
                                         @click="openElementPicker()"
                                         class="px-3 py-2 bg-purple-100 text-purple-700 text-sm font-medium rounded-lg hover:bg-purple-200 transition-colors flex items-center gap-1.5"
-                                        title="Pick element visually"
+                                        title="{{ app(\App\Services\TerminologyService::class)->get('pick_element_label') }}"
                                     >
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                                         </svg>
-                                        Pick
+                                        @term('pick_label')
                                     </button>
                                 </div>
-                                <p class="mt-1 text-xs text-gray-500">Click "Pick" to visually select an element on the page</p>
+                                <p class="mt-1 text-xs text-gray-500">@term('pick_element_help_label')</p>
                                 @error('selector') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Title --}}
                             <div>
-                                <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                <label for="title" class="block text-sm font-medium text-gray-700 mb-1">@term('title_label')</label>
                                 <input
                                     type="text"
                                     id="title"
                                     wire:model="title"
-                                    placeholder="Search Reports"
+                                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('tooltip_title_placeholder') }}"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm"
                                 />
                                 @error('title') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
@@ -267,12 +267,12 @@
 
                             {{-- Description --}}
                             <div>
-                                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">@term('description_label')</label>
                                 <textarea
                                     id="description"
                                     wire:model="description"
                                     rows="3"
-                                    placeholder="Explain what this feature does and how to use it..."
+                                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('tooltip_description_placeholder') }}"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm"
                                 ></textarea>
                                 @error('description') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
@@ -281,15 +281,14 @@
                             {{-- Video URL --}}
                             <div>
                                 <label for="videoUrl" class="block text-sm font-medium text-gray-700 mb-1">
-                                    Video URL
-                                    <span class="text-gray-400 font-normal">(optional)</span>
+                                    @term('video_url_optional_label')
                                 </label>
                                 <div class="relative">
                                     <input
                                         type="url"
                                         id="videoUrl"
                                         wire:model="videoUrl"
-                                        placeholder="Paste Loom, YouTube, or Vimeo URL"
+                                        placeholder="{{ app(\App\Services\TerminologyService::class)->get('video_url_hint_placeholder') }}"
                                         class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm"
                                     />
                                     <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -303,7 +302,7 @@
                             {{-- Position & Sort Order --}}
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label for="position" class="block text-sm font-medium text-gray-700 mb-1">Tooltip Position</label>
+                                    <label for="position" class="block text-sm font-medium text-gray-700 mb-1">@term('tooltip_position_label')</label>
                                     <select
                                         id="position"
                                         wire:model="position"
@@ -315,7 +314,7 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label for="sortOrder" class="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
+                                    <label for="sortOrder" class="block text-sm font-medium text-gray-700 mb-1">@term('sort_order_label')</label>
                                     <input
                                         type="number"
                                         id="sortOrder"
@@ -336,7 +335,7 @@
                                 >
                                     <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $isActive ? 'translate-x-5' : 'translate-x-0' }}"></span>
                                 </button>
-                                <label class="text-sm text-gray-700">Active</label>
+                                <label class="text-sm text-gray-700">@term('active_label')</label>
                             </div>
                         </div>
                     </div>
@@ -347,13 +346,13 @@
                             wire:click="closeModal"
                             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                         >
-                            Cancel
+                            @term('cancel_action')
                         </button>
                         <button
                             type="submit"
                             class="px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
                         >
-                            {{ $editMode ? 'Save Changes' : 'Add Tooltip' }}
+                            {{ $editMode ? app(\App\Services\TerminologyService::class)->get('save_changes_label') : app(\App\Services\TerminologyService::class)->get('add_action') . ' ' . app(\App\Services\TerminologyService::class)->get('tooltip_singular') }}
                         </button>
                     </div>
                 </form>

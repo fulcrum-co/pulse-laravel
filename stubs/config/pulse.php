@@ -26,7 +26,7 @@ return [
     'org_types' => [
         'consultant',
         'district',
-        'school',
+        'organization',
     ],
 
     /*
@@ -49,14 +49,14 @@ return [
                 'manage_resources',
                 'manage_reports',
                 'manage_triggers',
-                'view_all_students',
+                'view_all_learners',
             ],
         ],
         'teacher' => [
             'label' => 'Teacher',
             'level' => 50,
             'permissions' => [
-                'view_assigned_students',
+                'view_assigned_learners',
                 'complete_surveys',
                 'view_reports',
                 'suggest_resources',
@@ -66,13 +66,13 @@ return [
             'label' => 'Parent',
             'level' => 30,
             'permissions' => [
-                'view_own_students',
+                'view_own_learners',
                 'complete_surveys',
-                'view_student_reports',
+                'view_learner_reports',
             ],
         ],
-        'student' => [
-            'label' => 'Student',
+        'learner' => [
+            'label' => 'Learner',
             'level' => 20,
             'permissions' => [
                 'view_own_data',
@@ -84,7 +84,7 @@ return [
             'label' => 'Volunteer',
             'level' => 40,
             'permissions' => [
-                'view_assigned_students',
+                'view_assigned_learners',
                 'complete_surveys',
             ],
         ],
@@ -97,7 +97,7 @@ return [
     */
     'survey' => [
         'max_call_duration_seconds' => 600, // 10 minutes
-        'max_students_per_call' => 15,
+        'max_learners_per_call' => 15,
         'default_frequency' => 'weekly',
     ],
 
@@ -108,16 +108,16 @@ return [
     */
     'prompts' => [
         'conversational_survey' => <<<'PROMPT'
-You are Pulse, a friendly educational data collection assistant. Your role is to have natural conversations with teachers to gather information about their students.
+You are Pulse, a friendly educational data collection assistant. Your role is to have natural conversations with teachers to gather information about their learners.
 
 Guidelines:
 - Be warm, professional, and efficient
 - Ask about academics, behavior, social-emotional wellbeing, and any concerns
 - Extract specific, factual information while filtering out emotional language
 - Keep the conversation focused but allow teachers to share important context
-- Summarize findings at the end of each student discussion
+- Summarize findings at the end of each learner discussion
 
-For each student, gather:
+For each learner, gather:
 1. Academic performance (by subject if relevant)
 2. Behavioral observations
 3. Social-emotional status
@@ -125,11 +125,11 @@ For each student, gather:
 5. Any concerns or needs
 6. Positive developments
 
-Always maintain student privacy and confidentiality.
+Always maintain learner privacy and confidentiality.
 PROMPT,
 
         'data_extraction' => <<<'PROMPT'
-Extract structured data from the following teacher conversation about a student. Return a JSON object with these fields:
+Extract structured data from the following teacher conversation about a learner. Return a JSON object with these fields:
 
 {
   "academics": {
@@ -171,7 +171,7 @@ PROMPT,
 You are an educational data analyst. Write a clear, professional narrative report based on the provided data. The report should:
 
 1. Highlight key trends (positive and negative)
-2. Identify students or groups needing attention
+2. Identify learners or groups needing attention
 3. Compare current data to previous periods if available
 4. Provide actionable recommendations
 5. Use clear, jargon-free language appropriate for educators

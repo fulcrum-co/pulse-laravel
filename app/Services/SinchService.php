@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Conversation;
 use App\Models\User;
+use App\Services\Domain\PhoneNumberFormatterService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -25,7 +28,9 @@ class SinchService
 
     protected string $whatsappUrl;
 
-    public function __construct()
+    protected PhoneNumberFormatterService $phoneFormatter;
+
+    public function __construct(PhoneNumberFormatterService $phoneFormatter)
     {
         $this->projectId = config('services.sinch.project_id');
         $this->keyId = config('services.sinch.key_id');
@@ -35,6 +40,7 @@ class SinchService
         $this->voiceUrl = config('services.sinch.voice_url');
         $this->smsUrl = config('services.sinch.sms_url');
         $this->whatsappUrl = config('services.sinch.whatsapp_url');
+        $this->phoneFormatter = $phoneFormatter;
     }
 
     /**
@@ -348,15 +354,7 @@ class SinchService
      */
     protected function formatPhoneNumber(string $number): string
     {
-        // Remove all non-numeric characters
-        $number = preg_replace('/[^0-9]/', '', $number);
-
-        // Add country code if not present (assuming US)
-        if (strlen($number) === 10) {
-            $number = '1'.$number;
-        }
-
-        return '+'.$number;
+        return $this->phoneFormatter->formatPhoneNumber($number);
     }
 
     /**

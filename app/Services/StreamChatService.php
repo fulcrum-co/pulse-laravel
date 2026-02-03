@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Provider;
 use App\Models\ProviderConversation;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
+use App\Services\Domain\StreamIdGeneratorService;
 use Illuminate\Support\Facades\Log;
 
 class StreamChatService
@@ -18,8 +21,11 @@ class StreamChatService
 
     protected bool $sdkAvailable = false;
 
-    public function __construct()
+    protected StreamIdGeneratorService $idGenerator;
+
+    public function __construct(StreamIdGeneratorService $idGenerator)
     {
+        $this->idGenerator = $idGenerator;
         $this->apiKey = config('services.stream.api_key');
         $this->apiSecret = config('services.stream.api_secret');
 
@@ -114,7 +120,7 @@ class StreamChatService
     /**
      * Create a channel for provider conversation.
      */
-    public function createProviderChannel(Provider $provider, User|Student $initiator): array
+    public function createProviderChannel(Provider $provider, User|Learner $initiator): array
     {
         if (! $this->isConfigured()) {
             throw new \Exception('StreamChatService is not configured');
@@ -403,25 +409,25 @@ class StreamChatService
     /**
      * Ensure a user exists in Stream.
      */
-    protected function ensureUserExists(Provider|User|Student $entity): void
+    protected function ensureUserExists(Provider|User|Learner $entity): void
     {
         if ($entity instanceof Provider) {
-            $this->createOrUpdateUser($this->getProviderStreamId($entity), [
+            $this->createOrUpdateUser($this->idGenerator->getProviderStreamId($entity), [
                 'name' => $entity->display_name,
                 'image' => $entity->thumbnail_url,
                 'role' => 'provider',
                 'provider_type' => $entity->provider_type,
             ]);
         } elseif ($entity instanceof User) {
-            $this->createOrUpdateUser($this->getUserStreamId($entity), [
+            $this->createOrUpdateUser($this->idGenerator->getUserStreamId($entity), [
                 'name' => $entity->full_name,
                 'image' => $entity->avatar_url,
                 'role' => $entity->primary_role,
             ]);
-        } elseif ($entity instanceof Student) {
-            $this->createOrUpdateUser($this->getStudentStreamId($entity), [
+        } elseif ($entity instanceof Learner) {
+            $this->createOrUpdateUser($this->idGenerator->getLearnerStreamId($entity), [
                 'name' => $entity->full_name,
-                'role' => 'student',
+                'role' => 'learner',
             ]);
         }
     }
@@ -431,7 +437,7 @@ class StreamChatService
      */
     public function getProviderStreamId(Provider $provider): string
     {
-        return 'provider_'.$provider->id;
+        return $this->idGenerator->getProviderStreamId($provider);
     }
 
     /**
@@ -439,37 +445,31 @@ class StreamChatService
      */
     public function getUserStreamId(User $user): string
     {
-        return 'user_'.$user->id;
+        return $this->idGenerator->getUserStreamId($user);
     }
 
     /**
-     * Get Stream user ID for a student.
+     * Get Stream user ID for a learner.
      */
-    public function getStudentStreamId(Student $student): string
+    public function getLearnerStreamId(Learner $learner): string
     {
-        return 'student_'.$student->id;
+        return $this->idGenerator->getLearnerStreamId($learner);
     }
 
     /**
-     * Get Stream user ID for an initiator (User or Student).
+     * Get Stream user ID for an initiator (User or Learner).
      */
-    public function getInitiatorStreamId(User|Student $initiator): string
+    public function getInitiatorStreamId(User|Learner $initiator): string
     {
-        if ($initiator instanceof User) {
-            return $this->getUserStreamId($initiator);
-        }
-
-        return $this->getStudentStreamId($initiator);
+        return $this->idGenerator->getInitiatorStreamId($initiator);
     }
 
     /**
      * Generate channel ID for provider conversation.
      */
-    public function generateChannelId(Provider $provider, User|Student $initiator): string
+    public function generateChannelId(Provider $provider, User|Learner $initiator): string
     {
-        $initiatorPrefix = $initiator instanceof User ? 'user' : 'student';
-
-        return "provider_{$provider->id}_{$initiatorPrefix}_{$initiator->id}";
+        return $this->idGenerator->generateProviderChannelId($provider, $initiator);
     }
 
     /**

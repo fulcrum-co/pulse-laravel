@@ -20,19 +20,19 @@ class PlanTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        $school = Organization::where('org_type', 'school')->first();
-        if (! $school) {
-            $this->command->info('No school organization found. Skipping PlanTypeSeeder.');
+        $organization = Organization::where('org_type', 'organization')->first();
+        if (! $organization) {
+            $this->command->info('No organization organization found. Skipping PlanTypeSeeder.');
 
             return;
         }
 
-        $admin = User::where('org_id', $school->id)
+        $admin = User::where('org_id', $organization->id)
             ->where('primary_role', 'admin')
             ->first();
 
         if (! $admin) {
-            $admin = User::where('org_id', $school->id)->first();
+            $admin = User::where('org_id', $organization->id)->first();
         }
 
         if (! $admin) {
@@ -41,7 +41,7 @@ class PlanTypeSeeder extends Seeder
             return;
         }
 
-        $teachers = User::where('org_id', $school->id)
+        $teachers = User::where('org_id', $organization->id)
             ->where('primary_role', 'teacher')
             ->take(3)
             ->get();
@@ -49,10 +49,10 @@ class PlanTypeSeeder extends Seeder
         $this->command->info('Creating demo plans...');
 
         // Create one of each new plan type
-        $this->createImprovementPlan($school, $admin, $teachers->first() ?? $admin);
-        $this->createGrowthPlan($school, $teachers->first() ?? $admin);
-        $this->createStrategicOkrPlan($school, $admin);
-        $this->createActionPlan($school, $admin);
+        $this->createImprovementPlan($organization, $admin, $teachers->first() ?? $admin);
+        $this->createGrowthPlan($organization, $teachers->first() ?? $admin);
+        $this->createStrategicOkrPlan($organization, $admin);
+        $this->createActionPlan($organization, $admin);
 
         $this->command->info('Demo plans created successfully!');
     }
@@ -60,12 +60,12 @@ class PlanTypeSeeder extends Seeder
     /**
      * Create a Performance Improvement Plan (PIP).
      */
-    protected function createImprovementPlan(Organization $school, User $admin, User $teacher): void
+    protected function createImprovementPlan(Organization $organization, User $admin, User $teacher): void
     {
         $pip = StrategicPlan::create([
-            'org_id' => $school->id,
+            'org_id' => $organization->id,
             'title' => 'Performance Improvement Plan - '.$teacher->first_name.' '.$teacher->last_name,
-            'description' => 'Structured 90-day improvement plan addressing classroom management and student engagement.',
+            'description' => 'Structured 90-day improvement plan addressing classroom management and learner engagement.',
             'plan_type' => 'improvement',
             'category' => 'pip',
             'target_type' => 'App\\Models\\User',
@@ -88,7 +88,7 @@ class PlanTypeSeeder extends Seeder
         $goal1 = Goal::create([
             'strategic_plan_id' => $pip->id,
             'title' => 'Improve Classroom Management',
-            'description' => 'Reduce classroom disruptions and improve student time-on-task',
+            'description' => 'Reduce classroom disruptions and improve learner time-on-task',
             'goal_type' => 'objective',
             'target_value' => 50,
             'current_value' => 20,
@@ -137,10 +137,10 @@ class PlanTypeSeeder extends Seeder
             'sort_order' => 3,
         ]);
 
-        // Goal 2: Student Engagement
+        // Goal 2: Learner Engagement
         $goal2 = Goal::create([
             'strategic_plan_id' => $pip->id,
-            'title' => 'Increase Student Engagement',
+            'title' => 'Increase Learner Engagement',
             'description' => 'Implement more interactive teaching strategies',
             'goal_type' => 'objective',
             'due_date' => Carbon::now()->addDays(75),
@@ -213,10 +213,10 @@ class PlanTypeSeeder extends Seeder
     /**
      * Create a Growth/Development Plan (IDP).
      */
-    protected function createGrowthPlan(Organization $school, User $teacher): void
+    protected function createGrowthPlan(Organization $organization, User $teacher): void
     {
         $idp = StrategicPlan::create([
-            'org_id' => $school->id,
+            'org_id' => $organization->id,
             'title' => 'Professional Growth Plan - '.$teacher->first_name.' '.$teacher->last_name,
             'description' => 'Self-directed professional development for instructional leadership and technology integration.',
             'plan_type' => 'growth',
@@ -343,12 +343,12 @@ class PlanTypeSeeder extends Seeder
     /**
      * Create a Strategic OKR Plan.
      */
-    protected function createStrategicOkrPlan(Organization $school, User $admin): void
+    protected function createStrategicOkrPlan(Organization $organization, User $admin): void
     {
         $okr = StrategicPlan::create([
-            'org_id' => $school->id,
-            'title' => 'Q1 2026 School OKRs - Student Success Initiative',
-            'description' => 'Quarterly objectives and key results focused on improving student outcomes and engagement across all grade levels.',
+            'org_id' => $organization->id,
+            'title' => 'Q1 2026 Organization OKRs - Learner Success Initiative',
+            'description' => 'Quarterly objectives and key results focused on improving learner outcomes and engagement across all grade levels.',
             'plan_type' => 'strategic',
             'category' => 'okr',
             'status' => 'active',
@@ -363,10 +363,10 @@ class PlanTypeSeeder extends Seeder
             'role' => 'owner',
         ]);
 
-        // Objective 1: Student Engagement
+        // Objective 1: Learner Engagement
         $obj1 = Goal::create([
             'strategic_plan_id' => $okr->id,
-            'title' => 'Increase Student Engagement Across All Grades',
+            'title' => 'Increase Learner Engagement Across All Grades',
             'description' => 'Create more engaging learning environments leading to improved attendance and participation',
             'goal_type' => 'objective',
             'due_date' => Carbon::create(2026, 3, 31),
@@ -388,7 +388,7 @@ class PlanTypeSeeder extends Seeder
 
         KeyResult::create([
             'goal_id' => $obj1->id,
-            'title' => 'Increase student participation in extracurricular activities',
+            'title' => 'Increase learner participation in extracurricular activities',
             'metric_type' => 'percentage',
             'starting_value' => 45,
             'target_value' => 60,
@@ -500,7 +500,7 @@ class PlanTypeSeeder extends Seeder
         ProgressUpdate::create([
             'strategic_plan_id' => $okr->id,
             'goal_id' => $obj1->id,
-            'content' => 'Launched new attendance incentive program this week. Early indicators show positive response from students.',
+            'content' => 'Launched new attendance incentive program this week. Early indicators show positive response from learners.',
             'update_type' => 'manual',
             'created_by' => $admin->id,
             'created_at' => Carbon::now()->subDays(3),
@@ -512,10 +512,10 @@ class PlanTypeSeeder extends Seeder
     /**
      * Create an Action Plan triggered by an alert.
      */
-    protected function createActionPlan(Organization $school, User $admin): void
+    protected function createActionPlan(Organization $organization, User $admin): void
     {
         $actionPlan = StrategicPlan::create([
-            'org_id' => $school->id,
+            'org_id' => $organization->id,
             'title' => 'Crisis Response: 9th Grade Attendance Drop',
             'description' => 'Immediate action plan triggered by attendance alert. Grade 9 attendance dropped below 85% threshold.',
             'plan_type' => 'action',
@@ -555,7 +555,7 @@ class PlanTypeSeeder extends Seeder
 
         KeyResult::create([
             'goal_id' => $goal->id,
-            'title' => 'Contact families of chronically absent students',
+            'title' => 'Contact families of chronically absent learners',
             'metric_type' => 'percentage',
             'target_value' => 100,
             'current_value' => 40,
@@ -568,12 +568,12 @@ class PlanTypeSeeder extends Seeder
 
         KeyResult::create([
             'goal_id' => $goal->id,
-            'title' => 'Students connected with support services',
+            'title' => 'Learners connected with support services',
             'metric_type' => 'number',
             'target_value' => 15,
             'current_value' => 6,
             'starting_value' => 0,
-            'unit' => 'students',
+            'unit' => 'learners',
             'due_date' => Carbon::now()->addWeeks(2),
             'status' => 'in_progress',
             'sort_order' => 2,
@@ -582,7 +582,7 @@ class PlanTypeSeeder extends Seeder
         // Immediate action milestones
         Milestone::create([
             'strategic_plan_id' => $actionPlan->id,
-            'title' => 'Complete family outreach for all at-risk students',
+            'title' => 'Complete family outreach for all at-risk learners',
             'due_date' => Carbon::now()->addDays(3),
             'status' => 'in_progress',
             'sort_order' => 1,
@@ -631,7 +631,7 @@ class PlanTypeSeeder extends Seeder
 
         ProgressUpdate::create([
             'strategic_plan_id' => $actionPlan->id,
-            'content' => 'Met with counseling team to identify students needing additional support. 6 students connected with services so far.',
+            'content' => 'Met with counseling team to identify learners needing additional support. 6 learners connected with services so far.',
             'update_type' => 'manual',
             'created_by' => $admin->id,
             'created_at' => Carbon::now()->subDays(1),

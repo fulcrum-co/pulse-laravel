@@ -8,7 +8,7 @@ use App\Models\ContactResourceSuggestion;
 use App\Models\MetricThreshold;
 use App\Models\Organization;
 use App\Models\Resource;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -19,32 +19,32 @@ class ContactMetricSeeder extends Seeder
 
     public function run(): void
     {
-        $school = Organization::where('org_type', 'school')->first();
-        if (! $school) {
-            $this->command->warn('No school organization found. Skipping ContactMetricSeeder.');
+        $organization = Organization::where('org_type', 'organization')->first();
+        if (! $organization) {
+            $this->command->warn('No organization organization found. Skipping ContactMetricSeeder.');
 
             return;
         }
 
-        $students = Student::where('org_id', $school->id)->get();
-        $this->staffUsers = User::where('org_id', $school->id)
+        $learners = Learner::where('org_id', $organization->id)->get();
+        $this->staffUsers = User::where('org_id', $organization->id)
             ->whereIn('primary_role', ['admin', 'teacher'])
             ->get()
             ->all();
 
         // Create default metric thresholds
-        $this->createDefaultThresholds($school->id);
+        $this->createDefaultThresholds($organization->id);
 
-        // Create metrics for each student
-        foreach ($students as $index => $student) {
+        // Create metrics for each learner
+        foreach ($learners as $index => $learner) {
             // Assign different trend patterns to make data interesting
-            $trendPattern = $this->getTrendPattern($index, $student->risk_level);
-            $this->createStudentMetrics($student, $school->id, $trendPattern);
-            $this->createStudentNotes($student, $school->id);
-            $this->createResourceSuggestions($student, $school->id);
+            $trendPattern = $this->getTrendPattern($index, $learner->risk_level);
+            $this->createLearnerMetrics($learner, $organization->id, $trendPattern);
+            $this->createLearnerNotes($learner, $organization->id);
+            $this->createResourceSuggestions($learner, $organization->id);
         }
 
-        $this->command->info('Created rich demo data for '.$students->count().' students.');
+        $this->command->info('Created rich demo data for '.$learners->count().' learners.');
     }
 
     private function getTrendPattern(int $index, string $riskLevel): string
@@ -87,12 +87,12 @@ class ContactMetricSeeder extends Seeder
         }
     }
 
-    private function createStudentMetrics(Student $student, int $orgId, string $trendPattern): void
+    private function createLearnerMetrics(Learner $learner, int $orgId, string $trendPattern): void
     {
         $userId = $this->getRandomStaffId();
 
         // Base values based on risk level
-        $baseValues = match ($student->risk_level) {
+        $baseValues = match ($learner->risk_level) {
             'good' => ['gpa' => 3.5, 'wellness' => 82, 'emotional' => 78, 'engagement' => 85, 'attendance' => 97, 'behavior' => 90, 'life_skills' => 80],
             'low' => ['gpa' => 2.8, 'wellness' => 65, 'emotional' => 60, 'engagement' => 62, 'attendance' => 92, 'behavior' => 72, 'life_skills' => 65],
             'high' => ['gpa' => 2.0, 'wellness' => 48, 'emotional' => 45, 'engagement' => 40, 'attendance' => 85, 'behavior' => 55, 'life_skills' => 50],
@@ -102,7 +102,7 @@ class ContactMetricSeeder extends Seeder
         // Generate 18 months of data for richer charts
         for ($monthsAgo = 18; $monthsAgo >= 0; $monthsAgo--) {
             $date = Carbon::now()->subMonths($monthsAgo);
-            $schoolYear = $this->getSchoolYearFromDate($date);
+            $organizationYear = $this->getOrganizationYearFromDate($date);
             $quarter = $this->getQuarterFromDate($date);
 
             // Apply trend pattern
@@ -124,14 +124,14 @@ class ContactMetricSeeder extends Seeder
             // Plan progress should increase over time
             $planProgress = min(100, max(0, ((18 - $monthsAgo) / 18) * 100 * $trendMultiplier));
 
-            $this->createMetric($student, $orgId, 'academics', 'gpa', $values['gpa'], $date, $schoolYear, $quarter, $userId);
-            $this->createMetric($student, $orgId, 'academics', 'plan_progress', $planProgress, $date, $schoolYear, $quarter, $userId);
-            $this->createMetric($student, $orgId, 'wellness', 'wellness_score', $values['wellness_score'], $date, $schoolYear, $quarter, $userId);
-            $this->createMetric($student, $orgId, 'wellness', 'emotional_wellbeing', $values['emotional_wellbeing'], $date, $schoolYear, $quarter, $userId);
-            $this->createMetric($student, $orgId, 'engagement', 'engagement_score', $values['engagement_score'], $date, $schoolYear, $quarter, $userId);
-            $this->createMetric($student, $orgId, 'attendance', 'attendance_rate', $values['attendance_rate'], $date, $schoolYear, $quarter, $userId);
-            $this->createMetric($student, $orgId, 'behavior', 'behavior_score', $values['behavior_score'], $date, $schoolYear, $quarter, $userId);
-            $this->createMetric($student, $orgId, 'life_skills', 'life_skills_score', $values['life_skills_score'], $date, $schoolYear, $quarter, $userId);
+            $this->createMetric($learner, $orgId, 'academics', 'gpa', $values['gpa'], $date, $organizationYear, $quarter, $userId);
+            $this->createMetric($learner, $orgId, 'academics', 'plan_progress', $planProgress, $date, $organizationYear, $quarter, $userId);
+            $this->createMetric($learner, $orgId, 'wellness', 'wellness_score', $values['wellness_score'], $date, $organizationYear, $quarter, $userId);
+            $this->createMetric($learner, $orgId, 'wellness', 'emotional_wellbeing', $values['emotional_wellbeing'], $date, $organizationYear, $quarter, $userId);
+            $this->createMetric($learner, $orgId, 'engagement', 'engagement_score', $values['engagement_score'], $date, $organizationYear, $quarter, $userId);
+            $this->createMetric($learner, $orgId, 'attendance', 'attendance_rate', $values['attendance_rate'], $date, $organizationYear, $quarter, $userId);
+            $this->createMetric($learner, $orgId, 'behavior', 'behavior_score', $values['behavior_score'], $date, $organizationYear, $quarter, $userId);
+            $this->createMetric($learner, $orgId, 'life_skills', 'life_skills_score', $values['life_skills_score'], $date, $organizationYear, $quarter, $userId);
         }
     }
 
@@ -157,7 +157,7 @@ class ContactMetricSeeder extends Seeder
         return max($min, min($max, $value));
     }
 
-    private function createMetric(Student $student, int $orgId, string $category, string $key, float $value, Carbon $date, string $schoolYear, int $quarter, ?int $userId): void
+    private function createMetric(Learner $learner, int $orgId, string $category, string $key, float $value, Carbon $date, string $organizationYear, int $quarter, ?int $userId): void
     {
         $threshold = MetricThreshold::where('org_id', $orgId)
             ->where('metric_category', $category)
@@ -168,8 +168,8 @@ class ContactMetricSeeder extends Seeder
 
         ContactMetric::create([
             'org_id' => $orgId,
-            'contact_type' => Student::class,
-            'contact_id' => $student->id,
+            'contact_type' => Learner::class,
+            'contact_id' => $learner->id,
             'metric_category' => $category,
             'metric_key' => $key,
             'numeric_value' => round($value, 2),
@@ -179,59 +179,59 @@ class ContactMetricSeeder extends Seeder
             'period_start' => $date->copy()->startOfMonth(),
             'period_end' => $date->copy()->endOfMonth(),
             'period_type' => 'monthly',
-            'school_year' => $schoolYear,
+            'organization_year' => $organizationYear,
             'quarter' => $quarter,
             'recorded_by_user_id' => $userId,
             'recorded_at' => $date,
         ]);
     }
 
-    private function createStudentNotes(Student $student, int $orgId): void
+    private function createLearnerNotes(Learner $learner, int $orgId): void
     {
-        $studentName = $student->user?->first_name ?? 'Student';
+        $learnerName = $learner->user?->first_name ?? 'Learner';
 
         // Rich, realistic notes based on risk level
         $noteTemplates = [
             'general' => [
-                "Had a productive check-in with {$studentName} today. Discussed upcoming assignments and goals for the quarter.",
-                "Met with {$studentName} during advisory. They expressed interest in the upcoming career fair.",
-                "{$studentName} asked about tutoring resources for math. Provided information about after-school help.",
-                "Observed {$studentName} helping a classmate during group work. Great collaborative skills.",
-                "Quick hallway chat with {$studentName} - they mentioned enjoying the new science unit.",
-                "{$studentName} submitted college interest survey. Interested in engineering programs.",
-                "Discussed course selection for next year with {$studentName}. Considering AP classes.",
-                "{$studentName} participated actively in today's class discussion about career pathways.",
+                "Had a productive check-in with {$learnerName} today. Discussed upcoming assignments and goals for the quarter.",
+                "Met with {$learnerName} during advisory. They expressed interest in the upcoming career fair.",
+                "{$learnerName} asked about tutoring resources for math. Provided information about after-organization help.",
+                "Observed {$learnerName} helping a classmate during group work. Great collaborative skills.",
+                "Quick hallway chat with {$learnerName} - they mentioned enjoying the new science unit.",
+                "{$learnerName} submitted college interest survey. Interested in engineering programs.",
+                "Discussed course selection for next year with {$learnerName}. Considering AP classes.",
+                "{$learnerName} participated actively in today's class discussion about career pathways.",
             ],
             'follow_up' => [
-                "Following up on {$studentName}'s attendance last week. Family confirmed illness, all excused.",
-                "Check-in with {$studentName} about missing assignments. Created plan to catch up by Friday.",
-                "Follow-up meeting with {$studentName} and parent regarding grade concerns. Set bi-weekly check-ins.",
-                "Checked in about the tutoring referral - {$studentName} has attended two sessions so far.",
-                "Following up on {$studentName}'s interest in joining the robotics club. Connected with advisor.",
-                "Post-conference follow-up: {$studentName} is using the planner strategies we discussed.",
+                "Following up on {$learnerName}'s attendance last week. Family confirmed illness, all excused.",
+                "Check-in with {$learnerName} about missing assignments. Created plan to catch up by Friday.",
+                "Follow-up meeting with {$learnerName} and parent regarding grade concerns. Set bi-weekly check-ins.",
+                "Checked in about the tutoring referral - {$learnerName} has attended two sessions so far.",
+                "Following up on {$learnerName}'s interest in joining the robotics club. Connected with advisor.",
+                "Post-conference follow-up: {$learnerName} is using the planner strategies we discussed.",
             ],
             'concern' => [
-                "{$studentName} seems more withdrawn than usual in class this week. Will continue to monitor.",
-                "Noticed {$studentName} struggling to stay focused. Recommend checking in about sleep/wellness.",
-                "Math teacher reported {$studentName} has missing work in their class as well. Need coordinated approach.",
-                "{$studentName} mentioned stress about upcoming tests. Discussed study strategies and resources.",
-                "Attendance pattern shows {$studentName} missing more Mondays. May need family outreach.",
-                "Peer conflict reported involving {$studentName}. Counselor meeting scheduled.",
+                "{$learnerName} seems more withdrawn than usual in class this week. Will continue to monitor.",
+                "Noticed {$learnerName} struggling to stay focused. Recommend checking in about sleep/wellness.",
+                "Math teacher reported {$learnerName} has missing work in their class as well. Need coordinated approach.",
+                "{$learnerName} mentioned stress about upcoming tests. Discussed study strategies and resources.",
+                "Attendance pattern shows {$learnerName} missing more Mondays. May need family outreach.",
+                "Peer conflict reported involving {$learnerName}. Counselor meeting scheduled.",
             ],
             'milestone' => [
-                "Congratulations to {$studentName} - made the Honor Roll this quarter!",
-                "{$studentName} completed their community service requirement for graduation.",
-                "Excellent progress! {$studentName} improved their GPA by 0.3 points this semester.",
-                "{$studentName} was selected for the district's student leadership program.",
-                "Perfect attendance this month for {$studentName}. Great improvement!",
-                "{$studentName} passed all state assessments with proficient or above scores.",
-                "{$studentName} completed their first successful job interview as part of career readiness program.",
-                "{$studentName} received recognition for outstanding improvement in behavior.",
+                "Congratulations to {$learnerName} - made the Honor Roll this quarter!",
+                "{$learnerName} completed their community service requirement for graduation.",
+                "Excellent progress! {$learnerName} improved their GPA by 0.3 points this semester.",
+                "{$learnerName} was selected for the district's learner leadership program.",
+                "Perfect attendance this month for {$learnerName}. Great improvement!",
+                "{$learnerName} passed all state assessments with proficient or above scores.",
+                "{$learnerName} completed their first successful job interview as part of career readiness program.",
+                "{$learnerName} received recognition for outstanding improvement in behavior.",
             ],
         ];
 
-        // More notes for higher-risk students (they need more attention)
-        $numNotes = match ($student->risk_level) {
+        // More notes for higher-risk learners (they need more attention)
+        $numNotes = match ($learner->risk_level) {
             'high' => rand(8, 12),
             'low' => rand(5, 8),
             'good' => rand(3, 6),
@@ -239,7 +239,7 @@ class ContactMetricSeeder extends Seeder
         };
 
         // Weight note types based on risk level
-        $typeWeights = match ($student->risk_level) {
+        $typeWeights = match ($learner->risk_level) {
             'high' => ['general' => 2, 'follow_up' => 4, 'concern' => 4, 'milestone' => 1],
             'low' => ['general' => 3, 'follow_up' => 3, 'concern' => 2, 'milestone' => 2],
             'good' => ['general' => 4, 'follow_up' => 1, 'concern' => 1, 'milestone' => 4],
@@ -261,8 +261,8 @@ class ContactMetricSeeder extends Seeder
 
             ContactNote::create([
                 'org_id' => $orgId,
-                'contact_type' => Student::class,
-                'contact_id' => $student->id,
+                'contact_type' => Learner::class,
+                'contact_id' => $learner->id,
                 'note_type' => $noteType,
                 'content' => $content,
                 'is_private' => rand(1, 10) <= 2,
@@ -273,7 +273,7 @@ class ContactMetricSeeder extends Seeder
         }
     }
 
-    private function createResourceSuggestions(Student $student, int $orgId): void
+    private function createResourceSuggestions(Learner $learner, int $orgId): void
     {
         $resources = Resource::where('org_id', $orgId)->where('active', true)->get();
         if ($resources->isEmpty()) {
@@ -281,7 +281,7 @@ class ContactMetricSeeder extends Seeder
         }
 
         // Higher risk = more suggestions
-        $numSuggestions = match ($student->risk_level) {
+        $numSuggestions = match ($learner->risk_level) {
             'high' => rand(3, 5),
             'low' => rand(1, 3),
             'good' => rand(0, 2),
@@ -292,8 +292,8 @@ class ContactMetricSeeder extends Seeder
 
         foreach ($selectedResources as $resource) {
             // Skip if suggestion already exists for this contact/resource combo
-            $exists = ContactResourceSuggestion::where('contact_type', Student::class)
-                ->where('contact_id', $student->id)
+            $exists = ContactResourceSuggestion::where('contact_type', Learner::class)
+                ->where('contact_id', $learner->id)
                 ->where('resource_id', $resource->id)
                 ->exists();
 
@@ -306,12 +306,12 @@ class ContactMetricSeeder extends Seeder
 
             $suggestion = ContactResourceSuggestion::create([
                 'org_id' => $orgId,
-                'contact_type' => Student::class,
-                'contact_id' => $student->id,
+                'contact_type' => Learner::class,
+                'contact_id' => $learner->id,
                 'resource_id' => $resource->id,
                 'suggestion_source' => $source,
                 'relevance_score' => $source === 'ai_recommendation' ? rand(65, 98) : null,
-                'ai_rationale' => $source === 'ai_recommendation' ? $this->getAiRationale($resource, $student) : null,
+                'ai_rationale' => $source === 'ai_recommendation' ? $this->getAiRationale($resource, $learner) : null,
                 'status' => $status,
                 'created_at' => Carbon::now()->subDays(rand(1, 60)),
             ]);
@@ -320,19 +320,19 @@ class ContactMetricSeeder extends Seeder
                 $suggestion->update([
                     'reviewed_by' => $this->getRandomStaffId(),
                     'reviewed_at' => Carbon::now()->subDays(rand(0, 30)),
-                    'review_notes' => $status === 'accepted' ? 'Good fit for student needs.' : 'Not appropriate at this time.',
+                    'review_notes' => $status === 'accepted' ? 'Good fit for learner needs.' : 'Not appropriate at this time.',
                 ]);
             }
         }
     }
 
-    private function getAiRationale(Resource $resource, Student $student): string
+    private function getAiRationale(Resource $resource, Learner $learner): string
     {
         $rationales = [
-            "Based on {$student->user?->first_name}'s recent academic performance trends, this resource addresses key skill gaps.",
-            "Student's engagement patterns suggest this type of intervention would be beneficial.",
-            "Matches student's learning style and current support needs identified in recent assessments.",
-            'Recommended based on similar successful interventions with comparable student profiles.',
+            "Based on {$learner->user?->first_name}'s recent academic performance trends, this resource addresses key skill gaps.",
+            "Learner's engagement patterns suggest this type of intervention would be beneficial.",
+            "Matches learner's learning style and current support needs identified in recent assessments.",
+            'Recommended based on similar successful interventions with comparable learner profiles.',
             'Addresses specific areas flagged in recent wellness check-in responses.',
         ];
 
@@ -369,7 +369,7 @@ class ContactMetricSeeder extends Seeder
         };
     }
 
-    private function getSchoolYearFromDate(Carbon $date): string
+    private function getOrganizationYearFromDate(Carbon $date): string
     {
         $year = $date->month >= 8 ? $date->year : $date->year - 1;
 

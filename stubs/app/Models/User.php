@@ -31,7 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'sso_id',
         'preferred_contact_method',
         'contact_preferences',
-        'student_ids',
+        'learner_ids',
         'department_ids',
         'classroom_ids',
         'avatar_url',
@@ -53,7 +53,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'accessible_org_ids' => 'array',
         'role_scopes' => 'array',
         'contact_preferences' => 'array',
-        'student_ids' => 'array',
+        'learner_ids' => 'array',
         'department_ids' => 'array',
         'classroom_ids' => 'array',
         'last_login' => 'datetime',
@@ -82,19 +82,19 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the students associated with this user (for teachers/parents).
+     * Get the learners associated with this user (for teachers/parents).
      */
-    public function students(): HasMany
+    public function learners(): HasMany
     {
-        return $this->hasMany(Student::class, 'user_id');
+        return $this->hasMany(Learner::class, 'user_id');
     }
 
     /**
-     * Get the student profile if this user is a student.
+     * Get the learner profile if this user is a learner.
      */
-    public function studentProfile(): BelongsTo
+    public function learnerProfile(): BelongsTo
     {
-        return $this->belongsTo(Student::class, 'user_id', '_id');
+        return $this->belongsTo(Learner::class, 'user_id', '_id');
     }
 
     /**
@@ -152,7 +152,7 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         // Check if org is a descendant (for admins/consultants)
-        if ($this->hasPermission('view_all_students')) {
+        if ($this->hasPermission('view_all_learners')) {
             $org = Organization::find($this->org_id);
             if ($org && in_array($this->org_id, Organization::find($orgId)?->ancestor_org_ids ?? [])) {
                 return true;

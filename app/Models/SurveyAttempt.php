@@ -11,7 +11,7 @@ class SurveyAttempt extends Model
 {
     protected $fillable = [
         'survey_id',
-        'student_id',
+        'learner_id',
         'user_id',
         'status',
         'response_channel',
@@ -72,11 +72,11 @@ class SurveyAttempt extends Model
     }
 
     /**
-     * Get the student.
+     * Get the learner.
      */
-    public function student(): BelongsTo
+    public function learner(): BelongsTo
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Learner::class);
     }
 
     /**
@@ -223,11 +223,11 @@ class SurveyAttempt extends Model
     }
 
     /**
-     * Get the respondent (student or user).
+     * Get the respondent (learner or user).
      */
     public function getRespondent(): ?Model
     {
-        return $this->student ?? $this->user;
+        return $this->learner ?? $this->user;
     }
 
     /**
@@ -235,8 +235,8 @@ class SurveyAttempt extends Model
      */
     public function getRespondentNameAttribute(): string
     {
-        if ($this->student) {
-            return $this->student->name ?? $this->student->first_name ?? 'Student';
+        if ($this->learner) {
+            return $this->learner->name ?? $this->learner->first_name ?? 'Learner';
         }
         if ($this->user) {
             return $this->user->name ?? 'User';

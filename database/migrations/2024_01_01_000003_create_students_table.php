@@ -9,15 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         // Skip if table already exists (idempotent migration)
-        if (Schema::hasTable('students')) {
+        if (Schema::hasTable('learners')) {
             return;
         }
 
-        Schema::create('students', function (Blueprint $table) {
+        Schema::create('learners', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('org_id')->constrained('organizations')->cascadeOnDelete();
-            $table->string('student_number')->nullable();
+            $table->string('learner_number')->nullable();
             $table->string('grade_level')->nullable();
             $table->date('date_of_birth')->nullable();
             $table->string('gender')->nullable();
@@ -40,20 +40,20 @@ return new class extends Migration
             $table->index(['org_id', 'grade_level']);
         });
 
-        // Pivot table for students and classrooms
-        Schema::create('classroom_student', function (Blueprint $table) {
+        // Pivot table for learners and classrooms
+        Schema::create('classroom_learner', function (Blueprint $table) {
             $table->id();
             $table->foreignId('classroom_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('student_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('learner_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
 
-            $table->unique(['classroom_id', 'student_id']);
+            $table->unique(['classroom_id', 'learner_id']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('classroom_student');
-        Schema::dropIfExists('students');
+        Schema::dropIfExists('classroom_learner');
+        Schema::dropIfExists('learners');
     }
 };

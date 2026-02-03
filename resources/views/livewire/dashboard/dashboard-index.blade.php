@@ -235,29 +235,29 @@
                             </div>
                             @break
 
-                        @case('student_list')
+                        @case('learner_list')
                             <div class="space-y-3">
-                                @forelse($data['students'] ?? [] as $student)
+                                @forelse($data['learners'] ?? [] as $learner)
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                                            @if($student['avatar_url'])
-                                                <img src="{{ $student['avatar_url'] }}" alt="" class="w-full h-full object-cover">
+                                            @if($learner['avatar_url'])
+                                                <img src="{{ $learner['avatar_url'] }}" alt="" class="w-full h-full object-cover">
                                             @else
                                                 <div class="w-full h-full flex items-center justify-center text-gray-500 text-sm font-medium">
-                                                    {{ substr($student['name'], 0, 1) }}
+                                                    {{ substr($learner['name'], 0, 1) }}
                                                 </div>
                                             @endif
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <div class="font-medium text-gray-900 truncate">{{ $student['name'] }}</div>
-                                            <div class="text-sm text-gray-500">Grade {{ $student['grade'] }}</div>
+                                            <div class="font-medium text-gray-900 truncate">{{ $learner['name'] }}</div>
+                                            <div class="text-sm text-gray-500">Grade {{ $learner['grade'] }}</div>
                                         </div>
-                                        <span class="px-2 py-1 text-xs rounded-full {{ $student['risk_level'] === 'high' ? 'bg-red-100 text-red-700' : ($student['risk_level'] === 'low' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">
-                                            {{ ucfirst($student['risk_level']) }}
+                                        <span class="px-2 py-1 text-xs rounded-full {{ $learner['risk_level'] === 'high' ? 'bg-red-100 text-red-700' : ($learner['risk_level'] === 'low' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">
+                                            {{ ucfirst($learner['risk_level']) }}
                                         </span>
                                     </div>
                                 @empty
-                                    <div class="text-center text-gray-500 py-4">No students found</div>
+                                    <div class="text-center text-gray-500 py-4">No learners found</div>
                                 @endforelse
                             </div>
                             @break
@@ -526,9 +526,9 @@
                                         wire:model="newWidgetConfig.data_source"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                                     >
-                                        <option value="students_total">Total Students</option>
-                                        <option value="students_at_risk">At-Risk Students</option>
-                                        <option value="students_good">Students in Good Standing</option>
+                                        <option value="learners_total">Total Learners</option>
+                                        <option value="learners_at_risk">At-Risk Learners</option>
+                                        <option value="learners_good">Learners in Good Standing</option>
                                         <option value="surveys_active">Active Surveys</option>
                                         <option value="responses_today">Responses Today</option>
                                         <option value="responses_week">Responses This Week</option>
@@ -549,17 +549,17 @@
                                 </div>
                             @endif
 
-                            @if($newWidgetType === 'student_list')
+                            @if($newWidgetType === 'learner_list')
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Filter</label>
                                     <select
                                         wire:model="newWidgetConfig.filter"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                                     >
-                                        <option value="high_risk">High Risk Students</option>
-                                        <option value="low_risk">Low Risk Students</option>
-                                        <option value="good">Students in Good Standing</option>
-                                        <option value="all">All Students</option>
+                                        <option value="high_risk">High Risk Learners</option>
+                                        <option value="low_risk">Low Risk Learners</option>
+                                        <option value="good">Learners in Good Standing</option>
+                                        <option value="all">All Learners</option>
                                     </select>
                                 </div>
                                 <div>

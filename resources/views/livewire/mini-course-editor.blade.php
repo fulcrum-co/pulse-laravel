@@ -474,7 +474,7 @@
                                         <div>
                                             <label class="block text-xs font-medium text-gray-700 mb-1">Audience</label>
                                             <select wire:model="aiAudience" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                                                <option value="students">Students</option>
+                                                <option value="learners">Learners</option>
                                                 <option value="teachers">Teachers</option>
                                                 <option value="parents">Parents</option>
                                             </select>

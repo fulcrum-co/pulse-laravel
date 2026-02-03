@@ -6,7 +6,7 @@ use App\Models\Collection;
 use App\Models\CustomReport;
 use App\Models\MiniCourse;
 use App\Models\StrategicPlan;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\Survey;
 use App\Models\User;
 use App\Models\UserNotification;
@@ -145,8 +145,8 @@ class PopulateDemoNotifications extends Command
         $courses = MiniCourse::limit(3)->pluck('title', 'id')->toArray();
         $reports = CustomReport::limit(3)->pluck('report_name', 'id')->toArray();
         $workflows = Workflow::limit(3)->pluck('name', 'id')->toArray();
-        // Students may be linked to users table via user_id - get student IDs and try to get names from user relationship
-        $students = Student::with('user')->limit(3)->get(['id', 'user_id', 'student_number'])->toArray();
+        // Learners may be linked to users table via user_id - get learner IDs and try to get names from user relationship
+        $learners = Learner::with('user')->limit(3)->get(['id', 'user_id', 'learner_number'])->toArray();
         $strategies = StrategicPlan::limit(3)->pluck('title', 'id')->toArray();
 
         $notifications = [];
@@ -232,24 +232,24 @@ class PopulateDemoNotifications extends Command
             ];
         }
 
-        // Student contact notifications - use actual student IDs
-        foreach ($students as $student) {
-            // Try to get name from user relationship (first_name + last_name), fall back to student_number or ID
-            $studentUser = $student['user'] ?? null;
-            $name = $studentUser
-                ? trim(($studentUser['first_name'] ?? '').' '.($studentUser['last_name'] ?? ''))
+        // Learner contact notifications - use actual learner IDs
+        foreach ($learners as $learner) {
+            // Try to get name from user relationship (first_name + last_name), fall back to learner_number or ID
+            $learnerUser = $learner['user'] ?? null;
+            $name = $learnerUser
+                ? trim(($learnerUser['first_name'] ?? '').' '.($learnerUser['last_name'] ?? ''))
                 : null;
-            $name = $name ?: ($student['student_number'] ? "#{$student['student_number']}" : "#{$student['id']}");
+            $name = $name ?: ($learner['learner_number'] ? "#{$learner['learner_number']}" : "#{$learner['id']}");
             $notifications[] = [
                 'category' => UserNotification::CATEGORY_WORKFLOW_ALERT,
-                'type' => 'student_flagged',
+                'type' => 'learner_flagged',
                 'data' => [
-                    'title' => "Review student: {$name}",
-                    'body' => 'This student has been flagged for review by an alert workflow.',
+                    'title' => "Review learner: {$name}",
+                    'body' => 'This learner has been flagged for review by an alert workflow.',
                     'icon' => 'user',
                     'priority' => UserNotification::PRIORITY_HIGH,
-                    'action_url' => "/contacts/students/{$student['id']}",
-                    'action_label' => 'View Student',
+                    'action_url' => "/contacts/learners/{$learner['id']}",
+                    'action_label' => 'View Learner',
                 ],
             ];
         }

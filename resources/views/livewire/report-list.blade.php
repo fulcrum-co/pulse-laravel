@@ -7,7 +7,7 @@
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search reports..."
+                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('search_action') }} {{ strtolower(app(\App\Services\TerminologyService::class)->get('report_plural')) }}..."
                     class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 />
             </div>
@@ -16,9 +16,9 @@
                 wire:model.live="statusFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">All Statuses</option>
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
+                <option value="">{{ app(\App\Services\TerminologyService::class)->get('all_label') }} {{ app(\App\Services\TerminologyService::class)->get('status_label') }}es</option>
+                <option value="draft">@term('draft_label')</option>
+                <option value="published">@term('published_label')</option>
             </select>
 
             @if($search || $statusFilter)
@@ -26,7 +26,7 @@
                 wire:click="clearFilters"
                 class="text-sm text-gray-500 hover:text-gray-700"
             >
-                Clear
+                @term('clear_label')
             </button>
             @endif
         </div>
@@ -36,22 +36,22 @@
             <button
                 wire:click="setViewMode('grid')"
                 class="p-1.5 rounded {{ $viewMode === 'grid' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="Grid view"
-            >
+                    title="{{ app(\App\Services\TerminologyService::class)->get('grid_view_label') }}"
+                >
                 <x-icon name="squares-2x2" class="w-4 h-4" />
             </button>
             <button
                 wire:click="setViewMode('list')"
                 class="p-1.5 rounded {{ $viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="List view"
-            >
+                    title="{{ app(\App\Services\TerminologyService::class)->get('list_view_label') }}"
+                >
                 <x-icon name="list-bullet" class="w-4 h-4" />
             </button>
             <button
                 wire:click="setViewMode('table')"
                 class="p-1.5 rounded {{ $viewMode === 'table' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="Table view"
-            >
+                    title="{{ app(\App\Services\TerminologyService::class)->get('table_view_label') }}"
+                >
                 <x-icon name="table-cells" class="w-4 h-4" />
             </button>
         </div>
@@ -64,13 +64,13 @@
                 <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-pulse-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                     <x-icon name="chart-pie" class="w-8 h-8 text-pulse-orange-500" />
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">Create your first report</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">@term('report_empty_title')</h3>
                 <p class="text-gray-500 mb-4 max-w-sm mx-auto text-sm">
-                    Build beautiful, data-driven reports with our drag-and-drop editor.
+                    @term('report_empty_body')
                 </p>
                 <a href="{{ route('reports.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
                     <x-icon name="plus" class="w-4 h-4 mr-1" />
-                    Create Report
+                    @term('create_action') @term('report_singular')
                 </a>
             </div>
         </x-card>
@@ -83,14 +83,14 @@
                     <!-- Content -->
                     <div class="p-4">
                         <div class="flex items-start justify-between gap-2 mb-3">
-                            <h3 class="font-medium text-gray-900 text-sm truncate flex-1">{{ $report->report_name ?? 'Untitled Report' }}</h3>
+                            <h3 class="font-medium text-gray-900 text-sm truncate flex-1">{{ $report->report_name ?? app(\App\Services\TerminologyService::class)->get('untitled_report_label') }}</h3>
                             @if($report->isPublished())
                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700 flex-shrink-0">
-                                    Published
+                                    @term('published_label')
                                 </span>
                             @else
                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 flex-shrink-0">
-                                    Draft
+                                    @term('draft_label')
                                 </span>
                             @endif
                         </div>
@@ -120,34 +120,34 @@
                         </div>
 
                         <p class="text-[11px] text-gray-500">
-                            Updated {{ $report->updated_at?->diffForHumans() ?? 'Unknown' }}
+                            @term('updated_label') {{ $report->updated_at?->diffForHumans() ?? app(\App\Services\TerminologyService::class)->get('unknown_label') }}
                         </p>
                     </div>
 
                     <!-- Actions bar -->
                     <div class="px-4 py-2 bg-gray-50 border-t border-gray-100 flex items-center justify-between" onclick="event.preventDefault(); event.stopPropagation();">
                         <div class="flex items-center gap-1">
-                            <button wire:click.prevent="duplicate({{ $report->id }})" class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors" title="Duplicate">
+                            <button wire:click.prevent="duplicate({{ $report->id }})" class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors" title="{{ app(\App\Services\TerminologyService::class)->get('duplicate_action') }}">
                                 <x-icon name="document-duplicate" class="w-3.5 h-3.5" />
                             </button>
                             @if($canPush)
                             <div class="relative group/push">
-                                <button wire:click.prevent="openPushModal({{ $report->id }})" class="p-1 text-gray-400 hover:text-pulse-orange-500 hover:bg-pulse-orange-50 rounded transition-colors" title="Push to Schools">
+                                <button wire:click.prevent="openPushModal({{ $report->id }})" class="p-1 text-gray-400 hover:text-pulse-orange-500 hover:bg-pulse-orange-50 rounded transition-colors" title="{{ app(\App\Services\TerminologyService::class)->get('push_label') }} to {{ app(\App\Services\TerminologyService::class)->get('organization_plural') }}">
                                     <x-icon name="arrow-up-on-square" class="w-3.5 h-3.5" />
                                 </button>
                             </div>
                             @endif
                             @if($report->isPublished())
-                            <a href="{{ $report->getPublicUrl() }}" target="_blank" onclick="event.stopPropagation();" class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors" title="View Published">
+                            <a href="{{ $report->getPublicUrl() }}" target="_blank" onclick="event.stopPropagation();" class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors" title="{{ app(\App\Services\TerminologyService::class)->get('view_action') }} {{ app(\App\Services\TerminologyService::class)->get('published_label') }}">
                                 <x-icon name="arrow-top-right-on-square" class="w-3.5 h-3.5" />
                             </a>
                             @endif
                         </div>
                         <button
                             wire:click.prevent="delete({{ $report->id }})"
-                            wire:confirm="Are you sure you want to delete this report?"
+                            wire:confirm="{{ app(\App\Services\TerminologyService::class)->get('confirm_label') }}: {{ app(\App\Services\TerminologyService::class)->get('delete_action') }} {{ app(\App\Services\TerminologyService::class)->get('report_singular') }}?"
                             class="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                            title="Delete"
+                            title="{{ app(\App\Services\TerminologyService::class)->get('delete_action') }}"
                         >
                             <x-icon name="trash" class="w-3.5 h-3.5" />
                         </button>
@@ -165,7 +165,7 @@
                         <!-- Thumbnail -->
                         <div class="w-20 h-14 bg-gradient-to-br from-gray-100 to-gray-50 rounded-lg flex-shrink-0 overflow-hidden">
                             @if($report->thumbnail_path)
-                                <img src="{{ $report->thumbnail_path }}" alt="{{ $report->report_name ?? 'Report thumbnail' }}" class="w-full h-full object-cover">
+                                <img src="{{ $report->thumbnail_path }}" alt="{{ $report->report_name ?? app(\App\Services\TerminologyService::class)->get('report_thumbnail_label') }}" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
                                     <x-icon name="document-chart-bar" class="w-6 h-6 text-gray-300" />
@@ -175,19 +175,19 @@
 
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
-                                <h3 class="font-medium text-gray-900 text-sm truncate">{{ $report->report_name ?? 'Untitled Report' }}</h3>
-                                @if($report->isPublished())
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        Published
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        Draft
-                                    </span>
-                                @endif
-                            </div>
-                            <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                                <span>Updated {{ $report->updated_at?->diffForHumans() ?? 'Unknown' }}</span>
+                                <h3 class="font-medium text-gray-900 text-sm truncate">{{ $report->report_name ?? app(\App\Services\TerminologyService::class)->get('untitled_report_label') }}</h3>
+                            @if($report->isPublished())
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    @term('published_label')
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    @term('draft_label')
+                                </span>
+                            @endif
+                        </div>
+                        <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
+                                <span>@term('updated_label') {{ $report->updated_at?->diffForHumans() ?? app(\App\Services\TerminologyService::class)->get('unknown_label') }}</span>
                                 @if($report->report_type)
                                     <span class="capitalize">{{ str_replace('_', ' ', $report->report_type) }}</span>
                                 @endif
@@ -206,7 +206,7 @@
                                 <button wire:click="openPushModal({{ $report->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-500 rounded">
                                     <x-icon name="arrow-up-on-square" class="w-4 h-4" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none">Push to Schools</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none">@term('push_label') to @term('organization_plural')</span>
                             </div>
                             @endif
                             @if($report->isPublished())
@@ -216,13 +216,13 @@
                             @endif
                             <button
                                 wire:click="delete({{ $report->id }})"
-                                wire:confirm="Are you sure you want to delete this report?"
+                                wire:confirm="{{ app(\App\Services\TerminologyService::class)->get('confirm_label') }}: {{ app(\App\Services\TerminologyService::class)->get('delete_action') }} {{ app(\App\Services\TerminologyService::class)->get('report_singular') }}?"
                                 class="p-1.5 text-gray-400 hover:text-red-500 rounded"
                             >
                                 <x-icon name="trash" class="w-4 h-4" />
                             </button>
                             <a href="{{ route('reports.edit', $report) }}" class="ml-2 px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600">
-                                Edit
+                                @term('edit_action')
                             </a>
                         </div>
                     </div>
@@ -236,11 +236,11 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated</th>
-                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('report_singular')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('type_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('status_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('updated_label')</th>
+                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">@term('actions_label')</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -257,7 +257,7 @@
                                             </div>
                                         @endif
                                     </div>
-                                    <span class="text-sm font-medium text-gray-900">{{ $report->report_name ?? 'Untitled Report' }}</span>
+                                    <span class="text-sm font-medium text-gray-900">{{ $report->report_name ?? app(\App\Services\TerminologyService::class)->get('untitled_report_label') }}</span>
                                 </div>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">
@@ -272,11 +272,11 @@
                             <td class="px-4 py-3 whitespace-nowrap">
                                 @if($report->isPublished())
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        Published
+                                        @term('published_label')
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        Draft
+                                        @term('draft_label')
                                     </span>
                                 @endif
                             </td>
@@ -296,7 +296,7 @@
                                         <button wire:click="openPushModal({{ $report->id }})" class="p-1 text-gray-400 hover:text-pulse-orange-500 rounded">
                                             <x-icon name="arrow-up-on-square" class="w-3.5 h-3.5" />
                                         </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-10">Push to Schools</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-10">@term('push_label') to @term('organization_plural')</span>
                                     </div>
                                     @endif
                                     @if($report->isPublished())
@@ -306,13 +306,13 @@
                                     @endif
                                     <button
                                         wire:click="delete({{ $report->id }})"
-                                        wire:confirm="Are you sure you want to delete this report?"
+                                        wire:confirm="{{ app(\App\Services\TerminologyService::class)->get('confirm_label') }}: {{ app(\App\Services\TerminologyService::class)->get('delete_action') }} {{ app(\App\Services\TerminologyService::class)->get('report_singular') }}?"
                                         class="p-1 text-gray-400 hover:text-red-500 rounded"
                                     >
                                         <x-icon name="trash" class="w-4 h-4" />
                                     </button>
                                     <a href="{{ route('reports.edit', $report) }}" class="ml-1 px-2 py-1 text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                                        Edit
+                                        @term('edit_action')
                                     </a>
                                 </div>
                             </td>

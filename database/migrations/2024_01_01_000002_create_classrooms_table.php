@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('subject')->nullable();
             $table->string('period')->nullable();
             $table->string('room_number')->nullable();
-            $table->string('school_year')->nullable();
+            $table->string('organization_year')->nullable();
             $table->string('term')->nullable();
             $table->boolean('active')->default(true);
             $table->timestamps();

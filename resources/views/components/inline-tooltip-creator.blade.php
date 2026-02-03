@@ -1,7 +1,29 @@
 {{-- Inline Tooltip Creator - Admin tool to create tooltips by clicking on elements --}}
 {{-- Only enabled when admin toggles "Create Tooltips" from Help dropdown --}}
 <div
-    x-data="inlineTooltipCreator()"
+    x-data="inlineTooltipCreator(@js([
+        'tooltip_creator_mode' => app(\App\Services\TerminologyService::class)->get('tooltip_creator_mode_label'),
+        'click_add_tooltip' => app(\App\Services\TerminologyService::class)->get('click_add_tooltip_label'),
+        'page' => app(\App\Services\TerminologyService::class)->get('page_label'),
+        'exit_creator' => app(\App\Services\TerminologyService::class)->get('exit_creator_label'),
+        'add_new_tooltip' => app(\App\Services\TerminologyService::class)->get('add_new_tooltip_label'),
+        'for_label' => app(\App\Services\TerminologyService::class)->get('for_label'),
+        'title' => app(\App\Services\TerminologyService::class)->get('title_label'),
+        'description' => app(\App\Services\TerminologyService::class)->get('description_label'),
+        'tooltip_position' => app(\App\Services\TerminologyService::class)->get('tooltip_position_label'),
+        'above_element' => app(\App\Services\TerminologyService::class)->get('tooltip_position_above_label'),
+        'below_element' => app(\App\Services\TerminologyService::class)->get('tooltip_position_below_label'),
+        'left_of_element' => app(\App\Services\TerminologyService::class)->get('tooltip_position_left_label'),
+        'right_of_element' => app(\App\Services\TerminologyService::class)->get('tooltip_position_right_label'),
+        'video_url_optional' => app(\App\Services\TerminologyService::class)->get('video_url_optional_label'),
+        'video_url_supports' => app(\App\Services\TerminologyService::class)->get('video_url_supports_label'),
+        'tooltip_title_placeholder' => app(\App\Services\TerminologyService::class)->get('tooltip_title_placeholder'),
+        'tooltip_description_placeholder' => app(\App\Services\TerminologyService::class)->get('tooltip_description_placeholder'),
+        'video_url_hint_placeholder' => app(\App\Services\TerminologyService::class)->get('video_url_hint_placeholder'),
+        'cancel' => app(\App\Services\TerminologyService::class)->get('cancel_action'),
+        'saving' => app(\App\Services\TerminologyService::class)->get('saving_label'),
+        'create_tooltip' => app(\App\Services\TerminologyService::class)->get('create_action') . ' ' . app(\App\Services\TerminologyService::class)->get('tooltip_singular'),
+    ]))"
     x-show="active"
     x-cloak
     @enable-tooltip-creator.window="enable()"
@@ -24,13 +46,13 @@
                     </svg>
                 </span>
                 <div>
-                    <p class="font-semibold">Tooltip Creator Mode</p>
-                    <p class="text-sm text-orange-100">Click on any element to add a tooltip</p>
+                    <p class="font-semibold" x-text="labels.tooltip_creator_mode"></p>
+                    <p class="text-sm text-orange-100" x-text="labels.click_add_tooltip"></p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
                 <span class="text-sm text-orange-100 hidden sm:inline">
-                    Page: <span class="font-medium text-white" x-text="currentContext"></span>
+                    <span x-text="labels.page"></span>: <span class="font-medium text-white" x-text="currentContext"></span>
                 </span>
                 <button
                     @click="disable()"
@@ -39,7 +61,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    Exit Creator
+                    <span x-text="labels.exit_creator"></span>
                 </button>
             </div>
         </div>
@@ -89,8 +111,8 @@
                         </svg>
                     </span>
                     <div>
-                        <h3 class="font-semibold text-gray-900">Add New Tooltip</h3>
-                        <p class="text-xs text-gray-500">For: <code class="bg-gray-100 px-1 rounded" x-text="truncateSelector(generatedSelector)"></code></p>
+                        <h3 class="font-semibold text-gray-900" x-text="labels.add_new_tooltip"></h3>
+                        <p class="text-xs text-gray-500"><span x-text="labels.for_label"></span>: <code class="bg-gray-100 px-1 rounded" x-text="truncateSelector(generatedSelector)"></code></p>
                     </div>
                 </div>
                 <button @click="cancelForm()" class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
@@ -105,12 +127,12 @@
         <form @submit.prevent="saveTooltip()" class="p-5 space-y-4">
             {{-- Title --}}
             <div>
-                <label for="tooltip-title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <label for="tooltip-title" class="block text-sm font-medium text-gray-700 mb-1" x-text="labels.title"></label>
                 <input
                     type="text"
                     id="tooltip-title"
                     x-model="formData.title"
-                    placeholder="e.g., Search Reports"
+                    :placeholder="labels.tooltip_title_placeholder || ''"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
                     required
                     autofocus
@@ -119,12 +141,12 @@
 
             {{-- Description --}}
             <div>
-                <label for="tooltip-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label for="tooltip-description" class="block text-sm font-medium text-gray-700 mb-1" x-text="labels.description"></label>
                 <textarea
                     id="tooltip-description"
                     x-model="formData.description"
                     rows="3"
-                    placeholder="Explain what this feature does..."
+                    :placeholder="labels.tooltip_description_placeholder || ''"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm resize-none"
                     required
                 ></textarea>
@@ -132,32 +154,32 @@
 
             {{-- Position --}}
             <div>
-                <label for="tooltip-position" class="block text-sm font-medium text-gray-700 mb-1">Tooltip Position</label>
+                <label for="tooltip-position" class="block text-sm font-medium text-gray-700 mb-1" x-text="labels.tooltip_position"></label>
                 <select
                     id="tooltip-position"
                     x-model="formData.position"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
                 >
-                    <option value="top">Above element</option>
-                    <option value="bottom">Below element</option>
-                    <option value="left">Left of element</option>
-                    <option value="right">Right of element</option>
+                    <option value="top" x-text="labels.above_element"></option>
+                    <option value="bottom" x-text="labels.below_element"></option>
+                    <option value="left" x-text="labels.left_of_element"></option>
+                    <option value="right" x-text="labels.right_of_element"></option>
                 </select>
             </div>
 
             {{-- Video URL (Optional) --}}
             <div>
                 <label for="tooltip-video" class="block text-sm font-medium text-gray-700 mb-1">
-                    Video URL <span class="text-gray-400 font-normal">(optional)</span>
+                    <span x-text="labels.video_url_optional"></span>
                 </label>
                 <input
                     type="url"
                     id="tooltip-video"
                     x-model="formData.videoUrl"
-                    placeholder="https://www.loom.com/share/..."
+                    :placeholder="labels.video_url_hint_placeholder || ''"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
                 >
-                <p class="mt-1 text-xs text-gray-400">Supports Loom, YouTube, Vimeo</p>
+                <p class="mt-1 text-xs text-gray-400" x-text="labels.video_url_supports"></p>
             </div>
 
             {{-- Error Message --}}
@@ -172,7 +194,7 @@
                     @click="cancelForm()"
                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                    Cancel
+                    <span x-text="labels.cancel"></span>
                 </button>
                 <button
                     type="submit"
@@ -183,7 +205,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span x-text="saving ? 'Saving...' : 'Create Tooltip'"></span>
+                    <span x-text="saving ? labels.saving : labels.create_tooltip"></span>
                 </button>
             </div>
         </form>
@@ -404,7 +426,7 @@ function inlineTooltipCreator() {
             if (path.includes('/plans')) return 'plans';
             if (path.includes('/surveys')) return 'surveys';
             if (path.includes('/alerts')) return 'alerts';
-            if (path.includes('/students') || path.includes('/contacts')) return 'contacts';
+            if (path.includes('/learners') || path.includes('/contacts')) return 'contacts';
             if (path.includes('/resources')) return 'resources';
             if (path.includes('/collect')) return 'collect';
             if (path.includes('/distribute')) return 'distribute';

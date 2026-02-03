@@ -1,12 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\Survey;
 use App\Models\SurveyAttempt;
 use App\Models\SurveyDelivery;
 use App\Models\User;
+use App\Services\Domain\PhoneNumberFormatterService;
+use App\Services\Domain\SurveyQuestionFormatterService;
+use App\Services\Domain\SurveyResponseNormalizerService;
 use Illuminate\Support\Facades\Log;
 
 class SurveyDeliveryService
@@ -14,7 +19,10 @@ class SurveyDeliveryService
     public function __construct(
         protected SinchService $sinchService,
         protected TranscriptionService $transcriptionService,
-        protected ClaudeService $claudeService
+        protected ClaudeService $claudeService,
+        protected PhoneNumberFormatterService $phoneFormatter,
+        protected SurveyQuestionFormatterService $questionFormatter,
+        protected SurveyResponseNormalizerService $responseNormalizer
     ) {}
 
     /**
@@ -33,7 +41,7 @@ class SurveyDeliveryService
             'survey_id' => $survey->id,
             'channel' => $channel,
             'status' => SurveyDelivery::STATUS_PENDING,
-            'recipient_type' => $recipientType === 'student' ? Student::class : User::class,
+            'recipient_type' => $recipientType === 'learner' ? Learner::class : User::class,
             'recipient_id' => $recipientId,
             'phone_number' => $phoneNumber ? $this->formatPhoneNumber($phoneNumber) : null,
             'scheduled_for' => $scheduledFor,
@@ -81,7 +89,7 @@ class SurveyDeliveryService
         // Create a survey attempt for the recipient
         $attempt = SurveyAttempt::create([
             'survey_id' => $delivery->survey_id,
-            'student_id' => $delivery->recipient_type === Student::class ? $delivery->recipient_id : null,
+            'learner_id' => $delivery->recipient_type === Learner::class ? $delivery->recipient_id : null,
             'user_id' => $delivery->recipient_type === User::class ? $delivery->recipient_id : null,
             'status' => SurveyAttempt::STATUS_IN_PROGRESS,
             'response_channel' => SurveyAttempt::CHANNEL_WEB,
@@ -120,7 +128,7 @@ class SurveyDeliveryService
         // Create a survey attempt
         $attempt = SurveyAttempt::create([
             'survey_id' => $delivery->survey_id,
-            'student_id' => $delivery->recipient_type === Student::class ? $delivery->recipient_id : null,
+            'learner_id' => $delivery->recipient_type === Learner::class ? $delivery->recipient_id : null,
             'user_id' => $delivery->recipient_type === User::class ? $delivery->recipient_id : null,
             'status' => SurveyAttempt::STATUS_IN_PROGRESS,
             'response_channel' => SurveyAttempt::CHANNEL_SMS,
@@ -164,7 +172,7 @@ class SurveyDeliveryService
         // Create a survey attempt
         $attempt = SurveyAttempt::create([
             'survey_id' => $delivery->survey_id,
-            'student_id' => $delivery->recipient_type === Student::class ? $delivery->recipient_id : null,
+            'learner_id' => $delivery->recipient_type === Learner::class ? $delivery->recipient_id : null,
             'user_id' => $delivery->recipient_type === User::class ? $delivery->recipient_id : null,
             'status' => SurveyAttempt::STATUS_IN_PROGRESS,
             'response_channel' => SurveyAttempt::CHANNEL_VOICE,
@@ -173,7 +181,8 @@ class SurveyDeliveryService
         ]);
 
         // Generate initial greeting for the call
-        $greeting = $this->generateVoiceGreeting($survey);
+        $firstQuestion = $survey->questions[0] ?? null;
+        $greeting = $this->questionFormatter->formatVoiceGreeting($survey->title, $firstQuestion ?? []);
 
         // Initiate the call via Sinch
         $result = $this->sinchService->initiateCall($delivery->phone_number, $greeting);
@@ -212,7 +221,7 @@ class SurveyDeliveryService
         // Create a survey attempt
         $attempt = SurveyAttempt::create([
             'survey_id' => $delivery->survey_id,
-            'student_id' => $delivery->recipient_type === Student::class ? $delivery->recipient_id : null,
+            'learner_id' => $delivery->recipient_type === Learner::class ? $delivery->recipient_id : null,
             'user_id' => $delivery->recipient_type === User::class ? $delivery->recipient_id : null,
             'status' => SurveyAttempt::STATUS_IN_PROGRESS,
             'response_channel' => SurveyAttempt::CHANNEL_CHAT,
@@ -248,7 +257,7 @@ class SurveyDeliveryService
         // Create a survey attempt
         $attempt = SurveyAttempt::create([
             'survey_id' => $delivery->survey_id,
-            'student_id' => $delivery->recipient_type === Student::class ? $delivery->recipient_id : null,
+            'learner_id' => $delivery->recipient_type === Learner::class ? $delivery->recipient_id : null,
             'user_id' => $delivery->recipient_type === User::class ? $delivery->recipient_id : null,
             'status' => SurveyAttempt::STATUS_IN_PROGRESS,
             'response_channel' => SurveyAttempt::CHANNEL_CHAT,
@@ -258,7 +267,7 @@ class SurveyDeliveryService
 
         // Generate initial chat message
         $survey = $delivery->survey;
-        $initialMessage = "Hi! I'm here to ask you a few questions about \"{$survey->title}\". This should take about {$survey->estimated_duration_minutes} minutes. Ready to begin?";
+        $initialMessage = $this->questionFormatter->formatChatGreeting($survey->title, $survey->estimated_duration_minutes ?? 5);
 
         $delivery->update([
             'status' => SurveyDelivery::STATUS_SENT,
@@ -306,7 +315,7 @@ class SurveyDeliveryService
         }
 
         // Process the response
-        $normalizedResponse = $this->normalizeResponse($body, $currentQuestion);
+        $normalizedResponse = $this->responseNormalizer->normalizeTextResponse($body, $currentQuestion);
 
         // Record the response
         $attempt->recordResponse($currentQuestion['id'], $normalizedResponse);
@@ -327,7 +336,7 @@ class SurveyDeliveryService
 
         // Send next question
         $nextQuestion = $delivery->getCurrentQuestion();
-        $nextMessage = $this->formatQuestionForSms($nextQuestion);
+        $nextMessage = $this->questionFormatter->formatQuestionForSms($nextQuestion);
 
         $this->sinchService->sendSms($from, $nextMessage);
 
@@ -367,7 +376,7 @@ class SurveyDeliveryService
         }
 
         // Process DTMF response
-        $normalizedResponse = $this->normalizeDtmfResponse($dtmfDigits, $currentQuestion);
+        $normalizedResponse = $this->responseNormalizer->normalizeDtmfResponse($dtmfDigits, $currentQuestion);
 
         // Record the response
         $attempt->recordResponse($currentQuestion['id'], $normalizedResponse);
@@ -389,7 +398,7 @@ class SurveyDeliveryService
 
         // Get next question TTS
         $nextQuestion = $delivery->getCurrentQuestion();
-        $nextTts = $this->formatQuestionForTts($nextQuestion, $delivery->current_question_index + 1);
+        $nextTts = $this->questionFormatter->formatQuestionForTts($nextQuestion, $delivery->current_question_index + 1);
 
         return [
             'success' => true,
@@ -400,156 +409,10 @@ class SurveyDeliveryService
     }
 
     /**
-     * Generate voice greeting for survey call.
-     */
-    protected function generateVoiceGreeting(Survey $survey): string
-    {
-        $firstQuestion = $survey->questions[0] ?? null;
-        $questionText = $firstQuestion ? $this->formatQuestionForTts($firstQuestion, 1) : '';
-
-        return "Hello! This is Pulse calling with a quick survey called {$survey->title}. ".
-               'Please use your phone keypad to respond. '.
-               $questionText;
-    }
-
-    /**
-     * Format a question for TTS delivery.
-     */
-    protected function formatQuestionForTts(array $question, int $questionNumber): string
-    {
-        $text = "Question {$questionNumber}: {$question['question']} ";
-
-        if ($question['type'] === 'scale') {
-            $min = $question['min'] ?? 1;
-            $max = $question['max'] ?? 5;
-            $labels = $question['labels'] ?? [];
-
-            $text .= "Press a number from {$min} to {$max}. ";
-
-            if (! empty($labels)) {
-                $text .= "{$min} means {$labels[0]}, and {$max} means ".end($labels).'. ';
-            }
-        } elseif ($question['type'] === 'multiple_choice') {
-            $options = $question['options'] ?? [];
-            $text .= 'Your options are: ';
-            foreach ($options as $i => $option) {
-                $num = $i + 1;
-                $text .= "Press {$num} for {$option}. ";
-            }
-        }
-
-        return $text;
-    }
-
-    /**
-     * Format a question for SMS delivery.
-     */
-    protected function formatQuestionForSms(array $question): string
-    {
-        $text = $question['question']."\n\n";
-
-        if ($question['type'] === 'scale') {
-            $min = $question['min'] ?? 1;
-            $max = $question['max'] ?? 5;
-            $labels = $question['labels'] ?? [];
-
-            $text .= "Reply with a number ({$min}-{$max}):\n";
-
-            if (! empty($labels)) {
-                for ($i = $min; $i <= $max; $i++) {
-                    $labelIndex = $i - $min;
-                    if (isset($labels[$labelIndex])) {
-                        $text .= "{$i} = {$labels[$labelIndex]}\n";
-                    }
-                }
-            }
-        } elseif ($question['type'] === 'multiple_choice') {
-            $options = $question['options'] ?? [];
-            $text .= "Reply with a number:\n";
-            foreach ($options as $i => $option) {
-                $text .= ($i + 1)." = {$option}\n";
-            }
-        } else {
-            $text .= 'Reply with your answer.';
-        }
-
-        return $text;
-    }
-
-    /**
-     * Normalize a text response based on question type.
-     */
-    protected function normalizeResponse(string $response, array $question): mixed
-    {
-        $response = trim($response);
-
-        if ($question['type'] === 'scale') {
-            if (is_numeric($response)) {
-                $value = (int) $response;
-                $min = $question['min'] ?? 1;
-                $max = $question['max'] ?? 5;
-
-                return max($min, min($max, $value));
-            }
-        }
-
-        if ($question['type'] === 'multiple_choice') {
-            if (is_numeric($response)) {
-                $options = $question['options'] ?? [];
-                $index = (int) $response - 1;
-
-                return $options[$index] ?? $response;
-            }
-        }
-
-        return $response;
-    }
-
-    /**
-     * Normalize DTMF digits to a response.
-     */
-    protected function normalizeDtmfResponse(string $dtmf, array $question): mixed
-    {
-        // DTMF digits are typically single characters
-        $digit = substr($dtmf, 0, 1);
-
-        if ($question['type'] === 'scale' && is_numeric($digit)) {
-            $value = (int) $digit;
-            $min = $question['min'] ?? 1;
-            $max = $question['max'] ?? 5;
-
-            return max($min, min($max, $value));
-        }
-
-        if ($question['type'] === 'multiple_choice' && is_numeric($digit)) {
-            $options = $question['options'] ?? [];
-            $index = (int) $digit - 1;
-
-            return $options[$index] ?? $digit;
-        }
-
-        return $digit;
-    }
-
-    /**
      * Format phone number to E.164 format.
      */
     protected function formatPhoneNumber(string $phone): string
     {
-        // Remove all non-numeric characters
-        $cleaned = preg_replace('/[^0-9]/', '', $phone);
-
-        // Add +1 if US number without country code
-        if (strlen($cleaned) === 10) {
-            return '+1'.$cleaned;
-        }
-
-        // Add + if not present
-        if (strlen($cleaned) === 11 && str_starts_with($cleaned, '1')) {
-            return '+'.$cleaned;
-        }
-
-        // Return with + prefix
-        return '+'.$cleaned;
+        return $this->phoneFormatter->formatPhoneNumber($phone);
     }
 }

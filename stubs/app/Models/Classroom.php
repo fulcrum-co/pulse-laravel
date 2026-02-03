@@ -23,7 +23,7 @@ class Classroom extends Model
         'room_number',
         'primary_teacher_id',
         'co_teacher_ids',
-        'student_ids',
+        'learner_ids',
         'max_capacity',
         'meeting_schedule',
         'strategy_ids',
@@ -32,7 +32,7 @@ class Classroom extends Model
 
     protected $casts = [
         'co_teacher_ids' => 'array',
-        'student_ids' => 'array',
+        'learner_ids' => 'array',
         'meeting_schedule' => 'array',
         'strategy_ids' => 'array',
         'grade_level' => 'integer',
@@ -41,9 +41,9 @@ class Classroom extends Model
     ];
 
     /**
-     * Get the school (organization).
+     * Get the organization (organization).
      */
-    public function school(): BelongsTo
+    public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class, 'org_id');
     }
@@ -65,11 +65,11 @@ class Classroom extends Model
     }
 
     /**
-     * Get the student count.
+     * Get the learner count.
      */
-    public function getStudentCountAttribute(): int
+    public function getLearnerCountAttribute(): int
     {
-        return count($this->student_ids ?? []);
+        return count($this->learner_ids ?? []);
     }
 
     /**
@@ -77,35 +77,35 @@ class Classroom extends Model
      */
     public function isAtCapacity(): bool
     {
-        return $this->student_count >= $this->max_capacity;
+        return $this->learner_count >= $this->max_capacity;
     }
 
     /**
-     * Add a student to the classroom.
+     * Add a learner to the classroom.
      */
-    public function addStudent(string $studentId): bool
+    public function addLearner(string $learnerId): bool
     {
         if ($this->isAtCapacity()) {
             return false;
         }
 
-        $studentIds = $this->student_ids ?? [];
-        if (! in_array($studentId, $studentIds)) {
-            $studentIds[] = $studentId;
-            $this->update(['student_ids' => $studentIds]);
+        $learnerIds = $this->learner_ids ?? [];
+        if (! in_array($learnerId, $learnerIds)) {
+            $learnerIds[] = $learnerId;
+            $this->update(['learner_ids' => $learnerIds]);
         }
 
         return true;
     }
 
     /**
-     * Remove a student from the classroom.
+     * Remove a learner from the classroom.
      */
-    public function removeStudent(string $studentId): void
+    public function removeLearner(string $learnerId): void
     {
-        $studentIds = $this->student_ids ?? [];
-        $studentIds = array_filter($studentIds, fn ($id) => $id !== $studentId);
-        $this->update(['student_ids' => array_values($studentIds)]);
+        $learnerIds = $this->learner_ids ?? [];
+        $learnerIds = array_filter($learnerIds, fn ($id) => $id !== $learnerId);
+        $this->update(['learner_ids' => array_values($learnerIds)]);
     }
 
     /**

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Collection;
@@ -7,7 +9,7 @@ use App\Models\CollectionEntry;
 use App\Models\CollectionQueueItem;
 use App\Models\CollectionSchedule;
 use App\Models\CollectionSession;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection as SupportCollection;
@@ -198,10 +200,10 @@ class CollectionService
     protected function getEligibleContacts(Collection $collection): SupportCollection
     {
         $scope = $collection->contact_scope ?? [];
-        $targetType = $scope['target_type'] ?? 'students';
+        $targetType = $scope['target_type'] ?? 'learners';
 
-        if ($targetType === 'students') {
-            $query = Student::where('org_id', $collection->org_id)
+        if ($targetType === 'learners') {
+            $query = Learner::where('org_id', $collection->org_id)
                 ->whereNull('deleted_at');
 
             // Filter by grades
@@ -251,14 +253,14 @@ class CollectionService
             $priority = CollectionQueueItem::PRIORITY_NORMAL;
             $reason = null;
 
-            // High-risk students get highest priority
-            if ($contact instanceof Student) {
+            // High-risk learners get highest priority
+            if ($contact instanceof Learner) {
                 if ($contact->risk_level === 'high') {
                     $priority = CollectionQueueItem::PRIORITY_CRITICAL;
-                    $reason = 'High risk student';
+                    $reason = 'High risk learner';
                 } elseif ($contact->risk_level === 'medium') {
                     $priority = CollectionQueueItem::PRIORITY_HIGH;
-                    $reason = 'Medium risk student';
+                    $reason = 'Medium risk learner';
                 }
 
                 // Check for recent flags

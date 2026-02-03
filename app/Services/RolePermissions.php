@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 class RolePermissions
@@ -10,34 +12,34 @@ class RolePermissions
      */
     public const NAV_PERMISSIONS = [
         // Quick Access Grid
-        'home' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher', 'student', 'parent'],
-        'contacts' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher'],
-        'surveys' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher', 'student'],
-        'dashboards' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher', 'student', 'parent'],
+        'home' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher', 'learner', 'parent'],
+        'contacts' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher'],
+        'surveys' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher', 'learner'],
+        'dashboards' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher', 'learner', 'parent'],
 
         // Workspace Navigation
-        'strategy' => ['admin', 'consultant', 'superintendent', 'school_admin'],
-        'reports' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor'],
-        'collect' => ['admin', 'consultant', 'superintendent', 'school_admin'],
-        'distribute' => ['admin', 'consultant', 'superintendent', 'school_admin'],
-        'resources' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher', 'student', 'parent'],
-        'moderation' => ['admin', 'consultant', 'superintendent', 'school_admin'],
-        'alerts' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher'],
-        'marketplace' => ['admin', 'consultant', 'superintendent', 'school_admin'],
+        'strategy' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
+        'reports' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor'],
+        'collect' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
+        'distribute' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
+        'resources' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher', 'learner', 'parent'],
+        'moderation' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
+        'alerts' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher'],
+        'marketplace' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
 
         // Other
         'sub_organizations' => ['admin', 'consultant', 'superintendent'],
-        'settings' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher'],
-        'messages' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher', 'student', 'parent'],
+        'settings' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher'],
+        'messages' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher', 'learner', 'parent'],
 
         // Header Actions
-        'create_survey' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher'],
-        'create_collection' => ['admin', 'consultant', 'superintendent', 'school_admin'],
-        'create_report' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor'],
-        'create_strategy' => ['admin', 'consultant', 'superintendent', 'school_admin'],
-        'create_alert' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor'],
-        'create_resource' => ['admin', 'consultant', 'superintendent', 'school_admin', 'counselor', 'teacher'],
-        'create_distribution' => ['admin', 'consultant', 'superintendent', 'school_admin'],
+        'create_survey' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher'],
+        'create_collection' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
+        'create_report' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor'],
+        'create_strategy' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
+        'create_alert' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor'],
+        'create_resource' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher'],
+        'create_distribution' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
     ];
 
     /**
@@ -45,12 +47,12 @@ class RolePermissions
      */
     public const ROLE_DESCRIPTIONS = [
         'admin' => 'Full system access',
-        'consultant' => 'District consultant with cross-school visibility',
+        'consultant' => 'District consultant with cross-organization visibility',
         'superintendent' => 'District administrator with full oversight',
-        'school_admin' => 'School-level administrator (principal)',
-        'counselor' => 'Student support and intervention focus',
-        'teacher' => 'Classroom management and student engagement',
-        'student' => 'Student portal for surveys and resources',
+        'organization_admin' => 'Organization-level administrator (principal)',
+        'counselor' => 'Learner support and intervention focus',
+        'teacher' => 'Classroom management and learner engagement',
+        'learner' => 'Learner portal for surveys and resources',
         'parent' => 'Parent portal for child monitoring',
     ];
 

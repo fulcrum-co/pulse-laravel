@@ -110,7 +110,7 @@ class HelpArticleManager extends Component
             'counselor' => 'Counselor',
             'teacher' => 'Teacher',
             'parent' => 'Parent',
-            'student' => 'Student',
+            'learner' => 'Learner',
         ];
     }
 

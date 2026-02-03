@@ -211,7 +211,7 @@ class Program extends Model
     }
 
     /**
-     * Student enrollments for this program.
+     * Learner enrollments for this program.
      */
     public function enrollments(): HasMany
     {

@@ -9,12 +9,12 @@ class OrganizationSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create a sample school district
+        // Create a sample organization district
         $district = Organization::create([
             'org_type' => 'district',
-            'org_name' => 'Lincoln County School District',
+            'org_name' => 'Lincoln County Organization District',
             'primary_contact_name' => 'Dr. Sarah Johnson',
-            'primary_contact_email' => 'sjohnson@lincolnschools.edu',
+            'primary_contact_email' => 'sjohnson@lincolnorganizations.edu',
             'primary_contact_phone' => '(555) 123-4567',
             'address' => [
                 'street' => '100 Education Way',
@@ -28,10 +28,10 @@ class OrganizationSeeder extends Seeder
             'active' => true,
         ]);
 
-        // Create sample schools under the district
+        // Create sample organizations under the district
         Organization::create([
-            'org_type' => 'school',
-            'org_name' => 'Lincoln High School',
+            'org_type' => 'organization',
+            'org_name' => 'Lincoln High Organization',
             'parent_org_id' => $district->id,
             'primary_contact_name' => 'Principal Michael Torres',
             'primary_contact_email' => 'mtorres@lincolnhigh.edu',
@@ -48,8 +48,8 @@ class OrganizationSeeder extends Seeder
         ]);
 
         Organization::create([
-            'org_type' => 'school',
-            'org_name' => 'Washington Middle School',
+            'org_type' => 'organization',
+            'org_name' => 'Washington Middle Organization',
             'parent_org_id' => $district->id,
             'primary_contact_name' => 'Principal Lisa Park',
             'primary_contact_email' => 'lpark@washingtonms.edu',
@@ -66,7 +66,7 @@ class OrganizationSeeder extends Seeder
         ]);
 
         Organization::create([
-            'org_type' => 'school',
+            'org_type' => 'organization',
             'org_name' => 'Jefferson Elementary',
             'parent_org_id' => $district->id,
             'primary_contact_name' => 'Principal Robert Kim',
@@ -84,7 +84,7 @@ class OrganizationSeeder extends Seeder
         ]);
 
         Organization::create([
-            'org_type' => 'school',
+            'org_type' => 'organization',
             'org_name' => 'Roosevelt Elementary',
             'parent_org_id' => $district->id,
             'primary_contact_name' => 'Principal Amanda Wright',

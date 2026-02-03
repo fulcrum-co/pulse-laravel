@@ -367,7 +367,7 @@
                     </button>
                 @else
                     <h3 class="text-lg font-medium text-gray-900 mb-1">No courses yet</h3>
-                    <p class="text-gray-500 mb-4">Create personalized learning paths and mini-courses for students.</p>
+                    <p class="text-gray-500 mb-4">Create personalized learning paths and mini-courses for learners.</p>
                     <div class="flex items-center justify-center gap-3">
                         <a
                             href="{{ route('resources.courses.create') }}"

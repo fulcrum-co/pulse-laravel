@@ -1,7 +1,7 @@
 <div>
     <!-- Filter Tabs -->
     <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
-        @foreach(['all' => 'All', 'completed' => 'Completed', 'in_progress' => 'In Progress', 'abandoned' => 'Abandoned'] as $status => $label)
+        @foreach(['all' => app(\App\Services\TerminologyService::class)->get('all_label'), 'completed' => app(\App\Services\TerminologyService::class)->get('completed_label'), 'in_progress' => app(\App\Services\TerminologyService::class)->get('in_progress_label'), 'abandoned' => app(\App\Services\TerminologyService::class)->get('abandoned_label')] as $status => $label)
         <button
             wire:click="setFilterStatus('{{ $status }}')"
             class="px-3 py-1 text-sm font-medium rounded-lg whitespace-nowrap transition-colors {{ $filterStatus === $status ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
@@ -38,7 +38,7 @@
                         @endif
                     </div>
                     <div>
-                        <div class="text-sm font-medium text-gray-900">{{ $attempt->survey->title ?? 'Unknown Survey' }}</div>
+                        <div class="text-sm font-medium text-gray-900">{{ $attempt->survey->title ?? (app(\App\Services\TerminologyService::class)->get('unknown_label') . ' ' . app(\App\Services\TerminologyService::class)->get('survey_singular')) }}</div>
                         <div class="text-xs text-gray-500">
                             {{ $attempt->completed_at?->format('M d, Y h:i A') ?? ($attempt->started_at?->format('M d, Y h:i A') ?? $attempt->created_at->format('M d, Y h:i A')) }}
                             @if($attempt->response_channel)
@@ -68,7 +68,7 @@
             <div class="border-t border-gray-200 p-4 bg-white">
                 <!-- Actions -->
                 <div class="flex items-center justify-between mb-4">
-                    <h4 class="text-sm font-medium text-gray-700">Responses</h4>
+                    <h4 class="text-sm font-medium text-gray-700">@term('responses_label')</h4>
                     @if($editingAttemptId !== $attempt->id)
                     <button
                         wire:click="startEdit({{ $attempt->id }})"
@@ -77,7 +77,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
-                        Edit Scores
+                        @term('edit_scores_label')
                     </button>
                     @else
                     <div class="flex gap-2">
@@ -88,13 +88,13 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            Save Changes
+                            @term('save_changes_label')
                         </button>
                         <button
                             wire:click="cancelEdit"
                             class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                         >
-                            Cancel
+                            @term('cancel_action')
                         </button>
                     </div>
                     @endif
@@ -114,7 +114,7 @@
                         <div class="flex items-start justify-between gap-4">
                             <div class="flex-1">
                                 <p class="text-sm font-medium text-gray-700 mb-1">
-                                    {{ $index + 1 }}. {{ $question['text'] ?? $question['question'] ?? 'Question' }}
+                                    {{ $index + 1 }}. {{ $question['text'] ?? $question['question'] ?? app(\App\Services\TerminologyService::class)->get('question_singular') }}
                                 </p>
                                 @if($editingAttemptId === $attempt->id)
                                 <!-- Edit Mode -->
@@ -146,7 +146,7 @@
                                     wire:change="updateResponse('{{ $questionId }}', $event.target.value)"
                                     class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                                 >
-                                    <option value="">Select...</option>
+                                    <option value="">@term('select_placeholder_label')</option>
                                     @foreach($question['options'] as $option)
                                     <option value="{{ is_array($option) ? ($option['value'] ?? $option['label']) : $option }}" {{ $response == (is_array($option) ? ($option['value'] ?? $option['label']) : $option) ? 'selected' : '' }}>
                                         {{ is_array($option) ? ($option['label'] ?? $option['value']) : $option }}
@@ -173,7 +173,7 @@
                                         {{ is_array($response) ? implode(', ', $response) : $response }}
                                         @endif
                                     @else
-                                    <span class="text-gray-400 italic">No response</span>
+                                    <span class="text-gray-400 italic">@term('no_response_label')</span>
                                     @endif
                                 </p>
                                 @endif
@@ -184,7 +184,7 @@
                 </div>
                 @else
                 <div class="text-center py-4 text-gray-500">
-                    <p class="text-sm">No question data available</p>
+                    <p class="text-sm">@term('no_question_data_label')</p>
                 </div>
                 @endif
 
@@ -195,14 +195,14 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                         </svg>
-                        AI Analysis
+                        @term('ai_analysis_label')
                     </h5>
                     @if(isset($attempt->ai_analysis['summary']))
                     <p class="text-sm text-blue-800">{{ $attempt->ai_analysis['summary'] }}</p>
                     @endif
                     @if(isset($attempt->ai_analysis['recommendations']))
                     <div class="mt-2">
-                        <p class="text-xs font-medium text-blue-700 mb-1">Recommendations:</p>
+                        <p class="text-xs font-medium text-blue-700 mb-1">@term('recommendations_label'):</p>
                         <ul class="text-sm text-blue-800 list-disc list-inside">
                             @foreach($attempt->ai_analysis['recommendations'] as $rec)
                             <li>{{ $rec }}</li>
@@ -216,7 +216,7 @@
                 <!-- Risk Level Badge -->
                 @if($attempt->risk_level)
                 <div class="mt-4 flex items-center gap-2">
-                    <span class="text-sm text-gray-500">Risk Level:</span>
+                    <span class="text-sm text-gray-500">@term('risk_level_label'):</span>
                     <span class="px-2 py-1 text-sm font-medium rounded-full
                         {{ $attempt->risk_level === 'high' ? 'bg-red-100 text-red-700' : ($attempt->risk_level === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">
                         {{ ucfirst($attempt->risk_level) }}
@@ -231,12 +231,12 @@
             <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
             </svg>
-            <p>No surveys completed yet.</p>
+            <p>@term('no_surveys_completed_label')</p>
             <a href="{{ route('surveys.index') }}" class="inline-flex items-center gap-1 mt-2 text-sm text-pulse-orange-600 hover:text-pulse-orange-700">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
-                Send a Survey
+                @term('send_action') @term('survey_singular')
             </a>
         </div>
         @endforelse

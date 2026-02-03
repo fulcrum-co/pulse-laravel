@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Schema;
  * Organization hierarchy:
  * - pulse_admin: Top-level Pulse company account
  * - consultant: Can manage multiple districts
- * - district: Can manage multiple schools
- * - school: End user organizations
- * - department: Sub-unit within a school
+ * - district: Can manage multiple organizations
+ * - organization: End user organizations
+ * - department: Sub-unit within a organization
  */
 return new class extends Migration
 {

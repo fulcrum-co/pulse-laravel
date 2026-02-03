@@ -23,7 +23,7 @@ class Conversation extends Model
         'messages',
         'related_survey_id',
         'related_attempt_id',
-        'students_covered',
+        'learners_covered',
         'full_transcript',
         'llm_processed',
         'llm_summary',
@@ -35,7 +35,7 @@ class Conversation extends Model
 
     protected $casts = [
         'messages' => 'array',
-        'students_covered' => 'array',
+        'learners_covered' => 'array',
         'llm_processed' => 'boolean',
         'call_duration_seconds' => 'integer',
         'cost_usd' => 'float',

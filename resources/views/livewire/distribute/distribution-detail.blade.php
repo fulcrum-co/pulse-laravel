@@ -35,7 +35,7 @@
                     class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
                 >
                     <x-icon name="play" class="w-4 h-4 mr-1" />
-                    Activate
+                    @term('activate_action')
                 </button>
             @elseif($distribution->isActive())
                 <button
@@ -43,14 +43,14 @@
                     class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
                 >
                     <x-icon name="paper-airplane" class="w-4 h-4 mr-1 transform -rotate-45" />
-                    Send Now
+                    @term('send_now_label')
                 </button>
                 <button
                     wire:click="pause"
                     class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                     <x-icon name="pause" class="w-4 h-4 mr-1" />
-                    Pause
+                    @term('pause_action')
                 </button>
             @elseif($distribution->isPaused())
                 <button
@@ -58,7 +58,7 @@
                     class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
                 >
                     <x-icon name="play" class="w-4 h-4 mr-1" />
-                    Resume
+                    @term('resume_action')
                 </button>
             @endif
 
@@ -67,7 +67,7 @@
                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
             >
                 <x-icon name="pencil" class="w-4 h-4 mr-1" />
-                Edit
+                @term('edit_action')
             </a>
 
             <button
@@ -82,19 +82,19 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-4 gap-4">
         <x-card class="p-4">
-            <p class="text-xs text-gray-500 uppercase tracking-wide">Total Deliveries</p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide">@term('total_deliveries_label')</p>
             <p class="text-2xl font-semibold text-gray-900 mt-1">{{ number_format($stats['total_deliveries']) }}</p>
         </x-card>
         <x-card class="p-4">
-            <p class="text-xs text-gray-500 uppercase tracking-wide">Messages Sent</p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide">@term('messages_sent_label')</p>
             <p class="text-2xl font-semibold text-gray-900 mt-1">{{ number_format($stats['total_sent']) }}</p>
         </x-card>
         <x-card class="p-4">
-            <p class="text-xs text-gray-500 uppercase tracking-wide">Opens</p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide">@term('opens_label')</p>
             <p class="text-2xl font-semibold text-gray-900 mt-1">{{ number_format($stats['total_opened']) }}</p>
         </x-card>
         <x-card class="p-4">
-            <p class="text-xs text-gray-500 uppercase tracking-wide">Avg. Open Rate</p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide">@term('avg_open_rate_label')</p>
             <p class="text-2xl font-semibold text-gray-900 mt-1">{{ $stats['avg_open_rate'] }}%</p>
         </x-card>
     </div>
@@ -104,69 +104,69 @@
         <div class="col-span-1">
             <x-card>
                 <div class="p-4 border-b border-gray-200">
-                    <h3 class="font-medium text-gray-900">Distribution Details</h3>
+                    <h3 class="font-medium text-gray-900">@term('distribution_details_label')</h3>
                 </div>
                 <div class="p-4 space-y-4">
                     <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wide">Channel</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide">@term('channel_label')</p>
                         <p class="mt-1 flex items-center text-sm text-gray-900">
                             <x-icon name="{{ $distribution->channel === 'email' ? 'envelope' : 'device-phone-mobile' }}" class="w-4 h-4 mr-1 text-gray-400" />
-                            {{ ucfirst($distribution->channel) }}
+                            {{ $distribution->channel === 'email' ? app(\App\Services\TerminologyService::class)->get('email_label') : app(\App\Services\TerminologyService::class)->get('sms_label') }}
                         </p>
                     </div>
 
                     <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wide">Type</p>
-                        <p class="mt-1 text-sm text-gray-900">{{ $distribution->isRecurring() ? 'Recurring' : 'One-time' }}</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide">@term('type_label')</p>
+                        <p class="mt-1 text-sm text-gray-900">{{ $distribution->isRecurring() ? app(\App\Services\TerminologyService::class)->get('recurring_label') : app(\App\Services\TerminologyService::class)->get('one_time_label') }}</p>
                     </div>
 
                     <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wide">Content</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide">@term('content_label')</p>
                         <p class="mt-1 text-sm text-gray-900">
                             @if($distribution->usesReport())
                                 <span class="flex items-center">
                                     <x-icon name="chart-bar" class="w-4 h-4 mr-1 text-gray-400" />
-                                    {{ $distribution->report?->title ?? 'Report' }}
-                                    <span class="ml-1 text-xs text-gray-500">({{ $distribution->report_mode === 'live' ? 'Live' : 'PDF' }})</span>
+                                    {{ $distribution->report?->title ?? app(\App\Services\TerminologyService::class)->get('report_singular') }}
+                                    <span class="ml-1 text-xs text-gray-500">({{ $distribution->report_mode === 'live' ? app(\App\Services\TerminologyService::class)->get('live_link_label') : app(\App\Services\TerminologyService::class)->get('pdf_snapshot_label') }})</span>
                                 </span>
                             @else
-                                Custom Message
+                                @term('custom_message_label')
                             @endif
                         </p>
                     </div>
 
                     <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wide">Recipients</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide">@term('recipients_label')</p>
                         <p class="mt-1 text-sm text-gray-900">
                             @if($distribution->contactList)
                                 <a href="{{ route('contacts.lists') }}" class="text-pulse-orange-600 hover:underline">
                                     {{ $distribution->contactList->name }}
                                 </a>
                             @elseif($distribution->recipient_ids)
-                                {{ count($distribution->recipient_ids) }} individual contacts
+                                {{ count($distribution->recipient_ids) }} @term('individual_contacts_label')
                             @else
-                                Not configured
+                                @term('not_configured_label')
                             @endif
                         </p>
                     </div>
 
                     @if($distribution->isRecurring() && $distribution->schedule)
                         <div>
-                            <p class="text-xs text-gray-500 uppercase tracking-wide">Schedule</p>
+                            <p class="text-xs text-gray-500 uppercase tracking-wide">@term('schedule_label')</p>
                             <p class="mt-1 text-sm text-gray-900">
                                 @if($distribution->schedule->schedule_type === 'interval')
-                                    Every {{ $distribution->schedule->interval_value }}
+                                    @term('every_label') {{ $distribution->schedule->interval_value }}
                                     {{ Str::plural($distribution->schedule->interval_type, $distribution->schedule->interval_value) }}
                                 @else
                                     {{ implode(', ', array_map('ucfirst', $distribution->schedule->custom_days ?? [])) }}
                                 @endif
-                                at {{ \Carbon\Carbon::parse($distribution->schedule->send_time)->format('g:i A') }}
+                                @term('at_label') {{ \Carbon\Carbon::parse($distribution->schedule->send_time)->format('g:i A') }}
                             </p>
                         </div>
 
                         @if($distribution->schedule->next_scheduled_at)
                             <div>
-                                <p class="text-xs text-gray-500 uppercase tracking-wide">Next Send</p>
+                                <p class="text-xs text-gray-500 uppercase tracking-wide">@term('next_send_label')</p>
                                 <p class="mt-1 text-sm text-gray-900">
                                     {{ $distribution->schedule->next_scheduled_at->format('M j, Y \a\t g:i A') }}
                                 </p>
@@ -175,10 +175,10 @@
                     @endif
 
                     <div class="pt-4 border-t border-gray-200">
-                        <p class="text-xs text-gray-500 uppercase tracking-wide">Created</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide">@term('created_label')</p>
                         <p class="mt-1 text-sm text-gray-900">
                             {{ $distribution->created_at->format('M j, Y') }}
-                            by {{ $distribution->creator?->first_name }} {{ $distribution->creator?->last_name }}
+                            @term('by_label') {{ $distribution->creator?->first_name }} {{ $distribution->creator?->last_name }}
                         </p>
                     </div>
                 </div>
@@ -187,14 +187,14 @@
             @if($distribution->usesCustomMessage())
                 <x-card class="mt-4">
                     <div class="p-4 border-b border-gray-200">
-                        <h3 class="font-medium text-gray-900">Message Preview</h3>
+                        <h3 class="font-medium text-gray-900">@term('message_preview_label')</h3>
                     </div>
                     <div class="p-4">
                         @if($distribution->channel === 'email' && $distribution->subject)
-                            <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Subject</p>
+                            <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">@term('subject_label')</p>
                             <p class="text-sm font-medium text-gray-900 mb-3">{{ $distribution->subject }}</p>
                         @endif
-                        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Body</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">@term('body_label')</p>
                         <div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 rounded p-3">{{ $distribution->message_body }}</div>
                     </div>
                 </x-card>
@@ -205,14 +205,14 @@
         <div class="col-span-2">
             <x-card>
                 <div class="p-4 border-b border-gray-200">
-                    <h3 class="font-medium text-gray-900">Delivery History</h3>
+                    <h3 class="font-medium text-gray-900">@term('delivery_history_label')</h3>
                 </div>
 
                 @if($deliveries->isEmpty())
                     <div class="p-8 text-center">
                         <x-icon name="paper-airplane" class="w-12 h-12 text-gray-300 mx-auto mb-3 transform -rotate-45" />
-                        <p class="text-sm text-gray-500">No deliveries yet</p>
-                        <p class="text-xs text-gray-400 mt-1">Deliveries will appear here once the distribution is sent.</p>
+                        <p class="text-sm text-gray-500">@term('no_deliveries_label')</p>
+                        <p class="text-xs text-gray-400 mt-1">@term('deliveries_will_appear_label')</p>
                     </div>
                 @else
                     <div class="divide-y divide-gray-200">
@@ -239,13 +239,13 @@
                                     </div>
                                     <div class="text-right text-sm">
                                         <p class="text-gray-900">
-                                            {{ number_format($delivery->sent_count) }}/{{ number_format($delivery->total_recipients) }} sent
+                                            {{ number_format($delivery->sent_count) }}/{{ number_format($delivery->total_recipients) }} @term('sent_label')
                                         </p>
                                         @if($delivery->sent_count > 0)
                                             <p class="text-gray-500 text-xs">
-                                                {{ $delivery->getOpenRate() }}% opened
+                                                {{ $delivery->getOpenRate() }}% @term('opened_label')
                                                 @if($delivery->clicked_count > 0)
-                                                    &bull; {{ $delivery->getClickRate() }}% clicked
+                                                    &bull; {{ $delivery->getClickRate() }}% @term('clicked_label')
                                                 @endif
                                             </p>
                                         @endif
@@ -277,18 +277,18 @@
                         <x-icon name="paper-airplane" class="h-5 w-5 text-pulse-orange-600 transform -rotate-45" />
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-base font-medium text-gray-900">Send Distribution</h3>
+                        <h3 class="text-base font-medium text-gray-900">@term('send_distribution_label')</h3>
                         <p class="mt-1 text-sm text-gray-500">
-                            Are you sure you want to send this distribution now? It will be sent to all recipients.
+                            @term('send_distribution_confirm_label')
                         </p>
                     </div>
                 </div>
                 <div class="mt-4 sm:flex sm:flex-row-reverse gap-2">
                     <button wire:click="sendNow" class="w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
-                        Send Now
+                        @term('send_now_label')
                     </button>
                     <button wire:click="closeSendModal" class="mt-2 sm:mt-0 w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
+                        @term('cancel_action')
                     </button>
                 </div>
             </div>
@@ -308,18 +308,18 @@
                         <x-icon name="exclamation-triangle" class="h-5 w-5 text-red-600" />
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-base font-medium text-gray-900">Delete Distribution</h3>
+                        <h3 class="text-base font-medium text-gray-900">@term('delete_distribution_label')</h3>
                         <p class="mt-1 text-sm text-gray-500">
-                            Are you sure? This will also delete all delivery history. This cannot be undone.
+                            @term('delete_distribution_confirm_label')
                         </p>
                     </div>
                 </div>
                 <div class="mt-4 sm:flex sm:flex-row-reverse gap-2">
                     <button wire:click="delete" class="w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                        Delete
+                        @term('delete_action')
                     </button>
                     <button wire:click="cancelDelete" class="mt-2 sm:mt-0 w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
+                        @term('cancel_action')
                     </button>
                 </div>
             </div>

@@ -82,7 +82,7 @@ class ProviderChatWindow extends Component
             return;
         }
 
-        $this->conversation = ProviderConversation::with(['provider', 'student'])
+        $this->conversation = ProviderConversation::with(['provider', 'learner'])
             ->find($conversationId);
 
         if (! $this->conversation) {
@@ -490,7 +490,7 @@ class ProviderChatWindow extends Component
         $userId = $message['user']['id'] ?? '';
 
         if ($this->isDemo) {
-            return $userId === 'user_current' || $userId === 'student_current';
+            return $userId === 'user_current' || $userId === 'learner_current';
         }
 
         return str_starts_with($userId, 'user_'.auth()->id());

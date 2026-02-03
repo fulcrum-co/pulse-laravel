@@ -184,7 +184,7 @@ class SurveyCreator extends Component
         // Add initial greeting
         $this->chatMessages[] = [
             'role' => 'assistant',
-            'content' => "Hi! I'm here to help you create a survey. What's the purpose of your survey? For example: 'I want to check in on student wellness' or 'I need to assess academic stress levels'.",
+            'content' => "Hi! I'm here to help you create a survey. What's the purpose of your survey? For example: 'I want to check in on learner wellness' or 'I need to assess academic stress levels'.",
         ];
     }
 
@@ -331,7 +331,7 @@ class SurveyCreator extends Component
                     "\n\nFeel free to ask me to modify, remove, or add questions!";
             }
 
-            return "Could you tell me more about what you'd like to survey? For example:\n- Student wellness and emotional well-being\n- Academic stress and workload\n- Classroom engagement\n- Social connections";
+            return "Could you tell me more about what you'd like to survey? For example:\n- Learner wellness and emotional well-being\n- Academic stress and workload\n- Classroom engagement\n- Social connections";
         }
 
         // Follow-up messages
@@ -383,7 +383,7 @@ class SurveyCreator extends Component
                 [
                     'id' => (string) Str::uuid(),
                     'type' => 'scale',
-                    'question' => 'How stressed do you feel about your schoolwork?',
+                    'question' => 'How stressed do you feel about your organizationwork?',
                     'options' => ['1' => 'Not stressed', '5' => 'Very stressed'],
                     'required' => true,
                 ],

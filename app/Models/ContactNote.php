@@ -79,7 +79,7 @@ class ContactNote extends Model
     public const TRANSCRIPTION_FAILED = 'failed';
 
     /**
-     * Get the contact (Student or User).
+     * Get the contact (Learner or User).
      */
     public function contact(): MorphTo
     {

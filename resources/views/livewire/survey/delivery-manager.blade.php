@@ -2,11 +2,11 @@
     {{-- Delivery Stats --}}
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
         @foreach([
-            ['label' => 'Total Sent', 'value' => $this->deliveryStats['total'], 'color' => 'gray'],
-            ['label' => 'Pending', 'value' => $this->deliveryStats['pending'], 'color' => 'yellow'],
-            ['label' => 'Delivered', 'value' => $this->deliveryStats['delivered'], 'color' => 'blue'],
-            ['label' => 'Completed', 'value' => $this->deliveryStats['completed'], 'color' => 'green'],
-            ['label' => 'Failed', 'value' => $this->deliveryStats['failed'], 'color' => 'red'],
+            ['label' => app(\App\Services\TerminologyService::class)->get('total_sent_label'), 'value' => $this->deliveryStats['total'], 'color' => 'gray'],
+            ['label' => app(\App\Services\TerminologyService::class)->get('pending_label'), 'value' => $this->deliveryStats['pending'], 'color' => 'yellow'],
+            ['label' => app(\App\Services\TerminologyService::class)->get('delivered_label'), 'value' => $this->deliveryStats['delivered'], 'color' => 'blue'],
+            ['label' => app(\App\Services\TerminologyService::class)->get('completed_label'), 'value' => $this->deliveryStats['completed'], 'color' => 'green'],
+            ['label' => app(\App\Services\TerminologyService::class)->get('failed_label'), 'value' => $this->deliveryStats['failed'], 'color' => 'red'],
         ] as $stat)
             <div class="bg-white rounded-lg border border-gray-200 p-4">
                 <div class="text-2xl font-bold text-{{ $stat['color'] }}-600">{{ $stat['value'] }}</div>
@@ -20,7 +20,7 @@
         <div class="lg:col-span-2 space-y-6">
             {{-- Channel Selection --}}
             <x-card>
-                <h3 class="font-semibold text-gray-900 mb-4">Delivery Channel</h3>
+                <h3 class="font-semibold text-gray-900 mb-4">@term('delivery_label') @term('channel_singular')</h3>
 
                 <div class="grid md:grid-cols-2 gap-3">
                     @foreach($this->channelOptions as $key => $option)
@@ -45,14 +45,14 @@
             {{-- Recipient Selection --}}
             <x-card>
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-semibold text-gray-900">Select Recipients</h3>
+                    <h3 class="font-semibold text-gray-900">@term('select_recipients_label')</h3>
                     <div class="flex gap-2">
                         <button wire:click="selectAll" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">
-                            Select All
+                            @term('select_action') @term('all_label')
                         </button>
                         <span class="text-gray-300">|</span>
                         <button wire:click="clearSelection" class="text-sm text-gray-500 hover:text-gray-700">
-                            Clear
+                            @term('clear_label')
                         </button>
                     </div>
                 </div>
@@ -60,16 +60,16 @@
                 {{-- Recipient Type Tabs --}}
                 <div class="flex gap-2 mb-4">
                     <button
-                        wire:click="$set('recipientType', 'student')"
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $recipientType === 'student' ? 'bg-pulse-orange-100 text-pulse-orange-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
+                        wire:click="$set('recipientType', 'learner')"
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $recipientType === 'learner' ? 'bg-pulse-orange-100 text-pulse-orange-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
                     >
-                        Students
+                        @term('learner_plural')
                     </button>
                     <button
                         wire:click="$set('recipientType', 'user')"
                         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $recipientType === 'user' ? 'bg-pulse-orange-100 text-pulse-orange-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
                     >
-                        Staff
+                        @term('staff_label')
                     </button>
                 </div>
 
@@ -78,7 +78,7 @@
                     <input
                         type="text"
                         wire:model.live.debounce.300ms="search"
-                        placeholder="Search by name or email..."
+                        placeholder="{{ app(\App\Services\TerminologyService::class)->get('search_by_label') }}"
                         class="w-full rounded-lg border-gray-300 focus:border-pulse-orange-500 focus:ring-pulse-orange-500"
                     />
                 </div>
@@ -86,7 +86,7 @@
                 {{-- Manual Phone Entry (for SMS/Voice) --}}
                 @if(in_array($channel, ['sms', 'voice_call', 'whatsapp']))
                     <div class="mb-4 p-4 bg-gray-50 rounded-lg">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Add Phone Number Manually</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">@term('add_phone_manually_label')</label>
                         <div class="flex gap-2">
                             <input
                                 type="tel"
@@ -98,10 +98,10 @@
                                 wire:click="addManualRecipient"
                                 class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
                             >
-                                Add
+                                @term('add_action')
                             </button>
                         </div>
-                        <p class="mt-1 text-xs text-gray-500">For demo: Add your phone number here to receive a live survey</p>
+                        <p class="mt-1 text-xs text-gray-500">@term('manual_phone_help_label')</p>
                     </div>
                 @endif
 
@@ -134,7 +134,7 @@
                         </label>
                     @empty
                         <div class="p-8 text-center text-gray-500">
-                            No recipients found
+                            @term('no_recipients_found_label')
                         </div>
                     @endforelse
                 </div>
@@ -143,10 +143,10 @@
                 @if(count($selectedRecipients) > 0)
                     <div class="mt-4 flex items-center justify-between p-3 bg-pulse-orange-50 rounded-lg">
                         <span class="text-sm text-pulse-orange-700">
-                            <strong>{{ count($selectedRecipients) }}</strong> recipient(s) selected
+                            <strong>{{ count($selectedRecipients) }}</strong> @term('recipient_selected_label')
                         </span>
                         <button wire:click="clearSelection" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700">
-                            Clear all
+                            @term('clear_all_label')
                         </button>
                     </div>
                 @endif
@@ -156,8 +156,8 @@
             <x-card>
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="font-semibold text-gray-900">Schedule Delivery</h3>
-                        <p class="text-sm text-gray-500">Send at a specific date and time</p>
+                        <h3 class="font-semibold text-gray-900">@term('schedule_delivery_label')</h3>
+                        <p class="text-sm text-gray-500">@term('send_at_label')</p>
                     </div>
                     <button
                         wire:click="$toggle('scheduleDelivery')"
@@ -186,10 +186,10 @@
             >
                 @if($isDelivering)
                     <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Sending...
+                    @term('sending_label')
                 @else
                     <x-icon name="paper-airplane" class="w-5 h-5" />
-                    Send Survey to {{ count($selectedRecipients) }} Recipient(s)
+                    @term('send_action') @term('survey_singular') to {{ count($selectedRecipients) }} @term('recipient_plural')
                 @endif
             </button>
         </div>
@@ -197,7 +197,7 @@
         {{-- Recent Deliveries --}}
         <div class="space-y-6">
             <x-card>
-                <h3 class="font-semibold text-gray-900 mb-4">Recent Deliveries</h3>
+                <h3 class="font-semibold text-gray-900 mb-4">@term('recent_deliveries_label')</h3>
 
                 @if($this->recentDeliveries->count() > 0)
                     <div class="space-y-3">
@@ -223,7 +223,7 @@
                                         }">{{ ucfirst($delivery->status) }}</x-badge>
                                     </div>
                                     <div class="text-sm text-gray-500 mt-1">
-                                        {{ $delivery->phone_number ?? 'Web' }}
+                                        {{ $delivery->phone_number ?? app(\App\Services\TerminologyService::class)->get('web_link_label') }}
                                     </div>
                                     <div class="text-xs text-gray-400">
                                         {{ $delivery->created_at->diffForHumans() }}
@@ -235,26 +235,26 @@
                 @else
                     <div class="text-center py-8">
                         <x-icon name="paper-airplane" class="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                        <p class="text-gray-500">No deliveries yet</p>
+                        <p class="text-gray-500">@term('no_deliveries_label')</p>
                     </div>
                 @endif
             </x-card>
 
             {{-- Quick Tips --}}
             <x-card class="bg-blue-50 border-blue-200">
-                <h4 class="font-medium text-blue-900 mb-2">Tips for Demo</h4>
+                <h4 class="font-medium text-blue-900 mb-2">@term('tips_for_demo_label')</h4>
                 <ul class="text-sm text-blue-800 space-y-2">
                     <li class="flex items-start gap-2">
                         <x-icon name="light-bulb" class="w-4 h-4 mt-0.5 flex-shrink-0" />
-                        <span>Add your phone number to receive a live survey via SMS</span>
+                        <span>Add your phone number to receive a live @term('survey_singular') via @term('sms_label')</span>
                     </li>
                     <li class="flex items-start gap-2">
                         <x-icon name="light-bulb" class="w-4 h-4 mt-0.5 flex-shrink-0" />
-                        <span>Voice calls use TTS to read questions aloud</span>
+                        <span>@term('voice_call_label') uses TTS to read @term('questions_label') aloud</span>
                     </li>
                     <li class="flex items-start gap-2">
                         <x-icon name="light-bulb" class="w-4 h-4 mt-0.5 flex-shrink-0" />
-                        <span>Responses trigger workflows automatically</span>
+                        <span>@term('responses_label') trigger workflows automatically</span>
                     </li>
                 </ul>
             </x-card>
@@ -273,23 +273,23 @@
                         <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <x-icon name="check-circle" class="w-10 h-10 text-green-600" />
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900">Delivery Successful!</h3>
+                        <h3 class="text-lg font-semibold text-gray-900">@term('delivery_successful_label')</h3>
                     @else
                         <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <x-icon name="exclamation-triangle" class="w-10 h-10 text-yellow-600" />
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900">Delivery Complete</h3>
+                        <h3 class="text-lg font-semibold text-gray-900">@term('delivery_complete_label')</h3>
                     @endif
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div class="text-center p-3 bg-green-50 rounded-lg">
                         <div class="text-2xl font-bold text-green-600">{{ $deliveryResult['success'] }}</div>
-                        <div class="text-sm text-green-700">Successful</div>
+                        <div class="text-sm text-green-700">@term('successful_label')</div>
                     </div>
                     <div class="text-center p-3 bg-red-50 rounded-lg">
                         <div class="text-2xl font-bold text-red-600">{{ $deliveryResult['failed'] }}</div>
-                        <div class="text-sm text-red-700">Failed</div>
+                        <div class="text-sm text-red-700">@term('failed_label')</div>
                     </div>
                 </div>
 
@@ -297,7 +297,7 @@
                     wire:click="$set('deliveryResult', null)"
                     class="w-full py-2 px-4 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600"
                 >
-                    Done
+                    @term('done_label')
                 </button>
             </div>
         </div>

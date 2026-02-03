@@ -61,7 +61,7 @@ class MiniCourse extends Model
     public const APPROVAL_REVISION = 'revision_requested';
 
     // Target entity types
-    public const TARGET_STUDENT = 'student';
+    public const TARGET_STUDENT = 'learner';
 
     public const TARGET_TEACHER = 'teacher';
 
@@ -113,7 +113,7 @@ class MiniCourse extends Model
         // Generation tracking
         'generation_request_id',
         'template_id',
-        'assigned_student_ids',
+        'assigned_learner_ids',
         'assigned_group_id',
         // Lead generation fields
         'visibility',
@@ -145,7 +145,7 @@ class MiniCourse extends Model
         'published_at' => 'datetime',
         'auto_generated_at' => 'datetime',
         'approved_at' => 'datetime',
-        'assigned_student_ids' => 'array',
+        'assigned_learner_ids' => 'array',
         // Lead generation casts
         'requires_email' => 'boolean',
         'is_embeddable' => 'boolean',
@@ -325,7 +325,7 @@ class MiniCourse extends Model
     }
 
     /**
-     * Target entity (polymorphic - student, user/teacher, department).
+     * Target entity (polymorphic - learner, user/teacher, department).
      */
     public function targetEntity(): \Illuminate\Database\Eloquent\Relations\MorphTo
     {
@@ -692,7 +692,7 @@ class MiniCourse extends Model
     public static function getTargetEntityTypes(): array
     {
         return [
-            self::TARGET_STUDENT => 'Student',
+            self::TARGET_STUDENT => 'Learner',
             self::TARGET_TEACHER => 'Teacher',
             self::TARGET_DEPARTMENT => 'Department',
             self::TARGET_CONTACT_LIST => 'Contact List',

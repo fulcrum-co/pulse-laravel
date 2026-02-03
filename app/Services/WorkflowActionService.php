@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
 use App\Models\UserNotification;
 use App\Models\Workflow;
 use App\Models\WorkflowExecution;
+use App\Services\Domain\WorkflowActionInterpolationService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -15,7 +18,8 @@ use Illuminate\Support\Facades\Notification;
 class WorkflowActionService
 {
     public function __construct(
-        protected SinchService $sinchService
+        protected SinchService $sinchService,
+        protected WorkflowActionInterpolationService $interpolationService
     ) {}
 
     /**
@@ -60,8 +64,8 @@ class WorkflowActionService
     public function sendEmail(array $config, array $context): array
     {
         $recipients = $this->resolveRecipients($config['recipients'] ?? [], $context);
-        $subject = $this->interpolateTemplate($config['subject'] ?? 'Alert Notification', $context);
-        $body = $this->interpolateTemplate($config['body'] ?? '', $context);
+        $subject = $this->interpolationService->interpolateTemplate($config['subject'] ?? 'Alert Notification', $context);
+        $body = $this->interpolationService->interpolateTemplate($config['body'] ?? '', $context);
         $template = $config['template'] ?? null;
 
         $sent = 0;
@@ -105,7 +109,7 @@ class WorkflowActionService
     public function sendSms(array $config, array $context): array
     {
         $recipients = $this->resolveRecipients($config['recipients'] ?? [], $context);
-        $message = $this->interpolateTemplate($config['message'] ?? 'Alert from Pulse', $context);
+        $message = $this->interpolationService->interpolateTemplate($config['message'] ?? 'Alert from Pulse', $context);
 
         $sent = 0;
         $errors = [];
@@ -139,7 +143,7 @@ class WorkflowActionService
     public function sendWhatsApp(array $config, array $context): array
     {
         $recipients = $this->resolveRecipients($config['recipients'] ?? [], $context);
-        $message = $this->interpolateTemplate($config['message'] ?? 'Alert from Pulse', $context);
+        $message = $this->interpolationService->interpolateTemplate($config['message'] ?? 'Alert from Pulse', $context);
 
         $sent = 0;
         $errors = [];
@@ -172,7 +176,7 @@ class WorkflowActionService
     public function makeCall(array $config, array $context): array
     {
         $recipients = $this->resolveRecipients($config['recipients'] ?? [], $context);
-        $message = $this->interpolateTemplate($config['message'] ?? 'This is an automated alert from Pulse.', $context);
+        $message = $this->interpolationService->interpolateTemplate($config['message'] ?? 'This is an automated alert from Pulse.', $context);
 
         $sent = 0;
         $errors = [];
@@ -219,9 +223,9 @@ class WorkflowActionService
         }
 
         // Interpolate URL and payload
-        $url = $this->interpolateTemplate($url, $context);
+        $url = $this->interpolationService->interpolateTemplate($url, $context);
         if (is_array($payload)) {
-            $payload = $this->interpolateArrayValues($payload, $context);
+            $payload = $this->interpolationService->interpolateArrayValues($payload, $context);
         }
 
         $response = Http::withHeaders($headers)
@@ -246,8 +250,8 @@ class WorkflowActionService
      */
     public function createTask(array $config, array $context): array
     {
-        $title = $this->interpolateTemplate($config['title'] ?? 'Follow-up Task', $context);
-        $description = $this->interpolateTemplate($config['description'] ?? '', $context);
+        $title = $this->interpolationService->interpolateTemplate($config['title'] ?? 'Follow-up Task', $context);
+        $description = $this->interpolationService->interpolateTemplate($config['description'] ?? '', $context);
         $assigneeId = $config['assignee_id'] ?? $context['created_by'] ?? null;
         $dueDate = $config['due_date'] ?? now()->addDays(1);
         $priority = $config['priority'] ?? 'medium';
@@ -277,18 +281,18 @@ class WorkflowActionService
     }
 
     /**
-     * Assign a resource to a student.
+     * Assign a resource to a learner.
      */
     public function assignResource(array $config, array $context): array
     {
         $resourceId = $config['resource_id'] ?? null;
-        $studentId = $context['student_id'] ?? $context['contact_id'] ?? null;
+        $learnerId = $context['learner_id'] ?? $context['contact_id'] ?? null;
 
-        if (! $resourceId || ! $studentId) {
+        if (! $resourceId || ! $learnerId) {
             return [
                 'success' => false,
                 'action_type' => 'assign_resource',
-                'error' => 'Missing resource_id or student_id',
+                'error' => 'Missing resource_id or learner_id',
                 'executed_at' => now()->toISOString(),
             ];
         }
@@ -296,7 +300,7 @@ class WorkflowActionService
         // TODO: Implement actual resource assignment
         Log::info('Resource assigned by workflow', [
             'resource_id' => $resourceId,
-            'student_id' => $studentId,
+            'learner_id' => $learnerId,
             'context' => $context,
         ]);
 
@@ -305,7 +309,7 @@ class WorkflowActionService
             'action_type' => 'assign_resource',
             'details' => [
                 'resource_id' => $resourceId,
-                'student_id' => $studentId,
+                'learner_id' => $learnerId,
             ],
             'executed_at' => now()->toISOString(),
         ];
@@ -317,10 +321,10 @@ class WorkflowActionService
     public function sendInAppNotification(array $config, array $context): array
     {
         $recipients = $this->resolveRecipients($config['recipients'] ?? [], $context);
-        $title = $this->interpolateTemplate($config['title'] ?? 'Alert', $context);
-        $message = $this->interpolateTemplate($config['message'] ?? '', $context);
+        $title = $this->interpolationService->interpolateTemplate($config['title'] ?? 'Alert', $context);
+        $message = $this->interpolationService->interpolateTemplate($config['message'] ?? '', $context);
         $priority = $config['priority'] ?? UserNotification::PRIORITY_NORMAL;
-        $url = $this->interpolateTemplate($config['url'] ?? '', $context);
+        $url = $this->interpolationService->interpolateTemplate($config['url'] ?? '', $context);
         $actionLabel = $config['action_label'] ?? 'View Details';
 
         $notificationService = app(NotificationService::class);
@@ -364,7 +368,7 @@ class WorkflowActionService
                     'workflow_name',
                     'execution_id',
                     'trigger_type',
-                    'student_id',
+                    'learner_id',
                     'contact_id',
                 ])),
             ],
@@ -463,7 +467,7 @@ class WorkflowActionService
     {
         $field = $config['field'] ?? null;
         $value = $config['value'] ?? null;
-        $entityType = $config['entity_type'] ?? 'student';
+        $entityType = $config['entity_type'] ?? 'learner';
         $entityId = $context["{$entityType}_id"] ?? $context['contact_id'] ?? null;
 
         if (! $field || ! $entityId) {
@@ -520,8 +524,8 @@ class WorkflowActionService
         foreach ($recipients as $recipient) {
             if (is_string($recipient)) {
                 // Check if it's a context reference
-                if (str_starts_with($recipient, '{{') && str_ends_with($recipient, '}}')) {
-                    $key = trim($recipient, '{} ');
+                if ($this->interpolationService->isContextReference($recipient)) {
+                    $key = $this->interpolationService->extractContextKey($recipient);
                     $value = data_get($context, $key);
                     if ($value) {
                         $resolved[] = $value;
@@ -556,13 +560,13 @@ class WorkflowActionService
                             }
                             break;
 
-                        case 'student_contact':
-                            // Get student's emergency contacts
-                            $studentId = $context['student_id'] ?? null;
-                            if ($studentId) {
-                                $student = Student::find($studentId);
-                                if ($student && $student->emergency_contacts) {
-                                    foreach ($student->emergency_contacts as $contact) {
+                        case 'learner_contact':
+                            // Get learner's emergency contacts
+                            $learnerId = $context['learner_id'] ?? null;
+                            if ($learnerId) {
+                                $learner = Learner::find($learnerId);
+                                if ($learner && $learner->emergency_contacts) {
+                                    foreach ($learner->emergency_contacts as $contact) {
                                         $resolved[] = $contact;
                                     }
                                 }
@@ -576,37 +580,5 @@ class WorkflowActionService
         }
 
         return $resolved;
-    }
-
-    /**
-     * Interpolate template variables with context values.
-     */
-    protected function interpolateTemplate(string $template, array $context): string
-    {
-        return preg_replace_callback('/\{\{([^}]+)\}\}/', function ($matches) use ($context) {
-            $key = trim($matches[1]);
-
-            return data_get($context, $key, $matches[0]);
-        }, $template);
-    }
-
-    /**
-     * Interpolate array values recursively.
-     */
-    protected function interpolateArrayValues(array $array, array $context): array
-    {
-        $result = [];
-
-        foreach ($array as $key => $value) {
-            if (is_string($value)) {
-                $result[$key] = $this->interpolateTemplate($value, $context);
-            } elseif (is_array($value)) {
-                $result[$key] = $this->interpolateArrayValues($value, $context);
-            } else {
-                $result[$key] = $value;
-            }
-        }
-
-        return $result;
     }
 }

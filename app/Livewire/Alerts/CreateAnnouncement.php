@@ -140,7 +140,7 @@ class CreateAnnouncement extends Component
      */
     public function getAvailableRolesProperty(): array
     {
-        return ['admin', 'manager', 'teacher', 'student', 'parent'];
+        return ['admin', 'manager', 'teacher', 'learner', 'parent'];
     }
 
     /**

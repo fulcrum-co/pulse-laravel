@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\ContactMetric;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Services\ContactMetricService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +22,7 @@ class ContactMetricController extends Controller
     public function timeSeries(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'contact_type' => 'required|string|in:student,user,App\\Models\\Student,App\\Models\\User',
+            'contact_type' => 'required|string|in:learner,user,App\\Models\\Learner,App\\Models\\User',
             'contact_id' => 'required|integer',
             'metrics' => 'required|array',
             'metrics.*' => 'string',
@@ -33,7 +33,7 @@ class ContactMetricController extends Controller
 
         // Map shorthand contact type to full class name
         $typeMap = [
-            'student' => 'App\\Models\\Student',
+            'learner' => 'App\\Models\\Learner',
             'user' => 'App\\Models\\User',
         ];
         $contactType = $typeMap[$validated['contact_type']] ?? $validated['contact_type'];
@@ -56,7 +56,7 @@ class ContactMetricController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'contact_type' => 'required|string|in:student,user,App\\Models\\Student,App\\Models\\User',
+            'contact_type' => 'required|string|in:learner,user,App\\Models\\Learner,App\\Models\\User',
             'contact_id' => 'required|integer',
             'metric_category' => 'required|string',
             'metric_key' => 'required|string',
@@ -64,7 +64,7 @@ class ContactMetricController extends Controller
             'text_value' => 'nullable|string',
             'period_start' => 'required|date',
             'period_end' => 'required|date|after_or_equal:period_start',
-            'school_year' => 'nullable|string',
+            'organization_year' => 'nullable|string',
             'quarter' => 'nullable|integer|between:1,4',
         ]);
 
@@ -72,7 +72,7 @@ class ContactMetricController extends Controller
 
         // Map shorthand contact type to full class name
         $typeMap = [
-            'student' => 'App\\Models\\Student',
+            'learner' => 'App\\Models\\Learner',
             'user' => 'App\\Models\\User',
         ];
         $contactType = $typeMap[$validated['contact_type']] ?? $validated['contact_type'];
@@ -89,7 +89,7 @@ class ContactMetricController extends Controller
             'period_start' => $validated['period_start'],
             'period_end' => $validated['period_end'],
             'period_type' => 'point_in_time',
-            'school_year' => $validated['school_year'] ?? $this->metricService->getCurrentSchoolYear(),
+            'organization_year' => $validated['organization_year'] ?? $this->metricService->getCurrentOrganizationYear(),
             'quarter' => $validated['quarter'] ?? $this->metricService->getCurrentQuarter(),
             'recorded_by_user_id' => $user->id,
             'recorded_at' => now(),
@@ -104,15 +104,15 @@ class ContactMetricController extends Controller
     }
 
     /**
-     * Get heat map data for a student.
+     * Get heat map data for a learner.
      */
-    public function heatMap(Request $request, Student $student): JsonResponse
+    public function heatMap(Request $request, Learner $learner): JsonResponse
     {
-        $schoolYear = $request->get('school_year', $this->metricService->getCurrentSchoolYear());
+        $organizationYear = $request->get('organization_year', $this->metricService->getCurrentOrganizationYear());
 
         $data = $this->metricService->getHeatMapData(
-            $student,
-            $schoolYear,
+            $learner,
+            $organizationYear,
             ['academics', 'attendance', 'behavior', 'life_skills']
         );
 
@@ -124,10 +124,10 @@ class ContactMetricController extends Controller
      */
     public function available(Request $request): JsonResponse
     {
-        $contactType = $request->get('contact_type', 'student');
+        $contactType = $request->get('contact_type', 'learner');
 
         $metrics = match ($contactType) {
-            'student' => [
+            'learner' => [
                 ['key' => 'gpa', 'label' => 'GPA', 'category' => 'academics'],
                 ['key' => 'wellness_score', 'label' => 'Health & Wellness', 'category' => 'wellness'],
                 ['key' => 'emotional_wellbeing', 'label' => 'Emotional Well-Being', 'category' => 'wellness'],
@@ -139,7 +139,7 @@ class ContactMetricController extends Controller
             ],
             'teacher' => [
                 ['key' => 'classroom_performance', 'label' => 'Classroom Performance', 'category' => 'classroom'],
-                ['key' => 'student_growth', 'label' => 'Student Growth', 'category' => 'classroom'],
+                ['key' => 'learner_growth', 'label' => 'Learner Growth', 'category' => 'classroom'],
                 ['key' => 'pd_progress', 'label' => 'PD Progress', 'category' => 'professional_development'],
             ],
             default => [],

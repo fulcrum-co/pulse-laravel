@@ -7,7 +7,7 @@
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search surveys..."
+                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('search_action') }} {{ strtolower(app(\App\Services\TerminologyService::class)->get('survey_plural')) }}..."
                     class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 />
             </div>
@@ -16,7 +16,7 @@
                 wire:model.live="statusFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">All Statuses</option>
+                <option value="">{{ app(\App\Services\TerminologyService::class)->get('all_label') }} {{ app(\App\Services\TerminologyService::class)->get('status_label') }}es</option>
                 @foreach($statuses as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
@@ -26,7 +26,7 @@
                 wire:model.live="typeFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">All Types</option>
+                <option value="">{{ app(\App\Services\TerminologyService::class)->get('all_label') }} {{ app(\App\Services\TerminologyService::class)->get('type_label') }}s</option>
                 @foreach($surveyTypes as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
@@ -37,7 +37,7 @@
                 wire:model.live="orgFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">All Organizations</option>
+                <option value="">{{ app(\App\Services\TerminologyService::class)->get('all_label') }} {{ app(\App\Services\TerminologyService::class)->get('organization_plural') }}</option>
                 @foreach($accessibleOrgs as $org)
                     <option value="{{ $org->id }}">{{ $org->org_name }}</option>
                 @endforeach
@@ -49,7 +49,7 @@
                 wire:click="clearFilters"
                 class="text-sm text-gray-500 hover:text-gray-700"
             >
-                Clear
+                @term('clear_label')
             </button>
             @endif
         </div>
@@ -58,34 +58,34 @@
         <div class="flex items-center gap-3">
             @if(count($selected) > 0)
                 <div class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5">
-                    <span class="text-sm text-red-700">{{ count($selected) }} selected</span>
-                    <button wire:click="deselectAll" class="text-xs text-red-600 hover:text-red-800 underline">Clear</button>
+                    <span class="text-sm text-red-700">{{ count($selected) }} @term('selected_label')</span>
+                    <button wire:click="deselectAll" class="text-xs text-red-600 hover:text-red-800 underline">@term('clear_label')</button>
                     <button wire:click="confirmBulkDelete" class="ml-2 px-2 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700">
-                        Delete Selected
+                        @term('delete_action') @term('selected_label')
                     </button>
                 </div>
             @else
-                <button wire:click="selectAll" class="text-xs text-gray-500 hover:text-gray-700">Select All</button>
+                <button wire:click="selectAll" class="text-xs text-gray-500 hover:text-gray-700">@term('select_action') @term('all_label')</button>
             @endif
             <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
                 <button
                     wire:click="setViewMode('grid')"
                     class="p-1.5 rounded {{ $viewMode === 'grid' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                    title="Grid view"
+                    title="{{ app(\App\Services\TerminologyService::class)->get('grid_view_label') }}"
                 >
                     <x-icon name="squares-2x2" class="w-4 h-4" />
                 </button>
                 <button
                     wire:click="setViewMode('list')"
                     class="p-1.5 rounded {{ $viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                    title="List view"
+                    title="{{ app(\App\Services\TerminologyService::class)->get('list_view_label') }}"
                 >
                     <x-icon name="list-bullet" class="w-4 h-4" />
                 </button>
                 <button
                     wire:click="setViewMode('table')"
                     class="p-1.5 rounded {{ $viewMode === 'table' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                    title="Table view"
+                    title="{{ app(\App\Services\TerminologyService::class)->get('table_view_label') }}"
                 >
                     <x-icon name="table-cells" class="w-4 h-4" />
                 </button>
@@ -100,13 +100,13 @@
                 <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                     <x-icon name="clipboard-document-list" class="w-8 h-8 text-pulse-orange-500" />
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">Create your first survey</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">@term('survey_empty_title')</h3>
                 <p class="text-gray-500 mb-4 max-w-sm mx-auto text-sm">
-                    Build surveys to check in on students using AI assistance, voice, or the form builder.
+                    @term('survey_empty_body')
                 </p>
                 <a href="{{ route('surveys.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
                     <x-icon name="plus" class="w-4 h-4 mr-1" />
-                    Create Survey
+                    @term('create_action') @term('survey_singular')
                 </a>
             </div>
         </x-card>
@@ -156,13 +156,13 @@
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-{{ $typeColor }}-100 text-{{ $typeColor }}-700">
                                 {{ ucfirst($survey->survey_type) }}
                             </span>
-                            <span class="text-gray-500">{{ $survey->question_count }} questions</span>
+                            <span class="text-gray-500">{{ $survey->question_count }} @term('questions_label')</span>
                         </div>
 
                         <div class="flex items-center justify-between text-xs mb-3">
                             <div>
                                 <span class="font-semibold text-gray-900">{{ number_format($survey->completed_attempts_count ?? 0) }}</span>
-                                <span class="text-gray-500 ml-1">responses</span>
+                                <span class="text-gray-500 ml-1">@term('responses_label')</span>
                             </div>
                             <div class="text-gray-500">
                                 {{ $survey->created_at->diffForHumans(null, true) }}
@@ -172,7 +172,7 @@
                         @if($survey->creation_mode === 'ai_assisted' || $survey->creation_mode === 'chat')
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">
                                 <x-icon name="sparkles" class="w-3 h-3 mr-0.5" />
-                                AI Created
+                                @term('ai_created_label')
                             </span>
                         @endif
                     </div>
@@ -183,39 +183,39 @@
                                 <button wire:click="toggleStatus('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded" onclick="event.stopPropagation()">
                                     <x-icon name="{{ $survey->status === 'active' ? 'pause' : 'play' }}" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">{{ $survey->status === 'active' ? 'Pause' : 'Activate' }}</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">{{ $survey->status === 'active' ? app(\App\Services\TerminologyService::class)->get('pause_action') : app(\App\Services\TerminologyService::class)->get('activate_action') }}</span>
                             </div>
                             @if($survey->status === 'active')
                             <div class="relative group/btn">
                                 <a href="{{ route('surveys.deliver.form', $survey) }}" class="p-1.5 text-gray-400 hover:text-gray-600 rounded inline-block" onclick="event.stopPropagation()">
                                     <x-icon name="paper-airplane" class="w-3.5 h-3.5" />
                                 </a>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Send</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">@term('send_action')</span>
                             </div>
                             @endif
                             <div class="relative group/btn">
                                 <button wire:click="duplicate('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded" onclick="event.stopPropagation()">
                                     <x-icon name="document-duplicate" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">@term('duplicate_action')</span>
                             </div>
                             @if($canPush)
                             <div class="relative group/btn">
                                 <button wire:click="openPushModal({{ $survey->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-500 rounded" onclick="event.stopPropagation()">
                                     <x-icon name="arrow-up-on-square" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Push to Schools</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">@term('push_label') to @term('organization_plural')</span>
                             </div>
                             @endif
                             <div class="relative group/btn">
                                 <button wire:click="confirmDelete('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded" onclick="event.stopPropagation()">
                                     <x-icon name="trash" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Delete</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">@term('delete_action')</span>
                             </div>
                         </div>
                         <span class="text-xs font-medium text-pulse-orange-600 pointer-events-none">
-                            View →
+                            @term('view_action') →
                         </span>
                     </div>
                 </div>
@@ -296,14 +296,14 @@
                             <button wire:click="openPushModal({{ $survey->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-500 rounded">
                                 <x-icon name="arrow-up-on-square" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Push to Schools</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Push to Organizations</span>
                         </div>
                         @endif
                         <div class="relative group/btn">
                             <button wire:click="confirmDelete('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded">
                                 <x-icon name="trash" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Delete</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">@term('delete_action')</span>
                         </div>
                         <span class="ml-2 px-3 py-1 text-xs font-medium text-pulse-orange-600">
                             View →
@@ -327,7 +327,7 @@
                                 class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
                             />
                         </th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Survey</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('survey_singular')</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
@@ -417,14 +417,14 @@
                                         <button wire:click="openPushModal({{ $survey->id }})" class="p-1 text-gray-400 hover:text-pulse-orange-500 rounded">
                                             <x-icon name="arrow-up-on-square" class="w-4 h-4" />
                                         </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Push to Schools</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Push to Organizations</span>
                                     </div>
                                     @endif
                                     <div class="relative group">
                                         <button wire:click="confirmDelete('{{ $survey->id }}')" class="p-1 text-gray-400 hover:text-red-500 rounded">
                                             <x-icon name="trash" class="w-4 h-4" />
                                         </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Delete</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">@term('delete_action')</span>
                                     </div>
                                     <a href="{{ route('surveys.show', $survey) }}" class="ml-1 px-2 py-1 text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
                                         View
@@ -457,16 +457,16 @@
                         <x-icon name="exclamation-triangle" class="h-5 w-5 text-red-600" />
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-base font-medium text-gray-900">Delete Survey</h3>
-                        <p class="mt-1 text-sm text-gray-500">Are you sure? This will also delete all responses. This cannot be undone.</p>
+                        <h3 class="text-base font-medium text-gray-900">@term('delete_action') @term('survey_singular')</h3>
+                        <p class="mt-1 text-sm text-gray-500">@term('delete_survey_confirm_label')</p>
                     </div>
                 </div>
                 <div class="mt-4 sm:flex sm:flex-row-reverse gap-2">
                     <button wire:click="deleteSurvey" class="w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                        Delete
+                        @term('delete_action')
                     </button>
                     <button wire:click="cancelDelete" class="mt-2 sm:mt-0 w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
+                        @term('cancel_action')
                     </button>
                 </div>
             </div>
@@ -486,16 +486,16 @@
                         <x-icon name="exclamation-triangle" class="h-5 w-5 text-red-600" />
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-base font-medium text-gray-900">Delete {{ count($selected) }} Survey(s)</h3>
-                        <p class="mt-1 text-sm text-gray-500">Are you sure you want to delete all selected surveys and their responses? This cannot be undone.</p>
+                        <h3 class="text-base font-medium text-gray-900">@term('delete_action') {{ count($selected) }} @term('survey_singular')</h3>
+                        <p class="mt-1 text-sm text-gray-500">@term('delete_selected_surveys_confirm_label')</p>
                     </div>
                 </div>
                 <div class="mt-4 sm:flex sm:flex-row-reverse gap-2">
                     <button wire:click="deleteSelected" class="w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                        Delete All
+                        @term('delete_action') @term('all_label')
                     </button>
                     <button wire:click="cancelBulkDelete" class="mt-2 sm:mt-0 w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
+                        @term('cancel_action')
                     </button>
                 </div>
             </div>

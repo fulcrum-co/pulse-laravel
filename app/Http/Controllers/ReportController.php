@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CustomReport;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Services\ReportPdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -253,30 +253,30 @@ class ReportController extends Controller
     protected function getTemplates(): array
     {
         return [
-            // Student Reports
+            // Learner Reports
             [
-                'id' => 'student_progress',
-                'name' => 'Student Progress Report',
-                'description' => 'Individual student performance tracking with metrics over time',
-                'thumbnail' => '/images/templates/student-progress.png',
+                'id' => 'learner_progress',
+                'name' => 'Learner Progress Report',
+                'description' => 'Individual learner performance tracking with metrics over time',
+                'thumbnail' => '/images/templates/learner-progress.png',
                 'type' => CustomReport::TYPE_STUDENT_PROGRESS,
-                'category' => 'student',
-                'layout' => $this->getStudentProgressLayout(),
+                'category' => 'learner',
+                'layout' => $this->getLearnerProgressLayout(),
             ],
             [
-                'id' => 'student_quick_view',
-                'name' => 'Student Quick View',
+                'id' => 'learner_quick_view',
+                'name' => 'Learner Quick View',
                 'description' => 'One-page summary perfect for parent meetings',
-                'thumbnail' => '/images/templates/student-quick.png',
+                'thumbnail' => '/images/templates/learner-quick.png',
                 'type' => CustomReport::TYPE_STUDENT_PROGRESS,
-                'category' => 'student',
-                'layout' => $this->getStudentQuickViewLayout(),
+                'category' => 'learner',
+                'layout' => $this->getLearnerQuickViewLayout(),
             ],
             // Cohort Reports
             [
                 'id' => 'cohort_summary',
                 'name' => 'Cohort Summary',
-                'description' => 'Aggregate metrics for a group of students',
+                'description' => 'Aggregate metrics for a group of learners',
                 'thumbnail' => '/images/templates/cohort-summary.png',
                 'type' => CustomReport::TYPE_COHORT_SUMMARY,
                 'category' => 'cohort',
@@ -291,24 +291,24 @@ class ReportController extends Controller
                 'category' => 'cohort',
                 'layout' => $this->getCohortSummaryLayout(),
             ],
-            // School Dashboards
+            // Organization Dashboards
             [
-                'id' => 'school_dashboard',
-                'name' => 'School Dashboard',
-                'description' => 'School-wide analytics and KPIs',
-                'thumbnail' => '/images/templates/school-dashboard.png',
+                'id' => 'organization_dashboard',
+                'name' => 'Organization Dashboard',
+                'description' => 'Organization-wide analytics and KPIs',
+                'thumbnail' => '/images/templates/organization-dashboard.png',
                 'type' => CustomReport::TYPE_SCHOOL_DASHBOARD,
-                'category' => 'school',
-                'layout' => $this->getSchoolDashboardLayout(),
+                'category' => 'organization',
+                'layout' => $this->getOrganizationDashboardLayout(),
             ],
             [
                 'id' => 'wellness_overview',
                 'name' => 'Wellness Overview',
-                'description' => 'School-wide wellness trends and insights',
+                'description' => 'Organization-wide wellness trends and insights',
                 'thumbnail' => '/images/templates/wellness-overview.png',
                 'type' => CustomReport::TYPE_SCHOOL_DASHBOARD,
-                'category' => 'school',
-                'layout' => $this->getSchoolDashboardLayout(),
+                'category' => 'organization',
+                'layout' => $this->getOrganizationDashboardLayout(),
             ],
             // Custom
             [
@@ -324,9 +324,9 @@ class ReportController extends Controller
     }
 
     /**
-     * Get Student Quick View template layout - simplified one-pager.
+     * Get Learner Quick View template layout - simplified one-pager.
      */
-    protected function getStudentQuickViewLayout(): array
+    protected function getLearnerQuickViewLayout(): array
     {
         return [
             [
@@ -335,7 +335,7 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 40],
                 'size' => ['width' => 720, 'height' => 50],
                 'config' => [
-                    'content' => '<h2 style="margin: 0;">Student Quick View</h2>',
+                    'content' => '<h2 style="margin: 0;">Learner Quick View</h2>',
                 ],
                 'styles' => [
                     'backgroundColor' => 'transparent',
@@ -378,9 +378,9 @@ class ReportController extends Controller
     }
 
     /**
-     * Get Student Progress template layout.
+     * Get Learner Progress template layout.
      */
-    protected function getStudentProgressLayout(): array
+    protected function getLearnerProgressLayout(): array
     {
         return [
             [
@@ -389,7 +389,7 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 40],
                 'size' => ['width' => 720, 'height' => 60],
                 'config' => [
-                    'content' => '<h1>Student Progress Report</h1>',
+                    'content' => '<h1>Learner Progress Report</h1>',
                     'format' => 'html',
                 ],
                 'styles' => [
@@ -488,7 +488,7 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 560],
                 'size' => ['width' => 710, 'height' => 180],
                 'config' => [
-                    'prompt' => 'Write a brief progress summary for this student based on their metrics.',
+                    'prompt' => 'Write a brief progress summary for this learner based on their metrics.',
                     'format' => 'narrative',
                     'context_metrics' => ['gpa', 'attendance_rate', 'wellness_score', 'engagement_score'],
                 ],
@@ -524,10 +524,10 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 120],
                 'size' => ['width' => 710, 'height' => 300],
                 'config' => [
-                    'title' => 'Student Overview',
+                    'title' => 'Learner Overview',
                     'columns' => ['name', 'gpa', 'attendance', 'risk_level'],
                     'sortable' => true,
-                    'data_source' => 'students',
+                    'data_source' => 'learners',
                 ],
                 'styles' => [
                     'backgroundColor' => '#FFFFFF',
@@ -571,9 +571,9 @@ class ReportController extends Controller
     }
 
     /**
-     * Get School Dashboard template layout.
+     * Get Organization Dashboard template layout.
      */
-    protected function getSchoolDashboardLayout(): array
+    protected function getOrganizationDashboardLayout(): array
     {
         return [
             [
@@ -582,7 +582,7 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 40],
                 'size' => ['width' => 720, 'height' => 60],
                 'config' => [
-                    'content' => '<h1>School Performance Dashboard</h1>',
+                    'content' => '<h1>Organization Performance Dashboard</h1>',
                     'format' => 'html',
                 ],
                 'styles' => [],
@@ -593,8 +593,8 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 120],
                 'size' => ['width' => 170, 'height' => 100],
                 'config' => [
-                    'label' => 'Total Students',
-                    'data_source' => 'student_count',
+                    'label' => 'Total Learners',
+                    'data_source' => 'learner_count',
                     'show_trend' => false,
                 ],
                 'styles' => [
@@ -660,9 +660,9 @@ class ReportController extends Controller
                 'size' => ['width' => 450, 'height' => 280],
                 'config' => [
                     'chart_type' => 'line',
-                    'title' => 'School-wide Trends',
+                    'title' => 'Organization-wide Trends',
                     'metric_keys' => ['average_gpa', 'average_attendance', 'average_wellness'],
-                    'aggregation' => 'school',
+                    'aggregation' => 'organization',
                 ],
                 'styles' => [
                     'backgroundColor' => '#FFFFFF',
@@ -696,7 +696,7 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 540],
                 'size' => ['width' => 710, 'height' => 150],
                 'config' => [
-                    'prompt' => 'Provide an executive summary of school performance with key insights and recommendations.',
+                    'prompt' => 'Provide an executive summary of organization performance with key insights and recommendations.',
                     'format' => 'executive_summary',
                 ],
                 'styles' => [

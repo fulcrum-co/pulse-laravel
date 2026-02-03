@@ -522,7 +522,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
                         </svg>
-                        <div x-show="hoveredItem === 'dashboards'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Dashboards</div>
+                        <div x-show="hoveredItem === 'dashboards'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">@term('dashboard_plural')</div>
                     </a>
                     @endif
                 </div>
@@ -530,7 +530,7 @@
 
             <!-- Workspace Navigation -->
             <nav class="flex-1 py-2" :class="pulseNavCollapsed ? 'px-2 overflow-visible' : 'px-2 overflow-y-auto'">
-                <p x-show="!pulseNavCollapsed" class="px-2 mb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-content-transition">Workspace</p>
+                <p x-show="!pulseNavCollapsed" class="px-2 mb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-content-transition">@term('workspace_label')</p>
 
                 @if(RolePermissions::currentUserCanAccess('strategy'))
                 <!-- Plan -->
@@ -541,9 +541,9 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
-                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">Plan</span>
+                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">@term('plan_singular')</span>
                     </a>
-                    <div x-show="pulseNavCollapsed && hoveredItem === 'plan'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Plan</div>
+                    <div x-show="pulseNavCollapsed && hoveredItem === 'plan'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">@term('plan_singular')</div>
                 </div>
                 @endif
 
@@ -556,9 +556,9 @@
                         <svg class="w-5 h-5 flex-shrink-0 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
-                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">Reports</span>
+                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">@term('report_plural')</span>
                     </a>
-                    <div x-show="pulseNavCollapsed && hoveredItem === 'reports'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Reports</div>
+                    <div x-show="pulseNavCollapsed && hoveredItem === 'reports'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">@term('report_plural')</div>
                 </div>
                 @endif
 
@@ -571,9 +571,9 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                         </svg>
-                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">Collect</span>
+                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">@term('collect_label')</span>
                     </a>
-                    <div x-show="pulseNavCollapsed && hoveredItem === 'collect'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Collect</div>
+                    <div x-show="pulseNavCollapsed && hoveredItem === 'collect'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">@term('collect_label')</div>
                 </div>
                 @endif
 
@@ -586,9 +586,9 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
                         </svg>
-                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">Distribute</span>
+                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">@term('distribute_label')</span>
                     </a>
-                    <div x-show="pulseNavCollapsed && hoveredItem === 'distribute'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Distribute</div>
+                    <div x-show="pulseNavCollapsed && hoveredItem === 'distribute'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">@term('distribute_label')</div>
                 </div>
                 @endif
 
@@ -601,9 +601,9 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
-                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">Resource</span>
+                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">@term('resource_singular')</span>
                     </a>
-                    <div x-show="pulseNavCollapsed && hoveredItem === 'resource'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Resource</div>
+                    <div x-show="pulseNavCollapsed && hoveredItem === 'resource'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">@term('resource_singular')</div>
                 </div>
                 @endif
 
@@ -616,7 +616,7 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                         </svg>
-                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">Marketplace</span>
+                        <span x-show="!pulseNavCollapsed" class="font-medium sidebar-content-transition">@term('marketplace_label')</span>
                     </a>
                     <div x-show="pulseNavCollapsed && hoveredItem === 'marketplace'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace</div>
                 </div>

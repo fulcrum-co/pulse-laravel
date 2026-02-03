@@ -13,7 +13,7 @@ class ContentModerationResultPolicy
     /**
      * Roles that can access the moderation queue.
      */
-    protected array $moderatorRoles = ['admin', 'consultant', 'superintendent', 'school_admin'];
+    protected array $moderatorRoles = ['admin', 'consultant', 'superintendent', 'organization_admin'];
 
     /**
      * Can user view the moderation queue?
@@ -37,8 +37,8 @@ class ContentModerationResultPolicy
             return true;
         }
 
-        // School admins see their org's items
-        if ($user->effective_role === 'school_admin') {
+        // Organization admins see their org's items
+        if ($user->effective_role === 'organization_admin') {
             return true;
         }
 
@@ -68,7 +68,7 @@ class ContentModerationResultPolicy
         }
 
         // Only admins can assign
-        return in_array($user->effective_role, ['admin', 'consultant', 'superintendent', 'school_admin']);
+        return in_array($user->effective_role, ['admin', 'consultant', 'superintendent', 'organization_admin']);
     }
 
     /**
@@ -109,8 +109,8 @@ class ContentModerationResultPolicy
             return true;
         }
 
-        // School admin can manage in their org
-        if ($user->effective_role === 'school_admin') {
+        // Organization admin can manage in their org
+        if ($user->effective_role === 'organization_admin') {
             return true;
         }
 

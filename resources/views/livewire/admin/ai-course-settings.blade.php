@@ -200,8 +200,8 @@
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-900">{{ $workflow->course->title ?? 'Untitled Course' }}</p>
                             <p class="text-xs text-gray-500 mt-1">
-                                @if($workflow->course->target_entity_type === 'student')
-                                    <span class="text-blue-600">For Student</span>
+                                @if($workflow->course->target_entity_type === 'learner')
+                                    <span class="text-blue-600">For Learner</span>
                                 @elseif($workflow->course->target_entity_type === 'teacher')
                                     <span class="text-green-600">For Teacher</span>
                                 @else

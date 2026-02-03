@@ -1,15 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\ContactMetric;
 use App\Models\MetricThreshold;
-use App\Models\Student;
+use App\Models\Learner;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
-class ContactMetricService
-{
+    protected \App\Services\Domain\MetricNormalizationService $normalizationService;
+    protected \App\Services\Domain\OrganizationYearCalculationService $organizationYearService;
+
+    public function __construct()
+    {
+        $this->normalizationService = app(\App\Services\Domain\MetricNormalizationService::class);
+        $this->organizationYearService = app(\App\Services\Domain\OrganizationYearCalculationService::class);
+    }
+
     /**
      * Ingest a metric from any source.
      */
@@ -25,7 +34,7 @@ class ContactMetricService
 
         if ($threshold && isset($data['numeric_value'])) {
             $data['status'] = $threshold->calculateStatus($data['numeric_value']);
-            $data['normalized_score'] = $this->normalizeScore($data['numeric_value'], $threshold);
+            $data['normalized_score'] = $this->normalizationService->normalizeScore($data['numeric_value'], $threshold);
         }
 
         return ContactMetric::create($data);
@@ -52,26 +61,26 @@ class ContactMetricService
                 'day' => $metric->period_start->format('Y-m-d'),
                 'week' => $metric->period_start->startOfWeek()->format('Y-m-d'),
                 'month' => $metric->period_start->format('Y-m'),
-                'quarter' => $metric->school_year.'-Q'.$metric->quarter,
+                'quarter' => $metric->organization_year.'-Q'.$metric->quarter,
                 default => $metric->period_start->format('Y-m-d'),
             };
         });
     }
 
     /**
-     * Get heat map data for student plan progress.
+     * Get heat map data for learner plan progress.
      */
     public function getHeatMapData(
-        Student $student,
-        string $schoolYear,
+        Learner $learner,
+        string $organizationYear,
         array $categories = ['academics', 'attendance', 'behavior', 'life_skills']
     ): array {
-        $metrics = ContactMetric::forContact(Student::class, $student->id)
-            ->forSchoolYear($schoolYear)
+        $metrics = ContactMetric::forContact(Learner::class, $learner->id)
+            ->forOrganizationYear($organizationYear)
             ->whereIn('metric_category', $categories)
             ->get();
 
-        $thresholds = MetricThreshold::where('org_id', $student->org_id)
+        $thresholds = MetricThreshold::where('org_id', $learner->org_id)
             ->whereIn('metric_category', $categories)
             ->active()
             ->get()
@@ -149,8 +158,8 @@ class ContactMetricService
         foreach ($sisData as $record) {
             $this->ingestMetric([
                 'org_id' => $orgId,
-                'contact_type' => Student::class,
-                'contact_id' => $record['student_id'],
+                'contact_type' => Learner::class,
+                'contact_id' => $record['learner_id'],
                 'metric_category' => $record['category'],
                 'metric_key' => $record['metric'],
                 'numeric_value' => $record['value'],
@@ -169,16 +178,16 @@ class ContactMetricService
     /**
      * Import metrics from survey response.
      */
-    public function importFromSurvey(int $orgId, int $studentId, int $surveyAttemptId, array $scores): int
+    public function importFromSurvey(int $orgId, int $learnerId, int $surveyAttemptId, array $scores): int
     {
         $count = 0;
         foreach ($scores as $key => $value) {
-            $category = $this->getCategoryFromKey($key);
+            $category = $this->normalizationService->getCategoryFromKey($key);
 
             $this->ingestMetric([
                 'org_id' => $orgId,
-                'contact_type' => Student::class,
-                'contact_id' => $studentId,
+                'contact_type' => Learner::class,
+                'contact_id' => $learnerId,
                 'metric_category' => $category,
                 'metric_key' => $key,
                 'numeric_value' => $value,
@@ -208,69 +217,11 @@ class ContactMetricService
     }
 
     /**
-     * Normalize score to 0-100 scale.
+     * Get current organization year string.
      */
-    private function normalizeScore(float $value, MetricThreshold $threshold): float
+    public function getCurrentOrganizationYear(): string
     {
-        $min = $threshold->off_track_min ?? 0;
-        $max = $threshold->on_track_min ?? 100;
-
-        if ($max == $min) {
-            return 50;
-        }
-
-        return min(100, max(0, (($value - $min) / ($max - $min)) * 100));
-    }
-
-    /**
-     * Get human-readable label for metric key.
-     */
-    private function getMetricLabel(string $key): string
-    {
-        return match ($key) {
-            'gpa' => 'GPA',
-            'wellness_score' => 'Health & Wellness',
-            'emotional_wellbeing' => 'Emotional Well-Being',
-            'engagement_score' => 'Engagement',
-            'plan_progress' => 'Student Plan Progress',
-            'attendance_rate' => 'Attendance',
-            default => ucwords(str_replace('_', ' ', $key)),
-        };
-    }
-
-    /**
-     * Get category from metric key.
-     */
-    private function getCategoryFromKey(string $key): string
-    {
-        $categoryMap = [
-            'gpa' => ContactMetric::CATEGORY_ACADEMICS,
-            'homework_completion' => ContactMetric::CATEGORY_ACADEMICS,
-            'test_scores' => ContactMetric::CATEGORY_ACADEMICS,
-            'attendance_rate' => ContactMetric::CATEGORY_ATTENDANCE,
-            'absences' => ContactMetric::CATEGORY_ATTENDANCE,
-            'tardies' => ContactMetric::CATEGORY_ATTENDANCE,
-            'discipline_incidents' => ContactMetric::CATEGORY_BEHAVIOR,
-            'behavior_score' => ContactMetric::CATEGORY_BEHAVIOR,
-            'wellness_score' => ContactMetric::CATEGORY_WELLNESS,
-            'emotional_wellbeing' => ContactMetric::CATEGORY_WELLNESS,
-            'engagement_score' => ContactMetric::CATEGORY_ENGAGEMENT,
-            'life_skills_score' => ContactMetric::CATEGORY_LIFE_SKILLS,
-            'plan_progress' => ContactMetric::CATEGORY_ACADEMICS,
-        ];
-
-        return $categoryMap[$key] ?? ContactMetric::CATEGORY_ACADEMICS;
-    }
-
-    /**
-     * Get current school year string.
-     */
-    public function getCurrentSchoolYear(): string
-    {
-        $now = now();
-        $year = $now->month >= 8 ? $now->year : $now->year - 1;
-
-        return $year.'-'.($year + 1);
+        return $this->organizationYearService->getCurrentOrganizationYear();
     }
 
     /**
@@ -278,15 +229,6 @@ class ContactMetricService
      */
     public function getCurrentQuarter(): int
     {
-        $month = now()->month;
-
-        // Assuming school year starts in August
-        // Q1: Aug-Oct, Q2: Nov-Jan, Q3: Feb-Apr, Q4: May-Jul
-        return match (true) {
-            $month >= 8 && $month <= 10 => 1,
-            $month >= 11 || $month <= 1 => 2,
-            $month >= 2 && $month <= 4 => 3,
-            default => 4,
-        };
+        return $this->organizationYearService->getCurrentQuarter();
     }
 }

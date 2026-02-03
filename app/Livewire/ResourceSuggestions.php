@@ -50,7 +50,7 @@ class ResourceSuggestions extends Component
 
         // Map shorthand contact type to full class name
         $typeMap = [
-            'student' => 'App\\Models\\Student',
+            'learner' => 'App\\Models\\Learner',
             'user' => 'App\\Models\\User',
         ];
         $fullContactType = $typeMap[$this->contactType] ?? $this->contactType;
@@ -104,7 +104,7 @@ class ResourceSuggestions extends Component
     {
         // Map shorthand contact type to full class name
         $typeMap = [
-            'student' => 'App\\Models\\Student',
+            'learner' => 'App\\Models\\Learner',
             'user' => 'App\\Models\\User',
         ];
         $fullContactType = $typeMap[$this->contactType] ?? $this->contactType;

@@ -16,11 +16,11 @@
                 <div class="flex items-center justify-center gap-4 text-sm text-gray-500 mb-8">
                     <div class="flex items-center gap-1">
                         <x-icon name="question-mark-circle" class="w-4 h-4" />
-                        {{ count($survey->questions ?? []) }} questions
+                        {{ count($survey->questions ?? []) }} @term('questions_label')
                     </div>
                     <div class="flex items-center gap-1">
                         <x-icon name="clock" class="w-4 h-4" />
-                        ~{{ $survey->estimated_duration_minutes ?? 5 }} min
+                        ~{{ $survey->estimated_duration_minutes ?? 5 }} @term('minutes_label')
                     </div>
                 </div>
 
@@ -28,7 +28,7 @@
                     <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-6">
                         <div class="flex items-center gap-2 text-green-800 text-sm">
                             <x-icon name="shield-check" class="w-5 h-5" />
-                            <span>Your responses are anonymous</span>
+                            <span>@term('anonymous_responses_label')</span>
                         </div>
                     </div>
                 @endif
@@ -37,7 +37,7 @@
                     wire:click="startSurvey"
                     class="w-full py-3 px-6 bg-pulse-orange-500 text-white font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
                 >
-                    Start Survey
+                    @term('start_survey_label')
                 </button>
             </div>
 
@@ -48,19 +48,19 @@
                     <x-icon name="check-circle" class="w-10 h-10 text-green-600" />
                 </div>
 
-                <h1 class="text-2xl font-bold text-gray-900 mb-2">Thank You!</h1>
-                <p class="text-gray-600 mb-6">Your responses have been submitted successfully.</p>
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">@term('thank_you_label')</h1>
+                <p class="text-gray-600 mb-6">@term('responses_submitted_label')</p>
 
                 @if($attempt->risk_level === 'high')
                     <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
                         <p class="text-amber-800 text-sm">
                             Based on your responses, a staff member may reach out to check in with you.
-                            If you need immediate support, please contact your school counselor.
+                            If you need immediate support, please contact your organization counselor.
                         </p>
                     </div>
                 @endif
 
-                <p class="text-sm text-gray-500">You can close this window now.</p>
+                <p class="text-sm text-gray-500">@term('close_window_label')</p>
             </div>
 
         {{-- Question Display --}}
@@ -80,7 +80,7 @@
                     <div class="p-8">
                         {{-- Question Counter --}}
                         <div class="text-sm text-gray-500 mb-4">
-                            Question {{ $currentQuestionIndex + 1 }} of {{ count($survey->questions) }}
+                            @term('question_singular') {{ $currentQuestionIndex + 1 }} @term('question_of_label') {{ count($survey->questions) }}
                         </div>
 
                         {{-- Question Text --}}
@@ -107,8 +107,8 @@
                                     @endfor
                                 </div>
                                 <div class="flex justify-between mt-3 text-sm text-gray-500">
-                                    <span>{{ $currentQuestion['options']['1'] ?? 'Not at all' }}</span>
-                                    <span>{{ $currentQuestion['options']['5'] ?? 'Very much' }}</span>
+                                    <span>{{ $currentQuestion['options']['1'] ?? app(\App\Services\TerminologyService::class)->get('scale_low_label') }}</span>
+                                    <span>{{ $currentQuestion['options']['5'] ?? app(\App\Services\TerminologyService::class)->get('scale_high_label') }}</span>
                                 </div>
                             </div>
 
@@ -130,14 +130,14 @@
                                     x-model="answer"
                                     rows="4"
                                     class="w-full rounded-lg border-gray-300 focus:border-pulse-orange-500 focus:ring-pulse-orange-500"
-                                    placeholder="Type your answer here..."
+                                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('answer_here_label') }}"
                                 ></textarea>
                                 <button
                                     @click="$wire.submitAnswer(answer)"
                                     x-bind:disabled="!answer.trim()"
                                     class="mt-4 w-full py-3 px-6 bg-pulse-orange-500 text-white font-medium rounded-lg hover:bg-pulse-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
-                                    Continue
+                                    @term('continue_label')
                                 </button>
                             </div>
 
@@ -151,7 +151,7 @@
                                     >
                                         <x-icon name="microphone" class="w-8 h-8" />
                                     </button>
-                                    <p class="text-gray-600" x-text="isRecording ? 'Recording... Tap to stop' : 'Tap to record your answer'"></p>
+                                    <p class="text-gray-600" x-text="isRecording ? '{{ app(\App\Services\TerminologyService::class)->get('recording_tap_to_stop_label') }}' : '{{ app(\App\Services\TerminologyService::class)->get('tap_to_record_label') }}'"></p>
                                 </div>
 
                                 <template x-if="transcription">
@@ -161,7 +161,7 @@
                                             @click="$wire.submitAnswer(transcription)"
                                             class="mt-3 w-full py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600"
                                         >
-                                            Submit Answer
+                                            @term('submit_answer_label')
                                         </button>
                                     </div>
                                 </template>
@@ -175,7 +175,7 @@
                                 class="text-gray-500 hover:text-gray-700 text-sm {{ $currentQuestionIndex === 0 ? 'invisible' : '' }}"
                             >
                                 <x-icon name="arrow-left" class="w-4 h-4 inline mr-1" />
-                                Previous
+                                @term('previous_label')
                             </button>
 
                             @if(!($currentQuestion['required'] ?? true))
@@ -183,7 +183,7 @@
                                     wire:click="skipQuestion"
                                     class="text-gray-400 hover:text-gray-600 text-sm"
                                 >
-                                    Skip
+                                    @term('skip_label')
                                 </button>
                             @endif
                         </div>

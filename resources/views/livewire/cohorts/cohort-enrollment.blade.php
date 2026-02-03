@@ -123,7 +123,7 @@
                         <div class="mt-4 p-3 bg-gray-50 rounded-lg">
                             <p class="text-sm font-medium text-gray-700 mb-2">CSV Template</p>
                             <code class="text-xs text-gray-600 block">email,name,role</code>
-                            <code class="text-xs text-gray-600 block">john@example.com,John Doe,student</code>
+                            <code class="text-xs text-gray-600 block">john@example.com,John Doe,learner</code>
                             <code class="text-xs text-gray-600 block">jane@example.com,Jane Smith,mentor</code>
                         </div>
                     @else

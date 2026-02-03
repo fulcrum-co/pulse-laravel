@@ -10,7 +10,7 @@ use App\Models\MiniCourseSuggestion;
 use App\Models\Organization;
 use App\Models\Provider;
 use App\Models\Resource;
-use App\Models\Student;
+use App\Models\Learner;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -18,17 +18,17 @@ class MiniCourseSeeder extends Seeder
 {
     public function run(): void
     {
-        $school = Organization::where('org_type', 'school')->first();
-        if (! $school) {
-            $school = Organization::first();
+        $organization = Organization::where('org_type', 'organization')->first();
+        if (! $organization) {
+            $organization = Organization::first();
         }
-        if (! $school) {
+        if (! $organization) {
             $this->command->error('No organization found. Please seed organizations first.');
 
             return;
         }
 
-        $admin = User::where('org_id', $school->id)->first();
+        $admin = User::where('org_id', $organization->id)->first();
         if (! $admin) {
             $admin = User::first();
         }
@@ -38,7 +38,7 @@ class MiniCourseSeeder extends Seeder
             return;
         }
 
-        $counselor = User::where('primary_role', 'counselor')->where('org_id', $school->id)->first() ?? $admin;
+        $counselor = User::where('primary_role', 'counselor')->where('org_id', $organization->id)->first() ?? $admin;
 
         // Get some resources and providers to link in courses
         $anxietyResource = Resource::where('category', 'anxiety')->first();
@@ -48,7 +48,7 @@ class MiniCourseSeeder extends Seeder
 
         // Course 1: Stress Management (comprehensive example)
         $stressCourse = MiniCourse::create([
-            'org_id' => $school->id,
+            'org_id' => $organization->id,
             'title' => 'Stress Management Foundations',
             'description' => 'Learn practical techniques to identify, understand, and manage stress effectively. This course combines education, self-reflection, and actionable strategies.',
             'objectives' => [
@@ -57,7 +57,7 @@ class MiniCourseSeeder extends Seeder
                 'Create a personalized stress management plan',
                 'Identify healthy vs unhealthy coping mechanisms',
             ],
-            'rationale' => 'Stress management is a foundational life skill that impacts academic performance, relationships, and overall wellbeing. This course was designed to give students practical tools they can use immediately.',
+            'rationale' => 'Stress management is a foundational life skill that impacts academic performance, relationships, and overall wellbeing. This course was designed to give learners practical tools they can use immediately.',
             'expected_experience' => 'You\'ll watch a short video, complete reflection exercises, practice mindfulness techniques, and create a personal action plan. The course takes about 45 minutes to complete, but you can take breaks and return anytime.',
             'course_type' => MiniCourse::TYPE_WELLNESS,
             'creation_source' => MiniCourse::SOURCE_HUMAN_CREATED,
@@ -79,7 +79,7 @@ class MiniCourseSeeder extends Seeder
 
         // Course 2: Study Skills Booster (AI-generated example)
         $studyCourse = MiniCourse::create([
-            'org_id' => $school->id,
+            'org_id' => $organization->id,
             'title' => 'Study Skills Booster',
             'description' => 'Discover effective study techniques backed by cognitive science. Learn how your brain learns best and build habits for academic success.',
             'objectives' => [
@@ -88,8 +88,8 @@ class MiniCourseSeeder extends Seeder
                 'Create an effective study schedule',
                 'Reduce test anxiety through preparation',
             ],
-            'rationale' => 'Many students struggle academically not due to lack of ability, but because they haven\'t learned effective study strategies. This course teaches evidence-based techniques that can significantly improve retention and performance.',
-            'expected_experience' => 'You\'ll learn about the science of learning through short readings and videos, then practice applying techniques to your own schoolwork. By the end, you\'ll have a personalized study plan.',
+            'rationale' => 'Many learners struggle academically not due to lack of ability, but because they haven\'t learned effective study strategies. This course teaches evidence-based techniques that can significantly improve retention and performance.',
+            'expected_experience' => 'You\'ll learn about the science of learning through short readings and videos, then practice applying techniques to your own organizationwork. By the end, you\'ll have a personalized study plan.',
             'course_type' => MiniCourse::TYPE_ACADEMIC,
             'creation_source' => MiniCourse::SOURCE_AI_GENERATED,
             'ai_generation_context' => [
@@ -116,7 +116,7 @@ class MiniCourseSeeder extends Seeder
 
         // Course 3: Building Self-Confidence (draft example)
         $confidenceCourse = MiniCourse::create([
-            'org_id' => $school->id,
+            'org_id' => $organization->id,
             'title' => 'Building Self-Confidence',
             'description' => 'Develop a stronger sense of self-worth and learn to believe in your abilities. This course combines psychology insights with practical exercises.',
             'objectives' => [
@@ -142,7 +142,7 @@ class MiniCourseSeeder extends Seeder
 
         // Course 4: Anger Management Essentials
         $angerCourse = MiniCourse::create([
-            'org_id' => $school->id,
+            'org_id' => $organization->id,
             'title' => 'Anger Management Essentials',
             'description' => 'Learn to recognize anger triggers, understand the emotion, and develop healthy ways to express and manage anger.',
             'objectives' => [
@@ -151,7 +151,7 @@ class MiniCourseSeeder extends Seeder
                 'Learn and practice de-escalation techniques',
                 'Develop healthy expression strategies',
             ],
-            'rationale' => 'Anger is a normal emotion, but without healthy management skills, it can damage relationships and lead to regrettable actions. This course teaches students to work with anger constructively.',
+            'rationale' => 'Anger is a normal emotion, but without healthy management skills, it can damage relationships and lead to regrettable actions. This course teaches learners to work with anger constructively.',
             'expected_experience' => 'You\'ll learn about the anger cycle, practice breathing and grounding techniques, and develop a personal anger management toolkit through interactive exercises.',
             'course_type' => MiniCourse::TYPE_BEHAVIORAL,
             'creation_source' => MiniCourse::SOURCE_HUMAN_CREATED,
@@ -170,7 +170,7 @@ class MiniCourseSeeder extends Seeder
 
         // Course 5: Goal Setting Workshop (intervention type)
         $goalCourse = MiniCourse::create([
-            'org_id' => $school->id,
+            'org_id' => $organization->id,
             'title' => 'Goal Setting Workshop',
             'description' => 'Transform your dreams into achievable goals using proven frameworks. Learn to set SMART goals and create action plans.',
             'objectives' => [
@@ -179,7 +179,7 @@ class MiniCourseSeeder extends Seeder
                 'Break big goals into manageable steps',
                 'Track progress and adjust plans',
             ],
-            'rationale' => 'Goal-setting is a critical skill for academic success and life satisfaction. Students who learn to set and pursue meaningful goals show improved motivation and achievement.',
+            'rationale' => 'Goal-setting is a critical skill for academic success and life satisfaction. Learners who learn to set and pursue meaningful goals show improved motivation and achievement.',
             'expected_experience' => 'Through guided worksheets and reflection prompts, you\'ll identify what matters most to you and create a concrete plan to achieve your goals.',
             'course_type' => MiniCourse::TYPE_INTERVENTION,
             'creation_source' => MiniCourse::SOURCE_HYBRID,
@@ -196,11 +196,11 @@ class MiniCourseSeeder extends Seeder
         $this->createGoalSettingSteps($goalCourse);
         $goalCourse->createVersion('Published version with reflection prompts');
 
-        // Create enrollments for some students
-        $this->createSampleEnrollments($school, [$stressCourse, $studyCourse, $angerCourse, $goalCourse], $counselor);
+        // Create enrollments for some learners
+        $this->createSampleEnrollments($organization, [$stressCourse, $studyCourse, $angerCourse, $goalCourse], $counselor);
 
-        // Create course suggestions for high-risk students
-        $this->createSampleSuggestions($school, [$stressCourse, $studyCourse, $angerCourse, $goalCourse]);
+        // Create course suggestions for high-risk learners
+        $this->createSampleSuggestions($organization, [$stressCourse, $studyCourse, $angerCourse, $goalCourse]);
     }
 
     private function createStressManagementSteps(MiniCourse $course, ?Resource $resource): void
@@ -261,7 +261,7 @@ class MiniCourseSeeder extends Seeder
                 'body' => "Understanding your personal stress signals is the first step to managing them effectively. Everyone experiences stress differently.\n\nTake your time with these reflections - the more honest you are, the more helpful this will be.",
                 'prompts' => [
                     'What physical signs do you notice when you\'re stressed? (headaches, tight shoulders, stomach aches, etc.)',
-                    'What situations at school tend to stress you out the most?',
+                    'What situations at organization tend to stress you out the most?',
                     'How do you currently cope with stress? (Be honest - no judgment!)',
                     'On a scale of 1-10, how stressed have you felt this past week?',
                 ],
@@ -345,7 +345,7 @@ class MiniCourseSeeder extends Seeder
             'instructions' => 'Based on what you\'ve learned, create your personal stress management plan by answering these questions.',
             'content_type' => MiniCourseStep::CONTENT_TEXT,
             'content_data' => [
-                'body' => "Now it's time to create YOUR personal stress management toolkit. There's no one-size-fits-all approach - the best plan works for your life, schedule, and triggers.\n\nBe specific in your answers. Instead of \"exercise more,\" try \"walk for 15 minutes after school on Mondays, Wednesdays, and Fridays.\"",
+                'body' => "Now it's time to create YOUR personal stress management toolkit. There's no one-size-fits-all approach - the best plan works for your life, schedule, and triggers.\n\nBe specific in your answers. Instead of \"exercise more,\" try \"walk for 15 minutes after organization on Mondays, Wednesdays, and Fridays.\"",
                 'prompts' => [
                     'List 3 healthy coping strategies you will try this week (be specific about when and how):',
                     'Who are 2-3 people you can talk to when feeling stressed?',
@@ -359,8 +359,8 @@ class MiniCourseSeeder extends Seeder
                         'url' => 'https://www.crisistextline.org/',
                     ],
                     [
-                        'title' => 'School Counseling Office',
-                        'description' => 'Schedule a free appointment with your school counselor',
+                        'title' => 'Organization Counseling Office',
+                        'description' => 'Schedule a free appointment with your organization counselor',
                     ],
                     [
                         'title' => 'Teen Line',
@@ -537,11 +537,11 @@ class MiniCourseSeeder extends Seeder
                 'resources' => [
                     [
                         'title' => 'Academic Support Center',
-                        'description' => 'Free tutoring and study skills coaching for all students',
+                        'description' => 'Free tutoring and study skills coaching for all learners',
                     ],
                     [
                         'title' => 'Peer Tutoring Program',
-                        'description' => 'Get help from high-achieving students in your subjects',
+                        'description' => 'Get help from high-achieving learners in your subjects',
                     ],
                     [
                         'title' => 'Khan Academy',
@@ -670,7 +670,7 @@ class MiniCourseSeeder extends Seeder
                 ],
                 'resources' => [
                     [
-                        'title' => 'School Counseling Office',
+                        'title' => 'Organization Counseling Office',
                         'description' => 'Talk to a counselor about building self-confidence',
                     ],
                     [
@@ -787,7 +787,7 @@ class MiniCourseSeeder extends Seeder
                 'recommendation' => 'A therapist can help you develop personalized strategies for managing intense anger.',
                 'resources' => [
                     [
-                        'title' => 'School Counseling Office',
+                        'title' => 'Organization Counseling Office',
                         'description' => 'Free, confidential support from trained counselors',
                     ],
                     [
@@ -895,7 +895,7 @@ class MiniCourseSeeder extends Seeder
                 'body' => "Goals work best when they connect to what you truly care about. Take a moment to think about different areas of your life:\n\n- **Academic:** Grades, skills, college prep\n- **Social:** Friendships, relationships, communication\n- **Health:** Physical fitness, sleep, mental health\n- **Personal:** Hobbies, creativity, self-improvement\n- **Future:** Career, independence, life skills\n\nThere are no wrong answers here - this is about discovering what matters to YOU.",
                 'prompts' => [
                     'What do you want your life to look like in 1 year? Be specific.',
-                    'What\'s one thing you wish was different about school right now?',
+                    'What\'s one thing you wish was different about organization right now?',
                     'What skill would make the biggest difference in your life if you developed it?',
                     'What achievement would make you genuinely proud of yourself?',
                 ],
@@ -904,7 +904,7 @@ class MiniCourseSeeder extends Seeder
                         'id' => 'goal_area',
                         'question' => 'Which area of your life do you most want to improve?',
                         'type' => 'multiple_choice',
-                        'options' => ['Academic/School', 'Social/Relationships', 'Health/Wellness', 'Personal Growth', 'Future/Career'],
+                        'options' => ['Academic/Organization', 'Social/Relationships', 'Health/Wellness', 'Personal Growth', 'Future/Career'],
                     ],
                 ],
             ],
@@ -952,23 +952,23 @@ class MiniCourseSeeder extends Seeder
         ]);
     }
 
-    private function createSampleEnrollments(Organization $school, array $courses, User $counselor): void
+    private function createSampleEnrollments(Organization $organization, array $courses, User $counselor): void
     {
-        $students = Student::where('org_id', $school->id)->take(10)->get();
+        $learners = Learner::where('org_id', $organization->id)->take(10)->get();
 
-        if ($students->isEmpty()) {
-            return; // No students to enroll
+        if ($learners->isEmpty()) {
+            return; // No learners to enroll
         }
 
-        foreach ($students as $index => $student) {
-            // Enroll some students in courses with varying progress
+        foreach ($learners as $index => $learner) {
+            // Enroll some learners in courses with varying progress
             $course = $courses[$index % count($courses)];
             if ($course->status !== MiniCourse::STATUS_ACTIVE) {
                 continue;
             }
 
             // Skip if already enrolled (prevents duplicate key error)
-            if (MiniCourseEnrollment::where('mini_course_id', $course->id)->where('student_id', $student->id)->exists()) {
+            if (MiniCourseEnrollment::where('mini_course_id', $course->id)->where('learner_id', $learner->id)->exists()) {
                 continue;
             }
 
@@ -981,7 +981,7 @@ class MiniCourseSeeder extends Seeder
             $enrollment = MiniCourseEnrollment::create([
                 'mini_course_id' => $course->id,
                 'mini_course_version_id' => $course->current_version_id,
-                'student_id' => $student->id,
+                'learner_id' => $learner->id,
                 'enrolled_by' => $counselor->id,
                 'enrollment_source' => collect([
                     MiniCourseEnrollment::SOURCE_MANUAL,
@@ -1029,35 +1029,35 @@ class MiniCourseSeeder extends Seeder
         }
     }
 
-    private function createSampleSuggestions(Organization $school, array $courses): void
+    private function createSampleSuggestions(Organization $organization, array $courses): void
     {
-        $highRiskStudents = Student::where('org_id', $school->id)
+        $highRiskLearners = Learner::where('org_id', $organization->id)
             ->where('risk_level', 'high')
             ->take(5)
             ->get();
 
-        if ($highRiskStudents->isEmpty()) {
-            return; // No high-risk students for suggestions
+        if ($highRiskLearners->isEmpty()) {
+            return; // No high-risk learners for suggestions
         }
 
-        foreach ($highRiskStudents as $student) {
+        foreach ($highRiskLearners as $learner) {
             $course = $courses[array_rand($courses)];
             if ($course->status !== MiniCourse::STATUS_ACTIVE) {
                 continue;
             }
 
             // Skip if suggestion already exists (prevents duplicate key error)
-            if (MiniCourseSuggestion::where('contact_type', Student::class)
-                ->where('contact_id', $student->id)
+            if (MiniCourseSuggestion::where('contact_type', Learner::class)
+                ->where('contact_id', $learner->id)
                 ->where('mini_course_id', $course->id)
                 ->exists()) {
                 continue;
             }
 
             MiniCourseSuggestion::create([
-                'org_id' => $school->id,
-                'contact_type' => Student::class,
-                'contact_id' => $student->id,
+                'org_id' => $organization->id,
+                'contact_type' => Learner::class,
+                'contact_id' => $learner->id,
                 'mini_course_id' => $course->id,
                 'suggestion_source' => MiniCourseSuggestion::SOURCE_AI_GENERATED,
                 'relevance_score' => rand(75, 98) / 100,
@@ -1066,10 +1066,10 @@ class MiniCourseSeeder extends Seeder
                     'recent_survey_score' => rand(3, 5),
                     'attendance_rate' => rand(70, 85),
                 ],
-                'ai_rationale' => "Based on {$student->full_name}'s recent assessment results and behavioral patterns, this course could help address identified areas of concern. The student's profile matches the target audience for this intervention.",
+                'ai_rationale' => "Based on {$learner->full_name}'s recent assessment results and behavioral patterns, this course could help address identified areas of concern. The learner's profile matches the target audience for this intervention.",
                 'ai_explanation' => [
                     'primary_signals' => ['elevated risk score', 'survey responses indicating stress'],
-                    'similar_student_outcomes' => '78% of similar students showed improvement after completing this course',
+                    'similar_learner_outcomes' => '78% of similar learners showed improvement after completing this course',
                     'expected_benefits' => ['improved coping skills', 'reduced stress indicators'],
                 ],
                 'intended_outcomes' => [

@@ -19,12 +19,12 @@ return new class extends Migration
             $table->foreignId('provider_id')->constrained()->cascadeOnDelete();
             $table->foreignId('conversation_id')->nullable()->constrained('provider_conversations')->nullOnDelete();
 
-            // Who booked (User or Student)
-            $table->string('booked_by_type'); // 'App\Models\User' or 'App\Models\Student'
+            // Who booked (User or Learner)
+            $table->string('booked_by_type'); // 'App\Models\User' or 'App\Models\Learner'
             $table->unsignedBigInteger('booked_by_id');
 
-            // Student receiving service
-            $table->foreignId('student_id')->constrained()->cascadeOnDelete();
+            // Learner receiving service
+            $table->foreignId('learner_id')->constrained()->cascadeOnDelete();
 
             // Booking details
             $table->enum('booking_type', ['consultation', 'session', 'assessment'])->default('session');

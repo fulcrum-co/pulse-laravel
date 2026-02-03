@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Reports\Concerns;
 
-use App\Models\Student;
+use App\Models\Learner;
 use App\Services\ContactMetricService;
 use App\Services\ReportAIService;
 use App\Services\ReportDataService;
@@ -32,7 +32,7 @@ trait WithChartData
             $dateRange = $this->getDateRangeForFilters();
 
             if ($this->filters['scope'] === 'individual' && $this->filters['contact_id']) {
-                $contactType = $this->filters['contact_type'] === 'student' ? Student::class : 'App\\Models\\User';
+                $contactType = $this->filters['contact_type'] === 'learner' ? Learner::class : 'App\\Models\\User';
                 $data = $metricService->getChartData(
                     $contactType,
                     (int) $this->filters['contact_id'],
@@ -72,7 +72,7 @@ trait WithChartData
         $metricsData = [];
         if ($this->filters['scope'] === 'individual' && $this->filters['contact_id']) {
             $metricsData = $aiService->getMetricsForContext(
-                $this->filters['contact_type'] === 'student' ? Student::class : 'App\\Models\\User',
+                $this->filters['contact_type'] === 'learner' ? Learner::class : 'App\\Models\\User',
                 (int) $this->filters['contact_id'],
                 $contextMetrics,
             );
@@ -80,7 +80,7 @@ trait WithChartData
             $dataService = app(ReportDataService::class);
             $metricsData = $dataService->getAggregatedData(
                 $user->org_id,
-                $this->filters['scope'] ?? 'school',
+                $this->filters['scope'] ?? 'organization',
                 $this->filters,
                 $contextMetrics,
             );
@@ -96,7 +96,7 @@ trait WithChartData
         $content = $aiService->generateAdaptiveText(
             $context,
             $format,
-            $user->organization?->name ?? 'School',
+            $user->organization?->name ?? 'Organization',
         );
 
         foreach ($this->elements as &$el) {
@@ -174,7 +174,7 @@ trait WithChartData
 
         if ($this->filters['scope'] === 'individual' && $this->filters['contact_id']) {
             $metric = \App\Models\ContactMetric::forContact(
-                $this->filters['contact_type'] === 'student' ? Student::class : 'App\\Models\\User',
+                $this->filters['contact_type'] === 'learner' ? Learner::class : 'App\\Models\\User',
                 (int) $this->filters['contact_id'],
             )
                 ->where('metric_key', $metricKey)
@@ -187,7 +187,7 @@ trait WithChartData
         $dataService = app(ReportDataService::class);
         $aggregates = $dataService->getAggregatedData(
             $user->org_id,
-            'school',
+            'organization',
             $this->filters,
             [$metricKey],
         );

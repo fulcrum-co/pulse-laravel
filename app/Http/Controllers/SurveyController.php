@@ -673,7 +673,7 @@ class SurveyController extends Controller
         $validated = $request->validate([
             'channel' => 'required|string|in:web,sms,voice_call,whatsapp,chat',
             'recipients' => 'required|array|min:1',
-            'recipients.*.type' => 'required|string|in:student,user',
+            'recipients.*.type' => 'required|string|in:learner,user',
             'recipients.*.id' => 'required|integer',
             'recipients.*.phone_number' => 'required_unless:channel,web|string',
             'scheduled_for' => 'nullable|date|after:now',

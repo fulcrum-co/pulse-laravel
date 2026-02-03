@@ -19,7 +19,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('org_id')->constrained('organizations')->cascadeOnDelete();
 
-            // Polymorphic contact reference (Student or User)
+            // Polymorphic contact reference (Learner or User)
             $table->string('contact_type');
             $table->unsignedBigInteger('contact_id');
 
@@ -46,7 +46,7 @@ return new class extends Migration
             $table->date('period_start');
             $table->date('period_end');
             $table->string('period_type')->default('point_in_time'); // point_in_time, daily, weekly, quarter, semester, year
-            $table->string('school_year')->nullable(); // 2024-2025
+            $table->string('organization_year')->nullable(); // 2024-2025
             $table->tinyInteger('quarter')->nullable(); // 1-4
 
             // Audit/FERPA
@@ -61,7 +61,7 @@ return new class extends Migration
             // Indexes for efficient querying
             $table->index(['contact_type', 'contact_id', 'metric_category']);
             $table->index(['org_id', 'metric_key', 'period_start']);
-            $table->index(['org_id', 'contact_type', 'school_year', 'quarter']);
+            $table->index(['org_id', 'contact_type', 'organization_year', 'quarter']);
             $table->index(['source_type', 'source_id']);
         });
     }

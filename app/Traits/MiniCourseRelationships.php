@@ -177,15 +177,15 @@ trait MiniCourseRelationships
     }
 
     /**
-     * Get students enrolled in this course.
+     * Get learners enrolled in this course.
      */
-    public function students()
+    public function learners()
     {
         return $this->belongsToMany(
-            \App\Models\Student::class,
+            \App\Models\Learner::class,
             'mini_course_enrollments',
             'mini_course_id',
-            'student_id'
+            'learner_id'
         )->withPivot(['status', 'progress_percentage', 'started_at', 'completed_at'])
          ->withTimestamps();
     }

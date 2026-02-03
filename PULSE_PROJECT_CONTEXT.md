@@ -1,8 +1,8 @@
-# Pulse - AI-Powered Student Support Platform
+# Pulse - AI-Powered Learner Support Platform
 
 ## Project Overview
 
-Pulse is a Laravel 12 application designed for K-12 educational organizations to monitor student well-being, identify at-risk students through data analysis, and deliver personalized interventions through mini-courses and workflows. The platform serves district administrators, school principals, counselors, teachers, and students.
+Pulse is a Laravel 12 application designed for K-12 educational organizations to monitor learner well-being, identify at-risk learners through data analysis, and deliver personalized interventions through mini-courses and workflows. The platform serves district administrators, organization principals, counselors, teachers, and learners.
 
 **Tech Stack:**
 - Laravel 12 with PHP 8.3
@@ -18,21 +18,21 @@ Pulse is a Laravel 12 application designed for K-12 educational organizations to
 ## Core Domain Concepts
 
 ### Organizations (Multi-Tenant Hierarchy)
-- **Districts** - Top-level organizations containing multiple schools
-- **Schools** - Individual schools within a district
+- **Districts** - Top-level organizations containing multiple organizations
+- **Organizations** - Individual organizations within a district
 - **Parent-Child Relationships** - Organizations can have hierarchical relationships via `parent_org_id`
-- **Downstream Organizations** - Districts can push content/resources to child schools
+- **Downstream Organizations** - Districts can push content/resources to child organizations
 
 ### Users & Roles
-- **District Admin** - Full access to district and all child schools
-- **School Principal** - Access to their school
-- **Counselor** - Student-facing, manages interventions
-- **Teacher** - Limited view of assigned students
+- **District Admin** - Full access to district and all child organizations
+- **Organization Principal** - Access to their organization
+- **Counselor** - Learner-facing, manages interventions
+- **Teacher** - Limited view of assigned learners
 - **Consultant** - External users with access to assigned organizations
-- **Student** - End users who consume mini-courses
+- **Learner** - End users who consume mini-courses
 
-### Students
-- Belong to organizations (schools)
+### Learners
+- Belong to organizations (organizations)
 - Have risk signals tracked across multiple factors
 - Can be enrolled in mini-courses
 - Have demographic data, IEP status, grade levels
@@ -57,7 +57,7 @@ organizations
 ├── id
 ├── parent_org_id (nullable, self-referential FK)
 ├── name
-├── type (district, school, etc.)
+├── type (district, organization, etc.)
 ├── settings (JSON)
 ├── course_generation_settings (JSON) -- AI course generation config
 ├── active
@@ -71,16 +71,16 @@ users
 ├── org_id (FK to organizations)
 ├── primary_role
 ├── email
-├── student_id (nullable, FK to students)
+├── learner_id (nullable, FK to learners)
 └── timestamps
 ```
 
-#### Students
+#### Learners
 ```
-students
+learners
 ├── id
 ├── org_id (FK to organizations)
-├── student_number
+├── learner_number
 ├── first_name, last_name
 ├── grade_level
 ├── demographics (JSON)
@@ -93,7 +93,7 @@ students
 ## Mini-Courses System (Learning Delivery)
 
 ### Overview
-Mini-courses are personalized learning experiences delivered to students. They consist of ordered steps with various content types and can be generated manually, from templates, or via AI.
+Mini-courses are personalized learning experiences delivered to learners. They consist of ordered steps with various content types and can be generated manually, from templates, or via AI.
 
 ### Database Schema
 
@@ -111,7 +111,7 @@ mini_courses
 ├── is_ai_generated (BOOLEAN)
 ├── template_id (FK to course_templates, nullable)
 ├── generation_request_id (FK, nullable)
-├── assigned_student_ids (JSON)
+├── assigned_learner_ids (JSON)
 ├── created_by (FK to users)
 └── timestamps, soft_deletes
 ```
@@ -143,7 +143,7 @@ mini_course_enrollments
 ├── id
 ├── mini_course_id (FK)
 ├── mini_course_version_id (FK)
-├── student_id (FK)
+├── learner_id (FK)
 ├── enrolled_by (FK to users)
 ├── enrollment_source (self_enrolled, assigned, workflow, risk_triggered)
 ├── status (not_started, in_progress, completed, dropped)
@@ -171,7 +171,7 @@ mini_course_step_progress
 | Type | Purpose | Example |
 |------|---------|---------|
 | `content` | Educational material to consume | Video lesson, reading |
-| `reflection` | Prompt for student journaling/thinking | "What triggers your stress?" |
+| `reflection` | Prompt for learner journaling/thinking | "What triggers your stress?" |
 | `action` | Task to complete outside the course | "Talk to a trusted adult" |
 | `practice` | Interactive exercise | Breathing technique practice |
 | `human_connection` | Connect with counselor/mentor | Schedule appointment |
@@ -252,7 +252,7 @@ mini_course_step_progress
 ## AI-Powered Course Generation System
 
 ### Overview
-The platform can automatically generate personalized mini-courses based on student data using a hybrid approach: curated content blocks + AI generation + external content sources.
+The platform can automatically generate personalized mini-courses based on learner data using a hybrid approach: curated content blocks + AI generation + external content sources.
 
 ### Database Schema
 
@@ -340,7 +340,7 @@ course_templates
         "topics": ["{primary_topic}"],
         "max_duration": 300
       },
-      "fallback_ai_prompt": "Create an introduction to {topic} for {grade_level} students"
+      "fallback_ai_prompt": "Create an introduction to {topic} for {grade_level} learners"
     }
   ]
 }
@@ -357,9 +357,9 @@ course_generation_requests
 ├── triggered_by_user_id (FK)
 ├── workflow_execution_id (FK, nullable)
 ├── assignment_type (individual, group)
-├── target_student_ids (JSON)
+├── target_learner_ids (JSON)
 ├── target_group_id (FK, nullable)
-├── student_context (JSON) -- Risk signals, demographics, history
+├── learner_context (JSON) -- Risk signals, demographics, history
 ├── template_id (FK, nullable)
 ├── generation_strategy (template_fill, ai_full, hybrid)
 ├── generation_params (JSON)
@@ -401,13 +401,13 @@ course_generation_requests
 
 ```
 TRIGGER SOURCES
-├── Risk Threshold (auto-detect high-risk students)
+├── Risk Threshold (auto-detect high-risk learners)
 ├── Alert Workflow (node action in workflow builder)
 └── Manual Staff Request (UI button)
            │
            ▼
 COURSE GENERATION SERVICE
-├── 1. Aggregate Student Context
+├── 1. Aggregate Learner Context
 ├── 2. Select Generation Strategy
 ├── 3. Query Content Blocks + External Sources
 ├── 4. AI Assembly/Generation
@@ -425,7 +425,7 @@ BLOCKS              SOURCES
 | Service | Purpose |
 |---------|---------|
 | `CourseGenerationService` | Main orchestrator |
-| `StudentContextAggregator` | Collects student data for personalization |
+| `LearnerContextAggregator` | Collects learner data for personalization |
 | `AIGenerationService` | Claude API integration for content generation |
 | `ExternalContentService` | YouTube, Khan Academy, uploads integration |
 | `CourseAssemblyService` | Builds final course structure |
@@ -435,7 +435,7 @@ BLOCKS              SOURCES
 ## Alert Workflows System
 
 ### Overview
-Visual workflow builder for creating automated alert rules that trigger actions based on student data changes.
+Visual workflow builder for creating automated alert rules that trigger actions based on learner data changes.
 
 ### Current State
 
@@ -477,7 +477,7 @@ workflow_executions
 
 **Conditions:**
 - `if_then` - Branch based on conditions
-- `filter` - Filter student population
+- `filter` - Filter learner population
 - `wait` - Delay execution
 
 **Actions:**
@@ -581,10 +581,10 @@ class MiniCourseStep extends Model
 
 | Component | Purpose |
 |-----------|---------|
-| `MiniCourseViewer` | Student-facing course viewer |
+| `MiniCourseViewer` | Learner-facing course viewer |
 | `AlertsIndex` | Alerts management with search, filters, views |
 | `WorkflowCanvas` | Visual workflow builder |
-| `StudentProfile` | Student detail view with risk data |
+| `LearnerProfile` | Learner detail view with risk data |
 | `GenerateCourseModal` | Manual course generation trigger |
 
 ### Common Patterns
@@ -617,7 +617,7 @@ app/
 ├── Models/
 │   ├── Organization.php
 │   ├── User.php
-│   ├── Student.php
+│   ├── Learner.php
 │   ├── MiniCourse.php
 │   ├── MiniCourseStep.php
 │   ├── MiniCourseEnrollment.php
@@ -631,7 +631,7 @@ app/
 ├── Services/
 │   ├── CourseGeneration/
 │   │   ├── CourseGenerationService.php (planned)
-│   │   ├── StudentContextAggregator.php (planned)
+│   │   ├── LearnerContextAggregator.php (planned)
 │   │   ├── AIGenerationService.php (planned)
 │   │   ├── ExternalContentService.php (planned)
 │   │   └── CourseAssemblyService.php (planned)
@@ -642,7 +642,7 @@ app/
 │   ├── ProcessCourseGeneration.php (planned)
 │   └── ProcessWorkflow.php
 └── Observers/
-    └── StudentRiskObserver.php (planned)
+    └── LearnerRiskObserver.php (planned)
 
 database/
 ├── migrations/
@@ -676,8 +676,8 @@ resources/views/
 
 | Role | Email | Organization |
 |------|-------|--------------|
-| District Admin | mchen@lincolnschools.edu | Lincoln USD |
-| School Principal | mtorres@lincolnhigh.edu | Lincoln High |
+| District Admin | mchen@lincolnorganizations.edu | Lincoln USD |
+| Organization Principal | mtorres@lincolnhigh.edu | Lincoln High |
 | Counselor | erodriguez@lincolnhigh.edu | Lincoln High |
 
 ### Demo Course: "Building Emotional Resilience"
@@ -743,7 +743,7 @@ environments:
 - [x] Rich demo course seeded
 
 ### Phase 2: Core Services (Planned)
-- [ ] StudentContextAggregator
+- [ ] LearnerContextAggregator
 - [ ] CourseAssemblyService
 - [ ] CourseGenerationService
 - [ ] ProcessCourseGeneration job

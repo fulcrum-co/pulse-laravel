@@ -20,8 +20,8 @@ return new class extends Migration
             $table->foreignId('source_org_id')->nullable()->constrained('organizations')->nullOnDelete();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->string('plan_type')->default('organizational'); // organizational, teacher, student, department, grade
-            $table->string('target_type')->nullable(); // For improvement plans: App\Models\User, App\Models\Student, App\Models\Department
+            $table->string('plan_type')->default('organizational'); // organizational, teacher, learner, department, grade
+            $table->string('target_type')->nullable(); // For improvement plans: App\Models\User, App\Models\Learner, App\Models\Department
             $table->unsignedBigInteger('target_id')->nullable(); // ID of the target entity
             $table->string('status')->default('draft'); // draft, active, completed, archived
             $table->date('start_date');

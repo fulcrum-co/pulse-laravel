@@ -210,7 +210,7 @@ class Provider extends Model
     }
 
     /**
-     * Student assignments for this provider.
+     * Learner assignments for this provider.
      */
     public function assignments(): HasMany
     {

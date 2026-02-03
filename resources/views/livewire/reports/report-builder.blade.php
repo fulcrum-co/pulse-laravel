@@ -220,7 +220,7 @@
                     @if($canPush && $reportId)
                     <div class="border-t border-gray-100 my-1"></div>
 
-                    <!-- Push to Schools -->
+                    <!-- Push to Organizations -->
                     <button
                         wire:click="openPushModal"
                         @click="open = false"
@@ -232,7 +232,7 @@
                             </svg>
                         </div>
                         <div class="text-left">
-                            <div class="font-medium">Push to Schools</div>
+                            <div class="font-medium">Push to Organizations</div>
                             <div class="text-xs text-gray-500">Share with organizations</div>
                         </div>
                     </button>
@@ -288,7 +288,7 @@
                             >
                         </div>
                         <div class="p-1">
-                            @foreach($this->availableStudents as $contact)
+                            @foreach($this->availableLearners as $contact)
                                 <label class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -300,7 +300,7 @@
                                 </label>
                             @endforeach
                         </div>
-                        @if(count($this->availableStudents) === 0)
+                        @if(count($this->availableLearners) === 0)
                             <div class="p-3 text-center text-sm text-gray-500">No contacts found</div>
                         @endif
                     </div>
@@ -2230,7 +2230,7 @@
                                     <span class="text-xs text-gray-500 mt-1">Start from scratch</span>
                                 </button>
 
-                                @foreach(collect($templates)->whereIn('category', ['contact', 'student'])->take(3) as $template)
+                                @foreach(collect($templates)->whereIn('category', ['contact', 'learner'])->take(3) as $template)
                                 <button
                                     wire:click="loadTemplate('{{ $template['id'] }}')"
                                     class="group flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200 hover:border-blue-300 rounded-xl transition-all"
@@ -2262,9 +2262,9 @@
                                         <div
                                             class="aspect-video flex items-center justify-center relative"
                                             :class="{
-                                                'bg-gradient-to-br from-blue-100 to-blue-50': template.category === 'contact' || template.category === 'student',
+                                                'bg-gradient-to-br from-blue-100 to-blue-50': template.category === 'contact' || template.category === 'learner',
                                                 'bg-gradient-to-br from-green-100 to-green-50': template.category === 'contact_list' || template.category === 'cohort',
-                                                'bg-gradient-to-br from-purple-100 to-purple-50': template.category === 'organization' || template.category === 'school',
+                                                'bg-gradient-to-br from-purple-100 to-purple-50': template.category === 'organization' || template.category === 'organization',
                                                 'bg-gradient-to-br from-gray-100 to-gray-50': template.category === 'custom'
                                             }"
                                         >
@@ -2272,12 +2272,12 @@
                                             <span
                                                 class="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-medium rounded-full"
                                                 :class="{
-                                                    'bg-blue-100 text-blue-700': template.category === 'contact' || template.category === 'student',
+                                                    'bg-blue-100 text-blue-700': template.category === 'contact' || template.category === 'learner',
                                                     'bg-green-100 text-green-700': template.category === 'contact_list' || template.category === 'cohort',
-                                                    'bg-purple-100 text-purple-700': template.category === 'organization' || template.category === 'school',
+                                                    'bg-purple-100 text-purple-700': template.category === 'organization' || template.category === 'organization',
                                                     'bg-gray-100 text-gray-700': template.category === 'custom'
                                                 }"
-                                                x-text="template.category === 'contact_list' ? 'Contact List' : (template.category === 'student' ? 'Contact' : (template.category === 'cohort' ? 'Contact List' : (template.category === 'school' ? 'Organization' : (template.category.charAt(0).toUpperCase() + template.category.slice(1)))))"
+                                                x-text="template.category === 'contact_list' ? 'Contact List' : (template.category === 'learner' ? 'Contact' : (template.category === 'cohort' ? 'Contact List' : (template.category === 'organization' ? 'Organization' : (template.category.charAt(0).toUpperCase() + template.category.slice(1)))))"
                                             ></span>
 
                                             {{-- Template Icon --}}
@@ -2290,9 +2290,9 @@
                                                 <svg
                                                     class="w-10 h-10 mx-auto transition-colors"
                                                     :class="{
-                                                        'text-blue-400 group-hover:text-blue-500': template.category === 'contact' || template.category === 'student',
+                                                        'text-blue-400 group-hover:text-blue-500': template.category === 'contact' || template.category === 'learner',
                                                         'text-green-400 group-hover:text-green-500': template.category === 'contact_list' || template.category === 'cohort',
-                                                        'text-purple-400 group-hover:text-purple-500': template.category === 'organization' || template.category === 'school',
+                                                        'text-purple-400 group-hover:text-purple-500': template.category === 'organization' || template.category === 'organization',
                                                         'text-gray-400 group-hover:text-gray-500': template.category === 'custom'
                                                     }"
                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24"

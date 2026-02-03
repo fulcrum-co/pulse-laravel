@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Conversation extends Model
 {
     protected $fillable = [
-        'student_id',
+        'learner_id',
         'survey_attempt_id',
         'conversation_type',
         'status',
@@ -36,11 +36,11 @@ class Conversation extends Model
     ];
 
     /**
-     * Get the student.
+     * Get the learner.
      */
-    public function student(): BelongsTo
+    public function learner(): BelongsTo
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Learner::class);
     }
 
     /**

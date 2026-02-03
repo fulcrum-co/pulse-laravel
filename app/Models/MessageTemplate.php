@@ -94,10 +94,10 @@ class MessageTemplate extends Model
                 '{{sender_name}}' => 'Sender name',
                 '{{sender_email}}' => 'Sender email',
             ],
-            'student' => [
-                '{{student_name}}' => 'Student full name',
-                '{{grade_level}}' => 'Student grade level',
-                '{{classroom}}' => 'Student classroom',
+            'learner' => [
+                '{{learner_name}}' => 'Learner full name',
+                '{{grade_level}}' => 'Learner grade level',
+                '{{classroom}}' => 'Learner classroom',
                 '{{teacher_name}}' => 'Teacher name',
             ],
         ];

@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Student extends Model
+class Learner extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
         'user_id',
         'org_id',
-        'student_number',
+        'learner_number',
         'grade_level',
         'date_of_birth',
         'gender',
@@ -54,7 +54,7 @@ class Student extends Model
     }
 
     /**
-     * Get the student's organization (school).
+     * Get the learner's organization (organization).
      */
     public function organization(): BelongsTo
     {
@@ -62,7 +62,7 @@ class Student extends Model
     }
 
     /**
-     * Get the student's counselor.
+     * Get the learner's counselor.
      */
     public function counselor(): BelongsTo
     {
@@ -70,7 +70,7 @@ class Student extends Model
     }
 
     /**
-     * Get the student's homeroom classroom.
+     * Get the learner's homeroom classroom.
      */
     public function homeroomClassroom(): BelongsTo
     {
@@ -78,7 +78,7 @@ class Student extends Model
     }
 
     /**
-     * Get the classrooms the student is enrolled in.
+     * Get the classrooms the learner is enrolled in.
      */
     public function classrooms(): BelongsToMany
     {
@@ -86,7 +86,7 @@ class Student extends Model
     }
 
     /**
-     * Get survey attempts for this student.
+     * Get survey attempts for this learner.
      */
     public function surveyAttempts(): HasMany
     {
@@ -94,7 +94,7 @@ class Student extends Model
     }
 
     /**
-     * Get resource assignments for this student.
+     * Get resource assignments for this learner.
      */
     public function resourceAssignments(): HasMany
     {
@@ -102,7 +102,7 @@ class Student extends Model
     }
 
     /**
-     * Get conversations for this student.
+     * Get conversations for this learner.
      */
     public function conversations(): HasMany
     {
@@ -110,7 +110,7 @@ class Student extends Model
     }
 
     /**
-     * Get metrics for this student (contact view).
+     * Get metrics for this learner (contact view).
      */
     public function metrics(): MorphMany
     {
@@ -118,7 +118,7 @@ class Student extends Model
     }
 
     /**
-     * Get notes for this student (contact view).
+     * Get notes for this learner (contact view).
      */
     public function notes(): MorphMany
     {
@@ -126,7 +126,7 @@ class Student extends Model
     }
 
     /**
-     * Get resource suggestions for this student.
+     * Get resource suggestions for this learner.
      */
     public function resourceSuggestions(): MorphMany
     {
@@ -134,7 +134,7 @@ class Student extends Model
     }
 
     /**
-     * Get mini-course enrollments for this student.
+     * Get mini-course enrollments for this learner.
      */
     public function miniCourseEnrollments(): HasMany
     {
@@ -154,7 +154,7 @@ class Student extends Model
     }
 
     /**
-     * Get mini-course suggestions for this student.
+     * Get mini-course suggestions for this learner.
      */
     public function courseSuggestions(): MorphMany
     {
@@ -171,7 +171,7 @@ class Student extends Model
     }
 
     /**
-     * Get strategic plans targeting this student.
+     * Get strategic plans targeting this learner.
      */
     public function strategicPlans(): HasMany
     {
@@ -180,12 +180,12 @@ class Student extends Model
     }
 
     /**
-     * Get heat map data for student plan progress.
+     * Get heat map data for learner plan progress.
      */
-    public function getHeatMapData(string $schoolYear): array
+    public function getHeatMapData(string $organizationYear): array
     {
         $metrics = $this->metrics()
-            ->forSchoolYear($schoolYear)
+            ->forOrganizationYear($organizationYear)
             ->whereIn('metric_category', [
                 ContactMetric::CATEGORY_ACADEMICS,
                 ContactMetric::CATEGORY_ATTENDANCE,
@@ -199,11 +199,11 @@ class Student extends Model
     }
 
     /**
-     * Get the student's full name from user.
+     * Get the learner's full name from user.
      */
     public function getFullNameAttribute(): string
     {
-        return $this->user?->full_name ?? 'Unknown Student';
+        return $this->user?->full_name ?? 'Unknown Learner';
     }
 
     /**
@@ -226,7 +226,7 @@ class Student extends Model
     }
 
     /**
-     * Scope to filter active students.
+     * Scope to filter active learners.
      */
     public function scopeActive($query)
     {
@@ -242,7 +242,7 @@ class Student extends Model
     }
 
     /**
-     * Scope to filter students with IEP.
+     * Scope to filter learners with IEP.
      */
     public function scopeWithIep($query)
     {

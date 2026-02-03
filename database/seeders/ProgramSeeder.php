@@ -11,17 +11,17 @@ class ProgramSeeder extends Seeder
 {
     public function run(): void
     {
-        $school = Organization::where('org_type', 'school')->first();
-        if (! $school) {
-            $school = Organization::first();
+        $organization = Organization::where('org_type', 'organization')->first();
+        if (! $organization) {
+            $organization = Organization::first();
         }
-        if (! $school) {
+        if (! $organization) {
             $this->command->error('No organization found. Please seed organizations first.');
 
             return;
         }
 
-        $admin = User::where('org_id', $school->id)->first();
+        $admin = User::where('org_id', $organization->id)->first();
         if (! $admin) {
             $admin = User::first();
         }
@@ -46,7 +46,7 @@ class ProgramSeeder extends Seeder
             ],
             [
                 'name' => 'AVID College Readiness',
-                'description' => 'AVID (Advancement Via Individual Determination) is a college readiness program designed to help students develop critical thinking, literacy, and math skills.',
+                'description' => 'AVID (Advancement Via Individual Determination) is a college readiness program designed to help learners develop critical thinking, literacy, and math skills.',
                 'program_type' => Program::TYPE_ENRICHMENT,
                 'provider_org_name' => 'AVID Center',
                 'target_needs' => ['college preparation', 'academic skills', 'first-generation support'],
@@ -86,7 +86,7 @@ class ProgramSeeder extends Seeder
                 'program_type' => Program::TYPE_THERAPY,
                 'provider_org_name' => 'Community Mental Health Center',
                 'target_needs' => ['emotional regulation', 'self-harm prevention', 'anxiety', 'depression'],
-                'eligibility_criteria' => ['Ages 13-17', 'Referral from therapist or school counselor', 'Insurance or sliding scale'],
+                'eligibility_criteria' => ['Ages 13-17', 'Referral from therapist or organization counselor', 'Insurance or sliding scale'],
                 'cost_structure' => Program::COST_INSURANCE,
                 'duration_weeks' => 16,
                 'location_type' => Program::LOCATION_IN_PERSON,
@@ -122,7 +122,7 @@ class ProgramSeeder extends Seeder
                 'program_type' => Program::TYPE_INTERVENTION,
                 'provider_org_name' => 'Prevention Services Inc.',
                 'target_needs' => ['substance use prevention', 'risk reduction', 'decision making'],
-                'eligibility_criteria' => ['School enrollment required', 'Parent consent for intensive track'],
+                'eligibility_criteria' => ['Organization enrollment required', 'Parent consent for intensive track'],
                 'cost_structure' => Program::COST_FREE,
                 'duration_weeks' => 10,
                 'location_type' => Program::LOCATION_IN_PERSON,
@@ -142,7 +142,7 @@ class ProgramSeeder extends Seeder
             ],
             [
                 'name' => 'Career Exploration Internship',
-                'description' => 'Summer internship program placing students in local businesses for hands-on career exploration and professional skill development.',
+                'description' => 'Summer internship program placing learners in local businesses for hands-on career exploration and professional skill development.',
                 'program_type' => Program::TYPE_EXTERNAL_SERVICE,
                 'provider_org_name' => 'Chamber of Commerce Youth Initiative',
                 'target_needs' => ['career exploration', 'work experience', 'professional development'],
@@ -156,7 +156,7 @@ class ProgramSeeder extends Seeder
 
         foreach ($programs as $programData) {
             Program::create([
-                'org_id' => $school->id,
+                'org_id' => $organization->id,
                 'name' => $programData['name'],
                 'description' => $programData['description'],
                 'program_type' => $programData['program_type'],

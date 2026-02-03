@@ -93,7 +93,7 @@
                                 </div>
                                 <div>
                                     <div class="font-medium text-gray-900 text-sm">{{ $contact->user->first_name }} {{ $contact->user->last_name }}</div>
-                                    <div class="text-xs text-gray-500">{{ $contact->student_number }}</div>
+                                    <div class="text-xs text-gray-500">{{ $contact->learner_number }}</div>
                                 </div>
                             </a>
                         </td>

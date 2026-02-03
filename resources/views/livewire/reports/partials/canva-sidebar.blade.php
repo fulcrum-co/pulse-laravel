@@ -154,12 +154,12 @@
                     </button>
                 </div>
 
-                {{-- Student Reports --}}
+                {{-- Learner Reports --}}
                 <div>
-                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Student Reports</h4>
+                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Learner Reports</h4>
                     <div class="space-y-1.5">
                         @foreach($templates as $template)
-                            @if(($template['category'] ?? 'student') === 'student')
+                            @if(($template['category'] ?? 'learner') === 'learner')
                             <button
                                 wire:click="loadTemplate('{{ $template['id'] }}')"
                                 class="w-full flex items-center gap-2.5 p-2 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 rounded-lg transition-colors text-left border border-blue-200"
@@ -198,12 +198,12 @@
                     </div>
                 </div>
 
-                {{-- School Dashboards --}}
+                {{-- Organization Dashboards --}}
                 <div>
-                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">School Dashboards</h4>
+                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Organization Dashboards</h4>
                     <div class="space-y-1.5">
                         @foreach($templates as $template)
-                            @if(($template['category'] ?? '') === 'school')
+                            @if(($template['category'] ?? '') === 'organization')
                             <button
                                 wire:click="loadTemplate('{{ $template['id'] }}')"
                                 class="w-full flex items-center gap-2.5 p-2 bg-gradient-to-r from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100 rounded-lg transition-colors text-left border border-purple-200"
@@ -457,12 +457,12 @@
             <div x-show="activePanel === 'smart_blocks'" class="p-3 space-y-3">
                 <p class="text-xs text-gray-500">Pre-built components that auto-populate with data.</p>
 
-                {{-- Student Blocks --}}
+                {{-- Learner Blocks --}}
                 <div>
-                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Student Reports</h4>
+                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Learner Reports</h4>
                     <div class="space-y-1.5">
                         <button
-                            wire:click="addSmartBlock('student_header')"
+                            wire:click="addSmartBlock('learner_header')"
                             class="w-full flex items-center gap-2.5 p-2 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 rounded-lg transition-colors text-left border border-blue-200"
                         >
                             <div class="w-8 h-8 bg-white rounded flex items-center justify-center flex-shrink-0">
@@ -471,7 +471,7 @@
                                 </svg>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <span class="text-xs font-medium text-gray-900">Student Header</span>
+                                <span class="text-xs font-medium text-gray-900">Learner Header</span>
                                 <p class="text-[10px] text-gray-500 truncate">Name, photo, grade</p>
                             </div>
                             <span class="px-1.5 py-0.5 text-[9px] font-medium bg-blue-100 text-blue-700 rounded flex-shrink-0">Auto</span>
@@ -545,7 +545,7 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <span class="text-xs font-medium text-gray-900">Comparison Chart</span>
-                                <p class="text-[10px] text-gray-500 truncate">Student vs cohort</p>
+                                <p class="text-[10px] text-gray-500 truncate">Learner vs cohort</p>
                             </div>
                         </button>
 

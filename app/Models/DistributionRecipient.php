@@ -212,7 +212,7 @@ class DistributionRecipient extends Model
     public function getRecipientName(): string
     {
         if ($this->contact) {
-            if ($this->contact_type === 'App\\Models\\Student') {
+            if ($this->contact_type === 'App\\Models\\Learner') {
                 return $this->contact->user->first_name.' '.$this->contact->user->last_name;
             }
 

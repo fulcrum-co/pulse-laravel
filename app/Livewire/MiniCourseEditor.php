@@ -66,7 +66,7 @@ class MiniCourseEditor extends Component
 
     public string $aiTopic = '';
 
-    public string $aiAudience = 'students';
+    public string $aiAudience = 'learners';
 
     public ?string $aiGradeLevel = null;
 

@@ -38,7 +38,7 @@ class DashboardWidget extends Model
             Dashboard::WIDGET_METRIC_CARD => $this->getMetricCardData($orgId),
             Dashboard::WIDGET_BAR_CHART => $this->getBarChartData($orgId),
             Dashboard::WIDGET_LINE_CHART => $this->getLineChartData($orgId),
-            Dashboard::WIDGET_STUDENT_LIST => $this->getStudentListData($orgId),
+            Dashboard::WIDGET_STUDENT_LIST => $this->getLearnerListData($orgId),
             Dashboard::WIDGET_SURVEY_SUMMARY => $this->getSurveySummaryData($orgId),
             Dashboard::WIDGET_ALERT_FEED => $this->getAlertFeedData($orgId),
             Dashboard::WIDGET_NOTIFICATION_FEED => $this->getNotificationFeedData($orgId),
@@ -51,21 +51,21 @@ class DashboardWidget extends Model
      */
     protected function getMetricCardData(int $orgId): array
     {
-        $dataSource = $this->config['data_source'] ?? 'students_total';
+        $dataSource = $this->config['data_source'] ?? 'learners_total';
         $color = $this->config['color'] ?? 'blue';
 
         $value = match ($dataSource) {
-            'students_total' => Student::where('org_id', $orgId)->count(),
-            'students_at_risk' => Student::where('org_id', $orgId)->where('risk_level', 'high')->count(),
-            'students_good' => Student::where('org_id', $orgId)->where('risk_level', 'good')->count(),
-            'students_low_risk' => Student::where('org_id', $orgId)->where('risk_level', 'low')->count(),
+            'learners_total' => Learner::where('org_id', $orgId)->count(),
+            'learners_at_risk' => Learner::where('org_id', $orgId)->where('risk_level', 'high')->count(),
+            'learners_good' => Learner::where('org_id', $orgId)->where('risk_level', 'good')->count(),
+            'learners_low_risk' => Learner::where('org_id', $orgId)->where('risk_level', 'low')->count(),
             'surveys_active' => Survey::where('org_id', $orgId)->where('status', 'active')->count(),
             'surveys_total' => Survey::where('org_id', $orgId)->count(),
             'responses_today' => SurveyAttempt::whereHas('survey', fn ($q) => $q->where('org_id', $orgId))
                 ->whereDate('completed_at', today())->count(),
             'responses_week' => SurveyAttempt::whereHas('survey', fn ($q) => $q->where('org_id', $orgId))
                 ->where('completed_at', '>=', now()->startOfWeek())->count(),
-            'students_need_attention' => Student::where('org_id', $orgId)
+            'learners_need_attention' => Learner::where('org_id', $orgId)
                 ->where(function ($q) {
                     $q->where('risk_level', 'high');
                 })->count(),
@@ -126,9 +126,9 @@ class DashboardWidget extends Model
             }
         } elseif ($dataSource === 'risk_distribution') {
             $data = [
-                ['label' => 'Good', 'value' => Student::where('org_id', $orgId)->where('risk_level', 'good')->count(), 'color' => 'green'],
-                ['label' => 'Low Risk', 'value' => Student::where('org_id', $orgId)->where('risk_level', 'low')->count(), 'color' => 'yellow'],
-                ['label' => 'High Risk', 'value' => Student::where('org_id', $orgId)->where('risk_level', 'high')->count(), 'color' => 'red'],
+                ['label' => 'Good', 'value' => Learner::where('org_id', $orgId)->where('risk_level', 'good')->count(), 'color' => 'green'],
+                ['label' => 'Low Risk', 'value' => Learner::where('org_id', $orgId)->where('risk_level', 'low')->count(), 'color' => 'yellow'],
+                ['label' => 'High Risk', 'value' => Learner::where('org_id', $orgId)->where('risk_level', 'high')->count(), 'color' => 'red'],
             ];
         }
 
@@ -165,14 +165,14 @@ class DashboardWidget extends Model
     }
 
     /**
-     * Get student list data.
+     * Get learner list data.
      */
-    protected function getStudentListData(int $orgId): array
+    protected function getLearnerListData(int $orgId): array
     {
         $filter = $this->config['filter'] ?? 'all';
         $limit = $this->config['limit'] ?? 10;
 
-        $query = Student::with('user')->where('org_id', $orgId);
+        $query = Learner::with('user')->where('org_id', $orgId);
 
         $query = match ($filter) {
             'high_risk' => $query->where('risk_level', 'high'),
@@ -184,10 +184,10 @@ class DashboardWidget extends Model
             default => $query,
         };
 
-        $students = $query->orderBy('risk_score', 'desc')->limit($limit)->get();
+        $learners = $query->orderBy('risk_score', 'desc')->limit($limit)->get();
 
         return [
-            'students' => $students->map(fn ($s) => [
+            'learners' => $learners->map(fn ($s) => [
                 'id' => $s->id,
                 'name' => $s->user->full_name ?? 'Unknown',
                 'grade' => $s->grade_level,
@@ -280,8 +280,8 @@ class DashboardWidget extends Model
             $notifications = $notifications->concat($alerts);
         }
 
-        // 2. Students needing attention (high risk)
-        $students = Student::with('user')
+        // 2. Learners needing attention (high risk)
+        $learners = Learner::with('user')
             ->where('org_id', $orgId)
             ->where('risk_level', 'high')
             ->orderBy('updated_at', 'desc')
@@ -290,13 +290,13 @@ class DashboardWidget extends Model
             ->map(fn ($s) => [
                 'type' => 'action',
                 'icon' => 'user',
-                'title' => ($s->user->full_name ?? 'Student').' needs check-in',
-                'subtitle' => 'High risk student',
-                'url' => '/contacts/students/'.$s->id,
+                'title' => ($s->user->full_name ?? 'Learner').' needs check-in',
+                'subtitle' => 'High risk learner',
+                'url' => '/contacts/learners/'.$s->id,
                 'status' => 'warning',
                 'timestamp' => $s->updated_at,
             ]);
-        $notifications = $notifications->concat($students);
+        $notifications = $notifications->concat($learners);
 
         // 3. Active surveys
         $surveys = Survey::where('org_id', $orgId)

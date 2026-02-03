@@ -3,8 +3,8 @@
     <div class="bg-gradient-to-br from-purple-700 via-purple-600 to-indigo-700 text-white -mx-8 -mt-8 px-8">
         <div class="max-w-5xl mx-auto py-16">
             <div class="text-center">
-                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Help Center</h1>
-                <p class="mt-4 text-xl text-purple-200">Find answers to your questions and learn how to use Pulse</p>
+                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">@term('help_center_label')</h1>
+                <p class="mt-4 text-xl text-purple-200">@term('find_answers_label')</p>
 
                 <!-- Search -->
                 <div class="mt-8 max-w-xl mx-auto">
@@ -12,7 +12,7 @@
                         <input
                             type="text"
                             wire:model.live.debounce.300ms="search"
-                            placeholder="Search for articles..."
+                            placeholder="{{ app(\App\Services\TerminologyService::class)->get('search_articles_placeholder') }}"
                             class="w-full pl-12 pr-4 py-4 text-gray-900 placeholder-gray-500 bg-white rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                         >
                         <svg class="absolute left-4 top-4 w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,7 +21,7 @@
                     </div>
                     @if($search)
                         <a href="{{ route('help.search', ['q' => $search]) }}" class="mt-3 inline-block text-purple-200 hover:text-white text-sm">
-                            View all search results →
+                            @term('view_all_search_results_label') →
                         </a>
                     @endif
                 </div>
@@ -33,13 +33,13 @@
         <!-- Featured Articles -->
         @if($featuredArticles->isNotEmpty())
         <section class="mb-12">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Featured Articles</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">@term('featured_articles_label')</h2>
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 @foreach($featuredArticles as $article)
                 <a href="{{ route('help.article', $article->slug) }}" class="group bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:border-purple-300 transition-all">
                     <div class="flex items-center gap-2 mb-3">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                            Featured
+                            @term('featured_label')
                         </span>
                         @if($article->category)
                         <span class="text-xs text-gray-500">{{ $article->category->name }}</span>
@@ -53,7 +53,7 @@
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        {{ $article->getReadingTimeMinutes() }} min read
+                        {{ $article->getReadingTimeMinutes() }} @term('min_read_label')
                     </div>
                 </a>
                 @endforeach
@@ -63,7 +63,7 @@
 
         <!-- Categories Grid -->
         <section class="mb-12">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Browse by Category</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">@term('browse_by_category_label')</h2>
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach($categories as $category)
                 <a href="{{ route('help.category', $category->slug) }}" class="group flex items-start gap-4 p-5 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-purple-300 transition-all">
@@ -75,7 +75,7 @@
                             {{ $category->name }}
                         </h3>
                         <p class="mt-1 text-sm text-gray-500 line-clamp-2">{{ $category->description }}</p>
-                        <p class="mt-2 text-xs text-gray-400">{{ $category->published_articles_count }} articles</p>
+                        <p class="mt-2 text-xs text-gray-400">{{ $category->published_articles_count }} @term('articles_label')</p>
                     </div>
                 </a>
                 @endforeach
@@ -85,7 +85,7 @@
         <!-- Popular Articles -->
         @if($popularArticles->isNotEmpty())
         <section>
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Most Popular</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">@term('most_popular_label')</h2>
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 divide-y divide-gray-100">
                 @foreach($popularArticles as $index => $article)
                 <a href="{{ route('help.article', $article->slug) }}" class="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
@@ -99,7 +99,7 @@
                         @endif
                     </div>
                     <div class="flex-shrink-0 text-xs text-gray-400">
-                        {{ number_format($article->view_count) }} views
+                        {{ number_format($article->view_count) }} @term('views_label')
                     </div>
                 </a>
                 @endforeach
@@ -109,8 +109,8 @@
 
         <!-- Contact Section -->
         <section class="mt-12 bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-8 text-center">
-            <h2 class="text-xl font-semibold text-gray-900">Can't find what you're looking for?</h2>
-            <p class="mt-2 text-gray-600">Our support team is here to help</p>
+            <h2 class="text-xl font-semibold text-gray-900">@term('cant_find_label')</h2>
+            <p class="mt-2 text-gray-600">@term('support_team_help_label')</p>
             <button
                 @click="$dispatch('open-support-modal', { context: 'help-center' })"
                 class="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
@@ -118,7 +118,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                Contact Support
+                @term('contact_support_label')
             </button>
         </section>
     </div>

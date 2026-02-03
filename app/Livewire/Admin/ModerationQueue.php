@@ -92,7 +92,7 @@ class ModerationQueue extends Component
             return true;
         }
 
-        if ($user->effective_role === 'school_admin' && $user->canAccessOrganization($result->org_id)) {
+        if ($user->effective_role === 'organization_admin' && $user->canAccessOrganization($result->org_id)) {
             return true;
         }
 
@@ -114,7 +114,7 @@ class ModerationQueue extends Component
     {
         $user = auth()->user();
 
-        return in_array($user->effective_role, ['admin', 'consultant', 'superintendent', 'school_admin']);
+        return in_array($user->effective_role, ['admin', 'consultant', 'superintendent', 'organization_admin']);
     }
 
     // ============================================

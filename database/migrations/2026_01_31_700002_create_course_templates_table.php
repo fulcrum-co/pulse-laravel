@@ -40,7 +40,7 @@ return new class extends Migration
              *         "topics": ["{primary_topic}"],
              *         "max_duration": 300
              *       },
-             *       "fallback_ai_prompt": "Create an engaging introduction to {topic} for {grade_level} students"
+             *       "fallback_ai_prompt": "Create an engaging introduction to {topic} for {grade_level} learners"
              *     }
              *   ],
              *   "variables": {

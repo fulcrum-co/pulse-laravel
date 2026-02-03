@@ -105,10 +105,10 @@
 
     <!-- Messages Area -->
     <div class="flex-1 overflow-y-auto p-6 space-y-4" id="messages-container">
-        @if($conversation->student)
+        @if($conversation->learner)
         <div class="flex justify-center">
             <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                Regarding: {{ $conversation->student->full_name ?? $conversation->student->name }}
+                Regarding: {{ $conversation->learner->full_name ?? $conversation->learner->name }}
             </span>
         </div>
         @endif
