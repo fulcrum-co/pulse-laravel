@@ -83,7 +83,7 @@
                     <!-- Thumbnail -->
                     <div class="aspect-video bg-gradient-to-br from-gray-100 to-gray-50 relative">
                         @if($report->thumbnail_path)
-                            <img src="{{ $report->thumbnail_path }}" alt="{{ $report->report_name }}" class="w-full h-full object-cover">
+                            <img src="{{ $report->thumbnail_path }}" alt="{{ $report->report_name ?? 'Report thumbnail' }}" class="w-full h-full object-cover">
                         @else
                             <div class="absolute inset-0 flex items-center justify-center">
                                 <x-icon name="document-chart-bar" class="w-16 h-16 text-gray-300" />
@@ -107,9 +107,9 @@
                     <div class="p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div class="flex-1 min-w-0">
-                                <h3 class="font-semibold text-gray-900 truncate">{{ $report->report_name }}</h3>
+                                <h3 class="font-semibold text-gray-900 truncate">{{ $report->report_name ?? 'Untitled Report' }}</h3>
                                 <p class="text-sm text-gray-500 mt-1">
-                                    Updated {{ $report->updated_at->diffForHumans() }}
+                                    Updated {{ $report->updated_at?->diffForHumans() ?? 'Unknown' }}
                                 </p>
                             </div>
 
@@ -163,7 +163,7 @@
                         <!-- Thumbnail -->
                         <div class="w-20 h-14 bg-gradient-to-br from-gray-100 to-gray-50 rounded-lg flex-shrink-0 overflow-hidden">
                             @if($report->thumbnail_path)
-                                <img src="{{ $report->thumbnail_path }}" alt="{{ $report->report_name }}" class="w-full h-full object-cover">
+                                <img src="{{ $report->thumbnail_path }}" alt="{{ $report->report_name ?? 'Report thumbnail' }}" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
                                     <x-icon name="document-chart-bar" class="w-6 h-6 text-gray-300" />
@@ -173,7 +173,7 @@
 
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
-                                <h3 class="font-medium text-gray-900 text-sm truncate">{{ $report->report_name }}</h3>
+                                <h3 class="font-medium text-gray-900 text-sm truncate">{{ $report->report_name ?? 'Untitled Report' }}</h3>
                                 @if($report->isPublished())
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         Published
@@ -185,7 +185,7 @@
                                 @endif
                             </div>
                             <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                                <span>Updated {{ $report->updated_at->diffForHumans() }}</span>
+                                <span>Updated {{ $report->updated_at?->diffForHumans() ?? 'Unknown' }}</span>
                                 @if($report->report_type)
                                     <span class="capitalize">{{ str_replace('_', ' ', $report->report_type) }}</span>
                                 @endif
@@ -255,7 +255,7 @@
                                             </div>
                                         @endif
                                     </div>
-                                    <span class="text-sm font-medium text-gray-900">{{ $report->report_name }}</span>
+                                    <span class="text-sm font-medium text-gray-900">{{ $report->report_name ?? 'Untitled Report' }}</span>
                                 </div>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">
@@ -279,7 +279,7 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                                {{ $report->updated_at->format('M d, Y') }}
+                                {{ $report->updated_at?->format('M d, Y') ?? '-' }}
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-right">
                                 <div class="flex items-center justify-end gap-1">
