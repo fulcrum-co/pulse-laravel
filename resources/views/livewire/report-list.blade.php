@@ -95,28 +95,44 @@
                             @endif
                         </div>
 
-                        <!-- Preview placeholder (like dashboard widget grid) -->
-                        <div class="grid grid-cols-4 gap-1 mb-2" style="height: 48px;">
-                            <div class="rounded flex items-center justify-center h-full" style="background: linear-gradient(to bottom right, #eff6ff, #dbeafe);">
-                                <svg class="w-3 h-3" style="color: #60a5fa;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                                </svg>
-                            </div>
-                            <div class="rounded flex items-center justify-center h-full" style="background: linear-gradient(to bottom right, #f0fdf4, #dcfce7);">
-                                <svg class="w-3 h-3" style="color: #4ade80;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                            </div>
-                            <div class="rounded flex items-center justify-center h-full" style="background: linear-gradient(to bottom right, #faf5ff, #f3e8ff);">
-                                <svg class="w-3 h-3" style="color: #c084fc;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
-                            <div class="rounded flex items-center justify-center h-full" style="background: linear-gradient(to bottom right, #fff7ed, #ffedd5);">
-                                <svg class="w-3 h-3" style="color: #fb923c;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
-                                </svg>
-                            </div>
+                        <!-- Report Type Preview -->
+                        @php
+                            $gridTypeConfig = match($report->report_type) {
+                                'document' => [
+                                    'icon' => 'document-text',
+                                    'gradient' => 'from-blue-50 to-blue-100',
+                                    'iconColor' => 'text-blue-500',
+                                    'label' => 'Document'
+                                ],
+                                'widget' => [
+                                    'icon' => 'squares-2x2',
+                                    'gradient' => 'from-purple-50 to-purple-100',
+                                    'iconColor' => 'text-purple-500',
+                                    'label' => 'Widget'
+                                ],
+                                'social' => [
+                                    'icon' => 'share',
+                                    'gradient' => 'from-pink-50 to-pink-100',
+                                    'iconColor' => 'text-pink-500',
+                                    'label' => 'Social'
+                                ],
+                                'custom' => [
+                                    'icon' => 'adjustments-horizontal',
+                                    'gradient' => 'from-orange-50 to-orange-100',
+                                    'iconColor' => 'text-pulse-orange-500',
+                                    'label' => 'Custom'
+                                ],
+                                default => [
+                                    'icon' => 'document-chart-bar',
+                                    'gradient' => 'from-gray-50 to-gray-100',
+                                    'iconColor' => 'text-gray-400',
+                                    'label' => 'Report'
+                                ]
+                            };
+                        @endphp
+                        <div class="rounded-lg bg-gradient-to-br {{ $gridTypeConfig['gradient'] }} flex items-center justify-center mb-2" style="height: 48px;">
+                            <x-icon :name="$gridTypeConfig['icon']" class="w-6 h-6 {{ $gridTypeConfig['iconColor'] }}" />
+                            <span class="ml-2 text-xs font-medium {{ $gridTypeConfig['iconColor'] }}">{{ $gridTypeConfig['label'] }}</span>
                         </div>
 
                         <p class="text-[11px] text-gray-500">
