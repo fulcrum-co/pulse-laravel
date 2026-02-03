@@ -12,12 +12,17 @@ trait WithElementDefaults
 
         $defaults = match ($type) {
             'text' => $this->getTextElementDefaults(),
+            'heading' => $this->getHeadingElementDefaults(),
             'chart' => $this->getChartElementDefaults(),
             'table' => $this->getTableElementDefaults(),
             'metric_card' => $this->getMetricCardElementDefaults(),
             'ai_text' => $this->getAiTextElementDefaults(),
             'image' => $this->getImageElementDefaults(),
+            'logo' => $this->getLogoElementDefaults(),
             'spacer' => $this->getSpacerElementDefaults(),
+            'rectangle' => $this->getRectangleElementDefaults(),
+            'circle' => $this->getCircleElementDefaults(),
+            'line' => $this->getLineElementDefaults(),
             default => $this->getGenericElementDefaults(),
         };
 
@@ -34,7 +39,15 @@ trait WithElementDefaults
             'position' => ['x' => 40, 'y' => $this->getNextY()],
             'size' => ['width' => 400, 'height' => 60],
             'config' => ['content' => '<p>Enter your text here...</p>', 'format' => 'html'],
-            'styles' => ['backgroundColor' => 'transparent', 'padding' => 8, 'borderRadius' => 4],
+            'styles' => [
+                'backgroundColor' => 'transparent',
+                'padding' => 8,
+                'borderRadius' => 4,
+                'fontSize' => 14,
+                'fontWeight' => 'normal',
+                'textAlign' => 'left',
+                'color' => '#111827',
+            ],
         ];
     }
 
@@ -89,6 +102,7 @@ trait WithElementDefaults
                 'backgroundColor' => '#F0F9FF',
                 'borderRadius' => 8,
                 'padding' => 16,
+                'valueColor' => '#1E40AF',
             ],
         ];
     }
@@ -109,6 +123,10 @@ trait WithElementDefaults
                 'backgroundColor' => '#F9FAFB',
                 'borderRadius' => 8,
                 'padding' => 20,
+                'fontSize' => 14,
+                'fontWeight' => 'normal',
+                'textAlign' => 'left',
+                'color' => '#374151',
             ],
         ];
     }
@@ -140,6 +158,75 @@ trait WithElementDefaults
             'size' => ['width' => 200, 'height' => 100],
             'config' => [],
             'styles' => [],
+        ];
+    }
+
+    protected function getHeadingElementDefaults(): array
+    {
+        return [
+            'position' => ['x' => 40, 'y' => $this->getNextY()],
+            'size' => ['width' => 500, 'height' => 50],
+            'config' => ['content' => '<h2>Heading</h2>', 'format' => 'html'],
+            'styles' => [
+                'backgroundColor' => 'transparent',
+                'padding' => 8,
+                'borderRadius' => 0,
+                'fontSize' => 24,
+                'fontWeight' => 'bold',
+                'textAlign' => 'left',
+                'color' => '#111827',
+            ],
+        ];
+    }
+
+    protected function getLogoElementDefaults(): array
+    {
+        return [
+            'position' => ['x' => 40, 'y' => $this->getNextY()],
+            'size' => ['width' => 150, 'height' => 60],
+            'config' => ['src' => null, 'alt' => 'Organization Logo', 'fit' => 'contain', 'use_org_logo' => true],
+            'styles' => ['borderRadius' => 0],
+        ];
+    }
+
+    protected function getRectangleElementDefaults(): array
+    {
+        return [
+            'position' => ['x' => 40, 'y' => $this->getNextY()],
+            'size' => ['width' => 200, 'height' => 100],
+            'config' => [],
+            'styles' => [
+                'backgroundColor' => '#E5E7EB',
+                'borderRadius' => 8,
+                'opacity' => 100,
+            ],
+        ];
+    }
+
+    protected function getCircleElementDefaults(): array
+    {
+        return [
+            'position' => ['x' => 40, 'y' => $this->getNextY()],
+            'size' => ['width' => 100, 'height' => 100],
+            'config' => [],
+            'styles' => [
+                'backgroundColor' => '#E5E7EB',
+                'borderRadius' => 50,
+                'opacity' => 100,
+            ],
+        ];
+    }
+
+    protected function getLineElementDefaults(): array
+    {
+        return [
+            'position' => ['x' => 40, 'y' => $this->getNextY()],
+            'size' => ['width' => 300, 'height' => 2],
+            'config' => [],
+            'styles' => [
+                'backgroundColor' => '#9CA3AF',
+                'opacity' => 100,
+            ],
         ];
     }
 }

@@ -9,10 +9,42 @@ trait WithComments
     public ?string $activeCommentId = null;
     public string $newCommentText = '';
     public ?array $commentPosition = null;
+    public string $commentFilter = 'all'; // all, unresolved, resolved
+    public ?int $replyingToCommentId = null;
+    public bool $showCommentsPanel = false;
 
     public function toggleComments(): void
     {
         $this->showComments = !$this->showComments;
+    }
+
+    public function openCommentsPanel(): void
+    {
+        $this->showCommentsPanel = true;
+    }
+
+    public function closeCommentsPanel(): void
+    {
+        $this->showCommentsPanel = false;
+    }
+
+    public function getMentionableUsers(): array
+    {
+        $user = auth()->user();
+        if (!$user || !$user->org_id) {
+            return [];
+        }
+
+        return \App\Models\User::where('org_id', $user->org_id)
+            ->select('id', 'first_name', 'last_name', 'email')
+            ->limit(50)
+            ->get()
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'name' => $u->full_name ?? trim($u->first_name . ' ' . $u->last_name),
+                'email' => $u->email,
+            ])
+            ->toArray();
     }
 
     public function startComment(int $x, int $y): void
@@ -113,6 +145,41 @@ trait WithComments
     public function getUnresolvedCount(): int
     {
         return $this->getUnresolvedCommentsCount();
+    }
+
+    public function setCommentFilter(string $filter): void
+    {
+        $this->commentFilter = $filter;
+    }
+
+    public function getFilteredComments(): array
+    {
+        return collect($this->comments)
+            ->when($this->commentFilter === 'unresolved', fn ($c) => $c->where('resolved', false))
+            ->when($this->commentFilter === 'resolved', fn ($c) => $c->where('resolved', true))
+            ->values()
+            ->toArray();
+    }
+
+    public function startReply(int $commentId): void
+    {
+        $this->replyingToCommentId = $commentId;
+    }
+
+    public function cancelReply(): void
+    {
+        $this->replyingToCommentId = null;
+    }
+
+    public function loadComments(): void
+    {
+        // Load comments from report if persisted
+        if (property_exists($this, 'reportId') && $this->reportId) {
+            $report = \App\Models\CustomReport::find($this->reportId);
+            if ($report && isset($report->comments)) {
+                $this->comments = $report->comments ?? [];
+            }
+        }
     }
 
     protected function markDirty(): void

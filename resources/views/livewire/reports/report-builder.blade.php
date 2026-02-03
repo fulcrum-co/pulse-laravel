@@ -1,8 +1,169 @@
+@use('App\Services\RolePermissions')
+@use('Illuminate\Support\Str')
 <div
-    class="h-screen flex flex-col"
-    x-data
+    class="h-screen flex"
+    x-data="{
+        mainNavCollapsed: localStorage.getItem('reportBuilderNavCollapsed') === 'true',
+        hoveredNav: null,
+        init() {
+            this.$watch('mainNavCollapsed', val => localStorage.setItem('reportBuilderNavCollapsed', val));
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Zoom in: Ctrl/Cmd + Plus or Ctrl/Cmd + =
+                if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=')) {
+                    e.preventDefault();
+                    $wire.zoomIn();
+                }
+                // Zoom out: Ctrl/Cmd + Minus
+                if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+                    e.preventDefault();
+                    $wire.zoomOut();
+                }
+                // Reset zoom: Ctrl/Cmd + 0
+                if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+                    e.preventDefault();
+                    $wire.resetZoom();
+                }
+                // Toggle grid: G key (when not in text input)
+                if (e.key === 'g' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName) && !e.target.isContentEditable) {
+                    $wire.toggleGrid();
+                }
+                // Undo: Ctrl/Cmd + Z
+                if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                    e.preventDefault();
+                    $wire.undo();
+                }
+                // Redo: Ctrl/Cmd + Shift + Z or Ctrl/Cmd + Y
+                if ((e.ctrlKey || e.metaKey) && ((e.key === 'z' && e.shiftKey) || e.key === 'y')) {
+                    e.preventDefault();
+                    $wire.redo();
+                }
+                // Delete selected element: Delete or Backspace
+                if ((e.key === 'Delete' || e.key === 'Backspace') && !['INPUT', 'TEXTAREA'].includes(e.target.tagName) && !e.target.isContentEditable) {
+                    e.preventDefault();
+                    $wire.deleteSelectedElement();
+                }
+                // Save: Ctrl/Cmd + S
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    $wire.save();
+                }
+            });
+        },
+        handleWheel(e) {
+            // Mouse wheel zoom with Ctrl/Cmd
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                if (e.deltaY < 0) {
+                    $wire.zoomIn();
+                } else {
+                    $wire.zoomOut();
+                }
+            }
+        }
+    }"
+    @wheel.window="handleWheel($event)"
     @open-preview.window="window.open($event.detail.url, '_blank')"
 >
+    {{-- Main Pulse Navigation Rail --}}
+    <aside class="w-14 bg-white border-r border-gray-200 flex flex-col h-full flex-shrink-0">
+        {{-- Logo --}}
+        <div class="p-2 border-b border-gray-200 flex justify-center">
+            <a href="/dashboard" class="text-pulse-orange-500 font-bold text-xl" title="Back to Dashboard">P</a>
+        </div>
+
+        {{-- Navigation Items --}}
+        <nav class="flex-1 py-2 px-1.5 space-y-1 overflow-y-auto">
+            @if(RolePermissions::currentUserCanAccess('home'))
+            <div @mouseenter="hoveredNav = 'home'" @mouseleave="hoveredNav = null" class="relative">
+                <a href="/dashboard" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
+                    <x-icon name="home" class="w-5 h-5" />
+                </a>
+                <div x-show="hoveredNav === 'home'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Home</div>
+            </div>
+            @endif
+
+            @if(RolePermissions::currentUserCanAccess('contacts'))
+            <div @mouseenter="hoveredNav = 'contacts'" @mouseleave="hoveredNav = null" class="relative">
+                <a href="/contacts" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
+                    <x-icon name="users" class="w-5 h-5" />
+                </a>
+                <div x-show="hoveredNav === 'contacts'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Contacts</div>
+            </div>
+            @endif
+
+            @if(RolePermissions::currentUserCanAccess('surveys'))
+            <div @mouseenter="hoveredNav = 'surveys'" @mouseleave="hoveredNav = null" class="relative">
+                <a href="/surveys" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
+                    <x-icon name="clipboard-list" class="w-5 h-5" />
+                </a>
+                <div x-show="hoveredNav === 'surveys'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Surveys</div>
+            </div>
+            @endif
+
+            @if(RolePermissions::currentUserCanAccess('dashboards'))
+            <div @mouseenter="hoveredNav = 'dashboards'" @mouseleave="hoveredNav = null" class="relative">
+                <a href="/dashboards" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
+                    <x-icon name="chart-pie" class="w-5 h-5" />
+                </a>
+                <div x-show="hoveredNav === 'dashboards'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Dashboards</div>
+            </div>
+            @endif
+
+            <div class="border-t border-gray-200 my-2"></div>
+
+            @if(RolePermissions::currentUserCanAccess('reports'))
+            <div @mouseenter="hoveredNav = 'reports'" @mouseleave="hoveredNav = null" class="relative">
+                <a href="/reports" class="flex items-center justify-center p-2 rounded-lg transition-colors bg-pulse-orange-50 text-pulse-orange-600">
+                    <x-icon name="chart-bar" class="w-5 h-5" />
+                </a>
+                <div x-show="hoveredNav === 'reports'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Reports (Current)</div>
+            </div>
+            @endif
+
+            @if(RolePermissions::currentUserCanAccess('strategy'))
+            <div @mouseenter="hoveredNav = 'plans'" @mouseleave="hoveredNav = null" class="relative">
+                <a href="/plans" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
+                    <x-icon name="clipboard-document-list" class="w-5 h-5" />
+                </a>
+                <div x-show="hoveredNav === 'plans'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Plans</div>
+            </div>
+            @endif
+
+            @if(RolePermissions::currentUserCanAccess('resources'))
+            <div @mouseenter="hoveredNav = 'resources'" @mouseleave="hoveredNav = null" class="relative">
+                <a href="/resources" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
+                    <x-icon name="book-open" class="w-5 h-5" />
+                </a>
+                <div x-show="hoveredNav === 'resources'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Resources</div>
+            </div>
+            @endif
+
+            @if(RolePermissions::currentUserCanAccess('marketplace'))
+            <div @mouseenter="hoveredNav = 'marketplace'" @mouseleave="hoveredNav = null" class="relative">
+                <a href="/marketplace" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
+                    <x-icon name="shopping-bag" class="w-5 h-5" />
+                </a>
+                <div x-show="hoveredNav === 'marketplace'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace</div>
+            </div>
+            @endif
+        </nav>
+
+        {{-- Settings --}}
+        @if(RolePermissions::currentUserCanAccess('settings'))
+        <div class="p-1.5 border-t border-gray-200">
+            <div @mouseenter="hoveredNav = 'settings'" @mouseleave="hoveredNav = null" class="relative">
+                <a href="/settings" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
+                    <x-icon name="cog" class="w-5 h-5" />
+                </a>
+                <div x-show="hoveredNav === 'settings'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Settings</div>
+            </div>
+        </div>
+        @endif
+    </aside>
+
+    {{-- Main Content Area --}}
+    <div class="flex-1 flex flex-col min-w-0">
     <!-- Header -->
     <header class="h-14 bg-white border-b border-gray-200 px-4 flex items-center justify-between flex-shrink-0 z-50">
         <div class="flex items-center gap-4">
@@ -68,6 +229,7 @@
                 wire:loading.attr="disabled"
                 wire:target="save"
                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                title="Save report (Ctrl+S)"
             >
                 <span wire:loading.remove wire:target="save">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,6 +252,7 @@
                 wire:loading.attr="disabled"
                 wire:target="previewReport"
                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                title="Preview report in new tab"
             >
                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -102,6 +265,7 @@
             <button
                 wire:click="openCommentsPanel"
                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-pulse-purple-500 border border-pulse-purple-500 rounded-lg hover:bg-pulse-purple-600 transition-colors relative shadow-sm"
+                title="View and add comments"
             >
                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
@@ -144,6 +308,7 @@
                     @click="open = !open"
                     @click.away="open = false"
                     class="inline-flex items-center px-4 py-1.5 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors"
+                    title="Share and publish options"
                 >
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
@@ -314,14 +479,29 @@
                 showListADropdown: false,
                 showListBDropdown: false,
                 showCreateForm: false,
+                showInlineCreate: null,
                 newListName: '',
-                createForSlot: null
-            }">
+                createForSlot: null,
+                isCreating: false,
+                async createList(slot) {
+                    if (!this.newListName.trim()) return;
+                    this.isCreating = true;
+                    await $wire.createContactList(this.newListName, slot);
+                    this.newListName = '';
+                    this.showInlineCreate = null;
+                    this.showListADropdown = false;
+                    this.showListBDropdown = false;
+                    this.isCreating = false;
+                }
+            }"
+            @list-created.window="showListADropdown = false; showListBDropdown = false; showInlineCreate = null"
+            >
                 {{-- Mode Toggle --}}
                 <div class="flex items-center bg-gray-100 rounded-lg p-0.5">
                     <button
                         wire:click="$set('filters.list_mode', 'single')"
                         class="px-2.5 py-1 text-xs font-medium rounded-md transition-colors {{ ($filters['list_mode'] ?? 'single') === 'single' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
+                        title="View a single list"
                     >
                         Single
                     </button>
@@ -334,7 +514,19 @@
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                             </svg>
-                            Compare
+                            A/B
+                        </span>
+                    </button>
+                    <button
+                        wire:click="$set('filters.list_mode', 'multi')"
+                        class="px-2.5 py-1 text-xs font-medium rounded-md transition-colors {{ ($filters['list_mode'] ?? 'single') === 'multi' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
+                        title="Compare multiple lists (N-list comparison)"
+                    >
+                        <span class="flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                            </svg>
+                            Multi
                         </span>
                     </button>
                 </div>
@@ -352,17 +544,52 @@
                             </svg>
                         </button>
 
-                        <div x-show="showListADropdown" @click.outside="showListADropdown = false" x-transition
-                            class="absolute z-50 mt-1 w-64 bg-white rounded-lg shadow-lg border border-gray-200 max-h-64 overflow-hidden">
+                        <div x-show="showListADropdown" @click.outside="showListADropdown = false; showInlineCreate = null" x-transition
+                            class="absolute z-50 mt-1 w-64 bg-white rounded-lg shadow-lg border border-gray-200 max-h-72 overflow-hidden">
+                            {{-- Inline Create Form --}}
                             <div class="p-2 border-b border-gray-100">
-                                <button @click="showCreateForm = true; createForSlot = 'single'"
-                                    class="w-full flex items-center gap-2 px-3 py-2 text-sm text-pulse-orange-600 hover:bg-pulse-orange-50 rounded-lg">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                    </svg>
-                                    Create new list
-                                </button>
+                                <template x-if="showInlineCreate !== 'single'">
+                                    <button @click="showInlineCreate = 'single'; $nextTick(() => $refs.inlineCreateSingle?.focus())"
+                                        class="w-full flex items-center gap-2 px-3 py-2 text-sm text-pulse-orange-600 hover:bg-pulse-orange-50 rounded-lg transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                        Create new list
+                                    </button>
+                                </template>
+                                <template x-if="showInlineCreate === 'single'">
+                                    <div class="flex items-center gap-2">
+                                        <input
+                                            x-ref="inlineCreateSingle"
+                                            x-model="newListName"
+                                            type="text"
+                                            placeholder="List name..."
+                                            class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                                            @keydown.enter="createList('single')"
+                                            @keydown.escape="showInlineCreate = null; newListName = ''"
+                                            :disabled="isCreating"
+                                        >
+                                        <button
+                                            @click="createList('single')"
+                                            :disabled="isCreating || !newListName.trim()"
+                                            class="px-3 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                                        >
+                                            <template x-if="isCreating">
+                                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                            </template>
+                                            <template x-if="!isCreating">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </template>
+                                        </button>
+                                    </div>
+                                </template>
                             </div>
+                            {{-- List Options --}}
                             <div class="p-2 max-h-48 overflow-y-auto">
                                 @forelse($this->availableContactLists ?? [] as $list)
                                     <button
@@ -378,13 +605,13 @@
                             </div>
                         </div>
                     </div>
-                @else
+                @elseif(($filters['list_mode'] ?? 'single') === 'compare')
                     {{-- Compare Mode - Two list selectors --}}
                     <div class="flex items-center gap-2">
                         {{-- List A (Left side) --}}
                         <div class="relative">
                             <span class="text-xs font-medium text-blue-600 mr-1">A:</span>
-                            <button @click="showListADropdown = !showListADropdown" type="button"
+                            <button @click="showListADropdown = !showListADropdown; showListBDropdown = false" type="button"
                                 class="border-0 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 text-sm min-w-[140px] text-left inline-flex items-center justify-between gap-2">
                                 @php $listA = collect($this->availableContactLists ?? [])->firstWhere('id', $filters['list_a_id']); @endphp
                                 <span class="text-blue-700">{{ $listA['name'] ?? 'Select list...' }}</span>
@@ -393,8 +620,51 @@
                                 </svg>
                             </button>
 
-                            <div x-show="showListADropdown" @click.outside="showListADropdown = false" x-transition
-                                class="absolute z-50 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 max-h-64 overflow-hidden">
+                            <div x-show="showListADropdown" @click.outside="showListADropdown = false; showInlineCreate = null" x-transition
+                                class="absolute z-50 mt-1 w-60 bg-white rounded-lg shadow-lg border border-gray-200 max-h-72 overflow-hidden">
+                                {{-- Inline Create for List A --}}
+                                <div class="p-2 border-b border-gray-100">
+                                    <template x-if="showInlineCreate !== 'list_a'">
+                                        <button @click="showInlineCreate = 'list_a'; $nextTick(() => $refs.inlineCreateA?.focus())"
+                                            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                            Create new list
+                                        </button>
+                                    </template>
+                                    <template x-if="showInlineCreate === 'list_a'">
+                                        <div class="flex items-center gap-2">
+                                            <input
+                                                x-ref="inlineCreateA"
+                                                x-model="newListName"
+                                                type="text"
+                                                placeholder="List name..."
+                                                class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                                @keydown.enter="createList('list_a')"
+                                                @keydown.escape="showInlineCreate = null; newListName = ''"
+                                                :disabled="isCreating"
+                                            >
+                                            <button
+                                                @click="createList('list_a')"
+                                                :disabled="isCreating || !newListName.trim()"
+                                                class="px-3 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                            >
+                                                <template x-if="isCreating">
+                                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                </template>
+                                                <template x-if="!isCreating">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                </template>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
                                 <div class="p-2 max-h-48 overflow-y-auto">
                                     @forelse($this->availableContactLists ?? [] as $list)
                                         <button
@@ -416,7 +686,7 @@
                         {{-- List B (Right side) --}}
                         <div class="relative">
                             <span class="text-xs font-medium text-purple-600 mr-1">B:</span>
-                            <button @click="showListBDropdown = !showListBDropdown" type="button"
+                            <button @click="showListBDropdown = !showListBDropdown; showListADropdown = false" type="button"
                                 class="border-0 bg-purple-50 border border-purple-200 rounded-lg px-3 py-1.5 text-sm min-w-[140px] text-left inline-flex items-center justify-between gap-2">
                                 @php $listB = collect($this->availableContactLists ?? [])->firstWhere('id', $filters['list_b_id']); @endphp
                                 <span class="text-purple-700">{{ $listB['name'] ?? 'Select list...' }}</span>
@@ -425,8 +695,51 @@
                                 </svg>
                             </button>
 
-                            <div x-show="showListBDropdown" @click.outside="showListBDropdown = false" x-transition
-                                class="absolute z-50 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 max-h-64 overflow-hidden">
+                            <div x-show="showListBDropdown" @click.outside="showListBDropdown = false; showInlineCreate = null" x-transition
+                                class="absolute z-50 mt-1 w-60 bg-white rounded-lg shadow-lg border border-gray-200 max-h-72 overflow-hidden">
+                                {{-- Inline Create for List B --}}
+                                <div class="p-2 border-b border-gray-100">
+                                    <template x-if="showInlineCreate !== 'list_b'">
+                                        <button @click="showInlineCreate = 'list_b'; $nextTick(() => $refs.inlineCreateB?.focus())"
+                                            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                            Create new list
+                                        </button>
+                                    </template>
+                                    <template x-if="showInlineCreate === 'list_b'">
+                                        <div class="flex items-center gap-2">
+                                            <input
+                                                x-ref="inlineCreateB"
+                                                x-model="newListName"
+                                                type="text"
+                                                placeholder="List name..."
+                                                class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
+                                                @keydown.enter="createList('list_b')"
+                                                @keydown.escape="showInlineCreate = null; newListName = ''"
+                                                :disabled="isCreating"
+                                            >
+                                            <button
+                                                @click="createList('list_b')"
+                                                :disabled="isCreating || !newListName.trim()"
+                                                class="px-3 py-2 text-sm bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                            >
+                                                <template x-if="isCreating">
+                                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                </template>
+                                                <template x-if="!isCreating">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                </template>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
                                 <div class="p-2 max-h-48 overflow-y-auto">
                                     @forelse($this->availableContactLists ?? [] as $list)
                                         <button
@@ -453,6 +766,184 @@
                             Comparative mode
                         </span>
                     @endif
+                @elseif(($filters['list_mode'] ?? 'single') === 'multi')
+                    {{-- Multi-List Mode (N-list comparison) --}}
+                    <div class="flex items-center gap-3" x-data="{ showMultiListDropdown: false }">
+                        {{-- Multi-Select Dropdown --}}
+                        <div class="relative">
+                            <button
+                                @click="showMultiListDropdown = !showMultiListDropdown"
+                                type="button"
+                                class="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-white shadow-sm rounded-lg border border-gray-200 hover:border-gray-300 transition-colors min-w-[200px]"
+                            >
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                                </svg>
+                                <span class="flex-1 text-left text-gray-700">
+                                    @if(count($filters['list_ids'] ?? []) === 0)
+                                        Select lists to compare...
+                                    @elseif(count($filters['list_ids'] ?? []) === 1)
+                                        1 list selected
+                                    @else
+                                        {{ count($filters['list_ids']) }} lists selected
+                                    @endif
+                                </span>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="showMultiListDropdown ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+
+                            <div
+                                x-show="showMultiListDropdown"
+                                @click.outside="showMultiListDropdown = false"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-75"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95"
+                                class="absolute z-50 mt-1 w-72 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
+                            >
+                                {{-- Header with Select All/None --}}
+                                <div class="px-3 py-2 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Select Lists</span>
+                                    <div class="flex items-center gap-2">
+                                        <button
+                                            wire:click="selectAllLists"
+                                            class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700 font-medium"
+                                        >
+                                            All
+                                        </button>
+                                        <span class="text-gray-300">|</span>
+                                        <button
+                                            wire:click="clearAllLists"
+                                            class="text-xs text-gray-500 hover:text-gray-700 font-medium"
+                                        >
+                                            None
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {{-- Inline Create --}}
+                                <div class="p-2 border-b border-gray-100">
+                                    <template x-if="showInlineCreate !== 'multi'">
+                                        <button @click="showInlineCreate = 'multi'; $nextTick(() => $refs.inlineCreateMulti?.focus())"
+                                            class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-pulse-orange-600 hover:bg-pulse-orange-50 rounded-md transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                            Create new list
+                                        </button>
+                                    </template>
+                                    <template x-if="showInlineCreate === 'multi'">
+                                        <div class="flex items-center gap-2">
+                                            <input
+                                                x-ref="inlineCreateMulti"
+                                                x-model="newListName"
+                                                type="text"
+                                                placeholder="List name..."
+                                                class="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                                                @keydown.enter="createList('multi')"
+                                                @keydown.escape="showInlineCreate = null; newListName = ''"
+                                                :disabled="isCreating"
+                                            >
+                                            <button
+                                                @click="createList('multi')"
+                                                :disabled="isCreating || !newListName.trim()"
+                                                class="px-2 py-1.5 text-sm bg-pulse-orange-500 text-white rounded-md hover:bg-pulse-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                {{-- List Options with Checkboxes --}}
+                                <div class="max-h-64 overflow-y-auto p-1">
+                                    @forelse($this->availableContactLists ?? [] as $index => $list)
+                                        @php
+                                            $isSelected = in_array($list['id'], $filters['list_ids'] ?? []);
+                                            $colorIndex = array_search($list['id'], $filters['list_ids'] ?? []);
+                                            $colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'];
+                                            $listColor = $isSelected ? ($colors[$colorIndex % count($colors)] ?? '#6B7280') : '#6B7280';
+                                        @endphp
+                                        <label
+                                            class="flex items-center gap-3 px-2 py-2 rounded-md cursor-pointer transition-colors {{ $isSelected ? 'bg-pulse-orange-50' : 'hover:bg-gray-50' }}"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                wire:click="toggleListInComparison({{ $list['id'] }})"
+                                                {{ $isSelected ? 'checked' : '' }}
+                                                class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500 w-4 h-4"
+                                            >
+                                            @if($isSelected)
+                                                <span
+                                                    class="w-3 h-3 rounded-full flex-shrink-0"
+                                                    style="background-color: {{ $listColor }}"
+                                                ></span>
+                                            @endif
+                                            <span class="flex-1 text-sm {{ $isSelected ? 'text-gray-900 font-medium' : 'text-gray-700' }}">
+                                                {{ $list['name'] }}
+                                            </span>
+                                            <span class="text-xs text-gray-400">({{ $list['count'] ?? 0 }})</span>
+                                        </label>
+                                    @empty
+                                        <p class="px-3 py-4 text-sm text-gray-500 text-center">No lists available</p>
+                                    @endforelse
+                                </div>
+
+                                {{-- Footer --}}
+                                @if(count($filters['list_ids'] ?? []) > 0)
+                                    <div class="px-3 py-2 bg-gray-50 border-t border-gray-200">
+                                        <button
+                                            @click="showMultiListDropdown = false"
+                                            class="w-full px-3 py-1.5 text-sm font-medium text-white bg-pulse-orange-500 hover:bg-pulse-orange-600 rounded-md transition-colors"
+                                        >
+                                            Done ({{ count($filters['list_ids']) }} selected)
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Selected Lists Preview (Color-coded chips) --}}
+                        @if(count($filters['list_ids'] ?? []) > 0)
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                @foreach($this->selectedListsForComparison ?? [] as $selectedList)
+                                    <span
+                                        class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full text-white"
+                                        style="background-color: {{ $selectedList['color'] }}"
+                                        title="{{ $selectedList['name'] }}"
+                                    >
+                                        {{ Str::limit($selectedList['name'], 12) }}
+                                        <button
+                                            wire:click="removeListFromComparison({{ $selectedList['id'] }})"
+                                            class="hover:bg-white/20 rounded-full transition-colors ml-0.5"
+                                        >
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        {{-- Show Differences Only Toggle --}}
+                        @if(count($filters['list_ids'] ?? []) >= 2)
+                            <label class="inline-flex items-center gap-2 cursor-pointer border-l border-gray-200 pl-3">
+                                <input
+                                    type="checkbox"
+                                    wire:click="toggleShowDifferencesOnly"
+                                    {{ ($filters['show_differences_only'] ?? false) ? 'checked' : '' }}
+                                    class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500 w-3.5 h-3.5"
+                                >
+                                <span class="text-xs text-gray-600">Differences only</span>
+                            </label>
+                        @endif
+                    </div>
                 @endif
 
                 {{-- Create List Modal (shared) --}}
@@ -486,11 +977,11 @@
         <div class="h-6 w-px bg-gray-300"></div>
 
         <!-- Date range -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2" x-data="{ showCustomDates: $wire.filters.date_range === 'custom' }">
             <span class="text-sm text-gray-500">Period:</span>
             <select
                 wire:model.live="filters.date_range"
-                wire:change="setDateRange($event.target.value)"
+                @change="showCustomDates = $event.target.value === 'custom'"
                 class="border-0 bg-white shadow-sm rounded-lg px-3 py-1.5 text-sm focus:ring-pulse-orange-500"
             >
                 <option value="3_months">Last 3 months</option>
@@ -498,7 +989,25 @@
                 <option value="12_months">Last 12 months</option>
                 <option value="2_years">Last 2 years</option>
                 <option value="all">All time</option>
+                <option value="custom">Custom range</option>
             </select>
+
+            {{-- Custom date range inputs --}}
+            <div x-show="showCustomDates" x-transition class="flex items-center gap-2">
+                <input
+                    type="date"
+                    wire:model.live="filters.start_date"
+                    class="border-0 bg-white shadow-sm rounded-lg px-2 py-1.5 text-sm focus:ring-pulse-orange-500"
+                    title="Start date"
+                >
+                <span class="text-gray-400 text-sm">to</span>
+                <input
+                    type="date"
+                    wire:model.live="filters.end_date"
+                    class="border-0 bg-white shadow-sm rounded-lg px-2 py-1.5 text-sm focus:ring-pulse-orange-500"
+                    title="End date"
+                >
+            </div>
         </div>
 
         <div class="flex-1"></div>
@@ -1251,6 +1760,7 @@
                             wire:click="previousPage"
                             class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             {{ $currentPageIndex === 0 ? 'disabled' : '' }}
+                            title="Previous page"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -1261,6 +1771,7 @@
                             wire:click="nextPage"
                             class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             {{ $currentPageIndex >= count($pages) - 1 ? 'disabled' : '' }}
+                            title="Next page"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -1364,6 +1875,7 @@
                             <button
                                 wire:click="addPage"
                                 class="flex-shrink-0 w-16 h-20 bg-white hover:bg-gray-50 border-2 border-dashed border-gray-300 hover:border-pulse-orange-400 rounded flex flex-col items-center justify-center transition-colors"
+                                title="Add a new page"
                             >
                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -2102,15 +2614,16 @@
         <div
             class="fixed inset-0 z-50 overflow-y-auto"
             x-data="{
-                activeCategory: 'all',
+                canvasMode: @js($canvasMode),
                 searchQuery: '',
                 get filteredTemplates() {
                     return @js($templates).filter(t => {
-                        const matchesCategory = this.activeCategory === 'all' || t.category === this.activeCategory;
+                        // Filter by current canvas mode
+                        const matchesMode = t.category === this.canvasMode;
                         const matchesSearch = !this.searchQuery ||
                             t.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
                             t.description.toLowerCase().includes(this.searchQuery.toLowerCase());
-                        return matchesCategory && matchesSearch;
+                        return matchesMode && matchesSearch;
                     });
                 }
             }"
@@ -2143,14 +2656,28 @@
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                                 </svg>
-                                                Document Report
+                                                Document
                                             </span>
-                                        @else
+                                        @elseif($canvasMode === 'widget')
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                                </svg>
+                                                Website Widget
+                                            </span>
+                                        @elseif($canvasMode === 'social')
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                                 </svg>
-                                                Dashboard
+                                                Social Post
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                                </svg>
+                                                Custom Size
                                             </span>
                                         @endif
                                     </div>
@@ -3441,7 +3968,7 @@
 
         <!-- New Comment Form with @mention autocomplete -->
         <div class="p-4 border-t bg-gray-50">
-            @if($replyingToComment)
+            @if($replyingToComment ?? false)
                 <div class="mb-2 text-xs text-gray-500 flex items-center justify-between">
                     <span>Replying to comment...</span>
                     <button wire:click="cancelComment" class="text-gray-400 hover:text-gray-600">Cancel</button>
@@ -3566,4 +4093,5 @@
         </div>
     </div>
     @endif
+    </div>{{-- End Main Content Area wrapper --}}
 </div>

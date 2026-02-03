@@ -10,9 +10,38 @@ trait WithElementManagement
 
     public ?string $selectedElementId = null;
 
+    public array $selectedElementIds = [];
+
     public function selectElement(?string $elementId): void
     {
         $this->selectedElementId = $elementId;
+        // Clear multi-selection when selecting a single element
+        if ($elementId !== null) {
+            $this->selectedElementIds = [$elementId];
+        } else {
+            $this->selectedElementIds = [];
+        }
+    }
+
+    public function toggleInSelection(string $elementId): void
+    {
+        if (in_array($elementId, $this->selectedElementIds)) {
+            $this->selectedElementIds = array_values(array_filter(
+                $this->selectedElementIds,
+                fn ($id) => $id !== $elementId
+            ));
+        } else {
+            $this->selectedElementIds[] = $elementId;
+        }
+
+        // Update selected element to last in selection
+        $this->selectedElementId = end($this->selectedElementIds) ?: null;
+    }
+
+    public function clearSelection(): void
+    {
+        $this->selectedElementId = null;
+        $this->selectedElementIds = [];
     }
 
     public function getSelectedElement(): ?array
@@ -140,6 +169,17 @@ trait WithElementManagement
             $this->elements[$index - 1] = $temp;
             $this->pushHistory();
         }
+    }
+
+    public function toggleElementLock(string $elementId): void
+    {
+        foreach ($this->elements as &$element) {
+            if ($element['id'] === $elementId) {
+                $element['config']['locked'] = !($element['config']['locked'] ?? false);
+                break;
+            }
+        }
+        $this->pushHistory();
     }
 
     protected function getNextY(): int

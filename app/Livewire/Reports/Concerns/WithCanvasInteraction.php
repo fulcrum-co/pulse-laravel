@@ -6,11 +6,20 @@ trait WithCanvasInteraction
 {
     public float $zoom = 1.0;
     public float $canvasZoom = 1.0;
-    public bool $showGrid = true;
+    public bool $showGrid = false;
     public bool $snapToGrid = true;
     public int $gridSize = 20;
     public bool $isPanning = false;
     public array $panOffset = ['x' => 0, 'y' => 0];
+    public array $zoomPresets = [
+        ['value' => 0.25, 'label' => '25%'],
+        ['value' => 0.5, 'label' => '50%'],
+        ['value' => 0.75, 'label' => '75%'],
+        ['value' => 1.0, 'label' => '100%'],
+        ['value' => 1.25, 'label' => '125%'],
+        ['value' => 1.5, 'label' => '150%'],
+        ['value' => 2.0, 'label' => '200%'],
+    ];
 
     public function zoomIn(): void
     {
@@ -20,7 +29,7 @@ trait WithCanvasInteraction
 
     public function zoomOut(): void
     {
-        $this->zoom = max(0.5, $this->zoom - 0.1);
+        $this->zoom = max(0.25, $this->zoom - 0.1);
         $this->canvasZoom = $this->zoom;
     }
 
@@ -32,7 +41,7 @@ trait WithCanvasInteraction
 
     public function setZoom(float $level): void
     {
-        $this->zoom = max(0.5, min(2.0, $level));
+        $this->zoom = max(0.25, min(2.0, $level));
         $this->canvasZoom = $this->zoom;
     }
 

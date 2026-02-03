@@ -175,7 +175,7 @@
 
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
-                                <h3 class="font-medium text-gray-900 text-sm truncate">{{ $report->report_name ?? 'Untitled Report' }}</h3>
+                                <a href="{{ route('reports.edit', $report) }}" class="font-medium text-gray-900 text-sm truncate hover:text-pulse-orange-600 transition-colors">{{ $report->report_name ?? 'Untitled Report' }}</a>
                                 @if($report->isPublished())
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         Published
@@ -257,7 +257,7 @@
                                             </div>
                                         @endif
                                     </div>
-                                    <span class="text-sm font-medium text-gray-900">{{ $report->report_name ?? 'Untitled Report' }}</span>
+                                    <a href="{{ route('reports.edit', $report) }}" class="text-sm font-medium text-gray-900 hover:text-pulse-orange-600 transition-colors">{{ $report->report_name ?? 'Untitled Report' }}</a>
                                 </div>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">

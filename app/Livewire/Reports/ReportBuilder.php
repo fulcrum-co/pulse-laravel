@@ -71,11 +71,13 @@ class ReportBuilder extends Component
         'contact_type' => 'contact',
         'contact_id' => null,
         'selected_contacts' => [], // Multi-select contacts for individual scope
-        // List comparison mode (single = one list, compare = side-by-side analysis)
-        'list_mode' => 'single', // 'single' or 'compare'
+        // List comparison mode (single = one list, compare = side-by-side, multi = N-list)
+        'list_mode' => 'single', // 'single', 'compare', or 'multi'
         'list_id' => null, // Single list mode
         'list_a_id' => null, // Compare mode - left side
         'list_b_id' => null, // Compare mode - right side
+        'list_ids' => [], // Multi-list mode - array of list IDs for N-list comparison
+        'show_differences_only' => false, // Filter to only show metrics that differ
         'grade_level' => null,
         'risk_level' => null,
     ];
@@ -105,6 +107,7 @@ class ReportBuilder extends Component
 
     // Canva-style sidebar panel state
     public string $activeSidebarPanel = 'elements'; // templates, elements, data, smart_blocks, design, layers
+    public string $sidebarTab = 'elements'; // For canva-sidebar.blade.php compatibility
 
     public bool $sidebarExpanded = true;
 
@@ -345,7 +348,7 @@ class ReportBuilder extends Component
             ->toArray();
     }
 
-    public function createContactList(string $name): void
+    public function createContactList(string $name, ?string $slot = null): void
     {
         if (empty(trim($name))) {
             $this->dispatch('notify', type: 'error', message: 'Please enter a list name');
@@ -368,10 +371,23 @@ class ReportBuilder extends Component
             'created_by' => $user->id,
         ]);
 
-        // Add the newly created list to selection
-        $this->filters['selected_list_ids'][] = $list->id;
+        // Auto-select the newly created list based on the slot/mode
+        if ($slot === 'single' || ($slot === null && ($this->filters['list_mode'] ?? 'single') === 'single')) {
+            $this->filters['list_id'] = $list->id;
+        } elseif ($slot === 'list_a') {
+            $this->filters['list_a_id'] = $list->id;
+        } elseif ($slot === 'list_b') {
+            $this->filters['list_b_id'] = $list->id;
+        } elseif ($slot === 'multi') {
+            // Add to multi-list comparison
+            $this->filters['list_ids'][] = $list->id;
+        } else {
+            // Legacy: add to selected_list_ids array
+            $this->filters['selected_list_ids'][] = $list->id;
+        }
 
         $this->dispatch('notify', type: 'success', message: 'Contact list created');
+        $this->dispatch('listCreated', id: $list->id, name: $list->name);
     }
 
     public function setContactFilter(?int $contactId, string $contactType = 'contact'): void
@@ -385,6 +401,114 @@ class ReportBuilder extends Component
     {
         $this->filters['date_range'] = $range;
         $this->dispatch('chartsUpdated');
+    }
+
+    /**
+     * Add a list to the multi-list comparison.
+     */
+    public function addListToComparison(int $listId): void
+    {
+        if (! in_array($listId, $this->filters['list_ids'])) {
+            $this->filters['list_ids'][] = $listId;
+            $this->dispatch('chartsUpdated');
+        }
+    }
+
+    /**
+     * Remove a list from the multi-list comparison.
+     */
+    public function removeListFromComparison(int $listId): void
+    {
+        $this->filters['list_ids'] = array_values(
+            array_filter($this->filters['list_ids'], fn ($id) => $id !== $listId)
+        );
+        $this->dispatch('chartsUpdated');
+    }
+
+    /**
+     * Toggle "show differences only" filter for multi-list comparison.
+     */
+    public function toggleShowDifferencesOnly(): void
+    {
+        $this->filters['show_differences_only'] = ! ($this->filters['show_differences_only'] ?? false);
+        $this->dispatch('chartsUpdated');
+    }
+
+    /**
+     * Toggle a list in the multi-list comparison (add if not present, remove if present).
+     */
+    public function toggleListInComparison(int $listId): void
+    {
+        if (in_array($listId, $this->filters['list_ids'])) {
+            $this->removeListFromComparison($listId);
+        } else {
+            $this->addListToComparison($listId);
+        }
+    }
+
+    /**
+     * Select all available lists for multi-list comparison.
+     */
+    public function selectAllLists(): void
+    {
+        $availableLists = $this->availableContactLists;
+        $this->filters['list_ids'] = collect($availableLists)->pluck('id')->toArray();
+        $this->dispatch('chartsUpdated');
+    }
+
+    /**
+     * Clear all selected lists from multi-list comparison.
+     */
+    public function clearAllLists(): void
+    {
+        $this->filters['list_ids'] = [];
+        $this->dispatch('chartsUpdated');
+    }
+
+    /**
+     * Get the selected lists with their details for multi-list mode.
+     */
+    #[Computed]
+    public function selectedListsForComparison(): array
+    {
+        if (empty($this->filters['list_ids'])) {
+            return [];
+        }
+
+        if (! class_exists(\App\Models\ContactList::class)) {
+            return [];
+        }
+
+        return \App\Models\ContactList::whereIn('id', $this->filters['list_ids'])
+            ->get()
+            ->map(fn ($list) => [
+                'id' => $list->id,
+                'name' => $list->name,
+                'count' => $list->member_count ?? 0,
+                'color' => $this->getListColor($list->id),
+            ])
+            ->toArray();
+    }
+
+    /**
+     * Generate a consistent color for a list based on its position.
+     */
+    protected function getListColor(int $listId): string
+    {
+        $colors = [
+            '#3B82F6', // blue
+            '#8B5CF6', // violet
+            '#10B981', // emerald
+            '#F59E0B', // amber
+            '#EF4444', // red
+            '#EC4899', // pink
+            '#06B6D4', // cyan
+            '#84CC16', // lime
+        ];
+
+        $index = array_search($listId, $this->filters['list_ids']);
+
+        return $colors[$index % count($colors)] ?? $colors[0];
     }
 
     public function openPushModal(): void
@@ -419,6 +543,23 @@ class ReportBuilder extends Component
     public function finishEditingText(): void
     {
         $this->editingTextElementId = null;
+    }
+
+    /**
+     * Toggle sidebar visibility.
+     */
+    public function toggleSidebar(): void
+    {
+        $this->sidebarExpanded = !$this->sidebarExpanded;
+    }
+
+    /**
+     * Set the active sidebar tab.
+     */
+    public function setSidebarTab(string $tab): void
+    {
+        $this->sidebarTab = $tab;
+        $this->activeSidebarPanel = $tab;
     }
 
     public function render()

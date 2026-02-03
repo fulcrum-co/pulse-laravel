@@ -368,15 +368,44 @@ class CustomReport extends Model
 
     /**
      * Duplicate this report.
+     *
+     * Creates a complete deep-copy of the report including all JSON fields.
+     * Resets version, clears published state, and clears snapshot data.
      */
     public function duplicate(?int $userId = null): self
     {
         $newReport = $this->replicate();
+
+        // Update name to indicate copy
         $newReport->report_name = $this->report_name.' (Copy)';
+
+        // Reset to draft state
         $newReport->status = self::STATUS_DRAFT;
+        $newReport->is_live = false;
+
+        // Clear published/public fields
         $newReport->public_token = null;
+        $newReport->snapshot_data = null;
+        $newReport->thumbnail_path = null;
+
+        // Reset version
         $newReport->version = 1;
-        $newReport->created_by = $userId ?? $this->created_by;
+
+        // Set ownership
+        $userId = $userId ?? auth()->id() ?? $this->created_by;
+        $newReport->created_by = $userId;
+        $newReport->last_edited_by = $userId;
+
+        // Clear source tracking (this is a new independent report)
+        $newReport->source_report_id = null;
+        $newReport->source_org_id = null;
+
+        // Ensure JSON fields are deep-copied (replicate should handle this, but explicit for safety)
+        $newReport->report_layout = $this->report_layout ? json_decode(json_encode($this->report_layout), true) : null;
+        $newReport->page_settings = $this->page_settings ? json_decode(json_encode($this->page_settings), true) : null;
+        $newReport->branding = $this->branding ? json_decode(json_encode($this->branding), true) : null;
+        $newReport->filters = $this->filters ? json_decode(json_encode($this->filters), true) : null;
+
         $newReport->save();
 
         return $newReport;
