@@ -57,16 +57,23 @@ trait WithReportPersistence
         // Check for multi-page structure
         $layout = $report->report_layout ?? [];
         if (isset($layout['pages']) && is_array($layout['pages'])) {
-            // Multi-page report
-            if (method_exists($this, 'initializePages')) {
-                $this->initializePages();
+            // Multi-page report - load pages data FIRST
+            $this->pages = $layout['pages'];
+            $this->currentPageIndex = $layout['currentPageIndex'] ?? 0;
+            // Ensure currentPageIndex is valid
+            if ($this->currentPageIndex >= count($this->pages)) {
+                $this->currentPageIndex = 0;
             }
+            // Load elements from current page
+            $this->elements = $this->pages[$this->currentPageIndex]['elements'] ?? [];
         } else {
-            // Legacy single-page report
-            $this->elements = $layout;
-            if (method_exists($this, 'initializePages')) {
-                $this->initializePages();
-            }
+            // Legacy single-page report - validate layout is an array
+            $this->elements = is_array($layout) ? $layout : [];
+        }
+
+        // Initialize pages structure if needed (will use existing $this->pages or convert from elements)
+        if (method_exists($this, 'initializePages')) {
+            $this->initializePages();
         }
 
         $this->pushHistory();

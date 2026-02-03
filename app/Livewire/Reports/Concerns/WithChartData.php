@@ -20,7 +20,7 @@ trait WithChartData
         $chartsData = [];
 
         foreach ($this->elements as $element) {
-            if ($element['type'] !== 'chart') {
+            if (! is_array($element) || ! isset($element['type']) || $element['type'] !== 'chart') {
                 continue;
             }
 
@@ -59,7 +59,7 @@ trait WithChartData
     public function generateAiContent(string $elementId): void
     {
         $element = collect($this->elements)->firstWhere('id', $elementId);
-        if (! $element || $element['type'] !== 'ai_text') {
+        if (! $element || ! is_array($element) || ! isset($element['type']) || $element['type'] !== 'ai_text') {
             return;
         }
 
@@ -114,6 +114,9 @@ trait WithChartData
     public function updateTextContent(string $elementId, string $content): void
     {
         foreach ($this->elements as &$element) {
+            if (! is_array($element) || ! isset($element['id'], $element['type'])) {
+                continue;
+            }
             if ($element['id'] === $elementId && $element['type'] === 'text') {
                 $element['config']['content'] = $content;
                 break;
@@ -125,6 +128,9 @@ trait WithChartData
     public function updateChartConfig(string $elementId, string $chartType, array $metricKeys, ?string $title = null): void
     {
         foreach ($this->elements as &$element) {
+            if (! is_array($element) || ! isset($element['id'], $element['type'])) {
+                continue;
+            }
             if ($element['id'] === $elementId && $element['type'] === 'chart') {
                 $element['config']['chart_type'] = $chartType;
                 $element['config']['metric_keys'] = $metricKeys;
@@ -141,6 +147,9 @@ trait WithChartData
     public function updateMetricCardConfig(string $elementId, string $metricKey, string $label, bool $showTrend = true): void
     {
         foreach ($this->elements as &$element) {
+            if (! is_array($element) || ! isset($element['id'], $element['type'])) {
+                continue;
+            }
             if ($element['id'] === $elementId && $element['type'] === 'metric_card') {
                 $element['config']['metric_key'] = $metricKey;
                 $element['config']['label'] = $label;
