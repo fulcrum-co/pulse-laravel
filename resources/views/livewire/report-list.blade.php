@@ -122,6 +122,24 @@
                                     'iconColor' => 'text-pulse-orange-500',
                                     'label' => 'Custom'
                                 ],
+                                'student_progress' => [
+                                    'icon' => 'academic-cap',
+                                    'gradient' => 'from-emerald-50 to-emerald-100',
+                                    'iconColor' => 'text-emerald-500',
+                                    'label' => 'Progress'
+                                ],
+                                'cohort_summary' => [
+                                    'icon' => 'user-group',
+                                    'gradient' => 'from-cyan-50 to-cyan-100',
+                                    'iconColor' => 'text-cyan-500',
+                                    'label' => 'Cohort'
+                                ],
+                                'school_dashboard' => [
+                                    'icon' => 'building-library',
+                                    'gradient' => 'from-indigo-50 to-indigo-100',
+                                    'iconColor' => 'text-indigo-500',
+                                    'label' => 'Dashboard'
+                                ],
                                 default => [
                                     'icon' => 'document-chart-bar',
                                     'gradient' => 'from-gray-50 to-gray-100',
@@ -210,6 +228,9 @@
                                         'widget' => ['icon' => 'squares-2x2', 'color' => 'text-purple-500', 'label' => 'Widget'],
                                         'social' => ['icon' => 'share', 'color' => 'text-pink-500', 'label' => 'Social'],
                                         'custom' => ['icon' => 'adjustments-horizontal', 'color' => 'text-pulse-orange-500', 'label' => 'Custom'],
+                                        'student_progress' => ['icon' => 'academic-cap', 'color' => 'text-emerald-500', 'label' => 'Progress'],
+                                        'cohort_summary' => ['icon' => 'user-group', 'color' => 'text-cyan-500', 'label' => 'Cohort'],
+                                        'school_dashboard' => ['icon' => 'building-library', 'color' => 'text-indigo-500', 'label' => 'Dashboard'],
                                         default => null
                                     };
                                 @endphp
@@ -318,6 +339,27 @@
                                             'text' => 'text-pulse-orange-700',
                                             'iconColor' => 'text-pulse-orange-500',
                                             'label' => 'Custom'
+                                        ],
+                                        'student_progress' => [
+                                            'icon' => 'academic-cap',
+                                            'bg' => 'bg-emerald-50',
+                                            'text' => 'text-emerald-700',
+                                            'iconColor' => 'text-emerald-500',
+                                            'label' => 'Progress'
+                                        ],
+                                        'cohort_summary' => [
+                                            'icon' => 'user-group',
+                                            'bg' => 'bg-cyan-50',
+                                            'text' => 'text-cyan-700',
+                                            'iconColor' => 'text-cyan-500',
+                                            'label' => 'Cohort'
+                                        ],
+                                        'school_dashboard' => [
+                                            'icon' => 'building-library',
+                                            'bg' => 'bg-indigo-50',
+                                            'text' => 'text-indigo-700',
+                                            'iconColor' => 'text-indigo-500',
+                                            'label' => 'Dashboard'
                                         ],
                                         default => null
                                     };
