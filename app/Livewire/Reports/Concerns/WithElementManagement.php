@@ -175,17 +175,6 @@ trait WithElementManagement
         }
     }
 
-    public function toggleElementLock(string $elementId): void
-    {
-        foreach ($this->elements as &$element) {
-            if ($element['id'] === $elementId) {
-                $element['config']['locked'] = !($element['config']['locked'] ?? false);
-                break;
-            }
-        }
-        $this->pushHistory();
-    }
-
     protected function getNextY(): int
     {
         if (empty($this->elements)) {
