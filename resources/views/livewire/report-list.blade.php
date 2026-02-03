@@ -83,7 +83,7 @@
                     <!-- Content -->
                     <div class="p-4">
                         <div class="flex items-start justify-between gap-2 mb-3">
-                            <h3 class="font-medium text-gray-900 text-sm truncate flex-1">{{ $report->report_name }}</h3>
+                            <h3 class="font-medium text-gray-900 text-sm truncate flex-1">{{ $report->report_name ?? 'Untitled Report' }}</h3>
                             @if($report->isPublished())
                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700 flex-shrink-0">
                                     Published
@@ -96,23 +96,31 @@
                         </div>
 
                         <!-- Preview placeholder (like dashboard widget grid) -->
-                        <div class="grid grid-cols-4 gap-1 h-12 mb-2">
-                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded flex items-center justify-center">
-                                <x-icon name="chart-bar" class="w-3 h-3 text-blue-400" />
+                        <div class="grid grid-cols-4 gap-1 mb-2" style="height: 48px;">
+                            <div class="rounded flex items-center justify-center h-full" style="background: linear-gradient(to bottom right, #eff6ff, #dbeafe);">
+                                <svg class="w-3 h-3" style="color: #60a5fa;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
                             </div>
-                            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded flex items-center justify-center">
-                                <x-icon name="document-text" class="w-3 h-3 text-green-400" />
+                            <div class="rounded flex items-center justify-center h-full" style="background: linear-gradient(to bottom right, #f0fdf4, #dcfce7);">
+                                <svg class="w-3 h-3" style="color: #4ade80;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
                             </div>
-                            <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded flex items-center justify-center">
-                                <x-icon name="table-cells" class="w-3 h-3 text-purple-400" />
+                            <div class="rounded flex items-center justify-center h-full" style="background: linear-gradient(to bottom right, #faf5ff, #f3e8ff);">
+                                <svg class="w-3 h-3" style="color: #c084fc;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
                             </div>
-                            <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded flex items-center justify-center">
-                                <x-icon name="chart-pie" class="w-3 h-3 text-orange-400" />
+                            <div class="rounded flex items-center justify-center h-full" style="background: linear-gradient(to bottom right, #fff7ed, #ffedd5);">
+                                <svg class="w-3 h-3" style="color: #fb923c;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                                </svg>
                             </div>
                         </div>
 
                         <p class="text-[11px] text-gray-500">
-                            Updated {{ $report->updated_at->diffForHumans() }}
+                            Updated {{ $report->updated_at?->diffForHumans() ?? 'Unknown' }}
                         </p>
                     </div>
 
@@ -157,7 +165,7 @@
                         <!-- Thumbnail -->
                         <div class="w-20 h-14 bg-gradient-to-br from-gray-100 to-gray-50 rounded-lg flex-shrink-0 overflow-hidden">
                             @if($report->thumbnail_path)
-                                <img src="{{ $report->thumbnail_path }}" alt="{{ $report->report_name }}" class="w-full h-full object-cover">
+                                <img src="{{ $report->thumbnail_path }}" alt="{{ $report->report_name ?? 'Report thumbnail' }}" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
                                     <x-icon name="document-chart-bar" class="w-6 h-6 text-gray-300" />
@@ -167,7 +175,7 @@
 
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
-                                <h3 class="font-medium text-gray-900 text-sm truncate">{{ $report->report_name }}</h3>
+                                <a href="{{ route('reports.edit', $report) }}" class="font-medium text-gray-900 text-sm truncate hover:text-pulse-orange-600 transition-colors">{{ $report->report_name ?? 'Untitled Report' }}</a>
                                 @if($report->isPublished())
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         Published
@@ -179,7 +187,7 @@
                                 @endif
                             </div>
                             <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                                <span>Updated {{ $report->updated_at->diffForHumans() }}</span>
+                                <span>Updated {{ $report->updated_at?->diffForHumans() ?? 'Unknown' }}</span>
                                 @if($report->report_type)
                                     <span class="capitalize">{{ str_replace('_', ' ', $report->report_type) }}</span>
                                 @endif
@@ -249,7 +257,7 @@
                                             </div>
                                         @endif
                                     </div>
-                                    <span class="text-sm font-medium text-gray-900">{{ $report->report_name }}</span>
+                                    <a href="{{ route('reports.edit', $report) }}" class="text-sm font-medium text-gray-900 hover:text-pulse-orange-600 transition-colors">{{ $report->report_name ?? 'Untitled Report' }}</a>
                                 </div>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">
@@ -273,7 +281,7 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                                {{ $report->updated_at->format('M d, Y') }}
+                                {{ $report->updated_at?->format('M d, Y') ?? '-' }}
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-right">
                                 <div class="flex items-center justify-end gap-1">

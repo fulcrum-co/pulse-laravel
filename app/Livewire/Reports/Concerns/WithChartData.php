@@ -153,9 +153,21 @@ trait WithChartData
 
     protected function getDateRangeForFilters(): array
     {
-        $end = Carbon::now();
         $range = $this->filters['date_range'] ?? '6_months';
 
+        // Handle custom date range
+        if ($range === 'custom') {
+            $start = $this->filters['start_date']
+                ? Carbon::parse($this->filters['start_date'])
+                : Carbon::now()->subMonths(6);
+            $end = $this->filters['end_date']
+                ? Carbon::parse($this->filters['end_date'])
+                : Carbon::now();
+
+            return ['start' => $start, 'end' => $end];
+        }
+
+        $end = Carbon::now();
         $start = match ($range) {
             '3_months' => $end->copy()->subMonths(3),
             '6_months' => $end->copy()->subMonths(6),

@@ -206,9 +206,7 @@ class ReportController extends Controller
     {
         $user = auth()->user();
 
-        // Check if user has access to the report's organization
-        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
-        if (!in_array($report->org_id, $accessibleOrgIds)) {
+        if ($report->org_id !== $user->org_id) {
             abort(403);
         }
 
@@ -253,68 +251,125 @@ class ReportController extends Controller
     protected function getTemplates(): array
     {
         return [
-            // Student Reports
+            // === DOCUMENT TEMPLATES ===
             [
                 'id' => 'student_progress',
                 'name' => 'Student Progress Report',
                 'description' => 'Individual student performance tracking with metrics over time',
                 'thumbnail' => '/images/templates/student-progress.png',
                 'type' => CustomReport::TYPE_STUDENT_PROGRESS,
-                'category' => 'student',
+                'category' => 'document',
                 'layout' => $this->getStudentProgressLayout(),
             ],
-            [
-                'id' => 'student_quick_view',
-                'name' => 'Student Quick View',
-                'description' => 'One-page summary perfect for parent meetings',
-                'thumbnail' => '/images/templates/student-quick.png',
-                'type' => CustomReport::TYPE_STUDENT_PROGRESS,
-                'category' => 'student',
-                'layout' => $this->getStudentQuickViewLayout(),
-            ],
-            // Cohort Reports
             [
                 'id' => 'cohort_summary',
                 'name' => 'Cohort Summary',
                 'description' => 'Aggregate metrics for a group of students',
                 'thumbnail' => '/images/templates/cohort-summary.png',
                 'type' => CustomReport::TYPE_COHORT_SUMMARY,
-                'category' => 'cohort',
+                'category' => 'document',
                 'layout' => $this->getCohortSummaryLayout(),
             ],
-            [
-                'id' => 'grade_level_overview',
-                'name' => 'Grade Level Overview',
-                'description' => 'Compare performance across a grade level',
-                'thumbnail' => '/images/templates/grade-overview.png',
-                'type' => CustomReport::TYPE_COHORT_SUMMARY,
-                'category' => 'cohort',
-                'layout' => $this->getCohortSummaryLayout(),
-            ],
-            // School Dashboards
             [
                 'id' => 'school_dashboard',
                 'name' => 'School Dashboard',
                 'description' => 'School-wide analytics and KPIs',
                 'thumbnail' => '/images/templates/school-dashboard.png',
                 'type' => CustomReport::TYPE_SCHOOL_DASHBOARD,
-                'category' => 'school',
+                'category' => 'document',
                 'layout' => $this->getSchoolDashboardLayout(),
             ],
             [
-                'id' => 'wellness_overview',
-                'name' => 'Wellness Overview',
-                'description' => 'School-wide wellness trends and insights',
-                'thumbnail' => '/images/templates/wellness-overview.png',
-                'type' => CustomReport::TYPE_SCHOOL_DASHBOARD,
-                'category' => 'school',
-                'layout' => $this->getSchoolDashboardLayout(),
+                'id' => 'blank_document',
+                'name' => 'Blank Document',
+                'description' => 'Start from scratch with a blank document',
+                'thumbnail' => '/images/templates/blank.png',
+                'type' => CustomReport::TYPE_CUSTOM,
+                'category' => 'document',
+                'layout' => [],
             ],
-            // Custom
+
+            // === WIDGET TEMPLATES ===
             [
-                'id' => 'blank',
+                'id' => 'kpi_widget',
+                'name' => 'KPI Dashboard Widget',
+                'description' => 'Single metric display for embedding on websites',
+                'thumbnail' => '/images/templates/widget-kpi.png',
+                'type' => CustomReport::TYPE_CUSTOM,
+                'category' => 'widget',
+                'layout' => $this->getKpiWidgetLayout(),
+            ],
+            [
+                'id' => 'chart_widget',
+                'name' => 'Chart Widget',
+                'description' => 'Embeddable chart with trend visualization',
+                'thumbnail' => '/images/templates/widget-chart.png',
+                'type' => CustomReport::TYPE_CUSTOM,
+                'category' => 'widget',
+                'layout' => $this->getChartWidgetLayout(),
+            ],
+            [
+                'id' => 'stats_banner',
+                'name' => 'Stats Banner',
+                'description' => 'Horizontal banner with multiple KPIs',
+                'thumbnail' => '/images/templates/widget-banner.png',
+                'type' => CustomReport::TYPE_CUSTOM,
+                'category' => 'widget',
+                'layout' => $this->getStatsBannerLayout(),
+            ],
+            [
+                'id' => 'blank_widget',
+                'name' => 'Blank Widget',
+                'description' => 'Start from scratch with a blank widget',
+                'thumbnail' => '/images/templates/blank.png',
+                'type' => CustomReport::TYPE_CUSTOM,
+                'category' => 'widget',
+                'layout' => [],
+            ],
+
+            // === SOCIAL TEMPLATES ===
+            [
+                'id' => 'achievement_post',
+                'name' => 'Achievement Celebration',
+                'description' => 'Share student achievements on social media',
+                'thumbnail' => '/images/templates/social-achievement.png',
+                'type' => CustomReport::TYPE_CUSTOM,
+                'category' => 'social',
+                'layout' => $this->getAchievementPostLayout(),
+            ],
+            [
+                'id' => 'stats_infographic',
+                'name' => 'Stats Infographic',
+                'description' => 'Eye-catching statistics for social sharing',
+                'thumbnail' => '/images/templates/social-stats.png',
+                'type' => CustomReport::TYPE_CUSTOM,
+                'category' => 'social',
+                'layout' => $this->getStatsInfographicLayout(),
+            ],
+            [
+                'id' => 'announcement_post',
+                'name' => 'Announcement Post',
+                'description' => 'School news and announcements',
+                'thumbnail' => '/images/templates/social-announcement.png',
+                'type' => CustomReport::TYPE_CUSTOM,
+                'category' => 'social',
+                'layout' => $this->getAnnouncementPostLayout(),
+            ],
+            [
+                'id' => 'blank_social',
+                'name' => 'Blank Social Post',
+                'description' => 'Start from scratch',
+                'thumbnail' => '/images/templates/blank.png',
+                'type' => CustomReport::TYPE_CUSTOM,
+                'category' => 'social',
+                'layout' => [],
+            ],
+
+            // === CUSTOM TEMPLATES ===
+            [
+                'id' => 'blank_custom',
                 'name' => 'Blank Canvas',
-                'description' => 'Start from scratch with a blank report',
+                'description' => 'Custom dimensions, start fresh',
                 'thumbnail' => '/images/templates/blank.png',
                 'type' => CustomReport::TYPE_CUSTOM,
                 'category' => 'custom',
@@ -324,55 +379,395 @@ class ReportController extends Controller
     }
 
     /**
-     * Get Student Quick View template layout - simplified one-pager.
+     * KPI Widget Layout (300x250 medium rectangle)
      */
-    protected function getStudentQuickViewLayout(): array
+    protected function getKpiWidgetLayout(): array
     {
         return [
             [
                 'id' => Str::uuid()->toString(),
-                'type' => 'text',
-                'position' => ['x' => 40, 'y' => 40],
-                'size' => ['width' => 720, 'height' => 50],
-                'config' => [
-                    'content' => '<h2 style="margin: 0;">Student Quick View</h2>',
-                ],
-                'styles' => [
-                    'backgroundColor' => 'transparent',
-                    'padding' => 8,
-                ],
-            ],
-            [
-                'id' => Str::uuid()->toString(),
                 'type' => 'metric_card',
-                'position' => ['x' => 40, 'y' => 100],
-                'size' => ['width' => 350, 'height' => 100],
+                'position' => ['x' => 20, 'y' => 20],
+                'size' => ['width' => 260, 'height' => 120],
                 'config' => [
                     'metric_key' => 'gpa',
-                    'label' => 'Current GPA',
+                    'label' => 'Average GPA',
                     'show_trend' => true,
+                    'comparison_period' => 'last_month',
                 ],
                 'styles' => [
                     'backgroundColor' => '#F0F9FF',
                     'borderRadius' => 12,
-                    'padding' => 16,
+                    'padding' => 20,
+                    'valueColor' => '#1E40AF',
+                ],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'text',
+                'position' => ['x' => 20, 'y' => 160],
+                'size' => ['width' => 260, 'height' => 70],
+                'config' => [
+                    'content' => '<p style="text-align: center; color: #6B7280; font-size: 12px;">Updated in real-time</p>',
+                    'format' => 'html',
+                ],
+                'styles' => [
+                    'backgroundColor' => 'transparent',
+                    'textAlign' => 'center',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Chart Widget Layout (728x90 leaderboard)
+     */
+    protected function getChartWidgetLayout(): array
+    {
+        return [
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'chart',
+                'position' => ['x' => 10, 'y' => 10],
+                'size' => ['width' => 280, 'height' => 230],
+                'config' => [
+                    'chart_type' => 'line',
+                    'title' => 'Performance Trend',
+                    'metric_keys' => ['gpa'],
+                    'colors' => ['#3B82F6'],
+                ],
+                'styles' => [
+                    'backgroundColor' => '#FFFFFF',
+                    'borderRadius' => 8,
+                    'padding' => 12,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Stats Banner Layout (970x250 billboard)
+     */
+    protected function getStatsBannerLayout(): array
+    {
+        return [
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'heading',
+                'position' => ['x' => 20, 'y' => 20],
+                'size' => ['width' => 930, 'height' => 40],
+                'config' => [
+                    'content' => '<h2>School Performance Dashboard</h2>',
+                    'format' => 'html',
+                ],
+                'styles' => [
+                    'backgroundColor' => 'transparent',
+                    'fontSize' => 24,
+                    'fontWeight' => 'bold',
+                    'textAlign' => 'center',
+                    'color' => '#111827',
                 ],
             ],
             [
                 'id' => Str::uuid()->toString(),
                 'type' => 'metric_card',
-                'position' => ['x' => 410, 'y' => 100],
-                'size' => ['width' => 350, 'height' => 100],
+                'position' => ['x' => 20, 'y' => 80],
+                'size' => ['width' => 220, 'height' => 150],
+                'config' => [
+                    'metric_key' => 'gpa',
+                    'label' => 'Average GPA',
+                    'show_trend' => true,
+                ],
+                'styles' => ['backgroundColor' => '#EFF6FF', 'borderRadius' => 12, 'padding' => 16],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'metric_card',
+                'position' => ['x' => 260, 'y' => 80],
+                'size' => ['width' => 220, 'height' => 150],
                 'config' => [
                     'metric_key' => 'attendance_rate',
                     'label' => 'Attendance Rate',
                     'show_trend' => true,
                 ],
-                'styles' => [
-                    'backgroundColor' => '#F0FDF4',
-                    'borderRadius' => 12,
-                    'padding' => 16,
+                'styles' => ['backgroundColor' => '#F0FDF4', 'borderRadius' => 12, 'padding' => 16],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'metric_card',
+                'position' => ['x' => 500, 'y' => 80],
+                'size' => ['width' => 220, 'height' => 150],
+                'config' => [
+                    'metric_key' => 'wellness_score',
+                    'label' => 'Wellness Score',
+                    'show_trend' => true,
                 ],
+                'styles' => ['backgroundColor' => '#FDF4FF', 'borderRadius' => 12, 'padding' => 16],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'metric_card',
+                'position' => ['x' => 740, 'y' => 80],
+                'size' => ['width' => 210, 'height' => 150],
+                'config' => [
+                    'metric_key' => 'engagement_score',
+                    'label' => 'Engagement',
+                    'show_trend' => true,
+                ],
+                'styles' => ['backgroundColor' => '#FFF7ED', 'borderRadius' => 12, 'padding' => 16],
+            ],
+        ];
+    }
+
+    /**
+     * Achievement Post Layout (1080x1080 Instagram)
+     */
+    protected function getAchievementPostLayout(): array
+    {
+        return [
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'rectangle',
+                'position' => ['x' => 0, 'y' => 0],
+                'size' => ['width' => 1080, 'height' => 1080],
+                'config' => [],
+                'styles' => [
+                    'backgroundColor' => '#1E40AF',
+                    'borderRadius' => 0,
+                    'opacity' => 100,
+                ],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'heading',
+                'position' => ['x' => 80, 'y' => 120],
+                'size' => ['width' => 920, 'height' => 100],
+                'config' => [
+                    'content' => '<h1>🎉 Congratulations!</h1>',
+                    'format' => 'html',
+                ],
+                'styles' => [
+                    'backgroundColor' => 'transparent',
+                    'fontSize' => 56,
+                    'fontWeight' => 'bold',
+                    'textAlign' => 'center',
+                    'color' => '#FFFFFF',
+                ],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'metric_card',
+                'position' => ['x' => 240, 'y' => 320],
+                'size' => ['width' => 600, 'height' => 300],
+                'config' => [
+                    'metric_key' => 'gpa',
+                    'label' => 'Outstanding Achievement',
+                    'show_trend' => false,
+                ],
+                'styles' => [
+                    'backgroundColor' => '#FFFFFF',
+                    'borderRadius' => 24,
+                    'padding' => 40,
+                    'valueColor' => '#1E40AF',
+                ],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'text',
+                'position' => ['x' => 80, 'y' => 700],
+                'size' => ['width' => 920, 'height' => 120],
+                'config' => [
+                    'content' => '<p style="text-align: center;">Student Name has achieved exceptional results this semester!</p>',
+                    'format' => 'html',
+                ],
+                'styles' => [
+                    'backgroundColor' => 'transparent',
+                    'fontSize' => 28,
+                    'textAlign' => 'center',
+                    'color' => '#FFFFFF',
+                ],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'logo',
+                'position' => ['x' => 440, 'y' => 900],
+                'size' => ['width' => 200, 'height' => 80],
+                'config' => ['use_org_logo' => true, 'fit' => 'contain'],
+                'styles' => ['borderRadius' => 0],
+            ],
+        ];
+    }
+
+    /**
+     * Stats Infographic Layout (1080x1080 Instagram)
+     */
+    protected function getStatsInfographicLayout(): array
+    {
+        return [
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'rectangle',
+                'position' => ['x' => 0, 'y' => 0],
+                'size' => ['width' => 1080, 'height' => 1080],
+                'config' => [],
+                'styles' => [
+                    'backgroundColor' => '#F97316',
+                    'borderRadius' => 0,
+                    'opacity' => 100,
+                ],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'heading',
+                'position' => ['x' => 80, 'y' => 80],
+                'size' => ['width' => 920, 'height' => 100],
+                'config' => [
+                    'content' => '<h1>📊 By The Numbers</h1>',
+                    'format' => 'html',
+                ],
+                'styles' => [
+                    'backgroundColor' => 'transparent',
+                    'fontSize' => 48,
+                    'fontWeight' => 'bold',
+                    'textAlign' => 'center',
+                    'color' => '#FFFFFF',
+                ],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'metric_card',
+                'position' => ['x' => 80, 'y' => 240],
+                'size' => ['width' => 440, 'height' => 200],
+                'config' => [
+                    'metric_key' => 'gpa',
+                    'label' => 'Average GPA',
+                    'show_trend' => true,
+                ],
+                'styles' => ['backgroundColor' => '#FFFFFF', 'borderRadius' => 20, 'padding' => 24],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'metric_card',
+                'position' => ['x' => 560, 'y' => 240],
+                'size' => ['width' => 440, 'height' => 200],
+                'config' => [
+                    'metric_key' => 'attendance_rate',
+                    'label' => 'Attendance',
+                    'show_trend' => true,
+                ],
+                'styles' => ['backgroundColor' => '#FFFFFF', 'borderRadius' => 20, 'padding' => 24],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'metric_card',
+                'position' => ['x' => 80, 'y' => 480],
+                'size' => ['width' => 440, 'height' => 200],
+                'config' => [
+                    'metric_key' => 'wellness_score',
+                    'label' => 'Wellness',
+                    'show_trend' => true,
+                ],
+                'styles' => ['backgroundColor' => '#FFFFFF', 'borderRadius' => 20, 'padding' => 24],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'metric_card',
+                'position' => ['x' => 560, 'y' => 480],
+                'size' => ['width' => 440, 'height' => 200],
+                'config' => [
+                    'metric_key' => 'engagement_score',
+                    'label' => 'Engagement',
+                    'show_trend' => true,
+                ],
+                'styles' => ['backgroundColor' => '#FFFFFF', 'borderRadius' => 20, 'padding' => 24],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'text',
+                'position' => ['x' => 80, 'y' => 740],
+                'size' => ['width' => 920, 'height' => 80],
+                'config' => [
+                    'content' => '<p style="text-align: center;">This Semester\'s Highlights</p>',
+                    'format' => 'html',
+                ],
+                'styles' => [
+                    'backgroundColor' => 'transparent',
+                    'fontSize' => 24,
+                    'textAlign' => 'center',
+                    'color' => '#FFFFFF',
+                ],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'logo',
+                'position' => ['x' => 440, 'y' => 900],
+                'size' => ['width' => 200, 'height' => 80],
+                'config' => ['use_org_logo' => true, 'fit' => 'contain'],
+                'styles' => ['borderRadius' => 0],
+            ],
+        ];
+    }
+
+    /**
+     * Announcement Post Layout (1080x1080 Instagram)
+     */
+    protected function getAnnouncementPostLayout(): array
+    {
+        return [
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'rectangle',
+                'position' => ['x' => 0, 'y' => 0],
+                'size' => ['width' => 1080, 'height' => 1080],
+                'config' => [],
+                'styles' => [
+                    'backgroundColor' => '#10B981',
+                    'borderRadius' => 0,
+                    'opacity' => 100,
+                ],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'heading',
+                'position' => ['x' => 80, 'y' => 200],
+                'size' => ['width' => 920, 'height' => 120],
+                'config' => [
+                    'content' => '<h1>📢 Announcement</h1>',
+                    'format' => 'html',
+                ],
+                'styles' => [
+                    'backgroundColor' => 'transparent',
+                    'fontSize' => 56,
+                    'fontWeight' => 'bold',
+                    'textAlign' => 'center',
+                    'color' => '#FFFFFF',
+                ],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'text',
+                'position' => ['x' => 120, 'y' => 400],
+                'size' => ['width' => 840, 'height' => 400],
+                'config' => [
+                    'content' => '<p style="text-align: center; font-size: 32px; line-height: 1.6;">Your announcement message goes here. Share important updates, news, and information with your community.</p>',
+                    'format' => 'html',
+                ],
+                'styles' => [
+                    'backgroundColor' => '#FFFFFF',
+                    'borderRadius' => 24,
+                    'padding' => 40,
+                    'fontSize' => 24,
+                    'textAlign' => 'center',
+                    'color' => '#111827',
+                ],
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'type' => 'logo',
+                'position' => ['x' => 440, 'y' => 900],
+                'size' => ['width' => 200, 'height' => 80],
+                'config' => ['use_org_logo' => true, 'fit' => 'contain'],
+                'styles' => ['borderRadius' => 0],
             ],
         ];
     }
