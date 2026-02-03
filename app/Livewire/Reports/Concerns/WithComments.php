@@ -110,6 +110,11 @@ trait WithComments
         return collect($this->comments)->where('resolved', false)->count();
     }
 
+    public function getUnresolvedCount(): int
+    {
+        return $this->getUnresolvedCommentsCount();
+    }
+
     protected function markDirty(): void
     {
         if (property_exists($this, 'isDirty')) {
