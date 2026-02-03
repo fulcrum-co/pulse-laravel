@@ -54,10 +54,11 @@ trait WithReportPersistence
         $this->filters = array_merge($this->filters, $report->filters ?? []);
         $this->isLive = $report->is_live ?? true;
 
-        // Check for multi-page structure
+        // Parse layout - handle multiple storage formats
         $layout = $report->report_layout ?? [];
+
         if (isset($layout['pages']) && is_array($layout['pages'])) {
-            // Multi-page report - load pages data FIRST
+            // Format 1: Multi-page report {pages: [...], currentPageIndex: N}
             $this->pages = $layout['pages'];
             $this->currentPageIndex = $layout['currentPageIndex'] ?? 0;
             // Ensure currentPageIndex is valid
@@ -66,9 +67,15 @@ trait WithReportPersistence
             }
             // Load elements from current page
             $this->elements = $this->pages[$this->currentPageIndex]['elements'] ?? [];
+        } elseif (isset($layout['elements']) && is_array($layout['elements'])) {
+            // Format 2: Wrapped elements {elements: [...]}
+            $this->elements = $layout['elements'];
+        } elseif (is_array($layout) && (empty($layout) || array_is_list($layout))) {
+            // Format 3: Direct array of elements [...] or empty array
+            $this->elements = $layout;
         } else {
-            // Legacy single-page report - validate layout is an array
-            $this->elements = is_array($layout) ? $layout : [];
+            // Unknown format - start with empty elements
+            $this->elements = [];
         }
 
         // Initialize pages structure if needed (will use existing $this->pages or convert from elements)
