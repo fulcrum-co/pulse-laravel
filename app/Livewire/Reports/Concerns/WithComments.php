@@ -176,8 +176,8 @@ trait WithComments
         // Load comments from report if persisted
         if (property_exists($this, 'reportId') && $this->reportId) {
             $report = \App\Models\CustomReport::find($this->reportId);
-            if ($report && isset($report->comments)) {
-                $this->comments = $report->comments ?? [];
+            if ($report) {
+                $this->comments = $report->comments()->with('user')->get()->toArray();
             }
         }
     }
