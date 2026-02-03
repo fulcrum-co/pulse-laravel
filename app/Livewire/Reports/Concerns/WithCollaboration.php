@@ -18,6 +18,14 @@ trait WithCollaboration
     public string $shareRole = 'editor';
 
     /**
+     * Initialize collaboration features.
+     */
+    public function initializeCollaboration(): void
+    {
+        $this->loadCollaborators();
+    }
+
+    /**
      * Broadcast cursor position to other collaborators.
      */
     public function broadcastCursor(float $x, float $y): void
@@ -230,7 +238,7 @@ trait WithCollaboration
 
         $report = \App\Models\CustomReport::find($this->reportId);
 
-        if ($report) {
+        if ($report && method_exists($report, 'collaborators')) {
             $this->activeCollaborators = $report->collaborators()
                 ->with('user')
                 ->get()
@@ -243,7 +251,47 @@ trait WithCollaboration
                     'lastSeen' => $c->last_seen_at,
                 ])
                 ->toArray();
+        } else {
+            $this->activeCollaborators = [];
         }
+    }
+
+    /**
+     * Get all collaborators including the owner.
+     */
+    public function getAllCollaborators(): array
+    {
+        $all = [];
+
+        // Add owner first
+        if ($this->reportId) {
+            $report = \App\Models\CustomReport::find($this->reportId);
+            if ($report && $report->creator) {
+                $all[] = [
+                    'id' => $report->created_by,
+                    'name' => $report->creator?->full_name ?? $report->creator?->name ?? 'Unknown',
+                    'email' => $report->creator?->email,
+                    'avatar' => $report->creator?->profile_photo_url,
+                    'role' => 'owner',
+                    'isOwner' => true,
+                ];
+            }
+        }
+
+        // Add collaborators
+        foreach ($this->activeCollaborators as $collab) {
+            $all[] = array_merge($collab, ['isOwner' => false]);
+        }
+
+        return $all;
+    }
+
+    /**
+     * Add a collaborator (form submission handler).
+     */
+    public function addCollaborator(): void
+    {
+        $this->inviteCollaborator();
     }
 
     /**

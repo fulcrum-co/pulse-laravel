@@ -18,11 +18,47 @@ trait WithComments
     public string $commentFilter = 'all'; // all, unresolved, resolved
 
     /**
+     * Get count of unresolved comments.
+     */
+    public function getUnresolvedCount(): int
+    {
+        if (! $this->reportId) {
+            return 0;
+        }
+
+        // Check if ReportComment model exists
+        if (! class_exists(\App\Models\ReportComment::class)) {
+            return 0;
+        }
+
+        return \App\Models\ReportComment::where('custom_report_id', $this->reportId)
+            ->whereNull('parent_id')
+            ->where('resolved', false)
+            ->count();
+    }
+
+    /**
+     * Open comments panel.
+     */
+    public function openCommentsPanel(): void
+    {
+        $this->showCommentsPanel = true;
+        $this->loadComments();
+    }
+
+    /**
      * Load comments for the current report.
      */
     public function loadComments(): void
     {
         if (! $this->reportId) {
+            $this->comments = [];
+
+            return;
+        }
+
+        // Check if ReportComment model exists
+        if (! class_exists(\App\Models\ReportComment::class)) {
             $this->comments = [];
 
             return;
@@ -88,6 +124,13 @@ trait WithComments
             return;
         }
 
+        // Check if ReportComment model exists
+        if (! class_exists(\App\Models\ReportComment::class)) {
+            session()->flash('error', 'Comments feature is not yet available.');
+
+            return;
+        }
+
         $user = auth()->user();
 
         // Parse @mentions from content
@@ -149,6 +192,10 @@ trait WithComments
      */
     public function resolveComment(int $commentId): void
     {
+        if (! class_exists(\App\Models\ReportComment::class)) {
+            return;
+        }
+
         $comment = \App\Models\ReportComment::find($commentId);
 
         if ($comment && $comment->custom_report_id == $this->reportId) {
@@ -162,6 +209,10 @@ trait WithComments
      */
     public function unresolveComment(int $commentId): void
     {
+        if (! class_exists(\App\Models\ReportComment::class)) {
+            return;
+        }
+
         $comment = \App\Models\ReportComment::find($commentId);
 
         if ($comment && $comment->custom_report_id == $this->reportId) {
@@ -175,6 +226,10 @@ trait WithComments
      */
     public function deleteComment(int $commentId): void
     {
+        if (! class_exists(\App\Models\ReportComment::class)) {
+            return;
+        }
+
         $comment = \App\Models\ReportComment::find($commentId);
 
         if ($comment && $comment->custom_report_id == $this->reportId) {

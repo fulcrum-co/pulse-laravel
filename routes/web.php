@@ -400,6 +400,9 @@ Route::get('/surveys/{survey}/respond/{attempt}', function ($survey, $attempt) {
     return view('surveys.respond', compact('survey', 'attempt'));
 })->name('surveys.respond');
 
+// Public certificate verification (no auth required)
+Route::get('/verify/{uuid}', [App\Http\Controllers\CertificateController::class, 'verify'])->name('certificates.verify');
+
 // Sinch Webhooks (no auth required)
 Route::prefix('webhooks/surveys')->group(function () {
     Route::post('/sinch/voice', [App\Http\Controllers\SurveyWebhookController::class, 'handleVoice'])->name('webhooks.surveys.voice');
@@ -422,6 +425,12 @@ Route::middleware('auth')->group(function () {
     // Dashboard (HubSpot-style customizable)
     Route::get('/dashboard', App\Livewire\Dashboard\DashboardIndex::class)->name('dashboard');
     Route::get('/dashboards', App\Livewire\Dashboard\DashboardList::class)->name('dashboards.index');
+
+    // Learner Experience - Cohort-based Learning
+    Route::prefix('learn')->group(function () {
+        Route::get('/', App\Livewire\Cohorts\CohortDashboard::class)->name('learn.dashboard');
+        Route::get('/cohort/{cohort}', App\Livewire\Cohorts\CohortViewer::class)->name('learn.cohort');
+    });
 
     // Contacts (Students, Teachers, Parents)
     Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
@@ -726,6 +735,13 @@ Route::middleware('auth')->group(function () {
     // Admin Settings
     Route::prefix('admin')->group(function () {
         Route::get('/settings/ai-courses', App\Livewire\Admin\AICourseSettings::class)->name('admin.settings.ai-courses');
+        Route::get('/settings/terminology', App\Livewire\Admin\TerminologySettings::class)->name('admin.settings.terminology');
+
+        // Cohort Management
+        Route::get('/cohorts', App\Livewire\Cohorts\CohortManager::class)->name('admin.cohorts.index');
+        Route::get('/cohorts/{cohort}', App\Livewire\Cohorts\CohortDetail::class)->name('admin.cohorts.show');
+        Route::get('/cohorts/{cohort}/enroll', App\Livewire\Cohorts\CohortEnrollment::class)->name('admin.cohorts.enroll');
+        Route::get('/cohorts/{cohort}/schedule', App\Livewire\Cohorts\DripScheduleBuilder::class)->name('admin.cohorts.schedule');
 
         // Moderation
         Route::get('/moderation', App\Livewire\Admin\ModerationQueue::class)->name('admin.moderation');
