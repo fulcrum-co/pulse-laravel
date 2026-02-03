@@ -5,6 +5,7 @@ namespace App\Livewire\Reports\Concerns;
 trait WithCanvasInteraction
 {
     public float $zoom = 1.0;
+    public float $canvasZoom = 1.0;
     public bool $showGrid = true;
     public bool $snapToGrid = true;
     public int $gridSize = 20;
@@ -14,21 +15,25 @@ trait WithCanvasInteraction
     public function zoomIn(): void
     {
         $this->zoom = min(2.0, $this->zoom + 0.1);
+        $this->canvasZoom = $this->zoom;
     }
 
     public function zoomOut(): void
     {
         $this->zoom = max(0.5, $this->zoom - 0.1);
+        $this->canvasZoom = $this->zoom;
     }
 
     public function resetZoom(): void
     {
         $this->zoom = 1.0;
+        $this->canvasZoom = 1.0;
     }
 
     public function setZoom(float $level): void
     {
         $this->zoom = max(0.5, min(2.0, $level));
+        $this->canvasZoom = $this->zoom;
     }
 
     public function toggleGrid(): void
