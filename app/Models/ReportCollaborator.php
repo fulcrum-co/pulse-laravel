@@ -74,7 +74,7 @@ class ReportCollaborator extends Model
     /**
      * Update last seen timestamp.
      */
-    public function touch(): bool
+    public function updateLastSeen(): bool
     {
         $this->last_seen_at = now();
 
