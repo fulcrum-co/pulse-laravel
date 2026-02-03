@@ -1,12 +1,9 @@
 @use('App\Services\RolePermissions')
 @use('Illuminate\Support\Str')
 <div
-    class="h-screen flex"
+    class="h-screen flex flex-col"
     x-data="{
-        mainNavCollapsed: localStorage.getItem('reportBuilderNavCollapsed') === 'true',
-        hoveredNav: null,
         init() {
-            this.$watch('mainNavCollapsed', val => localStorage.setItem('reportBuilderNavCollapsed', val));
             // Keyboard shortcuts
             document.addEventListener('keydown', (e) => {
                 // Zoom in: Ctrl/Cmd + Plus or Ctrl/Cmd + =
@@ -65,104 +62,7 @@
     @wheel.window="handleWheel($event)"
     @open-preview.window="window.open($event.detail.url, '_blank')"
 >
-    {{-- Main Pulse Navigation Rail --}}
-    <aside class="w-14 bg-white border-r border-gray-200 flex flex-col h-full flex-shrink-0">
-        {{-- Logo --}}
-        <div class="p-2 border-b border-gray-200 flex justify-center">
-            <a href="/dashboard" class="text-pulse-orange-500 font-bold text-xl" title="Back to Dashboard">P</a>
-        </div>
-
-        {{-- Navigation Items --}}
-        <nav class="flex-1 py-2 px-1.5 space-y-1 overflow-y-auto">
-            @if(RolePermissions::currentUserCanAccess('home'))
-            <div @mouseenter="hoveredNav = 'home'" @mouseleave="hoveredNav = null" class="relative">
-                <a href="/dashboard" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
-                    <x-icon name="home" class="w-5 h-5" />
-                </a>
-                <div x-show="hoveredNav === 'home'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Home</div>
-            </div>
-            @endif
-
-            @if(RolePermissions::currentUserCanAccess('contacts'))
-            <div @mouseenter="hoveredNav = 'contacts'" @mouseleave="hoveredNav = null" class="relative">
-                <a href="/contacts" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
-                    <x-icon name="users" class="w-5 h-5" />
-                </a>
-                <div x-show="hoveredNav === 'contacts'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Contacts</div>
-            </div>
-            @endif
-
-            @if(RolePermissions::currentUserCanAccess('surveys'))
-            <div @mouseenter="hoveredNav = 'surveys'" @mouseleave="hoveredNav = null" class="relative">
-                <a href="/surveys" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
-                    <x-icon name="clipboard-list" class="w-5 h-5" />
-                </a>
-                <div x-show="hoveredNav === 'surveys'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Surveys</div>
-            </div>
-            @endif
-
-            @if(RolePermissions::currentUserCanAccess('dashboards'))
-            <div @mouseenter="hoveredNav = 'dashboards'" @mouseleave="hoveredNav = null" class="relative">
-                <a href="/dashboards" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
-                    <x-icon name="chart-pie" class="w-5 h-5" />
-                </a>
-                <div x-show="hoveredNav === 'dashboards'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Dashboards</div>
-            </div>
-            @endif
-
-            <div class="border-t border-gray-200 my-2"></div>
-
-            @if(RolePermissions::currentUserCanAccess('reports'))
-            <div @mouseenter="hoveredNav = 'reports'" @mouseleave="hoveredNav = null" class="relative">
-                <a href="/reports" class="flex items-center justify-center p-2 rounded-lg transition-colors bg-pulse-orange-50 text-pulse-orange-600">
-                    <x-icon name="chart-bar" class="w-5 h-5" />
-                </a>
-                <div x-show="hoveredNav === 'reports'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Reports (Current)</div>
-            </div>
-            @endif
-
-            @if(RolePermissions::currentUserCanAccess('strategy'))
-            <div @mouseenter="hoveredNav = 'plans'" @mouseleave="hoveredNav = null" class="relative">
-                <a href="/plans" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
-                    <x-icon name="clipboard-document-list" class="w-5 h-5" />
-                </a>
-                <div x-show="hoveredNav === 'plans'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Plans</div>
-            </div>
-            @endif
-
-            @if(RolePermissions::currentUserCanAccess('resources'))
-            <div @mouseenter="hoveredNav = 'resources'" @mouseleave="hoveredNav = null" class="relative">
-                <a href="/resources" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
-                    <x-icon name="book-open" class="w-5 h-5" />
-                </a>
-                <div x-show="hoveredNav === 'resources'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Resources</div>
-            </div>
-            @endif
-
-            @if(RolePermissions::currentUserCanAccess('marketplace'))
-            <div @mouseenter="hoveredNav = 'marketplace'" @mouseleave="hoveredNav = null" class="relative">
-                <a href="/marketplace" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
-                    <x-icon name="shopping-bag" class="w-5 h-5" />
-                </a>
-                <div x-show="hoveredNav === 'marketplace'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Marketplace</div>
-            </div>
-            @endif
-        </nav>
-
-        {{-- Settings --}}
-        @if(RolePermissions::currentUserCanAccess('settings'))
-        <div class="p-1.5 border-t border-gray-200">
-            <div @mouseenter="hoveredNav = 'settings'" @mouseleave="hoveredNav = null" class="relative">
-                <a href="/settings" class="flex items-center justify-center p-2 rounded-lg transition-colors text-gray-600 hover:bg-pulse-orange-50 hover:text-pulse-orange-600">
-                    <x-icon name="cog" class="w-5 h-5" />
-                </a>
-                <div x-show="hoveredNav === 'settings'" x-transition.opacity class="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap z-50">Settings</div>
-            </div>
-        </div>
-        @endif
-    </aside>
-
-    {{-- Main Content Area --}}
+    {{-- Main Content Area (sidebar is provided by outer layout) --}}
     <div class="flex-1 flex flex-col min-w-0">
     <!-- Header -->
     <header class="h-14 bg-white border-b border-gray-200 px-4 flex items-center justify-between flex-shrink-0 z-50">
