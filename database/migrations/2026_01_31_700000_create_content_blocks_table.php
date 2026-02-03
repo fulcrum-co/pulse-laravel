@@ -34,7 +34,7 @@ return new class extends Migration
             // Classification
             $table->json('topics')->nullable(); // ['anxiety', 'stress', 'coping']
             $table->json('skills')->nullable(); // ['breathing', 'journaling', 'communication']
-            $table->json('grade_levels')->nullable(); // ['6', '7', '8'] or ['elementary', 'middle', 'high']
+            $table->json('levels')->nullable(); // ['6', '7', '8'] or ['elementary', 'middle', 'high']
             $table->json('subject_areas')->nullable(); // ['SEL', 'health', 'academics']
 
             // Targeting

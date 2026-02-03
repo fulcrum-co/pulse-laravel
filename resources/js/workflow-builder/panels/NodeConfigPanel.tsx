@@ -29,10 +29,10 @@ export default function NodeConfigPanel({ node, onUpdate, onClose, onDelete }: N
         onUpdate(newData);
     };
 
-    const updateNestedField = (parent: string, field: string, value: unknown) => {
-        const parentObj = (localData[parent] as Record<string, unknown>) || {};
+    const updateNestedField = (parentKey: string, field: string, value: unknown) => {
+        const parentObj = (localData[parentKey] as Record<string, unknown>) || {};
         const newParent = { ...parentObj, [field]: value };
-        updateField(parent, newParent);
+        updateField(parentKey, newParent);
     };
 
     const renderTriggerConfig = () => {
@@ -386,7 +386,7 @@ export default function NodeConfigPanel({ node, onUpdate, onClose, onDelete }: N
                                 type="text"
                                 value={config.url || ''}
                                 onChange={(e) => updateNestedField('config', 'url', e.target.value)}
-                                placeholder="/students/{{contact_id}}"
+                                placeholder="/participants/{{contact_id}}"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                             />
                             <p className="text-xs text-gray-400 mt-1">Deep link when notification is clicked</p>

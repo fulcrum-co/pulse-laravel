@@ -21,7 +21,7 @@ class ResourceSuggestionController extends Controller
     {
         // Map shorthand contact type to full class name
         $typeMap = [
-            'learner' => 'App\\Models\\Learner',
+            'participant' => 'App\\Models\\Participant',
             'user' => 'App\\Models\\User',
         ];
         $fullType = $typeMap[$contactType] ?? $contactType;
@@ -40,7 +40,7 @@ class ResourceSuggestionController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'contact_type' => 'required|string|in:learner,user,App\\Models\\Learner,App\\Models\\User',
+            'contact_type' => 'required|string|in:participant,user,App\\Models\\Participant,App\\Models\\User',
             'contact_id' => 'required|integer',
             'resource_id' => 'required|exists:resources,id',
             'notes' => 'nullable|string',
@@ -50,7 +50,7 @@ class ResourceSuggestionController extends Controller
 
         // Map shorthand contact type to full class name
         $typeMap = [
-            'learner' => 'App\\Models\\Learner',
+            'participant' => 'App\\Models\\Participant',
             'user' => 'App\\Models\\User',
         ];
         $contactType = $typeMap[$validated['contact_type']] ?? $validated['contact_type'];
@@ -109,17 +109,17 @@ class ResourceSuggestionController extends Controller
     public function generate(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'contact_type' => 'required|string|in:learner',
-            'contact_id' => 'required|integer|exists:learners,id',
+            'contact_type' => 'required|string|in:participant',
+            'contact_id' => 'required|integer|exists:participants,id',
         ]);
 
-        $learner = \App\Models\Learner::findOrFail($validated['contact_id']);
+        $participant = \App\Models\Participant::findOrFail($validated['contact_id']);
 
         // Check if AI suggestions are enabled
         if (config('pulse.contact_view.ai_suggestions.enabled', false)) {
-            $suggestions = $this->suggestionService->generateAiSuggestions($learner);
+            $suggestions = $this->suggestionService->generateAiSuggestions($participant);
         } else {
-            $suggestions = $this->suggestionService->generateRuleBasedSuggestions($learner);
+            $suggestions = $this->suggestionService->generateRuleBasedSuggestions($participant);
         }
 
         return response()->json([

@@ -210,7 +210,7 @@ function supportTicketModal() {
             if (path.includes('/plans')) return 'strategic-plans';
             if (path.includes('/surveys')) return 'surveys';
             if (path.includes('/alerts')) return 'alerts';
-            if (path.includes('/learners')) return 'learners';
+            if (path.includes('/participants')) return 'participants';
             if (path.includes('/courses')) return 'courses';
             if (path.includes('/resources')) return 'resources';
             if (path.includes('/help')) return 'help-center';

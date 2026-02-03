@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\SurveyAttempt;
 use App\Models\Trigger;
 use App\Models\TriggerLog;
@@ -19,16 +19,16 @@ class TriggerEvaluationService
     }
 
     /**
-     * Evaluate all triggers for a learner based on survey data.
+     * Evaluate all triggers for a participant based on survey data.
      */
-    public function evaluateForLearner(Learner $learner, SurveyAttempt $attempt): array
+    public function evaluateForLearner(Participant $participant, SurveyAttempt $attempt): array
     {
         $triggeredLogs = [];
 
         // Get active triggers for this organization (and ancestors)
         $orgIds = array_merge(
-            [$learner->org_id],
-            $learner->organization?->ancestor_org_ids ?? []
+            [$participant->org_id],
+            $participant->organization?->ancestor_org_ids ?? []
         );
 
         $triggers = Trigger::active()
@@ -42,8 +42,8 @@ class TriggerEvaluationService
             }
 
             // Evaluate trigger conditions
-            if ($this->evaluateConditions($trigger, $learner, $attempt)) {
-                $log = $this->executeTrigger($trigger, $learner, $attempt);
+            if ($this->evaluateConditions($trigger, $participant, $attempt)) {
+                $log = $this->executeTrigger($trigger, $participant, $attempt);
                 $triggeredLogs[] = $log;
             }
         }
@@ -54,7 +54,7 @@ class TriggerEvaluationService
     /**
      * Evaluate trigger conditions.
      */
-    protected function evaluateConditions(Trigger $trigger, Learner $learner, SurveyAttempt $attempt): bool
+    protected function evaluateConditions(Trigger $trigger, Participant $participant, SurveyAttempt $attempt): bool
     {
         $operations = $trigger->operations ?? [];
         $condition = $trigger->operand_condition ?? 'AND';
@@ -66,7 +66,7 @@ class TriggerEvaluationService
         $results = [];
 
         foreach ($operations as $operation) {
-            $results[] = $this->evaluateOperation($operation, $learner, $attempt);
+            $results[] = $this->evaluateOperation($operation, $participant, $attempt);
         }
 
         return $condition === 'AND'
@@ -77,7 +77,7 @@ class TriggerEvaluationService
     /**
      * Evaluate a single operation.
      */
-    protected function evaluateOperation(array $operation, Learner $learner, SurveyAttempt $attempt): bool
+    protected function evaluateOperation(array $operation, Participant $participant, SurveyAttempt $attempt): bool
     {
         $operandType = $operation['operand_type'] ?? null;
         $criteria = $operation['criteria'] ?? [];
@@ -87,7 +87,7 @@ class TriggerEvaluationService
             $condition = $criterion['condition'] ?? null;
             $value = $criterion['value'] ?? null;
 
-            $actualValue = $this->getFieldValue($operandType, $field, $learner, $attempt);
+            $actualValue = $this->getFieldValue($operandType, $field, $participant, $attempt);
 
             if (! $this->compareValues($actualValue, $condition, $value)) {
                 return false;
@@ -100,7 +100,7 @@ class TriggerEvaluationService
     /**
      * Get the value of a field for comparison.
      */
-    protected function getFieldValue(string $operandType, string $field, Learner $learner, SurveyAttempt $attempt)
+    protected function getFieldValue(string $operandType, string $field, Participant $participant, SurveyAttempt $attempt)
     {
         switch ($operandType) {
             case 'survey_score':
@@ -121,8 +121,8 @@ class TriggerEvaluationService
 
                 return data_get($data, $field);
 
-            case 'learner':
-                return data_get($learner->toArray(), $field);
+            case 'participant':
+                return data_get($participant->toArray(), $field);
 
             default:
                 return null;
@@ -170,12 +170,12 @@ class TriggerEvaluationService
     /**
      * Execute trigger actions.
      */
-    protected function executeTrigger(Trigger $trigger, Learner $learner, SurveyAttempt $attempt): TriggerLog
+    protected function executeTrigger(Trigger $trigger, Participant $participant, SurveyAttempt $attempt): TriggerLog
     {
         $actionsExecuted = [];
 
         foreach ($trigger->actions ?? [] as $action) {
-            $result = $this->executeAction($action, $learner, $attempt);
+            $result = $this->executeAction($action, $participant, $attempt);
             $actionsExecuted[] = $result;
         }
 
@@ -185,8 +185,8 @@ class TriggerEvaluationService
         // Create log
         $log = TriggerLog::create([
             'trigger_id' => $trigger->_id,
-            'learner_id' => $learner->_id,
-            'org_id' => $learner->org_id,
+            'participant_id' => $participant->_id,
+            'org_id' => $participant->org_id,
             'triggering_event' => [
                 'type' => 'survey_completed',
                 'related_survey_attempt_id' => $attempt->_id,
@@ -201,7 +201,7 @@ class TriggerEvaluationService
     /**
      * Execute a single action.
      */
-    protected function executeAction(array $action, Learner $learner, SurveyAttempt $attempt): array
+    protected function executeAction(array $action, Participant $participant, SurveyAttempt $attempt): array
     {
         $actionType = $action['action_type'] ?? null;
         $events = $action['action_events'] ?? [];
@@ -209,22 +209,22 @@ class TriggerEvaluationService
         try {
             switch ($actionType) {
                 case 'send_email':
-                    return $this->sendEmailAction($events, $learner, $attempt);
+                    return $this->sendEmailAction($events, $participant, $attempt);
 
                 case 'send_sms':
-                    return $this->sendSmsAction($events, $learner, $attempt);
+                    return $this->sendSmsAction($events, $participant, $attempt);
 
                 case 'send_whatsapp':
-                    return $this->sendWhatsAppAction($events, $learner, $attempt);
+                    return $this->sendWhatsAppAction($events, $participant, $attempt);
 
                 case 'make_call':
-                    return $this->makeCallAction($events, $learner, $attempt);
+                    return $this->makeCallAction($events, $participant, $attempt);
 
                 case 'assign_resource':
-                    return $this->assignResourceAction($events, $learner, $attempt);
+                    return $this->assignResourceAction($events, $participant, $attempt);
 
                 case 'create_task':
-                    return $this->createTaskAction($events, $learner, $attempt);
+                    return $this->createTaskAction($events, $participant, $attempt);
 
                 default:
                     return [
@@ -237,7 +237,7 @@ class TriggerEvaluationService
         } catch (\Exception $e) {
             Log::error('Trigger action failed', [
                 'action_type' => $actionType,
-                'learner_id' => $learner->_id,
+                'participant_id' => $participant->_id,
                 'error' => $e->getMessage(),
             ]);
 
@@ -253,13 +253,13 @@ class TriggerEvaluationService
     /**
      * Send email action.
      */
-    protected function sendEmailAction(array $events, Learner $learner, SurveyAttempt $attempt): array
+    protected function sendEmailAction(array $events, Participant $participant, SurveyAttempt $attempt): array
     {
         foreach ($events as $event) {
             $email = $event['action_value'] ?? null;
             if ($email) {
                 // TODO: Implement email notification
-                // Mail::to($email)->send(new TriggerAlertEmail($learner, $attempt));
+                // Mail::to($email)->send(new TriggerAlertEmail($participant, $attempt));
             }
         }
 
@@ -274,9 +274,9 @@ class TriggerEvaluationService
     /**
      * Send SMS action.
      */
-    protected function sendSmsAction(array $events, Learner $learner, SurveyAttempt $attempt): array
+    protected function sendSmsAction(array $events, Participant $participant, SurveyAttempt $attempt): array
     {
-        $message = "Alert: {$learner->full_name} requires attention based on recent check-in. Please review in Pulse.";
+        $message = "Alert: {$participant->full_name} requires attention based on recent check-in. Please review in Pulse.";
 
         foreach ($events as $event) {
             $phone = $event['action_value'] ?? null;
@@ -296,9 +296,9 @@ class TriggerEvaluationService
     /**
      * Send WhatsApp action.
      */
-    protected function sendWhatsAppAction(array $events, Learner $learner, SurveyAttempt $attempt): array
+    protected function sendWhatsAppAction(array $events, Participant $participant, SurveyAttempt $attempt): array
     {
-        $message = "Alert: {$learner->full_name} requires attention based on recent check-in. Please review in Pulse.";
+        $message = "Alert: {$participant->full_name} requires attention based on recent check-in. Please review in Pulse.";
 
         foreach ($events as $event) {
             $phone = $event['action_value'] ?? null;
@@ -318,9 +318,9 @@ class TriggerEvaluationService
     /**
      * Make call action.
      */
-    protected function makeCallAction(array $events, Learner $learner, SurveyAttempt $attempt): array
+    protected function makeCallAction(array $events, Participant $participant, SurveyAttempt $attempt): array
     {
-        $message = "This is an automated alert from Pulse. Learner {$learner->full_name} requires attention based on a recent check-in. Please log in to Pulse for details.";
+        $message = "This is an automated alert from Pulse. Participant {$participant->full_name} requires attention based on a recent check-in. Please log in to Pulse for details.";
 
         foreach ($events as $event) {
             $phone = $event['action_value'] ?? null;
@@ -340,7 +340,7 @@ class TriggerEvaluationService
     /**
      * Assign resource action.
      */
-    protected function assignResourceAction(array $events, Learner $learner, SurveyAttempt $attempt): array
+    protected function assignResourceAction(array $events, Participant $participant, SurveyAttempt $attempt): array
     {
         // TODO: Implement resource assignment
         return [
@@ -354,7 +354,7 @@ class TriggerEvaluationService
     /**
      * Create task action.
      */
-    protected function createTaskAction(array $events, Learner $learner, SurveyAttempt $attempt): array
+    protected function createTaskAction(array $events, Participant $participant, SurveyAttempt $attempt): array
     {
         // TODO: Implement task creation
         return [

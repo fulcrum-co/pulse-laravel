@@ -142,7 +142,7 @@ class LeadScore extends Model
     }
 
     /**
-     * Get score tier/grade.
+     * Get score tier/level.
      */
     public function getTier(): string
     {

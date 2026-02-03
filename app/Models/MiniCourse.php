@@ -61,9 +61,9 @@ class MiniCourse extends Model
     public const APPROVAL_REVISION = 'revision_requested';
 
     // Target entity types
-    public const TARGET_STUDENT = 'learner';
+    public const TARGET_STUDENT = 'participant';
 
-    public const TARGET_TEACHER = 'teacher';
+    public const TARGET_TEACHER = 'instructor';
 
     public const TARGET_DEPARTMENT = 'department';
 
@@ -88,7 +88,7 @@ class MiniCourse extends Model
         'course_type',
         'creation_source',
         'ai_generation_context',
-        'target_grades',
+        'target_levels',
         'target_risk_levels',
         'target_needs',
         'estimated_duration_minutes',
@@ -135,7 +135,7 @@ class MiniCourse extends Model
     protected $casts = [
         'objectives' => 'array',
         'ai_generation_context' => 'array',
-        'target_grades' => 'array',
+        'target_levels' => 'array',
         'target_risk_levels' => 'array',
         'target_needs' => 'array',
         'analytics_config' => 'array',
@@ -325,7 +325,7 @@ class MiniCourse extends Model
     }
 
     /**
-     * Target entity (polymorphic - learner, user/teacher, department).
+     * Target entity (polymorphic - participant, user/instructor, department).
      */
     public function targetEntity(): \Illuminate\Database\Eloquent\Relations\MorphTo
     {
@@ -429,11 +429,19 @@ class MiniCourse extends Model
     }
 
     /**
-     * Scope for target grade.
+     * Scope for target level.
      */
-    public function scopeForGrade(Builder $query, int|string $grade): Builder
+    public function scopeForLevel(Builder $query, int|string $level): Builder
     {
-        return $query->whereJsonContains('target_grades', $grade);
+        return $query->whereJsonContains('target_levels', $level);
+    }
+
+    /**
+     * Legacy compatibility.
+     */
+    public function scopeForGrade(Builder $query, int|string $level): Builder
+    {
+        return $this->scopeForLevel($query, $level);
     }
 
     /**
@@ -666,10 +674,12 @@ class MiniCourse extends Model
      */
     public static function getGenerationTriggers(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
-            self::TRIGGER_MANUAL => 'Manual Request',
-            self::TRIGGER_SCHEDULED => 'Scheduled Batch',
-            self::TRIGGER_SIGNAL => 'Real-time Signal',
+            self::TRIGGER_MANUAL => $terminology->get('trigger_manual_request_label'),
+            self::TRIGGER_SCHEDULED => $terminology->get('trigger_scheduled_batch_label'),
+            self::TRIGGER_SIGNAL => $terminology->get('trigger_real_time_signal_label'),
         ];
     }
 
@@ -678,11 +688,13 @@ class MiniCourse extends Model
      */
     public static function getApprovalStatuses(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
-            self::APPROVAL_PENDING => 'Pending Review',
-            self::APPROVAL_APPROVED => 'Approved',
-            self::APPROVAL_REJECTED => 'Rejected',
-            self::APPROVAL_REVISION => 'Revision Requested',
+            self::APPROVAL_PENDING => $terminology->get('course_approval_pending_review_label'),
+            self::APPROVAL_APPROVED => $terminology->get('course_approval_approved_label'),
+            self::APPROVAL_REJECTED => $terminology->get('course_approval_rejected_label'),
+            self::APPROVAL_REVISION => $terminology->get('course_approval_revision_requested_label'),
         ];
     }
 
@@ -691,11 +703,13 @@ class MiniCourse extends Model
      */
     public static function getTargetEntityTypes(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
-            self::TARGET_STUDENT => 'Learner',
-            self::TARGET_TEACHER => 'Teacher',
-            self::TARGET_DEPARTMENT => 'Department',
-            self::TARGET_CONTACT_LIST => 'Contact List',
+            self::TARGET_STUDENT => $terminology->get('participant_label'),
+            self::TARGET_TEACHER => $terminology->get('instructor_label'),
+            self::TARGET_DEPARTMENT => $terminology->get('department_label'),
+            self::TARGET_CONTACT_LIST => $terminology->get('contact_list_label'),
         ];
     }
 
@@ -714,7 +728,7 @@ class MiniCourse extends Model
             'course_type' => $this->course_type,
             'creation_source' => $this->creation_source,
             'status' => $this->status,
-            'target_grades' => $this->target_grades ?? [],
+            'target_levels' => $this->target_levels ?? [],
             'target_risk_levels' => $this->target_risk_levels ?? [],
             'target_needs' => $this->target_needs ?? [],
             'is_template' => (bool) $this->is_template,
@@ -764,9 +778,9 @@ class MiniCourse extends Model
             $parts[] = 'Objectives: '.implode(', ', $objectives);
         }
 
-        if (! empty($this->target_grades)) {
-            $grades = is_array($this->target_grades) ? $this->target_grades : [];
-            $parts[] = 'Grades: '.implode(', ', $grades);
+        if (! empty($this->target_levels)) {
+            $levels = is_array($this->target_levels) ? $this->target_levels : [];
+            $parts[] = 'Levels: '.implode(', ', $levels);
         }
 
         if (! empty($this->target_needs)) {
@@ -787,7 +801,7 @@ class MiniCourse extends Model
      */
     protected function getEmbeddingTextFields(): array
     {
-        return ['title', 'description', 'rationale', 'expected_experience', 'objectives', 'target_grades', 'target_needs', 'target_risk_levels'];
+        return ['title', 'description', 'rationale', 'expected_experience', 'objectives', 'target_levels', 'target_needs', 'target_risk_levels'];
     }
 
     /**
@@ -832,7 +846,7 @@ class MiniCourse extends Model
             'type' => 'MiniCourse',
             'id' => $this->id,
             'org_id' => $this->org_id,
-            'target_grades' => $this->target_grades ?? [],
+            'target_levels' => $this->target_levels ?? [],
             'course_type' => $this->course_type,
             'is_ai_generated' => $this->isAiGenerated(),
         ];

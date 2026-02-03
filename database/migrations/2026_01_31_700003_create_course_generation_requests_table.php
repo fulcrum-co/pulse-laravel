@@ -24,8 +24,8 @@ return new class extends Migration
 
             // Target assignment
             $table->string('assignment_type'); // individual, group
-            $table->json('target_learner_ids')->nullable(); // Array of learner IDs
-            $table->unsignedBigInteger('target_group_id')->nullable(); // Reference to a learner group/contact list
+            $table->json('target_learner_ids')->nullable(); // Array of participant IDs
+            $table->unsignedBigInteger('target_group_id')->nullable(); // Reference to a participant group/contact list
 
             // Context data used for generation
             $table->json('learner_context');
@@ -33,7 +33,7 @@ return new class extends Migration
              * Example:
              * {
              *   "risk_signals": {"attendance": 0.7, "behavior": 0.4, "academic": 0.8},
-             *   "demographics": {"grade": "9", "iep": true},
+             *   "demographics": {"level": "9", "iep": true},
              *   "recent_events": [...],
              *   "course_history": [...]
              * }

@@ -27,7 +27,7 @@ class ContentLibrary extends Component
     protected $queryString = [
         'search' => ['except' => '', 'as' => 'q'],
         'selectedTypes' => ['except' => [], 'as' => 'type'],
-        'selectedGrades' => ['except' => [], 'as' => 'grade'],
+        'selectedGrades' => ['except' => [], 'as' => 'level'],
         'selectedCategories' => ['except' => [], 'as' => 'category'],
         'selectedRiskLevels' => ['except' => [], 'as' => 'risk'],
         'sortBy' => ['except' => 'recent', 'as' => 'sort'],
@@ -49,12 +49,12 @@ class ContentLibrary extends Component
         $this->resetPage();
     }
 
-    public function toggleGrade(string $grade): void
+    public function toggleGrade(string $level): void
     {
-        if (in_array($grade, $this->selectedGrades)) {
-            $this->selectedGrades = array_values(array_diff($this->selectedGrades, [$grade]));
+        if (in_array($level, $this->selectedGrades)) {
+            $this->selectedGrades = array_values(array_diff($this->selectedGrades, [$level]));
         } else {
-            $this->selectedGrades[] = $grade;
+            $this->selectedGrades[] = $level;
         }
         $this->resetPage();
     }
@@ -115,11 +115,11 @@ class ContentLibrary extends Component
             $query->whereIn('category', $this->selectedCategories);
         }
 
-        // Grade filter (JSON array field)
+        // Level filter (JSON array field)
         if (count($this->selectedGrades) > 0) {
             $query->where(function ($q) {
-                foreach ($this->selectedGrades as $grade) {
-                    $q->orWhereJsonContains('target_grade_levels', $grade);
+                foreach ($this->selectedGrades as $level) {
+                    $q->orWhereJsonContains('target_levels', $level);
                 }
             });
         }

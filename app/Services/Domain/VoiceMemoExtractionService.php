@@ -45,7 +45,7 @@ class VoiceMemoExtractionService
     public function buildExtractionPrompt(): string
     {
         return <<<'PROMPT'
-You are analyzing a voice memo from an educator about a learner or contact. Extract structured information from the transcription.
+You are analyzing a voice memo from an educator about a participant or contact. Extract structured information from the transcription.
 
 Return a JSON object with:
 - summary: A 1-2 sentence summary of the key points

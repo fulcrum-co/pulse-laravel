@@ -8,7 +8,7 @@ use App\Models\ContactMetric;
 use App\Models\ContactResourceSuggestion;
 use App\Models\Resource;
 use App\Models\ResourceAssignment;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Services\Domain\AIResponseParserService;
 use App\Services\Domain\LearnerNeedsInferenceService;
 use Illuminate\Support\Collection;
@@ -51,7 +51,7 @@ class ResourceSuggestionService
     }
 
     /**
-     * Generate AI-based resource suggestions for a learner.
+     * Generate AI-based resource suggestions for a participant.
      *
      * PERFORMANCE OPTIMIZATION:
      * - Uses select() to fetch only required columns from metrics and resources
@@ -59,20 +59,20 @@ class ResourceSuggestionService
      * - Reduces data transfer and memory footprint
      * - Reuses data instead of multiple queries
      */
-    public function generateAiSuggestions(Learner $learner, int $maxSuggestions = 5): Collection
+    public function generateAiSuggestions(Participant $participant, int $maxSuggestions = 5): Collection
     {
         // OPTIMIZATION: Select only required columns for metrics
-        $metrics = $learner->metrics()
+        $metrics = $participant->metrics()
             ->select(['id', 'metric_key', 'metric_category', 'numeric_value', 'status', 'period_start'])
             ->where('period_start', '>=', now()->subMonths(3))
             ->orderBy('period_start', 'desc')
             ->get();
 
         // Build need description
-        $needDescription = $this->buildNeedDescription($learner, $metrics);
+        $needDescription = $this->buildNeedDescription($participant, $metrics);
 
         // OPTIMIZATION: Select only required columns and filter at database level
-        $resources = Resource::where('org_id', $learner->org_id)
+        $resources = Resource::where('org_id', $participant->org_id)
             ->select(['id', 'title', 'description', 'type', 'tags', 'org_id'])
             ->where('active', true)
             ->get();
@@ -100,12 +100,12 @@ class ResourceSuggestionService
 
             $suggestion = ContactResourceSuggestion::updateOrCreate(
                 [
-                    'contact_type' => Learner::class,
-                    'contact_id' => $learner->id,
+                    'contact_type' => Participant::class,
+                    'contact_id' => $participant->id,
                     'resource_id' => $resource->id,
                 ],
                 [
-                    'org_id' => $learner->org_id,
+                    'org_id' => $participant->org_id,
                     'suggestion_source' => ContactResourceSuggestion::SOURCE_AI_RECOMMENDATION,
                     'relevance_score' => $ranked['score'] ?? (100 - ($count * 15)),
                     'matching_criteria' => [
@@ -160,12 +160,12 @@ class ResourceSuggestionService
     }
 
     /**
-     * Build a description of learner needs based on metrics using domain service.
+     * Build a description of participant needs based on metrics using domain service.
      */
-    private function buildNeedDescription(Learner $learner, Collection $metrics): string
+    private function buildNeedDescription(Participant $participant, Collection $metrics): string
     {
         // Use LearnerNeedsInferenceService to identify needs
-        $inferredNeeds = $this->needsInference->inferNeeds($learner);
+        $inferredNeeds = $this->needsInference->inferNeeds($participant);
         $concerns = $this->needsInference->extractConcerns(
             $metrics->mapWithKeys(fn ($m) => [$m->metric_key => $m->numeric_value])->toArray()
         );
@@ -185,13 +185,13 @@ class ResourceSuggestionService
             $needs[] = ucfirst($readableKey) . " - {$concern['label']}";
         }
 
-        // Include learner context
-        $needs[] = "Risk level: {$learner->risk_level}";
-        $needs[] = "Grade level: {$learner->grade_level}";
+        // Include participant context
+        $needs[] = "Risk level: {$participant->risk_level}";
+        $needs[] = "Level level: {$participant->level}";
 
         // Include any tags
-        if (!empty($learner->tags)) {
-            $needs[] = 'Tags: ' . implode(', ', $learner->tags);
+        if (!empty($participant->tags)) {
+            $needs[] = 'Tags: ' . implode(', ', $participant->tags);
         }
 
         return implode('. ', array_filter($needs));
@@ -211,17 +211,18 @@ class ResourceSuggestionService
         ])->toArray();
 
         $systemPrompt = <<<'PROMPT'
-You are helping match educational resources to learner needs. Given a learner's needs and a list of available resources, rank the top 5 most relevant resources.
+You are helping match educational resources to participant needs. Given a participant's needs and a list of available resources, rank the top 5 most relevant resources.
 
 Return a JSON array of objects with:
 - resource_id: The ID of the resource
 - score: Relevance score from 0-100
-- reason: Brief explanation of why this resource matches the learner's needs
+- reason: Brief explanation of why this resource matches the participant's needs
 
 Only return valid JSON array, no other text.
 PROMPT;
 
-        $userMessage = "Learner needs:\n{$needDescription}\n\nAvailable resources:\n".json_encode($resourceList);
+        $terminology = app(\App\Services\TerminologyService::class);
+        $userMessage = $terminology->get('participant_needs_label').":\n{$needDescription}\n\n".$terminology->get('available_resources_label').":\n".json_encode($resourceList);
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
 
@@ -253,10 +254,10 @@ PROMPT;
      * - Reduces collection size for sorting operation
      * - Batch upsert pattern for efficient creation
      */
-    public function generateRuleBasedSuggestions(Learner $learner, int $maxSuggestions = 5): Collection
+    public function generateRuleBasedSuggestions(Participant $participant, int $maxSuggestions = 5): Collection
     {
         // OPTIMIZATION: Select only required columns
-        $resources = Resource::where('org_id', $learner->org_id)
+        $resources = Resource::where('org_id', $participant->org_id)
             ->select(['id', 'title', 'description', 'type', 'tags', 'org_id'])
             ->where('active', true)
             ->get();
@@ -264,7 +265,7 @@ PROMPT;
         $suggestions = collect();
 
         // OPTIMIZATION: Select only required columns and group by key for efficient lookup
-        $metrics = $learner->metrics()
+        $metrics = $participant->metrics()
             ->select(['id', 'metric_key', 'metric_category', 'numeric_value', 'status', 'period_start'])
             ->where('period_start', '>=', now()->subMonths(3))
             ->orderBy('period_start', 'desc')
@@ -273,7 +274,7 @@ PROMPT;
 
         // Pre-compute frequently accessed metrics
         $gpaMetric = $metrics['gpa']?->first();
-        $wellnessMetrics = $learner->metrics()
+        $wellnessMetrics = $participant->metrics()
             ->select(['id', 'metric_category', 'status'])
             ->where('metric_category', ContactMetric::CATEGORY_WELLNESS)
             ->where('period_start', '>=', now()->subMonths(3))
@@ -301,10 +302,10 @@ PROMPT;
                 }
             }
 
-            // Grade level match
-            if (in_array("grade-{$learner->grade_level}", $resourceTags)) {
+            // Level level match
+            if (in_array("level-{$participant->level}", $resourceTags)) {
                 $score += 20;
-                $reasons[] = 'Grade level appropriate';
+                $reasons[] = 'Level level appropriate';
             }
 
             if ($score > 0) {
@@ -319,15 +320,15 @@ PROMPT;
         // OPTIMIZATION: Sort and create in single batch operation
         return $suggestions->sortByDesc('score')
             ->take($maxSuggestions)
-            ->map(function ($item) use ($learner) {
+            ->map(function ($item) use ($participant) {
                 return ContactResourceSuggestion::updateOrCreate(
                     [
-                        'contact_type' => Learner::class,
-                        'contact_id' => $learner->id,
+                        'contact_type' => Participant::class,
+                        'contact_id' => $participant->id,
                         'resource_id' => $item['resource']->id,
                     ],
                     [
-                        'org_id' => $learner->org_id,
+                        'org_id' => $participant->org_id,
                         'suggestion_source' => ContactResourceSuggestion::SOURCE_RULE_BASED,
                         'relevance_score' => $item['score'],
                         'matching_criteria' => ['reasons' => $item['reasons']],

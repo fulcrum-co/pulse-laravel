@@ -35,7 +35,7 @@ class ResourceFactory extends Factory
             'file_path' => null,
             'file_size' => null,
             'mime_type' => null,
-            'target_grades' => $this->faker->randomElements(['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], 3),
+            'target_levels' => $this->faker->randomElements(['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], 3),
             'subject_areas' => $this->faker->randomElements(['math', 'science', 'english', 'history', 'art'], 2),
             'tags' => $this->faker->words(4),
             'is_featured' => false,

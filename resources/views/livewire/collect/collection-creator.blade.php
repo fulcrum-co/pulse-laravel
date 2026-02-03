@@ -1,3 +1,18 @@
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+    $roleLabels = [
+        'instructor' => $terminology->get('role_instructor_label'),
+        'support_person' => $terminology->get('role_support_person_label'),
+        'admin' => $terminology->get('role_admin_label'),
+        'direct_supervisor' => $terminology->get('role_direct_supervisor_label'),
+    ];
+    $reminderChannelLabels = [
+        'email' => $terminology->get('email_label'),
+        'sms' => $terminology->get('sms_label'),
+        'whatsapp' => $terminology->get('whatsapp_label'),
+    ];
+@endphp
+
 <div class="max-w-4xl mx-auto">
     <!-- Step Indicator -->
     <nav class="mb-8">
@@ -45,7 +60,7 @@
                             type="text"
                             id="title"
                             wire:model="title"
-                            placeholder="{{ app(\App\Services\TerminologyService::class)->get('survey_title_example_label') }}"
+                            placeholder="{{ $terminology->get('survey_title_example_label') }}"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                         />
                         @error('title') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -58,7 +73,7 @@
                             id="description"
                             wire:model="description"
                             rows="3"
-                            placeholder="{{ app(\App\Services\TerminologyService::class)->get('what_collection_for_label') }}"
+                            placeholder="{{ $terminology->get('what_collection_for_label') }}"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                         ></textarea>
                     </div>
@@ -152,7 +167,7 @@
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <label class="block text-sm font-medium text-gray-700">
-                                    {{ $dataSource === 'hybrid' ? app(\App\Services\TerminologyService::class)->get('additional_questions_label') : app(\App\Services\TerminologyService::class)->get('questions_label') }}
+                                    {{ $dataSource === 'hybrid' ? $terminology->get('additional_questions_label') : $terminology->get('questions_label') }}
                                 </label>
                                 <button
                                     type="button"
@@ -374,12 +389,12 @@
                     <div class="flex gap-4">
                         <button
                             type="button"
-                            wire:click="$set('targetType', 'learners')"
+                            wire:click="$set('targetType', 'participants')"
                             class="flex-1 p-4 rounded-lg border-2 text-center transition-all
-                                {{ $targetType === 'learners' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
+                                {{ $targetType === 'participants' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
                         >
-                            <x-icon name="academic-cap" class="w-8 h-8 mx-auto mb-2 {{ $targetType === 'learners' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
-                            <span class="font-medium {{ $targetType === 'learners' ? 'text-pulse-orange-600' : 'text-gray-900' }}">@term('learner_plural')</span>
+                            <x-icon name="academic-cap" class="w-8 h-8 mx-auto mb-2 {{ $targetType === 'participants' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
+                            <span class="font-medium {{ $targetType === 'participants' ? 'text-pulse-orange-600' : 'text-gray-900' }}">@term('learner_plural')</span>
                         </button>
                         <button
                             type="button"
@@ -388,46 +403,46 @@
                                 {{ $targetType === 'users' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
                         >
                             <x-icon name="users" class="w-8 h-8 mx-auto mb-2 {{ $targetType === 'users' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
-                            <span class="font-medium {{ $targetType === 'users' ? 'text-pulse-orange-600' : 'text-gray-900' }}">@term('staff_parents_label')</span>
+                            <span class="font-medium {{ $targetType === 'users' ? 'text-pulse-orange-600' : 'text-gray-900' }}">@term('staff_supervisors_label')</span>
                         </button>
                     </div>
                 </div>
 
-                @if($targetType === 'learners')
-                    <!-- Grades Filter -->
+                @if($targetType === 'participants')
+                    <!-- Levels Filter -->
                     @if(count($availableGrades) > 0)
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">@term('filter_by_grade_label')</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">@term('filter_by_level_label')</label>
                             <div class="flex flex-wrap gap-2">
-                                @foreach($availableGrades as $grade)
+                                @foreach($availableGrades as $level)
                                     <button
                                         type="button"
-                                        wire:click="toggleGrade('{{ $grade }}')"
+                                        wire:click="toggleGrade('{{ $level }}')"
                                         class="px-3 py-1.5 rounded-lg text-sm border transition-all
-                                            {{ in_array($grade, $selectedGrades) ? 'bg-pulse-orange-500 border-pulse-orange-500 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400' }}"
+                                            {{ in_array($level, $selectedGrades) ? 'bg-pulse-orange-500 border-pulse-orange-500 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400' }}"
                                     >
-                                        {{ $grade }}
+                                        {{ $level }}
                                     </button>
                                 @endforeach
                             </div>
                         </div>
                     @endif
 
-                    <!-- Classrooms Filter -->
+                    <!-- LearningGroups Filter -->
                     @if(count($availableClassrooms) > 0)
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">@term('filter_by_classroom_label')</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">@term('filter_by_learning_group_label')</label>
                             <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2 space-y-1">
-                                @foreach($availableClassrooms as $classroom)
+                                @foreach($availableClassrooms as $learning_group)
                                     <button
                                         type="button"
-                                        wire:click="toggleClassroom({{ $classroom['id'] }})"
+                                        wire:click="toggleClassroom({{ $learning_group['id'] }})"
                                         class="w-full px-3 py-2 rounded-lg text-left text-sm transition-all
-                                            {{ in_array($classroom['id'], $selectedClassrooms) ? 'bg-pulse-orange-50 text-pulse-orange-700' : 'hover:bg-gray-50' }}"
+                                            {{ in_array($learning_group['id'], $selectedClassrooms) ? 'bg-pulse-orange-50 text-pulse-orange-700' : 'hover:bg-gray-50' }}"
                                     >
                                         <div class="flex items-center justify-between">
-                                            <span>{{ $classroom['name'] }}</span>
-                                            @if(in_array($classroom['id'], $selectedClassrooms))
+                                            <span>{{ $learning_group['name'] }}</span>
+                                            @if(in_array($learning_group['id'], $selectedClassrooms))
                                                 <x-icon name="check" class="w-4 h-4 text-pulse-orange-600" />
                                             @endif
                                         </div>
@@ -441,14 +456,14 @@
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">@term('filter_by_role_label')</label>
                         <div class="flex flex-wrap gap-2">
-                            @foreach(['teacher', 'counselor', 'admin', 'parent'] as $role)
+                            @foreach(['instructor', 'support_person', 'admin', 'direct_supervisor'] as $role)
                                 <button
                                     type="button"
                                     wire:click="$toggle('selectedRoles.{{ $role }}')"
                                     class="px-3 py-1.5 rounded-lg text-sm border transition-all
                                         {{ in_array($role, $selectedRoles) ? 'bg-pulse-orange-500 border-pulse-orange-500 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400' }}"
                                 >
-                                    {{ ucfirst($role) }}
+                                    {{ $roleLabels[$role] ?? ucfirst($role) }}
                                 </button>
                             @endforeach
                         </div>
@@ -461,7 +476,7 @@
                         <x-icon name="information-circle" class="w-5 h-5 text-blue-600" />
                         <span class="text-sm text-blue-800">
                             <strong>{{ $this->estimatedContactCount }}</strong>
-                            {{ $targetType === 'learners' ? app(\App\Services\TerminologyService::class)->get('learner_plural') : app(\App\Services\TerminologyService::class)->get('user_plural') }} @term('match_filters_label')
+                            {{ $targetType === 'participants' ? $terminology->get('learner_plural') : $terminology->get('user_plural') }} @term('match_filters_label')
                             @if(empty($selectedGrades) && empty($selectedClassrooms))
                                 <span class="text-blue-600">(@term('all_label') {{ $targetType }})</span>
                             @endif
@@ -493,7 +508,7 @@
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-3">@term('reminder_channels_label')</label>
                         <div class="flex gap-4">
-                            @foreach(['email' => 'Email', 'sms' => 'SMS', 'whatsapp' => 'WhatsApp'] as $channel => $label)
+                            @foreach(['email', 'sms', 'whatsapp'] as $channel)
                                 <button
                                     type="button"
                                     wire:click="toggleReminderChannel('{{ $channel }}')"
@@ -501,7 +516,7 @@
                                         {{ in_array($channel, $reminderChannels) ? 'bg-pulse-orange-500 border-pulse-orange-500 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400' }}"
                                 >
                                     <x-icon name="{{ $channel === 'email' ? 'envelope' : ($channel === 'sms' ? 'device-phone-mobile' : 'chat-bubble-left-ellipsis') }}" class="w-4 h-4" />
-                                    {{ $label }}
+                                    {{ $reminderChannelLabels[$channel] ?? ucfirst($channel) }}
                                 </button>
                             @endforeach
                         </div>
@@ -515,11 +530,11 @@
                             wire:model="reminderLeadTime"
                             class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                         >
-                            <option value="15">15 minutes</option>
-                            <option value="30">30 minutes</option>
-                            <option value="60">1 hour</option>
-                            <option value="120">2 hours</option>
-                            <option value="1440">1 day</option>
+                            <option value="15">15 {{ $terminology->get('minutes_label') }}</option>
+                            <option value="30">30 {{ $terminology->get('minutes_label') }}</option>
+                            <option value="60">1 {{ $terminology->get('hour_label') }}</option>
+                            <option value="120">2 {{ $terminology->get('hours_label') }}</option>
+                            <option value="1440">1 {{ $terminology->get('day_label') }}</option>
                         </select>
                     </div>
 
@@ -541,10 +556,10 @@
                                     wire:model="followUpDelay"
                                     class="w-full md:w-64 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                 >
-                                    <option value="1">1 hour</option>
-                                    <option value="4">4 hours</option>
-                                    <option value="24">24 hours</option>
-                                    <option value="48">48 hours</option>
+                                    <option value="1">1 {{ $terminology->get('hour_label') }}</option>
+                                    <option value="4">4 {{ $terminology->get('hours_label') }}</option>
+                                    <option value="24">24 {{ $terminology->get('hours_label') }}</option>
+                                    <option value="48">48 {{ $terminology->get('hours_label') }}</option>
                                 </select>
                             </div>
                         @endif
@@ -584,7 +599,7 @@
                             <dt class="text-gray-500">@term('questions_label')</dt>
                             <dd class="text-gray-900">
                                 @if($dataSource === 'survey' && $surveyId)
-                                    {{ collect($availableSurveys)->firstWhere('id', $surveyId)['title'] ?? app(\App\Services\TerminologyService::class)->get('survey_singular') }}
+                                    {{ collect($availableSurveys)->firstWhere('id', $surveyId)['title'] ?? $terminology->get('survey_singular') }}
                                 @else
                                     {{ count($inlineQuestions) }} @term('inline_questions_label')
                                 @endif
@@ -623,9 +638,9 @@
                         <h3 class="font-medium text-gray-900 mb-2">@term('contacts_label')</h3>
                         <dl class="grid grid-cols-2 gap-2 text-sm">
                             <dt class="text-gray-500">@term('target_type_label')</dt>
-                            <dd class="text-gray-900">{{ ucfirst($targetType) }}</dd>
+                            <dd class="text-gray-900">{{ $targetType === 'participants' ? $terminology->get('learner_plural') : $terminology->get('user_plural') }}</dd>
                             <dt class="text-gray-500">@term('estimated_count_label')</dt>
-                            <dd class="text-gray-900">{{ $this->estimatedContactCount }} {{ $targetType }}</dd>
+                            <dd class="text-gray-900">{{ $this->estimatedContactCount }} {{ $targetType === 'participants' ? $terminology->get('learner_plural') : $terminology->get('user_plural') }}</dd>
                         </dl>
                     </div>
 
@@ -634,7 +649,7 @@
                         <h3 class="font-medium text-gray-900 mb-2">@term('reminders_label')</h3>
                         <p class="text-sm text-gray-900">
                             @if($enableReminders)
-                                @term('enabled_via_label') {{ implode(', ', array_map('ucfirst', $reminderChannels)) }}
+                                @term('enabled_via_label') {{ implode(', ', array_map(fn($channel) => $reminderChannelLabels[$channel] ?? ucfirst($channel), $reminderChannels)) }}
                             @else
                                 @term('disabled_label')
                             @endif
@@ -699,7 +714,7 @@
 
                 <div class="relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                        {{ $editingQuestionIndex !== null ? app(\App\Services\TerminologyService::class)->get('edit_question_title_label') : app(\App\Services\TerminologyService::class)->get('add_question_title_label') }}
+                        {{ $editingQuestionIndex !== null ? $terminology->get('edit_question_title_label') : $terminology->get('add_question_title_label') }}
                     </h3>
 
                     <div class="space-y-4">
@@ -710,7 +725,7 @@
                                 wire:model="questionForm.question"
                                 rows="2"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                                placeholder="{{ app(\App\Services\TerminologyService::class)->get('enter_question_label') }}"
+                                placeholder="{{ $terminology->get('enter_question_label') }}"
                             ></textarea>
                             @error('questionForm.question') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                         </div>
@@ -742,7 +757,7 @@
                                                 type="text"
                                                 wire:model="questionForm.options.{{ $index }}"
                                                 class="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                                                placeholder="{{ app(\App\Services\TerminologyService::class)->get('option_singular') }} {{ $index + 1 }}"
+                                                placeholder="{{ $terminology->get('option_singular') }} {{ $index + 1 }}"
                                             />
                                             @if(count($questionForm['options'] ?? []) > 2)
                                                 <button type="button" wire:click="removeOption({{ $index }})" class="p-1 text-gray-400 hover:text-red-500">

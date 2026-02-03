@@ -292,7 +292,7 @@ class ProviderNotificationService
             return;
         }
 
-        $learnerName = $bookingDetails['learner_name'] ?? 'a learner';
+        $learnerName = $bookingDetails['learner_name'] ?? 'a participant';
         $time = $bookingDetails['scheduled_time'] ?? 'tomorrow';
 
         $message = $this->formatter->formatBookingReminderSms($learnerName, $time);

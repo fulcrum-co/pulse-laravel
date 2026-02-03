@@ -1,4 +1,5 @@
 <div class="min-h-screen bg-gray-50">
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <!-- Header Banner -->
     <div class="bg-white border-b border-gray-200">
         <div class="px-6 py-4 flex items-center justify-between">
@@ -8,11 +9,11 @@
                 </a>
                 <div>
                     <nav class="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                        <a href="{{ route('resources.index') }}" class="hover:text-gray-700">Resources</a>
-                        <span>/</span>
-                        <span class="text-gray-900">Content</span>
+                        <a href="{{ route('resources.index') }}" class="hover:text-gray-700">@term('resources_label')</a>
+                        <span>@term('breadcrumb_separator_label')</span>
+                        <span class="text-gray-900">@term('content_label')</span>
                     </nav>
-                    <h1 class="text-2xl font-semibold text-gray-900">Content Library</h1>
+                    <h1 class="text-2xl font-semibold text-gray-900">@term('content_library_label')</h1>
                 </div>
             </div>
             <button
@@ -20,7 +21,7 @@
                 class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
             >
                 <x-icon name="plus" class="w-4 h-4" />
-                Add Content
+                @term('add_content_label')
             </button>
         </div>
     </div>
@@ -37,7 +38,7 @@
                     <input
                         type="text"
                         wire:model.live.debounce.300ms="search"
-                        placeholder="Search..."
+                        placeholder="@term('search_action')"
                         class="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                     >
                 </div>
@@ -45,7 +46,7 @@
 
             <!-- Type Filter -->
             <div class="mb-6">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Type</h3>
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('type_label')</h3>
                 <div class="space-y-2">
                     @foreach($this->types as $value => $label)
                         <label class="flex items-center gap-2 cursor-pointer group">
@@ -61,11 +62,11 @@
                 </div>
             </div>
 
-            <!-- Grade Filter -->
+            <!-- Level Filter -->
             <div class="mb-6">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Grade Level</h3>
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('levels_label')</h3>
                 <div class="space-y-2">
-                    @foreach($this->grades as $value => $label)
+                    @foreach($this->levels as $value => $label)
                         <label class="flex items-center gap-2 cursor-pointer group">
                             <input
                                 type="checkbox"
@@ -82,7 +83,7 @@
             <!-- Category Filter -->
             @if(count($this->categories) > 0)
                 <div class="mb-6">
-                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Category</h3>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('category_singular')</h3>
                     <div class="space-y-2 max-h-48 overflow-y-auto">
                         @foreach($this->categories as $category)
                             <label class="flex items-center gap-2 cursor-pointer group">
@@ -101,7 +102,7 @@
 
             <!-- Risk Level Filter -->
             <div class="mb-6">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Target Risk Level</h3>
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('target_risk_levels_label')</h3>
                 <div class="space-y-2">
                     @foreach($this->riskLevels as $value => $label)
                         <label class="flex items-center gap-2 cursor-pointer group">
@@ -123,7 +124,7 @@
                     wire:click="clearFilters"
                     class="w-full text-sm text-pulse-orange-600 hover:text-pulse-orange-700 font-medium"
                 >
-                    Clear all filters
+                    @term('clear_filters_label')
                 </button>
             @endif
         </div>
@@ -133,7 +134,7 @@
             <!-- Sort & Count Bar -->
             <div class="flex items-center justify-between mb-6">
                 <p class="text-sm text-gray-600">
-                    Showing <span class="font-medium">{{ $resources->count() }}</span> of <span class="font-medium">{{ $resources->total() }}</span> resources
+                    @term('showing_label') <span class="font-medium">{{ $resources->count() }}</span> @term('of_label') <span class="font-medium">{{ $resources->total() }}</span> @term('resources_label')
                 </p>
                 <div class="flex items-center gap-4">
                     <!-- View Toggle -->
@@ -141,34 +142,34 @@
                         <button
                             wire:click="$set('viewMode', 'grid')"
                             class="p-2 {{ $viewMode === 'grid' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }}"
-                            title="Grid view"
+                            title="@term('grid_view_label')"
                         >
                             <x-icon name="squares-2x2" class="w-4 h-4" />
                         </button>
                         <button
                             wire:click="$set('viewMode', 'list')"
                             class="p-2 border-l border-gray-300 {{ $viewMode === 'list' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }}"
-                            title="List view"
+                            title="@term('list_view_label')"
                         >
                             <x-icon name="bars-3" class="w-4 h-4" />
                         </button>
                         <button
                             wire:click="$set('viewMode', 'table')"
                             class="p-2 border-l border-gray-300 {{ $viewMode === 'table' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }}"
-                            title="Table view"
+                            title="@term('table_view_label')"
                         >
                             <x-icon name="table-cells" class="w-4 h-4" />
                         </button>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-sm text-gray-500">Sort by:</span>
+                        <span class="text-sm text-gray-500">@term('sort_by_label'):</span>
                         <select
                             wire:model.live="sortBy"
                             class="border-gray-300 rounded-lg text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                         >
-                            <option value="recent">Recently Added</option>
-                            <option value="oldest">Oldest First</option>
-                            <option value="title">Title A-Z</option>
+                            <option value="recent">@term('recently_added_label')</option>
+                            <option value="oldest">@term('oldest_first_label')</option>
+                            <option value="title">@term('title_az_label')</option>
                         </select>
                     </div>
                 </div>
@@ -216,7 +217,7 @@
                                                 {{ $resource->title }}
                                             </h3>
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-700 mt-1">
-                                                {{ ucfirst($resource->resource_type) }}
+                                                {{ $terminology->get('resource_type_'.$resource->resource_type.'_label') }}
                                             </span>
                                         </div>
                                     </div>
@@ -229,14 +230,14 @@
                                         @if($resource->estimated_duration_minutes)
                                             <span class="text-xs text-gray-500 flex items-center gap-1">
                                                 <x-icon name="clock" class="w-3.5 h-3.5" />
-                                                {{ $resource->estimated_duration_minutes }} min
+                                                {{ $resource->estimated_duration_minutes }} @term('minutes_label')
                                             </span>
                                         @endif
                                         @if($resource->category)
                                             <span class="text-xs text-gray-500">{{ ucfirst($resource->category) }}</span>
                                         @endif
                                     </div>
-                                    <span class="text-xs font-medium text-pulse-orange-600 group-hover:text-pulse-orange-700">View &rarr;</span>
+                                    <span class="text-xs font-medium text-pulse-orange-600 group-hover:text-pulse-orange-700">@term('view_action') &rarr;</span>
                                 </div>
                             </a>
                         @endforeach
@@ -261,10 +262,10 @@
                                 </div>
                                 <div class="flex items-center gap-4 flex-shrink-0">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-700">
-                                        {{ ucfirst($resource->resource_type) }}
+                                        {{ $terminology->get('resource_type_'.$resource->resource_type.'_label') }}
                                     </span>
                                     @if($resource->estimated_duration_minutes)
-                                        <span class="text-xs text-gray-500">{{ $resource->estimated_duration_minutes }} min</span>
+                                        <span class="text-xs text-gray-500">{{ $resource->estimated_duration_minutes }} @term('minutes_label')</span>
                                     @endif
                                     @if($resource->category)
                                         <span class="text-xs text-gray-500">{{ ucfirst($resource->category) }}</span>
@@ -280,11 +281,11 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Added</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('title_label')</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('type_label')</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('category_singular')</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('duration_label')</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('added_label')</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
                                 </tr>
                             </thead>
@@ -305,21 +306,21 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-700">
-                                                {{ ucfirst($resource->resource_type) }}
+                                                {{ $terminology->get('resource_type_'.$resource->resource_type.'_label') }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $resource->category ? ucfirst($resource->category) : '-' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $resource->estimated_duration_minutes ? $resource->estimated_duration_minutes . ' min' : '-' }}
+                                            {{ $resource->estimated_duration_minutes ? $resource->estimated_duration_minutes . ' ' . $terminology->get('minutes_label') : $terminology->get('empty_dash_label') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $resource->created_at->format('M j, Y') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right">
                                             <a href="{{ route('resources.show', $resource) }}" class="text-pulse-orange-600 hover:text-pulse-orange-700 text-sm font-medium">
-                                                View &rarr;
+                                                @term('view_action') &rarr;
                                             </a>
                                         </td>
                                     </tr>
@@ -340,23 +341,23 @@
                         <x-icon name="document-text" class="w-8 h-8 text-gray-400" />
                     </div>
                     @if($this->hasActiveFilters)
-                        <h3 class="text-lg font-medium text-gray-900 mb-1">No resources match your filters</h3>
-                        <p class="text-gray-500 mb-4">Try adjusting your filter criteria or clear all filters.</p>
+                        <h3 class="text-lg font-medium text-gray-900 mb-1">@term('no_resources_match_filters_label')</h3>
+                        <p class="text-gray-500 mb-4">@term('adjust_filters_or_clear_label')</p>
                         <button
                             wire:click="clearFilters"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
                         >
-                            Clear filters
+                            @term('clear_filters_label')
                         </button>
                     @else
-                        <h3 class="text-lg font-medium text-gray-900 mb-1">No content resources yet</h3>
-                        <p class="text-gray-500 mb-4">Start by adding articles, videos, worksheets, and other learning materials.</p>
+                        <h3 class="text-lg font-medium text-gray-900 mb-1">@term('no_content_resources_yet_label')</h3>
+                        <p class="text-gray-500 mb-4">@term('content_library_empty_help_label')</p>
                         <button
                             wire:click="$dispatch('openAddResourceModal')"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
                         >
                             <x-icon name="plus" class="w-4 h-4" />
-                            Add Content
+                            @term('add_content_label')
                         </button>
                     @endif
                 </div>

@@ -23,11 +23,11 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->json('objectives')->nullable(); // Array of learning objectives
             $table->text('rationale')->nullable(); // Why this course exists
-            $table->text('expected_experience')->nullable(); // What the learner will experience
+            $table->text('expected_experience')->nullable(); // What the participant will experience
             $table->string('course_type')->default('intervention'); // intervention, enrichment, skill_building, wellness, academic, behavioral
             $table->string('creation_source')->default('human_created'); // ai_generated, human_created, hybrid, template
             $table->json('ai_generation_context')->nullable(); // Signals that triggered AI generation
-            $table->json('target_grades')->nullable();
+            $table->json('target_levels')->nullable();
             $table->json('target_risk_levels')->nullable();
             $table->json('target_needs')->nullable();
             $table->unsignedSmallInteger('estimated_duration_minutes')->nullable();

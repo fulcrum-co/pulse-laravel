@@ -18,8 +18,8 @@ return new class extends Migration
         // Get the organization org - this is where demo data should live
         $organization = DB::table('organizations')->where('org_type', 'organization')->first();
         if (! $organization) {
-            // Try district if no organization
-            $organization = DB::table('organizations')->where('org_type', 'district')->first();
+            // Try section if no organization
+            $organization = DB::table('organizations')->where('org_type', 'section')->first();
         }
         if (! $organization) {
             return;
@@ -40,13 +40,13 @@ return new class extends Migration
 
     protected function ensureOrgHierarchy(): void
     {
-        $district = DB::table('organizations')->where('org_type', 'district')->first();
+        $section = DB::table('organizations')->where('org_type', 'section')->first();
         $organization = DB::table('organizations')->where('org_type', 'organization')->first();
 
-        if ($district && $organization && ! $organization->parent_org_id) {
+        if ($section && $organization && ! $organization->parent_org_id) {
             DB::table('organizations')
                 ->where('id', $organization->id)
-                ->update(['parent_org_id' => $district->id]);
+                ->update(['parent_org_id' => $section->id]);
         }
     }
 
@@ -80,10 +80,10 @@ return new class extends Migration
             [
                 'org_id' => $orgId,
                 'name' => 'Marcus Thompson',
-                'provider_type' => 'counselor',
+                'provider_type' => 'support_person',
                 'specialty_areas' => json_encode(['academic', 'career', 'social skills']),
-                'credentials' => 'M.Ed., Licensed Organization Counselor',
-                'bio' => 'Marcus has 12 years of experience helping learners navigate academic and personal challenges.',
+                'credentials' => 'M.Ed., Licensed Organization Support Person',
+                'bio' => 'Marcus has 12 years of experience helping participants navigate academic and personal challenges.',
                 'contact_email' => 'marcus.thompson@example.com',
                 'contact_phone' => '(555) 234-5678',
                 'availability_notes' => 'Available during organization hours',
@@ -121,7 +121,7 @@ return new class extends Migration
                 'provider_type' => 'mentor',
                 'specialty_areas' => json_encode(['leadership', 'motivation', 'goal setting']),
                 'credentials' => 'Certified Life Coach',
-                'bio' => 'James works with learners to develop leadership skills and achieve their personal and academic goals.',
+                'bio' => 'James works with participants to develop leadership skills and achieve their personal and academic goals.',
                 'contact_email' => 'james.wilson@example.com',
                 'contact_phone' => '(555) 456-7890',
                 'availability_notes' => 'Flexible scheduling available',
@@ -151,10 +151,10 @@ return new class extends Migration
                 'org_id' => $orgId,
                 'name' => 'Anxiety Management Workshop',
                 'program_type' => 'therapy',
-                'description' => 'An 8-week workshop teaching learners evidence-based techniques for managing anxiety and stress.',
+                'description' => 'An 8-week workshop teaching participants evidence-based techniques for managing anxiety and stress.',
                 'provider_org_name' => 'Wellness Center',
                 'target_needs' => json_encode(['anxiety', 'stress', 'coping skills']),
-                'eligibility_criteria' => json_encode(['Grades 9-12', 'Parent consent required']),
+                'eligibility_criteria' => json_encode(['Levels 9-12', 'Direct Supervisor consent required']),
                 'cost_structure' => 'free',
                 'duration_weeks' => 8,
                 'frequency_per_week' => 1,
@@ -170,10 +170,10 @@ return new class extends Migration
                 'org_id' => $orgId,
                 'name' => 'Social Skills Development',
                 'program_type' => 'support_group',
-                'description' => 'A supportive group program helping learners develop communication and interpersonal skills.',
+                'description' => 'A supportive group program helping participants develop communication and interpersonal skills.',
                 'provider_org_name' => 'Youth Services',
                 'target_needs' => json_encode(['social skills', 'communication', 'peer relationships']),
-                'eligibility_criteria' => json_encode(['Grades 6-12', 'Counselor referral']),
+                'eligibility_criteria' => json_encode(['Levels 6-12', 'Support Person referral']),
                 'cost_structure' => 'free',
                 'duration_weeks' => 12,
                 'frequency_per_week' => 1,
@@ -189,10 +189,10 @@ return new class extends Migration
                 'org_id' => $orgId,
                 'name' => 'Mindfulness & Meditation',
                 'program_type' => 'enrichment',
-                'description' => 'Weekly mindfulness sessions teaching learners meditation and relaxation techniques.',
+                'description' => 'Weekly mindfulness sessions teaching participants meditation and relaxation techniques.',
                 'provider_org_name' => 'Mindful Organizations',
                 'target_needs' => json_encode(['stress reduction', 'focus', 'emotional regulation']),
-                'eligibility_criteria' => json_encode(['All grades welcome']),
+                'eligibility_criteria' => json_encode(['All levels welcome']),
                 'cost_structure' => 'free',
                 'duration_weeks' => 6,
                 'frequency_per_week' => 2,
@@ -208,10 +208,10 @@ return new class extends Migration
                 'org_id' => $orgId,
                 'name' => 'Peer Support Training',
                 'program_type' => 'mentorship',
-                'description' => 'Train learner leaders to provide peer support and recognize warning signs in their classmates.',
-                'provider_org_name' => 'Learner Leadership Initiative',
+                'description' => 'Train participant leaders to provide peer support and recognize warning signs in their classmates.',
+                'provider_org_name' => 'Participant Leadership Initiative',
                 'target_needs' => json_encode(['leadership', 'peer support', 'crisis awareness']),
-                'eligibility_criteria' => json_encode(['Grades 10-12', 'Teacher recommendation', 'GPA 2.5+']),
+                'eligibility_criteria' => json_encode(['Levels 10-12', 'Instructor recommendation', 'GPA 2.5+']),
                 'cost_structure' => 'free',
                 'duration_weeks' => 4,
                 'frequency_per_week' => 2,
@@ -271,8 +271,8 @@ return new class extends Migration
             ],
             [
                 'org_id' => $orgId,
-                'title' => 'Supporting Learners in Crisis',
-                'description' => 'Training for teachers on recognizing and responding to learners in distress.',
+                'title' => 'Supporting Participants in Crisis',
+                'description' => 'Training for instructors on recognizing and responding to participants in distress.',
                 'course_type' => 'academic',
                 'estimated_duration_minutes' => 60,
                 'status' => 'active',

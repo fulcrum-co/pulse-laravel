@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CustomReport;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Services\ReportPdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -21,7 +21,7 @@ class ReportController extends Controller
         // Build query for reports
         $query = CustomReport::query();
 
-        // If user is a consultant/admin at district level, they can see reports from child orgs
+        // If user is a consultant/admin at section level, they can see reports from child orgs
         if ($user->isAdmin() && $user->organization) {
             // Get all accessible org IDs (includes own org and all descendants)
             $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
@@ -252,31 +252,33 @@ class ReportController extends Controller
      */
     protected function getTemplates(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
-            // Learner Reports
+            // Participant Reports
             [
                 'id' => 'learner_progress',
-                'name' => 'Learner Progress Report',
-                'description' => 'Individual learner performance tracking with metrics over time',
-                'thumbnail' => '/images/templates/learner-progress.png',
+                'name' => $terminology->get('report_template_participant_progress_name'),
+                'description' => $terminology->get('report_template_participant_progress_description'),
+                'thumbnail' => '/images/templates/participant-progress.png',
                 'type' => CustomReport::TYPE_STUDENT_PROGRESS,
-                'category' => 'learner',
+                'category' => 'participant',
                 'layout' => $this->getLearnerProgressLayout(),
             ],
             [
                 'id' => 'learner_quick_view',
-                'name' => 'Learner Quick View',
-                'description' => 'One-page summary perfect for parent meetings',
-                'thumbnail' => '/images/templates/learner-quick.png',
+                'name' => $terminology->get('report_template_participant_quick_view_name'),
+                'description' => $terminology->get('report_template_participant_quick_view_description'),
+                'thumbnail' => '/images/templates/participant-quick.png',
                 'type' => CustomReport::TYPE_STUDENT_PROGRESS,
-                'category' => 'learner',
+                'category' => 'participant',
                 'layout' => $this->getLearnerQuickViewLayout(),
             ],
             // Cohort Reports
             [
                 'id' => 'cohort_summary',
-                'name' => 'Cohort Summary',
-                'description' => 'Aggregate metrics for a group of learners',
+                'name' => $terminology->get('report_template_cohort_summary_name'),
+                'description' => $terminology->get('report_template_cohort_summary_description'),
                 'thumbnail' => '/images/templates/cohort-summary.png',
                 'type' => CustomReport::TYPE_COHORT_SUMMARY,
                 'category' => 'cohort',
@@ -284,9 +286,9 @@ class ReportController extends Controller
             ],
             [
                 'id' => 'grade_level_overview',
-                'name' => 'Grade Level Overview',
-                'description' => 'Compare performance across a grade level',
-                'thumbnail' => '/images/templates/grade-overview.png',
+                'name' => $terminology->get('report_template_level_overview_name'),
+                'description' => $terminology->get('report_template_level_overview_description'),
+                'thumbnail' => '/images/templates/level-overview.png',
                 'type' => CustomReport::TYPE_COHORT_SUMMARY,
                 'category' => 'cohort',
                 'layout' => $this->getCohortSummaryLayout(),
@@ -294,8 +296,8 @@ class ReportController extends Controller
             // Organization Dashboards
             [
                 'id' => 'organization_dashboard',
-                'name' => 'Organization Dashboard',
-                'description' => 'Organization-wide analytics and KPIs',
+                'name' => $terminology->get('report_template_organization_dashboard_name'),
+                'description' => $terminology->get('report_template_organization_dashboard_description'),
                 'thumbnail' => '/images/templates/organization-dashboard.png',
                 'type' => CustomReport::TYPE_SCHOOL_DASHBOARD,
                 'category' => 'organization',
@@ -303,8 +305,8 @@ class ReportController extends Controller
             ],
             [
                 'id' => 'wellness_overview',
-                'name' => 'Wellness Overview',
-                'description' => 'Organization-wide wellness trends and insights',
+                'name' => $terminology->get('report_template_wellness_overview_name'),
+                'description' => $terminology->get('report_template_wellness_overview_description'),
                 'thumbnail' => '/images/templates/wellness-overview.png',
                 'type' => CustomReport::TYPE_SCHOOL_DASHBOARD,
                 'category' => 'organization',
@@ -313,8 +315,8 @@ class ReportController extends Controller
             // Custom
             [
                 'id' => 'blank',
-                'name' => 'Blank Canvas',
-                'description' => 'Start from scratch with a blank report',
+                'name' => $terminology->get('report_template_blank_name'),
+                'description' => $terminology->get('report_template_blank_description'),
                 'thumbnail' => '/images/templates/blank.png',
                 'type' => CustomReport::TYPE_CUSTOM,
                 'category' => 'custom',
@@ -324,10 +326,12 @@ class ReportController extends Controller
     }
 
     /**
-     * Get Learner Quick View template layout - simplified one-pager.
+     * Get Participant Quick View template layout - simplified one-pager.
      */
     protected function getLearnerQuickViewLayout(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
             [
                 'id' => Str::uuid()->toString(),
@@ -335,7 +339,7 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 40],
                 'size' => ['width' => 720, 'height' => 50],
                 'config' => [
-                    'content' => '<h2 style="margin: 0;">Learner Quick View</h2>',
+                    'content' => '<h2 style="margin: 0;">'.$terminology->get('report_template_participant_quick_view_name').'</h2>',
                 ],
                 'styles' => [
                     'backgroundColor' => 'transparent',
@@ -349,7 +353,7 @@ class ReportController extends Controller
                 'size' => ['width' => 350, 'height' => 100],
                 'config' => [
                     'metric_key' => 'gpa',
-                    'label' => 'Current GPA',
+                    'label' => $terminology->get('current_label').' '.$terminology->get('metric_gpa_label'),
                     'show_trend' => true,
                 ],
                 'styles' => [
@@ -365,7 +369,7 @@ class ReportController extends Controller
                 'size' => ['width' => 350, 'height' => 100],
                 'config' => [
                     'metric_key' => 'attendance_rate',
-                    'label' => 'Attendance Rate',
+                    'label' => $terminology->get('metric_attendance_rate_label'),
                     'show_trend' => true,
                 ],
                 'styles' => [
@@ -378,10 +382,12 @@ class ReportController extends Controller
     }
 
     /**
-     * Get Learner Progress template layout.
+     * Get Participant Progress template layout.
      */
     protected function getLearnerProgressLayout(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
             [
                 'id' => Str::uuid()->toString(),
@@ -389,7 +395,7 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 40],
                 'size' => ['width' => 720, 'height' => 60],
                 'config' => [
-                    'content' => '<h1>Learner Progress Report</h1>',
+                    'content' => '<h1>'.$terminology->get('report_template_participant_progress_name').'</h1>',
                     'format' => 'html',
                 ],
                 'styles' => [
@@ -404,7 +410,7 @@ class ReportController extends Controller
                 'size' => ['width' => 170, 'height' => 100],
                 'config' => [
                     'metric_key' => 'gpa',
-                    'label' => 'Current GPA',
+                    'label' => $terminology->get('current_label').' '.$terminology->get('metric_gpa_label'),
                     'show_trend' => true,
                     'comparison_period' => 'last_quarter',
                 ],
@@ -421,7 +427,7 @@ class ReportController extends Controller
                 'size' => ['width' => 170, 'height' => 100],
                 'config' => [
                     'metric_key' => 'attendance_rate',
-                    'label' => 'Attendance',
+                    'label' => $terminology->get('metric_attendance_rate_label'),
                     'show_trend' => true,
                     'format' => 'percentage',
                 ],
@@ -438,7 +444,7 @@ class ReportController extends Controller
                 'size' => ['width' => 170, 'height' => 100],
                 'config' => [
                     'metric_key' => 'wellness_score',
-                    'label' => 'Wellness',
+                    'label' => $terminology->get('metric_health_wellness_label'),
                     'show_trend' => true,
                 ],
                 'styles' => [
@@ -454,7 +460,7 @@ class ReportController extends Controller
                 'size' => ['width' => 170, 'height' => 100],
                 'config' => [
                     'metric_key' => 'engagement_score',
-                    'label' => 'Engagement',
+                    'label' => $terminology->get('metric_engagement_label'),
                     'show_trend' => true,
                 ],
                 'styles' => [
@@ -470,7 +476,7 @@ class ReportController extends Controller
                 'size' => ['width' => 710, 'height' => 300],
                 'config' => [
                     'chart_type' => 'line',
-                    'title' => 'Performance Trends',
+                    'title' => $terminology->get('performance_trends_label'),
                     'metric_keys' => ['gpa', 'wellness_score', 'engagement_score'],
                     'colors' => ['#3B82F6', '#10B981', '#F59E0B'],
                 ],
@@ -488,7 +494,7 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 560],
                 'size' => ['width' => 710, 'height' => 180],
                 'config' => [
-                    'prompt' => 'Write a brief progress summary for this learner based on their metrics.',
+                    'prompt' => 'Write a brief progress summary for this participant based on their metrics.',
                     'format' => 'narrative',
                     'context_metrics' => ['gpa', 'attendance_rate', 'wellness_score', 'engagement_score'],
                 ],
@@ -506,6 +512,8 @@ class ReportController extends Controller
      */
     protected function getCohortSummaryLayout(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
             [
                 'id' => Str::uuid()->toString(),
@@ -513,7 +521,7 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 40],
                 'size' => ['width' => 720, 'height' => 60],
                 'config' => [
-                    'content' => '<h1>Cohort Summary Report</h1>',
+                    'content' => '<h1>'.$terminology->get('cohort_summary_report_label').'</h1>',
                     'format' => 'html',
                 ],
                 'styles' => [],
@@ -524,10 +532,10 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 120],
                 'size' => ['width' => 710, 'height' => 300],
                 'config' => [
-                    'title' => 'Learner Overview',
+                    'title' => $terminology->get('participant_overview_label'),
                     'columns' => ['name', 'gpa', 'attendance', 'risk_level'],
                     'sortable' => true,
-                    'data_source' => 'learners',
+                    'data_source' => 'participants',
                 ],
                 'styles' => [
                     'backgroundColor' => '#FFFFFF',
@@ -541,7 +549,7 @@ class ReportController extends Controller
                 'size' => ['width' => 350, 'height' => 250],
                 'config' => [
                     'chart_type' => 'pie',
-                    'title' => 'Risk Distribution',
+                    'title' => $terminology->get('risk_distribution_label'),
                     'data_source' => 'risk_distribution',
                 ],
                 'styles' => [
@@ -557,9 +565,9 @@ class ReportController extends Controller
                 'size' => ['width' => 350, 'height' => 250],
                 'config' => [
                     'chart_type' => 'bar',
-                    'title' => 'Average Metrics by Grade',
+                    'title' => $terminology->get('average_metrics_by_level_label'),
                     'metric_keys' => ['gpa', 'attendance_rate'],
-                    'group_by' => 'grade_level',
+                    'group_by' => 'level',
                 ],
                 'styles' => [
                     'backgroundColor' => '#FFFFFF',
@@ -575,6 +583,8 @@ class ReportController extends Controller
      */
     protected function getOrganizationDashboardLayout(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
             [
                 'id' => Str::uuid()->toString(),
@@ -582,7 +592,7 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 40],
                 'size' => ['width' => 720, 'height' => 60],
                 'config' => [
-                    'content' => '<h1>Organization Performance Dashboard</h1>',
+                    'content' => '<h1>'.$terminology->get('organization_performance_dashboard_label').'</h1>',
                     'format' => 'html',
                 ],
                 'styles' => [],
@@ -593,7 +603,7 @@ class ReportController extends Controller
                 'position' => ['x' => 40, 'y' => 120],
                 'size' => ['width' => 170, 'height' => 100],
                 'config' => [
-                    'label' => 'Total Learners',
+                    'label' => $terminology->get('total_participants_label'),
                     'data_source' => 'learner_count',
                     'show_trend' => false,
                 ],
@@ -609,7 +619,7 @@ class ReportController extends Controller
                 'position' => ['x' => 220, 'y' => 120],
                 'size' => ['width' => 170, 'height' => 100],
                 'config' => [
-                    'label' => 'Good Standing',
+                    'label' => $terminology->get('participants_good_standing_label'),
                     'data_source' => 'good_standing_count',
                     'format' => 'percentage',
                     'show_trend' => true,
@@ -626,7 +636,7 @@ class ReportController extends Controller
                 'position' => ['x' => 400, 'y' => 120],
                 'size' => ['width' => 170, 'height' => 100],
                 'config' => [
-                    'label' => 'At Risk',
+                    'label' => $terminology->get('at_risk_participants_label'),
                     'data_source' => 'at_risk_count',
                     'format' => 'percentage',
                     'show_trend' => true,
@@ -643,7 +653,7 @@ class ReportController extends Controller
                 'position' => ['x' => 580, 'y' => 120],
                 'size' => ['width' => 170, 'height' => 100],
                 'config' => [
-                    'label' => 'Avg GPA',
+                    'label' => $terminology->get('avg_gpa_label'),
                     'data_source' => 'average_gpa',
                     'show_trend' => true,
                 ],
@@ -660,7 +670,7 @@ class ReportController extends Controller
                 'size' => ['width' => 450, 'height' => 280],
                 'config' => [
                     'chart_type' => 'line',
-                    'title' => 'Organization-wide Trends',
+                    'title' => $terminology->get('organization_wide_trends_label'),
                     'metric_keys' => ['average_gpa', 'average_attendance', 'average_wellness'],
                     'aggregation' => 'organization',
                 ],
@@ -679,7 +689,7 @@ class ReportController extends Controller
                 'size' => ['width' => 250, 'height' => 280],
                 'config' => [
                     'chart_type' => 'doughnut',
-                    'title' => 'Risk Distribution',
+                    'title' => $terminology->get('risk_distribution_label'),
                     'data_source' => 'risk_distribution',
                 ],
                 'styles' => [

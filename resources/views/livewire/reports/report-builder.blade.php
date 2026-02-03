@@ -1,3 +1,7 @@
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+@endphp
+
 <div
     class="h-screen flex flex-col"
     x-data
@@ -11,7 +15,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
-                <span class="text-sm font-medium">Reports</span>
+                <span class="text-sm font-medium">@term('reports_label')</span>
             </a>
 
             <!-- Divider -->
@@ -22,17 +26,17 @@
                 type="text"
                 wire:model.blur="reportName"
                 class="text-lg font-semibold text-gray-900 bg-transparent border-0 focus:ring-0 focus:outline-none hover:bg-gray-50 focus:bg-gray-50 px-2 py-1 rounded-lg -ml-2"
-                placeholder="Untitled Report"
+                placeholder="{{ $terminology->get('untitled_report_label') }}"
             >
 
             <!-- Status badge -->
             @if($status === 'published')
                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                    Published
+                    @term('published_label')
                 </span>
             @else
                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                    Draft
+                    @term('draft_label')
                 </span>
             @endif
         </div>
@@ -44,7 +48,7 @@
                     wire:click="undo"
                     @disabled(!$canUndo)
                     class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Undo (Ctrl+Z)"
+                    title="{{ $terminology->get('undo_action') }} (Ctrl+Z)"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
@@ -54,7 +58,7 @@
                     wire:click="redo"
                     @disabled(!$canRedo)
                     class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Redo (Ctrl+Shift+Z)"
+                    title="{{ $terminology->get('redo_action') }} (Ctrl+Shift+Z)"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"/>
@@ -80,8 +84,8 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 </span>
-                <span wire:loading.remove wire:target="save">Save</span>
-                <span wire:loading wire:target="save">Saving...</span>
+                <span wire:loading.remove wire:target="save">@term('save_action')</span>
+                <span wire:loading wire:target="save">@term('saving_label')</span>
             </button>
 
             <!-- Preview button -->
@@ -95,7 +99,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                 </svg>
-                Preview
+                @term('preview_label')
             </button>
 
             <!-- Comments Button (Purple - Prominent) -->
@@ -106,7 +110,7 @@
                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                 </svg>
-                Comments
+                @term('comments_label')
                 @if($this->getUnresolvedCount() > 0)
                     <span class="absolute -top-1.5 -right-1.5 bg-white text-pulse-purple-600 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold border border-pulse-purple-300">
                         {{ $this->getUnresolvedCount() }}
@@ -148,7 +152,7 @@
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
                     </svg>
-                    Share
+                    @term('share_action')
                     <svg class="w-4 h-4 ml-1.5 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                     </svg>
@@ -178,8 +182,8 @@
                             </svg>
                         </div>
                         <div class="text-left">
-                            <div class="font-medium">Publish to Web</div>
-                            <div class="text-xs text-gray-500">Create a shareable link</div>
+                            <div class="font-medium">@term('publish_to_web_label')</div>
+                            <div class="text-xs text-gray-500">@term('shareable_link_help_label')</div>
                         </div>
                     </button>
 
@@ -195,8 +199,8 @@
                             </svg>
                         </div>
                         <div class="text-left">
-                            <div class="font-medium">Invite Collaborators</div>
-                            <div class="text-xs text-gray-500">Work together in real-time</div>
+                            <div class="font-medium">@term('invite_collaborators_label')</div>
+                            <div class="text-xs text-gray-500">@term('collaborate_realtime_help_label')</div>
                         </div>
                     </button>
 
@@ -212,8 +216,8 @@
                             </svg>
                         </div>
                         <div class="text-left">
-                            <div class="font-medium">Download PDF</div>
-                            <div class="text-xs text-gray-500">Export for printing</div>
+                            <div class="font-medium">@term('download_pdf_label')</div>
+                            <div class="text-xs text-gray-500">@term('export_printing_help_label')</div>
                         </div>
                     </button>
 
@@ -232,8 +236,8 @@
                             </svg>
                         </div>
                         <div class="text-left">
-                            <div class="font-medium">Push to Organizations</div>
-                            <div class="text-xs text-gray-500">Share with organizations</div>
+                            <div class="font-medium">@term('push_to_organizations_label')</div>
+                            <div class="text-xs text-gray-500">@term('share_with_organizations_help_label')</div>
                         </div>
                     </button>
                     @endif
@@ -246,27 +250,27 @@
     <div class="h-12 bg-gray-50 border-b border-gray-200 px-4 flex items-center gap-4 flex-shrink-0">
         <!-- Scope selector -->
         <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500">Scope:</span>
+            <span class="text-sm text-gray-500">@term('scope_label'):</span>
             <select
                 wire:model.live="filters.scope"
                 class="border-0 bg-white shadow-sm rounded-lg px-3 py-1.5 text-sm focus:ring-pulse-orange-500"
             >
-                <option value="individual">Individual</option>
-                <option value="contact_list">Contact List</option>
-                <option value="organization">Organization-wide</option>
+                <option value="individual">@term('scope_individual_label')</option>
+                <option value="contact_list">@term('scope_contact_list_label')</option>
+                <option value="organization">@term('scope_organization_label')</option>
             </select>
         </div>
 
         <!-- Contact selector (only for individual scope) -->
         @if($filters['scope'] === 'individual')
             <div class="flex items-center gap-2" x-data="{ showMultiSelect: false, selectedContacts: @entangle('filters.selected_contacts').live }">
-                <span class="text-sm text-gray-500">Contact:</span>
+                <span class="text-sm text-gray-500">@term('contact_label'):</span>
                 <div class="relative">
                     <button
                         @click="showMultiSelect = !showMultiSelect"
                         class="border-0 bg-white shadow-sm rounded-lg px-3 py-1.5 text-sm focus:ring-pulse-orange-500 min-w-[200px] text-left flex items-center justify-between"
                     >
-                        <span x-text="selectedContacts.length > 0 ? selectedContacts.length + ' contact(s) selected' : 'Select contact(s)...'" class="text-gray-700"></span>
+                        <span x-text="selectedContacts.length > 0 ? selectedContacts.length + ' ' + @js($terminology->get('contacts_selected_label')) : @js($terminology->get('select_contacts_placeholder'))" class="text-gray-700"></span>
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
@@ -282,7 +286,7 @@
                         <div class="p-2 border-b border-gray-100">
                             <input
                                 type="text"
-                                placeholder="Search contacts..."
+                                placeholder="{{ $terminology->get('search_contacts_placeholder') }}"
                                 class="w-full border border-gray-200 rounded px-2 py-1 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                 wire:model.live.debounce.300ms="contactSearchQuery"
                             >
@@ -301,7 +305,7 @@
                             @endforeach
                         </div>
                         @if(count($this->availableLearners) === 0)
-                            <div class="p-3 text-center text-sm text-gray-500">No contacts found</div>
+                            <div class="p-3 text-center text-sm text-gray-500">@term('no_contacts_found_label')</div>
                         @endif
                     </div>
                 </div>
@@ -323,18 +327,18 @@
                         wire:click="$set('filters.list_mode', 'single')"
                         class="px-2.5 py-1 text-xs font-medium rounded-md transition-colors {{ ($filters['list_mode'] ?? 'single') === 'single' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
                     >
-                        Single
+                        @term('single_label')
                     </button>
                     <button
                         wire:click="$set('filters.list_mode', 'compare')"
                         class="px-2.5 py-1 text-xs font-medium rounded-md transition-colors {{ ($filters['list_mode'] ?? 'single') === 'compare' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                        title="Compare two lists side-by-side"
+                        title="{{ $terminology->get('compare_lists_help_label') }}"
                     >
                         <span class="flex items-center gap-1">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                             </svg>
-                            Compare
+                            @term('compare_label')
                         </span>
                     </button>
                 </div>
@@ -342,11 +346,11 @@
                 @if(($filters['list_mode'] ?? 'single') === 'single')
                     {{-- Single List Mode --}}
                     <div class="relative">
-                        <span class="text-sm text-gray-500 mr-1">List:</span>
+                        <span class="text-sm text-gray-500 mr-1">@term('list_label'):</span>
                         <button @click="showListADropdown = !showListADropdown" type="button"
                             class="border-0 bg-white shadow-sm rounded-lg px-3 py-1.5 text-sm focus:ring-pulse-orange-500 min-w-[180px] text-left inline-flex items-center justify-between gap-2">
                             @php $selectedList = collect($this->availableContactLists ?? [])->firstWhere('id', $filters['list_id']); @endphp
-                            <span>{{ $selectedList['name'] ?? 'Select a list...' }}</span>
+                            <span>{{ $selectedList['name'] ?? $terminology->get('select_list_placeholder') }}</span>
                             <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
@@ -360,7 +364,7 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                     </svg>
-                                    Create new list
+                                    @term('create_new_list_label')
                                 </button>
                             </div>
                             <div class="p-2 max-h-48 overflow-y-auto">
@@ -373,7 +377,7 @@
                                         <span class="text-xs text-gray-400">({{ $list['count'] ?? 0 }})</span>
                                     </button>
                                 @empty
-                                    <p class="px-3 py-2 text-sm text-gray-500">No lists yet</p>
+                                    <p class="px-3 py-2 text-sm text-gray-500">@term('no_lists_yet_label')</p>
                                 @endforelse
                             </div>
                         </div>
@@ -387,7 +391,7 @@
                             <button @click="showListADropdown = !showListADropdown" type="button"
                                 class="border-0 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 text-sm min-w-[140px] text-left inline-flex items-center justify-between gap-2">
                                 @php $listA = collect($this->availableContactLists ?? [])->firstWhere('id', $filters['list_a_id']); @endphp
-                                <span class="text-blue-700">{{ $listA['name'] ?? 'Select list...' }}</span>
+                                <span class="text-blue-700">{{ $listA['name'] ?? $terminology->get('select_list_placeholder') }}</span>
                                 <svg class="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                 </svg>
@@ -405,13 +409,13 @@
                                             <span class="text-xs text-gray-400">({{ $list['count'] ?? 0 }})</span>
                                         </button>
                                     @empty
-                                        <p class="px-3 py-2 text-sm text-gray-500">No lists yet</p>
+                                        <p class="px-3 py-2 text-sm text-gray-500">@term('no_lists_yet_label')</p>
                                     @endforelse
                                 </div>
                             </div>
                         </div>
 
-                        <span class="text-gray-400 text-sm font-medium">vs</span>
+                        <span class="text-gray-400 text-sm font-medium">@term('vs_label')</span>
 
                         {{-- List B (Right side) --}}
                         <div class="relative">
@@ -419,7 +423,7 @@
                             <button @click="showListBDropdown = !showListBDropdown" type="button"
                                 class="border-0 bg-purple-50 border border-purple-200 rounded-lg px-3 py-1.5 text-sm min-w-[140px] text-left inline-flex items-center justify-between gap-2">
                                 @php $listB = collect($this->availableContactLists ?? [])->firstWhere('id', $filters['list_b_id']); @endphp
-                                <span class="text-purple-700">{{ $listB['name'] ?? 'Select list...' }}</span>
+                                <span class="text-purple-700">{{ $listB['name'] ?? $terminology->get('select_list_placeholder') }}</span>
                                 <svg class="w-4 h-4 text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                 </svg>
@@ -437,7 +441,7 @@
                                             <span class="text-xs text-gray-400">({{ $list['count'] ?? 0 }})</span>
                                         </button>
                                     @empty
-                                        <p class="px-3 py-2 text-sm text-gray-500">No lists yet</p>
+                                        <p class="px-3 py-2 text-sm text-gray-500">@term('no_lists_yet_label')</p>
                                     @endforelse
                                 </div>
                             </div>
@@ -450,7 +454,7 @@
                             <svg class="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            Comparative mode
+                            @term('comparative_mode_label')
                         </span>
                     @endif
                 @endif
@@ -459,8 +463,8 @@
                 <template x-if="showCreateForm">
                     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/30" @click.self="showCreateForm = false">
                         <div class="bg-white rounded-xl shadow-xl p-4 w-80">
-                            <h3 class="text-sm font-semibold text-gray-900 mb-3">Create New List</h3>
-                            <input x-model="newListName" type="text" placeholder="List name..."
+                            <h3 class="text-sm font-semibold text-gray-900 mb-3">@term('create_new_list_label')</h3>
+                            <input x-model="newListName" type="text" placeholder="{{ $terminology->get('list_name_placeholder') }}"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                 @keydown.enter="$wire.createContactList(newListName); newListName = ''; showCreateForm = false;"
                                 x-ref="createListInput"
@@ -468,11 +472,11 @@
                             <div class="flex gap-2 mt-3">
                                 <button @click="showCreateForm = false; newListName = ''"
                                     class="flex-1 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">
-                                    Cancel
+                                    @term('cancel_action')
                                 </button>
                                 <button @click="$wire.createContactList(newListName); newListName = ''; showCreateForm = false;"
                                     class="flex-1 px-3 py-2 text-sm bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600">
-                                    Create
+                                    @term('create_action')
                                 </button>
                             </div>
                         </div>
@@ -487,17 +491,17 @@
 
         <!-- Date range -->
         <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500">Period:</span>
+            <span class="text-sm text-gray-500">@term('period_label'):</span>
             <select
                 wire:model.live="filters.date_range"
                 wire:change="setDateRange($event.target.value)"
                 class="border-0 bg-white shadow-sm rounded-lg px-3 py-1.5 text-sm focus:ring-pulse-orange-500"
             >
-                <option value="3_months">Last 3 months</option>
-                <option value="6_months">Last 6 months</option>
-                <option value="12_months">Last 12 months</option>
-                <option value="2_years">Last 2 years</option>
-                <option value="all">All time</option>
+                <option value="3_months">@term('last_3_months_label')</option>
+                <option value="6_months">@term('last_6_months_label')</option>
+                <option value="12_months">@term('last_12_months_label')</option>
+                <option value="2_years">@term('last_2_years_label')</option>
+                <option value="all">@term('all_time_label')</option>
             </select>
         </div>
 
@@ -508,14 +512,14 @@
             @if($isLive)
                 <span class="flex items-center gap-1.5 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                     <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                    Live Data
+                    @term('live_data_label')
                 </span>
             @else
                 <span class="flex items-center gap-1.5 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    Snapshot
+                    @term('snapshot_label')
                 </span>
             @endif
         </div>
@@ -536,7 +540,7 @@
                     <!-- Element Types -->
                     <div class="space-y-4">
                         <div>
-                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Content</h4>
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">@term('content_label')</h4>
                             <div class="grid grid-cols-2 gap-2">
                                 <button
                                     wire:click="addElement('text')"
@@ -545,7 +549,7 @@
                                     <svg class="w-6 h-6 text-gray-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
                                     </svg>
-                                    <span class="text-xs text-gray-600">Text</span>
+                                    <span class="text-xs text-gray-600">@term('text_label')</span>
                                 </button>
                                 <button
                                     wire:click="addElement('image')"
@@ -554,13 +558,13 @@
                                     <svg class="w-6 h-6 text-gray-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                     </svg>
-                                    <span class="text-xs text-gray-600">Image</span>
+                                    <span class="text-xs text-gray-600">@term('image_label')</span>
                                 </button>
                             </div>
                         </div>
 
                         <div>
-                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Data</h4>
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">@term('data_label')</h4>
                             <div class="grid grid-cols-2 gap-2">
                                 <button
                                     wire:click="addElement('chart')"
@@ -569,7 +573,7 @@
                                     <svg class="w-6 h-6 text-gray-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
                                     </svg>
-                                    <span class="text-xs text-gray-600">Chart</span>
+                                    <span class="text-xs text-gray-600">@term('chart_label')</span>
                                 </button>
                                 <button
                                     wire:click="addElement('table')"
@@ -578,7 +582,7 @@
                                     <svg class="w-6 h-6 text-gray-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                     </svg>
-                                    <span class="text-xs text-gray-600">Table</span>
+                                    <span class="text-xs text-gray-600">@term('table_label')</span>
                                 </button>
                                 <button
                                     wire:click="addElement('metric_card')"
@@ -587,7 +591,7 @@
                                     <svg class="w-6 h-6 text-gray-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                                     </svg>
-                                    <span class="text-xs text-gray-600">Metric</span>
+                                    <span class="text-xs text-gray-600">@term('metric_label')</span>
                                 </button>
                                 <button
                                     wire:click="addElement('ai_text')"
@@ -596,13 +600,13 @@
                                     <svg class="w-6 h-6 text-purple-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                                     </svg>
-                                    <span class="text-xs text-purple-600 font-medium">AI Text</span>
+                                    <span class="text-xs text-purple-600 font-medium">@term('ai_text_label')</span>
                                 </button>
                             </div>
                         </div>
 
                         <div>
-                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Layout</h4>
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">@term('layout_label')</h4>
                             <div class="grid grid-cols-2 gap-2">
                                 <button
                                     wire:click="addElement('spacer')"
@@ -611,7 +615,7 @@
                                     <svg class="w-6 h-6 text-gray-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
                                     </svg>
-                                    <span class="text-xs text-gray-600">Spacer</span>
+                                    <span class="text-xs text-gray-600">@term('spacer_label')</span>
                                 </button>
                             </div>
                         </div>
@@ -625,7 +629,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
                                 </svg>
-                                Browse Templates
+                                @term('browse_all_templates_label')
                             </button>
                         </div>
                     </div>
@@ -634,30 +638,30 @@
                     <div class="space-y-6">
                         <!-- Page Settings -->
                         <div>
-                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Page Settings</h4>
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('page_settings_label')</h4>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-sm text-gray-600 mb-1">Size</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('size_label')</label>
                                     <select wire:model.live="pageSettings.size" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                                        <option value="letter">Letter (8.5" x 11")</option>
-                                        <option value="a4">A4</option>
-                                        <option value="legal">Legal</option>
+                                        <option value="letter">@term('page_size_letter_label')</option>
+                                        <option value="a4">@term('page_size_a4_label')</option>
+                                        <option value="legal">@term('page_size_legal_label')</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm text-gray-600 mb-1">Orientation</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('orientation_label')</label>
                                     <div class="flex gap-2">
                                         <button
                                             wire:click="$set('pageSettings.orientation', 'portrait')"
                                             class="flex-1 px-3 py-2 text-sm rounded-lg border {{ $pageSettings['orientation'] === 'portrait' ? 'border-pulse-orange-500 bg-pulse-orange-50 text-pulse-orange-700' : 'border-gray-300 text-gray-600 hover:bg-gray-50' }}"
                                         >
-                                            Portrait
+                                            @term('portrait_label')
                                         </button>
                                         <button
                                             wire:click="$set('pageSettings.orientation', 'landscape')"
                                             class="flex-1 px-3 py-2 text-sm rounded-lg border {{ $pageSettings['orientation'] === 'landscape' ? 'border-pulse-orange-500 bg-pulse-orange-50 text-pulse-orange-700' : 'border-gray-300 text-gray-600 hover:bg-gray-50' }}"
                                         >
-                                            Landscape
+                                            @term('landscape_label')
                                         </button>
                                     </div>
                                 </div>
@@ -666,24 +670,24 @@
 
                         <!-- Data Settings -->
                         <div>
-                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Data Settings</h4>
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('data_settings_label')</h4>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-sm text-gray-600 mb-1">Data Mode</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('data_mode_label')</label>
                                     <div class="flex gap-2">
                                         <button
                                             wire:click="$set('isLive', true)"
                                             class="flex-1 px-3 py-2 text-sm rounded-lg border {{ $isLive ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-300 text-gray-600 hover:bg-gray-50' }}"
                                         >
-                                            <span class="block font-medium">Live</span>
-                                            <span class="block text-xs opacity-75">Always current</span>
+                                            <span class="block font-medium">@term('live_label')</span>
+                                            <span class="block text-xs opacity-75">@term('always_current_data_label')</span>
                                         </button>
                                         <button
                                             wire:click="$set('isLive', false)"
                                             class="flex-1 px-3 py-2 text-sm rounded-lg border {{ !$isLive ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-300 text-gray-600 hover:bg-gray-50' }}"
                                         >
-                                            <span class="block font-medium">Snapshot</span>
-                                            <span class="block text-xs opacity-75">Frozen in time</span>
+                                            <span class="block font-medium">@term('snapshot_label')</span>
+                                            <span class="block text-xs opacity-75">@term('frozen_in_time_label')</span>
                                         </button>
                                     </div>
                                 </div>
@@ -692,10 +696,10 @@
 
                         <!-- Branding -->
                         <div>
-                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Branding</h4>
+                            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('branding_label')</h4>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-sm text-gray-600 mb-1">Primary Color</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('primary_color_label')</label>
                                     <input
                                         type="color"
                                         wire:model.live="branding.primary_color"
@@ -703,12 +707,12 @@
                                     >
                                 </div>
                                 <div>
-                                    <label class="block text-sm text-gray-600 mb-1">Logo</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('logo_label')</label>
                                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-pulse-orange-300 transition-colors cursor-pointer">
                                         <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                         </svg>
-                                        <span class="text-sm text-gray-500">Upload logo</span>
+                                        <span class="text-sm text-gray-500">@term('upload_logo_label')</span>
                                     </div>
                                 </div>
                             </div>
@@ -729,7 +733,7 @@
                 <button
                     wire:click="zoomOut"
                     class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
-                    title="Zoom Out"
+                                title="{{ $terminology->get('zoom_out_label') }}"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
@@ -750,7 +754,7 @@
                 <button
                     wire:click="zoomIn"
                     class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
-                    title="Zoom In"
+                                title="{{ $terminology->get('zoom_in_label') }}"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -791,15 +795,15 @@
                             </button>
                         @endforeach
                         <hr class="my-1 border-gray-200">
-                        <button
-                            wire:click="fitToScreen"
-                            @click="showPresets = false"
-                            class="w-full px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                            Fit to screen
-                        </button>
-                    </div>
-                </div>
+                <button
+                    wire:click="fitToScreen"
+                    @click="showPresets = false"
+                    class="w-full px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                >
+                    @term('fit_to_screen_label')
+                </button>
+            </div>
+        </div>
             </div>
 
 
@@ -858,7 +862,7 @@
                                 @click.stop="showCommentPopover = !showCommentPopover"
                                 class="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full shadow-lg transition-all
                                        {{ $elementCommentCount > 0 ? 'bg-pulse-purple-500 text-white hover:bg-pulse-purple-600' : 'bg-pulse-purple-100 text-pulse-purple-700 hover:bg-pulse-purple-200 border border-pulse-purple-300' }}"
-                                title="Add comment"
+                                title="{{ $terminology->get('add_comment_label') }}"
                             >
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
@@ -888,7 +892,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                                             </svg>
                                         </div>
-                                        <span class="text-sm font-medium text-pulse-purple-700">Add comment</span>
+                                        <span class="text-sm font-medium text-pulse-purple-700">@term('add_comment_label')</span>
                                     </div>
 
                                     {{-- Existing comments on this element --}}
@@ -908,7 +912,7 @@
                                                                 {{ substr($comment['user']['name'] ?? 'U', 0, 1) }}
                                                             </div>
                                                         @endif
-                                                        <span class="text-xs font-medium text-gray-700">{{ $comment['user']['name'] ?? 'Unknown' }}</span>
+                                                        <span class="text-xs font-medium text-gray-700">{{ $comment['user']['name'] ?? $terminology->get('unknown_label') }}</span>
                                                         <span class="text-xs text-gray-400">{{ $comment['created_at_human'] ?? '' }}</span>
                                                     </div>
                                                     <p class="text-xs text-gray-600">{!! $comment['formatted_content'] ?? $comment['content'] ?? '' !!}</p>
@@ -988,7 +992,7 @@
                                                 x-model="content"
                                                 @input="handleInput($event)"
                                                 @keydown="handleKeydown($event)"
-                                                placeholder="Add a comment... Type @ to mention someone"
+                                                placeholder="{{ $terminology->get('add_comment_placeholder') }}"
                                                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-pulse-purple-500 focus:border-pulse-purple-500 resize-none"
                                                 rows="2"
                                                 @keydown.meta.enter="if(content.trim() && !showMentions) { $wire.set('commentingOnElement', '{{ $element['id'] }}'); $wire.set('newCommentContent', content); $wire.addComment(); content = ''; showCommentPopover = false; }"
@@ -1016,19 +1020,19 @@
                                                     </button>
                                                 </template>
                                                 <div x-show="filteredUsers.length === 0" class="px-3 py-2 text-sm text-gray-500">
-                                                    No users found
+                                                    @term('no_users_found_label')
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div class="flex items-center justify-between mt-2">
-                                            <span class="text-xs text-gray-400">Cmd+Enter to post</span>
+                                            <span class="text-xs text-gray-400">@term('cmd_enter_to_post_label')</span>
                                             <button
                                                 @click="if(content.trim()) { $wire.set('commentingOnElement', '{{ $element['id'] }}'); $wire.set('newCommentContent', content); $wire.addComment(); content = ''; showCommentPopover = false; }"
                                                 class="px-3 py-1 text-sm font-medium text-white bg-pulse-purple-500 hover:bg-pulse-purple-600 rounded-lg transition-colors disabled:opacity-50"
                                                 :disabled="!content.trim()"
                                             >
-                                                Post
+                                                @term('post_label')
                                             </button>
                                         </div>
                                     </div>
@@ -1056,7 +1060,7 @@
                                         class="w-full h-full overflow-hidden prose prose-sm max-w-none cursor-text"
                                         @dblclick.stop="$wire.startEditingText('{{ $element['id'] }}')"
                                     >
-                                        {!! $element['config']['content'] ?? '<p class="text-gray-400">Double-click to edit...</p>' !!}
+                                        {!! $element['config']['content'] ?? '<p class="text-gray-400">' . e($terminology->get('double_click_to_edit_label')) . '</p>' !!}
                                     </div>
                                 @endif
                                 @break
@@ -1081,7 +1085,7 @@
                                                     <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
                                                     </svg>
-                                                    <span class="text-sm text-gray-400">Select a contact to view data</span>
+                                                    <span class="text-sm text-gray-400">@term('select_contact_to_view_data_label')</span>
                                                 </div>
                                             </div>
                                         @endif
@@ -1096,7 +1100,7 @@
                                         <h4 class="text-sm font-medium text-gray-700 mb-2">{{ $element['config']['title'] }}</h4>
                                     @endif
                                     <div class="flex-1 flex items-center justify-center bg-gray-50 rounded">
-                                        <span class="text-sm text-gray-400">Table: {{ implode(', ', $element['config']['columns'] ?? []) }}</span>
+                                        <span class="text-sm text-gray-400">{{ $terminology->get('table_label') }}: {{ implode(', ', $element['config']['columns'] ?? []) }}</span>
                                     </div>
                                 </div>
                                 @break
@@ -1115,7 +1119,7 @@
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
                                             </svg>
-                                            Trend
+                                            @term('trend_label')
                                         </span>
                                     @endif
                                 </div>
@@ -1128,7 +1132,7 @@
                                             <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                                             </svg>
-                                            <span class="text-xs font-medium text-purple-600">AI Generated</span>
+                                            <span class="text-xs font-medium text-purple-600">@term('ai_generated_label')</span>
                                         </div>
                                         @if($selectedElementId === $element['id'])
                                             <button
@@ -1146,8 +1150,8 @@
                                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                     </svg>
                                                 </span>
-                                                <span wire:loading.remove wire:target="generateAiContent('{{ $element['id'] }}')">Generate</span>
-                                                <span wire:loading wire:target="generateAiContent('{{ $element['id'] }}')">Generating...</span>
+                                                <span wire:loading.remove wire:target="generateAiContent('{{ $element['id'] }}')">@term('generate_label')</span>
+                                                <span wire:loading wire:target="generateAiContent('{{ $element['id'] }}')">@term('generating_label')</span>
                                             </button>
                                         @endif
                                     </div>
@@ -1155,14 +1159,14 @@
                                         @if($element['config']['generated_content'] ?? null)
                                             {!! nl2br(e($element['config']['generated_content'])) !!}
                                             @if($element['config']['generated_at'] ?? null)
-                                                <p class="text-xs text-gray-400 mt-2">Generated {{ \Carbon\Carbon::parse($element['config']['generated_at'])->diffForHumans() }}</p>
+                                                <p class="text-xs text-gray-400 mt-2">{{ $terminology->get('generated_label') }} {{ \Carbon\Carbon::parse($element['config']['generated_at'])->diffForHumans() }}</p>
                                             @endif
                                         @else
                                             <div class="flex flex-col items-center justify-center h-full text-center">
                                                 <svg class="w-8 h-8 text-purple-200 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                                                 </svg>
-                                                <span class="text-gray-400 italic">Select this element and click "Generate" to create AI content</span>
+                                                <span class="text-gray-400 italic">@term('select_element_generate_help_label')</span>
                                             </div>
                                         @endif
                                     </div>
@@ -1178,7 +1182,7 @@
                                             <svg class="w-12 h-12 text-gray-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                             </svg>
-                                            <span class="text-xs text-gray-400 mt-1 block">Upload image</span>
+                                            <span class="text-xs text-gray-400 mt-1 block">@term('upload_image_label')</span>
                                         </div>
                                     @endif
                                 </div>
@@ -1186,7 +1190,7 @@
 
                             @case('spacer')
                                 <div class="w-full h-full border border-dashed border-gray-300 flex items-center justify-center">
-                                    <span class="text-xs text-gray-400">Spacer</span>
+                                    <span class="text-xs text-gray-400">@term('spacer_label')</span>
                                 </div>
                                 @break
 
@@ -1210,12 +1214,12 @@
                             <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
-                            <p class="text-gray-500 mb-4">Drag elements here to build your report</p>
+                            <p class="text-gray-500 mb-4">@term('drag_elements_here_label')</p>
                             <button
                                 wire:click="$set('showTemplateGallery', true)"
                                 class="text-pulse-orange-600 hover:text-pulse-orange-700 font-medium"
                             >
-                                Or start with a template
+                                @term('start_with_template_label')
                             </button>
                         </div>
                     </div>
@@ -1239,7 +1243,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        Pages
+                        @term('pages_label')
                         <svg class="w-4 h-4 transition-transform {{ $showPageThumbnails ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
                         </svg>
@@ -1276,7 +1280,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Add page
+                        @term('add_page_label')
                     </button>
                 </div>
 
@@ -1309,7 +1313,7 @@
 
                                         @if(empty($page['elements']))
                                             <div class="absolute inset-0 flex items-center justify-center">
-                                                <span class="text-[6px] text-gray-400">Empty</span>
+                                                <span class="text-[6px] text-gray-400">@term('empty_label')</span>
                                             </div>
                                         @endif
                                     </div>
@@ -1325,7 +1329,7 @@
                                             <button
                                                 wire:click.stop="movePageUp({{ $index }})"
                                                 class="w-5 h-5 bg-white text-gray-700 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-100"
-                                                title="Move left"
+                                                title="{{ $terminology->get('move_left_label') }}"
                                             >
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -1336,7 +1340,7 @@
                                             <button
                                                 wire:click.stop="movePageDown({{ $index }})"
                                                 class="w-5 h-5 bg-white text-gray-700 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-100"
-                                                title="Move right"
+                                                title="{{ $terminology->get('move_right_label') }}"
                                             >
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -1350,7 +1354,7 @@
                                         <button
                                             wire:click.stop="deletePage({{ $index }})"
                                             class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-sm"
-                                            title="Delete page"
+                                            title="{{ $terminology->get('delete_page_label') }}"
                                         >
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -1393,7 +1397,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                         </svg>
-                        Duplicate page
+                        @term('duplicate_page_label')
                     </button>
                     <button
                         @click="$wire.movePageUp(contextPageIndex); showContextMenu = false;"
@@ -1404,7 +1408,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
                         </svg>
-                        Move left
+                        @term('move_left_label')
                     </button>
                     <button
                         @click="$wire.movePageDown(contextPageIndex); showContextMenu = false;"
@@ -1415,7 +1419,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
                         </svg>
-                        Move right
+                        @term('move_right_label')
                     </button>
                     <hr class="my-1 border-gray-200">
                     <button
@@ -1427,7 +1431,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        Delete page
+                        @term('delete_page_label')
                     </button>
                 </div>
             </div>
@@ -1459,15 +1463,15 @@
                     @switch($selectedElement['type'])
                         @case('text')
                             <div x-data="{ content: @js($selectedElement['config']['content'] ?? '') }">
-                                <label class="block text-sm text-gray-600 mb-1">Content</label>
+                                <label class="block text-sm text-gray-600 mb-1">@term('content_label')</label>
                                 <textarea
                                     x-model="content"
                                     @change="$wire.updateTextContent('{{ $selectedElement['id'] }}', content)"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                     rows="4"
-                                    placeholder="Enter your text content..."
+                                    placeholder="{{ $terminology->get('enter_text_content_placeholder') }}"
                                 ></textarea>
-                                <p class="text-xs text-gray-400 mt-1">Supports basic HTML tags</p>
+                                <p class="text-xs text-gray-400 mt-1">@term('supports_basic_html_label')</p>
                             </div>
                             @break
 
@@ -1478,30 +1482,30 @@
                                 metricKeys: @js($selectedElement['config']['metric_keys'] ?? [])
                             }">
                                 <div class="mb-4">
-                                    <label class="block text-sm text-gray-600 mb-1">Chart Type</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('chart_type_label')</label>
                                     <select
                                         x-model="chartType"
                                         @change="$wire.updateChartConfig('{{ $selectedElement['id'] }}', chartType, metricKeys, title)"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                     >
-                                        <option value="line">Line</option>
-                                        <option value="bar">Bar</option>
-                                        <option value="pie">Pie</option>
-                                        <option value="doughnut">Doughnut</option>
+                                        <option value="line">@term('chart_type_line_label')</option>
+                                        <option value="bar">@term('chart_type_bar_label')</option>
+                                        <option value="pie">@term('chart_type_pie_label')</option>
+                                        <option value="doughnut">@term('chart_type_doughnut_label')</option>
                                     </select>
                                 </div>
                                 <div class="mb-4">
-                                    <label class="block text-sm text-gray-600 mb-1">Title</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('chart_title_label')</label>
                                     <input
                                         type="text"
                                         x-model="title"
                                         @change="$wire.updateChartConfig('{{ $selectedElement['id'] }}', chartType, metricKeys, title)"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                                        placeholder="Chart title"
+                                        placeholder="{{ $terminology->get('chart_title_placeholder') }}"
                                     >
                                 </div>
                                 <div>
-                                    <label class="block text-sm text-gray-600 mb-2">Metrics</label>
+                                    <label class="block text-sm text-gray-600 mb-2">@term('metrics_label')</label>
                                     <div class="space-y-2">
                                         @foreach(['gpa', 'attendance_rate', 'wellness_score', 'engagement_score', 'plan_progress'] as $metric)
                                             <label class="flex items-center gap-2 cursor-pointer">
@@ -1518,7 +1522,7 @@
                                                     "
                                                     class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
                                                 >
-                                                <span class="text-sm text-gray-700">{{ ucwords(str_replace('_', ' ', $metric)) }}</span>
+                                                <span class="text-sm text-gray-700">{{ $terminology->get('metric_' . $metric . '_label') }}</span>
                                             </label>
                                         @endforeach
                                     </div>
@@ -1533,7 +1537,7 @@
                                 showTrend: @js($selectedElement['config']['show_trend'] ?? true)
                             }">
                                 <div class="mb-4">
-                                    <label class="block text-sm text-gray-600 mb-1">Metric</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('metric_label')</label>
                                     <select
                                         x-model="metricKey"
                                         @change="
@@ -1542,21 +1546,21 @@
                                         "
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                     >
-                                        <option value="gpa">GPA</option>
-                                        <option value="attendance_rate">Attendance Rate</option>
-                                        <option value="wellness_score">Wellness Score</option>
-                                        <option value="engagement_score">Engagement Score</option>
-                                        <option value="plan_progress">Plan Progress</option>
+                                        <option value="gpa">@term('metric_gpa_label')</option>
+                                        <option value="attendance_rate">@term('metric_attendance_rate_label')</option>
+                                        <option value="wellness_score">@term('metric_wellness_score_label')</option>
+                                        <option value="engagement_score">@term('metric_engagement_score_label')</option>
+                                        <option value="plan_progress">@term('metric_plan_progress_label')</option>
                                     </select>
                                 </div>
                                 <div class="mb-4">
-                                    <label class="block text-sm text-gray-600 mb-1">Label</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('label_label')</label>
                                     <input
                                         type="text"
                                         x-model="label"
                                         @change="$wire.updateMetricCardConfig('{{ $selectedElement['id'] }}', metricKey, label, showTrend)"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                                        placeholder="Display label"
+                                        placeholder="{{ $terminology->get('display_label_placeholder') }}"
                                     >
                                 </div>
                                 <div>
@@ -1567,7 +1571,7 @@
                                             @change="$wire.updateMetricCardConfig('{{ $selectedElement['id'] }}', metricKey, label, showTrend)"
                                             class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
                                         >
-                                        <span class="text-sm text-gray-700">Show trend indicator</span>
+                                        <span class="text-sm text-gray-700">@term('show_trend_indicator_label')</span>
                                     </label>
                                 </div>
                             </div>
@@ -1579,33 +1583,33 @@
                                 format: @js($selectedElement['config']['format'] ?? 'narrative')
                             }">
                                 <div class="mb-4">
-                                    <label class="block text-sm text-gray-600 mb-1">AI Prompt</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('ai_prompt_label')</label>
                                     <textarea
                                         x-model="prompt"
                                         @change="$wire.updateElementConfig('{{ $selectedElement['id'] }}', { prompt: prompt, format: format })"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                         rows="3"
-                                        placeholder="Describe what you want the AI to write..."
+                                        placeholder="{{ $terminology->get('ai_prompt_placeholder') }}"
                                     ></textarea>
-                                    <p class="text-xs text-gray-400 mt-1">The AI will use available data to generate content</p>
+                                    <p class="text-xs text-gray-400 mt-1">@term('ai_prompt_help_label')</p>
                                 </div>
                                 <div class="mb-4">
-                                    <label class="block text-sm text-gray-600 mb-1">Format</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('format_label')</label>
                                     <select
                                         x-model="format"
                                         @change="$wire.updateElementConfig('{{ $selectedElement['id'] }}', { prompt: prompt, format: format })"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                     >
-                                        <option value="narrative">Narrative Paragraph</option>
-                                        <option value="bullets">Bullet Points</option>
-                                        <option value="executive_summary">Executive Summary</option>
+                                        <option value="narrative">@term('narrative_paragraph_label')</option>
+                                        <option value="bullets">@term('bullet_points_label')</option>
+                                        <option value="executive_summary">@term('executive_summary_label')</option>
                                     </select>
                                 </div>
                                 <div class="mb-4">
-                                    <label class="block text-sm text-gray-600 mb-2">Context Metrics</label>
+                                    <label class="block text-sm text-gray-600 mb-2">@term('context_metrics_label')</label>
                                     <div class="flex flex-wrap gap-1">
                                         @foreach($selectedElement['config']['context_metrics'] ?? ['gpa', 'attendance_rate', 'wellness_score'] as $metric)
-                                            <span class="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">{{ ucwords(str_replace('_', ' ', $metric)) }}</span>
+                                            <span class="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">{{ $terminology->get('metric_' . $metric . '_label') }}</span>
                                         @endforeach
                                     </div>
                                 </div>
@@ -1626,11 +1630,11 @@
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
                                     </span>
-                                    <span wire:loading.remove wire:target="generateAiContent('{{ $selectedElement['id'] }}')">Generate Content</span>
-                                    <span wire:loading wire:target="generateAiContent('{{ $selectedElement['id'] }}')">Generating...</span>
+                                    <span wire:loading.remove wire:target="generateAiContent('{{ $selectedElement['id'] }}')">@term('generate_content_label')</span>
+                                    <span wire:loading wire:target="generateAiContent('{{ $selectedElement['id'] }}')">@term('generating_label')</span>
                                 </button>
                                 @if($selectedElement['config']['generated_content'] ?? null)
-                                    <p class="text-xs text-green-600 mt-2 text-center">Content generated successfully</p>
+                                    <p class="text-xs text-green-600 mt-2 text-center">@term('content_generated_successfully_label')</p>
                                 @endif
                             </div>
                             @break
@@ -1638,26 +1642,26 @@
                         @case('table')
                             <div>
                                 <div class="mb-4">
-                                    <label class="block text-sm text-gray-600 mb-1">Title</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('table_title_label')</label>
                                     <input
                                         type="text"
                                         wire:model.blur="elements.{{ $elementIndex }}.config.title"
                                         wire:change="commitElementChange"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                                        placeholder="Table title"
+                                        placeholder="{{ $terminology->get('table_title_placeholder') }}"
                                     >
                                 </div>
                                 <div>
-                                    <label class="block text-sm text-gray-600 mb-2">Columns</label>
+                                    <label class="block text-sm text-gray-600 mb-2">@term('columns_label')</label>
                                     <div class="space-y-2">
-                                        @foreach(['name', 'email', 'grade_level', 'gpa', 'attendance_rate', 'wellness_score', 'risk_level'] as $col)
+                                        @foreach(['name', 'email', 'level', 'gpa', 'attendance_rate', 'wellness_score', 'risk_level'] as $col)
                                             <label class="flex items-center gap-2 cursor-pointer">
                                                 <input
                                                     type="checkbox"
                                                     {{ in_array($col, $selectedElement['config']['columns'] ?? []) ? 'checked' : '' }}
                                                     class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
                                                 >
-                                                <span class="text-sm text-gray-700">{{ ucwords(str_replace('_', ' ', $col)) }}</span>
+                                                <span class="text-sm text-gray-700">{{ $terminology->get('table_column_' . $col . '_label') }}</span>
                                             </label>
                                         @endforeach
                                     </div>
@@ -1667,44 +1671,44 @@
 
                         @case('image')
                             <div>
-                                <label class="block text-sm text-gray-600 mb-1">Image URL</label>
+                                <label class="block text-sm text-gray-600 mb-1">@term('image_url_label')</label>
                                 <input
                                     type="text"
                                     wire:model.blur="elements.{{ $elementIndex }}.config.src"
                                     wire:change="commitElementChange"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                                    placeholder="https://..."
+                                    placeholder="{{ $terminology->get('image_url_placeholder') }}"
                                 >
-                                <p class="text-xs text-gray-400 mt-1">Enter an image URL or upload below</p>
+                                <p class="text-xs text-gray-400 mt-1">@term('image_url_help_label')</p>
 
                                 <div class="mt-3">
-                                    <label class="block text-sm text-gray-600 mb-1">Alt Text</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('alt_text_label')</label>
                                     <input
                                         type="text"
                                         wire:model.blur="elements.{{ $elementIndex }}.config.alt"
                                         wire:change="commitElementChange"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                                        placeholder="Image description"
+                                        placeholder="{{ $terminology->get('image_description_placeholder') }}"
                                     >
                                 </div>
 
                                 <div class="mt-3">
-                                    <label class="block text-sm text-gray-600 mb-1">Fit</label>
+                                    <label class="block text-sm text-gray-600 mb-1">@term('fit_label')</label>
                                     <select
                                         wire:model.live="elements.{{ $elementIndex }}.config.fit"
                                         wire:change="commitElementChange"
                                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                     >
-                                        <option value="contain">Contain</option>
-                                        <option value="cover">Cover</option>
-                                        <option value="fill">Fill</option>
+                                        <option value="contain">@term('fit_contain_label')</option>
+                                        <option value="cover">@term('fit_cover_label')</option>
+                                        <option value="fill">@term('fit_fill_label')</option>
                                     </select>
                                 </div>
                             </div>
                             @break
 
                         @default
-                            <p class="text-sm text-gray-500">No properties available for this element type.</p>
+                            <p class="text-sm text-gray-500">@term('no_properties_available_label')</p>
                     @endswitch
 
                     <!-- Common style properties -->
@@ -1715,10 +1719,10 @@
                         borderWidth: @js($selectedElement['styles']['borderWidth'] ?? 0),
                         borderColor: @js($selectedElement['styles']['borderColor'] ?? '#E5E7EB')
                     }">
-                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Style</h4>
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('style_label')</h4>
                         <div class="space-y-3">
                             <div>
-                                <label class="block text-sm text-gray-600 mb-1">Background</label>
+                                <label class="block text-sm text-gray-600 mb-1">@term('background_label')</label>
                                 <div class="flex gap-2">
                                     <input
                                         type="color"
@@ -1736,14 +1740,14 @@
                                     <button
                                         @click="bgColor = 'transparent'; $wire.updateElementStyles('{{ $selectedElement['id'] }}', { backgroundColor: 'transparent' })"
                                         class="px-2 py-1 text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
-                                        title="Set transparent"
+                                        title="{{ $terminology->get('set_transparent_label') }}"
                                     >
-                                        None
+                                        @term('none_label')
                                     </button>
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm text-gray-600 mb-1">Border Radius: <span x-text="borderRadius"></span>px</label>
+                                <label class="block text-sm text-gray-600 mb-1">@term('border_radius_label'): <span x-text="borderRadius"></span>px</label>
                                 <input
                                     type="range"
                                     min="0"
@@ -1754,7 +1758,7 @@
                                 >
                             </div>
                             <div>
-                                <label class="block text-sm text-gray-600 mb-1">Padding: <span x-text="padding"></span>px</label>
+                                <label class="block text-sm text-gray-600 mb-1">@term('padding_label'): <span x-text="padding"></span>px</label>
                                 <input
                                     type="range"
                                     min="0"
@@ -1765,7 +1769,7 @@
                                 >
                             </div>
                             <div>
-                                <label class="block text-sm text-gray-600 mb-1">Border Width: <span x-text="borderWidth"></span>px</label>
+                                <label class="block text-sm text-gray-600 mb-1">@term('border_width_label'): <span x-text="borderWidth"></span>px</label>
                                 <input
                                     type="range"
                                     min="0"
@@ -1776,7 +1780,7 @@
                                 >
                             </div>
                             <div x-show="borderWidth > 0">
-                                <label class="block text-sm text-gray-600 mb-1">Border Color</label>
+                                <label class="block text-sm text-gray-600 mb-1">@term('border_color_label')</label>
                                 <div class="flex gap-2">
                                     <input
                                         type="color"
@@ -1805,7 +1809,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                             </svg>
-                            Duplicate
+                            @term('duplicate_label')
                         </button>
                         <button
                             wire:click="deleteElement('{{ $selectedElement['id'] }}')"
@@ -1814,7 +1818,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>
-                            Delete
+                            @term('delete_label')
                         </button>
                     </div>
                 </div>
@@ -1838,16 +1842,16 @@
                         </div>
                         <h2 class="text-xl font-bold text-gray-900">
                             @if($canvasSelectorStep === 1)
-                                What would you like to create?
+                                @term('canvas_selector_title_label')
                             @else
-                                Choose a size
+                                @term('choose_size_label')
                             @endif
                         </h2>
                         <p class="text-gray-500 mt-1 text-sm">
                             @if($canvasSelectorStep === 1)
-                                Select the type that best fits your needs
+                                @term('canvas_selector_help_label')
                             @else
-                                Select the dimensions for your {{ $canvasMode === 'document' ? 'document' : ($canvasMode === 'widget' ? 'widget' : ($canvasMode === 'social' ? 'social post' : 'design')) }}
+                                {{ $terminology->get('select_dimensions_for_label') }} {{ $canvasMode === 'document' ? $terminology->get('document_label') : ($canvasMode === 'widget' ? $terminology->get('widget_label') : ($canvasMode === 'social' ? $terminology->get('social_post_label') : $terminology->get('design_label'))) }}
                             @endif
                         </p>
                     </div>
@@ -1869,8 +1873,8 @@
                                         <div class="h-5 w-full bg-blue-50 rounded mb-1"></div>
                                         <div class="h-1 w-full bg-gray-100 rounded"></div>
                                     </div>
-                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">Document</h3>
-                                    <p class="text-xs text-gray-500 text-center">Printable reports & PDFs</p>
+                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">@term('document_label')</h3>
+                                    <p class="text-xs text-gray-500 text-center">@term('printable_reports_help_label')</p>
                                 </button>
 
                                 {{-- Website Widget Option --}}
@@ -1888,8 +1892,8 @@
                                             <div class="h-1 w-10 bg-gray-200 rounded mx-auto"></div>
                                         </div>
                                     </div>
-                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">Website Widget</h3>
-                                    <p class="text-xs text-gray-500 text-center">Embed on your site</p>
+                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">@term('website_widget_label')</h3>
+                                    <p class="text-xs text-gray-500 text-center">@term('embed_on_site_help_label')</p>
                                 </button>
 
                                 {{-- Social Post Option --}}
@@ -1904,8 +1908,8 @@
                                             </svg>
                                         </div>
                                     </div>
-                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">Social Post</h3>
-                                    <p class="text-xs text-gray-500 text-center">Instagram, Facebook, etc.</p>
+                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">@term('social_post_label')</h3>
+                                    <p class="text-xs text-gray-500 text-center">@term('social_platforms_help_label')</p>
                                 </button>
 
                                 {{-- Custom Option --}}
@@ -1918,8 +1922,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                         </svg>
                                     </div>
-                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">Custom</h3>
-                                    <p class="text-xs text-gray-500 text-center">Set your own size</p>
+                                    <h3 class="text-sm font-semibold text-gray-900 mb-1">@term('custom_label')</h3>
+                                    <p class="text-xs text-gray-500 text-center">@term('set_custom_size_help_label')</p>
                                 </button>
                             </div>
                         </div>
@@ -1933,7 +1937,7 @@
                                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                     <button wire:click="selectCanvasSize('letter')" class="flex flex-col items-center p-4 bg-white hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-400 rounded-xl transition-all">
                                         <div class="w-12 h-16 bg-blue-50 rounded border border-blue-200 mb-2"></div>
-                                        <span class="text-sm font-medium text-gray-900">Letter</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('paper_letter_label')</span>
                                         <span class="text-xs text-gray-500">8.5" × 11"</span>
                                     </button>
                                     <button wire:click="selectCanvasSize('a4')" class="flex flex-col items-center p-4 bg-white hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-400 rounded-xl transition-all">
@@ -1943,12 +1947,12 @@
                                     </button>
                                     <button wire:click="selectCanvasSize('legal')" class="flex flex-col items-center p-4 bg-white hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-400 rounded-xl transition-all">
                                         <div class="w-10 h-16 bg-blue-50 rounded border border-blue-200 mb-2"></div>
-                                        <span class="text-sm font-medium text-gray-900">Legal</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('paper_legal_label')</span>
                                         <span class="text-xs text-gray-500">8.5" × 14"</span>
                                     </button>
                                     <button wire:click="selectCanvasSize('tabloid')" class="flex flex-col items-center p-4 bg-white hover:bg-blue-50 border-2 border-gray-200 hover:border-blue-400 rounded-xl transition-all">
                                         <div class="w-10 h-14 bg-blue-50 rounded border border-blue-200 mb-2"></div>
-                                        <span class="text-sm font-medium text-gray-900">Tabloid</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('paper_tabloid_label')</span>
                                         <span class="text-xs text-gray-500">11" × 17"</span>
                                     </button>
                                 </div>
@@ -1959,27 +1963,27 @@
                                 <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
                                     <button wire:click="selectCanvasSize('small')" class="flex flex-col items-center p-4 bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-400 rounded-xl transition-all">
                                         <div class="w-16 h-12 bg-green-50 rounded border border-green-200 mb-2 flex items-center justify-center text-xs text-green-600">300×250</div>
-                                        <span class="text-sm font-medium text-gray-900">Medium Rectangle</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('widget_medium_rectangle_label')</span>
                                         <span class="text-xs text-gray-500">300 × 250px</span>
                                     </button>
                                     <button wire:click="selectCanvasSize('medium')" class="flex flex-col items-center p-4 bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-400 rounded-xl transition-all">
                                         <div class="w-24 h-6 bg-green-50 rounded border border-green-200 mb-2 flex items-center justify-center text-xs text-green-600">728×90</div>
-                                        <span class="text-sm font-medium text-gray-900">Leaderboard</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('widget_leaderboard_label')</span>
                                         <span class="text-xs text-gray-500">728 × 90px</span>
                                     </button>
                                     <button wire:click="selectCanvasSize('large')" class="flex flex-col items-center p-4 bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-400 rounded-xl transition-all">
                                         <div class="w-28 h-8 bg-green-50 rounded border border-green-200 mb-2 flex items-center justify-center text-xs text-green-600">970×250</div>
-                                        <span class="text-sm font-medium text-gray-900">Billboard</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('widget_billboard_label')</span>
                                         <span class="text-xs text-gray-500">970 × 250px</span>
                                     </button>
                                     <button wire:click="selectCanvasSize('skyscraper')" class="flex flex-col items-center p-4 bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-400 rounded-xl transition-all">
                                         <div class="w-6 h-20 bg-green-50 rounded border border-green-200 mb-2 flex items-center justify-center text-[8px] text-green-600 writing-mode-vertical">160×600</div>
-                                        <span class="text-sm font-medium text-gray-900">Skyscraper</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('widget_skyscraper_label')</span>
                                         <span class="text-xs text-gray-500">160 × 600px</span>
                                     </button>
                                     <button wire:click="selectCanvasSize('square')" class="flex flex-col items-center p-4 bg-white hover:bg-green-50 border-2 border-gray-200 hover:border-green-400 rounded-xl transition-all">
                                         <div class="w-12 h-12 bg-green-50 rounded border border-green-200 mb-2 flex items-center justify-center text-xs text-green-600">300</div>
-                                        <span class="text-sm font-medium text-gray-900">Square</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('widget_square_label')</span>
                                         <span class="text-xs text-gray-500">300 × 300px</span>
                                     </button>
                                 </div>
@@ -1990,34 +1994,34 @@
                                 <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
                                     <button wire:click="selectCanvasSize('instagram_post')" class="flex flex-col items-center p-4 bg-white hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-xl transition-all">
                                         <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded border border-purple-200 mb-2"></div>
-                                        <span class="text-sm font-medium text-gray-900">Instagram Post</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('instagram_post_label')</span>
                                         <span class="text-xs text-gray-500">1080 × 1080px</span>
                                     </button>
                                     <button wire:click="selectCanvasSize('instagram_story')" class="flex flex-col items-center p-4 bg-white hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-xl transition-all">
                                         <div class="w-8 h-14 bg-gradient-to-br from-purple-100 to-pink-100 rounded border border-purple-200 mb-2"></div>
-                                        <span class="text-sm font-medium text-gray-900">Instagram Story</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('instagram_story_label')</span>
                                         <span class="text-xs text-gray-500">1080 × 1920px</span>
                                     </button>
                                     <button wire:click="selectCanvasSize('facebook_post')" class="flex flex-col items-center p-4 bg-white hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-xl transition-all">
                                         <div class="w-16 h-8 bg-blue-100 rounded border border-blue-200 mb-2"></div>
-                                        <span class="text-sm font-medium text-gray-900">Facebook Post</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('facebook_post_label')</span>
                                         <span class="text-xs text-gray-500">1200 × 630px</span>
                                     </button>
                                     <button wire:click="selectCanvasSize('twitter')" class="flex flex-col items-center p-4 bg-white hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-xl transition-all">
                                         <div class="w-16 h-9 bg-sky-100 rounded border border-sky-200 mb-2"></div>
-                                        <span class="text-sm font-medium text-gray-900">X / Twitter</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('x_twitter_label')</span>
                                         <span class="text-xs text-gray-500">1600 × 900px</span>
                                     </button>
                                     <button wire:click="selectCanvasSize('linkedin')" class="flex flex-col items-center p-4 bg-white hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-xl transition-all">
                                         <div class="w-16 h-8 bg-blue-100 rounded border border-blue-200 mb-2"></div>
-                                        <span class="text-sm font-medium text-gray-900">LinkedIn</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('linkedin_label')</span>
                                         <span class="text-xs text-gray-500">1200 × 627px</span>
                                     </button>
                                     <button wire:click="selectCanvasSize('youtube_thumbnail')" class="flex flex-col items-center p-4 bg-white hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-xl transition-all">
                                         <div class="w-16 h-9 bg-red-100 rounded border border-red-200 mb-2 flex items-center justify-center">
                                             <svg class="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                         </div>
-                                        <span class="text-sm font-medium text-gray-900">YouTube Thumbnail</span>
+                                        <span class="text-sm font-medium text-gray-900">@term('youtube_thumbnail_label')</span>
                                         <span class="text-xs text-gray-500">1280 × 720px</span>
                                     </button>
                                 </div>
@@ -2029,25 +2033,25 @@
                                     <div class="bg-gray-50 rounded-xl p-6">
                                         <div class="grid grid-cols-2 gap-4 mb-6">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Width (px)</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">@term('width_label') (px)</label>
                                                 <input
                                                     type="number"
                                                     wire:model="customWidth"
                                                     min="100"
                                                     max="2000"
                                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                                                    placeholder="800"
+                                                    placeholder="{{ $terminology->get('custom_width_placeholder') }}"
                                                 >
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Height (px)</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">@term('height_label') (px)</label>
                                                 <input
                                                     type="number"
                                                     wire:model="customHeight"
                                                     min="100"
                                                     max="2000"
                                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                                                    placeholder="600"
+                                                    placeholder="{{ $terminology->get('custom_height_placeholder') }}"
                                                 >
                                             </div>
                                         </div>
@@ -2063,7 +2067,7 @@
                                             wire:click="selectCustomSize"
                                             class="w-full mt-6 px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 font-medium"
                                         >
-                                            Create Custom Canvas
+                                            @term('create_custom_canvas_label')
                                         </button>
                                     </div>
                                 </div>
@@ -2078,18 +2082,18 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                                 </svg>
-                                Back
+                                @term('back_label')
                             </button>
                         @else
                             <p class="text-sm text-gray-500">
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                You can change this later in design settings
+                                @term('change_later_help_label')
                             </p>
                         @endif
                         <a href="{{ route('reports.index') }}" class="text-sm text-gray-500 hover:text-gray-700">
-                            Cancel
+                            @term('cancel_label')
                         </a>
                     </div>
                 </div>
@@ -2128,7 +2132,7 @@
                                 <button
                                     wire:click="backToCanvasSelector"
                                     class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                    title="Back to canvas selection"
+                                    title="{{ $terminology->get('back_to_canvas_selection_label') }}"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -2136,25 +2140,25 @@
                                 </button>
                                 <div>
                                     <div class="flex items-center gap-3">
-                                        <h2 class="text-2xl font-bold text-gray-900">Choose a Template</h2>
+                                        <h2 class="text-2xl font-bold text-gray-900">@term('choose_template_label')</h2>
                                         {{-- Canvas Mode Badge --}}
                                         @if($canvasMode === 'document')
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                                 </svg>
-                                                Document Report
+                                                @term('document_report_label')
                                             </span>
                                         @else
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
                                                 </svg>
-                                                Dashboard
+                                                @term('dashboard_label')
                                             </span>
                                         @endif
                                     </div>
-                                    <p class="text-sm text-gray-500 mt-1">Start with a pre-built template or create from scratch</p>
+                                    <p class="text-sm text-gray-500 mt-1">@term('template_start_help_label')</p>
                                 </div>
                             </div>
                             <button wire:click="$set('showTemplateGallery', false)" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
@@ -2173,7 +2177,7 @@
                                 <input
                                     type="search"
                                     x-model="searchQuery"
-                                    placeholder="Search templates..."
+                                    placeholder="{{ $terminology->get('search_templates_placeholder') }}"
                                     class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
                                 >
                             </div>
@@ -2184,28 +2188,28 @@
                                     :class="activeCategory === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'"
                                     class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
                                 >
-                                    All
+                                    @term('all_label')
                                 </button>
                                 <button
                                     @click="activeCategory = 'contact'"
                                     :class="activeCategory === 'contact' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'"
                                     class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
                                 >
-                                    Contact
+                                    @term('contact_label')
                                 </button>
                                 <button
                                     @click="activeCategory = 'contact_list'"
                                     :class="activeCategory === 'contact_list' ? 'bg-white shadow-sm text-green-600' : 'text-gray-500 hover:text-gray-700'"
                                     class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
                                 >
-                                    Contact List
+                                    @term('contact_list_label')
                                 </button>
                                 <button
                                     @click="activeCategory = 'organization'"
                                     :class="activeCategory === 'organization' ? 'bg-white shadow-sm text-purple-600' : 'text-gray-500 hover:text-gray-700'"
                                     class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
                                 >
-                                    Organization
+                                    @term('organization_label')
                                 </button>
                             </div>
                         </div>
@@ -2215,7 +2219,7 @@
                     <div class="flex-1 overflow-y-auto p-6">
                         {{-- Quick Start --}}
                         <div class="mb-8">
-                            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Quick Start</h3>
+                            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">@term('quick_start_label')</h3>
                             <div class="grid grid-cols-4 gap-4">
                                 <button
                                     wire:click="startBlank"
@@ -2226,11 +2230,11 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                         </svg>
                                     </div>
-                                    <span class="text-sm font-medium text-gray-700">Blank Canvas</span>
-                                    <span class="text-xs text-gray-500 mt-1">Start from scratch</span>
+                                    <span class="text-sm font-medium text-gray-700">@term('blank_canvas_label')</span>
+                                    <span class="text-xs text-gray-500 mt-1">@term('start_from_scratch_label')</span>
                                 </button>
 
-                                @foreach(collect($templates)->whereIn('category', ['contact', 'learner'])->take(3) as $template)
+                                @foreach(collect($templates)->whereIn('category', ['contact', 'participant'])->take(3) as $template)
                                 <button
                                     wire:click="loadTemplate('{{ $template['id'] }}')"
                                     class="group flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200 hover:border-blue-300 rounded-xl transition-all"
@@ -2249,7 +2253,7 @@
                         {{-- All Templates Grid --}}
                         <div>
                             <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                                <span x-text="activeCategory === 'all' ? 'All Templates' : (activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1) + ' Templates')"></span>
+                                <span x-text="activeCategory === 'all' ? @js($terminology->get('all_templates_label')) : (activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1) + ' ' + @js($terminology->get('templates_label')))"></span>
                                 <span class="text-gray-400 font-normal" x-text="'(' + filteredTemplates.length + ')'"></span>
                             </h3>
 
@@ -2262,7 +2266,7 @@
                                         <div
                                             class="aspect-video flex items-center justify-center relative"
                                             :class="{
-                                                'bg-gradient-to-br from-blue-100 to-blue-50': template.category === 'contact' || template.category === 'learner',
+                                                'bg-gradient-to-br from-blue-100 to-blue-50': template.category === 'contact' || template.category === 'participant',
                                                 'bg-gradient-to-br from-green-100 to-green-50': template.category === 'contact_list' || template.category === 'cohort',
                                                 'bg-gradient-to-br from-purple-100 to-purple-50': template.category === 'organization' || template.category === 'organization',
                                                 'bg-gradient-to-br from-gray-100 to-gray-50': template.category === 'custom'
@@ -2272,12 +2276,12 @@
                                             <span
                                                 class="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-medium rounded-full"
                                                 :class="{
-                                                    'bg-blue-100 text-blue-700': template.category === 'contact' || template.category === 'learner',
+                                                    'bg-blue-100 text-blue-700': template.category === 'contact' || template.category === 'participant',
                                                     'bg-green-100 text-green-700': template.category === 'contact_list' || template.category === 'cohort',
                                                     'bg-purple-100 text-purple-700': template.category === 'organization' || template.category === 'organization',
                                                     'bg-gray-100 text-gray-700': template.category === 'custom'
                                                 }"
-                                                x-text="template.category === 'contact_list' ? 'Contact List' : (template.category === 'learner' ? 'Contact' : (template.category === 'cohort' ? 'Contact List' : (template.category === 'organization' ? 'Organization' : (template.category.charAt(0).toUpperCase() + template.category.slice(1)))))"
+                                                x-text="template.category === 'contact_list' ? @js($terminology->get('contact_list_label')) : (template.category === 'participant' ? @js($terminology->get('contact_label')) : (template.category === 'cohort' ? @js($terminology->get('contact_list_label')) : (template.category === 'organization' ? @js($terminology->get('organization_label')) : (template.category.charAt(0).toUpperCase() + template.category.slice(1)))))"
                                             ></span>
 
                                             {{-- Template Icon --}}
@@ -2290,7 +2294,7 @@
                                                 <svg
                                                     class="w-10 h-10 mx-auto transition-colors"
                                                     :class="{
-                                                        'text-blue-400 group-hover:text-blue-500': template.category === 'contact' || template.category === 'learner',
+                                                        'text-blue-400 group-hover:text-blue-500': template.category === 'contact' || template.category === 'participant',
                                                         'text-green-400 group-hover:text-green-500': template.category === 'contact_list' || template.category === 'cohort',
                                                         'text-purple-400 group-hover:text-purple-500': template.category === 'organization' || template.category === 'organization',
                                                         'text-gray-400 group-hover:text-gray-500': template.category === 'custom'
@@ -2304,7 +2308,7 @@
                                             {{-- Hover overlay --}}
                                             <div class="absolute inset-0 bg-pulse-orange-500/0 group-hover:bg-pulse-orange-500/5 flex items-center justify-center transition-colors">
                                                 <span class="opacity-0 group-hover:opacity-100 bg-pulse-orange-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow-lg transition-opacity">
-                                                    Use Template
+                                                    @term('use_template_label')
                                                 </span>
                                             </div>
                                         </div>
@@ -2321,9 +2325,9 @@
                                 <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                <p class="text-gray-500">No templates found matching your search.</p>
+                                <p class="text-gray-500">@term('no_templates_found_label')</p>
                                 <button @click="searchQuery = ''; activeCategory = 'all'" class="mt-2 text-pulse-orange-600 hover:text-pulse-orange-700 text-sm font-medium">
-                                    Clear filters
+                                    @term('clear_filters_label')
                                 </button>
                             </div>
                         </div>
@@ -2338,21 +2342,21 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2">
-                                        <h3 class="font-semibold text-gray-900">Generate with AI</h3>
-                                        <span class="px-2 py-0.5 text-[10px] font-semibold bg-purple-100 text-purple-700 rounded-full">Beta</span>
+                                        <h3 class="font-semibold text-gray-900">@term('generate_with_ai_label')</h3>
+                                        <span class="px-2 py-0.5 text-[10px] font-semibold bg-purple-100 text-purple-700 rounded-full">@term('beta_label')</span>
                                     </div>
-                                    <p class="text-sm text-gray-600 mt-1">Describe the report you need and AI will create a custom template for you.</p>
+                                    <p class="text-sm text-gray-600 mt-1">@term('generate_with_ai_help_label')</p>
                                     <div class="mt-4 flex gap-3">
                                         <input
                                             type="text"
-                                            placeholder="e.g., 'Weekly attendance summary for 10th grade with trend charts'"
+                                            placeholder="{{ $terminology->get('ai_template_prompt_placeholder') }}"
                                             class="flex-1 px-4 py-3 border border-purple-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
                                         >
                                         <button class="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all text-sm font-semibold shadow-lg shadow-purple-500/25 flex items-center gap-2">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                             </svg>
-                                            Generate
+                                            @term('generate_label')
                                         </button>
                                     </div>
                                 </div>
@@ -2426,8 +2430,8 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                         </svg>
-                        <span>Duplicate</span>
-                        <span class="ml-auto text-xs text-gray-400">Ctrl+D</span>
+                        <span>@term('duplicate_label')</span>
+                        <span class="ml-auto text-xs text-gray-400">@term('shortcut_ctrl_d_label')</span>
                     </button>
                     <button
                         @click="$wire.copySelected(); close()"
@@ -2436,8 +2440,8 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
                         </svg>
-                        <span>Copy</span>
-                        <span class="ml-auto text-xs text-gray-400">Ctrl+C</span>
+                        <span>@term('copy_label')</span>
+                        <span class="ml-auto text-xs text-gray-400">@term('shortcut_ctrl_c_label')</span>
                     </button>
                     <button
                         @click="$wire.cutSelected(); close()"
@@ -2446,8 +2450,8 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"/>
                         </svg>
-                        <span>Cut</span>
-                        <span class="ml-auto text-xs text-gray-400">Ctrl+X</span>
+                        <span>@term('cut_label')</span>
+                        <span class="ml-auto text-xs text-gray-400">@term('shortcut_ctrl_x_label')</span>
                     </button>
 
                     <div class="border-t border-gray-100 my-1"></div>
@@ -2459,7 +2463,7 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7"/>
                         </svg>
-                        <span>Bring to Front</span>
+                        <span>@term('bring_to_front_label')</span>
                     </button>
                     <button
                         @click="$wire.sendToBack(); close()"
@@ -2468,7 +2472,7 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"/>
                         </svg>
-                        <span>Send to Back</span>
+                        <span>@term('send_to_back_label')</span>
                     </button>
 
                     <div class="border-t border-gray-100 my-1"></div>
@@ -2480,8 +2484,8 @@
                         <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        <span>Delete</span>
-                        <span class="ml-auto text-xs text-gray-400">Del</span>
+                        <span>@term('delete_label')</span>
+                        <span class="ml-auto text-xs text-gray-400">@term('shortcut_del_label')</span>
                     </button>
                 </div>
             </template>
@@ -2496,8 +2500,8 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
-                        <span>Paste</span>
-                        <span class="ml-auto text-xs text-gray-400">Ctrl+V</span>
+                        <span>@term('paste_label')</span>
+                        <span class="ml-auto text-xs text-gray-400">@term('shortcut_ctrl_v_label')</span>
                     </button>
 
                     <div class="border-t border-gray-100 my-1"></div>
@@ -2509,8 +2513,8 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
                         </svg>
-                        <span>Select All</span>
-                        <span class="ml-auto text-xs text-gray-400">Ctrl+A</span>
+                        <span>@term('select_all_label')</span>
+                        <span class="ml-auto text-xs text-gray-400">@term('shortcut_ctrl_a_label')</span>
                     </button>
 
                     <div class="border-t border-gray-100 my-1"></div>
@@ -2522,7 +2526,7 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                         </svg>
-                        <span>{{ $showGrid ? 'Hide Grid' : 'Show Grid' }}</span>
+                        <span>{{ $showGrid ? $terminology->get('hide_grid_label') : $terminology->get('show_grid_label') }}</span>
                     </button>
 
                     <button
@@ -2532,7 +2536,7 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
                         </svg>
-                        <span>Fit to Screen</span>
+                        <span>@term('fit_to_screen_label')</span>
                     </button>
                 </div>
             </template>
@@ -2558,7 +2562,7 @@
 
             <div class="relative bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-semibold text-gray-900">Publish Report</h2>
+                    <h2 class="text-xl font-semibold text-gray-900">@term('publish_report_label')</h2>
                     <button wire:click="$set('showPublishModal', false)" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -2571,12 +2575,12 @@
                         <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <span class="text-sm text-green-700">This report is published! Copy the link or embed code below.</span>
+                        <span class="text-sm text-green-700">@term('report_published_help_label')</span>
                     </div>
 
                     <div class="space-y-4 mb-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Shareable Link</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('shareable_link_label')</label>
                             <div class="flex gap-2">
                                 <input
                                     type="text"
@@ -2591,14 +2595,14 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                     </svg>
-                                    <span x-show="copied !== 'link'">Copy</span>
-                                    <span x-show="copied === 'link'" class="text-green-600">Copied!</span>
+                                    <span x-show="copied !== 'link'">@term('copy_label')</span>
+                                    <span x-show="copied === 'link'" class="text-green-600">@term('copied_label')</span>
                                 </button>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Embed Code</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('embed_code_label')</label>
                             <textarea
                                 readonly
                                 rows="3"
@@ -2612,8 +2616,8 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                     </svg>
-                                    <span x-show="copied !== 'embed'">Copy Embed Code</span>
-                                    <span x-show="copied === 'embed'" class="text-green-600">Copied!</span>
+                                    <span x-show="copied !== 'embed'">@term('copy_embed_code_label')</span>
+                                    <span x-show="copied === 'embed'" class="text-green-600">@term('copied_label')</span>
                                 </button>
                             </div>
                         </div>
@@ -2624,25 +2628,25 @@
                             wire:click="$set('showPublishModal', false)"
                             class="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                         >
-                            Close
+                            @term('close_label')
                         </button>
                         <a
                             href="{{ $publicUrl }}"
                             target="_blank"
                             class="flex-1 px-4 py-2 text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors text-center"
                         >
-                            Open Report
+                            @term('open_report_label')
                         </a>
                     </div>
                 @else
-                    <p class="text-gray-600 mb-4">Publishing will generate a shareable link and embed code for this report.</p>
+                    <p class="text-gray-600 mb-4">@term('publishing_help_label')</p>
 
                     <div class="flex gap-3">
                         <button
                             wire:click="$set('showPublishModal', false)"
                             class="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                         >
-                            Cancel
+                            @term('cancel_label')
                         </button>
                         <button
                             wire:click="publish"
@@ -2650,14 +2654,14 @@
                             wire:target="publish"
                             class="flex-1 px-4 py-2 text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                         >
-                            <span wire:loading.remove wire:target="publish">Publish</span>
+                            <span wire:loading.remove wire:target="publish">@term('publish_label')</span>
                             <span wire:loading wire:target="publish">
                                 <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
                             </span>
-                            <span wire:loading wire:target="publish">Publishing...</span>
+                            <span wire:loading wire:target="publish">@term('publishing_label')</span>
                         </button>
                     </div>
                 @endif
@@ -2676,11 +2680,11 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span>{{ count($selectedElementIds) }} elements selected</span>
+            <span>{{ count($selectedElementIds) }} @term('elements_selected_label')</span>
             <button
                 wire:click="clearSelection"
                 class="ml-2 text-blue-200 hover:text-white"
-                title="Clear selection"
+                title="{{ $terminology->get('clear_selection_label') }}"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -2715,8 +2719,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="text-lg font-semibold text-white">Keyboard Shortcuts</h2>
-                            <p class="text-sm text-gray-400">Work faster with these shortcuts</p>
+                            <h2 class="text-lg font-semibold text-white">@term('keyboard_shortcuts_label')</h2>
+                            <p class="text-sm text-gray-400">@term('shortcuts_help_label')</p>
                         </div>
                     </div>
                     <button
@@ -2734,95 +2738,95 @@
                 <div class="p-6 grid grid-cols-2 gap-6">
                     <!-- Selection -->
                     <div>
-                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Selection</h3>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">@term('selection_label')</h3>
                         <div class="space-y-2">
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Select element</span>
-                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Click</kbd>
+                                <span class="text-gray-600">@term('select_element_label')</span>
+                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">@term('click_label')</kbd>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Multi-select</span>
-                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Shift + Click</kbd>
+                                <span class="text-gray-600">@term('multi_select_label')</span>
+                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">@term('shift_click_label')</kbd>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Select all</span>
+                                <span class="text-gray-600">@term('select_all_label')</span>
                                 <div class="flex gap-1">
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">A</kbd>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Deselect</span>
-                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Esc</kbd>
+                                <span class="text-gray-600">@term('deselect_label')</span>
+                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">@term('esc_label')</kbd>
                             </div>
                         </div>
                     </div>
 
                     <!-- Editing -->
                     <div>
-                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Editing</h3>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">@term('editing_label')</h3>
                         <div class="space-y-2">
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Copy</span>
+                                <span class="text-gray-600">@term('copy_label')</span>
                                 <div class="flex gap-1">
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">C</kbd>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Cut</span>
+                                <span class="text-gray-600">@term('cut_label')</span>
                                 <div class="flex gap-1">
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">X</kbd>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Paste</span>
+                                <span class="text-gray-600">@term('paste_label')</span>
                                 <div class="flex gap-1">
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">V</kbd>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Duplicate</span>
+                                <span class="text-gray-600">@term('duplicate_label')</span>
                                 <div class="flex gap-1">
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">D</kbd>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Delete</span>
-                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Delete</kbd>
+                                <span class="text-gray-600">@term('delete_label')</span>
+                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">@term('delete_key_label')</kbd>
                             </div>
                         </div>
                     </div>
 
                     <!-- Canvas -->
                     <div>
-                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Canvas</h3>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">@term('canvas_label')</h3>
                         <div class="space-y-2">
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Zoom in</span>
+                                <span class="text-gray-600">@term('zoom_in_label')</span>
                                 <div class="flex gap-1">
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">+</kbd>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Zoom out</span>
+                                <span class="text-gray-600">@term('zoom_out_label')</span>
                                 <div class="flex gap-1">
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">-</kbd>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Nudge 1px</span>
-                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Arrow keys</kbd>
+                                <span class="text-gray-600">@term('nudge_1px_label')</span>
+                                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">@term('arrow_keys_label')</kbd>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Nudge grid</span>
+                                <span class="text-gray-600">@term('nudge_grid_label')</span>
                                 <div class="flex gap-1">
-                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Shift</kbd>
+                                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">@term('shift_key_label')</kbd>
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">↑↓←→</kbd>
                                 </div>
                             </div>
@@ -2831,17 +2835,17 @@
 
                     <!-- History -->
                     <div>
-                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">History & Save</h3>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">@term('history_save_label')</h3>
                         <div class="space-y-2">
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Undo</span>
+                                <span class="text-gray-600">@term('undo_action')</span>
                                 <div class="flex gap-1">
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">Z</kbd>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Redo</span>
+                                <span class="text-gray-600">@term('redo_action')</span>
                                 <div class="flex gap-1">
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⇧</kbd>
@@ -2849,14 +2853,14 @@
                                 </div>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Save</span>
+                                <span class="text-gray-600">@term('save_action')</span>
                                 <div class="flex gap-1">
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">⌘</kbd>
                                     <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-700">S</kbd>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Show shortcuts</span>
+                                <span class="text-gray-600">@term('show_shortcuts_label')</span>
                                 <kbd class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-mono">?</kbd>
                             </div>
                         </div>
@@ -2866,7 +2870,7 @@
                 <!-- Footer -->
                 <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
                     <p class="text-xs text-gray-500 text-center">
-                        <span class="text-gray-400">Pro tip:</span> On Windows/Linux, use <kbd class="px-1.5 py-0.5 bg-gray-200 rounded text-xs">Ctrl</kbd> instead of <kbd class="px-1.5 py-0.5 bg-gray-200 rounded text-xs">⌘</kbd>
+                        <span class="text-gray-400">@term('pro_tip_label'):</span> @term('windows_shortcut_help_label') <kbd class="px-1.5 py-0.5 bg-gray-200 rounded text-xs">@term('ctrl_key_label')</kbd> @term('instead_of_label') <kbd class="px-1.5 py-0.5 bg-gray-200 rounded text-xs">⌘</kbd>
                     </p>
                 </div>
             </div>
@@ -2909,7 +2913,7 @@
             <button
                 wire:click="copySelected"
                 class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-                title="Copy (⌘C)"
+                title="{{ $terminology->get('copy_label') }} (⌘C)"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
@@ -2920,7 +2924,7 @@
             <button
                 wire:click="duplicateElement('{{ $selectedElement['id'] }}')"
                 class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-                title="Duplicate (⌘D)"
+                title="{{ $terminology->get('duplicate_label') }} (⌘D)"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
@@ -2933,7 +2937,7 @@
             <button
                 wire:click="bringToFront"
                 class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-                title="Bring to Front"
+                title="{{ $terminology->get('bring_to_front_label') }}"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7"/>
@@ -2944,7 +2948,7 @@
             <button
                 wire:click="sendToBack"
                 class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-                title="Send to Back"
+                title="{{ $terminology->get('send_to_back_label') }}"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"/>
@@ -2957,7 +2961,7 @@
             <button
                 wire:click="toggleElementLock('{{ $selectedElement['id'] }}')"
                 class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-                title="{{ ($selectedElement['config']['locked'] ?? false) ? 'Unlock' : 'Lock' }}"
+                title="{{ ($selectedElement['config']['locked'] ?? false) ? $terminology->get('unlock_label') : $terminology->get('lock_label') }}"
             >
                 @if($selectedElement['config']['locked'] ?? false)
                     <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2976,7 +2980,7 @@
             <button
                 wire:click="deleteElement('{{ $selectedElement['id'] }}')"
                 class="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors"
-                title="Delete (Del)"
+                title="{{ $terminology->get('delete_label') }} (Del)"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -3018,26 +3022,26 @@
                 const steps = [
                     {
                         icon: '👋',
-                        title: 'Welcome to Report Builder!',
-                        description: 'Create beautiful, data-rich reports in minutes. Start by choosing a template or building from scratch.',
+                        title: @js($terminology->get('onboarding_welcome_title')),
+                        description: @js($terminology->get('onboarding_welcome_body')),
                         position: 'center'
                     },
                     {
                         icon: '🎨',
-                        title: 'Drag & Drop Elements',
-                        description: 'Use the sidebar to drag elements onto your canvas. Try text, charts, metrics, and more.',
+                        title: @js($terminology->get('onboarding_drag_drop_title')),
+                        description: @js($terminology->get('onboarding_drag_drop_body')),
                         position: 'left'
                     },
                     {
                         icon: '✨',
-                        title: 'Smart Blocks',
-                        description: 'Pre-built sections that auto-populate with real contact data. Perfect for quick reports!',
+                        title: @js($terminology->get('onboarding_smart_blocks_title')),
+                        description: @js($terminology->get('onboarding_smart_blocks_body')),
                         position: 'left'
                     },
                     {
                         icon: '⌨️',
-                        title: 'Keyboard Shortcuts',
-                        description: 'Press ? anytime to see all shortcuts. Use ⌘C, ⌘V, arrows, and more to work faster.',
+                        title: @js($terminology->get('onboarding_shortcuts_title')),
+                        description: @js($terminology->get('onboarding_shortcuts_body')),
                         position: 'center'
                     }
                 ];
@@ -3083,13 +3087,13 @@
                             @click="skip()"
                             class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
                         >
-                            Skip
+                            @term('skip_label')
                         </button>
                         <button
                             @click="next()"
                             class="px-4 py-1.5 text-sm font-medium text-white bg-pulse-orange-500 hover:bg-pulse-orange-600 rounded-lg transition-colors"
                         >
-                            <span x-text="step === maxSteps - 1 ? 'Get Started' : 'Next'"></span>
+                            <span x-text="step === maxSteps - 1 ? @js($terminology->get('get_started_label')) : @js($terminology->get('next_label'))"></span>
                         </button>
                     </div>
                 </div>
@@ -3111,7 +3115,7 @@
             x-show="!expanded"
             @click="toggle()"
             class="bg-white rounded-xl shadow-lg p-3 hover:shadow-xl transition-shadow border border-gray-200"
-            title="Show minimap"
+                        title="{{ $terminology->get('show_minimap_label') }}"
         >
             <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
@@ -3127,7 +3131,7 @@
             class="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
         >
             <div class="px-3 py-2 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-                <span class="text-xs font-medium text-gray-600">Minimap</span>
+                <span class="text-xs font-medium text-gray-600">@term('minimap_label')</span>
                 <button @click="toggle()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -3165,7 +3169,7 @@
             <div class="inline-block w-full max-w-md p-0 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl animate-modal-in">
                 {{-- Header --}}
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                    <h3 class="text-lg font-semibold text-gray-900">Share this report</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">@term('share_report_label')</h3>
                     <button wire:click="closeShareModal" class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -3176,13 +3180,13 @@
                 <div class="px-6 py-4">
                     {{-- Add Collaborator Form --}}
                     <form wire:submit="addCollaborator" class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Invite by email</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">@term('invite_by_email_label')</label>
                         <div class="flex gap-2">
                             <div class="flex-1 relative">
                                 <input
                                     type="email"
                                     wire:model="collaboratorEmail"
-                                    placeholder="name@example.com"
+                                    placeholder="{{ $terminology->get('email_placeholder') }}"
                                     class="w-full rounded-lg border-gray-300 focus:border-pulse-orange-500 focus:ring-pulse-orange-500 text-sm pl-10"
                                 >
                                 <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3190,11 +3194,11 @@
                                 </svg>
                             </div>
                             <select wire:model="collaboratorRole" class="rounded-lg border-gray-300 text-sm pr-8">
-                                <option value="editor">Can edit</option>
-                                <option value="viewer">Can view</option>
+                                <option value="editor">@term('can_edit_label')</option>
+                                <option value="viewer">@term('can_view_label')</option>
                             </select>
                             <button type="submit" class="px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 text-sm font-medium transition-colors">
-                                Invite
+                                @term('invite_label')
                             </button>
                         </div>
                         @error('collaboratorEmail')
@@ -3204,7 +3208,7 @@
 
                     {{-- People with access --}}
                     <div class="mb-6">
-                        <h4 class="text-sm font-medium text-gray-700 mb-3">People with access</h4>
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">@term('people_with_access_label')</h4>
                         <div class="space-y-2 max-h-48 overflow-y-auto">
                             @forelse($this->getAllCollaborators() as $collab)
                                 <div class="flex items-center justify-between py-2 px-3 rounded-lg {{ $collab['role'] === 'owner' ? 'bg-pulse-orange-50' : 'hover:bg-gray-50' }}">
@@ -3220,7 +3224,7 @@
                                             <div class="text-sm font-medium text-gray-900">
                                                 {{ $collab['name'] }}
                                                 @if($collab['id'] === auth()->id())
-                                                    <span class="text-gray-400">(you)</span>
+                                                    <span class="text-gray-400">({{ $terminology->get('you_label') }})</span>
                                                 @endif
                                             </div>
                                             <div class="text-xs text-gray-500">{{ $collab['email'] }}</div>
@@ -3228,19 +3232,19 @@
                                     </div>
                                     <div class="flex items-center gap-2">
                                         @if($collab['role'] === 'owner')
-                                            <span class="text-xs font-medium text-pulse-orange-600 px-2.5 py-1 bg-pulse-orange-100 rounded-full">Owner</span>
+                                            <span class="text-xs font-medium text-pulse-orange-600 px-2.5 py-1 bg-pulse-orange-100 rounded-full">@term('owner_label')</span>
                                         @else
                                             <select
                                                 wire:change="updateCollaboratorRole({{ $collab['id'] }}, $event.target.value)"
                                                 class="text-xs border-gray-200 rounded-lg bg-white focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                             >
-                                                <option value="editor" {{ $collab['role'] === 'editor' ? 'selected' : '' }}>Can edit</option>
-                                                <option value="viewer" {{ $collab['role'] === 'viewer' ? 'selected' : '' }}>Can view</option>
+                                                <option value="editor" {{ $collab['role'] === 'editor' ? 'selected' : '' }}>@term('can_edit_label')</option>
+                                                <option value="viewer" {{ $collab['role'] === 'viewer' ? 'selected' : '' }}>@term('can_view_label')</option>
                                             </select>
                                             <button
                                                 wire:click="removeCollaborator({{ $collab['id'] }})"
                                                 class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                title="Remove access"
+                                                title="{{ $terminology->get('remove_access_label') }}"
                                             >
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -3254,8 +3258,8 @@
                                     <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                     </svg>
-                                    <p class="text-sm text-gray-500">No collaborators yet</p>
-                                    <p class="text-xs text-gray-400">Invite someone to work together</p>
+                                    <p class="text-sm text-gray-500">@term('no_collaborators_yet_label')</p>
+                                    <p class="text-xs text-gray-400">@term('invite_someone_help_label')</p>
                                 </div>
                             @endforelse
                         </div>
@@ -3270,7 +3274,7 @@
                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                             </svg>
-                            <span class="text-sm font-medium text-gray-700">Collaboration link</span>
+                            <span class="text-sm font-medium text-gray-700">@term('collaboration_link_label')</span>
                         </div>
                         <div class="flex gap-2">
                             <input
@@ -3288,7 +3292,7 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                         </svg>
-                                        Copy
+                                        @term('copy_label')
                                     </span>
                                 </template>
                                 <template x-if="copied">
@@ -3296,12 +3300,12 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
-                                        Copied!
+                                        @term('copied_label')
                                     </span>
                                 </template>
                             </button>
                         </div>
-                        <p class="text-xs text-gray-400 mt-2">Only people added above can access this report</p>
+                        <p class="text-xs text-gray-400 mt-2">@term('access_limited_help_label')</p>
                     </div>
                 </div>
             </div>
@@ -3315,8 +3319,8 @@
         <!-- Header -->
         <div class="p-4 border-b flex items-center justify-between">
             <div>
-                <h3 class="font-semibold text-gray-900">Comments</h3>
-                <p class="text-xs text-gray-500">{{ $this->getUnresolvedCount() }} unresolved</p>
+                <h3 class="font-semibold text-gray-900">@term('comments_label')</h3>
+                <p class="text-xs text-gray-500">{{ $this->getUnresolvedCount() }} @term('unresolved_label')</p>
             </div>
             <button wire:click="closeCommentsPanel" class="text-gray-400 hover:text-gray-600">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3331,19 +3335,19 @@
                 wire:click="setCommentFilter('all')"
                 class="px-3 py-1 text-sm rounded-full {{ $commentFilter === 'all' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
             >
-                All
+                @term('all_label')
             </button>
             <button
                 wire:click="setCommentFilter('unresolved')"
                 class="px-3 py-1 text-sm rounded-full {{ $commentFilter === 'unresolved' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
             >
-                Open
+                @term('open_label')
             </button>
             <button
                 wire:click="setCommentFilter('resolved')"
                 class="px-3 py-1 text-sm rounded-full {{ $commentFilter === 'resolved' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
             >
-                Resolved
+                @term('resolved_label')
             </button>
         </div>
 
@@ -3368,20 +3372,20 @@
                         </div>
                         <div class="flex items-center gap-1">
                             @if(!$comment['resolved'])
-                                <button wire:click="resolveComment({{ $comment['id'] }})" class="text-gray-400 hover:text-green-500" title="Resolve">
+                                <button wire:click="resolveComment({{ $comment['id'] }})" class="text-gray-400 hover:text-green-500" title="{{ $terminology->get('resolve_label') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
                                 </button>
                             @else
-                                <button wire:click="unresolveComment({{ $comment['id'] }})" class="text-green-500 hover:text-gray-400" title="Reopen">
+                                <button wire:click="unresolveComment({{ $comment['id'] }})" class="text-green-500 hover:text-gray-400" title="{{ $terminology->get('reopen_label') }}">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                                     </svg>
                                 </button>
                             @endif
                             @if($comment['user']['id'] === auth()->id())
-                                <button wire:click="deleteComment({{ $comment['id'] }})" class="text-gray-400 hover:text-red-500" title="Delete">
+                                <button wire:click="deleteComment({{ $comment['id'] }})" class="text-gray-400 hover:text-red-500" title="{{ $terminology->get('delete_label') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
@@ -3399,11 +3403,11 @@
                     @if($comment['element_id'] || $comment['position'])
                         <div class="mt-2 text-xs text-gray-400">
                             @if($comment['element_id'])
-                                On element
+                                @term('on_element_label')
                             @elseif($comment['position'])
-                                At position ({{ round($comment['position']['x']) }}, {{ round($comment['position']['y']) }})
+                                @term('at_position_label') ({{ round($comment['position']['x']) }}, {{ round($comment['position']['y']) }})
                             @endif
-                            - Page {{ $comment['page_index'] + 1 }}
+                            - @term('page_label') {{ $comment['page_index'] + 1 }}
                         </div>
                     @endif
 
@@ -3425,7 +3429,7 @@
                         wire:click="startReply({{ $comment['id'] }})"
                         class="mt-2 text-xs text-gray-500 hover:text-pulse-orange-500"
                     >
-                        Reply
+                        @term('reply_label')
                     </button>
                 </div>
             @empty
@@ -3433,8 +3437,8 @@
                     <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                     </svg>
-                    <p class="text-sm">No comments yet</p>
-                    <p class="text-xs mt-1">Be the first to leave feedback!</p>
+                    <p class="text-sm">@term('no_comments_yet_label')</p>
+                    <p class="text-xs mt-1">@term('be_first_leave_feedback_label')</p>
                 </div>
             @endforelse
         </div>
@@ -3443,8 +3447,8 @@
         <div class="p-4 border-t bg-gray-50">
             @if($replyingToComment)
                 <div class="mb-2 text-xs text-gray-500 flex items-center justify-between">
-                    <span>Replying to comment...</span>
-                    <button wire:click="cancelComment" class="text-gray-400 hover:text-gray-600">Cancel</button>
+                    <span>@term('replying_to_comment_label')</span>
+                    <button wire:click="cancelComment" class="text-gray-400 hover:text-gray-600">@term('cancel_label')</button>
                 </div>
             @endif
             <div x-data="{
@@ -3523,7 +3527,7 @@
                             @keydown="handleKeydown($event)"
                             @keydown.meta.enter="submitComment()"
                             @keydown.ctrl.enter="submitComment()"
-                            placeholder="Add a comment... Type @ to mention someone"
+                            placeholder="{{ $terminology->get('add_comment_placeholder') }}"
                             rows="2"
                             class="w-full rounded-lg border-gray-300 focus:border-pulse-orange-500 focus:ring-pulse-orange-500 text-sm resize-none"
                         ></textarea>
@@ -3549,7 +3553,7 @@
                                 </button>
                             </template>
                             <div x-show="filteredUsers.length === 0" class="px-3 py-2 text-sm text-gray-500">
-                                No users found
+                                @term('no_users_found_label')
                             </div>
                         </div>
                     </div>
@@ -3558,10 +3562,10 @@
                         class="self-end px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 text-sm font-medium disabled:opacity-50"
                         :disabled="!content.trim()"
                     >
-                        Post
+                        @term('post_label')
                     </button>
                 </div>
-                <p class="text-xs text-gray-400 mt-1">Ctrl+Enter to post</p>
+                <p class="text-xs text-gray-400 mt-1">@term('ctrl_enter_to_post_label')</p>
             </div>
         </div>
     </div>

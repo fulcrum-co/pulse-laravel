@@ -7,7 +7,7 @@
             <input
                 type="text"
                 wire:model.live.debounce.300ms="search"
-                placeholder="Search resources..."
+                placeholder="@term('search_resources_placeholder')"
                 class="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
             @if($search)
@@ -20,31 +20,31 @@
         {{-- Category Filter --}}
         <div class="mb-6">
             <div class="flex items-center justify-between mb-2">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</h3>
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">@term('category_label')</h3>
                 @if(count($selectedCategories) > 0)
-                    <button wire:click="clearCategories" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700">Clear</button>
+                    <button wire:click="clearCategories" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700">@term('clear_action')</button>
                 @endif
             </div>
             <div class="space-y-1">
                 <label class="flex items-center gap-2 py-1 cursor-pointer">
                     <input type="checkbox" wire:click="toggleCategory('content')" @checked(in_array('content', $selectedCategories)) class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
                     <x-icon name="document-text" class="w-4 h-4 text-blue-500" />
-                    <span class="text-sm text-gray-700">Content</span>
+                    <span class="text-sm text-gray-700">@term('content_singular')</span>
                 </label>
                 <label class="flex items-center gap-2 py-1 cursor-pointer">
                     <input type="checkbox" wire:click="toggleCategory('provider')" @checked(in_array('provider', $selectedCategories)) class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
                     <x-icon name="users" class="w-4 h-4 text-purple-500" />
-                    <span class="text-sm text-gray-700">Providers</span>
+                    <span class="text-sm text-gray-700">@term('provider_plural')</span>
                 </label>
                 <label class="flex items-center gap-2 py-1 cursor-pointer">
                     <input type="checkbox" wire:click="toggleCategory('program')" @checked(in_array('program', $selectedCategories)) class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
                     <x-icon name="building-office" class="w-4 h-4 text-green-500" />
-                    <span class="text-sm text-gray-700">Programs</span>
+                    <span class="text-sm text-gray-700">@term('program_plural')</span>
                 </label>
                 <label class="flex items-center gap-2 py-1 cursor-pointer">
                     <input type="checkbox" wire:click="toggleCategory('course')" @checked(in_array('course', $selectedCategories)) class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
                     <x-icon name="academic-cap" class="w-4 h-4 text-orange-500" />
-                    <span class="text-sm text-gray-700">Courses</span>
+                    <span class="text-sm text-gray-700">@term('course_plural')</span>
                 </label>
             </div>
         </div>
@@ -53,9 +53,9 @@
         @if(in_array('content', $selectedCategories))
             <div class="mb-6">
                 <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Content Type</h3>
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">@term('content_type_label')</h3>
                     @if(count($selectedContentTypes) > 0)
-                        <button wire:click="clearContentTypes" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700">Clear</button>
+                        <button wire:click="clearContentTypes" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700">@term('clear_action')</button>
                     @endif
                 </div>
                 <div class="space-y-1">
@@ -71,10 +71,10 @@
 
         {{-- Sort By --}}
         <div>
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Sort By</h3>
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">@term('sort_by_label')</h3>
             <select wire:model.live="sortBy" class="w-full text-sm border border-gray-300 rounded-lg py-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
-                <option value="recent">Recently Added</option>
-                <option value="alphabetical">Alphabetical</option>
+                <option value="recent">@term('recently_added_label')</option>
+                <option value="alphabetical">@term('alphabetical_label')</option>
             </select>
         </div>
     </div>
@@ -89,11 +89,11 @@
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-lg font-semibold text-gray-900">
-                                Content
+                                @term('content_singular')
                                 <span class="text-sm font-normal text-gray-500">({{ $searchResults['content']['total'] }} results)</span>
                             </h2>
                             <a href="{{ route('resources.content.index', ['q' => $search]) }}" class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                                View all content &rarr;
+                                @term('view_all_content_label') &rarr;
                             </a>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -119,11 +119,11 @@
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-lg font-semibold text-gray-900">
-                                Providers
+                                @term('provider_plural')
                                 <span class="text-sm font-normal text-gray-500">({{ $searchResults['providers']['total'] }} results)</span>
                             </h2>
                             <a href="{{ route('resources.providers.index', ['q' => $search]) }}" class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                                View all providers &rarr;
+                                @term('view_all_providers_label') &rarr;
                             </a>
                         </div>
                         <div class="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
@@ -143,7 +143,7 @@
                                     </div>
                                     <div class="flex items-center gap-3 flex-shrink-0">
                                         @if($item['serves_remote'])
-                                            <span class="text-xs text-gray-500">Remote available</span>
+                                            <span class="text-xs text-gray-500">@term('remote_available_label')</span>
                                         @endif
                                         <x-icon name="chevron-right" class="w-5 h-5 text-gray-400" />
                                     </div>
@@ -158,11 +158,11 @@
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-lg font-semibold text-gray-900">
-                                Programs
+                                @term('program_plural')
                                 <span class="text-sm font-normal text-gray-500">({{ $searchResults['programs']['total'] }} results)</span>
                             </h2>
                             <a href="{{ route('resources.programs.index', ['q' => $search]) }}" class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                                View all programs &rarr;
+                                @term('view_all_programs_label') &rarr;
                             </a>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -191,11 +191,11 @@
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-lg font-semibold text-gray-900">
-                                Courses
+                                @term('course_plural')
                                 <span class="text-sm font-normal text-gray-500">({{ $searchResults['courses']['total'] }} results)</span>
                             </h2>
                             <a href="{{ route('resources.courses.index', ['q' => $search]) }}" class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                                View all courses &rarr;
+                                @term('view_all_courses_label') &rarr;
                             </a>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -223,10 +223,10 @@
                 @if($searchResults['content']['total'] === 0 && $searchResults['providers']['total'] === 0 && $searchResults['programs']['total'] === 0 && $searchResults['courses']['total'] === 0)
                     <div class="text-center py-12">
                         <x-icon name="magnifying-glass" class="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                        <h3 class="text-lg font-medium text-gray-900 mb-1">No results found</h3>
-                        <p class="text-gray-500">Try adjusting your search terms or browse by category below.</p>
+                        <h3 class="text-lg font-medium text-gray-900 mb-1">@term('no_results_found_label')</h3>
+                        <p class="text-gray-500">@term('search_adjust_terms_label')</p>
                         <button wire:click="clearSearch" class="mt-4 text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                            Clear search
+                            @term('clear_search_label')
                         </button>
                     </div>
                 @endif
@@ -241,7 +241,7 @@
                             <x-icon name="document-text" class="w-5 h-5 text-blue-600" />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Content</h2>
+                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">@term('content_singular')</h2>
                             <p class="text-xl font-bold text-gray-900">{{ number_format($counts['content']) }}</p>
                         </div>
                     </div>
@@ -254,7 +254,7 @@
                             <x-icon name="users" class="w-5 h-5 text-purple-600" />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Providers</h2>
+                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">@term('provider_plural')</h2>
                             <p class="text-xl font-bold text-gray-900">{{ number_format($counts['providers']) }}</p>
                         </div>
                     </div>
@@ -267,7 +267,7 @@
                             <x-icon name="building-office" class="w-5 h-5 text-green-600" />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Programs</h2>
+                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">@term('program_plural')</h2>
                             <p class="text-xl font-bold text-gray-900">{{ number_format($counts['programs']) }}</p>
                         </div>
                     </div>
@@ -280,7 +280,7 @@
                             <x-icon name="academic-cap" class="w-5 h-5 text-orange-600" />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Courses</h2>
+                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">@term('course_plural')</h2>
                             <p class="text-xl font-bold text-gray-900">{{ number_format($counts['courses']) }}</p>
                         </div>
                     </div>
@@ -293,7 +293,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
                             <x-icon name="clock" class="w-5 h-5 text-gray-400" />
-                            Recently Added
+                            @term('recently_added_label')
                             <span class="text-sm font-normal text-gray-500">({{ $recentItems->count() }} items)</span>
                         </h2>
                         {{-- View Toggle --}}
@@ -301,21 +301,21 @@
                             <button
                                 wire:click="$set('viewMode', 'list')"
                                 class="p-2 {{ $viewMode === 'list' ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}"
-                                title="List view"
+                                title="@term('list_view_label')"
                             >
                                 <x-icon name="list-bullet" class="w-4 h-4" />
                             </button>
                             <button
                                 wire:click="$set('viewMode', 'grid')"
                                 class="p-2 border-l border-gray-200 {{ $viewMode === 'grid' ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}"
-                                title="Grid view"
+                                title="@term('grid_view_label')"
                             >
                                 <x-icon name="squares-2x2" class="w-4 h-4" />
                             </button>
                             <button
                                 wire:click="$set('viewMode', 'table')"
                                 class="p-2 border-l border-gray-200 {{ $viewMode === 'table' ? 'bg-pulse-orange-50 text-pulse-orange-600' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}"
-                                title="Table view"
+                                title="@term('table_view_label')"
                             >
                                 <x-icon name="table-cells" class="w-4 h-4" />
                             </button>
@@ -403,10 +403,10 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Description</th>
-                                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('name_label')</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('type_label')</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">@term('description_label')</th>
+                                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">@term('action_label')</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
@@ -443,7 +443,7 @@
                                                 <span class="text-sm text-gray-500 truncate max-w-xs block">{{ Str::limit($item['description'] ?? '', 50) }}</span>
                                             </td>
                                             <td class="px-4 py-3 text-right">
-                                                <a href="{{ $item['url'] }}" class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">View</a>
+                                                <a href="{{ $item['url'] }}" class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">@term('view_action')</a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -460,11 +460,11 @@
                     <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-6">
                         <x-icon name="folder-open" class="w-10 h-10 text-gray-400" />
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No resources yet</h3>
-                    <p class="text-gray-500 mb-6 max-w-md mx-auto">Start building your resource library by adding content, providers, programs, or courses.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">@term('no_resources_yet_label')</h3>
+                    <p class="text-gray-500 mb-6 max-w-md mx-auto">@term('resource_hub_empty_label')</p>
                     <a href="{{ route('resources.content.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-pulse-orange-500 text-white font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors">
                         <x-icon name="plus" class="w-5 h-5" />
-                        Browse Resources
+                        @term('browse_resources_label')
                     </a>
                 </div>
             @endif

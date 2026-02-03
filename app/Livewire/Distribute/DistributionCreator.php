@@ -185,7 +185,9 @@ class DistributionCreator extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => $this->distributionId ? 'Distribution updated successfully.' : 'Distribution created successfully.',
+            'message' => $this->distributionId
+                ? app(\App\Services\TerminologyService::class)->get('distribution_updated_success_label')
+                : app(\App\Services\TerminologyService::class)->get('distribution_created_success_label'),
         ]);
 
         $this->redirect(route('distribute.show', $distribution));
@@ -207,7 +209,9 @@ class DistributionCreator extends Component
                 ->where('channel', $this->channel)
                 ->get(),
         ])->layout('components.layouts.dashboard', [
-            'title' => $this->distributionId ? 'Edit Distribution' : 'Create Distribution',
+            'title' => $this->distributionId
+                ? app(\App\Services\TerminologyService::class)->get('edit_distribution_label')
+                : app(\App\Services\TerminologyService::class)->get('create_distribution_label'),
         ]);
     }
 }

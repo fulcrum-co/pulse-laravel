@@ -48,7 +48,7 @@ class ContactMetric extends Model
         'requires_consent' => 'boolean',
     ];
 
-    // Metric categories for learners
+    // Metric categories for participants
     public const CATEGORY_ACADEMICS = 'academics';
 
     public const CATEGORY_ATTENDANCE = 'attendance';
@@ -61,8 +61,9 @@ class ContactMetric extends Model
 
     public const CATEGORY_ENGAGEMENT = 'engagement';
 
-    // Metric categories for teachers
-    public const CATEGORY_CLASSROOM = 'classroom';
+    // Metric categories for instructors
+    public const CATEGORY_LEARNING_GROUP = 'learning_group';
+    public const CATEGORY_CLASSROOM = self::CATEGORY_LEARNING_GROUP; // Legacy alias
 
     public const CATEGORY_PD = 'professional_development';
 
@@ -87,7 +88,7 @@ class ContactMetric extends Model
     public const STATUS_NOT_STARTED = 'not_started';
 
     /**
-     * Get the contact (Learner or User).
+     * Get the contact (Participant or User).
      */
     public function contact(): MorphTo
     {

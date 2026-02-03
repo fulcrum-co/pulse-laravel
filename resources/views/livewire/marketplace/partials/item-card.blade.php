@@ -1,4 +1,5 @@
 @php
+    $terminology = app(\App\Services\TerminologyService::class);
     $featured = $featured ?? false;
     $categoryColors = [
         'survey' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-600', 'badge' => 'bg-blue-50 text-blue-700'],
@@ -32,7 +33,7 @@
             <div class="absolute top-2 left-2">
                 <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500 text-white text-xs font-medium">
                     <x-icon name="star" class="w-3 h-3" solid />
-                    Featured
+                    @term('featured_label')
                 </span>
             </div>
         @endif
@@ -41,9 +42,9 @@
         <div class="absolute top-2 right-2">
             <span class="inline-flex items-center px-2 py-1 rounded-full {{ $item->isFree() ? 'bg-green-500 text-white' : 'bg-white/90 text-gray-900' }} text-xs font-semibold shadow-sm">
                 @if($item->isFree())
-                    Free
+                    @term('free_label')
                 @elseif($item->pricing_type === 'recurring')
-                    ${{ number_format($item->price ?? 0, 2) }}/mo
+                    ${{ number_format($item->price ?? 0, 2) }}/{{ $terminology->get('month_short_label') }}
                 @else
                     ${{ number_format($item->price ?? 0, 2) }}
                 @endif
@@ -68,7 +69,7 @@
 
         <!-- Seller -->
         <div class="flex items-center gap-1.5 text-sm text-gray-500 mb-2">
-            <span>by {{ $item->seller->display_name }}</span>
+            <span>{{ $terminology->get('by_label') }} {{ $item->seller->display_name }}</span>
             @if($item->seller->is_verified)
                 <x-icon name="check-badge" class="w-4 h-4 text-blue-500" />
             @endif
@@ -84,13 +85,13 @@
                         <span class="text-gray-400">({{ $item->ratings_count }})</span>
                     </div>
                 @else
-                    <span class="text-gray-400">No reviews yet</span>
+                    <span class="text-gray-400">@term('no_reviews_yet_label')</span>
                 @endif
             </div>
 
             @if($item->purchase_count > 0 || $item->download_count > 0)
                 <span class="text-gray-400">
-                    {{ number_format($item->purchase_count + $item->download_count) }} {{ ($item->purchase_count + $item->download_count) === 1 ? 'user' : 'users' }}
+                    {{ number_format($item->purchase_count + $item->download_count) }} {{ ($item->purchase_count + $item->download_count) === 1 ? $terminology->get('user_label') : $terminology->get('users_label') }}
                 </span>
             @endif
         </div>
@@ -104,7 +105,7 @@
                     </span>
                 @endforeach
                 @if(count($item->tags) > 2)
-                    <span class="text-xs text-gray-400">+{{ count($item->tags) - 2 }}</span>
+                    <span class="text-xs text-gray-400">+{{ count($item->tags) - 2 }} {{ $terminology->get('more_label') }}</span>
                 @endif
             </div>
         @endif

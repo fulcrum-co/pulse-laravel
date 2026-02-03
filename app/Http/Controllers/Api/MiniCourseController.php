@@ -88,7 +88,7 @@ class MiniCourseController extends Controller
             'rationale' => 'nullable|string',
             'expected_experience' => 'nullable|string',
             'course_type' => 'required|in:intervention,enrichment,skill_building,wellness,academic,behavioral',
-            'target_grades' => 'nullable|array',
+            'target_levels' => 'nullable|array',
             'target_risk_levels' => 'nullable|array',
             'target_needs' => 'nullable|array',
             'estimated_duration_minutes' => 'nullable|integer|min:1|max:480',
@@ -128,7 +128,7 @@ class MiniCourseController extends Controller
             'rationale' => 'nullable|string',
             'expected_experience' => 'nullable|string',
             'course_type' => 'sometimes|in:intervention,enrichment,skill_building,wellness,academic,behavioral',
-            'target_grades' => 'nullable|array',
+            'target_levels' => 'nullable|array',
             'target_risk_levels' => 'nullable|array',
             'target_needs' => 'nullable|array',
             'estimated_duration_minutes' => 'nullable|integer|min:1|max:480',
@@ -191,7 +191,7 @@ class MiniCourseController extends Controller
         if ($course->steps()->count() === 0) {
             return response()->json([
                 'success' => false,
-                'error' => 'Cannot publish a course without steps.',
+                'error' => app(\App\Services\TerminologyService::class)->get('cannot_publish_without_steps_label'),
             ], 422);
         }
 
@@ -229,30 +229,30 @@ class MiniCourseController extends Controller
     public function generate(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'learner_id' => 'required|exists:learners,id',
+            'participant_id' => 'required|exists:participants,id',
             'signals' => 'nullable|array',
         ]);
 
-        $learner = \App\Models\Learner::findOrFail($validated['learner_id']);
+        $participant = \App\Models\Participant::findOrFail($validated['participant_id']);
 
         // Verify org access
-        if ($learner->org_id !== auth()->user()->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ($participant->org_id !== auth()->user()->org_id) {
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         $course = $this->generationService->generateFromContext(
-            $learner,
+            $participant,
             $validated['signals'] ?? []
         );
 
         if (! $course) {
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to generate course. Please try again.',
+                'error' => app(\App\Services\TerminologyService::class)->get('failed_generate_course_label'),
             ], 500);
         }
 
-        AuditLog::log('create', $course, null, ['source' => 'ai_generated', 'learner_id' => $learner->id]);
+        AuditLog::log('create', $course, null, ['source' => 'ai_generated', 'participant_id' => $participant->id]);
 
         return response()->json([
             'success' => true,
@@ -267,12 +267,12 @@ class MiniCourseController extends Controller
     {
         $this->authorize('update', $course);
 
-        $learner = null;
-        if ($request->has('learner_id')) {
-            $learner = \App\Models\Learner::find($request->learner_id);
+        $participant = null;
+        if ($request->has('participant_id')) {
+            $participant = \App\Models\Participant::find($request->participant_id);
         }
 
-        $suggestions = $this->generationService->suggestCourseEdits($course, $learner);
+        $suggestions = $this->generationService->suggestCourseEdits($course, $participant);
 
         return response()->json($suggestions);
     }

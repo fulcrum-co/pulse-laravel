@@ -11,7 +11,7 @@ class SurveyAttempt extends Model
 {
     protected $fillable = [
         'survey_id',
-        'learner_id',
+        'participant_id',
         'user_id',
         'status',
         'response_channel',
@@ -72,11 +72,11 @@ class SurveyAttempt extends Model
     }
 
     /**
-     * Get the learner.
+     * Get the participant.
      */
-    public function learner(): BelongsTo
+    public function participant(): BelongsTo
     {
-        return $this->belongsTo(Learner::class);
+        return $this->belongsTo(Participant::class);
     }
 
     /**
@@ -223,11 +223,11 @@ class SurveyAttempt extends Model
     }
 
     /**
-     * Get the respondent (learner or user).
+     * Get the respondent (participant or user).
      */
     public function getRespondent(): ?Model
     {
-        return $this->learner ?? $this->user;
+        return $this->participant ?? $this->user;
     }
 
     /**
@@ -235,14 +235,16 @@ class SurveyAttempt extends Model
      */
     public function getRespondentNameAttribute(): string
     {
-        if ($this->learner) {
-            return $this->learner->name ?? $this->learner->first_name ?? 'Learner';
+        $terminology = app(\App\Services\TerminologyService::class);
+
+        if ($this->participant) {
+            return $this->participant->name ?? $this->participant->first_name ?? $terminology->get('participant_label');
         }
         if ($this->user) {
-            return $this->user->name ?? 'User';
+            return $this->user->name ?? $terminology->get('user_label');
         }
 
-        return 'Anonymous';
+        return $terminology->get('anonymous_label');
     }
 
     /**

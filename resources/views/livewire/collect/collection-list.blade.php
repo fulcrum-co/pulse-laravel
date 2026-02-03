@@ -1,3 +1,23 @@
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+    $collectionStatusLabels = [
+        'active' => $terminology->get('collection_status_active_label'),
+        'paused' => $terminology->get('collection_status_paused_label'),
+        'draft' => $terminology->get('collection_status_draft_label'),
+        'archived' => $terminology->get('collection_status_archived_label'),
+    ];
+    $collectionTypeLabels = [
+        'recurring' => $terminology->get('collection_type_recurring_label'),
+        'one_time' => $terminology->get('collection_type_one_time_label'),
+        'event_triggered' => $terminology->get('collection_type_event_triggered_label'),
+    ];
+    $collectionFormatLabels = [
+        'conversational' => $terminology->get('collection_format_conversational_label'),
+        'form' => $terminology->get('collection_format_form_label'),
+        'grid' => $terminology->get('collection_format_grid_label'),
+    ];
+@endphp
+
 <div class="space-y-4">
     <!-- Search, Filters & View Toggle -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" data-help="collection-filters">
@@ -7,7 +27,7 @@
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('search_action') }} {{ strtolower(app(\App\Services\TerminologyService::class)->get('collection_plural')) }}..."
+                    placeholder="{{ $terminology->get('search_action') }} {{ strtolower($terminology->get('collection_plural')) }}..."
                     class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 />
             </div>
@@ -16,7 +36,7 @@
                 wire:model.live="statusFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">{{ app(\App\Services\TerminologyService::class)->get('all_label') }} {{ app(\App\Services\TerminologyService::class)->get('status_label') }}es</option>
+                <option value="">{{ $terminology->get('all_statuses_label') }}</option>
                 @foreach($statuses as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
@@ -26,7 +46,7 @@
                 wire:model.live="typeFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">{{ app(\App\Services\TerminologyService::class)->get('all_label') }} {{ app(\App\Services\TerminologyService::class)->get('type_label') }}s</option>
+                <option value="">{{ $terminology->get('all_types_label') }}</option>
                 @foreach($collectionTypes as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
@@ -47,21 +67,21 @@
             <button
                 wire:click="setViewMode('grid')"
                 class="p-1.5 rounded {{ $viewMode === 'grid' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="{{ app(\App\Services\TerminologyService::class)->get('grid_view_label') }}"
+                title="{{ $terminology->get('grid_view_label') }}"
             >
                 <x-icon name="squares-2x2" class="w-4 h-4" />
             </button>
             <button
                 wire:click="setViewMode('list')"
                 class="p-1.5 rounded {{ $viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="{{ app(\App\Services\TerminologyService::class)->get('list_view_label') }}"
+                title="{{ $terminology->get('list_view_label') }}"
             >
                 <x-icon name="list-bullet" class="w-4 h-4" />
             </button>
             <button
                 wire:click="setViewMode('table')"
                 class="p-1.5 rounded {{ $viewMode === 'table' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="{{ app(\App\Services\TerminologyService::class)->get('table_view_label') }}"
+                title="{{ $terminology->get('table_view_label') }}"
             >
                 <x-icon name="table-cells" class="w-4 h-4" />
             </button>
@@ -117,17 +137,17 @@
                         <div class="flex items-start justify-between gap-2 mb-3">
                             <h3 class="font-medium text-gray-900 text-sm truncate flex-1">{{ $collection->title }}</h3>
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $statusColor }}-100 text-{{ $statusColor }}-800 flex-shrink-0">
-                                {{ ucfirst($collection->status) }}
+                                {{ $collectionStatusLabels[$collection->status] ?? ucfirst($collection->status) }}
                             </span>
                         </div>
 
                         <div class="flex items-center gap-2 text-xs mb-3">
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-{{ $typeColor }}-100 text-{{ $typeColor }}-700">
-                                {{ str_replace('_', ' ', ucfirst($collection->collection_type)) }}
+                                {{ $collectionTypeLabels[$collection->collection_type] ?? str_replace('_', ' ', ucfirst($collection->collection_type)) }}
                             </span>
                             <span class="inline-flex items-center text-gray-500">
                                 <x-icon name="{{ $formatIcon }}" class="w-3 h-3 mr-0.5" />
-                                {{ ucfirst($collection->format_mode) }}
+                                {{ $collectionFormatLabels[$collection->format_mode] ?? ucfirst($collection->format_mode) }}
                             </span>
                         </div>
 
@@ -154,7 +174,7 @@
                             </div>
                         @else
                             <div class="text-xs text-gray-400">
-                                @term('updated_label') {{ $collection->updated_at->diffForHumans(null, true) }} ago
+                                @term('updated_label') {{ $collection->updated_at->diffForHumans(null, true) }} @term('ago_label')
                             </div>
                         @endif
                     </div>
@@ -165,7 +185,7 @@
                                 <button wire:click="toggleStatus({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                     <x-icon name="{{ $collection->status === 'active' ? 'pause' : 'play' }}" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $collection->status === 'active' ? app(\App\Services\TerminologyService::class)->get('pause_action') : app(\App\Services\TerminologyService::class)->get('activate_action') }}</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $collection->status === 'active' ? $terminology->get('pause_action') : $terminology->get('activate_action') }}</span>
                             </div>
                             <div class="relative group">
                                 <button wire:click="duplicate({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
@@ -213,10 +233,10 @@
                         <div class="flex items-center gap-2">
                             <h3 class="font-medium text-gray-900 text-sm truncate">{{ $collection->title }}</h3>
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $statusColor }}-100 text-{{ $statusColor }}-800">
-                                {{ ucfirst($collection->status) }}
+                                {{ $collectionStatusLabels[$collection->status] ?? ucfirst($collection->status) }}
                             </span>
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-{{ $typeColor }}-100 text-{{ $typeColor }}-700">
-                                {{ str_replace('_', ' ', ucfirst($collection->collection_type)) }}
+                                {{ $collectionTypeLabels[$collection->collection_type] ?? str_replace('_', ' ', ucfirst($collection->collection_type)) }}
                             </span>
                         </div>
                         <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
@@ -237,7 +257,7 @@
                             <button wire:click="toggleStatus({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                 <x-icon name="{{ $collection->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $collection->status === 'active' ? app(\App\Services\TerminologyService::class)->get('pause_action') : app(\App\Services\TerminologyService::class)->get('activate_action') }}</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $collection->status === 'active' ? $terminology->get('pause_action') : $terminology->get('activate_action') }}</span>
                         </div>
                         <div class="relative group">
                             <button wire:click="duplicate({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
@@ -304,16 +324,16 @@
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap">
                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-{{ $typeColor }}-100 text-{{ $typeColor }}-700">
-                                    {{ str_replace('_', ' ', ucfirst($collection->collection_type)) }}
+                                    {{ $collectionTypeLabels[$collection->collection_type] ?? str_replace('_', ' ', ucfirst($collection->collection_type)) }}
                                 </span>
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $statusColor }}-100 text-{{ $statusColor }}-800">
-                                    {{ ucfirst($collection->status) }}
+                                    {{ $collectionStatusLabels[$collection->status] ?? ucfirst($collection->status) }}
                                 </span>
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
-                                {{ ucfirst($collection->format_mode) }}
+                                {{ $collectionFormatLabels[$collection->format_mode] ?? ucfirst($collection->format_mode) }}
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
                                 {{ number_format($collection->sessions_count ?? 0) }}
@@ -334,7 +354,7 @@
                                         <button wire:click="toggleStatus({{ $collection->id }})" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                                             <x-icon name="{{ $collection->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
                                         </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">{{ $collection->status === 'active' ? app(\App\Services\TerminologyService::class)->get('pause_action') : app(\App\Services\TerminologyService::class)->get('activate_action') }}</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">{{ $collection->status === 'active' ? $terminology->get('pause_action') : $terminology->get('activate_action') }}</span>
                                     </div>
                                     <div class="relative group">
                                         <button wire:click="duplicate({{ $collection->id }})" class="p-1 text-gray-400 hover:text-gray-600 rounded">

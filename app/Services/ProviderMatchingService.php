@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Models\Program;
 use App\Models\Provider;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Services\Domain\AIResponseParserService;
 use App\Services\Domain\ResourceMatcherService;
 use App\Services\Domain\LearnerNeedsInferenceService;
@@ -23,11 +23,11 @@ class ProviderMatchingService
     ) {}
 
     /**
-     * Find matching providers for a learner's needs.
+     * Find matching providers for a participant's needs.
      */
-    public function findMatchingProviders(Learner $learner, array $needs = [], int $maxResults = 5): Collection
+    public function findMatchingProviders(Participant $participant, array $needs = [], int $maxResults = 5): Collection
     {
-        $providers = Provider::where('org_id', $learner->org_id)
+        $providers = Provider::where('org_id', $participant->org_id)
             ->active()
             ->verified()
             ->get();
@@ -36,14 +36,14 @@ class ProviderMatchingService
             return collect();
         }
 
-        // If no specific needs provided, infer from learner data
+        // If no specific needs provided, infer from participant data
         if (empty($needs)) {
-            $needs = $this->inferLearnerNeeds($learner);
+            $needs = $this->inferLearnerNeeds($participant);
         }
 
         // Score and rank providers
-        $scoredProviders = $providers->map(function ($provider) use ($needs, $learner) {
-            $score = $this->calculateMatchScore($provider, $needs, $learner);
+        $scoredProviders = $providers->map(function ($provider) use ($needs, $participant) {
+            $score = $this->calculateMatchScore($provider, $needs, $participant);
 
             return [
                 'provider' => $provider,
@@ -62,11 +62,11 @@ class ProviderMatchingService
     }
 
     /**
-     * Find matching programs for a learner's needs.
+     * Find matching programs for a participant's needs.
      */
-    public function findMatchingPrograms(Learner $learner, array $needs = [], int $maxResults = 5): Collection
+    public function findMatchingPrograms(Participant $participant, array $needs = [], int $maxResults = 5): Collection
     {
-        $programs = Program::where('org_id', $learner->org_id)
+        $programs = Program::where('org_id', $participant->org_id)
             ->active()
             ->get();
 
@@ -75,11 +75,11 @@ class ProviderMatchingService
         }
 
         if (empty($needs)) {
-            $needs = $this->inferLearnerNeeds($learner);
+            $needs = $this->inferLearnerNeeds($participant);
         }
 
-        $scoredPrograms = $programs->map(function ($program) use ($needs, $learner) {
-            $score = $this->calculateProgramMatchScore($program, $needs, $learner);
+        $scoredPrograms = $programs->map(function ($program) use ($needs, $participant) {
+            $score = $this->calculateProgramMatchScore($program, $needs, $participant);
 
             return [
                 'program' => $program,
@@ -99,9 +99,9 @@ class ProviderMatchingService
     /**
      * Get AI-powered provider recommendations with detailed rationale.
      */
-    public function getAiProviderRecommendations(Learner $learner, array $context = []): array
+    public function getAiProviderRecommendations(Participant $participant, array $context = []): array
     {
-        $providers = Provider::where('org_id', $learner->org_id)
+        $providers = Provider::where('org_id', $participant->org_id)
             ->active()
             ->verified()
             ->get();
@@ -127,36 +127,36 @@ class ProviderMatchingService
         ])->toArray();
 
         $learnerContext = [
-            'grade_level' => $learner->grade_level,
-            'risk_level' => $learner->risk_level,
-            'iep_status' => $learner->iep_status,
-            'needs' => $context['needs'] ?? $this->inferLearnerNeeds($learner),
+            'level' => $participant->level,
+            'risk_level' => $participant->risk_level,
+            'iep_status' => $participant->iep_status,
+            'needs' => $context['needs'] ?? $this->inferLearnerNeeds($participant),
             'preferences' => $context['preferences'] ?? [],
         ];
 
         $systemPrompt = <<<'PROMPT'
-You are a learner support specialist matching learners with appropriate service providers.
-Analyze the learner's needs and available providers to recommend the best matches.
+You are a participant support specialist matching participants with appropriate service providers.
+Analyze the participant's needs and available providers to recommend the best matches.
 
 Return a JSON object with:
 - recommendations: Array of up to 3 provider recommendations, each with:
   - provider_id: ID of the recommended provider
   - match_score: Score 0-100 indicating match quality
   - primary_reason: Main reason for this recommendation
-  - how_they_can_help: Specific ways this provider can help the learner
+  - how_they_can_help: Specific ways this provider can help the participant
   - considerations: Any important considerations (cost, availability, etc.)
 - overall_rationale: Brief explanation of the matching approach
 - alternative_suggestions: Any other suggestions if providers aren't quite right
 PROMPT;
 
         $response = $this->claudeService->sendMessage(
-            "Match providers for this learner:\n\nLearner:\n".json_encode($learnerContext, JSON_PRETTY_PRINT).
+            "Match providers for this participant:\n\nLearner:\n".json_encode($learnerContext, JSON_PRETTY_PRINT).
             "\n\nAvailable Providers:\n".json_encode($providerList, JSON_PRETTY_PRINT),
             $systemPrompt
         );
 
         if (! $response['success']) {
-            return $this->generateFallbackRecommendations($providers, $learner);
+            return $this->generateFallbackRecommendations($providers, $participant);
         }
 
         // Parse AI response using domain service
@@ -178,15 +178,15 @@ PROMPT;
             Log::warning('Failed to parse AI provider recommendations', ['error' => $e->getMessage()]);
         }
 
-        return $this->generateFallbackRecommendations($providers, $learner);
+        return $this->generateFallbackRecommendations($providers, $participant);
     }
 
     /**
-     * Infer learner needs from their data using domain service.
+     * Infer participant needs from their data using domain service.
      */
-    protected function inferLearnerNeeds(Learner $learner): array
+    protected function inferLearnerNeeds(Participant $participant): array
     {
-        $inferredNeeds = $this->needsInference->inferNeeds($learner);
+        $inferredNeeds = $this->needsInference->inferNeeds($participant);
 
         // Extract need keys from inferred data and convert to string array
         $needs = [];
@@ -197,7 +197,7 @@ PROMPT;
 
         // Add severity-based categorical needs
         $concerns = $this->needsInference->extractConcerns(
-            array_filter([$learner->metrics?->first() ?? []])
+            array_filter([$participant->metrics?->first() ?? []])
         );
 
         foreach ($concerns as $concernKey => $concernData) {
@@ -212,17 +212,17 @@ PROMPT;
     /**
      * Calculate match score for a provider using domain service.
      */
-    protected function calculateMatchScore(Provider $provider, array $needs, Learner $learner): array
+    protected function calculateMatchScore(Provider $provider, array $needs, Participant $participant): array
     {
-        return $this->resourceMatcher->calculateProviderScore($provider, $needs, $learner);
+        return $this->resourceMatcher->calculateProviderScore($provider, $needs, $participant);
     }
 
     /**
      * Calculate match score for a program using domain service.
      */
-    protected function calculateProgramMatchScore(Program $program, array $needs, Learner $learner): array
+    protected function calculateProgramMatchScore(Program $program, array $needs, Participant $participant): array
     {
-        return $this->resourceMatcher->calculateProgramScore($program, $needs, $learner);
+        return $this->resourceMatcher->calculateProgramScore($program, $needs, $participant);
     }
 
     /**
@@ -263,11 +263,11 @@ PROMPT;
     /**
      * Generate fallback recommendations when AI fails.
      */
-    protected function generateFallbackRecommendations(Collection $providers, Learner $learner): array
+    protected function generateFallbackRecommendations(Collection $providers, Participant $participant): array
     {
-        $needs = $this->inferLearnerNeeds($learner);
+        $needs = $this->inferLearnerNeeds($participant);
 
-        $recommendations = $this->findMatchingProviders($learner, $needs, 3);
+        $recommendations = $this->findMatchingProviders($participant, $needs, 3);
 
         return [
             'recommendations' => $recommendations->map(fn ($r) => [

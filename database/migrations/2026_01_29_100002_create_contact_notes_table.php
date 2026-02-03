@@ -42,7 +42,7 @@ return new class extends Migration
             // Privacy/Visibility
             $table->boolean('is_private')->default(false); // Only visible to author
             $table->string('visibility')->default('organization'); // private, team, organization
-            $table->json('visible_to_roles')->nullable(); // ['admin', 'counselor']
+            $table->json('visible_to_roles')->nullable(); // ['admin', 'support_person']
 
             // Linking
             $table->foreignId('parent_note_id')->nullable()->constrained('contact_notes')->nullOnDelete();

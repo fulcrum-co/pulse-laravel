@@ -67,7 +67,7 @@ trait WithElementDefaults
             'config' => [
                 'title' => 'Data Table',
                 'columns' => ['name', 'gpa', 'attendance'],
-                'data_source' => 'learners',
+                'data_source' => 'participants',
                 'sortable' => true,
             ],
             'styles' => ['backgroundColor' => '#FFFFFF', 'borderRadius' => 8],
@@ -99,7 +99,7 @@ trait WithElementDefaults
             'position' => ['x' => 40, 'y' => $this->getNextY()],
             'size' => ['width' => 600, 'height' => 150],
             'config' => [
-                'prompt' => 'Write a summary of the learner performance data.',
+                'prompt' => 'Write a summary of the participant performance data.',
                 'format' => 'narrative',
                 'context_metrics' => ['gpa', 'attendance_rate', 'wellness_score'],
                 'generated_content' => null,

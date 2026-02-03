@@ -8,24 +8,24 @@ use App\Models\MiniCourse;
 use App\Models\MiniCourseEnrollment;
 use App\Models\MiniCourseStep;
 use App\Models\MiniCourseStepProgress;
-use App\Models\Learner;
+use App\Models\Participant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class EnrollmentController extends Controller
 {
     /**
-     * List enrollments for a learner.
+     * List enrollments for a participant.
      */
-    public function indexByLearner(Request $request, Learner $learner): JsonResponse
+    public function indexByLearner(Request $request, Participant $participant): JsonResponse
     {
         $user = auth()->user();
 
-        if ($learner->org_id !== $user->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ($participant->org_id !== $user->org_id) {
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
-        $query = $learner->miniCourseEnrollments()
+        $query = $participant->miniCourseEnrollments()
             ->with(['miniCourse', 'currentStep']);
 
         if ($request->has('status')) {
@@ -45,7 +45,7 @@ class EnrollmentController extends Controller
         $this->authorize('view', $course);
 
         $query = $course->enrollments()
-            ->with(['learner.user', 'currentStep']);
+            ->with(['participant.user', 'currentStep']);
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -57,28 +57,28 @@ class EnrollmentController extends Controller
     }
 
     /**
-     * Enroll a learner in a course.
+     * Enroll a participant in a course.
      */
-    public function enroll(Request $request, MiniCourse $course, Learner $learner): JsonResponse
+    public function enroll(Request $request, MiniCourse $course, Participant $participant): JsonResponse
     {
         $user = auth()->user();
 
         // Verify access
-        if ($course->org_id !== $user->org_id || $learner->org_id !== $user->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ($course->org_id !== $user->org_id || $participant->org_id !== $user->org_id) {
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         // Check if course is active
         if ($course->status !== MiniCourse::STATUS_ACTIVE) {
             return response()->json([
                 'success' => false,
-                'error' => 'Cannot enroll in a non-active course.',
+                'error' => app(\App\Services\TerminologyService::class)->get('cannot_enroll_inactive_course_label'),
             ], 422);
         }
 
         // Check for existing active enrollment
         $existing = MiniCourseEnrollment::where('mini_course_id', $course->id)
-            ->where('learner_id', $learner->id)
+            ->where('participant_id', $participant->id)
             ->whereIn('status', [
                 MiniCourseEnrollment::STATUS_ENROLLED,
                 MiniCourseEnrollment::STATUS_IN_PROGRESS,
@@ -88,7 +88,7 @@ class EnrollmentController extends Controller
         if ($existing) {
             return response()->json([
                 'success' => false,
-                'error' => 'Learner is already enrolled in this course.',
+                'error' => app(\App\Services\TerminologyService::class)->get('participant_already_enrolled_label'),
                 'enrollment' => $existing,
             ], 422);
         }
@@ -96,7 +96,7 @@ class EnrollmentController extends Controller
         $enrollment = MiniCourseEnrollment::create([
             'mini_course_id' => $course->id,
             'mini_course_version_id' => $course->current_version_id,
-            'learner_id' => $learner->id,
+            'participant_id' => $participant->id,
             'enrolled_by' => $user->id,
             'enrollment_source' => $request->input('source', MiniCourseEnrollment::SOURCE_MANUAL),
             'status' => MiniCourseEnrollment::STATUS_ENROLLED,
@@ -106,7 +106,7 @@ class EnrollmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'enrollment' => $enrollment->load(['miniCourse', 'learner.user']),
+            'enrollment' => $enrollment->load(['miniCourse', 'participant.user']),
         ], 201);
     }
 
@@ -118,10 +118,10 @@ class EnrollmentController extends Controller
         $user = auth()->user();
 
         // Load relationships and check access
-        $enrollment->load(['miniCourse', 'learner', 'currentStep', 'stepProgress']);
+        $enrollment->load(['miniCourse', 'participant', 'currentStep', 'stepProgress']);
 
         if ($enrollment->miniCourse->org_id !== $user->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         return response()->json($enrollment);
@@ -135,7 +135,7 @@ class EnrollmentController extends Controller
         $user = auth()->user();
 
         if ($enrollment->miniCourse->org_id !== $user->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         $validated = $request->validate([
@@ -181,7 +181,7 @@ class EnrollmentController extends Controller
         $user = auth()->user();
 
         if ($enrollment->miniCourse->org_id !== $user->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         if ($step->mini_course_id !== $enrollment->mini_course_id) {
@@ -249,7 +249,7 @@ class EnrollmentController extends Controller
         $user = auth()->user();
 
         if ($enrollment->miniCourse->org_id !== $user->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         if ($step->mini_course_id !== $enrollment->mini_course_id) {
@@ -303,7 +303,7 @@ class EnrollmentController extends Controller
         $user = auth()->user();
 
         if ($enrollment->miniCourse->org_id !== $user->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         $oldStatus = $enrollment->status;
@@ -332,7 +332,7 @@ class EnrollmentController extends Controller
         $user = auth()->user();
 
         if ($enrollment->miniCourse->org_id !== $user->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         $steps = $enrollment->miniCourse->steps()

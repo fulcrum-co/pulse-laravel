@@ -1,51 +1,51 @@
-<x-layouts.dashboard :title="$learner->user->first_name . ' ' . $learner->user->last_name">
+<x-layouts.dashboard :title="$participant->user->first_name . ' ' . $participant->user->last_name">
     <x-slot name="actions">
         <x-button variant="secondary">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
             </svg>
-            Share
+            @term('share_label')
         </x-button>
     </x-slot>
 
     <!-- Contact Header (Compact) -->
-    <livewire:contact-header :contact="$learner" />
+    <livewire:contact-header :contact="$participant" />
 
     <!-- Quick Stats Bar -->
     @php
-        $gpaMetric = $learner->metrics()->where('metric_key', 'gpa')->latest('recorded_at')->first();
-        $attendanceMetric = $learner->metrics()->where('metric_key', 'attendance')->latest('recorded_at')->first();
-        $wellnessMetric = $learner->metrics()->where('metric_key', 'wellness_score')->latest('recorded_at')->first();
-        $latestSurvey = $learner->surveyAttempts?->where('status', 'completed')->sortByDesc('completed_at')->first();
+        $gpaMetric = $participant->metrics()->where('metric_key', 'gpa')->latest('recorded_at')->first();
+        $attendanceMetric = $participant->metrics()->where('metric_key', 'attendance')->latest('recorded_at')->first();
+        $wellnessMetric = $participant->metrics()->where('metric_key', 'wellness_score')->latest('recorded_at')->first();
+        $latestSurvey = $participant->surveyAttempts?->where('status', 'completed')->sortByDesc('completed_at')->first();
     @endphp
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-lg border border-gray-200 p-4">
-            <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">GPA</div>
+            <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">@term('performance_score_label')</div>
             <div class="text-2xl font-bold text-gray-900">
                 @if($gpaMetric)
                     {{ number_format($gpaMetric->value, 1) }}
                 @else
-                    <span class="text-gray-400">--</span>
+                    <span class="text-gray-400">@term('empty_value_placeholder')</span>
                 @endif
             </div>
         </div>
         <div class="bg-white rounded-lg border border-gray-200 p-4">
-            <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Attendance</div>
+            <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">@term('engagement_label')</div>
             <div class="text-2xl font-bold text-gray-900">
                 @if($attendanceMetric)
                     {{ number_format($attendanceMetric->value, 0) }}%
                 @else
-                    <span class="text-gray-400">--</span>
+                    <span class="text-gray-400">@term('empty_value_placeholder')</span>
                 @endif
             </div>
         </div>
         <div class="bg-white rounded-lg border border-gray-200 p-4">
-            <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Wellness</div>
+            <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">@term('wellness_label')</div>
             <div class="text-2xl font-bold text-gray-900">
                 @if($wellnessMetric)
                     {{ number_format($wellnessMetric->value, 0) }}/10
                 @else
-                    <span class="text-gray-400">--</span>
+                    <span class="text-gray-400">@term('empty_value_placeholder')</span>
                 @endif
             </div>
         </div>
@@ -55,7 +55,7 @@
                 @if($latestSurvey && $latestSurvey->completed_at)
                     {{ $latestSurvey->completed_at->diffForHumans() }}
                 @else
-                    <span class="text-gray-400">None</span>
+                    <span class="text-gray-400">@term('none_label')</span>
                 @endif
             </div>
         </div>
@@ -63,10 +63,10 @@
 
     <!-- Performance Trends (Full Width) -->
     <div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
-        <h3 class="text-sm font-semibold text-gray-900 mb-4">Performance Trends</h3>
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">@term('performance_trends_label')</h3>
         <livewire:contact-overview-charts
-            :contact-type="\App\Models\Learner::class"
-            :contact-id="$learner->id"
+            :contact-type="\App\Models\Participant::class"
+            :contact-id="$participant->id"
         />
     </div>
 
@@ -79,7 +79,7 @@
             <!-- Quick Actions -->
             <div x-data="{ open: true }" class="bg-white rounded-lg border border-gray-200">
                 <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left">
-                    <h3 class="text-sm font-semibold text-gray-900">Quick Actions</h3>
+                    <h3 class="text-sm font-semibold text-gray-900">@term('quick_actions_label')</h3>
                     <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
@@ -91,7 +91,7 @@
                             <svg class="w-4 h-4 text-pulse-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
-                            Add Note
+                            @term('add_note_label')
                         </button>
                         <button onclick="document.querySelector('[data-tab=resources]').click()"
                                 class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
@@ -121,14 +121,14 @@
                 <div x-show="open" x-collapse class="px-4 pb-4 border-t border-gray-100">
                     <div class="pt-3">
                         <livewire:resource-suggestions
-                            contact-type="learner"
-                            :contact-id="$learner->id"
+                            contact-type="participant"
+                            :contact-id="$participant->id"
                         />
                     </div>
                 </div>
             </div>
 
-            <!-- Learner Details -->
+            <!-- Participant Details -->
             <div x-data="{ open: false }" class="bg-white rounded-lg border border-gray-200">
                 <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left">
                     <h3 class="text-sm font-semibold text-gray-900">@term('learner_singular') @term('details_label')</h3>
@@ -140,29 +140,29 @@
                     <dl class="space-y-2 pt-3 text-sm">
                         <div class="flex justify-between">
                             <dt class="text-gray-500">@term('date_of_birth_label')</dt>
-                            <dd class="text-gray-900">{{ $learner->date_of_birth?->format('M d, Y') ?? 'N/A' }}</dd>
+                            <dd class="text-gray-900">{{ $participant->date_of_birth?->format('M d, Y') ?? 'N/A' }}</dd>
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-gray-500">@term('gender_label')</dt>
-                            <dd class="text-gray-900 capitalize">{{ $learner->gender ?? 'N/A' }}</dd>
+                            <dd class="text-gray-900 capitalize">{{ $participant->gender ?? 'N/A' }}</dd>
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-gray-500">@term('enrolled_label')</dt>
-                            <dd class="text-gray-900">{{ $learner->enrollment_date?->format('M d, Y') ?? 'N/A' }}</dd>
+                            <dd class="text-gray-900">{{ $participant->enrollment_date?->format('M d, Y') ?? 'N/A' }}</dd>
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-gray-500">@term('iep_status_label')</dt>
-                            <dd class="text-gray-900">{{ $learner->iep_status ? app(\App\Services\TerminologyService::class)->get('yes_label') : app(\App\Services\TerminologyService::class)->get('no_label') }}</dd>
+                            <dd class="text-gray-900">{{ $participant->iep_status ? app(\App\Services\TerminologyService::class)->get('yes_label') : app(\App\Services\TerminologyService::class)->get('no_label') }}</dd>
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-gray-500">@term('ell_status_label')</dt>
-                            <dd class="text-gray-900">{{ $learner->ell_status ? app(\App\Services\TerminologyService::class)->get('yes_label') : app(\App\Services\TerminologyService::class)->get('no_label') }}</dd>
+                            <dd class="text-gray-900">{{ $participant->ell_status ? app(\App\Services\TerminologyService::class)->get('yes_label') : app(\App\Services\TerminologyService::class)->get('no_label') }}</dd>
                         </div>
                     </dl>
-                    @if($learner->tags && count($learner->tags) > 0)
+                    @if($participant->tags && count($participant->tags) > 0)
                     <div class="mt-3 pt-3 border-t border-gray-100">
                         <div class="flex flex-wrap gap-1">
-                            @foreach($learner->tags as $tag)
+                            @foreach($participant->tags as $tag)
                             <span class="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $tag }}</span>
                             @endforeach
                         </div>
@@ -172,12 +172,12 @@
             </div>
 
             <!-- Strategic Plans -->
-            @if($learner->strategicPlans && $learner->strategicPlans->count() > 0)
+            @if($participant->strategicPlans && $participant->strategicPlans->count() > 0)
             <div x-data="{ open: false }" class="bg-white rounded-lg border border-gray-200">
                 <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left">
                     <div class="flex items-center gap-2">
                         <h3 class="text-sm font-semibold text-gray-900">@term('strategic_label') @term('plan_plural')</h3>
-                        <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $learner->strategicPlans->count() }}</span>
+                        <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $participant->strategicPlans->count() }}</span>
                     </div>
                     <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -185,7 +185,7 @@
                 </button>
                 <div x-show="open" x-collapse class="border-t border-gray-100">
                     <div class="divide-y divide-gray-100">
-                        @foreach($learner->strategicPlans as $plan)
+                        @foreach($participant->strategicPlans as $plan)
                         <a href="{{ route('plans.show', $plan) }}" class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors">
                             <div>
                                 <div class="text-sm font-medium text-gray-900">{{ $plan->title }}</div>
@@ -222,16 +222,16 @@
                                 :class="activeTab === 'surveys' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                                 class="px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-1">
                             @term('survey_plural')
-                            @if($learner->surveyAttempts && $learner->surveyAttempts->count() > 0)
-                            <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $learner->surveyAttempts->count() }}</span>
+                            @if($participant->surveyAttempts && $participant->surveyAttempts->count() > 0)
+                            <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $participant->surveyAttempts->count() }}</span>
                             @endif
                         </button>
                         <button @click="activeTab = 'resources'" data-tab="resources"
                                 :class="activeTab === 'resources' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                                 class="px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-1">
                             @term('resource_plural')
-                            @if($learner->resourceAssignments && $learner->resourceAssignments->count() > 0)
-                            <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $learner->resourceAssignments->count() }}</span>
+                            @if($participant->resourceAssignments && $participant->resourceAssignments->count() > 0)
+                            <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $participant->resourceAssignments->count() }}</span>
                             @endif
                         </button>
                     </nav>
@@ -305,7 +305,7 @@
                             $timelineItems = collect();
 
                             // Add notes
-                            foreach($learner->notes ?? [] as $note) {
+                            foreach($participant->notes ?? [] as $note) {
                                 $timelineItems->push([
                                     'id' => 'note-' . $note->id,
                                     'model_id' => $note->id,
@@ -322,7 +322,7 @@
                             }
 
                             // Add survey attempts
-                            foreach($learner->surveyAttempts ?? [] as $attempt) {
+                            foreach($participant->surveyAttempts ?? [] as $attempt) {
                                 $timelineItems->push([
                                     'id' => 'survey-' . $attempt->id,
                                     'model_id' => $attempt->id,
@@ -343,7 +343,7 @@
                             }
 
                             // Add resource assignments
-                            foreach($learner->resourceAssignments ?? [] as $assignment) {
+                            foreach($participant->resourceAssignments ?? [] as $assignment) {
                                 $timelineItems->push([
                                     'id' => 'resource-' . $assignment->id,
                                     'model_id' => $assignment->id,
@@ -443,7 +443,7 @@
                                                         {{ ucfirst(str_replace('_', ' ', $item['note_type'] ?? 'general')) }}
                                                     </span>
                                                     @if($item['is_private'])
-                                                    <span class="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-700">Private</span>
+                                                    <span class="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-700">@term('private_label')</span>
                                                     @endif
                                                 </div>
                                                 <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $item['content'] }}</p>
@@ -468,12 +468,12 @@
                                             <!-- Inline Edit Form -->
                                             <div x-show="editingNoteId === {{ $item['model_id'] }}" class="space-y-3">
                                                 <div class="flex items-center gap-2">
-                                                    <label class="text-xs font-medium text-gray-600">Note Type:</label>
+                                                    <label class="text-xs font-medium text-gray-600">@term('note_type_label')</label>
                                                     <select x-model="editNoteType" class="text-xs border-gray-300 rounded-md shadow-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
-                                                        <option value="general">General</option>
-                                                        <option value="follow_up">Follow Up</option>
-                                                        <option value="concern">Concern</option>
-                                                        <option value="milestone">Milestone</option>
+                                                        <option value="general">@term('note_type_general_label')</option>
+                                                        <option value="follow_up">@term('note_type_follow_up_label')</option>
+                                                        <option value="concern">@term('note_type_concern_label')</option>
+                                                        <option value="milestone">@term('note_type_milestone_label')</option>
                                                     </select>
                                                 </div>
                                                 <textarea
@@ -495,8 +495,8 @@
                                                         class="px-3 py-1.5 text-xs bg-pulse-orange-500 text-white rounded-md hover:bg-pulse-orange-600 disabled:opacity-50"
                                                         :disabled="isSaving"
                                                     >
-                                                        <span x-show="!isSaving">Save Changes</span>
-                                                        <span x-show="isSaving">Saving...</span>
+                                                        <span x-show="!isSaving">@term('save_changes_label')</span>
+                                                        <span x-show="isSaving">@term('saving_label')</span>
                                                     </button>
                                                 </div>
                                             </div>
@@ -529,7 +529,7 @@
                                                             @if($response !== null)
                                                             {{ is_array($response) ? implode(', ', $response) : $response }}
                                                             @else
-                                                            <span class="text-gray-400 italic">No response</span>
+                                                            <span class="text-gray-400 italic">@term('no_response_label')</span>
                                                             @endif
                                                         </p>
                                                     </div>
@@ -609,7 +609,7 @@
                             <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            <p class="text-sm text-gray-500">@term('no_label') @term('activity_label') yet</p>
+                            <p class="text-sm text-gray-500">@term('no_label') @term('activity_label') @term('yet_label')</p>
                         </div>
                         @endif
                     </div>
@@ -617,24 +617,24 @@
                     <!-- Notes Tab -->
                     <div x-show="activeTab === 'notes'" x-cloak>
                         <livewire:contact-notes
-                            contact-type="learner"
-                            :contact-id="$learner->id"
+                            contact-type="participant"
+                            :contact-id="$participant->id"
                         />
                     </div>
 
                     <!-- Surveys Tab -->
                     <div x-show="activeTab === 'surveys'" x-cloak>
                         <livewire:contact-surveys
-                            contact-type="learner"
-                            :contact-id="$learner->id"
+                            contact-type="participant"
+                            :contact-id="$participant->id"
                         />
                     </div>
 
                     <!-- Resources Tab -->
                     <div x-show="activeTab === 'resources'" x-cloak>
                         <livewire:contact-resources
-                            contact-type="learner"
-                            :contact-id="$learner->id"
+                            contact-type="participant"
+                            :contact-id="$participant->id"
                         />
                     </div>
                 </div>

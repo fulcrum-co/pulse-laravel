@@ -20,7 +20,7 @@ class ModerationQueueTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
+        direct_supervisor::setUp();
 
         $this->organization = Organization::factory()->create();
         $this->admin = User::factory()->create([

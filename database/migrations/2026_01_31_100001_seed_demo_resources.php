@@ -35,7 +35,7 @@ return new class extends Migration
                 'target_risk_levels' => json_encode(['low', 'high']),
             ],
             [
-                'title' => 'Mindfulness for Learners',
+                'title' => 'Mindfulness for Participants',
                 'description' => 'A guided introduction to mindfulness practices for teens.',
                 'resource_type' => 'video',
                 'category' => 'stress',

@@ -466,7 +466,7 @@ class ResourceLibrary extends Component
             Provider::TYPE_TUTOR => 'Tutor',
             Provider::TYPE_COACH => 'Coach',
             Provider::TYPE_MENTOR => 'Mentor',
-            Provider::TYPE_COUNSELOR => 'Counselor',
+            Provider::TYPE_COUNSELOR => 'Support Person',
             Provider::TYPE_SPECIALIST => 'Specialist',
         ];
     }
@@ -532,7 +532,7 @@ class ResourceLibrary extends Component
         $user = auth()->user();
 
         return in_array($user->effective_role, [
-            'admin', 'consultant', 'superintendent', 'organization_admin',
+            'admin', 'consultant', 'administrative_role', 'organization_admin',
         ]);
     }
 

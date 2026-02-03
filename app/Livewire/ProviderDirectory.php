@@ -20,6 +20,11 @@ class ProviderDirectory extends Component
 
     public string $viewMode = 'grid';
 
+    protected function term(string $key): string
+    {
+        return app(\App\Services\TerminologyService::class)->get($key);
+    }
+
     protected $queryString = [
         'search' => ['except' => '', 'as' => 'q'],
         'filterType' => ['except' => '', 'as' => 'type'],
@@ -84,20 +89,20 @@ class ProviderDirectory extends Component
     public function getProviderTypesProperty(): array
     {
         return [
-            Provider::TYPE_THERAPIST => 'Therapist',
-            Provider::TYPE_TUTOR => 'Tutor',
-            Provider::TYPE_COACH => 'Coach',
-            Provider::TYPE_MENTOR => 'Mentor',
-            Provider::TYPE_COUNSELOR => 'Counselor',
-            Provider::TYPE_SPECIALIST => 'Specialist',
+            Provider::TYPE_THERAPIST => $this->term('provider_type_therapist_label'),
+            Provider::TYPE_TUTOR => $this->term('provider_type_tutor_label'),
+            Provider::TYPE_COACH => $this->term('provider_type_coach_label'),
+            Provider::TYPE_MENTOR => $this->term('provider_type_mentor_label'),
+            Provider::TYPE_COUNSELOR => $this->term('support_person_singular'),
+            Provider::TYPE_SPECIALIST => $this->term('provider_type_specialist_label'),
         ];
     }
 
     public function getAvailabilityOptionsProperty(): array
     {
         return [
-            'verified' => 'Verified Only',
-            'unverified' => 'Unverified Only',
+            'verified' => $this->term('verified_only_label'),
+            'unverified' => $this->term('unverified_only_label'),
         ];
     }
 
@@ -113,6 +118,6 @@ class ProviderDirectory extends Component
     {
         return view('livewire.provider-directory', [
             'providers' => $this->providers,
-        ])->layout('layouts.dashboard', ['title' => 'Provider Directory', 'hideHeader' => true]);
+        ])->layout('layouts.dashboard', ['title' => $this->term('provider_directory_label'), 'hideHeader' => true]);
     }
 }

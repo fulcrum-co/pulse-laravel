@@ -137,7 +137,7 @@
                                     @if($survey->is_anonymous)
                                         <span class="text-gray-600">@term('anonymous_label') @term('responses_label')</span>
                                     @else
-                                        <span class="font-medium text-gray-900">{{ $attempt->learner?->name ?? 'Unknown' }}</span>
+                                        <span class="font-medium text-gray-900">{{ $attempt->participant?->name ?? 'Unknown' }}</span>
                                     @endif
                                     <div class="text-sm text-gray-500">{{ $attempt->completed_at?->diffForHumans() ?? app(\App\Services\TerminologyService::class)->get('in_progress_label') }}</div>
                                 </div>
@@ -160,7 +160,7 @@
                 @else
                     <div class="text-center py-8">
                         <x-icon name="clipboard-document" class="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                        <p class="text-gray-500">@term('no_label') @term('responses_label') yet</p>
+                        <p class="text-gray-500">@term('no_label') @term('responses_label') @term('yet_label')</p>
                         <p class="text-sm text-gray-400">@term('responses_label') will appear here once @term('learner_plural') @term('complete_action') the @term('survey_singular')</p>
                     </div>
                 @endif

@@ -105,12 +105,14 @@ class HelpArticleManager extends Component
     #[Computed]
     public function availableRoles()
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
-            'admin' => 'Administrator',
-            'counselor' => 'Counselor',
-            'teacher' => 'Teacher',
-            'parent' => 'Parent',
-            'learner' => 'Learner',
+            'admin' => $terminology->get('role_admin_label'),
+            'support_person' => $terminology->get('role_support_person_label'),
+            'instructor' => $terminology->get('role_instructor_label'),
+            'direct_supervisor' => $terminology->get('role_direct_supervisor_label'),
+            'participant' => $terminology->get('participant_label'),
         ];
     }
 

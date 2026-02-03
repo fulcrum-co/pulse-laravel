@@ -17,12 +17,12 @@
                 @click="activePanel = 'templates'; expanded = true"
                 :class="activePanel === 'templates' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'"
                 class="w-full p-3 rounded-xl flex flex-col items-center gap-1 transition-colors"
-                title="Templates"
+                title="@term('templates_label')"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
                 </svg>
-                <span class="text-[10px] font-medium">Templates</span>
+                <span class="text-[10px] font-medium">@term('templates_label')</span>
             </button>
 
             {{-- Elements --}}
@@ -30,12 +30,12 @@
                 @click="activePanel = 'elements'; expanded = true"
                 :class="activePanel === 'elements' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'"
                 class="w-full p-3 rounded-xl flex flex-col items-center gap-1 transition-colors"
-                title="Elements"
+                title="@term('elements_label')"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/>
                 </svg>
-                <span class="text-[10px] font-medium">Elements</span>
+                <span class="text-[10px] font-medium">@term('elements_label')</span>
             </button>
 
             {{-- Data --}}
@@ -43,12 +43,12 @@
                 @click="activePanel = 'data'; expanded = true"
                 :class="activePanel === 'data' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'"
                 class="w-full p-3 rounded-xl flex flex-col items-center gap-1 transition-colors"
-                title="Data"
+                title="@term('data_label')"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                 </svg>
-                <span class="text-[10px] font-medium">Data</span>
+                <span class="text-[10px] font-medium">@term('data_label')</span>
             </button>
 
             {{-- Smart Blocks --}}
@@ -56,12 +56,12 @@
                 @click="activePanel = 'smart_blocks'; expanded = true"
                 :class="activePanel === 'smart_blocks' ? 'bg-purple-100 text-purple-600' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'"
                 class="w-full p-3 rounded-xl flex flex-col items-center gap-1 transition-colors"
-                title="Smart Blocks"
+                title="@term('smart_blocks_label')"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                 </svg>
-                <span class="text-[10px] font-medium">Smart</span>
+                <span class="text-[10px] font-medium">@term('smart_label')</span>
             </button>
 
             {{-- Design --}}
@@ -69,12 +69,12 @@
                 @click="activePanel = 'design'; expanded = true"
                 :class="activePanel === 'design' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'"
                 class="w-full p-3 rounded-xl flex flex-col items-center gap-1 transition-colors"
-                title="Design"
+                title="@term('design_label')"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
                 </svg>
-                <span class="text-[10px] font-medium">Design</span>
+                <span class="text-[10px] font-medium">@term('design_label')</span>
             </button>
 
             {{-- Layers (Phase 6) --}}
@@ -82,12 +82,12 @@
                 @click="activePanel = 'layers'; expanded = true"
                 :class="activePanel === 'layers' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'"
                 class="w-full p-3 rounded-xl flex flex-col items-center gap-1 transition-colors"
-                title="Layers"
+                title="@term('layers_label')"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                 </svg>
-                <span class="text-[10px] font-medium">Layers</span>
+                <span class="text-[10px] font-medium">@term('layers_label')</span>
             </button>
         </div>
 
@@ -96,7 +96,7 @@
             <button
                 @click="expanded = !expanded"
                 class="w-full p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                :title="expanded ? 'Collapse sidebar' : 'Expand sidebar'"
+                :title="expanded ? @js($terminology->get('collapse_sidebar_label')) : @js($terminology->get('expand_sidebar_label'))"
             >
                 <svg class="w-5 h-5 mx-auto transition-transform" :class="expanded ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
@@ -125,7 +125,7 @@
                 <input
                     type="text"
                     x-model="searchQuery"
-                    placeholder="Search..."
+                    placeholder="{{ $terminology->get('search_placeholder_label') }}"
                     class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
                 >
             </div>
@@ -137,7 +137,7 @@
             <div x-show="activePanel === 'templates'" class="p-3 space-y-3">
                 {{-- Quick Start --}}
                 <div>
-                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Quick Start</h4>
+                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">@term('quick_start_label')</h4>
                     <button
                         wire:click="startBlank"
                         class="w-full flex items-center gap-2.5 p-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-left border border-gray-200"
@@ -148,18 +148,18 @@
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <span class="text-xs font-medium text-gray-900">Blank Canvas</span>
-                            <p class="text-[10px] text-gray-500">Start from scratch</p>
+                            <span class="text-xs font-medium text-gray-900">@term('blank_canvas_label')</span>
+                            <p class="text-[10px] text-gray-500">@term('start_from_scratch_label')</p>
                         </div>
                     </button>
                 </div>
 
-                {{-- Learner Reports --}}
+                {{-- Participant Reports --}}
                 <div>
-                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Learner Reports</h4>
+                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">@term('participant_reports_label')</h4>
                     <div class="space-y-1.5">
                         @foreach($templates as $template)
-                            @if(($template['category'] ?? 'learner') === 'learner')
+                            @if(($template['category'] ?? 'participant') === 'participant')
                             <button
                                 wire:click="loadTemplate('{{ $template['id'] }}')"
                                 class="w-full flex items-center gap-2.5 p-2 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 rounded-lg transition-colors text-left border border-blue-200"
@@ -178,7 +178,7 @@
 
                 {{-- Cohort Analysis --}}
                 <div>
-                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Cohort Analysis</h4>
+                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">@term('cohort_analysis_label')</h4>
                     <div class="space-y-1.5">
                         @foreach($templates as $template)
                             @if(($template['category'] ?? '') === 'cohort')
@@ -200,7 +200,7 @@
 
                 {{-- Organization Dashboards --}}
                 <div>
-                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Organization Dashboards</h4>
+                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">@term('organization_dashboards_label')</h4>
                     <div class="space-y-1.5">
                         @foreach($templates as $template)
                             @if(($template['category'] ?? '') === 'organization')
@@ -228,7 +228,7 @@
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                     </svg>
-                    Browse All Templates
+                    @term('browse_all_templates_label')
                 </button>
             </div>
 
@@ -236,7 +236,7 @@
             <div x-show="activePanel === 'elements'" class="p-3 space-y-4">
                 {{-- Recently Used --}}
                 <div x-show="recentElements.length > 0">
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Recently Used</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('recently_used_label')</h4>
                     <div class="flex gap-2 overflow-x-auto pb-2">
                         <template x-for="type in recentElements" :key="type">
                             <button
@@ -251,7 +251,7 @@
 
                 {{-- Text Elements --}}
                 <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Text</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('text_label')</h4>
                     <div class="space-y-2">
                         <button
                             wire:click="addElement('text')"
@@ -263,8 +263,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <span class="text-sm font-medium text-gray-900">Text Block</span>
-                                <p class="text-xs text-gray-500">Add a paragraph of text</p>
+                                <span class="text-sm font-medium text-gray-900">@term('text_block_label')</span>
+                                <p class="text-xs text-gray-500">@term('text_block_help_label')</p>
                             </div>
                         </button>
 
@@ -276,8 +276,8 @@
                                 <span class="text-lg font-bold text-gray-500">H</span>
                             </div>
                             <div>
-                                <span class="text-sm font-medium text-gray-900">Heading</span>
-                                <p class="text-xs text-gray-500">Add a title or heading</p>
+                                <span class="text-sm font-medium text-gray-900">@term('heading_label')</span>
+                                <p class="text-xs text-gray-500">@term('heading_help_label')</p>
                             </div>
                         </button>
                     </div>
@@ -285,7 +285,7 @@
 
                 {{-- Media --}}
                 <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Media</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('media_label')</h4>
                     <div class="space-y-2">
                         <button
                             wire:click="addElement('image')"
@@ -297,8 +297,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <span class="text-sm font-medium text-gray-900">Image</span>
-                                <p class="text-xs text-gray-500">Upload or link an image</p>
+                                <span class="text-sm font-medium text-gray-900">@term('image_label')</span>
+                                <p class="text-xs text-gray-500">@term('image_help_label')</p>
                             </div>
                         </button>
                     </div>
@@ -306,7 +306,7 @@
 
                 {{-- Layout --}}
                 <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Layout</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('layout_label')</h4>
                     <div class="grid grid-cols-2 gap-2">
                         <button
                             wire:click="addElement('spacer')"
@@ -317,7 +317,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
                                 </svg>
                             </div>
-                            <span class="text-xs text-gray-600">Spacer</span>
+                            <span class="text-xs text-gray-600">@term('spacer_label')</span>
                         </button>
 
                         <button
@@ -327,7 +327,7 @@
                             <div class="w-8 h-8 flex items-center justify-center mb-1">
                                 <div class="w-6 h-0.5 bg-gray-400 group-hover:bg-gray-500"></div>
                             </div>
-                            <span class="text-xs text-gray-600">Divider</span>
+                            <span class="text-xs text-gray-600">@term('divider_label')</span>
                         </button>
                     </div>
                 </div>
@@ -337,7 +337,7 @@
             <div x-show="activePanel === 'data'" class="p-3 space-y-4">
                 {{-- Charts --}}
                 <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Charts</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('charts_label')</h4>
                     <div class="grid grid-cols-2 gap-2">
                         <button
                             wire:click="addElement('chart', {'config': {'chart_type': 'line'}})"
@@ -348,7 +348,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4"/>
                                 </svg>
                             </div>
-                            <span class="text-xs font-medium text-gray-700">Line Chart</span>
+                            <span class="text-xs font-medium text-gray-700">@term('line_chart_label')</span>
                         </button>
 
                         <button
@@ -360,7 +360,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                                 </svg>
                             </div>
-                            <span class="text-xs font-medium text-gray-700">Bar Chart</span>
+                            <span class="text-xs font-medium text-gray-700">@term('bar_chart_label')</span>
                         </button>
 
                         <button
@@ -373,7 +373,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
                                 </svg>
                             </div>
-                            <span class="text-xs font-medium text-gray-700">Pie Chart</span>
+                            <span class="text-xs font-medium text-gray-700">@term('pie_chart_label')</span>
                         </button>
 
                         <button
@@ -386,14 +386,14 @@
                                     <path d="M12 4a8 8 0 018 8" stroke-width="4" stroke-linecap="round"/>
                                 </svg>
                             </div>
-                            <span class="text-xs font-medium text-gray-700">Doughnut</span>
+                            <span class="text-xs font-medium text-gray-700">@term('doughnut_chart_label')</span>
                         </button>
                     </div>
                 </div>
 
                 {{-- Metrics --}}
                 <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Metrics</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('metrics_label')</h4>
                     <div class="space-y-2">
                         <button
                             wire:click="addElement('metric_card')"
@@ -403,8 +403,8 @@
                                 <span class="text-sm font-bold">3.8</span>
                             </div>
                             <div>
-                                <span class="text-sm font-medium text-gray-900">Metric Card</span>
-                                <p class="text-xs text-gray-500">Display a single KPI value</p>
+                                <span class="text-sm font-medium text-gray-900">@term('metric_card_label')</span>
+                                <p class="text-xs text-gray-500">@term('metric_card_help_label')</p>
                             </div>
                         </button>
                     </div>
@@ -412,7 +412,7 @@
 
                 {{-- Tables --}}
                 <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Tables</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('tables_label')</h4>
                     <div class="space-y-2">
                         <button
                             wire:click="addElement('table')"
@@ -424,8 +424,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <span class="text-sm font-medium text-gray-900">Data Table</span>
-                                <p class="text-xs text-gray-500">Display tabular data</p>
+                                <span class="text-sm font-medium text-gray-900">@term('data_table_label')</span>
+                                <p class="text-xs text-gray-500">@term('data_table_help_label')</p>
                             </div>
                         </button>
                     </div>
@@ -433,7 +433,7 @@
 
                 {{-- AI Content --}}
                 <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">AI-Powered</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('ai_powered_label')</h4>
                     <div class="space-y-2">
                         <button
                             wire:click="addElement('ai_text')"
@@ -445,8 +445,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <span class="text-sm font-medium text-purple-900">AI Text</span>
-                                <p class="text-xs text-purple-600">Generate insights from data</p>
+                                <span class="text-sm font-medium text-purple-900">@term('ai_text_label')</span>
+                                <p class="text-xs text-purple-600">@term('ai_text_help_label')</p>
                             </div>
                         </button>
                     </div>
@@ -455,11 +455,11 @@
 
             {{-- Smart Blocks Panel --}}
             <div x-show="activePanel === 'smart_blocks'" class="p-3 space-y-3">
-                <p class="text-xs text-gray-500">Pre-built components that auto-populate with data.</p>
+                <p class="text-xs text-gray-500">@term('smart_blocks_intro_label')</p>
 
-                {{-- Learner Blocks --}}
+                {{-- Participant Blocks --}}
                 <div>
-                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Learner Reports</h4>
+                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">@term('participant_reports_label')</h4>
                     <div class="space-y-1.5">
                         <button
                             wire:click="addSmartBlock('learner_header')"
@@ -471,10 +471,10 @@
                                 </svg>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <span class="text-xs font-medium text-gray-900">Learner Header</span>
-                                <p class="text-[10px] text-gray-500 truncate">Name, photo, grade</p>
+                                <span class="text-xs font-medium text-gray-900">@term('participant_header_label')</span>
+                                <p class="text-[10px] text-gray-500 truncate">@term('participant_header_help_label')</p>
                             </div>
-                            <span class="px-1.5 py-0.5 text-[9px] font-medium bg-blue-100 text-blue-700 rounded flex-shrink-0">Auto</span>
+                            <span class="px-1.5 py-0.5 text-[9px] font-medium bg-blue-100 text-blue-700 rounded flex-shrink-0">@term('auto_label')</span>
                         </button>
 
                         <button
@@ -490,10 +490,10 @@
                                 </div>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <span class="text-xs font-medium text-gray-900">Metrics Row</span>
-                                <p class="text-[10px] text-gray-500 truncate">4 key metrics</p>
+                                <span class="text-xs font-medium text-gray-900">@term('metrics_row_label')</span>
+                                <p class="text-[10px] text-gray-500 truncate">@term('metrics_row_help_label')</p>
                             </div>
-                            <span class="px-1.5 py-0.5 text-[9px] font-medium bg-green-100 text-green-700 rounded flex-shrink-0">Auto</span>
+                            <span class="px-1.5 py-0.5 text-[9px] font-medium bg-green-100 text-green-700 rounded flex-shrink-0">@term('auto_label')</span>
                         </button>
 
                         <button
@@ -506,10 +506,10 @@
                                 </svg>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <span class="text-xs font-medium text-gray-900">Performance Trend</span>
-                                <p class="text-[10px] text-gray-500 truncate">Chart + AI insights</p>
+                                <span class="text-xs font-medium text-gray-900">@term('performance_trend_label')</span>
+                                <p class="text-[10px] text-gray-500 truncate">@term('performance_trend_help_label')</p>
                             </div>
-                            <span class="px-1.5 py-0.5 text-[9px] font-medium bg-purple-100 text-purple-700 rounded flex-shrink-0">AI</span>
+                            <span class="px-1.5 py-0.5 text-[9px] font-medium bg-purple-100 text-purple-700 rounded flex-shrink-0">@term('ai_label')</span>
                         </button>
 
                         <button
@@ -522,17 +522,17 @@
                                 </svg>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <span class="text-xs font-medium text-gray-900">Risk Banner</span>
-                                <p class="text-[10px] text-gray-500 truncate">Color-coded indicator</p>
+                                <span class="text-xs font-medium text-gray-900">@term('risk_banner_label')</span>
+                                <p class="text-[10px] text-gray-500 truncate">@term('risk_banner_help_label')</p>
                             </div>
-                            <span class="px-1.5 py-0.5 text-[9px] font-medium bg-amber-100 text-amber-700 rounded flex-shrink-0">Auto</span>
+                            <span class="px-1.5 py-0.5 text-[9px] font-medium bg-amber-100 text-amber-700 rounded flex-shrink-0">@term('auto_label')</span>
                         </button>
                     </div>
                 </div>
 
                 {{-- Analysis Blocks --}}
                 <div>
-                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Analysis</h4>
+                    <h4 class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">@term('analysis_label')</h4>
                     <div class="space-y-1.5">
                         <button
                             wire:click="addSmartBlock('comparison_chart')"
@@ -544,8 +544,8 @@
                                 </svg>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <span class="text-xs font-medium text-gray-900">Comparison Chart</span>
-                                <p class="text-[10px] text-gray-500 truncate">Learner vs cohort</p>
+                                <span class="text-xs font-medium text-gray-900">@term('comparison_chart_label')</span>
+                                <p class="text-[10px] text-gray-500 truncate">@term('comparison_chart_help_label')</p>
                             </div>
                         </button>
 
@@ -559,10 +559,10 @@
                                 </svg>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <span class="text-xs font-medium text-gray-900">Executive Summary</span>
-                                <p class="text-[10px] text-gray-500 truncate">AI narrative + metrics</p>
+                                <span class="text-xs font-medium text-gray-900">@term('executive_summary_label')</span>
+                                <p class="text-[10px] text-gray-500 truncate">@term('executive_summary_help_label')</p>
                             </div>
-                            <span class="px-1.5 py-0.5 text-[9px] font-medium bg-rose-100 text-rose-700 rounded flex-shrink-0">AI</span>
+                            <span class="px-1.5 py-0.5 text-[9px] font-medium bg-rose-100 text-rose-700 rounded flex-shrink-0">@term('ai_label')</span>
                         </button>
                     </div>
                 </div>
@@ -572,30 +572,30 @@
             <div x-show="activePanel === 'design'" class="p-3 space-y-4">
                 {{-- Page Settings --}}
                 <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Page</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('page_label')</h4>
                     <div class="space-y-3">
                         <div>
-                            <label class="block text-sm text-gray-600 mb-1">Size</label>
+                            <label class="block text-sm text-gray-600 mb-1">@term('size_label')</label>
                             <select wire:model.live="pageSettings.size" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
-                                <option value="letter">Letter (8.5" x 11")</option>
-                                <option value="a4">A4</option>
-                                <option value="legal">Legal</option>
+                                <option value="letter">@term('page_size_letter_label')</option>
+                                <option value="a4">@term('page_size_a4_label')</option>
+                                <option value="legal">@term('page_size_legal_label')</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm text-gray-600 mb-1">Orientation</label>
+                            <label class="block text-sm text-gray-600 mb-1">@term('orientation_label')</label>
                             <div class="flex gap-2">
                                 <button
                                     wire:click="$set('pageSettings.orientation', 'portrait')"
                                     class="flex-1 px-3 py-2 text-sm rounded-lg border {{ ($pageSettings['orientation'] ?? 'portrait') === 'portrait' ? 'border-pulse-orange-500 bg-pulse-orange-50 text-pulse-orange-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }}"
                                 >
-                                    Portrait
+                                    @term('portrait_label')
                                 </button>
                                 <button
                                     wire:click="$set('pageSettings.orientation', 'landscape')"
                                     class="flex-1 px-3 py-2 text-sm rounded-lg border {{ ($pageSettings['orientation'] ?? 'portrait') === 'landscape' ? 'border-pulse-orange-500 bg-pulse-orange-50 text-pulse-orange-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }}"
                                 >
-                                    Landscape
+                                    @term('landscape_label')
                                 </button>
                             </div>
                         </div>
@@ -604,10 +604,10 @@
 
                 {{-- Colors --}}
                 <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Colors</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('colors_label')</h4>
                     <div class="space-y-3">
                         <div>
-                            <label class="block text-sm text-gray-600 mb-2">Primary Color</label>
+                            <label class="block text-sm text-gray-600 mb-2">@term('primary_color_label')</label>
                             <div class="flex gap-2">
                                 <input
                                     type="color"
@@ -623,15 +623,15 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm text-gray-600 mb-2">Theme Presets</label>
+                            <label class="block text-sm text-gray-600 mb-2">@term('theme_presets_label')</label>
                             <div class="flex flex-wrap gap-2">
                                 @foreach([
-                                    ['#F97316', 'Pulse Orange'],
-                                    ['#3B82F6', 'Blue'],
-                                    ['#10B981', 'Green'],
-                                    ['#8B5CF6', 'Purple'],
-                                    ['#EC4899', 'Pink'],
-                                    ['#6B7280', 'Gray'],
+                                    ['#F97316', $terminology->get('theme_preset_pulse_orange_label')],
+                                    ['#3B82F6', $terminology->get('theme_preset_blue_label')],
+                                    ['#10B981', $terminology->get('theme_preset_green_label')],
+                                    ['#8B5CF6', $terminology->get('theme_preset_purple_label')],
+                                    ['#EC4899', $terminology->get('theme_preset_pink_label')],
+                                    ['#6B7280', $terminology->get('theme_preset_gray_label')],
                                 ] as [$color, $name])
                                 <button
                                     wire:click="$set('branding.primary_color', '{{ $color }}')"
@@ -647,7 +647,7 @@
 
                 {{-- Data Mode --}}
                 <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Data Mode</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('data_mode_label')</h4>
                     <div class="flex gap-2">
                         <button
                             wire:click="$set('isLive', true)"
@@ -655,9 +655,9 @@
                         >
                             <div class="flex items-center justify-center gap-2 {{ $isLive ? 'text-green-700' : 'text-gray-600' }}">
                                 <span class="w-2 h-2 rounded-full {{ $isLive ? 'bg-green-500 animate-pulse' : 'bg-gray-300' }}"></span>
-                                <span class="font-medium">Live</span>
+                                <span class="font-medium">@term('live_label')</span>
                             </div>
-                            <p class="text-xs {{ $isLive ? 'text-green-600' : 'text-gray-500' }} mt-1">Always current data</p>
+                            <p class="text-xs {{ $isLive ? 'text-green-600' : 'text-gray-500' }} mt-1">@term('always_current_data_label')</p>
                         </button>
                         <button
                             wire:click="$set('isLive', false)"
@@ -667,22 +667,22 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                <span class="font-medium">Snapshot</span>
+                                <span class="font-medium">@term('snapshot_label')</span>
                             </div>
-                            <p class="text-xs {{ !$isLive ? 'text-blue-600' : 'text-gray-500' }} mt-1">Frozen in time</p>
+                            <p class="text-xs {{ !$isLive ? 'text-blue-600' : 'text-gray-500' }} mt-1">@term('frozen_in_time_label')</p>
                         </button>
                     </div>
                 </div>
 
                 {{-- Logo Upload --}}
                 <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Branding</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('branding_label')</h4>
                     <div class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-pulse-orange-300 transition-colors cursor-pointer">
                         <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        <span class="text-sm text-gray-500">Upload logo</span>
-                        <p class="text-xs text-gray-400 mt-1">PNG, JPG up to 2MB</p>
+                        <span class="text-sm text-gray-500">@term('upload_logo_label')</span>
+                        <p class="text-xs text-gray-400 mt-1">@term('logo_format_help_label')</p>
                     </div>
                 </div>
             </div>
@@ -693,13 +693,13 @@
             <div x-show="activePanel === 'layers'" class="p-3 space-y-3">
                 {{-- Header --}}
                 <div class="flex items-center justify-between">
-                    <h3 class="font-semibold text-gray-900">Layers</h3>
-                    <span class="text-xs text-gray-400">{{ count($elements) }} elements</span>
+                    <h3 class="font-semibold text-gray-900">@term('layers_label')</h3>
+                    <span class="text-xs text-gray-400">{{ count($elements) }} {{ $terminology->get('elements_label') }}</span>
                 </div>
 
                 {{-- Helpful Hint --}}
                 <p class="text-xs text-gray-500">
-                    Reorder, hide, or lock your report elements.
+                    @term('layers_help_label')
                 </p>
 
                 {{-- Layers List --}}
@@ -758,7 +758,7 @@
                                     <button
                                         wire:click.stop="toggleElementVisibility('{{ $element['id'] }}')"
                                         class="p-1 rounded {{ $isHidden ? 'text-gray-400' : 'text-gray-500 hover:text-gray-700' }}"
-                                        title="{{ $isHidden ? 'Show' : 'Hide' }}"
+                                        title="{{ $isHidden ? $terminology->get('show_label') : $terminology->get('hide_label') }}"
                                     >
                                         @if($isHidden)
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -776,7 +776,7 @@
                                     <button
                                         wire:click.stop="toggleElementLock('{{ $element['id'] }}')"
                                         class="p-1 rounded {{ $isLocked ? 'text-yellow-500' : 'text-gray-500 hover:text-gray-700' }}"
-                                        title="{{ $isLocked ? 'Unlock' : 'Lock' }}"
+                                        title="{{ $isLocked ? $terminology->get('unlock_label') : $terminology->get('lock_label') }}"
                                     >
                                         @if($isLocked)
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -797,8 +797,8 @@
                         <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                         </svg>
-                        <p class="text-sm text-gray-500">No layers yet</p>
-                        <p class="text-xs text-gray-400 mt-1">Add elements to see them here</p>
+                        <p class="text-sm text-gray-500">@term('no_layers_yet_label')</p>
+                        <p class="text-xs text-gray-400 mt-1">@term('add_elements_help_label')</p>
                     </div>
                 @endif
 
@@ -810,13 +810,13 @@
                                 wire:click="selectAll"
                                 class="flex-1 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                             >
-                                Select All
+                                @term('select_all_label')
                             </button>
                             <button
                                 wire:click="clearSelection"
                                 class="flex-1 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                             >
-                                Deselect
+                                @term('deselect_label')
                             </button>
                         </div>
                     </div>

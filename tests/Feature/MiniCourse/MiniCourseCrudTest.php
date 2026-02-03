@@ -20,7 +20,7 @@ class MiniCourseCrudTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
+        direct_supervisor::setUp();
 
         $this->organization = Organization::factory()->create();
         $this->admin = User::factory()->create([
@@ -57,7 +57,7 @@ class MiniCourseCrudTest extends TestCase
             'short_description' => 'Learn math basics',
             'difficulty_level' => 'beginner',
             'course_type' => 'standard',
-            'target_grades' => ['6', '7', '8'],
+            'target_levels' => ['6', '7', '8'],
             'objectives' => [
                 'Understand basic arithmetic',
                 'Learn fractions and decimals',

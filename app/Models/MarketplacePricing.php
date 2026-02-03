@@ -27,7 +27,7 @@ class MarketplacePricing extends Model
 
     public const LICENSE_SITE = 'site';
 
-    public const LICENSE_DISTRICT = 'district';
+    public const LICENSE_DISTRICT = 'section';
 
     protected $table = 'marketplace_pricing';
 
@@ -94,7 +94,7 @@ class MarketplacePricing extends Model
             self::LICENSE_SINGLE => 'Single User',
             self::LICENSE_TEAM => 'Team',
             self::LICENSE_SITE => 'Site-wide',
-            self::LICENSE_DISTRICT => 'District-wide',
+            self::LICENSE_DISTRICT => 'Section-wide',
         ];
     }
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Domain;
 
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\Survey;
 
 class PromptBuilderService
@@ -12,9 +12,9 @@ class PromptBuilderService
     /**
      * Build system prompt for conversational survey.
      */
-    public function buildConversationalSurveyPrompt(Survey $survey, array $learners): string
+    public function buildConversationalSurveyPrompt(Survey $survey, array $participants): string
     {
-        $learnerNames = collect($learners)->pluck('full_name')->join(', ');
+        $learnerNames = collect($participants)->pluck('full_name')->join(', ');
 
         $basePrompt = $survey->llm_system_prompt ?: config('pulse.prompts.conversational_survey');
 
@@ -30,14 +30,16 @@ class PromptBuilderService
     }
 
     /**
-     * Build user message for data extraction from learner context.
+     * Build user message for data extraction from participant context.
      */
-    public function buildExtractionMessage(string $transcript, Learner $learner): string
+    public function buildExtractionMessage(string $transcript, Participant $participant): string
     {
-        return "Learner: {$learner->full_name}\n" .
-            "Grade: {$learner->grade_level}\n\n" .
-            "Conversation transcript:\n{$transcript}\n\n" .
-            'Extract the structured data as JSON.';
+        $terminology = app(\App\Services\TerminologyService::class);
+
+        return $terminology->get('participant_label').": {$participant->full_name}\n" .
+            $terminology->get('level_label').": {$participant->level}\n\n" .
+            $terminology->get('conversation_transcript_label').":\n{$transcript}\n\n" .
+            $terminology->get('extract_structured_data_label');
     }
 
     /**
@@ -54,8 +56,8 @@ class PromptBuilderService
     public function buildReportNarrativeMessage(array $data, array $context = []): string
     {
         return "Generate a narrative report for the following data:\n\n" .
-            'Organization: ' . ($context['org_name'] ?? 'Unknown') . "\n" .
-            'Time Period: ' . ($context['time_period'] ?? 'Unknown') . "\n\n" .
+            app(\App\Services\TerminologyService::class)->get('organization_label').': ' . ($context['org_name'] ?? app(\App\Services\TerminologyService::class)->get('unknown_label')) . "\n" .
+            app(\App\Services\TerminologyService::class)->get('time_period_label').': ' . ($context['time_period'] ?? app(\App\Services\TerminologyService::class)->get('unknown_label')) . "\n\n" .
             "Data:\n" . json_encode($data, JSON_PRETTY_PRINT);
     }
 
@@ -64,9 +66,10 @@ class PromptBuilderService
      */
     public function buildResourceRankingPrompt(): string
     {
-        return 'You are an educational resource specialist. ' .
-            "Rank the following resources by relevance to the learner's needs. " .
-            'Return a JSON array of indices in order of relevance (most relevant first).';
+        $terminology = app(\App\Services\TerminologyService::class);
+
+        return $terminology->get('resource_ranking_system_prompt_prefix') . ' ' .
+            str_replace(':participant', $terminology->get('learner_singular'), $terminology->get('resource_ranking_system_prompt_suffix'));
     }
 
     /**
@@ -84,9 +87,11 @@ class PromptBuilderService
             ];
         })->toArray();
 
-        return "Learner need: {$needDescription}\n\n" .
-            "Resources:\n" . json_encode($resourceList, JSON_PRETTY_PRINT) . "\n\n" .
-            'Return only a JSON array of indices, e.g., [2, 0, 3, 1]';
+        $terminology = app(\App\Services\TerminologyService::class);
+
+        return $terminology->get('participant_need_label').": {$needDescription}\n\n" .
+            $terminology->get('resources_label').":\n" . json_encode($resourceList, JSON_PRETTY_PRINT) . "\n\n" .
+            $terminology->get('return_indices_only_label');
     }
 
     /**

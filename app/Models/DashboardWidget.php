@@ -55,17 +55,17 @@ class DashboardWidget extends Model
         $color = $this->config['color'] ?? 'blue';
 
         $value = match ($dataSource) {
-            'learners_total' => Learner::where('org_id', $orgId)->count(),
-            'learners_at_risk' => Learner::where('org_id', $orgId)->where('risk_level', 'high')->count(),
-            'learners_good' => Learner::where('org_id', $orgId)->where('risk_level', 'good')->count(),
-            'learners_low_risk' => Learner::where('org_id', $orgId)->where('risk_level', 'low')->count(),
+            'learners_total' => Participant::where('org_id', $orgId)->count(),
+            'learners_at_risk' => Participant::where('org_id', $orgId)->where('risk_level', 'high')->count(),
+            'learners_good' => Participant::where('org_id', $orgId)->where('risk_level', 'good')->count(),
+            'learners_low_risk' => Participant::where('org_id', $orgId)->where('risk_level', 'low')->count(),
             'surveys_active' => Survey::where('org_id', $orgId)->where('status', 'active')->count(),
             'surveys_total' => Survey::where('org_id', $orgId)->count(),
             'responses_today' => SurveyAttempt::whereHas('survey', fn ($q) => $q->where('org_id', $orgId))
                 ->whereDate('completed_at', today())->count(),
             'responses_week' => SurveyAttempt::whereHas('survey', fn ($q) => $q->where('org_id', $orgId))
                 ->where('completed_at', '>=', now()->startOfWeek())->count(),
-            'learners_need_attention' => Learner::where('org_id', $orgId)
+            'learners_need_attention' => Participant::where('org_id', $orgId)
                 ->where(function ($q) {
                     $q->where('risk_level', 'high');
                 })->count(),
@@ -100,6 +100,7 @@ class DashboardWidget extends Model
      */
     protected function getBarChartData(int $orgId): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
         $dataSource = $this->config['data_source'] ?? 'survey_responses_weekly';
         $compare = $this->config['compare'] ?? false;
 
@@ -126,16 +127,16 @@ class DashboardWidget extends Model
             }
         } elseif ($dataSource === 'risk_distribution') {
             $data = [
-                ['label' => 'Good', 'value' => Learner::where('org_id', $orgId)->where('risk_level', 'good')->count(), 'color' => 'green'],
-                ['label' => 'Low Risk', 'value' => Learner::where('org_id', $orgId)->where('risk_level', 'low')->count(), 'color' => 'yellow'],
-                ['label' => 'High Risk', 'value' => Learner::where('org_id', $orgId)->where('risk_level', 'high')->count(), 'color' => 'red'],
+                ['label' => $terminology->get('risk_good_standing_label'), 'value' => Participant::where('org_id', $orgId)->where('risk_level', 'good')->count(), 'color' => 'green'],
+                ['label' => $terminology->get('risk_low_label'), 'value' => Participant::where('org_id', $orgId)->where('risk_level', 'low')->count(), 'color' => 'yellow'],
+                ['label' => $terminology->get('risk_high_label'), 'value' => Participant::where('org_id', $orgId)->where('risk_level', 'high')->count(), 'color' => 'red'],
             ];
         }
 
         return [
             'data' => $data,
             'compare' => $compare,
-            'labels' => ['This Week', 'Last Week'],
+            'labels' => [$terminology->get('this_week_label'), $terminology->get('last_week_label')],
         ];
     }
 
@@ -165,14 +166,15 @@ class DashboardWidget extends Model
     }
 
     /**
-     * Get learner list data.
+     * Get participant list data.
      */
     protected function getLearnerListData(int $orgId): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
         $filter = $this->config['filter'] ?? 'all';
         $limit = $this->config['limit'] ?? 10;
 
-        $query = Learner::with('user')->where('org_id', $orgId);
+        $query = Participant::with('user')->where('org_id', $orgId);
 
         $query = match ($filter) {
             'high_risk' => $query->where('risk_level', 'high'),
@@ -184,13 +186,13 @@ class DashboardWidget extends Model
             default => $query,
         };
 
-        $learners = $query->orderBy('risk_score', 'desc')->limit($limit)->get();
+        $participants = $query->orderBy('risk_score', 'desc')->limit($limit)->get();
 
         return [
-            'learners' => $learners->map(fn ($s) => [
+            'participants' => $participants->map(fn ($s) => [
                 'id' => $s->id,
-                'name' => $s->user->full_name ?? 'Unknown',
-                'grade' => $s->grade_level,
+                'name' => $s->user->full_name ?? $terminology->get('unknown_label'),
+                'level' => $s->level,
                 'risk_level' => $s->risk_level,
                 'risk_score' => $s->risk_score,
                 'avatar_url' => $s->user->avatar_url ?? null,
@@ -258,6 +260,7 @@ class DashboardWidget extends Model
      */
     protected function getNotificationFeedData(int $orgId): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
         $notifications = collect();
 
         // 1. Workflow alerts (recent executions)
@@ -271,7 +274,7 @@ class DashboardWidget extends Model
                 ->map(fn ($e) => [
                     'type' => 'alert',
                     'icon' => 'bell',
-                    'title' => $e->workflow->name ?? 'Alert triggered',
+                    'title' => $e->workflow->name ?? $terminology->get('alert_triggered_label'),
                     'subtitle' => $e->started_at?->diffForHumans(),
                     'url' => '/alerts/'.$e->workflow_id.'/executions/'.$e->id,
                     'status' => $e->status,
@@ -280,8 +283,8 @@ class DashboardWidget extends Model
             $notifications = $notifications->concat($alerts);
         }
 
-        // 2. Learners needing attention (high risk)
-        $learners = Learner::with('user')
+        // 2. Participants needing attention (high risk)
+        $participants = Participant::with('user')
             ->where('org_id', $orgId)
             ->where('risk_level', 'high')
             ->orderBy('updated_at', 'desc')
@@ -290,13 +293,13 @@ class DashboardWidget extends Model
             ->map(fn ($s) => [
                 'type' => 'action',
                 'icon' => 'user',
-                'title' => ($s->user->full_name ?? 'Learner').' needs check-in',
-                'subtitle' => 'High risk learner',
-                'url' => '/contacts/learners/'.$s->id,
+                'title' => ($s->user->full_name ?? $terminology->get('participant_label')).' '.$terminology->get('needs_check_in_label'),
+                'subtitle' => $terminology->get('high_risk_participant_label'),
+                'url' => '/contacts/participants/'.$s->id,
                 'status' => 'warning',
                 'timestamp' => $s->updated_at,
             ]);
-        $notifications = $notifications->concat($learners);
+        $notifications = $notifications->concat($participants);
 
         // 3. Active surveys
         $surveys = Survey::where('org_id', $orgId)
@@ -307,8 +310,8 @@ class DashboardWidget extends Model
             ->map(fn ($s) => [
                 'type' => 'info',
                 'icon' => 'clipboard',
-                'title' => 'Survey "'.$s->title.'" is active',
-                'subtitle' => 'Created '.$s->created_at?->diffForHumans(),
+                'title' => str_replace(':title', $s->title, $terminology->get('survey_active_label')),
+                'subtitle' => $terminology->get('created_label').' '.$s->created_at?->diffForHumans(),
                 'url' => '/surveys/'.$s->id,
                 'status' => 'info',
                 'timestamp' => $s->created_at,

@@ -10,7 +10,7 @@ use App\Models\Program;
 use App\Models\Provider;
 use App\Models\Resource;
 use App\Models\ResourceAssignment;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Services\ProviderMatchingService;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -99,7 +99,7 @@ class ContactResources extends Component
 
         $assignment = ResourceAssignment::create([
             'resource_id' => $this->selectedResourceId,
-            'learner_id' => $this->contactId,
+            'participant_id' => $this->contactId,
             'assigned_by' => $user->id,
             'status' => 'pending',
             'notes' => $this->assignmentNotes ?: null,
@@ -200,7 +200,7 @@ class ContactResources extends Component
 
     public function getAssignmentsProperty()
     {
-        $query = ResourceAssignment::where('learner_id', $this->contactId)
+        $query = ResourceAssignment::where('participant_id', $this->contactId)
             ->with(['resource', 'assigner'])
             ->orderByDesc('assigned_at');
 
@@ -258,7 +258,7 @@ class ContactResources extends Component
 
         // Check if already enrolled
         $existingEnrollment = MiniCourseEnrollment::where('mini_course_id', $course->id)
-            ->where('learner_id', $this->contactId)
+            ->where('participant_id', $this->contactId)
             ->whereIn('status', [
                 MiniCourseEnrollment::STATUS_ENROLLED,
                 MiniCourseEnrollment::STATUS_IN_PROGRESS,
@@ -268,7 +268,7 @@ class ContactResources extends Component
         if ($existingEnrollment) {
             $this->dispatch('notify', [
                 'type' => 'error',
-                'message' => 'Learner is already enrolled in this course.',
+                'message' => app(\App\Services\TerminologyService::class)->get('participant_already_enrolled_label'),
             ]);
 
             return;
@@ -277,7 +277,7 @@ class ContactResources extends Component
         $enrollment = MiniCourseEnrollment::create([
             'mini_course_id' => $course->id,
             'mini_course_version_id' => $course->current_version_id,
-            'learner_id' => $this->contactId,
+            'participant_id' => $this->contactId,
             'enrolled_by' => $user->id,
             'enrollment_source' => MiniCourseEnrollment::SOURCE_MANUAL,
             'status' => MiniCourseEnrollment::STATUS_ENROLLED,
@@ -289,7 +289,7 @@ class ContactResources extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Learner enrolled in course successfully.',
+            'message' => app(\App\Services\TerminologyService::class)->get('participant_enrolled_success_label'),
         ]);
     }
 
@@ -313,7 +313,7 @@ class ContactResources extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Enrollment paused.',
+            'message' => app(\App\Services\TerminologyService::class)->get('enrollment_paused_label'),
         ]);
     }
 
@@ -332,7 +332,7 @@ class ContactResources extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Enrollment resumed.',
+            'message' => app(\App\Services\TerminologyService::class)->get('enrollment_resumed_label'),
         ]);
     }
 
@@ -353,7 +353,7 @@ class ContactResources extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Learner withdrawn from course.',
+            'message' => app(\App\Services\TerminologyService::class)->get('participant_withdrawn_success_label'),
         ]);
     }
 
@@ -365,7 +365,7 @@ class ContactResources extends Component
 
     public function getEnrollmentsProperty()
     {
-        $query = MiniCourseEnrollment::where('learner_id', $this->contactId)
+        $query = MiniCourseEnrollment::where('participant_id', $this->contactId)
             ->with(['miniCourse', 'currentStep', 'stepProgress'])
             ->orderByDesc('created_at');
 
@@ -409,7 +409,7 @@ class ContactResources extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Suggestion accepted and learner enrolled.',
+            'message' => 'Suggestion accepted and participant enrolled.',
         ]);
     }
 
@@ -430,7 +430,7 @@ class ContactResources extends Component
 
     public function getCourseSuggestionsProperty()
     {
-        return MiniCourseSuggestion::where('contact_type', Learner::class)
+        return MiniCourseSuggestion::where('contact_type', Participant::class)
             ->where('contact_id', $this->contactId)
             ->where('status', MiniCourseSuggestion::STATUS_PENDING)
             ->with(['miniCourse'])
@@ -444,18 +444,18 @@ class ContactResources extends Component
 
     public function getProviderRecommendationsProperty()
     {
-        if ($this->contactType !== 'learner') {
+        if ($this->contactType !== 'participant') {
             return collect();
         }
 
-        $learner = Learner::find($this->contactId);
-        if (! $learner) {
+        $participant = Participant::find($this->contactId);
+        if (! $participant) {
             return collect();
         }
 
         $service = app(ProviderMatchingService::class);
 
-        return $service->findMatchingProviders($learner, [], 5);
+        return $service->findMatchingProviders($participant, [], 5);
     }
 
     // ========================================
@@ -464,18 +464,18 @@ class ContactResources extends Component
 
     public function getProgramRecommendationsProperty()
     {
-        if ($this->contactType !== 'learner') {
+        if ($this->contactType !== 'participant') {
             return collect();
         }
 
-        $learner = Learner::find($this->contactId);
-        if (! $learner) {
+        $participant = Participant::find($this->contactId);
+        if (! $participant) {
             return collect();
         }
 
         $service = app(ProviderMatchingService::class);
 
-        return $service->findMatchingPrograms($learner, [], 5);
+        return $service->findMatchingPrograms($participant, [], 5);
     }
 
     public function render()

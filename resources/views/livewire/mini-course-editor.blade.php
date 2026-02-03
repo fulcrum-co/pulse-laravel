@@ -1,4 +1,5 @@
 <div class="min-h-screen bg-gray-50">
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
@@ -7,9 +8,9 @@
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
-                    Back to Courses
+                    @term('back_to_courses_label')
                 </a>
-                <h1 class="text-2xl font-bold text-gray-900">{{ $isNew ? 'Create Mini-Course' : 'Edit Course' }}</h1>
+                <h1 class="text-2xl font-bold text-gray-900">{{ $isNew ? $terminology->get('create_mini_course_label') : $terminology->get('edit_course_label') }}</h1>
             </div>
             <div class="flex gap-3">
                 <!-- AI Assistant Toggle -->
@@ -20,7 +21,7 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                     </svg>
-                    AI Assistant
+                    @term('ai_assistant_button_label')
                 </button>
 
                 @if(!$isNew && $course)
@@ -29,14 +30,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
-                    Preview
+                    @term('preview_label')
                 </a>
                 @if($course->status === 'draft')
                 <button wire:click="$set('showPublishConfirm', true)" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    Publish
+                    @term('publish_label')
                 </button>
                 @endif
                 @endif
@@ -44,7 +45,7 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
                     </svg>
-                    Save
+                    @term('save_label')
                 </button>
             </div>
         </div>
@@ -53,35 +54,35 @@
             <!-- Course Info Panel -->
             <div class="lg:col-span-1 space-y-6">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Course Information</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">@term('course_information_label')</h2>
 
                     <!-- Title -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('title_label')</label>
                         <input
                             type="text"
                             wire:model="title"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
-                            placeholder="Course title"
+                            placeholder="@term('course_title_placeholder')"
                         >
                         @error('title') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Description -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('description_label')</label>
                         <textarea
                             wire:model="description"
                             rows="3"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
-                            placeholder="Brief description of the course"
+                            placeholder="@term('course_description_placeholder')"
                         ></textarea>
                         @error('description') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Course Type -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Course Type</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('course_type_label')</label>
                         <select wire:model="courseType" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent">
                             @foreach($courseTypes as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
@@ -91,12 +92,12 @@
 
                     <!-- Estimated Duration -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Estimated Duration (minutes)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('estimated_duration_minutes_label')</label>
                         <input
                             type="number"
                             wire:model="estimatedDuration"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
-                            placeholder="45"
+                            placeholder="@term('estimated_duration_minutes_placeholder')"
                             min="1"
                             max="480"
                         >
@@ -106,18 +107,18 @@
                     <div class="space-y-2">
                         <label class="flex items-center gap-2">
                             <input type="checkbox" wire:model="isTemplate" class="rounded text-pulse-orange-500 focus:ring-pulse-orange-500">
-                            <span class="text-sm text-gray-700">Make this a template</span>
+                            <span class="text-sm text-gray-700">@term('make_template_label')</span>
                         </label>
                         <label class="flex items-center gap-2">
                             <input type="checkbox" wire:model="isPublic" class="rounded text-pulse-orange-500 focus:ring-pulse-orange-500">
-                            <span class="text-sm text-gray-700">Make publicly visible</span>
+                            <span class="text-sm text-gray-700">@term('make_public_label')</span>
                         </label>
                     </div>
                 </div>
 
                 <!-- Objectives -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Objectives</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">@term('objectives_label')</h2>
                     <ul class="space-y-2 mb-4">
                         @foreach($objectives as $index => $objective)
                         <li class="flex items-center gap-2 text-sm">
@@ -139,7 +140,7 @@
                             wire:model="newObjective"
                             wire:keydown.enter="addObjective"
                             class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
-                            placeholder="Add an objective..."
+                            placeholder="@term('add_objective_placeholder')"
                         >
                         <button wire:click="addObjective" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,25 +152,25 @@
 
                 <!-- Rationale -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Rationale & Experience</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">@term('rationale_experience_label')</h2>
 
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Why This Course Exists</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('course_rationale_label')</label>
                         <textarea
                             wire:model="rationale"
                             rows="3"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
-                            placeholder="Explain the purpose and value of this course..."
+                            placeholder="@term('course_rationale_placeholder')"
                         ></textarea>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Expected Learner Experience</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('expected_participant_experience_label')</label>
                         <textarea
                             wire:model="expectedExperience"
                             rows="3"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
-                            placeholder="Describe what the learner will do and experience..."
+                            placeholder="@term('expected_participant_experience_placeholder')"
                         ></textarea>
                     </div>
                 </div>
@@ -179,12 +180,12 @@
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-semibold text-gray-900">Course Steps</h2>
+                        <h2 class="text-lg font-semibold text-gray-900">@term('course_steps_label')</h2>
                         <button wire:click="openStepModal" class="inline-flex items-center px-3 py-1.5 bg-pulse-orange-500 text-white rounded-lg text-sm hover:bg-pulse-orange-600">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
-                            Add Step
+                            @term('add_step_label')
                         </button>
                     </div>
 
@@ -201,9 +202,9 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2">
                                     <h3 class="font-medium text-gray-900">{{ $step->title }}</h3>
-                                    <span class="px-2 py-0.5 text-xs bg-gray-200 text-gray-600 rounded">{{ ucfirst($step->step_type) }}</span>
+                                    <span class="px-2 py-0.5 text-xs bg-gray-200 text-gray-600 rounded">{{ $terminology->get('step_type_'.$step->step_type.'_label') }}</span>
                                     @if($step->is_required)
-                                    <span class="px-2 py-0.5 text-xs bg-red-100 text-red-600 rounded">Required</span>
+                                    <span class="px-2 py-0.5 text-xs bg-red-100 text-red-600 rounded">@term('required_label')</span>
                                     @endif
                                 </div>
                                 @if($step->description)
@@ -218,22 +219,22 @@
 
                             <!-- Actions -->
                             <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button wire:click="moveStepUp({{ $step->id }})" class="p-1 text-gray-400 hover:text-gray-600" @if($index === 0) disabled @endif>
+                                <button wire:click="moveStepUp({{ $step->id }})" class="p-1 text-gray-400 hover:text-gray-600" @if($index === 0) disabled @endif aria-label="@term('move_step_up_label')">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
                                     </svg>
                                 </button>
-                                <button wire:click="moveStepDown({{ $step->id }})" class="p-1 text-gray-400 hover:text-gray-600" @if($index === $course->steps->count() - 1) disabled @endif>
+                                <button wire:click="moveStepDown({{ $step->id }})" class="p-1 text-gray-400 hover:text-gray-600" @if($index === $course->steps->count() - 1) disabled @endif aria-label="@term('move_step_down_label')">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                     </svg>
                                 </button>
-                                <button wire:click="openStepModal({{ $step->id }})" class="p-1 text-gray-400 hover:text-pulse-orange-500">
+                                <button wire:click="openStepModal({{ $step->id }})" class="p-1 text-gray-400 hover:text-pulse-orange-500" aria-label="@term('edit_step_label')">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                     </svg>
                                 </button>
-                                <button wire:click="deleteStep({{ $step->id }})" wire:confirm="Are you sure you want to delete this step?" class="p-1 text-gray-400 hover:text-red-500">
+                                <button wire:click="deleteStep({{ $step->id }})" wire:confirm="{{ $terminology->get('delete_step_confirm_label') }}" class="p-1 text-gray-400 hover:text-red-500" aria-label="@term('delete_step_label')">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                     </svg>
@@ -247,8 +248,8 @@
                         <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                         </svg>
-                        <p class="mb-2">No steps yet</p>
-                        <p class="text-sm">Add steps to build your course content.</p>
+                        <p class="mb-2">@term('no_steps_yet_label')</p>
+                        <p class="text-sm">@term('add_steps_help_label')</p>
                     </div>
                     @endif
                 </div>
@@ -264,13 +265,13 @@
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">{{ $editingStepId ? 'Edit Step' : 'Add Step' }}</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">{{ $editingStepId ? $terminology->get('edit_step_label') : $terminology->get('add_step_label') }}</h3>
 
                     <div class="space-y-4">
                         <!-- Step Type -->
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Step Type</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">@term('step_type_label')</label>
                                 <select wire:model="stepForm.step_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent">
                                     @foreach($stepTypes as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
@@ -278,7 +279,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Content Type</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">@term('content_type_label')</label>
                                 <select wire:model="stepForm.content_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent">
                                     @foreach($contentTypes as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
@@ -289,41 +290,41 @@
 
                         <!-- Title -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('title_label')</label>
                             <input
                                 type="text"
                                 wire:model="stepForm.title"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
-                                placeholder="Step title"
+                                placeholder="@term('step_title_placeholder')"
                             >
                         </div>
 
                         <!-- Description -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('description_label')</label>
                             <textarea
                                 wire:model="stepForm.description"
                                 rows="2"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
-                                placeholder="Brief description"
+                                placeholder="@term('step_description_placeholder')"
                             ></textarea>
                         </div>
 
                         <!-- Instructions -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Instructions</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('instructions_label')</label>
                             <textarea
                                 wire:model="stepForm.instructions"
                                 rows="4"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
-                                placeholder="Instructions for the learner..."
+                                placeholder="@term('step_instructions_placeholder')"
                             ></textarea>
                         </div>
 
                         <!-- Duration & Required -->
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">@term('duration_minutes_label')</label>
                                 <input
                                     type="number"
                                     wire:model="stepForm.estimated_duration_minutes"
@@ -334,7 +335,7 @@
                             <div class="flex items-end pb-2">
                                 <label class="flex items-center gap-2">
                                     <input type="checkbox" wire:model="stepForm.is_required" class="rounded text-pulse-orange-500 focus:ring-pulse-orange-500">
-                                    <span class="text-sm text-gray-700">Required step</span>
+                                    <span class="text-sm text-gray-700">@term('required_step_label')</span>
                                 </label>
                             </div>
                         </div>
@@ -342,7 +343,7 @@
                 </div>
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
                     <button wire:click="saveStep" class="w-full inline-flex justify-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg text-sm font-medium hover:bg-pulse-orange-600 sm:w-auto">
-                        {{ $editingStepId ? 'Update Step' : 'Add Step' }}
+                        {{ $editingStepId ? $terminology->get('update_step_label') : $terminology->get('add_step_label') }}
                     </button>
                     <button
                         wire:click="generateStepContent"
@@ -354,18 +355,18 @@
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                             </svg>
-                            AI Generate
+                            @term('ai_generate_label')
                         </span>
                         <span wire:loading wire:target="generateStepContent" class="flex items-center">
                             <svg class="animate-spin mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                             </svg>
-                            Generating...
+                            @term('generating_label')
                         </span>
                     </button>
                     <button wire:click="closeStepModal" class="mt-3 w-full inline-flex justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 sm:mt-0 sm:w-auto">
-                        Cancel
+                        @term('cancel_label')
                     </button>
                 </div>
             </div>
@@ -388,10 +389,10 @@
                             </svg>
                         </div>
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900">Publish Course</h3>
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">@term('publish_course_label')</h3>
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500">
-                                    Are you sure you want to publish this course? Once published, it will be available for enrollment and a new version will be created.
+                                    @term('publish_course_confirm_body_label')
                                 </p>
                             </div>
                         </div>
@@ -399,10 +400,10 @@
                 </div>
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
                     <button wire:click="publish" class="w-full inline-flex justify-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 sm:w-auto">
-                        Publish Course
+                        @term('publish_course_label')
                     </button>
                     <button wire:click="$set('showPublishConfirm', false)" class="mt-3 w-full inline-flex justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 sm:mt-0 sm:w-auto">
-                        Cancel
+                        @term('cancel_label')
                     </button>
                 </div>
             </div>
@@ -425,7 +426,7 @@
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                                     </svg>
-                                    AI Course Assistant
+                                    @term('ai_course_assistant_label')
                                 </h2>
                                 <button wire:click="toggleAIPanel" class="rounded-md text-purple-200 hover:text-white focus:outline-none">
                                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -433,7 +434,7 @@
                                     </svg>
                                 </button>
                             </div>
-                            <p class="mt-1 text-sm text-purple-200">Let AI help you create engaging course content</p>
+                            <p class="mt-1 text-sm text-purple-200">@term('ai_assistant_help_label')</p>
                         </div>
 
                         <!-- Content -->
@@ -456,31 +457,31 @@
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                     </svg>
-                                    Generate Complete Course
+                                    @term('generate_complete_course_label')
                                 </h3>
 
                                 <div class="space-y-3">
                                     <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Topic/Subject</label>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">@term('topic_subject_label')</label>
                                         <input
                                             type="text"
                                             wire:model="aiTopic"
                                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                            placeholder="e.g., Managing Test Anxiety"
+                                            placeholder="@term('ai_topic_placeholder')"
                                         >
                                     </div>
 
                                     <div class="grid grid-cols-2 gap-3">
                                         <div>
-                                            <label class="block text-xs font-medium text-gray-700 mb-1">Audience</label>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">@term('audience_label')</label>
                                             <select wire:model="aiAudience" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                                                <option value="learners">Learners</option>
-                                                <option value="teachers">Teachers</option>
-                                                <option value="parents">Parents</option>
+                                                <option value="participants">@term('participants_label')</option>
+                                                <option value="instructors">@term('instructors_label')</option>
+                                                <option value="direct_supervisors">@term('direct_supervisors_label')</option>
                                             </select>
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-medium text-gray-700 mb-1">Duration (min)</label>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">@term('duration_minutes_label')</label>
                                             <input
                                                 type="number"
                                                 wire:model="aiDurationMinutes"
@@ -492,13 +493,13 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Grade Level (optional)</label>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">@term('level_optional_label')</label>
                                         <select wire:model="aiGradeLevel" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                                            <option value="">Any grade</option>
-                                            <option value="K-2">K-2</option>
-                                            <option value="3-5">3-5</option>
-                                            <option value="6-8">6-8</option>
-                                            <option value="9-12">9-12</option>
+                                            <option value="">@term('any_level_label')</option>
+                                            <option value="L1-L2">@term('level_one_two_label')</option>
+                                            <option value="L3-L5">@term('level_three_five_label')</option>
+                                            <option value="L6-L8">@term('level_six_eight_label')</option>
+                                            <option value="L9-L12">@term('level_nine_twelve_label')</option>
                                         </select>
                                     </div>
 
@@ -512,14 +513,14 @@
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                             </svg>
-                                            Generate Course Draft
+                                            @term('generate_course_draft_label')
                                         </span>
                                         <span wire:loading wire:target="generateFullCourse" class="flex items-center">
                                             <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>
-                                            Generating...
+                                            @term('generating_label')
                                         </span>
                                     </button>
                                 </div>
@@ -531,7 +532,7 @@
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                                     </svg>
-                                    Create from Document
+                                    @term('create_from_document_label')
                                 </h3>
 
                                 <div class="space-y-3">
@@ -548,14 +549,14 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                             </svg>
                                             <span class="mt-2 block text-xs text-gray-600">
-                                                Click to upload TXT, PDF, or DOC
+                                                @term('upload_document_prompt_label')
                                             </span>
                                         </label>
                                         @if($uploadedDocument)
                                         <p class="mt-2 text-xs text-green-600">{{ $uploadedDocument->getClientOriginalName() }}</p>
                                         @endif
                                         <div wire:loading wire:target="uploadedDocument" class="mt-2 text-xs text-purple-600">
-                                            Uploading...
+                                            @term('uploading_label')
                                         </div>
                                     </div>
 
@@ -570,14 +571,14 @@
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                                             </svg>
-                                            Extract Course from Document
+                                            @term('extract_course_from_document_label')
                                         </span>
                                         <span wire:loading wire:target="processDocument" class="flex items-center">
                                             <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>
-                                            Processing...
+                                            @term('processing_label')
                                         </span>
                                     </button>
                                 </div>
@@ -589,7 +590,7 @@
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
                                     </svg>
-                                    Generate Sections
+                                    @term('generate_sections_label')
                                 </h3>
 
                                 <div class="grid grid-cols-2 gap-2">
@@ -601,7 +602,7 @@
                                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
-                                        Introduction
+                                        @term('introduction_label')
                                     </button>
                                     <button
                                         wire:click="generateSection('content')"
@@ -611,7 +612,7 @@
                                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                         </svg>
-                                        Content
+                                        @term('content_label')
                                     </button>
                                     <button
                                         wire:click="generateSection('reflection')"
@@ -621,7 +622,7 @@
                                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                                         </svg>
-                                        Reflection
+                                        @term('reflection_label')
                                     </button>
                                     <button
                                         wire:click="generateSection('assessment')"
@@ -631,7 +632,7 @@
                                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                                         </svg>
-                                        Assessment
+                                        @term('assessment_label')
                                     </button>
                                     <button
                                         wire:click="generateSection('action')"
@@ -641,7 +642,7 @@
                                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                         </svg>
-                                        Action Plan
+                                        @term('action_plan_label')
                                     </button>
                                 </div>
 
@@ -652,7 +653,7 @@
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        Generating section...
+                                        @term('generating_section_label')
                                     </div>
                                 </div>
                             </div>
@@ -661,7 +662,7 @@
                             @if(!empty($aiSuggestions))
                             <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                                 <div class="flex items-center justify-between mb-3">
-                                    <h3 class="text-sm font-semibold text-green-900">AI Suggestions</h3>
+                                    <h3 class="text-sm font-semibold text-green-900">@term('ai_suggestions_label')</h3>
                                     <button wire:click="clearAISuggestions" class="text-green-600 hover:text-green-800">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -672,15 +673,15 @@
                                 <div class="space-y-2 text-sm">
                                     @if(isset($aiSuggestions['title']))
                                     <div class="flex items-center justify-between p-2 bg-white rounded">
-                                        <span class="text-gray-600">Title: {{ $aiSuggestions['title'] }}</span>
-                                        <button wire:click="applySuggestion('title', '{{ addslashes($aiSuggestions['title']) }}')" class="text-xs text-green-600 hover:underline">Apply</button>
+                                        <span class="text-gray-600">@term('title_label'): {{ $aiSuggestions['title'] }}</span>
+                                        <button wire:click="applySuggestion('title', '{{ addslashes($aiSuggestions['title']) }}')" class="text-xs text-green-600 hover:underline">@term('apply_label')</button>
                                     </div>
                                     @endif
 
                                     @if(isset($aiSuggestions['suggestions']))
                                     @foreach($aiSuggestions['suggestions'] as $suggestion)
                                     <div class="p-2 bg-white rounded">
-                                        <span class="text-xs font-medium text-gray-500 uppercase">{{ $suggestion['type'] ?? 'Suggestion' }}</span>
+                                        <span class="text-xs font-medium text-gray-500 uppercase">{{ $suggestion['type'] ?? $terminology->get('suggestion_label') }}</span>
                                         <p class="text-gray-700">{{ $suggestion['text'] ?? $suggestion['description'] ?? '' }}</p>
                                     </div>
                                     @endforeach
@@ -691,19 +692,19 @@
 
                             <!-- Tips -->
                             <div class="bg-gray-50 rounded-lg p-4">
-                                <h4 class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">Tips</h4>
+                                <h4 class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">@term('tips_label')</h4>
                                 <ul class="text-xs text-gray-600 space-y-1">
                                     <li class="flex items-start">
                                         <span class="mr-2">•</span>
-                                        <span>Add objectives first for better AI content</span>
+                                        <span>@term('tips_add_objectives_label')</span>
                                     </li>
                                     <li class="flex items-start">
                                         <span class="mr-2">•</span>
-                                        <span>Upload existing documents to convert to courses</span>
+                                        <span>@term('tips_upload_documents_label')</span>
                                     </li>
                                     <li class="flex items-start">
                                         <span class="mr-2">•</span>
-                                        <span>Review and customize AI-generated content</span>
+                                        <span>@term('tips_review_customize_label')</span>
                                     </li>
                                 </ul>
                             </div>

@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+@endphp
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collection Reminder</title>
+    <title>{{ $terminology->get('email_collection_reminder_title') }}</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -85,7 +88,7 @@
 </head>
 <body>
     <div class="header">
-        <img src="{{ asset('images/pulse-logo.png') }}" alt="Pulse" class="logo" />
+        <img src="{{ asset('images/pulse-logo.png') }}" alt="{{ $terminology->get('app_name_label') }}" class="logo" />
     </div>
 
     <div class="content">
@@ -95,20 +98,20 @@
 
         @if($session)
         <div class="session-info">
-            <div class="session-label">Session Date</div>
+            <div class="session-label">{{ $terminology->get('email_collection_session_date_label') }}</div>
             <div class="session-value">{{ $session->session_date->format('l, F j, Y') }}</div>
         </div>
         @endif
 
         <a href="{{ $actionUrl }}" class="button">
-            Start Collection
+            {{ $terminology->get('email_collection_start_action') }}
         </a>
     </div>
 
     <div class="footer">
-        <p>You're receiving this because you're assigned to this data collection.</p>
+        <p>{{ $terminology->get('email_collection_footer_reason') }}</p>
         <p>
-            <a href="{{ route('settings.index') }}">Manage notification preferences</a>
+            <a href="{{ route('settings.index') }}">{{ $terminology->get('email_manage_notification_preferences_label') }}</a>
         </p>
     </div>
 </body>

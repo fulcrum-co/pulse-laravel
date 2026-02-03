@@ -266,7 +266,7 @@
                                         {{ str_replace('_', ' ', $report->report_type) }}
                                     </span>
                                 @else
-                                    <span class="text-sm text-gray-400">-</span>
+                                    <span class="text-sm text-gray-400">@term('empty_value_placeholder')</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">

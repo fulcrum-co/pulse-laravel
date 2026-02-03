@@ -1,8 +1,9 @@
 <div>
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <!-- Date Range Selector -->
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div class="flex flex-wrap gap-2">
-            @foreach(['3_months' => '3 Months', '6_months' => '6 Months', '12_months' => '1 Year', '2_years' => '2 Years', 'all' => 'All Time'] as $range => $label)
+            @foreach(['3_months' => $terminology->get('range_3_months_label'), '6_months' => $terminology->get('range_6_months_label'), '12_months' => $terminology->get('range_12_months_label'), '2_years' => $terminology->get('range_2_years_label'), 'all' => $terminology->get('range_all_time_label')] as $range => $label)
             <button
                 wire:click="setDateRange('{{ $range }}')"
                 class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors {{ $dateRange === $range ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"

@@ -67,38 +67,42 @@ class MessageTemplate extends Model
 
     public static function getChannels(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
-            self::CHANNEL_EMAIL => 'Email',
-            self::CHANNEL_SMS => 'SMS',
+            self::CHANNEL_EMAIL => $terminology->get('email_label'),
+            self::CHANNEL_SMS => $terminology->get('sms_label'),
         ];
     }
 
     public static function getMergeFields(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
             'recipient' => [
-                '{{first_name}}' => 'Recipient first name',
-                '{{last_name}}' => 'Recipient last name',
-                '{{full_name}}' => 'Recipient full name',
-                '{{email}}' => 'Recipient email',
-                '{{phone}}' => 'Recipient phone',
+                '{{first_name}}' => $terminology->get('recipient_first_name_label'),
+                '{{last_name}}' => $terminology->get('recipient_last_name_label'),
+                '{{full_name}}' => $terminology->get('recipient_full_name_label'),
+                '{{email}}' => $terminology->get('recipient_email_label'),
+                '{{phone}}' => $terminology->get('recipient_phone_label'),
             ],
             'organization' => [
-                '{{organization_name}}' => 'Organization name',
+                '{{organization_name}}' => $terminology->get('organization_name_label'),
             ],
             'report' => [
-                '{{report_link}}' => 'Link to report (for live reports)',
+                '{{report_link}}' => $terminology->get('report_link_label'),
             ],
             'system' => [
-                '{{unsubscribe_link}}' => 'Unsubscribe link',
-                '{{sender_name}}' => 'Sender name',
-                '{{sender_email}}' => 'Sender email',
+                '{{unsubscribe_link}}' => $terminology->get('unsubscribe_link_label'),
+                '{{sender_name}}' => $terminology->get('sender_name_label'),
+                '{{sender_email}}' => $terminology->get('sender_email_label'),
             ],
-            'learner' => [
-                '{{learner_name}}' => 'Learner full name',
-                '{{grade_level}}' => 'Learner grade level',
-                '{{classroom}}' => 'Learner classroom',
-                '{{teacher_name}}' => 'Teacher name',
+            'participant' => [
+                '{{learner_name}}' => $terminology->get('participant_full_name_label'),
+                '{{level}}' => $terminology->get('participant_level_label'),
+                '{{learning_group}}' => $terminology->get('participant_learning_group_label'),
+                '{{instructor_name}}' => $terminology->get('instructor_name_label'),
             ],
         ];
     }

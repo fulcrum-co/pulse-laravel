@@ -8,11 +8,11 @@
                 </a>
                 <div>
                     <nav class="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                        <a href="{{ route('resources.index') }}" class="hover:text-gray-700">Resources</a>
-                        <span>/</span>
-                        <span class="text-gray-900">Programs</span>
+                        <a href="{{ route('resources.index') }}" class="hover:text-gray-700">@term('resource_plural')</a>
+                        <span>@term('breadcrumb_separator_label')</span>
+                        <span class="text-gray-900">@term('program_plural')</span>
                     </nav>
-                    <h1 class="text-2xl font-semibold text-gray-900">Program Catalog</h1>
+                    <h1 class="text-2xl font-semibold text-gray-900">@term('program_catalog_label')</h1>
                 </div>
             </div>
             <button
@@ -20,7 +20,7 @@
                 class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
             >
                 <x-icon name="plus" class="w-4 h-4" />
-                Add Program
+                @term('add_action') @term('program_singular')
             </button>
         </div>
     </div>
@@ -38,7 +38,7 @@
                         <input
                             type="text"
                             wire:model.live.debounce.300ms="search"
-                            placeholder="Search programs..."
+                            placeholder="@term('search_programs_placeholder')"
                             class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                         >
                     </div>
@@ -50,7 +50,7 @@
                         wire:model.live="filterType"
                         class="border-gray-300 rounded-lg text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                     >
-                        <option value="">All Types</option>
+                        <option value="">@term('all_types_label')</option>
                         @foreach($this->programTypes as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
@@ -60,19 +60,19 @@
                         wire:model.live="filterLocation"
                         class="border-gray-300 rounded-lg text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                     >
-                        <option value="">Any Location</option>
-                        <option value="virtual">Virtual Only</option>
-                        <option value="in_person">In-Person Only</option>
-                        <option value="hybrid">Hybrid</option>
+                        <option value="">@term('any_location_label')</option>
+                        <option value="virtual">@term('virtual_only_label')</option>
+                        <option value="in_person">@term('in_person_only_label')</option>
+                        <option value="hybrid">@term('hybrid_label')</option>
                     </select>
 
                     <select
                         wire:model.live="filterCost"
                         class="border-gray-300 rounded-lg text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                     >
-                        <option value="">Any Cost</option>
-                        <option value="free">Free</option>
-                        <option value="paid">Paid</option>
+                        <option value="">@term('any_cost_label')</option>
+                        <option value="free">@term('free_label')</option>
+                        <option value="paid">@term('paid_label')</option>
                     </select>
 
                     <label class="flex items-center gap-2 cursor-pointer">
@@ -81,7 +81,7 @@
                             wire:model.live="showActiveOnly"
                             class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
                         >
-                        <span class="text-sm text-gray-700">Active only</span>
+                        <span class="text-sm text-gray-700">@term('active_only_label')</span>
                     </label>
 
                     @if($this->hasActiveFilters)
@@ -89,7 +89,7 @@
                             wire:click="clearFilters"
                             class="px-3 py-2 text-sm text-gray-600 hover:text-gray-900"
                         >
-                            Clear all
+                            @term('clear_all_label')
                         </button>
                     @endif
 
@@ -101,21 +101,21 @@
                         <button
                             wire:click="$set('viewMode', 'grid')"
                             class="p-2 {{ $viewMode === 'grid' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }} transition-colors"
-                            title="Grid view"
+                            title="@term('grid_view_label')"
                         >
                             <x-icon name="squares-2x2" class="w-4 h-4" />
                         </button>
                         <button
                             wire:click="$set('viewMode', 'list')"
                             class="p-2 border-l border-gray-300 {{ $viewMode === 'list' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }} transition-colors"
-                            title="List view"
+                            title="@term('list_view_label')"
                         >
                             <x-icon name="bars-3" class="w-4 h-4" />
                         </button>
                         <button
                             wire:click="$set('viewMode', 'table')"
                             class="p-2 border-l border-gray-300 {{ $viewMode === 'table' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }} transition-colors"
-                            title="Table view"
+                            title="@term('table_view_label')"
                         >
                             <x-icon name="table-cells" class="w-4 h-4" />
                         </button>
@@ -127,7 +127,7 @@
         <!-- Results Count -->
         <div class="mb-4">
             <p class="text-sm text-gray-600">
-                Showing <span class="font-medium">{{ $programs->count() }}</span> of <span class="font-medium">{{ $programs->total() }}</span> programs
+                @term('showing_label') <span class="font-medium">{{ $programs->count() }}</span> @term('of_label') <span class="font-medium">{{ $programs->total() }}</span> @term('program_plural')
             </p>
         </div>
 
@@ -175,7 +175,7 @@
                                             {{ $program->name }}
                                         </h3>
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-700 mt-1">
-                                            {{ ucfirst(str_replace('_', ' ', $program->program_type)) }}
+                                            {{ $terminology->get('program_type_' . $program->program_type . '_label') }}
                                         </span>
                                     </div>
                                 </div>
@@ -191,19 +191,19 @@
                                     @if($program->duration_weeks)
                                         <span class="flex items-center gap-1">
                                             <x-icon name="calendar" class="w-3.5 h-3.5" />
-                                            {{ $program->duration_weeks }} weeks
+                                            {{ $program->duration_weeks }} @term('weeks_label')
                                         </span>
                                     @endif
                                     @if($program->location_type)
                                         <span class="flex items-center gap-1">
                                             <x-icon name="{{ $program->location_type === 'virtual' ? 'globe-alt' : 'map-pin' }}" class="w-3.5 h-3.5" />
-                                            {{ ucfirst($program->location_type) }}
+                                            {{ $terminology->get('location_type_' . $program->location_type . '_label') }}
                                         </span>
                                     @endif
                                     @if($program->cost_structure === 'free')
                                         <span class="flex items-center gap-1 text-green-600">
                                             <x-icon name="check-circle" class="w-3.5 h-3.5" />
-                                            Free
+                                            @term('free_label')
                                         </span>
                                     @elseif($program->cost_details)
                                         <span class="flex items-center gap-1">
@@ -220,16 +220,16 @@
                                     @php $spotsLeft = $program->spots_remaining ?? $program->capacity; @endphp
                                     <span class="text-xs {{ $spotsLeft > 0 ? 'text-green-600' : 'text-red-600' }}">
                                         @if($spotsLeft > 0)
-                                            {{ $spotsLeft }} spots available
+                                            {{ $spotsLeft }} @term('spots_available_label')
                                         @else
-                                            Full
+                                            @term('full_label')
                                         @endif
                                     </span>
                                 @else
-                                    <span class="text-xs text-gray-500">Open enrollment</span>
+                                        <span class="text-xs text-gray-500">@term('open_enrollment_label')</span>
                                 @endif
                                 <span class="text-xs font-medium text-pulse-orange-600 group-hover:text-pulse-orange-700">
-                                    Learn more &rarr;
+                                    @term('learn_more_label') &rarr;
                                 </span>
                             </div>
                         </a>
@@ -260,7 +260,7 @@
                                         {{ $program->name }}
                                     </h3>
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-700">
-                                        {{ ucfirst(str_replace('_', ' ', $program->program_type)) }}
+                                        {{ $terminology->get('program_type_' . $program->program_type . '_label') }}
                                     </span>
                                 </div>
                                 @if($program->description)
@@ -270,13 +270,13 @@
                                     @if($program->duration_weeks)
                                         <span class="flex items-center gap-1">
                                             <x-icon name="calendar" class="w-3.5 h-3.5" />
-                                            {{ $program->duration_weeks }} weeks
+                                            {{ $program->duration_weeks }} @term('weeks_label')
                                         </span>
                                     @endif
                                     @if($program->location_type)
                                         <span class="flex items-center gap-1">
                                             <x-icon name="{{ $program->location_type === 'virtual' ? 'globe-alt' : 'map-pin' }}" class="w-3.5 h-3.5" />
-                                            {{ ucfirst($program->location_type) }}
+                                            {{ $terminology->get('location_type_' . $program->location_type . '_label') }}
                                         </span>
                                     @endif
                                 </div>
@@ -289,12 +289,12 @@
                                     @if($program->cost_structure === 'free')
                                         <span class="inline-flex items-center gap-1 text-sm font-medium text-green-600">
                                             <x-icon name="check-circle" class="w-4 h-4" />
-                                            Free
+                                            @term('free_label')
                                         </span>
                                     @elseif($program->cost_details)
                                         <span class="text-sm text-gray-600">{{ $program->cost_details }}</span>
                                     @else
-                                        <span class="text-sm text-gray-400">—</span>
+                                        <span class="text-sm text-gray-400">@term('empty_value_placeholder')</span>
                                     @endif
                                 </div>
 
@@ -303,14 +303,14 @@
                                     @php $spotsLeft = $program->spots_remaining ?? $program->capacity; @endphp
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $spotsLeft > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                                         @if($spotsLeft > 0)
-                                            {{ $spotsLeft }} spots
+                                            {{ $spotsLeft }} @term('spots_label')
                                         @else
-                                            Full
+                                            @term('full_label')
                                         @endif
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                                        Open
+                                        @term('open_label')
                                     </span>
                                 @endif
 
@@ -328,14 +328,14 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cost</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Availability</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('program_singular')</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('type_label')</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('duration_label')</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('location_label')</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('cost_label')</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('availability_label')</th>
                                     <th scope="col" class="relative px-6 py-3">
-                                        <span class="sr-only">Actions</span>
+                                        <span class="sr-only">@term('actions_label')</span>
                                     </th>
                                 </tr>
                             </thead>
@@ -361,36 +361,36 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ $color }}-100 text-{{ $color }}-700">
-                                                {{ ucfirst(str_replace('_', ' ', $program->program_type)) }}
+                                                {{ $terminology->get('program_type_' . $program->program_type . '_label') }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                             @if($program->duration_weeks)
-                                                {{ $program->duration_weeks }} weeks
+                                                {{ $program->duration_weeks }} @term('weeks_label')
                                                 @if($program->frequency_per_week)
-                                                    <span class="text-gray-400">({{ $program->frequency_per_week }}x/wk)</span>
+                                                    <span class="text-gray-400">({{ $program->frequency_per_week }}@term('times_per_week_label'))</span>
                                                 @endif
                                             @else
-                                                <span class="text-gray-400">—</span>
+                                                <span class="text-gray-400">@term('empty_value_placeholder')</span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                             @if($program->location_type)
                                                 <span class="flex items-center gap-1">
                                                     <x-icon name="{{ $program->location_type === 'virtual' ? 'globe-alt' : 'map-pin' }}" class="w-4 h-4" />
-                                                    {{ ucfirst($program->location_type) }}
+                                                    {{ $terminology->get('location_type_' . $program->location_type . '_label') }}
                                                 </span>
                                             @else
-                                                <span class="text-gray-400">—</span>
+                                                <span class="text-gray-400">@term('empty_value_placeholder')</span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             @if($program->cost_structure === 'free')
-                                                <span class="text-green-600 font-medium">Free</span>
+                                                <span class="text-green-600 font-medium">@term('free_label')</span>
                                             @elseif($program->cost_details)
                                                 <span class="text-gray-600">{{ $program->cost_details }}</span>
                                             @else
-                                                <span class="text-gray-400">—</span>
+                                                <span class="text-gray-400">@term('empty_value_placeholder')</span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -400,18 +400,18 @@
                                                     @if($spotsLeft > 0)
                                                         {{ $spotsLeft }} / {{ $program->capacity }}
                                                     @else
-                                                        Full
+                                                        @term('full_label')
                                                     @endif
                                                 </span>
                                             @else
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                                                    Open
+                                                    @term('open_label')
                                                 </span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <a href="{{ route('resources.programs.show', $program) }}" class="text-pulse-orange-600 hover:text-pulse-orange-700">
-                                                View
+                                                @term('view_action')
                                             </a>
                                         </td>
                                     </tr>
@@ -433,23 +433,23 @@
                     <x-icon name="building-office" class="w-8 h-8 text-green-400" />
                 </div>
                 @if($this->hasActiveFilters)
-                    <h3 class="text-lg font-medium text-gray-900 mb-1">No programs match your filters</h3>
-                    <p class="text-gray-500 mb-4">Try adjusting your search or filter criteria.</p>
+                    <h3 class="text-lg font-medium text-gray-900 mb-1">@term('no_programs_match_filters_label')</h3>
+                    <p class="text-gray-500 mb-4">@term('try_adjusting_filters_label')</p>
                     <button
                         wire:click="clearFilters"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                        Clear filters
+                        @term('clear_filters_label')
                     </button>
                 @else
-                    <h3 class="text-lg font-medium text-gray-900 mb-1">No programs yet</h3>
-                    <p class="text-gray-500 mb-4">Add intervention programs, support groups, and other services for learners.</p>
+                    <h3 class="text-lg font-medium text-gray-900 mb-1">@term('no_programs_yet_label')</h3>
+                    <p class="text-gray-500 mb-4">@term('program_catalog_empty_label')</p>
                     <button
                         wire:click="$dispatch('openAddResourceModal')"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
                     >
                         <x-icon name="plus" class="w-4 h-4" />
-                        Add Program
+                        @term('add_action') @term('program_singular')
                     </button>
                 @endif
             </div>

@@ -8,10 +8,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
             </svg>
-            <span>Demo Mode: Viewing as <strong>{{ $availableRoles[$currentRole]['label'] }}</strong></span>
+            <span>@term('demo_mode_viewing_as_label') <strong>{{ $availableRoles[$currentRole]['label'] }}</strong></span>
             <a href="{{ route('demo.role.switch', 'actual') }}"
                class="ml-2 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded text-xs transition-colors">
-                Exit Demo
+                @term('exit_demo_label')
             </a>
         </div>
     </div>
@@ -21,12 +21,12 @@
     <button
         @click="open = !open"
         class="fixed bottom-6 left-6 z-40 flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-        title="Demo Role Switcher"
+        title="@term('demo_role_switcher_label')"
     >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
         </svg>
-        <span class="font-medium hidden sm:inline">Switch Role</span>
+        <span class="font-medium hidden sm:inline">@term('switch_role_label')</span>
         <svg class="w-4 h-4 transition-transform hidden sm:block" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
         </svg>
@@ -46,8 +46,8 @@
     >
         <!-- Header -->
         <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3">
-            <h3 class="text-white font-semibold">Demo Role Switcher</h3>
-            <p class="text-purple-200 text-xs mt-0.5">Preview the app as different user types</p>
+            <h3 class="text-white font-semibold">@term('demo_role_switcher_label')</h3>
+            <p class="text-purple-200 text-xs mt-0.5">@term('preview_app_roles_label')</p>
         </div>
 
         <!-- Role List -->
@@ -109,7 +109,7 @@
                     <div class="flex items-center gap-2">
                         <span class="font-medium text-gray-900">{{ $role['label'] }}</span>
                         @if($currentRole === $roleKey)
-                        <span class="px-1.5 py-0.5 bg-purple-100 text-purple-700 text-xs rounded font-medium">Active</span>
+                        <span class="px-1.5 py-0.5 bg-purple-100 text-purple-700 text-xs rounded font-medium">@term('active_label')</span>
                         @endif
                     </div>
                     <p class="text-xs text-gray-500 mt-0.5">{{ $role['description'] }}</p>
@@ -128,7 +128,7 @@
         <!-- Footer -->
         <div class="px-4 py-3 bg-gray-50 border-t border-gray-200">
             <p class="text-xs text-gray-500 text-center">
-                Changes apply immediately and persist during your session
+                @term('demo_switcher_footer_label')
             </p>
         </div>
     </div>

@@ -32,8 +32,8 @@ class SurveyPolicy
      */
     public function create(User $user): bool
     {
-        // Admins and teachers can create surveys
-        return $user->isAdmin() || $user->primary_role === 'teacher';
+        // Admins and instructors can create surveys
+        return $user->isAdmin() || $user->primary_role === 'instructor';
     }
 
     /**

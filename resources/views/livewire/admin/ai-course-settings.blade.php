@@ -1,9 +1,10 @@
 <div class="space-y-6">
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">AI Course Settings</h1>
-            <p class="text-gray-600 mt-1">Configure automatic course generation and approval workflows</p>
+            <h1 class="text-2xl font-bold text-gray-900">@term('ai_course_settings_label')</h1>
+            <p class="text-gray-600 mt-1">@term('ai_course_settings_description')</p>
         </div>
     </div>
 
@@ -18,7 +19,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-2xl font-bold text-yellow-900">{{ $approvalStats['pending'] }}</p>
-                    <p class="text-xs text-yellow-600">Pending Review</p>
+                    <p class="text-xs text-yellow-600">@term('course_approval_pending_review_label')</p>
                 </div>
             </div>
         </div>
@@ -32,7 +33,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-2xl font-bold text-green-900">{{ $approvalStats['approved_this_week'] }}</p>
-                    <p class="text-xs text-green-600">Approved This Week</p>
+                    <p class="text-xs text-green-600">@term('approved_this_week_label')</p>
                 </div>
             </div>
         </div>
@@ -46,7 +47,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-2xl font-bold text-red-900">{{ $approvalStats['rejected_this_week'] }}</p>
-                    <p class="text-xs text-red-600">Rejected This Week</p>
+                    <p class="text-xs text-red-600">@term('rejected_this_week_label')</p>
                 </div>
             </div>
         </div>
@@ -60,7 +61,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-2xl font-bold text-purple-900">{{ $approvalStats['auto_generated_total'] }}</p>
-                    <p class="text-xs text-purple-600">AI-Generated Total</p>
+                    <p class="text-xs text-purple-600">@term('ai_generated_total_label')</p>
                 </div>
             </div>
         </div>
@@ -70,12 +71,12 @@
         <!-- Settings Panel -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
             <div class="px-4 py-3 border-b border-gray-200">
-                <h2 class="text-lg font-semibold text-gray-900">Generation Settings</h2>
+                <h2 class="text-lg font-semibold text-gray-900">@term('generation_settings_label')</h2>
             </div>
             <div class="p-4 space-y-6">
                 <!-- Approval Mode -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Approval Workflow Mode</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">@term('approval_workflow_mode_label')</label>
                     <select
                         wire:model="approvalMode"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -86,11 +87,11 @@
                     </select>
                     <p class="text-xs text-gray-500 mt-1">
                         @if($approvalMode === 'auto_activate')
-                        AI-generated courses will be published immediately without review.
+                        @term('approval_mode_auto_activate_help')
                         @elseif($approvalMode === 'create_approve')
-                        AI-generated courses will be created as drafts pending review.
+                        @term('approval_mode_create_approve_help')
                         @else
-                        Courses must be approved before AI generation begins.
+                        @term('approval_mode_manual_help')
                         @endif
                     </p>
                 </div>
@@ -98,14 +99,14 @@
                 <!-- Auto-Generate Toggle -->
                 <div class="flex items-center justify-between">
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Enable Auto-Generation</label>
-                        <p class="text-xs text-gray-500">Allow system to automatically generate courses based on triggers</p>
+                        <label class="text-sm font-medium text-gray-700">@term('enable_auto_generation_label')</label>
+                        <p class="text-xs text-gray-500">@term('enable_auto_generation_help')</p>
                     </div>
                     <button
                         wire:click="$toggle('autoGenerateEnabled')"
                         class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 {{ $autoGenerateEnabled ? 'bg-purple-600' : 'bg-gray-200' }}"
                     >
-                        <span class="sr-only">Enable auto-generation</span>
+                        <span class="sr-only">@term('enable_auto_generation_label')</span>
                         <span class="pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $autoGenerateEnabled ? 'translate-x-5' : 'translate-x-0' }}"></span>
                     </button>
                 </div>
@@ -113,7 +114,7 @@
                 <!-- Generation Triggers -->
                 @if($autoGenerateEnabled)
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Generation Triggers</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">@term('generation_triggers_label')</label>
                     <div class="space-y-2">
                         @foreach($triggerOptions as $value => $label)
                         <label class="flex items-center">
@@ -132,7 +133,7 @@
 
                 <!-- Max Courses Per Day -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Max Auto-Generated Courses Per Day</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">@term('max_auto_generated_courses_per_day_label')</label>
                     <input
                         type="number"
                         wire:model="maxAutoCoursesPerDay"
@@ -144,9 +145,9 @@
 
                 <!-- Notification Recipients -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Notification Recipients</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">@term('notification_recipients_label')</label>
                     <div class="space-y-2">
-                        @foreach(['admin' => 'Administrators', 'counselor' => 'Counselors', 'teacher' => 'Teachers'] as $value => $label)
+                        @foreach(['admin' => $terminology->get('administrators_label'), 'support_person' => $terminology->get('support_person_plural'), 'instructor' => $terminology->get('instructor_plural')] as $value => $label)
                         <label class="flex items-center">
                             <input
                                 type="checkbox"
@@ -163,14 +164,14 @@
                 <!-- Require Review Toggle -->
                 <div class="flex items-center justify-between">
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Require Review for AI-Generated</label>
-                        <p class="text-xs text-gray-500">All AI-generated courses require human review before publishing</p>
+                        <label class="text-sm font-medium text-gray-700">@term('require_review_for_ai_generated_label')</label>
+                        <p class="text-xs text-gray-500">@term('require_review_for_ai_generated_help')</p>
                     </div>
                     <button
                         wire:click="$toggle('requireReviewForAiGenerated')"
                         class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 {{ $requireReviewForAiGenerated ? 'bg-purple-600' : 'bg-gray-200' }}"
                     >
-                        <span class="sr-only">Require review</span>
+                        <span class="sr-only">@term('require_review_for_ai_generated_label')</span>
                         <span class="pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $requireReviewForAiGenerated ? 'translate-x-5' : 'translate-x-0' }}"></span>
                     </button>
                 </div>
@@ -181,7 +182,7 @@
                         wire:click="saveSettings"
                         class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
                     >
-                        Save Settings
+                        @term('save_settings_label')
                     </button>
                 </div>
             </div>
@@ -190,7 +191,7 @@
         <!-- Pending Approvals Panel -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
             <div class="px-4 py-3 border-b border-gray-200">
-                <h2 class="text-lg font-semibold text-gray-900">Pending Approvals</h2>
+                <h2 class="text-lg font-semibold text-gray-900">@term('pending_approvals_label')</h2>
             </div>
             <div class="p-4">
                 @if($pendingApprovals->count() > 0)
@@ -198,23 +199,23 @@
                     @foreach($pendingApprovals as $workflow)
                     <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-100">
                         <div class="flex-1">
-                            <p class="text-sm font-medium text-gray-900">{{ $workflow->course->title ?? 'Untitled Course' }}</p>
+                            <p class="text-sm font-medium text-gray-900">{{ $workflow->course->title ?? $terminology->get('untitled_course_label') }}</p>
                             <p class="text-xs text-gray-500 mt-1">
-                                @if($workflow->course->target_entity_type === 'learner')
-                                    <span class="text-blue-600">For Learner</span>
-                                @elseif($workflow->course->target_entity_type === 'teacher')
-                                    <span class="text-green-600">For Teacher</span>
+                                @if($workflow->course->target_entity_type === 'participant')
+                                    <span class="text-blue-600">@term('for_participant_label')</span>
+                                @elseif($workflow->course->target_entity_type === 'instructor')
+                                    <span class="text-green-600">@term('for_instructor_label')</span>
                                 @else
-                                    <span class="text-purple-600">{{ ucfirst($workflow->course->target_entity_type ?? 'General') }}</span>
+                                    <span class="text-purple-600">{{ ucfirst($workflow->course->target_entity_type ?? $terminology->get('general_label')) }}</span>
                                 @endif
-                                - Submitted {{ $workflow->submitted_at?->diffForHumans() ?? 'recently' }}
+                                - @term('submitted_label') {{ $workflow->submitted_at?->diffForHumans() ?? $terminology->get('recently_label') }}
                             </p>
                         </div>
                         <div class="flex gap-2">
                             <button
                                 wire:click="quickApprove({{ $workflow->id }})"
                                 class="p-1.5 text-green-600 hover:bg-green-100 rounded"
-                                title="Quick Approve"
+                                title="@term('quick_approve_label')"
                             >
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -223,7 +224,7 @@
                             <button
                                 wire:click="openApprovalModal({{ $workflow->id }})"
                                 class="p-1.5 text-gray-600 hover:bg-gray-100 rounded"
-                                title="Review Details"
+                                title="@term('review_details_label')"
                             >
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -241,8 +242,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
                     </div>
-                    <p class="text-sm text-gray-600">No pending approvals</p>
-                    <p class="text-xs text-gray-500 mt-1">All AI-generated courses have been reviewed</p>
+                    <p class="text-sm text-gray-600">@term('no_pending_approvals_label')</p>
+                    <p class="text-xs text-gray-500 mt-1">@term('all_ai_courses_reviewed_label')</p>
                 </div>
                 @endif
             </div>
@@ -262,7 +263,7 @@
 
             <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Review Course</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">@term('review_course_label')</h3>
 
                     @if($selectedWorkflow && $selectedWorkflow->course)
                     <div class="mb-4">
@@ -271,15 +272,15 @@
 
                         <div class="mt-3 flex flex-wrap gap-2">
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                {{ ucfirst(str_replace('_', ' ', $selectedWorkflow->course->course_type ?? 'general')) }}
+                                {{ ucfirst(str_replace('_', ' ', $selectedWorkflow->course->course_type ?? $terminology->get('general_label'))) }}
                             </span>
                             @if($selectedWorkflow->course->estimated_duration_minutes)
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                {{ $selectedWorkflow->course->estimated_duration_minutes }} min
+                                {{ $selectedWorkflow->course->estimated_duration_minutes }} @term('minutes_label')
                             </span>
                             @endif
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {{ $selectedWorkflow->course->steps_count ?? $selectedWorkflow->course->steps()->count() }} steps
+                                {{ $selectedWorkflow->course->steps_count ?? $selectedWorkflow->course->steps()->count() }} @term('steps_label')
                             </span>
                         </div>
 
@@ -289,7 +290,7 @@
                                 target="_blank"
                                 class="text-sm text-purple-600 hover:underline"
                             >
-                                Open in Editor &rarr;
+                                @term('open_in_editor_label') &rarr;
                             </a>
                         </div>
                     </div>
@@ -297,22 +298,22 @@
 
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Review Notes (optional)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('review_notes_optional_label')</label>
                             <textarea
                                 wire:model="reviewNotes"
                                 rows="2"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                placeholder="Add notes about this approval..."
+                                placeholder="@term('review_notes_placeholder')"
                             ></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Rejection Reason (required for rejection)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('rejection_reason_required_label')</label>
                             <textarea
                                 wire:model="rejectionReason"
                                 rows="2"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                placeholder="Explain why this course is being rejected..."
+                                placeholder="@term('rejection_reason_placeholder')"
                             ></textarea>
                         </div>
                     </div>
@@ -323,25 +324,25 @@
                         wire:click="approveCourse"
                         class="w-full inline-flex justify-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 sm:w-auto"
                     >
-                        Approve
+                        @term('approve_action')
                     </button>
                     <button
                         wire:click="requestRevision"
                         class="mt-2 w-full inline-flex justify-center px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium hover:bg-yellow-600 sm:mt-0 sm:w-auto"
                     >
-                        Request Revision
+                        @term('request_revision_action')
                     </button>
                     <button
                         wire:click="rejectCourse"
                         class="mt-2 w-full inline-flex justify-center px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 sm:mt-0 sm:w-auto"
                     >
-                        Reject
+                        @term('reject_action')
                     </button>
                     <button
                         wire:click="closeApprovalModal"
                         class="mt-2 w-full inline-flex justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 sm:mt-0 sm:w-auto"
                     >
-                        Cancel
+                        @term('cancel_action')
                     </button>
                 </div>
             </div>

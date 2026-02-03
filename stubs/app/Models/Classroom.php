@@ -6,24 +6,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use MongoDB\Laravel\Eloquent\Model;
 use MongoDB\Laravel\Eloquent\SoftDeletes;
 
-class Classroom extends Model
+class LearningGroup extends Model
 {
     use SoftDeletes;
 
     protected $connection = 'mongodb';
 
-    protected $collection = 'classrooms';
+    protected $collection = 'learning_groups';
 
     protected $fillable = [
         'org_id',
         'department_id',
         'name',
         'subject',
-        'grade_level',
+        'level',
         'room_number',
-        'primary_teacher_id',
-        'co_teacher_ids',
-        'learner_ids',
+        'primary_instructor_id',
+        'co_instructor_ids',
+        'participant_ids',
         'max_capacity',
         'meeting_schedule',
         'strategy_ids',
@@ -31,11 +31,11 @@ class Classroom extends Model
     ];
 
     protected $casts = [
-        'co_teacher_ids' => 'array',
-        'learner_ids' => 'array',
+        'co_instructor_ids' => 'array',
+        'participant_ids' => 'array',
         'meeting_schedule' => 'array',
         'strategy_ids' => 'array',
-        'grade_level' => 'integer',
+        'level' => 'integer',
         'max_capacity' => 'integer',
         'active' => 'boolean',
     ];
@@ -57,23 +57,23 @@ class Classroom extends Model
     }
 
     /**
-     * Get the primary teacher.
+     * Get the primary instructor.
      */
-    public function primaryTeacher(): BelongsTo
+    public function primaryInstructor(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'primary_teacher_id');
+        return $this->belongsTo(User::class, 'primary_instructor_id');
     }
 
     /**
-     * Get the learner count.
+     * Get the participant count.
      */
     public function getLearnerCountAttribute(): int
     {
-        return count($this->learner_ids ?? []);
+        return count($this->participant_ids ?? []);
     }
 
     /**
-     * Check if classroom is at capacity.
+     * Check if learning_group is at capacity.
      */
     public function isAtCapacity(): bool
     {
@@ -81,35 +81,35 @@ class Classroom extends Model
     }
 
     /**
-     * Add a learner to the classroom.
+     * Add a participant to the learning_group.
      */
-    public function addLearner(string $learnerId): bool
+    public function addLearner(string $participantId): bool
     {
         if ($this->isAtCapacity()) {
             return false;
         }
 
-        $learnerIds = $this->learner_ids ?? [];
-        if (! in_array($learnerId, $learnerIds)) {
-            $learnerIds[] = $learnerId;
-            $this->update(['learner_ids' => $learnerIds]);
+        $participantIds = $this->participant_ids ?? [];
+        if (! in_array($participantId, $participantIds)) {
+            $participantIds[] = $participantId;
+            $this->update(['participant_ids' => $participantIds]);
         }
 
         return true;
     }
 
     /**
-     * Remove a learner from the classroom.
+     * Remove a participant from the learning_group.
      */
-    public function removeLearner(string $learnerId): void
+    public function removeLearner(string $participantId): void
     {
-        $learnerIds = $this->learner_ids ?? [];
-        $learnerIds = array_filter($learnerIds, fn ($id) => $id !== $learnerId);
-        $this->update(['learner_ids' => array_values($learnerIds)]);
+        $participantIds = $this->participant_ids ?? [];
+        $participantIds = array_filter($participantIds, fn ($id) => $id !== $participantId);
+        $this->update(['participant_ids' => array_values($participantIds)]);
     }
 
     /**
-     * Scope to filter active classrooms.
+     * Scope to filter active learning_groups.
      */
     public function scopeActive($query)
     {
@@ -125,13 +125,13 @@ class Classroom extends Model
     }
 
     /**
-     * Scope to filter by teacher.
+     * Scope to filter by instructor.
      */
-    public function scopeForTeacher($query, string $teacherId)
+    public function scopeForInstructor($query, string $instructorId)
     {
-        return $query->where(function ($q) use ($teacherId) {
-            $q->where('primary_teacher_id', $teacherId)
-                ->orWhere('co_teacher_ids', $teacherId);
+        return $query->where(function ($q) use ($instructorId) {
+            $q->where('primary_instructor_id', $instructorId)
+                ->orWhere('co_instructor_ids', $instructorId);
         });
     }
 }

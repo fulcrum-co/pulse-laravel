@@ -9,19 +9,19 @@ return new class extends Migration
     public function up(): void
     {
         // Skip if table already exists (idempotent migration)
-        if (Schema::hasTable('classrooms')) {
+        if (Schema::hasTable('learning_groups')) {
             return;
         }
 
-        Schema::create('classrooms', function (Blueprint $table) {
+        Schema::create('learning_groups', function (Blueprint $table) {
             $table->id();
             $table->foreignId('org_id')->constrained('organizations')->cascadeOnDelete();
             $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
             $table->string('name');
             $table->string('code')->nullable();
             $table->text('description')->nullable();
-            $table->foreignId('teacher_user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('grade_level')->nullable();
+            $table->foreignId('instructor_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('level')->nullable();
             $table->string('subject')->nullable();
             $table->string('period')->nullable();
             $table->string('room_number')->nullable();
@@ -35,6 +35,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('classrooms');
+        Schema::dropIfExists('learning_groups');
     }
 };

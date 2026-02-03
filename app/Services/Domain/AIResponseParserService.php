@@ -177,9 +177,9 @@ class AIResponseParserService
      *
      * @example
      *   $schema = [
-     *       'required' => ['learner_id', 'needs'],
+     *       'required' => ['participant_id', 'needs'],
      *       'fields' => [
-     *           'learner_id' => 'int',
+     *           'participant_id' => 'int',
      *           'needs' => 'array',
      *           'severity' => 'string',
      *       ]

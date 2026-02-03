@@ -5,7 +5,7 @@ namespace App\Livewire;
 use App\Models\ContactList;
 use App\Models\Program;
 use App\Models\ProgramEnrollment;
-use App\Models\Learner;
+use App\Models\Participant;
 use Livewire\Component;
 
 class ProgramDetail extends Component
@@ -15,7 +15,7 @@ class ProgramDetail extends Component
     // Enroll modal state
     public bool $showEnrollModal = false;
 
-    public string $enrollType = 'learner'; // learner or list
+    public string $enrollType = 'participant'; // participant or list
 
     public ?int $selectedLearnerId = null;
 
@@ -76,39 +76,39 @@ class ProgramDetail extends Component
      */
     protected function resetEnrollForm(): void
     {
-        $this->enrollType = 'learner';
+        $this->enrollType = 'participant';
         $this->selectedLearnerId = null;
         $this->selectedListId = null;
         $this->enrollNote = '';
     }
 
     /**
-     * Enroll a learner or list in this program.
+     * Enroll a participant or list in this program.
      */
     public function enrollLearner(): void
     {
         $user = auth()->user();
 
-        if ($this->enrollType === 'learner') {
+        if ($this->enrollType === 'participant') {
             $this->validate([
-                'selectedLearnerId' => 'required|exists:learners,id',
+                'selectedLearnerId' => 'required|exists:participants,id',
             ]);
 
             // Check for existing enrollment
             $exists = ProgramEnrollment::where('program_id', $this->program->id)
-                ->where('learner_id', $this->selectedLearnerId)
+                ->where('participant_id', $this->selectedLearnerId)
                 ->whereIn('status', ['enrolled', 'active'])
                 ->exists();
 
             if ($exists) {
-                session()->flash('error', 'This learner is already enrolled in this program.');
+                session()->flash('error', 'This participant is already enrolled in this program.');
 
                 return;
             }
 
             ProgramEnrollment::create([
                 'program_id' => $this->program->id,
-                'learner_id' => $this->selectedLearnerId,
+                'participant_id' => $this->selectedLearnerId,
                 'enrolled_by' => $user->id,
                 'notes' => $this->enrollNote ?: null,
                 'enrolled_at' => now(),
@@ -118,7 +118,7 @@ class ProgramDetail extends Component
             // Increment enrollment count on program
             $this->program->incrementEnrollment();
 
-            session()->flash('success', 'Learner enrolled in program successfully.');
+            session()->flash('success', app(\App\Services\TerminologyService::class)->get('participant_enrolled_program_success_label'));
 
         } elseif ($this->enrollType === 'list') {
             $this->validate([
@@ -126,20 +126,20 @@ class ProgramDetail extends Component
             ]);
 
             $list = ContactList::find($this->selectedListId);
-            $learners = $list->learners;
+            $participants = $list->participants;
             $count = 0;
 
-            foreach ($learners as $learner) {
+            foreach ($participants as $participant) {
                 // Avoid duplicate enrollments
                 $exists = ProgramEnrollment::where('program_id', $this->program->id)
-                    ->where('learner_id', $learner->id)
+                    ->where('participant_id', $participant->id)
                     ->whereIn('status', ['enrolled', 'active'])
                     ->exists();
 
                 if (! $exists) {
                     ProgramEnrollment::create([
                         'program_id' => $this->program->id,
-                        'learner_id' => $learner->id,
+                        'participant_id' => $participant->id,
                         'enrolled_by' => $user->id,
                         'notes' => $this->enrollNote ?: null,
                         'enrolled_at' => now(),
@@ -150,23 +150,23 @@ class ProgramDetail extends Component
                 }
             }
 
-            session()->flash('success', "{$count} learners enrolled in program from the list.");
+            session()->flash('success', "{$count} participants enrolled in program from the list.");
         }
 
         $this->closeEnrollModal();
     }
 
     /**
-     * Get accessible learners for enrollment.
+     * Get accessible participants for enrollment.
      */
     public function getLearnersProperty()
     {
         $accessibleOrgIds = auth()->user()->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        return Learner::whereIn('org_id', $accessibleOrgIds)
+        return Participant::whereIn('org_id', $accessibleOrgIds)
             ->with('user')
             ->get()
-            ->sortBy(fn ($learner) => $learner->user?->name ?? '')
+            ->sortBy(fn ($participant) => $participant->user?->name ?? '')
             ->values();
     }
 
@@ -178,7 +178,7 @@ class ProgramDetail extends Component
         $accessibleOrgIds = auth()->user()->getAccessibleOrganizations()->pluck('id')->toArray();
 
         return ContactList::whereIn('org_id', $accessibleOrgIds)
-            ->whereIn('list_type', ['learner', 'mixed'])
+            ->whereIn('list_type', ['participant', 'mixed'])
             ->orderBy('name')
             ->get();
     }
@@ -195,7 +195,7 @@ class ProgramDetail extends Component
     {
         return view('livewire.program-detail', [
             'canPush' => $this->canPush,
-            'learners' => $this->learners,
+            'participants' => $this->participants,
             'contactLists' => $this->contactLists,
             'enrollmentCount' => $this->enrollmentCount,
         ])->layout('layouts.dashboard', ['title' => $this->program->name]);

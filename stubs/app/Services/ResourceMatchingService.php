@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Resource;
 use App\Models\ResourceAssignment;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\SurveyAttempt;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -21,18 +21,18 @@ class ResourceMatchingService
     /**
      * Match and assign resources based on survey data.
      */
-    public function matchAndAssign(Learner $learner, array $surveyData, ?SurveyAttempt $attempt = null): array
+    public function matchAndAssign(Participant $participant, array $surveyData, ?SurveyAttempt $attempt = null): array
     {
         $concerns = $this->extractConcerns($surveyData);
         $assignments = [];
 
         foreach ($concerns as $concern) {
             // Query matching resources
-            $resources = $this->findMatchingResources($learner, $concern);
+            $resources = $this->findMatchingResources($participant, $concern);
 
             if ($resources->isEmpty()) {
                 Log::info('No matching resources found', [
-                    'learner_id' => $learner->_id,
+                    'participant_id' => $participant->_id,
                     'concern' => $concern,
                 ]);
 
@@ -55,9 +55,9 @@ class ResourceMatchingService
             foreach ($resources->take(3) as $resource) {
                 $assignment = ResourceAssignment::create([
                     'resource_id' => $resource->_id,
-                    'assigned_to_user_id' => $learner->user_id,
+                    'assigned_to_user_id' => $participant->user_id,
                     'assigned_by_user_id' => auth()->id(),
-                    'org_id' => $learner->org_id,
+                    'org_id' => $participant->org_id,
                     'assignment_reason' => $concern['description'],
                     'related_survey_attempt_id' => $attempt?->_id,
                     'auto_assigned' => true,
@@ -73,7 +73,7 @@ class ResourceMatchingService
 
         // Send notifications
         if (! empty($assignments)) {
-            $this->notifyAssignments($learner, $assignments);
+            $this->notifyAssignments($participant, $assignments);
         }
 
         return $assignments;
@@ -140,7 +140,7 @@ class ResourceMatchingService
             $concerns[] = [
                 'type' => 'intervention',
                 'subject' => 'general',
-                'trigger' => 'teacher_recommendation',
+                'trigger' => 'instructor_recommendation',
                 'description' => $intervention,
                 'severity' => 'medium',
             ];
@@ -152,12 +152,12 @@ class ResourceMatchingService
     /**
      * Find resources matching a concern.
      */
-    protected function findMatchingResources(Learner $learner, array $concern): Collection
+    protected function findMatchingResources(Participant $participant, array $concern): Collection
     {
         $query = Resource::query()
             ->active()
             ->approved()
-            ->accessibleTo($learner->org_id);
+            ->accessibleTo($participant->org_id);
 
         // Filter by subject domain
         if (! empty($concern['subject'])) {
@@ -167,12 +167,12 @@ class ResourceMatchingService
             });
         }
 
-        // Filter by grade level
-        $gradeLevel = $this->getGradeLevelBucket($learner->grade_level);
+        // Filter by level level
+        $gradeLevel = $this->getGradeLevelBucket($participant->level);
         if ($gradeLevel) {
             $query->where(function ($q) use ($gradeLevel) {
-                $q->where('tags.grade_level', $gradeLevel)
-                    ->orWhereNull('tags.grade_level');
+                $q->where('tags.level', $gradeLevel)
+                    ->orWhereNull('tags.level');
             });
         }
 
@@ -192,8 +192,8 @@ class ResourceMatchingService
             });
         }
 
-        // Filter to learner-appropriate resources
-        $query->where('tags.target_audience', 'Learner');
+        // Filter to participant-appropriate resources
+        $query->where('tags.target_audience', 'Participant');
 
         return $query->orderBy('avg_rating', 'desc')
             ->orderBy('completion_count', 'desc')
@@ -202,15 +202,15 @@ class ResourceMatchingService
     }
 
     /**
-     * Convert grade level to bucket.
+     * Convert level level to bucket.
      */
-    protected function getGradeLevelBucket(int $grade): ?string
+    protected function getGradeLevelBucket(int $level): ?string
     {
         return match (true) {
-            $grade <= 2 => 'K-2',
-            $grade <= 5 => '3-5',
-            $grade <= 8 => '6-8',
-            $grade <= 12 => '9-12',
+            $level <= 2 => 'K-2',
+            $level <= 5 => '3-5',
+            $level <= 8 => '6-8',
+            $level <= 12 => '9-12',
             default => null,
         };
     }
@@ -218,31 +218,31 @@ class ResourceMatchingService
     /**
      * Send notifications about new assignments.
      */
-    protected function notifyAssignments(Learner $learner, array $assignments): void
+    protected function notifyAssignments(Participant $participant, array $assignments): void
     {
         // This would integrate with Laravel's notification system
         // For now, just log
-        Log::info('Resources assigned to learner', [
-            'learner_id' => $learner->_id,
+        Log::info('Resources assigned to participant', [
+            'participant_id' => $participant->_id,
             'assignment_count' => count($assignments),
         ]);
 
         // TODO: Implement notifications
-        // $learner->user->notify(new ResourcesAssignedNotification($assignments));
+        // $participant->user->notify(new ResourcesAssignedNotification($assignments));
         //
-        // foreach ($learner->parents as $parent) {
-        //     $parent->notify(new ChildResourcesAssignedNotification($learner, $assignments));
+        // foreach ($participant->direct_supervisors as $direct_supervisor) {
+        //     $direct_supervisor->notify(new ChildResourcesAssignedNotification($participant, $assignments));
         // }
     }
 
     /**
-     * Get recommended resources for a learner without auto-assigning.
+     * Get recommended resources for a participant without auto-assigning.
      */
-    public function getRecommendations(Learner $learner, ?array $surveyData = null): Collection
+    public function getRecommendations(Participant $participant, ?array $surveyData = null): Collection
     {
         // If no survey data provided, use latest survey attempt
         if (! $surveyData) {
-            $latestAttempt = $learner->latest_survey_attempt;
+            $latestAttempt = $participant->latest_survey_attempt;
             $surveyData = $latestAttempt?->llm_extracted_data ?? [];
         }
 
@@ -254,7 +254,7 @@ class ResourceMatchingService
         $allResources = collect();
 
         foreach ($concerns as $concern) {
-            $resources = $this->findMatchingResources($learner, $concern);
+            $resources = $this->findMatchingResources($participant, $concern);
             $allResources = $allResources->merge($resources);
         }
 

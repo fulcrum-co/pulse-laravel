@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Organization;
 use App\Models\User;
+use App\Services\TerminologyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -18,6 +19,7 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        $terminology = app(TerminologyService::class);
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
@@ -30,7 +32,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => $terminology->get('auth_invalid_credentials_label'),
         ])->onlyInput('email');
     }
 
@@ -52,7 +54,7 @@ class AuthController extends Controller
         // Create organization first
         $org = Organization::create([
             'org_name' => $validated['organization'],
-            'org_type' => 'district',
+            'org_type' => 'organization',
             'subscription_status' => 'trial',
             'active' => true,
         ]);

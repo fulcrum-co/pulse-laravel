@@ -10,20 +10,55 @@ class DemoRoleSwitcher extends Component
 
     public bool $isOpen = false;
 
-    public array $availableRoles = [
-        'actual' => ['label' => 'My Actual Role', 'icon' => 'user-circle', 'description' => 'Use your real account permissions'],
-        'consultant' => ['label' => 'District Consultant', 'icon' => 'academic-cap', 'description' => 'District-level oversight, can push content to organizations'],
-        'superintendent' => ['label' => 'Superintendent', 'icon' => 'building-library', 'description' => 'District administrator with full access'],
-        'organization_admin' => ['label' => 'Organization Administrator', 'icon' => 'building-office-2', 'description' => 'Principal or organization-level admin'],
-        'counselor' => ['label' => 'Organization Counselor', 'icon' => 'heart', 'description' => 'Learner support and intervention access'],
-        'teacher' => ['label' => 'Teacher', 'icon' => 'user-group', 'description' => 'Classroom view with learner roster'],
-        'learner' => ['label' => 'Learner', 'icon' => 'face-smile', 'description' => 'Learner portal experience'],
-        'parent' => ['label' => 'Parent/Guardian', 'icon' => 'home', 'description' => 'Parent portal with child info'],
-    ];
+    public array $availableRoles = [];
 
     public function mount(): void
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         $this->currentRole = session('demo_role_override', 'actual');
+        $this->availableRoles = [
+            'actual' => [
+                'label' => $terminology->get('demo_role_actual_label'),
+                'icon' => 'user-circle',
+                'description' => $terminology->get('demo_role_actual_description'),
+            ],
+            'consultant' => [
+                'label' => $terminology->get('demo_role_consultant_label'),
+                'icon' => 'academic-cap',
+                'description' => $terminology->get('demo_role_consultant_description'),
+            ],
+            'administrative_role' => [
+                'label' => $terminology->get('demo_role_administrative_label'),
+                'icon' => 'building-library',
+                'description' => $terminology->get('demo_role_administrative_description'),
+            ],
+            'organization_admin' => [
+                'label' => $terminology->get('demo_role_organization_admin_label'),
+                'icon' => 'building-office-2',
+                'description' => $terminology->get('demo_role_organization_admin_description'),
+            ],
+            'support_person' => [
+                'label' => $terminology->get('demo_role_support_person_label'),
+                'icon' => 'heart',
+                'description' => $terminology->get('demo_role_support_person_description'),
+            ],
+            'instructor' => [
+                'label' => $terminology->get('demo_role_instructor_label'),
+                'icon' => 'user-group',
+                'description' => $terminology->get('demo_role_instructor_description'),
+            ],
+            'participant' => [
+                'label' => $terminology->get('demo_role_participant_label'),
+                'icon' => 'face-smile',
+                'description' => $terminology->get('demo_role_participant_description'),
+            ],
+            'direct_supervisor' => [
+                'label' => $terminology->get('demo_role_direct_supervisor_label'),
+                'icon' => 'home',
+                'description' => $terminology->get('demo_role_direct_supervisor_description'),
+            ],
+        ];
     }
 
     public function toggle(): void

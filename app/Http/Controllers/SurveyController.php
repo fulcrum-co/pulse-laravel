@@ -30,7 +30,7 @@ class SurveyController extends Controller
         // Build query for surveys
         $query = Survey::query();
 
-        // If user is a consultant/admin at district level, they can see surveys from child orgs
+        // If user is a consultant/admin at section level, they can see surveys from child orgs
         if ($user->isAdmin() && $user->organization) {
             $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
             $query->whereIn('org_id', $accessibleOrgIds);
@@ -93,8 +93,8 @@ class SurveyController extends Controller
             'creation_mode' => 'nullable|string|in:static,chat,voice,ai_assisted',
             'interpretation_config' => 'nullable|array',
             'delivery_channels' => 'nullable|array',
-            'target_grades' => 'nullable|array',
-            'target_classrooms' => 'nullable|array',
+            'target_levels' => 'nullable|array',
+            'target_learning_groups' => 'nullable|array',
             'is_anonymous' => 'nullable|boolean',
             'estimated_duration_minutes' => 'nullable|integer|min:1',
             'allow_voice_responses' => 'nullable|boolean',
@@ -172,8 +172,8 @@ class SurveyController extends Controller
             'status' => 'sometimes|string|in:draft,active,paused,completed,archived',
             'interpretation_config' => 'nullable|array',
             'delivery_channels' => 'nullable|array',
-            'target_grades' => 'nullable|array',
-            'target_classrooms' => 'nullable|array',
+            'target_levels' => 'nullable|array',
+            'target_learning_groups' => 'nullable|array',
             'is_anonymous' => 'nullable|boolean',
             'estimated_duration_minutes' => 'nullable|integer|min:1',
             'voice_config' => 'nullable|array',
@@ -424,7 +424,7 @@ class SurveyController extends Controller
             'survey_type' => 'required|string|in:wellness,academic,behavioral,custom',
             'questions' => 'sometimes|array', // Override draft questions if provided
             'delivery_channels' => 'nullable|array',
-            'target_grades' => 'nullable|array',
+            'target_levels' => 'nullable|array',
         ]);
 
         $questions = $validated['questions'] ?? $session->draft_questions;
@@ -448,7 +448,7 @@ class SurveyController extends Controller
             'survey_type' => $validated['survey_type'],
             'questions' => $questions,
             'delivery_channels' => $validated['delivery_channels'] ?? ['web'],
-            'target_grades' => $validated['target_grades'] ?? null,
+            'target_levels' => $validated['target_levels'] ?? null,
             'status' => 'draft',
         ]);
 
@@ -636,8 +636,8 @@ class SurveyController extends Controller
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'target_grades' => 'nullable|array',
-            'target_classrooms' => 'nullable|array',
+            'target_levels' => 'nullable|array',
+            'target_learning_groups' => 'nullable|array',
         ]);
 
         $survey = $template->createSurvey($user->org_id, $user->id, $validated);
@@ -673,7 +673,7 @@ class SurveyController extends Controller
         $validated = $request->validate([
             'channel' => 'required|string|in:web,sms,voice_call,whatsapp,chat',
             'recipients' => 'required|array|min:1',
-            'recipients.*.type' => 'required|string|in:learner,user',
+            'recipients.*.type' => 'required|string|in:participant,user',
             'recipients.*.id' => 'required|integer',
             'recipients.*.phone_number' => 'required_unless:channel,web|string',
             'scheduled_for' => 'nullable|date|after:now',

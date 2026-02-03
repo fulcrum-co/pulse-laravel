@@ -28,7 +28,7 @@ class MarketplaceContent extends Component
         'search' => ['except' => '', 'as' => 'q'],
         'priceFilter' => ['except' => '', 'as' => 'price'],
         'ratingFilter' => ['except' => '', 'as' => 'rating'],
-        'selectedGrades' => ['except' => [], 'as' => 'grade'],
+        'selectedGrades' => ['except' => [], 'as' => 'level'],
         'selectedTypes' => ['except' => [], 'as' => 'type'],
         'sortBy' => ['except' => 'popular', 'as' => 'sort'],
         'viewMode' => ['except' => 'grid', 'as' => 'view'],
@@ -39,12 +39,12 @@ class MarketplaceContent extends Component
         $this->resetPage();
     }
 
-    public function toggleGrade(string $grade): void
+    public function toggleGrade(string $level): void
     {
-        if (in_array($grade, $this->selectedGrades)) {
-            $this->selectedGrades = array_values(array_diff($this->selectedGrades, [$grade]));
+        if (in_array($level, $this->selectedGrades)) {
+            $this->selectedGrades = array_values(array_diff($this->selectedGrades, [$level]));
         } else {
-            $this->selectedGrades[] = $grade;
+            $this->selectedGrades[] = $level;
         }
         $this->resetPage();
     }
@@ -94,11 +94,11 @@ class MarketplaceContent extends Component
             $query->minRating(3.0);
         }
 
-        // Grade filter
+        // Level filter
         if (count($this->selectedGrades) > 0) {
             $query->where(function ($q) {
-                foreach ($this->selectedGrades as $grade) {
-                    $q->orWhereJsonContains('target_grades', $grade);
+                foreach ($this->selectedGrades as $level) {
+                    $q->orWhereJsonContains('target_levels', $level);
                 }
             });
         }

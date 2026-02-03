@@ -19,7 +19,7 @@
             <div class="flex items-center gap-4 text-sm text-gray-600">
                 <span class="font-medium">{{ $roleDisplay }}</span>
                 @foreach($contactInfo as $info)
-                <span class="text-gray-400">|</span>
+                <span class="text-gray-400">@term('pipe_separator_label')</span>
                 <span>{{ $info['value'] }}</span>
                 @endforeach
             </div>

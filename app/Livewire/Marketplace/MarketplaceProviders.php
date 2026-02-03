@@ -118,7 +118,7 @@ class MarketplaceProviders extends Component
     {
         return [
             'therapist' => 'Therapist',
-            'counselor' => 'Counselor',
+            'support_person' => 'Support Person',
             'tutor' => 'Tutor',
             'coach' => 'Coach',
             'specialist' => 'Specialist',

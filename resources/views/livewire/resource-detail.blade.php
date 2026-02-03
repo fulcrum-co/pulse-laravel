@@ -1,8 +1,8 @@
 <div class="space-y-6">
     <!-- Breadcrumbs -->
     <x-breadcrumbs :items="[
-        ['label' => 'Resources', 'url' => route('resources.index')],
-        ['label' => 'Content', 'url' => route('resources.index') . '?activeTab=content'],
+        ['label' => app(\App\Services\TerminologyService::class)->get('resource_plural'), 'url' => route('resources.index')],
+        ['label' => app(\App\Services\TerminologyService::class)->get('content_singular'), 'url' => route('resources.index') . '?activeTab=content'],
         ['label' => $resource->title],
     ]" />
 
@@ -19,13 +19,13 @@
                 <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
                     @if($resource->category)
                         <span>{{ ucfirst($resource->category) }}</span>
-                        <span class="text-gray-300">·</span>
+                        <span class="text-gray-300">@term('dot_separator_label')</span>
                     @endif
                     @if($resource->estimated_duration_minutes)
-                        <span>{{ $resource->estimated_duration_minutes }} min</span>
-                        <span class="text-gray-300">·</span>
+                        <span>{{ $resource->estimated_duration_minutes }} @term('minutes_label')</span>
+                        <span class="text-gray-300">@term('dot_separator_label')</span>
                     @endif
-                    <span>{{ $assignmentCount }} {{ Str::plural('assignment', $assignmentCount) }}</span>
+                    <span>{{ $assignmentCount }} {{ $assignmentCount === 1 ? app(\App\Services\TerminologyService::class)->get('assignment_singular') : app(\App\Services\TerminologyService::class)->get('assignment_plural') }}</span>
                 </div>
             </div>
         </div>
@@ -38,17 +38,17 @@
                     class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                     <x-icon name="arrow-top-right-on-square" class="w-4 h-4 mr-2" />
-                    Open
+                    @term('open_action')
                 </a>
             @endif
             @if($canPush)
                 <button
                     wire:click="openPushModal"
                     class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                    title="Push to Organizations"
+                    title="@term('push_to_organizations_label')"
                 >
                     <x-icon name="arrow-up-on-square" class="w-4 h-4 mr-2" />
-                    Push
+                    @term('push_label')
                 </button>
             @endif
             <button
@@ -56,7 +56,7 @@
                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
             >
                 <x-icon name="user-plus" class="w-4 h-4 mr-2" />
-                Assign
+                @term('assign_action')
             </button>
         </div>
     </div>
@@ -120,16 +120,16 @@
                         <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <x-icon name="link" class="w-8 h-8 text-gray-400" />
                         </div>
-                        <p class="text-sm text-gray-500 mb-2">External Link</p>
+                        <p class="text-sm text-gray-500 mb-2">@term('external_link_label')</p>
                         <p class="text-pulse-orange-600 font-medium truncate max-w-md mx-auto">{{ $resource->url }}</p>
-                        <p class="mt-4 text-sm text-gray-400">Click to open in a new tab</p>
+                        <p class="mt-4 text-sm text-gray-400">@term('open_new_tab_label')</p>
                     </a>
                 @else
                     <div class="p-16 text-center">
                         <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <x-icon name="{{ $this->typeIcon }}" class="w-10 h-10 text-gray-400" />
                         </div>
-                        <p class="text-gray-500">No preview available for this resource</p>
+                        <p class="text-gray-500">@term('no_preview_available_label')</p>
                     </div>
                 @endif
             </div>
@@ -137,7 +137,7 @@
             <!-- Description -->
             @if($resource->description)
             <div class="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 class="text-sm font-medium text-gray-900 mb-3">Description</h2>
+                <h2 class="text-sm font-medium text-gray-900 mb-3">@term('description_label')</h2>
                 <p class="text-gray-600 whitespace-pre-wrap">{{ $resource->description }}</p>
             </div>
             @endif
@@ -147,11 +147,11 @@
         <div class="space-y-6">
             <!-- Metadata -->
             <div class="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 class="text-sm font-medium text-gray-900 mb-4">Details</h2>
+                <h2 class="text-sm font-medium text-gray-900 mb-4">@term('details_label')</h2>
 
                 <dl class="space-y-4">
                     <div>
-                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Type</dt>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">@term('type_label')</dt>
                         <dd class="mt-1 flex items-center gap-2">
                             <x-icon name="{{ $this->typeIcon }}" class="w-4 h-4 text-{{ $this->typeColor }}-500" />
                             <span class="text-sm text-gray-900">{{ ucfirst($resource->resource_type) }}</span>
@@ -160,25 +160,25 @@
 
                     @if($resource->category)
                     <div>
-                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Category</dt>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">@term('category_label')</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ ucfirst($resource->category) }}</dd>
                     </div>
                     @endif
 
                     @if($resource->estimated_duration_minutes)
                     <div>
-                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ $resource->estimated_duration_minutes }} minutes</dd>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">@term('duration_label')</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $resource->estimated_duration_minutes }} @term('minutes_label')</dd>
                     </div>
                     @endif
 
-                    @if($resource->target_grades && count($resource->target_grades) > 0)
+                    @if($resource->target_levels && count($resource->target_levels) > 0)
                     <div>
-                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Target Grades</dt>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">@term('target_levels_label')</dt>
                         <dd class="mt-1 flex flex-wrap gap-1">
-                            @foreach($resource->target_grades as $grade)
+                            @foreach($resource->target_levels as $level)
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                    {{ $grade }}
+                                    {{ $level }}
                                 </span>
                             @endforeach
                         </dd>
@@ -187,7 +187,7 @@
 
                     @if($resource->target_risk_levels && count($resource->target_risk_levels) > 0)
                     <div>
-                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Target Risk Levels</dt>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">@term('target_risk_levels_label')</dt>
                         <dd class="mt-1 flex flex-wrap gap-1">
                             @foreach($resource->target_risk_levels as $level)
                                 @php
@@ -208,7 +208,7 @@
 
                     @if($resource->tags && count($resource->tags) > 0)
                     <div>
-                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tags</dt>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">@term('tag_plural')</dt>
                         <dd class="mt-1 flex flex-wrap gap-1">
                             @foreach($resource->tags as $tag)
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
@@ -220,13 +220,13 @@
                     @endif
 
                     <div class="pt-4 border-t border-gray-100">
-                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Created</dt>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">@term('created_label')</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $resource->created_at->format('M d, Y') }}</dd>
                     </div>
 
                     @if($resource->creator)
                     <div>
-                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Added By</dt>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">@term('added_by_label')</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ $resource->creator->name }}</dd>
                     </div>
                     @endif
@@ -235,21 +235,21 @@
 
             <!-- Quick Assign -->
             <div class="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 class="text-sm font-medium text-gray-900 mb-3">Quick Assign</h2>
-                <p class="text-xs text-gray-500 mb-4">Assign this resource to learners or a contact list.</p>
+                <h2 class="text-sm font-medium text-gray-900 mb-3">@term('quick_assign_label')</h2>
+                <p class="text-xs text-gray-500 mb-4">@term('quick_assign_help_label')</p>
                 <button
                     wire:click="openAssignModal"
                     class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-pulse-orange-600 bg-pulse-orange-50 rounded-lg hover:bg-pulse-orange-100"
                 >
                     <x-icon name="user-plus" class="w-4 h-4 mr-2" />
-                    Assign to Learners
+                    @term('assign_to_participants_label')
                 </button>
             </div>
 
             <!-- Related Resources -->
             @if($relatedResources->isNotEmpty())
             <div class="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 class="text-sm font-medium text-gray-900 mb-4">Related Resources</h2>
+                <h2 class="text-sm font-medium text-gray-900 mb-4">@term('related_resources_label')</h2>
                 <div class="space-y-3">
                     @foreach($relatedResources as $related)
                         @php
@@ -282,7 +282,7 @@
                                 </div>
                                 <div class="min-w-0">
                                     <p class="text-sm font-medium text-gray-900 truncate">{{ $related->title }}</p>
-                                    <p class="text-xs text-gray-500">{{ ucfirst($related->resource_type) }}</p>
+                                    <p class="text-xs text-gray-500">{{ app(\App\Services\TerminologyService::class)->get($related->resource_type . '_label') }}</p>
                                 </div>
                             </div>
                         </a>
@@ -301,26 +301,26 @@
 
             <div class="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Assign Resource</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">@term('assign_resource_label')</h3>
                     <button wire:click="closeAssignModal" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                         <x-icon name="x-mark" class="w-5 h-5" />
                     </button>
                 </div>
 
                 <p class="text-sm text-gray-500 mb-4">
-                    Assign "{{ $resource->title }}" to a learner or contact list.
+                    @term('assign_resource_help_prefix') "{{ $resource->title }}" @term('assign_resource_help_suffix')
                 </p>
 
                 <!-- Assignment Type Toggle -->
                 <div class="flex gap-2 mb-4">
                     <button
                         type="button"
-                        wire:click="$set('assignType', 'learner')"
+                        wire:click="$set('assignType', 'participant')"
                         class="flex-1 p-3 rounded-lg border-2 text-center transition-all
-                            {{ $assignType === 'learner' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
+                            {{ $assignType === 'participant' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
                     >
-                        <x-icon name="user" class="w-5 h-5 mx-auto mb-1 {{ $assignType === 'learner' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
-                        <span class="text-sm font-medium {{ $assignType === 'learner' ? 'text-pulse-orange-600' : 'text-gray-700' }}">Individual</span>
+                        <x-icon name="user" class="w-5 h-5 mx-auto mb-1 {{ $assignType === 'participant' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
+                        <span class="text-sm font-medium {{ $assignType === 'participant' ? 'text-pulse-orange-600' : 'text-gray-700' }}">@term('individual_label')</span>
                     </button>
                     <button
                         type="button"
@@ -329,35 +329,35 @@
                             {{ $assignType === 'list' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
                     >
                         <x-icon name="user-group" class="w-5 h-5 mx-auto mb-1 {{ $assignType === 'list' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
-                        <span class="text-sm font-medium {{ $assignType === 'list' ? 'text-pulse-orange-600' : 'text-gray-700' }}">Contact List</span>
+                        <span class="text-sm font-medium {{ $assignType === 'list' ? 'text-pulse-orange-600' : 'text-gray-700' }}">@term('contact_list_label')</span>
                     </button>
                 </div>
 
                 <div class="space-y-4">
-                    @if($assignType === 'learner')
+                    @if($assignType === 'participant')
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Learner</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('select_participant_label')</label>
                         <select
                             wire:model="selectedLearnerId"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                         >
-                            <option value="">Choose a learner...</option>
-                            @foreach($this->learners as $learner)
-                                <option value="{{ $learner->id }}">{{ $learner->full_name }} ({{ $learner->grade_level }})</option>
+                            <option value="">@term('choose_participant_placeholder')</option>
+                            @foreach($this->participants as $participant)
+                                <option value="{{ $participant->id }}">{{ $participant->full_name }} ({{ $participant->level }})</option>
                             @endforeach
                         </select>
                         @error('selectedLearnerId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
                     @else
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Contact List</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('select_contact_list_label')</label>
                         <select
                             wire:model="selectedListId"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                         >
-                            <option value="">Choose a list...</option>
+                            <option value="">@term('choose_list_placeholder')</option>
                             @foreach($this->contactLists as $list)
-                                <option value="{{ $list->id }}">{{ $list->name }} ({{ $list->member_count }} learners)</option>
+                                <option value="{{ $list->id }}">{{ $list->name }} ({{ $list->member_count }} participants)</option>
                             @endforeach
                         </select>
                         @error('selectedListId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -365,12 +365,12 @@
                     @endif
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Note (optional)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('note_optional_label')</label>
                         <textarea
                             wire:model="assignNote"
                             rows="2"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                            placeholder="Add a note for the learner..."
+                            placeholder="@term('assign_note_placeholder')"
                         ></textarea>
                     </div>
                 </div>
@@ -381,14 +381,14 @@
                         wire:click="closeAssignModal"
                         class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                     >
-                        Cancel
+                        @term('cancel_action')
                     </button>
                     <button
                         type="button"
                         wire:click="assignResource"
                         class="px-4 py-2 text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
                     >
-                        Assign
+                        @term('assign_action')
                     </button>
                 </div>
             </div>

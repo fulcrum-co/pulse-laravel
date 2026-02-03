@@ -20,7 +20,7 @@ class ModerationWorkflowTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
+        direct_supervisor::setUp();
 
         $this->organization = Organization::factory()->create();
         $this->reviewer = User::factory()->create([

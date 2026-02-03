@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\Survey;
 use App\Services\Domain\AIResponseParserDomainService;
 use App\Services\Domain\PromptBuilderService;
@@ -95,18 +95,18 @@ class ClaudeService
     /**
      * Start a conversational survey session.
      */
-    public function startConversationalSurvey(Survey $survey, array $learners): array
+    public function startConversationalSurvey(Survey $survey, array $participants): array
     {
-        $systemPrompt = $this->promptBuilder->buildConversationalSurveyPrompt($survey, $learners);
+        $systemPrompt = $this->promptBuilder->buildConversationalSurveyPrompt($survey, $participants);
 
-        $initialMessage = "Hello! I'm ready to help you complete your check-in for your learners. " .
-            "We'll go through each learner one at a time. Let's start with the first learner. " .
+        $initialMessage = "Hello! I'm ready to help you complete your check-in for your participants. " .
+            "We'll go through each participant one at a time. Let's start with the first participant. " .
             'How has their week been academically?';
 
         return [
             'system_prompt' => $systemPrompt,
             'initial_message' => $initialMessage,
-            'learners' => $learners,
+            'participants' => $participants,
             'current_learner_index' => 0,
             'conversation_history' => [],
         ];
@@ -147,10 +147,10 @@ class ClaudeService
     /**
      * Extract structured data from conversation transcript.
      */
-    public function extractStructuredData(string $transcript, Learner $learner): array
+    public function extractStructuredData(string $transcript, Participant $participant): array
     {
         $systemPrompt = $this->promptBuilder->buildDataExtractionPrompt();
-        $userMessage = $this->promptBuilder->buildExtractionMessage($transcript, $learner);
+        $userMessage = $this->promptBuilder->buildExtractionMessage($transcript, $participant);
 
         $response = $this->sendMessage($userMessage, $systemPrompt);
 
@@ -206,7 +206,7 @@ class ClaudeService
     }
 
     /**
-     * Rank resources for a learner's needs.
+     * Rank resources for a participant's needs.
      */
     public function rankResources(array $resources, string $needDescription): array
     {

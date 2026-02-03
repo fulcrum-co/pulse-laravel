@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Organization;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\Survey;
 use App\Models\SurveyAttempt;
 use App\Models\User;
@@ -20,7 +20,7 @@ class SurveySeeder extends Seeder
         $wellnessSurvey = Survey::create([
             'org_id' => $organization->id,
             'title' => 'Weekly Wellness Check-In',
-            'description' => 'A quick check-in to see how learners are feeling this week.',
+            'description' => 'A quick check-in to see how participants are feeling this week.',
             'survey_type' => 'wellness',
             'questions' => [
                 [
@@ -58,7 +58,7 @@ class SurveySeeder extends Seeder
             'is_anonymous' => false,
             'estimated_duration_minutes' => 5,
             'start_date' => now()->subWeeks(2),
-            'target_grades' => ['9', '10', '11', '12'],
+            'target_levels' => ['9', '10', '11', '12'],
             'created_by' => $admin->id,
         ]);
 
@@ -66,7 +66,7 @@ class SurveySeeder extends Seeder
         Survey::create([
             'org_id' => $organization->id,
             'title' => 'Academic Stress Assessment',
-            'description' => 'Understanding how academic pressures affect learner wellbeing.',
+            'description' => 'Understanding how academic pressures affect participant wellbeing.',
             'survey_type' => 'wellness',
             'questions' => [
                 [
@@ -87,15 +87,15 @@ class SurveySeeder extends Seeder
             'status' => 'draft',
             'is_anonymous' => true,
             'estimated_duration_minutes' => 10,
-            'target_grades' => ['11', '12'],
+            'target_levels' => ['11', '12'],
             'created_by' => $admin->id,
         ]);
 
         // Create some survey attempts for the wellness survey
-        $learners = Learner::where('org_id', $organization->id)->take(15)->get();
+        $participants = Participant::where('org_id', $organization->id)->take(15)->get();
 
-        foreach ($learners as $learner) {
-            $overallScore = match ($learner->risk_level) {
+        foreach ($participants as $participant) {
+            $overallScore = match ($participant->risk_level) {
                 'good' => rand(70, 100) / 10,
                 'low' => rand(40, 70) / 10,
                 'high' => rand(20, 50) / 10,
@@ -103,8 +103,8 @@ class SurveySeeder extends Seeder
 
             SurveyAttempt::create([
                 'survey_id' => $wellnessSurvey->id,
-                'learner_id' => $learner->id,
-                'user_id' => $learner->user_id,
+                'participant_id' => $participant->id,
+                'user_id' => $participant->user_id,
                 'status' => 'completed',
                 'responses' => [
                     'q1' => rand(1, 5),
@@ -113,7 +113,7 @@ class SurveySeeder extends Seeder
                     'q4' => null,
                 ],
                 'overall_score' => $overallScore,
-                'risk_level' => $learner->risk_level,
+                'risk_level' => $participant->risk_level,
                 'started_at' => now()->subDays(rand(1, 14)),
                 'completed_at' => now()->subDays(rand(0, 13)),
                 'duration_seconds' => rand(120, 600),

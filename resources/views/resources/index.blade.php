@@ -9,8 +9,8 @@
     <x-card>
         <div class="text-center py-12">
             <x-icon name="book-open" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p class="text-gray-500">@term('resource_singular') library coming soon.</p>
-            <p class="text-gray-400 text-sm mt-1">This feature is under development.</p>
+            <p class="text-gray-500">@term('resource_library_coming_soon_label')</p>
+            <p class="text-gray-400 text-sm mt-1">@term('feature_under_development_label')</p>
         </div>
     </x-card>
 </x-layouts.dashboard>

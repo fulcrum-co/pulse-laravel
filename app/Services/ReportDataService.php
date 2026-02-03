@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Models\ContactMetric;
 use App\Models\CustomReport;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Services\Domain\ReportAggregatorService;
 
 class ReportDataService
@@ -83,24 +83,24 @@ class ReportDataService
             ->whereIn('metric_key', $metricKeys)
             ->forPeriod($dateRange['start'], $dateRange['end']);
 
-        // Extract and apply learner filters using domain service
+        // Extract and apply participant filters using domain service
         $learnerFilters = $this->aggregator->extractLearnerFilters($filters);
 
-        // Filter by learner criteria if needed
+        // Filter by participant criteria if needed
         if (! empty($learnerFilters)) {
-            $learnerIds = Learner::where('org_id', $orgId)
-                ->when(isset($learnerFilters['grade_level']), function ($q) use ($learnerFilters) {
-                    return $q->where('grade_level', $learnerFilters['grade_level']);
+            $participantIds = Participant::where('org_id', $orgId)
+                ->when(isset($learnerFilters['level']), function ($q) use ($learnerFilters) {
+                    return $q->where('level', $learnerFilters['level']);
                 })
                 ->when(isset($learnerFilters['risk_level']), function ($q) use ($learnerFilters) {
                     return $q->where('risk_level', $learnerFilters['risk_level']);
                 })
                 ->pluck('id');
 
-            if ($learnerIds->isNotEmpty()) {
-                $query->where(function ($q) use ($learnerIds) {
-                    $q->whereIn('contact_id', $learnerIds->toArray())
-                        ->orWhereNotIn('contact_type', [Learner::class]);
+            if ($participantIds->isNotEmpty()) {
+                $query->where(function ($q) use ($participantIds) {
+                    $q->whereIn('contact_id', $participantIds->toArray())
+                        ->orWhereNotIn('contact_type', [Participant::class]);
                 });
             }
         }
@@ -119,7 +119,7 @@ class ReportDataService
         $dateRange = $this->getDateRange($filters['date_range'] ?? '6_months');
         $groupBy = $filters['group_by'] ?? 'week';
 
-        $contactType = $filters['contact_type'] ?? Learner::class;
+        $contactType = $filters['contact_type'] ?? Participant::class;
         $contactId = $filters['contact_id'] ?? null;
 
         if ($contactId) {
@@ -146,16 +146,16 @@ class ReportDataService
     }
 
     /**
-     * Get learners data for tables.
+     * Get participants data for tables.
      */
     public function getLearnersTableData(int $orgId, array $columns, array $filters, int $pageSize = 100, int $page = 1): array
     {
-        $query = Learner::where('org_id', $orgId)
-            ->select('id', 'user_id', 'org_id', 'grade_level', 'risk_level');
+        $query = Participant::where('org_id', $orgId)
+            ->select('id', 'user_id', 'org_id', 'level', 'risk_level');
 
         // Apply filters early
-        if (! empty($filters['grade_level'])) {
-            $query->where('grade_level', $filters['grade_level']);
+        if (! empty($filters['level'])) {
+            $query->where('level', $filters['level']);
         }
 
         if (! empty($filters['risk_level'])) {
@@ -164,23 +164,23 @@ class ReportDataService
 
         // Calculate pagination offsets using domain service
         $offsets = $this->aggregator->calculatePaginationOffsets($page, $pageSize);
-        $learners = $query->skip($offsets['skip'])->take($offsets['take'])->get();
+        $participants = $query->skip($offsets['skip'])->take($offsets['take'])->get();
 
-        if ($learners->isEmpty()) {
+        if ($participants->isEmpty()) {
             return [];
         }
 
-        // Load user data only for learners we're displaying
-        $learnerIds = $learners->pluck('id')->toArray();
+        // Load user data only for participants we're displaying
+        $participantIds = $participants->pluck('id')->toArray();
         $userMap = [];
-        if (! empty($learnerIds)) {
+        if (! empty($participantIds)) {
             // Only load users if needed
             if (in_array('name', $columns) || in_array('email', $columns)) {
-                $userMap = Learner::whereIn('id', $learnerIds)
+                $userMap = Participant::whereIn('id', $participantIds)
                     ->with('user:id,email,first_name,last_name')
                     ->get()
-                    ->reduce(function ($carry, $learner) {
-                        $carry[$learner->id] = $learner->user;
+                    ->reduce(function ($carry, $participant) {
+                        $carry[$participant->id] = $participant->user;
                         return $carry;
                     }, []);
             }
@@ -192,8 +192,8 @@ class ReportDataService
         // Load all required metrics in a single query using aggregation
         $latestMetrics = [];
         if (! empty($metricKeys)) {
-            $latestMetrics = ContactMetric::whereIn('contact_id', $learnerIds)
-                ->where('contact_type', Learner::class)
+            $latestMetrics = ContactMetric::whereIn('contact_id', $participantIds)
+                ->where('contact_type', Participant::class)
                 ->whereIn('metric_key', $metricKeys)
                 ->select('contact_id', 'metric_key', 'numeric_value', 'recorded_at')
                 ->orderBy('contact_id')
@@ -207,8 +207,8 @@ class ReportDataService
 
         // Build result rows using domain service
         $data = [];
-        foreach ($learners as $learner) {
-            $row = $this->aggregator->buildLearnerTableRow($learner, $columns, $userMap, $latestMetrics);
+        foreach ($participants as $participant) {
+            $row = $this->aggregator->buildLearnerTableRow($participant, $columns, $userMap, $latestMetrics);
             $data[] = $row;
         }
 
@@ -221,7 +221,7 @@ class ReportDataService
     protected function resolveIndividualData(CustomReport $report, array $data, array $neededMetrics, array $dateRange): array
     {
         $filters = $report->filters ?? [];
-        $contactType = $filters['contact_type'] ?? Learner::class;
+        $contactType = $filters['contact_type'] ?? Participant::class;
         $contactId = $filters['contact_id'] ?? null;
 
         if (! $contactId) {
@@ -291,7 +291,7 @@ class ReportDataService
             $neededMetrics
         );
 
-        // Get learner counts and risk distribution using domain service
+        // Get participant counts and risk distribution using domain service
         $learnerAggregates = $this->aggregator->getLearnerCountAggregates($report->org_id);
         $data['learner_count'] = $learnerAggregates['total'];
         $data['good_standing_count'] = $learnerAggregates['good_standing'];
@@ -339,12 +339,12 @@ class ReportDataService
     }
 
     /**
-     * Get latest metric value for a learner.
-     * Use sparingly - prefer bulk loading via getLearnersTableData for multiple learners.
+     * Get latest metric value for a participant.
+     * Use sparingly - prefer bulk loading via getLearnersTableData for multiple participants.
      */
-    protected function getLatestMetric(Learner $learner, string $metricKey): ?float
+    protected function getLatestMetric(Participant $participant, string $metricKey): ?float
     {
-        $metric = ContactMetric::forContact(Learner::class, $learner->id)
+        $metric = ContactMetric::forContact(Participant::class, $participant->id)
             ->where('metric_key', $metricKey)
             ->select('numeric_value', 'recorded_at')
             ->orderBy('recorded_at', 'desc')

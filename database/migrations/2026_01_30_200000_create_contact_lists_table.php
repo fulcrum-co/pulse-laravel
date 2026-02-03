@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('org_id')->constrained('organizations')->cascadeOnDelete();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->string('list_type')->default('learner'); // learner, teacher, mixed
+            $table->string('list_type')->default('participant'); // participant, instructor, mixed
             $table->json('filter_criteria')->nullable();
             $table->boolean('is_dynamic')->default(false);
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();

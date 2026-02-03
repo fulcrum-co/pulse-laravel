@@ -66,7 +66,7 @@ class CollectionFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'type' => 'smart',
             'rules' => $rules ?: [
-                'grade_levels' => ['9', '10', '11', '12'],
+                'levels' => ['9', '10', '11', '12'],
                 'subject_areas' => ['math', 'science'],
             ],
         ]);

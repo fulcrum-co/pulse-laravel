@@ -182,7 +182,7 @@ class CourseGenerationRequestObserver
     {
         // Get users with admin or consultant roles in this org
         return User::where('org_id', $orgId)
-            ->whereIn('primary_role', ['admin', 'consultant', 'superintendent'])
+            ->whereIn('primary_role', ['admin', 'consultant', 'administrative_role'])
             ->pluck('id')
             ->toArray();
     }
@@ -207,7 +207,7 @@ class CourseGenerationRequestObserver
         $parts[] = $triggerLabel;
 
         if ($request->learner_count > 0) {
-            $parts[] = "Target: {$request->learner_count} learners";
+            $parts[] = "Target: {$request->learner_count} participants";
         }
 
         return implode('. ', $parts).'.';

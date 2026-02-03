@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 class CohortMember extends Model
 {
     // Roles
-    public const ROLE_STUDENT = 'learner';
+    public const ROLE_STUDENT = 'participant';
     public const ROLE_MENTOR = 'mentor';
     public const ROLE_FACILITATOR = 'facilitator';
     public const ROLE_ADMIN = 'admin';
@@ -138,32 +138,38 @@ class CohortMember extends Model
     // Helper methods
     public static function getRoleOptions(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
-            self::ROLE_STUDENT => 'Learner',
-            self::ROLE_MENTOR => 'Mentor',
-            self::ROLE_FACILITATOR => 'Facilitator',
-            self::ROLE_ADMIN => 'Admin',
+            self::ROLE_STUDENT => $terminology->get('learner_singular'),
+            self::ROLE_MENTOR => $terminology->get('mentor_singular'),
+            self::ROLE_FACILITATOR => $terminology->get('facilitator_singular'),
+            self::ROLE_ADMIN => $terminology->get('admin_label'),
         ];
     }
 
     public static function getStatusOptions(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
-            self::STATUS_ENROLLED => 'Enrolled',
-            self::STATUS_ACTIVE => 'Active',
-            self::STATUS_COMPLETED => 'Completed',
-            self::STATUS_WITHDRAWN => 'Withdrawn',
-            self::STATUS_PAUSED => 'Paused',
+            self::STATUS_ENROLLED => $terminology->get('enrolled_label'),
+            self::STATUS_ACTIVE => $terminology->get('active_label'),
+            self::STATUS_COMPLETED => $terminology->get('completed_label'),
+            self::STATUS_WITHDRAWN => $terminology->get('withdrawn_label'),
+            self::STATUS_PAUSED => $terminology->get('paused_label'),
         ];
     }
 
     public static function getLeadSources(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
-            self::LEAD_WIDGET => 'Embedded Widget',
-            self::LEAD_LANDING_PAGE => 'Landing Page',
-            self::LEAD_REFERRAL => 'Referral',
-            self::LEAD_ORGANIC => 'Organic',
+            self::LEAD_WIDGET => $terminology->get('lead_source_widget_label'),
+            self::LEAD_LANDING_PAGE => $terminology->get('lead_source_landing_page_label'),
+            self::LEAD_REFERRAL => $terminology->get('lead_source_referral_label'),
+            self::LEAD_ORGANIC => $terminology->get('lead_source_organic_label'),
         ];
     }
 

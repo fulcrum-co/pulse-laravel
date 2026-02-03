@@ -27,7 +27,7 @@ class QuestionBankSeeder extends Seeder
                     'high_concern' => ['max' => 2],
                     'moderate_concern' => ['min' => 3, 'max' => 3],
                     'low_concern' => ['min' => 4],
-                    'ai_prompt' => 'Scores of 1-2 indicate the learner may need immediate support. Consider follow-up with counselor.',
+                    'ai_prompt' => 'Scores of 1-2 indicate the participant may need immediate support. Consider follow-up with support_person.',
                 ],
                 'tags' => ['daily-check', 'mood', 'general-wellness'],
                 'is_public' => true,
@@ -112,7 +112,7 @@ class QuestionBankSeeder extends Seeder
                 ],
                 'interpretation_rules' => [
                     'high_concern' => ['values' => ['Rarely', 'No, never']],
-                    'ai_prompt' => 'Lack of support system is a risk factor. Consider connecting learner with peer support or counselor.',
+                    'ai_prompt' => 'Lack of support system is a risk factor. Consider connecting participant with peer support or support_person.',
                 ],
                 'tags' => ['support', 'social', 'mental-health'],
                 'is_public' => true,
@@ -237,9 +237,9 @@ class QuestionBankSeeder extends Seeder
                 ],
                 'interpretation_rules' => [
                     'high_concern' => ['max' => 2],
-                    'ai_prompt' => 'Discomfort with participation may indicate anxiety, language barriers, or classroom climate issues.',
+                    'ai_prompt' => 'Discomfort with participation may indicate anxiety, language barriers, or learning_group climate issues.',
                 ],
-                'tags' => ['participation', 'engagement', 'classroom'],
+                'tags' => ['participation', 'engagement', 'learning_group'],
                 'is_public' => true,
                 'is_validated' => true,
             ],
@@ -268,7 +268,7 @@ class QuestionBankSeeder extends Seeder
                     'choices' => ['Less than 1 hour', '1-2 hours', '2-3 hours', '3-4 hours', 'More than 4 hours'],
                 ],
                 'interpretation_rules' => [
-                    'ai_prompt' => 'Compare with grade level expectations. Excessive homework time (>4 hours) may indicate difficulty or overload.',
+                    'ai_prompt' => 'Compare with level level expectations. Excessive homework time (>4 hours) may indicate difficulty or overload.',
                 ],
                 'tags' => ['homework', 'time', 'workload'],
                 'is_public' => true,
@@ -281,7 +281,7 @@ class QuestionBankSeeder extends Seeder
             [
                 'category' => 'sel',
                 'subcategory' => 'relationships',
-                'question_text' => 'How would you describe your relationships with other learners?',
+                'question_text' => 'How would you describe your relationships with other participants?',
                 'question_type' => 'scale',
                 'options' => [
                     'min' => 1,
@@ -403,7 +403,7 @@ class QuestionBankSeeder extends Seeder
             [
                 'category' => 'behavioral',
                 'subcategory' => 'conflict',
-                'question_text' => 'How often do you get into conflicts or arguments with other learners?',
+                'question_text' => 'How often do you get into conflicts or arguments with other participants?',
                 'question_type' => 'multiple_choice',
                 'options' => [
                     'choices' => ['Never', 'Rarely', 'Sometimes', 'Often', 'Very Often'],

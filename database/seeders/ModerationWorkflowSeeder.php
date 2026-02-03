@@ -75,7 +75,7 @@ class ModerationWorkflowSeeder extends Seeder
     {
         // Find eligible moderators
         $moderators = User::where('org_id', $org->id)
-            ->whereIn('primary_role', ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor'])
+            ->whereIn('primary_role', ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person'])
             ->get();
 
         if ($moderators->isEmpty()) {
@@ -113,8 +113,8 @@ class ModerationWorkflowSeeder extends Seeder
 
     protected function determineSpecializations(User $user): array
     {
-        // Counselors specialize in wellness and social-emotional content
-        if ($user->primary_role === 'counselor') {
+        // Support Persons specialize in wellness and social-emotional content
+        if ($user->primary_role === 'support_person') {
             return [
                 ModerationTeamSetting::SPEC_WELLNESS,
                 ModerationTeamSetting::SPEC_SOCIAL_EMOTIONAL,
@@ -123,7 +123,7 @@ class ModerationWorkflowSeeder extends Seeder
         }
 
         // Admins and consultants can handle all types
-        if (in_array($user->primary_role, ['admin', 'consultant', 'superintendent'])) {
+        if (in_array($user->primary_role, ['admin', 'consultant', 'administrative_role'])) {
             return [
                 ModerationTeamSetting::SPEC_WELLNESS,
                 ModerationTeamSetting::SPEC_ACADEMIC,
@@ -142,13 +142,13 @@ class ModerationWorkflowSeeder extends Seeder
 
     protected function determineMaxLoad(User $user): int
     {
-        // Counselors have higher capacity for content review
-        if ($user->primary_role === 'counselor') {
+        // Support Persons have higher capacity for content review
+        if ($user->primary_role === 'support_person') {
             return 15;
         }
 
         // Admins/consultants moderate capacity
-        if (in_array($user->primary_role, ['admin', 'consultant', 'superintendent'])) {
+        if (in_array($user->primary_role, ['admin', 'consultant', 'administrative_role'])) {
             return 10;
         }
 

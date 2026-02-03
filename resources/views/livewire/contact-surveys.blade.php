@@ -1,7 +1,8 @@
 <div>
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <!-- Filter Tabs -->
     <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
-        @foreach(['all' => app(\App\Services\TerminologyService::class)->get('all_label'), 'completed' => app(\App\Services\TerminologyService::class)->get('completed_label'), 'in_progress' => app(\App\Services\TerminologyService::class)->get('in_progress_label'), 'abandoned' => app(\App\Services\TerminologyService::class)->get('abandoned_label')] as $status => $label)
+        @foreach(['all' => $terminology->get('all_label'), 'completed' => $terminology->get('completed_label'), 'in_progress' => $terminology->get('in_progress_label'), 'abandoned' => $terminology->get('abandoned_label')] as $status => $label)
         <button
             wire:click="setFilterStatus('{{ $status }}')"
             class="px-3 py-1 text-sm font-medium rounded-lg whitespace-nowrap transition-colors {{ $filterStatus === $status ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
@@ -42,7 +43,7 @@
                         <div class="text-xs text-gray-500">
                             {{ $attempt->completed_at?->format('M d, Y h:i A') ?? ($attempt->started_at?->format('M d, Y h:i A') ?? $attempt->created_at->format('M d, Y h:i A')) }}
                             @if($attempt->response_channel)
-                            <span class="text-gray-400">via {{ ucfirst($attempt->response_channel) }}</span>
+                            <span class="text-gray-400">@term('via_label') {{ $terminology->get('response_channel_'.$attempt->response_channel.'_label') }}</span>
                             @endif
                         </div>
                     </div>
@@ -55,7 +56,7 @@
                     @endif
                     <span class="px-2 py-0.5 text-xs rounded-full
                         {{ $attempt->status === 'completed' ? 'bg-green-100 text-green-700' : ($attempt->status === 'in_progress' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600') }}">
-                        {{ ucfirst(str_replace('_', ' ', $attempt->status)) }}
+                        {{ $terminology->get(($attempt->status ?? 'unknown').'_label') }}
                     </span>
                     <svg class="w-5 h-5 text-gray-400 transition-transform {{ $expandedAttemptId === $attempt->id ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -219,7 +220,7 @@
                     <span class="text-sm text-gray-500">@term('risk_level_label'):</span>
                     <span class="px-2 py-1 text-sm font-medium rounded-full
                         {{ $attempt->risk_level === 'high' ? 'bg-red-100 text-red-700' : ($attempt->risk_level === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">
-                        {{ ucfirst($attempt->risk_level) }}
+                        {{ $terminology->get('risk_'.$attempt->risk_level.'_label') }}
                     </span>
                 </div>
                 @endif

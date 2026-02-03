@@ -46,13 +46,13 @@ class StrategicPlan extends Model
      */
     public const TYPE_ORGANIZATIONAL = 'organizational';
 
-    public const TYPE_TEACHER = 'teacher';
+    public const TYPE_TEACHER = 'instructor';
 
-    public const TYPE_STUDENT = 'learner';
+    public const TYPE_STUDENT = 'participant';
 
     public const TYPE_DEPARTMENT = 'department';
 
-    public const TYPE_GRADE = 'grade';
+    public const TYPE_GRADE = 'level';
 
     // New OKR-style plan types
     public const TYPE_IMPROVEMENT = 'improvement';  // Performance Improvement Plans (PIPs)

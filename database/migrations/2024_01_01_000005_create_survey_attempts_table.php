@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('survey_attempts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('survey_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('learner_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('participant_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('status')->default('in_progress'); // in_progress, completed, abandoned
             $table->json('responses')->nullable();
@@ -30,7 +30,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['survey_id', 'status']);
-            $table->index(['learner_id', 'completed_at']);
+            $table->index(['participant_id', 'completed_at']);
         });
     }
 

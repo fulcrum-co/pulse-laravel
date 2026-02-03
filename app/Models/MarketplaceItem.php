@@ -57,7 +57,7 @@ class MarketplaceItem extends Model
         'thumbnail_url',
         'preview_images',
         'preview_content',
-        'target_grades',
+        'target_levels',
         'target_subjects',
         'target_needs',
         'pricing_type',
@@ -82,7 +82,7 @@ class MarketplaceItem extends Model
         'tags' => 'array',
         'preview_images' => 'array',
         'preview_content' => 'array',
-        'target_grades' => 'array',
+        'target_levels' => 'array',
         'target_subjects' => 'array',
         'target_needs' => 'array',
         'is_featured' => 'boolean',
@@ -299,11 +299,19 @@ class MarketplaceItem extends Model
     }
 
     /**
-     * Scope for grade level.
+     * Scope for level level.
      */
-    public function scopeForGrade(Builder $query, string $grade): Builder
+    public function scopeForLevel(Builder $query, string $level): Builder
     {
-        return $query->whereJsonContains('target_grades', $grade);
+        return $query->whereJsonContains('target_levels', $level);
+    }
+
+    /**
+     * Legacy compatibility.
+     */
+    public function scopeForGrade(Builder $query, string $level): Builder
+    {
+        return $this->scopeForLevel($query, $level);
     }
 
     /**

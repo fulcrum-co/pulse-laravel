@@ -128,7 +128,7 @@ class AuditLog extends Model
             'request_method' => $request?->method(),
             'request_url' => $request?->fullUrl(),
             'involves_pii' => self::checkPii($auditable),
-            'involves_education_records' => $contact instanceof Learner,
+            'involves_education_records' => $contact instanceof Participant,
             'legal_basis' => self::LEGAL_BASIS_EDUCATIONAL_INTEREST,
             'created_at' => now(),
         ]);
@@ -153,7 +153,7 @@ class AuditLog extends Model
     private static function checkPii(Model $model): bool
     {
         $piiModels = [
-            Learner::class,
+            Participant::class,
             User::class,
             ContactNote::class,
             ContactMetric::class,

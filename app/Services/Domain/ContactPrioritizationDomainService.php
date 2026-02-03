@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Domain;
 
 use App\Models\CollectionQueueItem;
-use App\Models\Learner;
+use App\Models\Participant;
 use Illuminate\Support\Collection as SupportCollection;
 
 /**
@@ -22,14 +22,14 @@ class ContactPrioritizationDomainService
         $priority = CollectionQueueItem::PRIORITY_NORMAL;
         $reason = null;
 
-        // High-risk learners get highest priority
-        if ($contact instanceof Learner) {
+        // High-risk participants get highest priority
+        if ($contact instanceof Participant) {
             if ($contact->risk_level === 'high') {
                 $priority = CollectionQueueItem::PRIORITY_CRITICAL;
-                $reason = 'High risk learner';
+                $reason = 'High risk participant';
             } elseif ($contact->risk_level === 'medium') {
                 $priority = CollectionQueueItem::PRIORITY_HIGH;
-                $reason = 'Medium risk learner';
+                $reason = 'Medium risk participant';
             }
 
             // Check for recent flags - escalate priority

@@ -80,7 +80,7 @@ class AdaptiveTrigger extends Model
         return [
             self::TYPE_COURSE_SUGGESTION => [
                 'label' => 'Course Suggestion',
-                'description' => 'Suggest a mini-course to a learner',
+                'description' => 'Suggest a mini-course to a participant',
             ],
             self::TYPE_COURSE_EDIT => [
                 'label' => 'Course Edit',
@@ -113,7 +113,7 @@ class AdaptiveTrigger extends Model
             ],
             self::ACTION_AUTO_ENROLL => [
                 'label' => 'Auto Enroll',
-                'description' => 'Automatically enroll learner',
+                'description' => 'Automatically enroll participant',
             ],
             self::ACTION_NOTIFY => [
                 'label' => 'Notify Only',
@@ -130,13 +130,13 @@ class AdaptiveTrigger extends Model
         return [
             self::INPUT_QUANTITATIVE => [
                 'label' => 'Quantitative Data',
-                'description' => 'Metrics, grades, attendance, scores',
+                'description' => 'Metrics, levels, attendance, scores',
                 'examples' => ['GPA', 'Attendance Rate', 'Survey Scores', 'Risk Level'],
             ],
             self::INPUT_QUALITATIVE => [
                 'label' => 'Qualitative Data',
                 'description' => 'Notes, survey responses, narratives',
-                'examples' => ['Teacher Notes', 'Survey Text Responses', 'Counselor Observations'],
+                'examples' => ['Instructor Notes', 'Survey Text Responses', 'Support Person Observations'],
             ],
             self::INPUT_BEHAVIORAL => [
                 'label' => 'Behavioral Data',

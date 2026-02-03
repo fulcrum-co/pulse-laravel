@@ -93,7 +93,7 @@ class Cohort extends Model
         return $this->hasMany(CohortMember::class);
     }
 
-    public function learners(): HasMany
+    public function participants(): HasMany
     {
         return $this->members()->where('role', CohortMember::ROLE_STUDENT);
     }

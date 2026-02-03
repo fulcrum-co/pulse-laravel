@@ -32,7 +32,7 @@ class MiniCourseEnrollment extends Model
     protected $fillable = [
         'mini_course_id',
         'mini_course_version_id',
-        'learner_id',
+        'participant_id',
         'enrolled_by',
         'enrollment_source',
         'suggestion_id',
@@ -105,15 +105,15 @@ class MiniCourseEnrollment extends Model
     }
 
     /**
-     * The learner enrolled.
+     * The participant enrolled.
      */
-    public function learner(): BelongsTo
+    public function participant(): BelongsTo
     {
-        return $this->belongsTo(Learner::class);
+        return $this->belongsTo(Participant::class);
     }
 
     /**
-     * Who enrolled the learner.
+     * Who enrolled the participant.
      */
     public function enrolledBy(): BelongsTo
     {

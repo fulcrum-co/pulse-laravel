@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('delivery_id')->constrained('distribution_deliveries')->cascadeOnDelete();
 
             // Polymorphic contact reference
-            $table->string('contact_type'); // learner, user, etc.
+            $table->string('contact_type'); // participant, user, etc.
             $table->unsignedBigInteger('contact_id');
 
             // Denormalized for delivery

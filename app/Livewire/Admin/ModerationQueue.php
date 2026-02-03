@@ -107,14 +107,14 @@ class ModerationQueue extends Component
     {
         $user = auth()->user();
 
-        return in_array($user->effective_role, ['admin', 'consultant', 'superintendent']);
+        return in_array($user->effective_role, ['admin', 'consultant', 'administrative_role']);
     }
 
     protected function canAssign(): bool
     {
         $user = auth()->user();
 
-        return in_array($user->effective_role, ['admin', 'consultant', 'superintendent', 'organization_admin']);
+        return in_array($user->effective_role, ['admin', 'consultant', 'administrative_role', 'organization_admin']);
     }
 
     // ============================================

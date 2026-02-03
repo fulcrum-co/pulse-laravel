@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\Survey;
 use App\Models\SurveyAttempt;
 use App\Models\SurveyDelivery;
@@ -41,7 +41,7 @@ class SurveyDeliveryService
             'survey_id' => $survey->id,
             'channel' => $channel,
             'status' => SurveyDelivery::STATUS_PENDING,
-            'recipient_type' => $recipientType === 'learner' ? Learner::class : User::class,
+            'recipient_type' => $recipientType === 'participant' ? Participant::class : User::class,
             'recipient_id' => $recipientId,
             'phone_number' => $phoneNumber ? $this->formatPhoneNumber($phoneNumber) : null,
             'scheduled_for' => $scheduledFor,
@@ -89,7 +89,7 @@ class SurveyDeliveryService
         // Create a survey attempt for the recipient
         $attempt = SurveyAttempt::create([
             'survey_id' => $delivery->survey_id,
-            'learner_id' => $delivery->recipient_type === Learner::class ? $delivery->recipient_id : null,
+            'participant_id' => $delivery->recipient_type === Participant::class ? $delivery->recipient_id : null,
             'user_id' => $delivery->recipient_type === User::class ? $delivery->recipient_id : null,
             'status' => SurveyAttempt::STATUS_IN_PROGRESS,
             'response_channel' => SurveyAttempt::CHANNEL_WEB,
@@ -128,7 +128,7 @@ class SurveyDeliveryService
         // Create a survey attempt
         $attempt = SurveyAttempt::create([
             'survey_id' => $delivery->survey_id,
-            'learner_id' => $delivery->recipient_type === Learner::class ? $delivery->recipient_id : null,
+            'participant_id' => $delivery->recipient_type === Participant::class ? $delivery->recipient_id : null,
             'user_id' => $delivery->recipient_type === User::class ? $delivery->recipient_id : null,
             'status' => SurveyAttempt::STATUS_IN_PROGRESS,
             'response_channel' => SurveyAttempt::CHANNEL_SMS,
@@ -172,7 +172,7 @@ class SurveyDeliveryService
         // Create a survey attempt
         $attempt = SurveyAttempt::create([
             'survey_id' => $delivery->survey_id,
-            'learner_id' => $delivery->recipient_type === Learner::class ? $delivery->recipient_id : null,
+            'participant_id' => $delivery->recipient_type === Participant::class ? $delivery->recipient_id : null,
             'user_id' => $delivery->recipient_type === User::class ? $delivery->recipient_id : null,
             'status' => SurveyAttempt::STATUS_IN_PROGRESS,
             'response_channel' => SurveyAttempt::CHANNEL_VOICE,
@@ -221,7 +221,7 @@ class SurveyDeliveryService
         // Create a survey attempt
         $attempt = SurveyAttempt::create([
             'survey_id' => $delivery->survey_id,
-            'learner_id' => $delivery->recipient_type === Learner::class ? $delivery->recipient_id : null,
+            'participant_id' => $delivery->recipient_type === Participant::class ? $delivery->recipient_id : null,
             'user_id' => $delivery->recipient_type === User::class ? $delivery->recipient_id : null,
             'status' => SurveyAttempt::STATUS_IN_PROGRESS,
             'response_channel' => SurveyAttempt::CHANNEL_CHAT,
@@ -257,7 +257,7 @@ class SurveyDeliveryService
         // Create a survey attempt
         $attempt = SurveyAttempt::create([
             'survey_id' => $delivery->survey_id,
-            'learner_id' => $delivery->recipient_type === Learner::class ? $delivery->recipient_id : null,
+            'participant_id' => $delivery->recipient_type === Participant::class ? $delivery->recipient_id : null,
             'user_id' => $delivery->recipient_type === User::class ? $delivery->recipient_id : null,
             'status' => SurveyAttempt::STATUS_IN_PROGRESS,
             'response_channel' => SurveyAttempt::CHANNEL_CHAT,

@@ -13,7 +13,7 @@ class ContentModerationResultPolicy
     /**
      * Roles that can access the moderation queue.
      */
-    protected array $moderatorRoles = ['admin', 'consultant', 'superintendent', 'organization_admin'];
+    protected array $moderatorRoles = ['admin', 'consultant', 'administrative_role', 'organization_admin'];
 
     /**
      * Can user view the moderation queue?
@@ -33,7 +33,7 @@ class ContentModerationResultPolicy
         }
 
         // Admins can view all
-        if (in_array($user->effective_role, ['admin', 'consultant', 'superintendent'])) {
+        if (in_array($user->effective_role, ['admin', 'consultant', 'administrative_role'])) {
             return true;
         }
 
@@ -68,7 +68,7 @@ class ContentModerationResultPolicy
         }
 
         // Only admins can assign
-        return in_array($user->effective_role, ['admin', 'consultant', 'superintendent', 'organization_admin']);
+        return in_array($user->effective_role, ['admin', 'consultant', 'administrative_role', 'organization_admin']);
     }
 
     /**
@@ -105,7 +105,7 @@ class ContentModerationResultPolicy
         }
 
         // Admins can manage any assignment in their org
-        if (in_array($user->effective_role, ['admin', 'consultant', 'superintendent'])) {
+        if (in_array($user->effective_role, ['admin', 'consultant', 'administrative_role'])) {
             return true;
         }
 

@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  *
  * And must implement:
  * - getModerationContent(): string - Returns the text content to be moderated
- * - getModerationContext(): array - Returns context for moderation (grade level, etc.)
+ * - getModerationContext(): array - Returns context for moderation (level level, etc.)
  */
 trait HasContentModeration
 {
@@ -104,7 +104,7 @@ trait HasContentModeration
             'type' => class_basename($this),
             'id' => $this->getKey(),
             'org_id' => $this->org_id ?? null,
-            'target_grades' => $this->target_grades ?? [],
+            'target_levels' => $this->target_levels ?? [],
             'is_ai_generated' => $this->isAiGenerated(),
         ];
     }

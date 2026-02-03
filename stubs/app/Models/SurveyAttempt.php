@@ -16,7 +16,7 @@ class SurveyAttempt extends Model
         'surveyor_id',
         'surveyee_id',
         'org_id',
-        'classroom_id',
+        'learning_group_id',
         'delivery_method',
         'conversation_transcript',
         'voice_recording_url',
@@ -60,11 +60,11 @@ class SurveyAttempt extends Model
     }
 
     /**
-     * Get the surveyee (learner being surveyed about).
+     * Get the surveyee (participant being surveyed about).
      */
     public function surveyee(): BelongsTo
     {
-        return $this->belongsTo(Learner::class, 'surveyee_id', 'user_id');
+        return $this->belongsTo(Participant::class, 'surveyee_id', 'user_id');
     }
 
     /**
@@ -76,11 +76,11 @@ class SurveyAttempt extends Model
     }
 
     /**
-     * Get the classroom.
+     * Get the learning_group.
      */
-    public function classroom(): BelongsTo
+    public function learning_group(): BelongsTo
     {
-        return $this->belongsTo(Classroom::class, 'classroom_id');
+        return $this->belongsTo(LearningGroup::class, 'learning_group_id');
     }
 
     /**

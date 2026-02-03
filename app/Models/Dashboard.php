@@ -47,40 +47,42 @@ class Dashboard extends Model
      */
     public static function getWidgetTypes(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
             self::WIDGET_METRIC_CARD => [
-                'label' => 'Metric Card',
-                'description' => 'Display a single number with label',
+                'label' => $terminology->get('widget_metric_card_label'),
+                'description' => $terminology->get('widget_metric_card_description'),
                 'icon' => 'chart-bar',
             ],
             self::WIDGET_BAR_CHART => [
-                'label' => 'Bar Chart',
-                'description' => 'Compare values across categories',
+                'label' => $terminology->get('widget_bar_chart_label'),
+                'description' => $terminology->get('widget_bar_chart_description'),
                 'icon' => 'chart-bar-square',
             ],
             self::WIDGET_LINE_CHART => [
-                'label' => 'Line Chart',
-                'description' => 'Show trends over time',
+                'label' => $terminology->get('widget_line_chart_label'),
+                'description' => $terminology->get('widget_line_chart_description'),
                 'icon' => 'arrow-trending-up',
             ],
             self::WIDGET_STUDENT_LIST => [
-                'label' => 'Learner List',
-                'description' => 'Display filtered learner records',
+                'label' => $terminology->get('widget_participant_list_label'),
+                'description' => $terminology->get('widget_participant_list_description'),
                 'icon' => 'users',
             ],
             self::WIDGET_SURVEY_SUMMARY => [
-                'label' => 'Survey Summary',
-                'description' => 'Survey response rates and status',
+                'label' => $terminology->get('widget_survey_summary_label'),
+                'description' => $terminology->get('widget_survey_summary_description'),
                 'icon' => 'clipboard-document-list',
             ],
             self::WIDGET_ALERT_FEED => [
-                'label' => 'Alert Feed',
-                'description' => 'Recent workflow triggers',
+                'label' => $terminology->get('widget_alert_feed_label'),
+                'description' => $terminology->get('widget_alert_feed_description'),
                 'icon' => 'bell-alert',
             ],
             self::WIDGET_NOTIFICATION_FEED => [
-                'label' => 'Notification Feed',
-                'description' => 'Unified feed of alerts, actions & notifications',
+                'label' => $terminology->get('widget_notification_feed_label'),
+                'description' => $terminology->get('widget_notification_feed_description'),
                 'icon' => 'bell',
             ],
         ];
@@ -205,14 +207,14 @@ class Dashboard extends Model
         // Row 1: 4 metric cards across
         $dashboard->addWidget(
             self::WIDGET_METRIC_CARD,
-            'Total Learners',
+            'Total Participants',
             ['data_source' => 'learners_total', 'color' => 'blue'],
             ['x' => 0, 'y' => 0, 'w' => 3, 'h' => 2]
         );
 
         $dashboard->addWidget(
             self::WIDGET_METRIC_CARD,
-            'At-Risk Learners',
+            'At-Risk Participants',
             ['data_source' => 'learners_at_risk', 'color' => 'red'],
             ['x' => 3, 'y' => 0, 'w' => 3, 'h' => 2]
         );

@@ -1,4 +1,5 @@
 <div>
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <!-- Add Suggestion Button -->
     <div class="mb-4">
         <button
@@ -8,7 +9,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
-            Add Suggestion
+            @term('add_suggestion_label')
         </button>
     </div>
 
@@ -16,9 +17,9 @@
     @if($showAddForm)
     <div class="mb-4 p-4 bg-gray-50 rounded-lg">
         <div class="mb-3">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Select Resource</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">@term('select_resource_label')</label>
             <select wire:model="selectedResourceId" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                <option value="">Choose a resource...</option>
+                <option value="">@term('choose_resource_placeholder')</option>
                 @foreach($availableResources as $resource)
                 <option value="{{ $resource->id }}">{{ $resource->title }} ({{ $resource->category }})</option>
                 @endforeach
@@ -26,8 +27,8 @@
             @error('selectedResourceId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
         <div class="flex gap-2">
-            <x-button wire:click="addManualSuggestion" variant="primary" size="small">Add</x-button>
-            <x-button wire:click="toggleAddForm" variant="secondary" size="small">Cancel</x-button>
+            <x-button wire:click="addManualSuggestion" variant="primary" size="small">@term('add_action')</x-button>
+            <x-button wire:click="toggleAddForm" variant="secondary" size="small">@term('cancel_action')</x-button>
         </div>
     </div>
     @endif
@@ -37,20 +38,20 @@
         @forelse($suggestions as $suggestion)
         <div class="flex items-start justify-between p-3 {{ $suggestion->status === 'pending' ? 'bg-yellow-50 border border-yellow-200' : 'bg-gray-50' }} rounded-lg">
             <div class="flex-1">
-                <div class="font-medium text-gray-900">{{ $suggestion->resource->title ?? 'Unknown Resource' }}</div>
+                <div class="font-medium text-gray-900">{{ $suggestion->resource->title ?? $terminology->get('unknown_resource_label') }}</div>
                 <div class="text-sm text-gray-500">
                     {{ $suggestion->resource->category ?? '' }}
                     @if($suggestion->suggestion_source === 'ai_recommendation')
-                    <span class="ml-2 px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full">AI Suggested</span>
+                    <span class="ml-2 px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full">@term('ai_suggested_label')</span>
                     @elseif($suggestion->suggestion_source === 'rule_based')
-                    <span class="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">Auto-matched</span>
+                    <span class="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">@term('auto_matched_label')</span>
                     @endif
                 </div>
                 @if($suggestion->ai_rationale)
                 <div class="mt-1 text-xs text-gray-600 italic">{{ $suggestion->ai_rationale }}</div>
                 @endif
                 @if($suggestion->relevance_score)
-                <div class="mt-1 text-xs text-gray-500">Relevance: {{ number_format($suggestion->relevance_score, 0) }}%</div>
+                <div class="mt-1 text-xs text-gray-500">@term('relevance_label'): {{ number_format($suggestion->relevance_score, 0) }}%</div>
                 @endif
             </div>
 
@@ -60,14 +61,14 @@
                     wire:click="openReview({{ $suggestion->id }})"
                     class="px-3 py-1 text-sm font-medium text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                 >
-                    Review
+                    @term('review_label')
                 </button>
                 @elseif($suggestion->status === 'accepted')
-                <x-badge color="green">Accepted</x-badge>
+                <x-badge color="green">@term('accepted_label')</x-badge>
                 @elseif($suggestion->status === 'declined')
-                <x-badge color="gray">Declined</x-badge>
+                <x-badge color="gray">@term('declined_label')</x-badge>
                 @elseif($suggestion->status === 'assigned')
-                <x-badge color="blue">Assigned</x-badge>
+                <x-badge color="blue">@term('assigned_label')</x-badge>
                 @endif
             </div>
         </div>
@@ -76,7 +77,7 @@
             <svg class="w-10 h-10 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
             </svg>
-            <p>No resource suggestions yet.</p>
+            <p>@term('no_resource_suggestions_yet_label')</p>
         </div>
         @endforelse
     </div>
@@ -86,7 +87,7 @@
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
             <div class="p-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Review Suggestion</h3>
+                <h3 class="text-lg font-semibold text-gray-900">@term('review_suggestion_label')</h3>
             </div>
             <div class="p-4">
                 @php
@@ -94,25 +95,25 @@
                 @endphp
                 @if($reviewSuggestion)
                 <div class="mb-4">
-                    <div class="font-medium text-gray-900">{{ $reviewSuggestion->resource->title ?? 'Unknown' }}</div>
+                    <div class="font-medium text-gray-900">{{ $reviewSuggestion->resource->title ?? $terminology->get('unknown_label') }}</div>
                     <div class="text-sm text-gray-500">{{ $reviewSuggestion->resource->description ?? '' }}</div>
                 </div>
                 @endif
 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">@term('notes_optional_label')</label>
                     <textarea
                         wire:model="reviewNotes"
                         rows="3"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Add any notes about this decision..."
+                        placeholder="@term('review_notes_placeholder')"
                     ></textarea>
                 </div>
             </div>
             <div class="p-4 border-t border-gray-200 flex justify-end gap-2">
-                <x-button wire:click="closeReview" variant="secondary">Cancel</x-button>
-                <x-button wire:click="declineSuggestion" variant="secondary" class="text-red-600 hover:bg-red-50">Decline</x-button>
-                <x-button wire:click="acceptSuggestion" variant="primary">Accept & Assign</x-button>
+                <x-button wire:click="closeReview" variant="secondary">@term('cancel_action')</x-button>
+                <x-button wire:click="declineSuggestion" variant="secondary" class="text-red-600 hover:bg-red-50">@term('decline_label')</x-button>
+                <x-button wire:click="acceptSuggestion" variant="primary">@term('accept_assign_label')</x-button>
             </div>
         </div>
     </div>

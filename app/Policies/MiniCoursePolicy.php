@@ -47,8 +47,8 @@ class MiniCoursePolicy
      */
     public function create(User $user): bool
     {
-        // Admins, consultants, teachers, and counselors can create courses
-        return $user->isAdmin() || in_array($user->primary_role, ['consultant', 'teacher', 'counselor']);
+        // Admins, consultants, instructors, and support_persons can create courses
+        return $user->isAdmin() || in_array($user->primary_role, ['consultant', 'instructor', 'support_person']);
     }
 
     /**
@@ -71,8 +71,8 @@ class MiniCoursePolicy
             return true;
         }
 
-        // Teachers and counselors can update courses in their org
-        return in_array($user->primary_role, ['teacher', 'counselor']);
+        // Instructors and support_persons can update courses in their org
+        return in_array($user->primary_role, ['instructor', 'support_person']);
     }
 
     /**
@@ -118,8 +118,8 @@ class MiniCoursePolicy
             return true;
         }
 
-        // Creator or teacher/counselor can publish
-        if ($course->created_by === $user->id || in_array($user->primary_role, ['teacher', 'counselor'])) {
+        // Creator or instructor/support_person can publish
+        if ($course->created_by === $user->id || in_array($user->primary_role, ['instructor', 'support_person'])) {
             return true;
         }
 
@@ -155,7 +155,7 @@ class MiniCoursePolicy
     }
 
     /**
-     * Determine whether the user can enroll learners in the mini course.
+     * Determine whether the user can enroll participants in the mini course.
      */
     public function enroll(User $user, MiniCourse $course): bool
     {
@@ -169,8 +169,8 @@ class MiniCoursePolicy
             return false;
         }
 
-        // Admins, consultants, teachers, counselors can enroll learners
-        return $user->isAdmin() || in_array($user->primary_role, ['consultant', 'teacher', 'counselor']);
+        // Admins, consultants, instructors, support_persons can enroll participants
+        return $user->isAdmin() || in_array($user->primary_role, ['consultant', 'instructor', 'support_person']);
     }
 
     /**

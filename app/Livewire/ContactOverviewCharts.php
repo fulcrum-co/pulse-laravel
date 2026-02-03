@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Services\ContactMetricService;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -35,21 +35,22 @@ class ContactOverviewCharts extends Component
 
     protected function loadAvailableMetrics()
     {
-        $type = $this->contactType === Learner::class ? 'learner' : 'teacher';
+        $terminology = app(\App\Services\TerminologyService::class);
+        $type = $this->contactType === Participant::class ? 'participant' : 'instructor';
 
         $this->availableMetrics = match ($type) {
-            'learner' => [
-                ['key' => 'gpa', 'label' => 'GPA', 'color' => '#3b82f6'],
-                ['key' => 'wellness_score', 'label' => 'Health & Wellness', 'color' => '#22c55e'],
-                ['key' => 'emotional_wellbeing', 'label' => 'Emotional Well-Being', 'color' => '#a855f7'],
-                ['key' => 'engagement_score', 'label' => 'Engagement', 'color' => '#f59e0b'],
-                ['key' => 'plan_progress', 'label' => 'Plan Progress', 'color' => '#06b6d4'],
-                ['key' => 'attendance_rate', 'label' => 'Attendance Rate', 'color' => '#ec4899'],
+            'participant' => [
+                ['key' => 'gpa', 'label' => $terminology->get('metric_gpa_label'), 'color' => '#3b82f6'],
+                ['key' => 'wellness_score', 'label' => $terminology->get('metric_health_wellness_label'), 'color' => '#22c55e'],
+                ['key' => 'emotional_wellbeing', 'label' => $terminology->get('metric_emotional_wellbeing_label'), 'color' => '#a855f7'],
+                ['key' => 'engagement_score', 'label' => $terminology->get('metric_engagement_label'), 'color' => '#f59e0b'],
+                ['key' => 'plan_progress', 'label' => $terminology->get('metric_plan_progress_label'), 'color' => '#06b6d4'],
+                ['key' => 'attendance_rate', 'label' => $terminology->get('metric_attendance_rate_label'), 'color' => '#ec4899'],
             ],
-            'teacher' => [
-                ['key' => 'classroom_performance', 'label' => 'Classroom Performance', 'color' => '#3b82f6'],
-                ['key' => 'learner_growth', 'label' => 'Learner Growth', 'color' => '#22c55e'],
-                ['key' => 'pd_progress', 'label' => 'PD Progress', 'color' => '#a855f7'],
+            'instructor' => [
+                ['key' => 'learning_group_performance', 'label' => $terminology->get('metric_learning_group_performance_label'), 'color' => '#3b82f6'],
+                ['key' => 'learner_growth', 'label' => $terminology->get('metric_participant_growth_label'), 'color' => '#22c55e'],
+                ['key' => 'pd_progress', 'label' => $terminology->get('metric_pd_progress_label'), 'color' => '#a855f7'],
             ],
             default => [],
         };

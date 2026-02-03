@@ -1,3 +1,7 @@
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+@endphp
+
 <div class="min-h-screen bg-gray-50">
     <!-- Header -->
     <div class="bg-white border-b border-gray-200">
@@ -17,7 +21,7 @@
                             @if($seller->is_verified)
                                 <span class="inline-flex items-center gap-1 text-sm text-blue-600">
                                     <x-icon name="check-badge" class="w-4 h-4" />
-                                    Verified
+                                    @term('verified_label')
                                 </span>
                             @endif
                             <span class="text-sm text-gray-500">{{ ucfirst(str_replace('_', ' ', $seller->seller_type)) }}</span>
@@ -27,11 +31,11 @@
                 <div class="flex items-center gap-3">
                     <a href="{{ route('marketplace.sellers.show', $seller->slug) }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" target="_blank">
                         <x-icon name="eye" class="w-4 h-4" />
-                        View Public Profile
+                        @term('view_public_profile_label')
                     </a>
                     <a href="{{ route('marketplace.seller.items.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors">
                         <x-icon name="plus" class="w-5 h-5" />
-                        List New Item
+                        @term('list_new_item_label')
                     </a>
                 </div>
             </div>
@@ -49,33 +53,33 @@
         <!-- Stats Grid -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
             <div class="bg-white rounded-xl border border-gray-200 p-5">
-                <div class="text-sm text-gray-500 mb-1">Total Items</div>
+                <div class="text-sm text-gray-500 mb-1">@term('total_items_label')</div>
                 <div class="text-3xl font-bold text-gray-900">{{ $stats['total_items'] }}</div>
-                <div class="text-xs text-gray-400 mt-1">{{ $stats['published_items'] }} published</div>
+                <div class="text-xs text-gray-400 mt-1">{{ $stats['published_items'] }} @term('published_label')</div>
             </div>
 
             <div class="bg-white rounded-xl border border-gray-200 p-5">
-                <div class="text-sm text-gray-500 mb-1">Total Sales</div>
+                <div class="text-sm text-gray-500 mb-1">@term('total_sales_label')</div>
                 <div class="text-3xl font-bold text-gray-900">{{ number_format($stats['total_sales']) }}</div>
             </div>
 
             <div class="bg-white rounded-xl border border-gray-200 p-5">
-                <div class="text-sm text-gray-500 mb-1">Total Revenue</div>
+                <div class="text-sm text-gray-500 mb-1">@term('total_revenue_label')</div>
                 <div class="text-3xl font-bold text-gray-900">${{ number_format($stats['total_revenue'], 2) }}</div>
             </div>
 
             <div class="bg-white rounded-xl border border-gray-200 p-5">
-                <div class="text-sm text-gray-500 mb-1">Rating</div>
+                <div class="text-sm text-gray-500 mb-1">@term('rating_label')</div>
                 <div class="flex items-center gap-2">
                     @if($stats['ratings_average'])
                         <div class="text-3xl font-bold text-gray-900">{{ number_format($stats['ratings_average'], 1) }}</div>
                         <x-icon name="star" class="w-6 h-6 text-amber-400" solid />
                     @else
-                        <div class="text-xl text-gray-400">No ratings yet</div>
+                        <div class="text-xl text-gray-400">@term('no_ratings_yet_label')</div>
                     @endif
                 </div>
                 @if($stats['ratings_count'] > 0)
-                    <div class="text-xs text-gray-400 mt-1">{{ $stats['ratings_count'] }} {{ $stats['ratings_count'] === 1 ? 'review' : 'reviews' }}</div>
+                    <div class="text-xs text-gray-400 mt-1">{{ $stats['ratings_count'] }} {{ Str::plural($terminology->get('review_label'), $stats['ratings_count']) }}</div>
                 @endif
             </div>
         </div>
@@ -85,10 +89,10 @@
             <div class="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <x-icon name="clock" class="w-5 h-5 text-amber-600" />
-                    <span class="text-amber-800">You have {{ $stats['pending_items'] }} {{ $stats['pending_items'] === 1 ? 'item' : 'items' }} pending review.</span>
+                    <span class="text-amber-800">{{ $terminology->get('you_have_label') }} {{ $stats['pending_items'] }} {{ Str::plural($terminology->get('item_label'), $stats['pending_items']) }} @term('pending_review_label').</span>
                 </div>
                 <a href="{{ route('marketplace.seller.items', ['status' => 'pending_review']) }}" class="text-sm font-medium text-amber-700 hover:text-amber-900">
-                    View items &rarr;
+                    {{ $terminology->get('view_items_label') }} &rarr;
                 </a>
             </div>
         @endif
@@ -97,9 +101,9 @@
             <!-- Recent Items -->
             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-gray-900">Your Items</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">@term('your_items_label')</h2>
                     <a href="{{ route('marketplace.seller.items') }}" class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                        View all &rarr;
+                        {{ $terminology->get('view_all_label') }} &rarr;
                     </a>
                 </div>
 
@@ -128,7 +132,7 @@
                                             {{ ucfirst(str_replace('_', ' ', $item->status)) }}
                                         </span>
                                         <span class="text-sm text-gray-500">
-                                            {{ $item->isFree() ? 'Free' : '$' . number_format($item->price ?? 0, 2) }}
+                                            {{ $item->isFree() ? $terminology->get('free_label') : '$' . number_format($item->price ?? 0, 2) }}
                                         </span>
                                     </div>
                                 </div>
@@ -141,11 +145,11 @@
                         <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
                             <x-icon name="shopping-bag" class="w-6 h-6 text-gray-400" />
                         </div>
-                        <h3 class="font-medium text-gray-900 mb-1">No items yet</h3>
-                        <p class="text-sm text-gray-500 mb-4">Start selling by listing your first item.</p>
+                        <h3 class="font-medium text-gray-900 mb-1">@term('no_items_yet_label')</h3>
+                        <p class="text-sm text-gray-500 mb-4">@term('start_selling_first_item_label')</p>
                         <a href="{{ route('marketplace.seller.items.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white font-medium rounded-lg hover:bg-pulse-orange-600 text-sm">
                             <x-icon name="plus" class="w-4 h-4" />
-                            List New Item
+                            @term('list_new_item_label')
                         </a>
                     </div>
                 @endif
@@ -154,9 +158,9 @@
             <!-- Recent Transactions -->
             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-gray-900">Recent Sales</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">@term('recent_sales_label')</h2>
                     <a href="{{ route('marketplace.seller.analytics') }}" class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                        View analytics &rarr;
+                        {{ $terminology->get('view_analytics_label') }} &rarr;
                     </a>
                 </div>
 
@@ -185,8 +189,8 @@
                         <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
                             <x-icon name="banknotes" class="w-6 h-6 text-gray-400" />
                         </div>
-                        <h3 class="font-medium text-gray-900 mb-1">No sales yet</h3>
-                        <p class="text-sm text-gray-500">Your sales will appear here once you make your first sale.</p>
+                        <h3 class="font-medium text-gray-900 mb-1">@term('no_sales_yet_label')</h3>
+                        <p class="text-sm text-gray-500">@term('sales_appear_after_first_sale_label')</p>
                     </div>
                 @endif
             </div>
@@ -196,26 +200,26 @@
         <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
             <a href="{{ route('marketplace.seller.items') }}" class="bg-white rounded-xl border border-gray-200 p-5 hover:border-pulse-orange-300 hover:shadow-md transition-all group">
                 <x-icon name="squares-2x2" class="w-8 h-8 text-gray-400 group-hover:text-pulse-orange-500 mb-3" />
-                <h3 class="font-semibold text-gray-900">My Items</h3>
-                <p class="text-sm text-gray-500 mt-1">Manage your listings</p>
+                <h3 class="font-semibold text-gray-900">@term('my_items_label')</h3>
+                <p class="text-sm text-gray-500 mt-1">@term('manage_listings_label')</p>
             </a>
 
             <a href="{{ route('marketplace.seller.analytics') }}" class="bg-white rounded-xl border border-gray-200 p-5 hover:border-pulse-orange-300 hover:shadow-md transition-all group">
                 <x-icon name="chart-bar" class="w-8 h-8 text-gray-400 group-hover:text-pulse-orange-500 mb-3" />
-                <h3 class="font-semibold text-gray-900">Analytics</h3>
-                <p class="text-sm text-gray-500 mt-1">View performance</p>
+                <h3 class="font-semibold text-gray-900">@term('analytics_label')</h3>
+                <p class="text-sm text-gray-500 mt-1">@term('view_performance_label')</p>
             </a>
 
             <a href="{{ route('marketplace.seller.reviews') }}" class="bg-white rounded-xl border border-gray-200 p-5 hover:border-pulse-orange-300 hover:shadow-md transition-all group">
                 <x-icon name="star" class="w-8 h-8 text-gray-400 group-hover:text-pulse-orange-500 mb-3" />
-                <h3 class="font-semibold text-gray-900">Reviews</h3>
-                <p class="text-sm text-gray-500 mt-1">Read & respond</p>
+                <h3 class="font-semibold text-gray-900">@term('reviews_label')</h3>
+                <p class="text-sm text-gray-500 mt-1">@term('read_respond_label')</p>
             </a>
 
             <a href="{{ route('marketplace.seller.payouts') }}" class="bg-white rounded-xl border border-gray-200 p-5 hover:border-pulse-orange-300 hover:shadow-md transition-all group">
                 <x-icon name="banknotes" class="w-8 h-8 text-gray-400 group-hover:text-pulse-orange-500 mb-3" />
-                <h3 class="font-semibold text-gray-900">Payouts</h3>
-                <p class="text-sm text-gray-500 mt-1">Manage earnings</p>
+                <h3 class="font-semibold text-gray-900">@term('payouts_label')</h3>
+                <p class="text-sm text-gray-500 mt-1">@term('manage_earnings_label')</p>
             </a>
         </div>
     </div>

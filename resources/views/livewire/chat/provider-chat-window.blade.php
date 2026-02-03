@@ -1,3 +1,17 @@
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+    $providerTypeLabels = [
+        'coach' => $terminology->get('provider_type_coach_label'),
+        'mentor' => $terminology->get('provider_type_mentor_label'),
+        'specialist' => $terminology->get('provider_type_specialist_label'),
+        'consultant' => $terminology->get('provider_type_consultant_label'),
+        'advisor' => $terminology->get('provider_type_advisor_label'),
+        'organization' => $terminology->get('provider_type_organization_label'),
+        'section' => $terminology->get('provider_type_section_label'),
+        'learning_group' => $terminology->get('provider_type_learning_group_label'),
+    ];
+@endphp
+
 <div class="flex flex-col h-full bg-gray-50" x-data="{ showAttachments: false }">
     @if($conversation)
     <!-- Chat Header -->
@@ -21,19 +35,19 @@
             <div class="min-w-0 flex-1">
                 <h2 class="text-base sm:text-lg font-semibold text-gray-900 truncate">{{ $conversation->provider->display_name }}</h2>
                 <div class="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
-                    <span>{{ ucfirst($conversation->provider->provider_type) }}</span>
+                    <span>{{ $providerTypeLabels[$conversation->provider->provider_type] ?? ucfirst($conversation->provider->provider_type) }}</span>
                     @if($conversation->provider->verified ?? false)
                     <span class="hidden sm:flex items-center gap-1 text-green-600">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                         </svg>
-                        Verified
+                        @term('verified_label')
                     </span>
                     @endif
                     @if($conversation->provider->online ?? false)
                     <span class="flex items-center gap-1 text-green-600">
                         <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                        <span class="hidden sm:inline">Online</span>
+                        <span class="hidden sm:inline">@term('online_label')</span>
                     </span>
                     @endif
                 </div>
@@ -46,14 +60,14 @@
             <button
                 wire:click="startVideoCall"
                 class="relative group p-2.5 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
-                title="Start Video Call"
+                title="{{ $terminology->get('start_video_call_label') }}"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                 </svg>
                 <!-- Tooltip -->
                 <span class="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                    Video Call
+                    @term('video_call_label')
                 </span>
             </button>
 
@@ -61,14 +75,14 @@
             <button
                 wire:click="openBookingModal"
                 class="relative group p-2.5 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                title="Book Session"
+                title="@term('book_session_label')"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
                 <!-- Tooltip -->
                 <span class="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                    Book Session
+                    @term('book_session_label')
                 </span>
             </button>
 
@@ -90,13 +104,13 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>
-                        View Profile
+                        @term('view_profile_label')
                     </button>
-                    <button wire:click="$parent.archiveConversation('{{ $conversation->id }}')" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                    <button wire:click="archiveConversation('{{ $conversation->id }}')" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
                         </svg>
-                        Archive
+                        @term('archive_label')
                     </button>
                 </div>
             </div>
@@ -105,10 +119,10 @@
 
     <!-- Messages Area -->
     <div class="flex-1 overflow-y-auto p-6 space-y-4" id="messages-container">
-        @if($conversation->learner)
+        @if($conversation->participant)
         <div class="flex justify-center">
             <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                Regarding: {{ $conversation->learner->full_name ?? $conversation->learner->name }}
+                @term('regarding_label') {{ $conversation->participant->full_name ?? $conversation->participant->name }}
             </span>
         </div>
         @endif
@@ -119,7 +133,7 @@
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                 </svg>
-                Demo Conversation - Try sending a message or starting a video call
+                @term('demo_conversation_label')
             </span>
         </div>
         @endif
@@ -169,8 +183,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                 </svg>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-1">Start the conversation</h3>
-            <p class="text-sm text-gray-500">Send a message to {{ $conversation->provider->name }}</p>
+            <h3 class="text-lg font-medium text-gray-900 mb-1">@term('start_conversation_label')</h3>
+            <p class="text-sm text-gray-500">@term('send_message_to_label') {{ $conversation->provider->name }}</p>
         </div>
         @endforelse
     </div>
@@ -192,7 +206,7 @@
             <div class="flex-1 min-w-0">
                 <textarea
                     wire:model="messageText"
-                    placeholder="Type your message..."
+                    placeholder="{{ $terminology->get('type_message_placeholder') }}"
                     rows="1"
                     class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
                     @keydown.enter.prevent="if (!event.shiftKey) { $wire.sendMessage(); }"
@@ -207,7 +221,7 @@
                 class="flex-shrink-0 px-4 sm:px-6 py-2.5 sm:py-3 bg-pulse-orange-500 text-white rounded-xl font-medium hover:bg-pulse-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 wire:loading.attr="disabled"
             >
-                <span wire:loading.remove>Send</span>
+                <span wire:loading.remove>@term('send_action')</span>
                 <span wire:loading class="flex items-center gap-2">
                     <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -226,9 +240,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path>
             </svg>
         </div>
-        <h2 class="text-xl font-semibold text-gray-900 mb-2">Select a conversation</h2>
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">@term('select_conversation_label')</h2>
         <p class="text-gray-500 max-w-sm">
-            Choose a conversation from the list or start a new one by selecting a provider.
+            @term('select_conversation_help_label')
         </p>
     </div>
     @endif
@@ -240,8 +254,8 @@
             <!-- Modal Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <div>
-                    <h2 class="text-xl font-semibold text-gray-900">Book a Session</h2>
-                    <p class="text-sm text-gray-500">with {{ $conversation->provider->name }}</p>
+                    <h2 class="text-xl font-semibold text-gray-900">@term('book_session_label')</h2>
+                    <p class="text-sm text-gray-500">@term('with_label') {{ $conversation->provider->name }}</p>
                 </div>
                 <button wire:click="closeBookingModal" class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -273,7 +287,7 @@
 
                     <!-- Calendar Grid -->
                     <div class="grid grid-cols-7 gap-1 mb-2">
-                        @foreach(['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as $dayName)
+                        @foreach([$terminology->get('sun_label'), $terminology->get('mon_label'), $terminology->get('tue_label'), $terminology->get('wed_label'), $terminology->get('thu_label'), $terminology->get('fri_label'), $terminology->get('sat_label')] as $dayName)
                         <div class="text-center text-xs font-medium text-gray-500 py-2">{{ $dayName }}</div>
                         @endforeach
                     </div>
@@ -307,8 +321,8 @@
                             {{ \Carbon\Carbon::parse($selectedDate)->format('D, M j') }}
                         </h3>
                         <div class="flex items-center gap-1 text-xs">
-                            <button class="px-2 py-1 rounded bg-gray-100 text-gray-700">12h</button>
-                            <button class="px-2 py-1 rounded text-gray-400 hover:bg-gray-50">24h</button>
+                            <button class="px-2 py-1 rounded bg-gray-100 text-gray-700">@term('time_format_12h_label')</button>
+                            <button class="px-2 py-1 rounded text-gray-400 hover:bg-gray-50">@term('time_format_24h_label')</button>
                         </div>
                     </div>
                     <div class="space-y-2 max-h-64 overflow-y-auto">
@@ -329,7 +343,7 @@
                         <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
-                        <p class="text-gray-500 text-sm">Select a date to see<br>available times</p>
+                        <p class="text-gray-500 text-sm">@term('select_date_help_label')</p>
                     </div>
                     @endif
                 </div>
@@ -340,21 +354,21 @@
                 <div class="text-sm text-gray-500">
                     @if($selectedDate && $selectedTime)
                     <span class="font-medium text-gray-900">{{ \Carbon\Carbon::parse($selectedDate)->format('F j, Y') }}</span>
-                    at <span class="font-medium text-gray-900">{{ $selectedTime }}</span>
+                    @term('at_label') <span class="font-medium text-gray-900">{{ $selectedTime }}</span>
                     @else
-                    Select a date and time
+                    @term('select_date_time_label')
                     @endif
                 </div>
                 <div class="flex items-center gap-3">
                     <button wire:click="closeBookingModal" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">
-                        Cancel
+                        @term('cancel_action')
                     </button>
                     <button
                         wire:click="confirmBooking"
                         @if(!$selectedDate || !$selectedTime) disabled @endif
                         class="px-6 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Confirm Booking
+                        @term('confirm_booking_label')
                     </button>
                 </div>
             </div>
@@ -385,7 +399,7 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                             </svg>
-                            Connecting...
+                            @term('connecting_label')
                         </p>
                     </div>
                     @elseif($videoCallState === 'connected')
@@ -404,7 +418,7 @@
                         <h3 class="text-white text-xl font-semibold mt-6">{{ $conversation->provider->name }}</h3>
                         <p class="text-green-400 flex items-center gap-2 mt-2">
                             <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                            Connected
+                            @term('connected_label')
                         </p>
                         <p class="text-gray-400 text-sm mt-1" x-text="callDuration"></p>
                     </div>
@@ -415,8 +429,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"></path>
                             </svg>
                         </div>
-                        <h3 class="text-white text-xl font-semibold">Call Ended</h3>
-                        <p class="text-gray-400 mt-2" x-text="'Duration: ' + callDuration"></p>
+                        <h3 class="text-white text-xl font-semibold">@term('call_ended_label')</h3>
+                        <p class="text-gray-400 mt-2" x-text="'{{ $terminology->get('duration_label') }}: ' + callDuration"></p>
                     </div>
                     @endif
                 </div>

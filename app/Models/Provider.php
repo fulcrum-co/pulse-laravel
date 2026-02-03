@@ -24,7 +24,7 @@ class Provider extends Model
 
     public const TYPE_MENTOR = 'mentor';
 
-    public const TYPE_COUNSELOR = 'counselor';
+    public const TYPE_COUNSELOR = 'support_person';
 
     public const TYPE_SPECIALIST = 'specialist';
 
@@ -87,7 +87,7 @@ class Provider extends Model
             self::TYPE_TUTOR => 'Tutor',
             self::TYPE_COACH => 'Coach',
             self::TYPE_MENTOR => 'Mentor',
-            self::TYPE_COUNSELOR => 'Counselor',
+            self::TYPE_COUNSELOR => 'Support Person',
             self::TYPE_SPECIALIST => 'Specialist',
         ];
     }
@@ -210,7 +210,7 @@ class Provider extends Model
     }
 
     /**
-     * Learner assignments for this provider.
+     * Participant assignments for this provider.
      */
     public function assignments(): HasMany
     {

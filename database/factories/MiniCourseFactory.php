@@ -44,7 +44,7 @@ class MiniCourseFactory extends Factory
                 $this->faker->sentence(),
                 $this->faker->sentence(),
             ],
-            'target_grades' => $this->faker->randomElements(['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], 3),
+            'target_levels' => $this->faker->randomElements(['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], 3),
             'estimated_duration_minutes' => $this->faker->numberBetween(15, 120),
             'tags' => $this->faker->words(3),
             'metadata' => [],

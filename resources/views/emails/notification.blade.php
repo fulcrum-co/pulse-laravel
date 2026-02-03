@@ -106,21 +106,24 @@
     </style>
 </head>
 <body>
+    @php
+        $terminology = app(\App\Services\TerminologyService::class);
+    @endphp
     <div class="container">
         <div class="card">
             <div class="header">
-                <h1>Pulse</h1>
+                <h1>{{ $terminology->get('app_name_label') }}</h1>
                 <div class="category">{{ $categoryLabel }}</div>
             </div>
 
             <div class="content">
                 @if($user)
-                    <p class="greeting">Hi {{ $user->first_name ?? 'there' }},</p>
+                    <p class="greeting">{{ $terminology->get('email_greeting_label') }} {{ $user->first_name ?? $terminology->get('email_greeting_fallback_label') }},</p>
                 @endif
 
                 @if(in_array($priority, ['high', 'urgent']))
                     <span class="priority-badge priority-{{ $priority }}">
-                        {{ ucfirst($priority) }} Priority
+                        {{ ucfirst($priority) }} {{ $terminology->get('priority_label') }}
                     </span>
                 @endif
 
@@ -141,12 +144,12 @@
 
             <div class="footer">
                 <p>
-                    You received this email because you have {{ strtolower($categoryLabel) }} notifications enabled.
+                    {{ $terminology->get('email_notifications_enabled_prefix') }} {{ strtolower($categoryLabel) }} {{ $terminology->get('email_notifications_enabled_suffix') }}
                     <br>
-                    <a href="{{ url('/settings/notifications') }}">Manage your notification preferences</a>
+                    <a href="{{ url('/settings/notifications') }}">{{ $terminology->get('email_manage_notification_preferences_label') }}</a>
                 </p>
                 <p style="margin-top: 16px;">
-                    &copy; {{ date('Y') }} Pulse Education Platform
+                    &copy; {{ date('Y') }} {{ $terminology->get('email_footer_brand_label') }}
                 </p>
             </div>
         </div>

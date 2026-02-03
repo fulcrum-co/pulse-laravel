@@ -1,4 +1,4 @@
-<x-layouts.dashboard title="Plan">
+<x-layouts.dashboard title="@term('plan_singular')">
     <x-slot name="actions">
         <div class="flex items-center gap-2">
             <span class="text-xs text-gray-400">
@@ -8,7 +8,7 @@
 
             <a href="{{ route('plans.create') }}" class="inline-flex items-center px-3 py-1.5 bg-pulse-orange-500 text-white rounded text-xs font-medium hover:bg-pulse-orange-600">
                 <x-icon name="plus" class="w-3.5 h-3.5 mr-1" />
-                Add Entry
+                @term('add_action') @term('entry_singular')
             </a>
         </div>
     </x-slot>
@@ -23,24 +23,24 @@
                 @if($plan->isOkrStyle())
                     <a href="{{ route('plans.show', ['plan' => $plan, 'view' => 'goals']) }}"
                        class="py-2 border-b-2 text-xs font-medium {{ $view === 'goals' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
-                        Goals
+                        @term('goals_label')
                     </a>
                     <a href="{{ route('plans.show', ['plan' => $plan, 'view' => 'milestones']) }}"
                        class="py-2 border-b-2 text-xs font-medium {{ $view === 'milestones' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
-                        Milestones
+                        @term('milestones_label')
                     </a>
                     <a href="{{ route('plans.show', ['plan' => $plan, 'view' => 'progress']) }}"
                        class="py-2 border-b-2 text-xs font-medium {{ $view === 'progress' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
-                        Progress
+                        @term('progress_label')
                     </a>
                 @else
                     <a href="{{ route('plans.show', ['plan' => $plan, 'view' => 'planner']) }}"
                        class="py-2 border-b-2 text-xs font-medium {{ $view === 'planner' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
-                        Planner
+                        @term('planner_label')
                     </a>
                     <a href="{{ route('plans.show', ['plan' => $plan, 'view' => 'timeline']) }}"
                        class="py-2 border-b-2 text-xs font-medium {{ $view === 'timeline' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
-                        Timeline
+                        @term('timeline_label')
                     </a>
                 @endif
             </nav>

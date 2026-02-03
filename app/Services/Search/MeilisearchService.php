@@ -104,7 +104,7 @@ class MeilisearchService
                 'filter' => $filterString,
                 'limit' => $limit,
                 'offset' => $offset,
-                'facets' => ['resource_type', 'category', 'target_grades'],
+                'facets' => ['resource_type', 'category', 'target_levels'],
             ],
             'courses' => [
                 'indexUid' => config('scout.prefix').'mini_courses',
@@ -112,7 +112,7 @@ class MeilisearchService
                 'filter' => $filterString,
                 'limit' => $limit,
                 'offset' => $offset,
-                'facets' => ['course_type', 'status', 'target_grades'],
+                'facets' => ['course_type', 'status', 'target_levels'],
             ],
             'content_blocks' => [
                 'indexUid' => config('scout.prefix').'content_blocks',
@@ -120,7 +120,7 @@ class MeilisearchService
                 'filter' => $filterString,
                 'limit' => $limit,
                 'offset' => $offset,
-                'facets' => ['block_type', 'grade_levels', 'topics'],
+                'facets' => ['block_type', 'levels', 'topics'],
             ],
             'providers' => [
                 'indexUid' => config('scout.prefix').'providers',

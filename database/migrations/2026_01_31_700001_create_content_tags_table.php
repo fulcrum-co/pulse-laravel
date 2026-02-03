@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('org_id')->nullable()->constrained('organizations')->cascadeOnDelete();
             $table->string('name', 100);
             $table->string('slug', 100);
-            $table->string('category'); // topic, skill, grade, subject, risk_factor
+            $table->string('category'); // topic, skill, level, subject, risk_factor
             $table->text('description')->nullable();
             $table->string('color', 7)->nullable(); // Hex color for UI
             $table->timestamps();

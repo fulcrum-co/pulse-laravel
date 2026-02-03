@@ -41,7 +41,7 @@ return new class extends Migration
             $table->json('preview_content')->nullable(); // Sample questions, steps, etc.
 
             // Targeting
-            $table->json('target_grades')->nullable();
+            $table->json('target_levels')->nullable();
             $table->json('target_subjects')->nullable();
             $table->json('target_needs')->nullable();
 

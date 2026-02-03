@@ -1,12 +1,13 @@
 <div class="overflow-x-auto">
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <div class="min-w-[800px]">
         {{-- Timeline Header --}}
         <div class="flex border-b border-gray-200 bg-gray-50">
             <div class="w-80 flex-shrink-0 px-4 py-3 font-medium text-sm text-gray-700 border-r border-gray-200">
                 <div class="flex">
-                    <span class="w-40">Name</span>
-                    <span class="w-20 text-center">Start Date</span>
-                    <span class="w-20 text-center">Due Date</span>
+                    <span class="w-40">@term('name_label')</span>
+                    <span class="w-20 text-center">@term('start_date_label')</span>
+                    <span class="w-20 text-center">@term('due_date_label')</span>
                 </div>
             </div>
             <div class="flex-1 flex">
@@ -74,8 +75,8 @@
 
         @if(empty($items))
             <div class="text-center py-12 text-gray-500">
-                <p>No items to display in timeline.</p>
-                <p class="text-sm">Add focus areas, objectives, and activities in the Planner view.</p>
+                <p>@term('no_timeline_items_label')</p>
+                <p class="text-sm">@term('timeline_add_items_help_label')</p>
             </div>
         @endif
     </div>

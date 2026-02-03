@@ -28,7 +28,7 @@ interface ContentModerationContract
      *
      * @return array Metadata array with keys like:
      *               - 'content_type': Type of content (course, resource, etc.)
-     *               - 'target_audience': Target grades or age group
+     *               - 'target_audience': Target levels or age group
      *               - 'subject_area': Subject matter
      *               - 'created_by': Creator information
      */

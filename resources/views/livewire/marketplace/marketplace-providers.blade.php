@@ -1,3 +1,7 @@
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+@endphp
+
 <div class="min-h-screen bg-gray-50">
     <!-- Header Banner -->
     <div class="bg-white border-b border-gray-200">
@@ -8,11 +12,11 @@
                 </a>
                 <div>
                     <nav class="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                        <a href="{{ route('marketplace.index') }}" class="hover:text-gray-700">Marketplace</a>
+                        <a href="{{ route('marketplace.index') }}" class="hover:text-gray-700">@term('marketplace_label')</a>
                         <span>/</span>
-                        <span class="text-gray-900">Providers</span>
+                        <span class="text-gray-900">@term('providers_label')</span>
                     </nav>
-                    <h1 class="text-2xl font-semibold text-gray-900">Providers</h1>
+                    <h1 class="text-2xl font-semibold text-gray-900">@term('providers_label')</h1>
                 </div>
             </div>
             @if($this->hasSellerProfile ?? false)
@@ -21,7 +25,7 @@
                     class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
                 >
                     <x-icon name="plus" class="w-4 h-4" />
-                    List Your Services
+                    @term('list_your_services_label')
                 </a>
             @endif
         </div>
@@ -39,7 +43,7 @@
                     <input
                         type="text"
                         wire:model.live.debounce.300ms="search"
-                        placeholder="Search providers..."
+                        placeholder="{{ $terminology->get('search_providers_placeholder') }}"
                         class="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                     >
                 </div>
@@ -56,14 +60,14 @@
                     >
                     <span class="text-sm text-gray-700 group-hover:text-gray-900 flex items-center gap-1">
                         <x-icon name="check-badge" class="w-4 h-4 text-blue-500" />
-                        Verified only
+                        @term('verified_only_label')
                     </span>
                 </label>
             </div>
 
             <!-- Price Filter -->
             <div class="mb-6">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Price</h3>
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('price_label')</h3>
                 <div class="space-y-2">
                     <label class="flex items-center gap-2 cursor-pointer group">
                         <input
@@ -72,7 +76,7 @@
                             value=""
                             class="w-4 h-4 border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
                         >
-                        <span class="text-sm text-gray-700 group-hover:text-gray-900">All prices</span>
+                        <span class="text-sm text-gray-700 group-hover:text-gray-900">@term('all_prices_label')</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer group">
                         <input
@@ -81,7 +85,7 @@
                             value="free"
                             class="w-4 h-4 border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
                         >
-                        <span class="text-sm text-gray-700 group-hover:text-gray-900">Free consultation</span>
+                        <span class="text-sm text-gray-700 group-hover:text-gray-900">@term('free_consultation_label')</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer group">
                         <input
@@ -90,14 +94,14 @@
                             value="paid"
                             class="w-4 h-4 border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
                         >
-                        <span class="text-sm text-gray-700 group-hover:text-gray-900">Paid services</span>
+                        <span class="text-sm text-gray-700 group-hover:text-gray-900">@term('paid_services_label')</span>
                     </label>
                 </div>
             </div>
 
             <!-- Rating Filter -->
             <div class="mb-6">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Rating</h3>
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('rating_label')</h3>
                 <div class="space-y-2">
                     <label class="flex items-center gap-2 cursor-pointer group">
                         <input
@@ -108,7 +112,7 @@
                         >
                         <span class="text-sm text-gray-700 group-hover:text-gray-900 flex items-center gap-1">
                             <x-icon name="star" class="w-4 h-4 text-amber-400" solid />
-                            4+ stars
+                            @term('rating_4_plus_label')
                         </span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer group">
@@ -120,7 +124,7 @@
                         >
                         <span class="text-sm text-gray-700 group-hover:text-gray-900 flex items-center gap-1">
                             <x-icon name="star" class="w-4 h-4 text-amber-400" solid />
-                            3+ stars
+                            @term('rating_3_plus_label')
                         </span>
                     </label>
                 </div>
@@ -128,7 +132,7 @@
 
             <!-- Provider Type Filter -->
             <div class="mb-6">
-                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Provider Type</h3>
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">@term('provider_type_label')</h3>
                 <div class="space-y-2">
                     @foreach($this->providerTypes as $value => $label)
                         <label class="flex items-center gap-2 cursor-pointer group">
@@ -150,7 +154,7 @@
                     wire:click="clearFilters"
                     class="w-full text-sm text-pulse-orange-600 hover:text-pulse-orange-700 font-medium"
                 >
-                    Clear all filters
+                    @term('clear_all_filters_label')
                 </button>
             @endif
         </div>
@@ -160,7 +164,7 @@
             <!-- Sort & Count Bar -->
             <div class="flex items-center justify-between mb-6">
                 <p class="text-sm text-gray-600">
-                    Showing <span class="font-medium">{{ $items->count() }}</span> of <span class="font-medium">{{ $items->total() }}</span> providers
+                    @term('showing_label') <span class="font-medium">{{ $items->count() }}</span> @term('of_label') <span class="font-medium">{{ $items->total() }}</span> @term('providers_label')
                 </p>
                 <div class="flex items-center gap-4">
                     <!-- View Toggle -->
@@ -168,27 +172,27 @@
                         <button
                             wire:click="$set('viewMode', 'grid')"
                             class="p-2 {{ $viewMode === 'grid' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }}"
-                            title="Grid view"
+                            title="{{ $terminology->get('grid_view_label') }}"
                         >
                             <x-icon name="squares-2x2" class="w-4 h-4" />
                         </button>
                         <button
                             wire:click="$set('viewMode', 'list')"
                             class="p-2 border-l border-gray-300 {{ $viewMode === 'list' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }}"
-                            title="List view"
+                            title="{{ $terminology->get('list_view_label') }}"
                         >
                             <x-icon name="bars-3" class="w-4 h-4" />
                         </button>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-sm text-gray-500">Sort by:</span>
+                        <span class="text-sm text-gray-500">@term('sort_by_label'):</span>
                         <select
                             wire:model.live="sortBy"
                             class="border-gray-300 rounded-lg text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                         >
-                            <option value="popular">Most Popular</option>
-                            <option value="newest">Newest</option>
-                            <option value="rating">Highest Rated</option>
+                            <option value="popular">@term('most_popular_label')</option>
+                            <option value="newest">@term('newest_label')</option>
+                            <option value="rating">@term('highest_rated_label')</option>
                         </select>
                     </div>
                 </div>
@@ -213,7 +217,7 @@
                                         <div class="absolute top-3 right-3">
                                             <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-500 text-white text-xs font-medium">
                                                 <x-icon name="check-badge" class="w-3 h-3" />
-                                                Verified
+                                                @term('verified_label')
                                             </span>
                                         </div>
                                     @endif
@@ -233,10 +237,10 @@
                                                 <span class="text-sm text-gray-400">({{ $item->ratings_count }})</span>
                                             </div>
                                         @else
-                                            <span class="text-sm text-gray-400">No reviews yet</span>
+                                            <span class="text-sm text-gray-400">@term('no_reviews_yet_label')</span>
                                         @endif
                                         <span class="text-sm font-semibold {{ $item->isFree() ? 'text-green-600' : 'text-gray-900' }}">
-                                            {{ $item->isFree() ? 'Free consultation' : 'Contact for rates' }}
+                                            {{ $item->isFree() ? $terminology->get('free_consultation_label') : $terminology->get('contact_for_rates_label') }}
                                         </span>
                                     </div>
                                 </div>
@@ -276,9 +280,9 @@
                                                         <x-icon name="star" class="w-4 h-4 text-amber-400" solid />
                                                         <span class="font-semibold text-gray-900">{{ number_format($item->ratings_average, 1) }}</span>
                                                     </div>
-                                                    <p class="text-xs text-gray-400 mt-0.5">{{ $item->ratings_count }} {{ Str::plural('review', $item->ratings_count) }}</p>
+                                                    <p class="text-xs text-gray-400 mt-0.5">{{ $item->ratings_count }} {{ Str::plural($terminology->get('review_label'), $item->ratings_count) }}</p>
                                                 @else
-                                                    <span class="text-sm text-gray-400">No reviews</span>
+                                                    <span class="text-sm text-gray-400">@term('no_reviews_label')</span>
                                                 @endif
                                             </div>
                                         </div>
@@ -296,16 +300,16 @@
                                                     </span>
                                                 @endforeach
                                                 @if(count($item->subcategories) > 4)
-                                                    <span class="text-xs text-gray-400">+{{ count($item->subcategories) - 4 }} more</span>
+                                                    <span class="text-xs text-gray-400">+{{ count($item->subcategories) - 4 }} {{ $terminology->get('more_label') }}</span>
                                                 @endif
                                             </div>
                                         @endif
 
                                         <div class="flex items-center gap-4 mt-4">
                                             <span class="text-sm font-semibold {{ $item->isFree() ? 'text-green-600' : 'text-gray-900' }}">
-                                                {{ $item->isFree() ? 'Free consultation' : 'Contact for rates' }}
+                                                {{ $item->isFree() ? $terminology->get('free_consultation_label') : $terminology->get('contact_for_rates_label') }}
                                             </span>
-                                            <span class="text-sm text-pulse-orange-600 group-hover:text-pulse-orange-700 font-medium">View profile &rarr;</span>
+                                            <span class="text-sm text-pulse-orange-600 group-hover:text-pulse-orange-700 font-medium">{{ $terminology->get('view_profile_label') }} &rarr;</span>
                                         </div>
                                     </div>
                                 </div>
@@ -325,23 +329,23 @@
                         <x-icon name="users" class="w-8 h-8 text-purple-600" />
                     </div>
                     @if($this->hasActiveFilters)
-                        <h3 class="text-lg font-medium text-gray-900 mb-1">No providers match your filters</h3>
-                        <p class="text-gray-500 mb-4">Try adjusting your filter criteria or clear all filters.</p>
+                        <h3 class="text-lg font-medium text-gray-900 mb-1">@term('no_providers_match_filters_label')</h3>
+                        <p class="text-gray-500 mb-4">@term('adjust_filter_criteria_label')</p>
                         <button
                             wire:click="clearFilters"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
                         >
-                            Clear filters
+                            @term('clear_filters_label')
                         </button>
                     @else
-                        <h3 class="text-lg font-medium text-gray-900 mb-1">No providers available yet</h3>
-                        <p class="text-gray-500 mb-4">Be the first to offer your services to the community.</p>
+                        <h3 class="text-lg font-medium text-gray-900 mb-1">@term('no_providers_available_yet_label')</h3>
+                        <p class="text-gray-500 mb-4">@term('be_first_offer_services_label')</p>
                         <a
                             href="{{ route('marketplace.seller.create') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
                         >
                             <x-icon name="plus" class="w-4 h-4" />
-                            List Your Services
+                            @term('list_your_services_label')
                         </a>
                     @endif
                 </div>

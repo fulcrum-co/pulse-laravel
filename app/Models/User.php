@@ -180,7 +180,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get child organizations the user can manage (for consultants/superintendents).
+     * Get child organizations the user can manage (for consultants/administrative leaders).
      */
     public function getManagedChildOrganizations(): \Illuminate\Support\Collection
     {
@@ -250,10 +250,10 @@ class User extends Authenticatable
         $demoRole = session('demo_role_override');
 
         if ($demoRole && $demoRole !== 'actual') {
-            return $demoRole;
+            return self::normalizeRole($demoRole);
         }
 
-        return $this->primary_role;
+        return self::normalizeRole($this->primary_role);
     }
 
     /**
@@ -275,14 +275,15 @@ class User extends Authenticatable
             return null;
         }
 
+        $terminology = app(\App\Services\TerminologyService::class);
         $labels = [
-            'consultant' => 'District Consultant',
-            'superintendent' => 'Superintendent',
-            'organization_admin' => 'Organization Administrator',
-            'counselor' => 'Organization Counselor',
-            'teacher' => 'Teacher',
-            'learner' => 'Learner',
-            'parent' => 'Parent/Guardian',
+            'consultant' => $terminology->get('demo_role_consultant_label'),
+            'administrative_role' => $terminology->get('demo_role_administrative_label'),
+            'organization_admin' => $terminology->get('demo_role_organization_admin_label'),
+            'support_person' => $terminology->get('demo_role_support_person_label'),
+            'instructor' => $terminology->get('demo_role_instructor_label'),
+            'participant' => $terminology->get('demo_role_participant_label'),
+            'direct_supervisor' => $terminology->get('demo_role_direct_supervisor_label'),
         ];
 
         return $labels[session('demo_role_override')] ?? null;
@@ -293,7 +294,7 @@ class User extends Authenticatable
      */
     public function hasRole(string $role): bool
     {
-        return $this->effective_role === $role;
+        return $this->effective_role === self::normalizeRole($role);
     }
 
     /**
@@ -301,7 +302,7 @@ class User extends Authenticatable
      */
     public function hasActualRole(string $role): bool
     {
-        return $this->primary_role === $role;
+        return self::normalizeRole($this->primary_role) === self::normalizeRole($role);
     }
 
     /**
@@ -311,7 +312,15 @@ class User extends Authenticatable
     {
         $role = $this->effective_role;
 
-        return in_array($role, ['admin', 'consultant', 'superintendent']);
+        return in_array($role, ['admin', 'consultant', 'administrative_role']);
+    }
+
+    /**
+     * Normalize legacy roles to current roles.
+     */
+    public static function normalizeRole(string $role): string
+    {
+        return $role;
     }
 
     /**
@@ -324,7 +333,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get metrics for this user (contact view for teachers/staff).
+     * Get metrics for this user (contact view for instructors/staff).
      */
     public function metrics(): MorphMany
     {
@@ -348,15 +357,15 @@ class User extends Authenticatable
     }
 
     /**
-     * Get classroom metrics for teachers.
+     * Get learning_group metrics for instructors.
      */
-    public function classroomMetrics(): MorphMany
+    public function learningGroupMetrics(): MorphMany
     {
-        return $this->metrics()->where('metric_category', ContactMetric::CATEGORY_CLASSROOM);
+        return $this->metrics()->where('metric_category', ContactMetric::CATEGORY_LEARNING_GROUP);
     }
 
     /**
-     * Get professional development metrics for teachers.
+     * Get professional development metrics for instructors.
      */
     public function pdMetrics(): MorphMany
     {

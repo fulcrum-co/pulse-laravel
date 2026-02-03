@@ -4,13 +4,18 @@
         <form wire:submit.prevent="saveNote">
             <!-- Note Type Selector -->
             <div class="flex flex-wrap gap-2 mb-3">
-                @foreach(['general' => 'General', 'follow_up' => 'Follow-up', 'concern' => 'Concern', 'milestone' => 'Milestone'] as $type => $label)
+                @foreach([
+                    'general' => 'note_type_general_label',
+                    'follow_up' => 'note_type_follow_up_label',
+                    'concern' => 'note_type_concern_label',
+                    'milestone' => 'note_type_milestone_label',
+                ] as $type => $labelKey)
                 <button
                     type="button"
                     wire:click="$set('newNoteType', '{{ $type }}')"
                     class="px-3 py-1 text-sm rounded-full transition-colors {{ $newNoteType === $type ? 'bg-blue-600 text-white' : 'bg-white border border-gray-300 text-gray-600 hover:border-gray-400' }}"
                 >
-                    {{ $label }}
+                    {{ app(\App\Services\TerminologyService::class)->get($labelKey) }}
                 </button>
                 @endforeach
             </div>
@@ -20,7 +25,7 @@
                 wire:model="newNoteContent"
                 rows="3"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                placeholder="Add a note..."
+                placeholder="@term('add_note_placeholder')"
             ></textarea>
 
             <!-- Voice Memo Upload -->
@@ -30,11 +35,11 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
                     </svg>
-                    <span>{{ $voiceMemo ? $voiceMemo->getClientOriginalName() : 'Upload voice memo' }}</span>
+                    <span>{{ $voiceMemo ? $voiceMemo->getClientOriginalName() : app(\App\Services\TerminologyService::class)->get('upload_voice_memo_label') }}</span>
                 </label>
                 @if($voiceMemo)
                 <div wire:loading wire:target="voiceMemo" class="mt-2 text-sm text-blue-600">
-                    Uploading...
+                    @term('uploading_label')
                 </div>
                 @endif
             </div>
@@ -44,20 +49,20 @@
                 <div class="flex items-center gap-4">
                     <!-- Visibility -->
                     <select wire:model="visibility" class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500">
-                        <option value="organization">Visible to Organization</option>
-                        <option value="team">Visible to Team</option>
-                        <option value="private">Private</option>
+                        <option value="organization">@term('visible_to_organization_label')</option>
+                        <option value="team">@term('visible_to_team_label')</option>
+                        <option value="private">@term('private_label')</option>
                     </select>
 
                     <!-- Private Toggle -->
                     <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
                         <input type="checkbox" wire:model="isPrivate" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        Private note
+                        @term('private_note_label')
                     </label>
                 </div>
 
                 <x-button type="submit" variant="primary" size="small">
-                    Save Note
+                    @term('save_note_label')
                 </x-button>
             </div>
 
@@ -67,12 +72,19 @@
 
     <!-- Filter Tabs -->
     <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
-        @foreach(['all' => 'All', 'general' => 'General', 'follow_up' => 'Follow-up', 'concern' => 'Concerns', 'milestone' => 'Milestones', 'voice_memo' => 'Voice Memos'] as $type => $label)
+        @foreach([
+            'all' => 'all_label',
+            'general' => 'note_type_general_label',
+            'follow_up' => 'note_type_follow_up_label',
+            'concern' => 'concerns_label',
+            'milestone' => 'milestones_label',
+            'voice_memo' => 'voice_memos_label',
+        ] as $type => $labelKey)
         <button
             wire:click="setFilterType('{{ $type }}')"
             class="px-3 py-1 text-sm font-medium rounded-lg whitespace-nowrap transition-colors {{ $filterType === $type ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
         >
-            {{ $label }}
+            {{ app(\App\Services\TerminologyService::class)->get($labelKey) }}
         </button>
         @endforeach
     </div>
@@ -95,7 +107,7 @@
                         {{ substr($note->author->name ?? 'U', 0, 1) }}
                     </div>
                     <div>
-                        <div class="text-sm font-medium text-gray-900">{{ $note->author->name ?? 'Unknown' }}</div>
+                        <div class="text-sm font-medium text-gray-900">{{ $note->author->name ?? app(\App\Services\TerminologyService::class)->get('unknown_label') }}</div>
                         <div class="text-xs text-gray-500">{{ $note->created_at->diffForHumans() }}</div>
                     </div>
                 </div>
@@ -109,11 +121,18 @@
                             'voice_memo' => 'purple',
                             default => 'gray',
                         };
+                        $typeLabels = [
+                            'general' => app(\App\Services\TerminologyService::class)->get('note_type_general_label'),
+                            'follow_up' => app(\App\Services\TerminologyService::class)->get('note_type_follow_up_label'),
+                            'concern' => app(\App\Services\TerminologyService::class)->get('note_type_concern_label'),
+                            'milestone' => app(\App\Services\TerminologyService::class)->get('note_type_milestone_label'),
+                            'voice_memo' => app(\App\Services\TerminologyService::class)->get('voice_memo_label'),
+                        ];
                     @endphp
-                    <x-badge :color="$typeColor">{{ ucfirst(str_replace('_', ' ', $note->note_type)) }}</x-badge>
+                    <x-badge :color="$typeColor">{{ $typeLabels[$note->note_type] ?? app(\App\Services\TerminologyService::class)->get('unknown_label') }}</x-badge>
 
                     @if($note->is_private)
-                    <x-badge color="yellow">Private</x-badge>
+                    <x-badge color="yellow">@term('private_label')</x-badge>
                     @endif
 
                     <!-- Actions -->
@@ -125,8 +144,8 @@
                             </svg>
                         </button>
                         <div x-show="open" @click.away="open = false" class="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                            <button wire:click="startEdit({{ $note->id }})" class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">Edit</button>
-                            <button wire:click="deleteNote({{ $note->id }})" wire:confirm="Are you sure you want to delete this note?" class="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50">Delete</button>
+                            <button wire:click="startEdit({{ $note->id }})" class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">@term('edit_action')</button>
+                            <button wire:click="deleteNote({{ $note->id }})" wire:confirm="@term('delete_note_confirm_label')" class="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50">@term('delete_action')</button>
                         </div>
                     </div>
                     @endcan
@@ -138,8 +157,8 @@
             <div class="mt-3" @click.stop>
                 <textarea wire:model="editContent" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
                 <div class="flex gap-2 mt-2">
-                    <x-button wire:click="updateNote" variant="primary" size="small">Save</x-button>
-                    <x-button wire:click="cancelEdit" variant="secondary" size="small">Cancel</x-button>
+                    <x-button wire:click="updateNote" variant="primary" size="small">@term('save_action')</x-button>
+                    <x-button wire:click="cancelEdit" variant="secondary" size="small">@term('cancel_action')</x-button>
                 </div>
             </div>
             @else
@@ -156,7 +175,7 @@
                         </svg>
                     </button>
                     <div class="flex-1">
-                        <div class="text-xs text-gray-500">Voice Memo</div>
+                        <div class="text-xs text-gray-500">@term('voice_memo_label')</div>
                         <audio controls class="w-full h-8">
                             <source src="{{ route('api.notes.audio', $note) }}" type="audio/mpeg">
                         </audio>
@@ -165,13 +184,13 @@
 
                 @if($note->transcription_status === 'completed' && $note->transcription)
                 <div class="mt-2 pt-2 border-t border-gray-200">
-                    <div class="text-xs text-gray-500 mb-1">Transcription</div>
+                    <div class="text-xs text-gray-500 mb-1">@term('transcription_label')</div>
                     <div class="text-sm text-gray-700">{{ $note->transcription }}</div>
                 </div>
                 @elseif($note->transcription_status === 'processing')
-                <div class="mt-2 text-xs text-blue-600">Transcription in progress...</div>
+                <div class="mt-2 text-xs text-blue-600">@term('transcription_in_progress_label')</div>
                 @elseif($note->transcription_status === 'failed')
-                <div class="mt-2 text-xs text-red-600">Transcription failed</div>
+                <div class="mt-2 text-xs text-red-600">@term('transcription_failed_label')</div>
                 @endif
             </div>
             @endif
@@ -179,7 +198,7 @@
             <!-- Structured Data -->
             @if($note->structured_data)
             <div class="mt-3 p-3 bg-blue-50 rounded-lg">
-                <div class="text-xs text-blue-600 font-medium mb-1">Extracted Information</div>
+                <div class="text-xs text-blue-600 font-medium mb-1">@term('extracted_information_label')</div>
                 <div class="text-sm text-gray-700">
                     @foreach($note->structured_data as $key => $value)
                     <div><span class="font-medium">{{ ucfirst(str_replace('_', ' ', $key)) }}:</span> {{ is_array($value) ? implode(', ', $value) : $value }}</div>
@@ -193,7 +212,7 @@
             <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
-            <p>No notes yet. Add a note above to get started.</p>
+            <p>@term('no_notes_yet_label')</p>
         </div>
         @endforelse
     </div>

@@ -40,7 +40,7 @@ class DemoDataProviderService
             'id' => 'demo_4',
             'name' => 'Marcus Thompson',
             'display_name' => 'Marcus Thompson - College Advisor',
-            'provider_type' => 'counselor',
+            'provider_type' => 'support_person',
             'thumbnail_url' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
             'verified' => false,
             'online' => true,
@@ -48,9 +48,9 @@ class DemoDataProviderService
     ];
 
     protected static array $demoLearners = [
-        ['id' => 'learner_101', 'name' => 'Emma Johnson', 'grade' => '10th Grade'],
-        ['id' => 'learner_102', 'name' => 'Liam Williams', 'grade' => '11th Grade'],
-        ['id' => 'learner_103', 'name' => 'Sophia Davis', 'grade' => '9th Grade'],
+        ['id' => 'learner_101', 'name' => 'Emma Johnson', 'level' => '10th Level'],
+        ['id' => 'learner_102', 'name' => 'Liam Williams', 'level' => '11th Level'],
+        ['id' => 'learner_103', 'name' => 'Sophia Davis', 'level' => '9th Level'],
     ];
 
     /**
@@ -62,7 +62,7 @@ class DemoDataProviderService
     }
 
     /**
-     * Get demo learners.
+     * Get demo participants.
      */
     public function getLearners(): array
     {
@@ -87,7 +87,7 @@ class DemoDataProviderService
     }
 
     /**
-     * Create a demo learner object.
+     * Create a demo participant object.
      */
     public function createLearner(array $data): stdClass
     {
@@ -95,7 +95,7 @@ class DemoDataProviderService
         $obj->id = $data['id'] ?? '';
         $obj->name = $data['name'] ?? '';
         $obj->full_name = $data['name'] ?? '';
-        $obj->grade = $data['grade'] ?? '';
+        $obj->level = $data['level'] ?? '';
 
         return $obj;
     }
@@ -108,7 +108,7 @@ class DemoDataProviderService
         $obj = new stdClass;
         $obj->id = $data['id'] ?? '';
         $obj->provider = $this->createProvider($data['provider'] ?? []);
-        $obj->learner = isset($data['learner']) && $data['learner'] ? $this->createLearner($data['learner']) : null;
+        $obj->participant = isset($data['participant']) && $data['participant'] ? $this->createLearner($data['participant']) : null;
         $obj->last_message_preview = $data['last_message'] ?? '';
         $obj->last_message_at = $data['last_message_at'] ?? now();
         $obj->unread_count_initiator = $data['unread_count'] ?? 0;

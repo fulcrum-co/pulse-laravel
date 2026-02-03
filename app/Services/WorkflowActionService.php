@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\User;
 use App\Models\UserNotification;
 use App\Models\Workflow;
@@ -281,18 +281,18 @@ class WorkflowActionService
     }
 
     /**
-     * Assign a resource to a learner.
+     * Assign a resource to a participant.
      */
     public function assignResource(array $config, array $context): array
     {
         $resourceId = $config['resource_id'] ?? null;
-        $learnerId = $context['learner_id'] ?? $context['contact_id'] ?? null;
+        $participantId = $context['participant_id'] ?? $context['contact_id'] ?? null;
 
-        if (! $resourceId || ! $learnerId) {
+        if (! $resourceId || ! $participantId) {
             return [
                 'success' => false,
                 'action_type' => 'assign_resource',
-                'error' => 'Missing resource_id or learner_id',
+                'error' => 'Missing resource_id or participant_id',
                 'executed_at' => now()->toISOString(),
             ];
         }
@@ -300,7 +300,7 @@ class WorkflowActionService
         // TODO: Implement actual resource assignment
         Log::info('Resource assigned by workflow', [
             'resource_id' => $resourceId,
-            'learner_id' => $learnerId,
+            'participant_id' => $participantId,
             'context' => $context,
         ]);
 
@@ -309,7 +309,7 @@ class WorkflowActionService
             'action_type' => 'assign_resource',
             'details' => [
                 'resource_id' => $resourceId,
-                'learner_id' => $learnerId,
+                'participant_id' => $participantId,
             ],
             'executed_at' => now()->toISOString(),
         ];
@@ -368,7 +368,7 @@ class WorkflowActionService
                     'workflow_name',
                     'execution_id',
                     'trigger_type',
-                    'learner_id',
+                    'participant_id',
                     'contact_id',
                 ])),
             ],
@@ -467,7 +467,7 @@ class WorkflowActionService
     {
         $field = $config['field'] ?? null;
         $value = $config['value'] ?? null;
-        $entityType = $config['entity_type'] ?? 'learner';
+        $entityType = $config['entity_type'] ?? 'participant';
         $entityId = $context["{$entityType}_id"] ?? $context['contact_id'] ?? null;
 
         if (! $field || ! $entityId) {
@@ -561,12 +561,12 @@ class WorkflowActionService
                             break;
 
                         case 'learner_contact':
-                            // Get learner's emergency contacts
-                            $learnerId = $context['learner_id'] ?? null;
-                            if ($learnerId) {
-                                $learner = Learner::find($learnerId);
-                                if ($learner && $learner->emergency_contacts) {
-                                    foreach ($learner->emergency_contacts as $contact) {
+                            // Get participant's emergency contacts
+                            $participantId = $context['participant_id'] ?? null;
+                            if ($participantId) {
+                                $participant = Participant::find($participantId);
+                                if ($participant && $participant->emergency_contacts) {
+                                    foreach ($participant->emergency_contacts as $contact) {
                                         $resolved[] = $contact;
                                     }
                                 }

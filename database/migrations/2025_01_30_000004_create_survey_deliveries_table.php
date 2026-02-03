@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('survey_attempt_id')->nullable()->constrained()->nullOnDelete();
             $table->string('channel'); // web, sms, voice_call, whatsapp, chat
             $table->string('status')->default('pending'); // pending, sent, in_progress, completed, failed
-            $table->nullableMorphs('recipient'); // learner, user, etc.
+            $table->nullableMorphs('recipient'); // participant, user, etc.
             $table->string('phone_number')->nullable(); // E.164 format for SMS/voice/WhatsApp
             $table->string('external_id')->nullable(); // Sinch call/message ID
             $table->json('delivery_metadata')->nullable(); // channel-specific data

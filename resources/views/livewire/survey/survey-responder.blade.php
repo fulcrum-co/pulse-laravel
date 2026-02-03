@@ -55,7 +55,7 @@
                     <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
                         <p class="text-amber-800 text-sm">
                             Based on your responses, a staff member may reach out to check in with you.
-                            If you need immediate support, please contact your organization counselor.
+                            If you need immediate support, please contact your organization support_person.
                         </p>
                     </div>
                 @endif

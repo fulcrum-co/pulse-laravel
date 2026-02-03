@@ -28,7 +28,7 @@ class ProgramFactory extends Factory
             'slug' => $this->faker->unique()->slug(),
             'description' => $this->faker->paragraph(2),
             'short_description' => $this->faker->sentence(10),
-            'target_grades' => $this->faker->randomElements(['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], 4),
+            'target_levels' => $this->faker->randomElements(['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'], 4),
             'subject_areas' => $this->faker->randomElements(['math', 'science', 'english', 'history', 'art', 'music'], 2),
             'is_active' => true,
             'settings' => [],

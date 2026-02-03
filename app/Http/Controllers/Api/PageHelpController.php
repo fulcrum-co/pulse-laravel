@@ -50,7 +50,7 @@ class PageHelpController extends Controller
     {
         // Verify user is admin
         if (! $request->user()?->isAdmin()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         $validator = Validator::make($request->all(), [
@@ -91,7 +91,7 @@ class PageHelpController extends Controller
     {
         // Verify user is admin
         if (! $request->user()?->isAdmin()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         $hint = PageHelpHint::findOrFail($id);
@@ -127,7 +127,7 @@ class PageHelpController extends Controller
     {
         // Verify user is admin
         if (! $request->user()?->isAdmin()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         $hint = PageHelpHint::findOrFail($id);
@@ -145,7 +145,7 @@ class PageHelpController extends Controller
     {
         // Verify user is admin
         if (! $request->user()?->isAdmin()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         $validator = Validator::make($request->all(), [

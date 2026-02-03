@@ -1,4 +1,5 @@
 <div>
+    @php($terminology = app(\App\Services\TerminologyService::class))
     {{-- Success notification --}}
     <div
         x-data="{ show: false }"
@@ -13,21 +14,21 @@
         class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50"
         style="display: none;"
     >
-        Preferences saved
+        @term('preferences_saved_label')
     </div>
 
     {{-- Header --}}
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h2 class="text-xl font-semibold text-gray-900">Notification Preferences</h2>
-            <p class="text-sm text-gray-500 mt-1">Choose how you want to receive notifications for different types of activity.</p>
+            <h2 class="text-xl font-semibold text-gray-900">@term('notification_preferences_label')</h2>
+            <p class="text-sm text-gray-500 mt-1">@term('notification_preferences_help_label')</p>
         </div>
         <button
             wire:click="resetToDefaults"
-            wire:confirm="Reset all notification preferences to defaults?"
+            wire:confirm="{{ $terminology->get('reset_notification_preferences_confirm_label') }}"
             class="text-sm text-gray-500 hover:text-gray-700 underline"
         >
-            Reset to defaults
+            @term('reset_to_defaults_label')
         </button>
     </div>
 
@@ -35,32 +36,32 @@
     {{-- DELIVERY CHANNELS BY PRIORITY --}}
     {{-- ========================================== --}}
     <div class="mb-8">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Delivery Channels by Priority</h3>
-        <p class="text-sm text-gray-500 mb-4">Control which channels are used based on notification priority. In-app notifications are always enabled.</p>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">@term('delivery_channels_by_priority_label')</h3>
+        <p class="text-sm text-gray-500 mb-4">@term('delivery_channels_by_priority_help_label')</p>
 
         <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
                         <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Priority Level
+                            @term('priority_level_label')
                         </th>
                         <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             <div class="flex items-center justify-center gap-1">
                                 <x-icon name="bell" class="w-4 h-4" />
-                                <span>In-App</span>
+                                <span>@term('in_app_label')</span>
                             </div>
                         </th>
                         <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             <div class="flex items-center justify-center gap-1">
                                 <x-icon name="envelope" class="w-4 h-4" />
-                                <span>Email</span>
+                                <span>@term('email_label')</span>
                             </div>
                         </th>
                         <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             <div class="flex items-center justify-center gap-1">
                                 <x-icon name="device-phone-mobile" class="w-4 h-4" />
-                                <span>SMS</span>
+                                <span>@term('sms_label')</span>
                             </div>
                         </th>
                     </tr>
@@ -74,7 +75,7 @@
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
                                             {{ $label }}
                                         </span>
-                                        <span class="text-xs text-gray-500">(cannot be disabled)</span>
+                                        <span class="text-xs text-gray-500">(@term('cannot_be_disabled_label'))</span>
                                     @elseif($priority === 'high')
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
                                             {{ $label }}
@@ -146,8 +147,8 @@
     {{-- NOTIFICATION CATEGORIES --}}
     {{-- ========================================== --}}
     <div class="mb-8">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Notification Categories</h3>
-        <p class="text-sm text-gray-500 mb-4">Enable or disable notifications by category. Expand each category to control individual notification types.</p>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">@term('notification_categories_label')</h3>
+        <p class="text-sm text-gray-500 mb-4">@term('notification_categories_help_label')</p>
 
         <div class="space-y-3">
             @foreach($categoryLabels as $category => $label)
@@ -177,7 +178,7 @@
                         <div class="flex items-center gap-4 ml-6">
                             {{-- In-App (always on) --}}
                             <div class="flex flex-col items-center gap-1">
-                                <span class="text-xs text-gray-500 font-medium">In-App</span>
+                                <span class="text-xs text-gray-500 font-medium">@term('in_app_label')</span>
                                 <input
                                     type="checkbox"
                                     checked
@@ -188,7 +189,7 @@
 
                             {{-- Email --}}
                             <div class="flex flex-col items-center gap-1">
-                                <span class="text-xs text-gray-500 font-medium">Email</span>
+                                <span class="text-xs text-gray-500 font-medium">@term('email_label')</span>
                                 <input
                                     type="checkbox"
                                     wire:click="togglePreference('{{ $category }}', 'email')"
@@ -199,7 +200,7 @@
 
                             {{-- SMS --}}
                             <div class="flex flex-col items-center gap-1">
-                                <span class="text-xs text-gray-500 font-medium">SMS</span>
+                                <span class="text-xs text-gray-500 font-medium">@term('sms_label')</span>
                                 <input
                                     type="checkbox"
                                     wire:click="togglePreference('{{ $category }}', 'sms')"
@@ -213,7 +214,7 @@
                     {{-- Type overrides (expanded) --}}
                     @if(in_array($category, $expandedCategories) && isset($typesByCategory[$category]))
                         <div class="border-t border-gray-100 bg-gray-50 px-4 py-3">
-                            <p class="text-xs text-gray-500 mb-3">Toggle individual notification types on/off:</p>
+                            <p class="text-xs text-gray-500 mb-3">@term('toggle_notification_types_help_label')</p>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 @foreach($typesByCategory[$category] as $type => $typeLabel)
                                     @php
@@ -243,7 +244,7 @@
     {{-- QUIET HOURS --}}
     {{-- ========================================== --}}
     <div class="mb-8">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Quiet Hours</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">@term('quiet_hours_label')</h3>
         <div class="bg-white border border-gray-200 rounded-lg p-4">
             <div class="flex items-start justify-between">
                 <div class="flex-1">
@@ -261,8 +262,8 @@
                             ></span>
                         </button>
                         <div>
-                            <span class="font-medium text-gray-900">Enable Do Not Disturb</span>
-                            <p class="text-sm text-gray-500">Pause email and SMS notifications during specified hours</p>
+                            <span class="font-medium text-gray-900">@term('enable_do_not_disturb_label')</span>
+                            <p class="text-sm text-gray-500">@term('quiet_hours_help_label')</p>
                         </div>
                     </div>
                 </div>
@@ -272,7 +273,7 @@
                 <div class="mt-4 pt-4 border-t border-gray-100">
                     <div class="flex flex-wrap items-end gap-4">
                         <div>
-                            <label for="quietHoursStart" class="block text-sm font-medium text-gray-700 mb-1">Start time</label>
+                            <label for="quietHoursStart" class="block text-sm font-medium text-gray-700 mb-1">@term('start_time_label')</label>
                             <input
                                 type="time"
                                 id="quietHoursStart"
@@ -281,10 +282,10 @@
                             />
                         </div>
                         <div class="pb-2">
-                            <span class="text-gray-400">to</span>
+                            <span class="text-gray-400">@term('to_label')</span>
                         </div>
                         <div>
-                            <label for="quietHoursEnd" class="block text-sm font-medium text-gray-700 mb-1">End time</label>
+                            <label for="quietHoursEnd" class="block text-sm font-medium text-gray-700 mb-1">@term('end_time_label')</label>
                             <input
                                 type="time"
                                 id="quietHoursEnd"
@@ -293,13 +294,13 @@
                             />
                         </div>
                         <div>
-                            <label for="quietHoursTimezone" class="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
+                            <label for="quietHoursTimezone" class="block text-sm font-medium text-gray-700 mb-1">@term('timezone_label')</label>
                             <select
                                 id="quietHoursTimezone"
                                 wire:model.live="quietHoursTimezone"
                                 class="block w-full rounded-md border-gray-300 shadow-sm focus:border-pulse-orange-500 focus:ring-pulse-orange-500 sm:text-sm"
                             >
-                                <option value="">Auto (browser)</option>
+                                <option value="">@term('auto_browser_label')</option>
                                 @foreach($timezones as $tz => $tzLabel)
                                     <option value="{{ $tz }}">{{ $tzLabel }}</option>
                                 @endforeach
@@ -307,7 +308,7 @@
                         </div>
                     </div>
                     <p class="mt-3 text-xs text-gray-500">
-                        In-app notifications will still appear, but email and SMS will be held until quiet hours end.
+                        @term('quiet_hours_notice_label')
                     </p>
                 </div>
             @endif
@@ -318,7 +319,7 @@
     {{-- EMAIL DIGESTS --}}
     {{-- ========================================== --}}
     <div class="mb-8">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Email Digests</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">@term('email_digests_label')</h3>
         <div class="bg-white border border-gray-200 rounded-lg p-4">
             <div class="flex items-start justify-between">
                 <div class="flex-1">
@@ -336,8 +337,8 @@
                             ></span>
                         </button>
                         <div>
-                            <span class="font-medium text-gray-900">Enable Digest Emails</span>
-                            <p class="text-sm text-gray-500">Receive a summary of your unread notifications</p>
+                            <span class="font-medium text-gray-900">@term('enable_digest_emails_label')</span>
+                            <p class="text-sm text-gray-500">@term('digest_emails_help_label')</p>
                         </div>
                     </div>
                 </div>
@@ -347,7 +348,7 @@
                 <div class="mt-4 pt-4 border-t border-gray-100 space-y-4">
                     {{-- Frequency --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Frequency</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">@term('frequency_label')</label>
                         <div class="flex items-center gap-4">
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input
@@ -357,7 +358,7 @@
                                     wire:model.live="digestFrequency"
                                     class="w-4 h-4 text-pulse-orange-500 border-gray-300 focus:ring-pulse-orange-500"
                                 />
-                                <span class="text-sm text-gray-700">Daily</span>
+                                <span class="text-sm text-gray-700">@term('daily_label')</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input
@@ -367,7 +368,7 @@
                                     wire:model.live="digestFrequency"
                                     class="w-4 h-4 text-pulse-orange-500 border-gray-300 focus:ring-pulse-orange-500"
                                 />
-                                <span class="text-sm text-gray-700">Weekly</span>
+                                <span class="text-sm text-gray-700">@term('weekly_label')</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input
@@ -377,7 +378,7 @@
                                     wire:model.live="digestFrequency"
                                     class="w-4 h-4 text-pulse-orange-500 border-gray-300 focus:ring-pulse-orange-500"
                                 />
-                                <span class="text-sm text-gray-700">Both</span>
+                                <span class="text-sm text-gray-700">@term('both_label')</span>
                             </label>
                         </div>
                     </div>
@@ -386,24 +387,24 @@
                     <div class="flex flex-wrap items-end gap-4">
                         @if(in_array($digestFrequency, ['weekly', 'both']))
                             <div>
-                                <label for="digestDay" class="block text-sm font-medium text-gray-700 mb-1">Weekly digest day</label>
+                                <label for="digestDay" class="block text-sm font-medium text-gray-700 mb-1">@term('weekly_digest_day_label')</label>
                                 <select
                                     id="digestDay"
                                     wire:model.live="digestDay"
                                     class="block w-full rounded-md border-gray-300 shadow-sm focus:border-pulse-orange-500 focus:ring-pulse-orange-500 sm:text-sm"
                                 >
-                                    <option value="monday">Monday</option>
-                                    <option value="tuesday">Tuesday</option>
-                                    <option value="wednesday">Wednesday</option>
-                                    <option value="thursday">Thursday</option>
-                                    <option value="friday">Friday</option>
-                                    <option value="saturday">Saturday</option>
-                                    <option value="sunday">Sunday</option>
+                                    <option value="monday">@term('monday_label')</option>
+                                    <option value="tuesday">@term('tuesday_label')</option>
+                                    <option value="wednesday">@term('wednesday_label')</option>
+                                    <option value="thursday">@term('thursday_label')</option>
+                                    <option value="friday">@term('friday_label')</option>
+                                    <option value="saturday">@term('saturday_label')</option>
+                                    <option value="sunday">@term('sunday_label')</option>
                                 </select>
                             </div>
                         @endif
                         <div>
-                            <label for="digestTime" class="block text-sm font-medium text-gray-700 mb-1">Delivery time</label>
+                            <label for="digestTime" class="block text-sm font-medium text-gray-700 mb-1">@term('delivery_time_label')</label>
                             <input
                                 type="time"
                                 id="digestTime"
@@ -422,9 +423,9 @@
                                 @checked($digestSuppressIndividual)
                                 class="w-4 h-4 text-pulse-orange-500 border-gray-300 rounded focus:ring-pulse-orange-500 cursor-pointer"
                             />
-                            <span class="text-sm text-gray-700">Suppress individual emails when digest is active</span>
+                            <span class="text-sm text-gray-700">@term('suppress_individual_emails_label')</span>
                         </label>
-                        <p class="text-xs text-gray-500 mt-1 ml-6">When enabled, you'll only receive digest summaries instead of individual notification emails.</p>
+                        <p class="text-xs text-gray-500 mt-1 ml-6">@term('suppress_individual_emails_help_label')</p>
                     </div>
                 </div>
             @endif
@@ -435,7 +436,7 @@
     {{-- POPUP NOTIFICATIONS --}}
     {{-- ========================================== --}}
     <div class="mb-8">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Popup Notifications</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">@term('popup_notifications_label')</h3>
         <div class="bg-white border border-gray-200 rounded-lg p-4">
             <div class="flex items-start justify-between">
                 <div class="flex-1">
@@ -453,8 +454,8 @@
                             ></span>
                         </button>
                         <div>
-                            <span class="font-medium text-gray-900">Show Popup Notifications</span>
-                            <p class="text-sm text-gray-500">Display real-time notifications in the corner of your screen as they arrive</p>
+                            <span class="font-medium text-gray-900">@term('show_popup_notifications_label')</span>
+                            <p class="text-sm text-gray-500">@term('popup_notifications_help_label')</p>
                         </div>
                     </div>
                 </div>
@@ -463,18 +464,18 @@
             @if($toastEnabled)
                 <div class="mt-4 pt-4 border-t border-gray-100">
                     <div>
-                        <label for="toastPriorityThreshold" class="block text-sm font-medium text-gray-700 mb-1">Minimum priority</label>
+                        <label for="toastPriorityThreshold" class="block text-sm font-medium text-gray-700 mb-1">@term('minimum_priority_label')</label>
                         <select
                             id="toastPriorityThreshold"
                             wire:model.live="toastPriorityThreshold"
                             class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-pulse-orange-500 focus:ring-pulse-orange-500 sm:text-sm"
                         >
-                            <option value="low">All notifications</option>
-                            <option value="normal">Normal and above</option>
-                            <option value="high">High and above</option>
-                            <option value="urgent">Critical only</option>
+                            <option value="low">@term('all_notifications_label')</option>
+                            <option value="normal">@term('normal_and_above_label')</option>
+                            <option value="high">@term('high_and_above_label')</option>
+                            <option value="urgent">@term('critical_only_label')</option>
                         </select>
-                        <p class="mt-2 text-xs text-gray-500">Only show popups for notifications at or above this priority level.</p>
+                        <p class="mt-2 text-xs text-gray-500">@term('popup_priority_help_label')</p>
                     </div>
                 </div>
             @endif
@@ -489,9 +490,9 @@
             <div class="flex items-start gap-3">
                 <x-icon name="exclamation-triangle" class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                 <div>
-                    <p class="text-sm font-medium text-amber-800">Phone number not set</p>
+                    <p class="text-sm font-medium text-amber-800">@term('phone_number_not_set_label')</p>
                     <p class="text-sm text-amber-700 mt-1">
-                        To receive SMS notifications, please add your phone number to your account.
+                        @term('phone_number_not_set_help_label')
                     </p>
                 </div>
             </div>

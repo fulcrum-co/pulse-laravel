@@ -30,7 +30,7 @@ return new class extends Migration
             $table->decimal('recurring_price', 10, 2)->nullable();
 
             // License options
-            $table->string('license_type')->default('single'); // single, team, site, district
+            $table->string('license_type')->default('single'); // single, team, site, section
             $table->integer('seat_limit')->nullable(); // For team licenses
             $table->json('license_terms')->nullable(); // Custom terms/restrictions
 

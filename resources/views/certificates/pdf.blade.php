@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html>
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+@endphp
 <head>
     <meta charset="utf-8">
-    <title>Certificate - {{ $certificate->title }}</title>
+    <title>{{ $terminology->get('certificate_pdf_page_title') }} - {{ $certificate->title }}</title>
     <style>
         @page {
             margin: 0;
@@ -197,33 +200,33 @@
                 </svg>
             </div>
 
-            <div class="certificate-title">Certificate of Completion</div>
-            <h1 class="certificate-heading">Achievement Unlocked</h1>
+            <div class="certificate-title">{{ $terminology->get('certificate_pdf_title_label') }}</div>
+            <h1 class="certificate-heading">{{ $terminology->get('certificate_pdf_heading_label') }}</h1>
 
-            <div class="presented-to">This certificate is proudly presented to</div>
+            <div class="presented-to">{{ $terminology->get('certificate_pdf_presented_to_label') }}</div>
             <div class="recipient-name">{{ $certificate->recipient_name }}</div>
 
             <div class="completion-text">
-                For successfully completing the course
+                {{ $terminology->get('certificate_pdf_completion_prefix_label') }}
                 <span class="course-title">"{{ $certificate->title }}"</span>
                 @if($certificate->metadata['cohort_name'] ?? null)
-                    as part of the {{ $certificate->metadata['cohort_name'] }} cohort
+                    {{ $terminology->get('certificate_pdf_cohort_suffix_label') }} {{ $certificate->metadata['cohort_name'] }}
                 @endif
             </div>
 
             <div class="details">
                 <div class="detail-item">
-                    <div class="detail-label">Date Completed</div>
+                    <div class="detail-label">{{ $terminology->get('certificate_pdf_date_completed_label') }}</div>
                     <div class="detail-value">{{ $certificate->issued_at->format('F j, Y') }}</div>
                 </div>
                 @if($certificate->course_hours)
                 <div class="detail-item">
-                    <div class="detail-label">Hours Completed</div>
-                    <div class="detail-value">{{ number_format($certificate->course_hours, 1) }} hours</div>
+                    <div class="detail-label">{{ $terminology->get('certificate_pdf_hours_completed_label') }}</div>
+                    <div class="detail-value">{{ number_format($certificate->course_hours, 1) }} {{ $terminology->get('hours_label') }}</div>
                 </div>
                 @endif
                 <div class="detail-item">
-                    <div class="detail-label">Credential ID</div>
+                    <div class="detail-label">{{ $terminology->get('certificate_pdf_credential_id_label') }}</div>
                     <div class="detail-value">{{ strtoupper(substr($certificate->uuid, 0, 8)) }}</div>
                 </div>
             </div>
@@ -231,12 +234,12 @@
             <div class="footer">
                 <div class="signature">
                     <div class="signature-line"></div>
-                    <div class="signature-name">Program Director</div>
-                    <div class="signature-title">{{ $certificate->organization?->name ?? 'Learning Platform' }}</div>
+                    <div class="signature-name">{{ $terminology->get('certificate_pdf_signature_name') }}</div>
+                    <div class="signature-title">{{ $certificate->organization?->name ?? $terminology->get('certificate_pdf_signature_org_fallback') }}</div>
                 </div>
 
                 <div class="verify">
-                    <div class="verify-label">Verify this certificate</div>
+                    <div class="verify-label">{{ $terminology->get('certificate_pdf_verify_label') }}</div>
                     <div class="verify-url">{{ route('certificates.verify', $certificate->uuid) }}</div>
                 </div>
             </div>

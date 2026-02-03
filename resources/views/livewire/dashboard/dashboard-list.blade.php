@@ -1,3 +1,7 @@
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+@endphp
+
 <div class="space-y-4">
     <!-- Search, Filters & View Toggle -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -7,7 +11,7 @@
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search dashboards..."
+                    placeholder="{{ $terminology->get('search_dashboards_placeholder') }}"
                     class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 />
             </div>
@@ -17,19 +21,19 @@
                     wire:click="setFilter('all')"
                     class="px-3 py-1 text-sm rounded {{ $filter === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
                 >
-                    All
+                    @term('all_label')
                 </button>
                 <button
                     wire:click="setFilter('mine')"
                     class="px-3 py-1 text-sm rounded {{ $filter === 'mine' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
                 >
-                    My Dashboards
+                    @term('my_dashboards_label')
                 </button>
                 <button
                     wire:click="setFilter('shared')"
                     class="px-3 py-1 text-sm rounded {{ $filter === 'shared' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
                 >
-                    Shared
+                    @term('shared_label')
                 </button>
             </div>
         </div>
@@ -39,21 +43,21 @@
             <button
                 wire:click="setViewMode('grid')"
                 class="p-1.5 rounded {{ $viewMode === 'grid' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="Grid view"
+                title="{{ $terminology->get('grid_view_label') }}"
             >
                 <x-icon name="squares-2x2" class="w-4 h-4" />
             </button>
             <button
                 wire:click="setViewMode('list')"
                 class="p-1.5 rounded {{ $viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="List view"
+                title="{{ $terminology->get('list_view_label') }}"
             >
                 <x-icon name="list-bullet" class="w-4 h-4" />
             </button>
             <button
                 wire:click="setViewMode('table')"
                 class="p-1.5 rounded {{ $viewMode === 'table' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                title="Table view"
+                title="{{ $terminology->get('table_view_label') }}"
             >
                 <x-icon name="table-cells" class="w-4 h-4" />
             </button>
@@ -66,13 +70,13 @@
             <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <x-icon name="squares-2x2" class="w-8 h-8 text-pulse-orange-500" />
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-1">No dashboards yet</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-1">@term('no_dashboards_yet_label')</h3>
             <p class="text-sm text-gray-500 mb-4 max-w-sm mx-auto">
-                Create your first dashboard to start tracking metrics and insights.
+                @term('create_first_dashboard_label')
             </p>
             <a href="/dashboard" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
                 <x-icon name="plus" class="w-4 h-4 mr-1" />
-                Create Dashboard
+                @term('create_dashboard_label')
             </a>
         </div>
 
@@ -87,10 +91,10 @@
                             <h3 class="font-medium text-gray-900 text-sm truncate">{{ $dashboard->name }}</h3>
                             <div class="flex items-center gap-1 flex-shrink-0">
                                 @if($dashboard->is_default)
-                                    <span class="text-xs bg-pulse-orange-100 text-pulse-orange-600 px-1.5 py-0.5 rounded">Default</span>
+                                    <span class="text-xs bg-pulse-orange-100 text-pulse-orange-600 px-1.5 py-0.5 rounded">@term('default_label')</span>
                                 @endif
                                 @if($dashboard->is_shared)
-                                    <span class="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">Shared</span>
+                                    <span class="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">@term('shared_label')</span>
                                 @endif
                             </div>
                         </div>
@@ -121,9 +125,9 @@
                         </div>
 
                         <div class="flex items-center justify-between text-xs">
-                            <span class="text-gray-500">{{ $dashboard->widgets->count() }} widgets</span>
+                            <span class="text-gray-500">{{ $dashboard->widgets->count() }} @term('widgets_label')</span>
                             @if($dashboard->user_id !== auth()->id())
-                                <span class="text-gray-400">by {{ $dashboard->user->first_name ?? 'Unknown' }}</span>
+                                <span class="text-gray-400">{{ $terminology->get('by_label') }} {{ $dashboard->user->first_name ?? $terminology->get('unknown_label') }}</span>
                             @else
                                 <span class="text-gray-400">{{ $dashboard->updated_at->diffForHumans() }}</span>
                             @endif
@@ -137,23 +141,23 @@
                                 <button wire:click="duplicateDashboard({{ $dashboard->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                     <x-icon name="document-duplicate" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">@term('duplicate_label')</span>
                             </div>
                             @if($dashboard->user_id === auth()->id())
                                 <div class="relative group">
                                     <button
                                         wire:click="deleteDashboard({{ $dashboard->id }})"
-                                        wire:confirm="Are you sure you want to delete this dashboard?"
+                                        wire:confirm="{{ $terminology->get('delete_dashboard_confirm_label') }}"
                                         class="p-1.5 text-gray-400 hover:text-red-500 rounded"
                                     >
                                         <x-icon name="trash" class="w-3.5 h-3.5" />
                                     </button>
-                                    <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Delete</span>
+                                    <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">@term('delete_label')</span>
                                 </div>
                             @endif
                         </div>
                         <a href="/dashboard?id={{ $dashboard->id }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                            Open
+                            @term('open_label')
                         </a>
                     </div>
                 </div>
@@ -191,18 +195,18 @@
                             <div class="flex items-center gap-2">
                                 <h3 class="font-medium text-gray-900 text-sm truncate">{{ $dashboard->name }}</h3>
                                 @if($dashboard->is_default)
-                                    <span class="text-xs bg-pulse-orange-100 text-pulse-orange-600 px-1.5 py-0.5 rounded">Default</span>
+                                    <span class="text-xs bg-pulse-orange-100 text-pulse-orange-600 px-1.5 py-0.5 rounded">@term('default_label')</span>
                                 @endif
                                 @if($dashboard->is_shared)
-                                    <span class="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">Shared</span>
+                                    <span class="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">@term('shared_label')</span>
                                 @endif
                             </div>
                             <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                                <span>{{ $dashboard->widgets->count() }} widgets</span>
+                                <span>{{ $dashboard->widgets->count() }} @term('widgets_label')</span>
                                 @if($dashboard->user_id !== auth()->id())
-                                    <span>by {{ $dashboard->user->first_name ?? 'Unknown' }}</span>
+                                    <span>{{ $terminology->get('by_label') }} {{ $dashboard->user->first_name ?? $terminology->get('unknown_label') }}</span>
                                 @else
-                                    <span>Updated {{ $dashboard->updated_at->diffForHumans() }}</span>
+                                    <span>@term('updated_label') {{ $dashboard->updated_at->diffForHumans() }}</span>
                                 @endif
                             </div>
                         </div>
@@ -214,14 +218,14 @@
                             @if($dashboard->user_id === auth()->id())
                                 <button
                                     wire:click="deleteDashboard({{ $dashboard->id }})"
-                                    wire:confirm="Are you sure you want to delete this dashboard?"
+                                    wire:confirm="{{ $terminology->get('delete_dashboard_confirm_label') }}"
                                     class="p-1.5 text-gray-400 hover:text-red-500 rounded"
                                 >
                                     <x-icon name="trash" class="w-4 h-4" />
                                 </button>
                             @endif
                             <a href="/dashboard?id={{ $dashboard->id }}" class="ml-2 px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600">
-                                Open
+                                @term('open_label')
                             </a>
                         </div>
                     </div>
@@ -235,12 +239,12 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dashboard</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Widgets</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated</th>
-                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('dashboard_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('widgets_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('status_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('owner_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('updated_label')</th>
+                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">@term('actions_label')</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -277,21 +281,21 @@
                             <td class="px-4 py-3 whitespace-nowrap">
                                 <div class="flex items-center gap-1">
                                     @if($dashboard->is_default)
-                                        <span class="text-xs bg-pulse-orange-100 text-pulse-orange-600 px-1.5 py-0.5 rounded">Default</span>
+                                        <span class="text-xs bg-pulse-orange-100 text-pulse-orange-600 px-1.5 py-0.5 rounded">@term('default_label')</span>
                                     @endif
                                     @if($dashboard->is_shared)
-                                        <span class="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">Shared</span>
+                                        <span class="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">@term('shared_label')</span>
                                     @endif
                                     @if(!$dashboard->is_default && !$dashboard->is_shared)
-                                        <span class="text-xs text-gray-400">Private</span>
+                                        <span class="text-xs text-gray-400">@term('private_label')</span>
                                     @endif
                                 </div>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                                 @if($dashboard->user_id === auth()->id())
-                                    You
+                                    @term('you_label')
                                 @else
-                                    {{ $dashboard->user->first_name ?? 'Unknown' }}
+                                    {{ $dashboard->user->first_name ?? $terminology->get('unknown_label') }}
                                 @endif
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
@@ -305,14 +309,14 @@
                                     @if($dashboard->user_id === auth()->id())
                                         <button
                                             wire:click="deleteDashboard({{ $dashboard->id }})"
-                                            wire:confirm="Are you sure you want to delete this dashboard?"
+                                            wire:confirm="{{ $terminology->get('delete_dashboard_confirm_label') }}"
                                             class="p-1 text-gray-400 hover:text-red-500 rounded"
                                         >
                                             <x-icon name="trash" class="w-4 h-4" />
                                         </button>
                                     @endif
                                     <a href="/dashboard?id={{ $dashboard->id }}" class="ml-1 px-2 py-1 text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                                        Open
+                                        @term('open_label')
                                     </a>
                                 </div>
                             </td>

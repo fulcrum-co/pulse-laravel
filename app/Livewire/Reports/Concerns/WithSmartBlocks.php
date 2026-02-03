@@ -9,56 +9,63 @@ trait WithSmartBlocks
     /**
      * Smart Block definitions - pre-built composite components
      */
-    protected array $smartBlockDefinitions = [
-        'learner_header' => [
-            'name' => 'Learner Profile Header',
-            'description' => 'Name, photo, grade, and key identifiers',
-            'category' => 'learner',
-            'size' => ['width' => 720, 'height' => 120],
-        ],
-        'metrics_row' => [
-            'name' => 'Metrics Row',
-            'description' => 'Four metric cards in a horizontal layout',
-            'category' => 'data',
-            'default_metrics' => ['gpa', 'attendance_rate', 'wellness_score', 'engagement_score'],
-            'size' => ['width' => 720, 'height' => 100],
-        ],
-        'trend_section' => [
-            'name' => 'Performance Trend Section',
-            'description' => 'Chart with title and optional AI insights',
-            'category' => 'analysis',
-            'size' => ['width' => 720, 'height' => 400],
-        ],
-        'risk_banner' => [
-            'name' => 'Risk Indicator Banner',
-            'description' => 'Color-coded risk status with explanation',
-            'category' => 'learner',
-            'size' => ['width' => 720, 'height' => 80],
-        ],
-        'comparison_chart' => [
-            'name' => 'Comparison Chart with Title',
-            'description' => 'Side-by-side or grouped comparison',
-            'category' => 'analysis',
-            'size' => ['width' => 720, 'height' => 320],
-        ],
-        'executive_summary' => [
-            'name' => 'Executive Summary Block',
-            'description' => 'AI-generated summary with key metrics callout',
-            'category' => 'analysis',
-            'size' => ['width' => 720, 'height' => 280],
-        ],
-    ];
+    protected function getSmartBlockDefinitions(): array
+    {
+        $terminology = app(\App\Services\TerminologyService::class);
+
+        return [
+            'learner_header' => [
+                'name' => $terminology->get('smart_block_learner_header_name'),
+                'description' => $terminology->get('smart_block_learner_header_description'),
+                'category' => $terminology->get('smart_block_category_participant_label'),
+                'size' => ['width' => 720, 'height' => 120],
+            ],
+            'metrics_row' => [
+                'name' => $terminology->get('smart_block_metrics_row_name'),
+                'description' => $terminology->get('smart_block_metrics_row_description'),
+                'category' => $terminology->get('smart_block_category_data_label'),
+                'default_metrics' => ['gpa', 'attendance_rate', 'wellness_score', 'engagement_score'],
+                'size' => ['width' => 720, 'height' => 100],
+            ],
+            'trend_section' => [
+                'name' => $terminology->get('smart_block_trend_section_name'),
+                'description' => $terminology->get('smart_block_trend_section_description'),
+                'category' => $terminology->get('smart_block_category_analysis_label'),
+                'size' => ['width' => 720, 'height' => 400],
+            ],
+            'risk_banner' => [
+                'name' => $terminology->get('smart_block_risk_banner_name'),
+                'description' => $terminology->get('smart_block_risk_banner_description'),
+                'category' => $terminology->get('smart_block_category_participant_label'),
+                'size' => ['width' => 720, 'height' => 80],
+            ],
+            'comparison_chart' => [
+                'name' => $terminology->get('smart_block_comparison_chart_name'),
+                'description' => $terminology->get('smart_block_comparison_chart_description'),
+                'category' => $terminology->get('smart_block_category_analysis_label'),
+                'size' => ['width' => 720, 'height' => 320],
+            ],
+            'executive_summary' => [
+                'name' => $terminology->get('smart_block_executive_summary_name'),
+                'description' => $terminology->get('smart_block_executive_summary_description'),
+                'category' => $terminology->get('smart_block_category_analysis_label'),
+                'size' => ['width' => 720, 'height' => 280],
+            ],
+        ];
+    }
 
     /**
      * Add a smart block to the canvas
      */
     public function addSmartBlock(string $blockType): void
     {
-        if (! isset($this->smartBlockDefinitions[$blockType])) {
+        $definitions = $this->getSmartBlockDefinitions();
+
+        if (! isset($definitions[$blockType])) {
             return;
         }
 
-        $definition = $this->smartBlockDefinitions[$blockType];
+        $definition = $definitions[$blockType];
         $baseY = $this->getNextY();
 
         // Generate elements based on block type
@@ -86,11 +93,12 @@ trait WithSmartBlocks
     }
 
     /**
-     * Generate Learner Header block elements
+     * Generate Participant Header block elements
      * Note: Uses getNextY() from WithElementManagement trait
      */
     protected function generateLearnerHeaderBlock(int $baseY): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
         $elements = [];
 
         // Title text
@@ -100,7 +108,7 @@ trait WithSmartBlocks
             'position' => ['x' => 40, 'y' => $baseY],
             'size' => ['width' => 500, 'height' => 50],
             'config' => [
-                'content' => '<h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #111827;">Learner Progress Report</h2>',
+                'content' => '<h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #111827;">'.$terminology->get('participant_progress_report_label').'</h2>',
             ],
             'styles' => [
                 'backgroundColor' => 'transparent',
@@ -109,14 +117,14 @@ trait WithSmartBlocks
             ],
         ];
 
-        // Subtitle with learner placeholder
+        // Subtitle with participant placeholder
         $elements[] = [
             'id' => Str::uuid()->toString(),
             'type' => 'text',
             'position' => ['x' => 40, 'y' => $baseY + 50],
             'size' => ['width' => 400, 'height' => 30],
             'config' => [
-                'content' => '<p style="margin: 0; font-size: 14px; color: #6B7280;">Select a learner from the filter bar above to populate this report</p>',
+                'content' => '<p style="margin: 0; font-size: 14px; color: #6B7280;">'.$terminology->get('report_select_participant_help_label').'</p>',
             ],
             'styles' => [
                 'backgroundColor' => 'transparent',
@@ -185,6 +193,7 @@ trait WithSmartBlocks
      */
     protected function generateTrendSectionBlock(int $baseY): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
         $elements = [];
 
         // Section title
@@ -194,7 +203,7 @@ trait WithSmartBlocks
             'position' => ['x' => 40, 'y' => $baseY],
             'size' => ['width' => 300, 'height' => 40],
             'config' => [
-                'content' => '<h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">Performance Over Time</h3>',
+                'content' => '<h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">'.$terminology->get('performance_over_time_label').'</h3>',
             ],
             'styles' => [
                 'backgroundColor' => 'transparent',
@@ -230,7 +239,7 @@ trait WithSmartBlocks
             'position' => ['x' => 500, 'y' => $baseY + 50],
             'size' => ['width' => 240, 'height' => 280],
             'config' => [
-                'prompt' => 'Analyze the learner performance trends and provide 3-4 key insights about their progress, areas of improvement, and any concerns.',
+                'prompt' => $terminology->get('ai_trend_insights_prompt'),
                 'format' => 'bullets',
                 'context_metrics' => ['gpa', 'attendance_rate', 'wellness_score', 'engagement_score'],
                 'generated_content' => null,
@@ -252,6 +261,7 @@ trait WithSmartBlocks
      */
     protected function generateRiskBannerBlock(int $baseY): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
         $elements = [];
 
         // Risk banner - defaults to "needs data" state
@@ -261,7 +271,7 @@ trait WithSmartBlocks
             'position' => ['x' => 40, 'y' => $baseY],
             'size' => ['width' => 720, 'height' => 70],
             'config' => [
-                'content' => '<div style="display: flex; align-items: center; gap: 12px;"><div style="font-size: 24px;">📊</div><div><p style="margin: 0; font-size: 14px; font-weight: 600; color: #1F2937;">Risk Status</p><p style="margin: 4px 0 0 0; font-size: 13px; color: #6B7280;">Select a learner to view their risk assessment</p></div></div>',
+                'content' => '<div style="display: flex; align-items: center; gap: 12px;"><div style="font-size: 24px;">📊</div><div><p style="margin: 0; font-size: 14px; font-weight: 600; color: #1F2937;">'.$terminology->get('risk_status_label').'</p><p style="margin: 4px 0 0 0; font-size: 13px; color: #6B7280;">'.$terminology->get('risk_status_select_participant_help_label').'</p></div></div>',
             ],
             'styles' => [
                 'backgroundColor' => '#F3F4F6',
@@ -280,6 +290,7 @@ trait WithSmartBlocks
      */
     protected function generateComparisonChartBlock(int $baseY): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
         $elements = [];
 
         // Section title
@@ -289,7 +300,7 @@ trait WithSmartBlocks
             'position' => ['x' => 40, 'y' => $baseY],
             'size' => ['width' => 400, 'height' => 40],
             'config' => [
-                'content' => '<h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">Comparison: Learner vs. Cohort Average</h3>',
+                'content' => '<h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">'.$terminology->get('comparison_participant_vs_cohort_label').'</h3>',
             ],
             'styles' => [
                 'backgroundColor' => 'transparent',
@@ -326,6 +337,7 @@ trait WithSmartBlocks
      */
     protected function generateExecutiveSummaryBlock(int $baseY): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
         $elements = [];
 
         // Section title
@@ -335,7 +347,7 @@ trait WithSmartBlocks
             'position' => ['x' => 40, 'y' => $baseY],
             'size' => ['width' => 300, 'height' => 40],
             'config' => [
-                'content' => '<h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">Executive Summary</h3>',
+                'content' => '<h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">'.$terminology->get('executive_summary_label').'</h3>',
             ],
             'styles' => [
                 'backgroundColor' => 'transparent',
@@ -351,7 +363,7 @@ trait WithSmartBlocks
             'position' => ['x' => 40, 'y' => $baseY + 50],
             'size' => ['width' => 480, 'height' => 200],
             'config' => [
-                'prompt' => 'Write a brief executive summary of this learner\'s overall performance. Include their strengths, areas for growth, and recommended next steps for parents and teachers.',
+                'prompt' => $terminology->get('ai_executive_summary_prompt'),
                 'format' => 'executive_summary',
                 'context_metrics' => ['gpa', 'attendance_rate', 'wellness_score', 'engagement_score', 'plan_progress'],
                 'generated_content' => null,
@@ -367,7 +379,11 @@ trait WithSmartBlocks
 
         // Key metric highlights (3 small metric cards)
         $highlightMetrics = ['gpa', 'attendance_rate', 'wellness_score'];
-        $highlightLabels = ['GPA', 'Attendance', 'Wellness'];
+        $highlightLabels = [
+            $terminology->get('metric_gpa_label'),
+            $terminology->get('metric_attendance_rate_label'),
+            $terminology->get('metric_health_wellness_label'),
+        ];
         $cardWidth = 70;
         $startX = 540;
 

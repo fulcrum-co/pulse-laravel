@@ -127,7 +127,7 @@ class SurveyCreator extends Component
         $this->estimatedDuration = $survey->estimated_duration_minutes;
         $this->allowVoiceResponses = $survey->allow_voice_responses ?? false;
         $this->aiFollowUpEnabled = $survey->ai_follow_up_enabled ?? false;
-        $this->targetGrades = $survey->target_grades;
+        $this->targetGrades = $survey->target_levels;
     }
 
     // ============================================
@@ -184,7 +184,7 @@ class SurveyCreator extends Component
         // Add initial greeting
         $this->chatMessages[] = [
             'role' => 'assistant',
-            'content' => "Hi! I'm here to help you create a survey. What's the purpose of your survey? For example: 'I want to check in on learner wellness' or 'I need to assess academic stress levels'.",
+            'content' => "Hi! I'm here to help you create a survey. What's the purpose of your survey? For example: 'I want to check in on participant wellness' or 'I need to assess academic stress levels'.",
         ];
     }
 
@@ -304,6 +304,7 @@ class SurveyCreator extends Component
 
     protected function generateAIResponse(string $message, SurveyCreationSession $session): string
     {
+        $terminology = app(\App\Services\TerminologyService::class);
         $lowerMessage = strtolower($message);
 
         // Simple pattern matching for demo - actual implementation uses Claude
@@ -331,7 +332,7 @@ class SurveyCreator extends Component
                     "\n\nFeel free to ask me to modify, remove, or add questions!";
             }
 
-            return "Could you tell me more about what you'd like to survey? For example:\n- Learner wellness and emotional well-being\n- Academic stress and workload\n- Classroom engagement\n- Social connections";
+            return "Could you tell me more about what you'd like to survey? For example:\n- ".$terminology->get('learner_singular')." wellness and emotional well-being\n- Performance stress and workload\n- ".$terminology->get('learning_group_singular')." engagement\n- Social connections";
         }
 
         // Follow-up messages
@@ -657,7 +658,7 @@ class SurveyCreator extends Component
             'estimated_duration_minutes' => $this->estimatedDuration,
             'allow_voice_responses' => $this->allowVoiceResponses,
             'ai_follow_up_enabled' => $this->aiFollowUpEnabled,
-            'target_grades' => $this->targetGrades,
+            'target_levels' => $this->targetGrades,
             'template_id' => $this->selectedTemplateId,
         ];
 

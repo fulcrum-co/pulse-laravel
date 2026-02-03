@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\User;
 use App\Services\ContactMetricService;
 use App\Services\ResourceSuggestionService;
@@ -26,14 +26,14 @@ class ContactController extends Controller
     }
 
     /**
-     * Display a learner contact view.
+     * Display a participant contact view.
      */
-    public function show(Request $request, Learner $learner)
+    public function show(Request $request, Participant $participant)
     {
         // TODO: Add LearnerPolicy for proper authorization
-        // $this->authorize('view', $learner);
+        // $this->authorize('view', $participant);
 
-        $learner->load([
+        $participant->load([
             'user',
             'organization',
             'surveyAttempts',
@@ -44,20 +44,20 @@ class ContactController extends Controller
         $user = auth()->user();
         $organizationYear = $request->get('organization_year', $this->metricService->getCurrentOrganizationYear());
 
-        // Log FERPA-compliant access
-        AuditLog::log('view', $learner, null, null, $learner);
+        // Log privacy-compliant access
+        AuditLog::log('view', $participant, null, null, $participant);
 
-        // Get heat map data for the learner
+        // Get heat map data for the participant
         $heatMapData = $this->metricService->getHeatMapData(
-            $learner,
+            $participant,
             $organizationYear,
             ['academics', 'attendance', 'behavior', 'life_skills']
         );
 
         // Get chart data for the last 12 months
         $chartData = $this->metricService->getChartData(
-            Learner::class,
-            $learner->id,
+            Participant::class,
+            $participant->id,
             ['gpa', 'wellness_score', 'emotional_wellbeing', 'engagement_score', 'plan_progress'],
             Carbon::now()->subMonths(12),
             Carbon::now(),
@@ -65,7 +65,7 @@ class ContactController extends Controller
         );
 
         // Get resource suggestions (pending and recently reviewed)
-        $resourceSuggestions = $learner->resourceSuggestions()
+        $resourceSuggestions = $participant->resourceSuggestions()
             ->with('resource')
             ->whereIn('status', ['pending', 'accepted'])
             ->orderByDesc('created_at')
@@ -73,14 +73,14 @@ class ContactController extends Controller
             ->get();
 
         // Get suggested resources based on risk level (legacy, for backward compatibility)
-        $suggestedResources = \App\Models\Resource::forOrganization($learner->org_id)
+        $suggestedResources = \App\Models\Resource::forOrganization($participant->org_id)
             ->active()
-            ->whereJsonContains('target_risk_levels', $learner->risk_level)
+            ->whereJsonContains('target_risk_levels', $participant->risk_level)
             ->limit(5)
             ->get();
 
-        return view('contacts.learner-view', compact(
-            'learner',
+        return view('contacts.participant-view', compact(
+            'participant',
             'suggestedResources',
             'heatMapData',
             'chartData',
@@ -90,106 +90,106 @@ class ContactController extends Controller
     }
 
     /**
-     * Display a teacher contact view.
+     * Display an instructor contact view.
      */
-    public function showTeacher(Request $request, User $teacher)
+    public function showInstructor(Request $request, User $instructor)
     {
-        // Verify the user is a teacher
-        if (! $teacher->hasRole('teacher')) {
+        // Verify the user is a instructor
+        if (! $instructor->hasRole('instructor')) {
             abort(404);
         }
 
         // TODO: Add UserPolicy for proper authorization
-        // $this->authorize('view', $teacher);
+        // $this->authorize('view', $instructor);
 
-        $teacher->load(['organization']);
+        $instructor->load(['organization']);
 
         $user = auth()->user();
         $organizationYear = $request->get('organization_year', $this->metricService->getCurrentOrganizationYear());
 
         // Log access
-        AuditLog::log('view', $teacher);
+        AuditLog::log('view', $instructor);
 
-        // Get chart data for classroom and PD metrics
+        // Get chart data for learning_group and PD metrics
         $chartData = $this->metricService->getChartData(
             User::class,
-            $teacher->id,
-            ['classroom_performance', 'learner_growth', 'pd_progress'],
+            $instructor->id,
+            ['learning_group_performance', 'learner_growth', 'pd_progress'],
             Carbon::now()->subMonths(12),
             Carbon::now(),
             'month'
         );
 
-        // Get classroom metrics
-        $classroomMetrics = $teacher->classroomMetrics()
+        // Get learning_group metrics
+        $learningGroupMetrics = $instructor->learningGroupMetrics()
             ->latest('recorded_at')
             ->limit(10)
             ->get();
 
         // Get PD metrics
-        $pdMetrics = $teacher->pdMetrics()
+        $pdMetrics = $instructor->pdMetrics()
             ->latest('recorded_at')
             ->limit(10)
             ->get();
 
-        return view('contacts.teacher-view', compact(
-            'teacher',
+        return view('contacts.instructor-view', compact(
+            'instructor',
             'chartData',
-            'classroomMetrics',
+            'learningGroupMetrics',
             'pdMetrics',
             'organizationYear'
         ));
     }
 
     /**
-     * Display a parent contact view.
+     * Display a direct supervisor contact view.
      */
-    public function showParent(Request $request, User $parent)
+    public function showDirectSupervisor(Request $request, User $direct_supervisor)
     {
-        // Verify the user is a parent
-        if (! $parent->hasRole('parent')) {
+        // Verify the user is a direct_supervisor
+        if (! $direct_supervisor->hasRole('direct_supervisor')) {
             abort(404);
         }
 
         // TODO: Add UserPolicy for proper authorization
-        // $this->authorize('view', $parent);
+        // $this->authorize('view', $direct_supervisor);
 
-        $parent->load(['organization']);
+        $direct_supervisor->load(['organization']);
 
         $user = auth()->user();
 
         // Log access
-        AuditLog::log('view', $parent);
+        AuditLog::log('view', $direct_supervisor);
 
-        // Get linked learners (children)
-        $linkedLearners = Learner::where('org_id', $parent->org_id)
-            ->whereHas('guardians', function ($query) use ($parent) {
-                $query->where('users.id', $parent->id);
+        // Get linked participants
+        $linkedLearners = Participant::where('org_id', $direct_supervisor->org_id)
+            ->whereHas('guardians', function ($query) use ($direct_supervisor) {
+                $query->where('users.id', $direct_supervisor->id);
             })
             ->with(['metrics' => function ($query) {
                 $query->latest('recorded_at')->limit(5);
             }])
             ->get();
 
-        // Get engagement metrics for parent
-        $engagementMetrics = $parent->metrics()
+        // Get engagement metrics for direct_supervisor
+        $engagementMetrics = $direct_supervisor->metrics()
             ->where('metric_category', 'engagement')
             ->latest('recorded_at')
             ->limit(10)
             ->get();
 
-        // Get chart data for parent engagement
+        // Get chart data for direct_supervisor engagement
         $chartData = $this->metricService->getChartData(
             User::class,
-            $parent->id,
+            $direct_supervisor->id,
             ['engagement_score', 'communication_frequency'],
             Carbon::now()->subMonths(12),
             Carbon::now(),
             'month'
         );
 
-        return view('contacts.parent-view', compact(
-            'parent',
+        return view('contacts.direct_supervisor-view', compact(
+            'direct_supervisor',
             'linkedLearners',
             'engagementMetrics',
             'chartData'

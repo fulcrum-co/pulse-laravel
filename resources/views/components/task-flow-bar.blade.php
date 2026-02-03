@@ -2,7 +2,19 @@
 {{-- Persistent top bar for guided task flow through notifications --}}
 @auth
 <div
-    x-data="taskFlowManager()"
+    x-data="Object.assign(taskFlowManager(), {
+        ofLabel: @js(app(\App\Services\TerminologyService::class)->get('of_label')),
+        urgentLabel: @js(app(\App\Services\TerminologyService::class)->get('priority_urgent_label')),
+        highLabel: @js(app(\App\Services\TerminologyService::class)->get('priority_high_label')),
+        taskLabel: @js(app(\App\Services\TerminologyService::class)->get('task_label')),
+        tasksLabel: @js(app(\App\Services\TerminologyService::class)->get('tasks_label')),
+        remainingLabel: @js(app(\App\Services\TerminologyService::class)->get('remaining_label')),
+        previousTaskLabel: @js(app(\App\Services\TerminologyService::class)->get('previous_task_label')),
+        nextTaskLabel: @js(app(\App\Services\TerminologyService::class)->get('next_task_label')),
+        skipLabel: @js(app(\App\Services\TerminologyService::class)->get('skip_label')),
+        doneLabel: @js(app(\App\Services\TerminologyService::class)->get('done_label')),
+        exitTaskFlowLabel: @js(app(\App\Services\TerminologyService::class)->get('exit_task_flow_label')),
+    })"
     x-show="isActive"
     x-transition:enter="transform ease-out duration-300"
     x-transition:enter-start="-translate-y-full"
@@ -21,7 +33,7 @@
                 <div class="flex items-center gap-2">
                     <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/20 text-white font-semibold text-sm"
                           x-text="currentIndex + 1"></span>
-                    <span class="text-sm text-purple-200">of</span>
+                    <span class="text-sm text-purple-200" x-text="ofLabel"></span>
                     <span class="text-sm font-medium text-white" x-text="queue.length"></span>
                 </div>
                 <div class="hidden sm:block h-4 w-px bg-purple-400/50"></div>
@@ -29,7 +41,7 @@
                     <template x-if="currentTask?.priority === 'urgent' || currentTask?.priority === 'high'">
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
                               :class="currentTask?.priority === 'urgent' ? 'bg-red-500 text-white' : 'bg-amber-400 text-amber-900'"
-                              x-text="currentTask?.priority === 'urgent' ? 'Urgent' : 'High'"></span>
+                              x-text="currentTask?.priority === 'urgent' ? urgentLabel : highLabel"></span>
                     </template>
                     <span class="text-sm font-medium text-white truncate max-w-xs" x-text="currentTask?.title"></span>
                 </div>
@@ -42,7 +54,9 @@
                          :style="`width: ${progress}%`"></div>
                 </div>
                 <p class="text-xs text-purple-200 mt-1 text-center" x-show="remainingCount > 0">
-                    <span x-text="remainingCount"></span> task<span x-show="remainingCount !== 1">s</span> remaining
+                    <span x-text="remainingCount"></span>
+                    <span x-text="remainingCount !== 1 ? tasksLabel : taskLabel"></span>
+                    <span x-text="remainingLabel"></span>
                 </p>
             </div>
 
@@ -52,7 +66,7 @@
                 <button @click="goToPrevious"
                         :disabled="currentIndex === 0"
                         class="p-2 text-purple-200 hover:text-white hover:bg-white/10 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Previous task">
+                        :title="previousTaskLabel">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
@@ -61,7 +75,7 @@
                 {{-- Skip Button --}}
                 <button @click="skipCurrentTask"
                         class="px-3 py-1.5 text-sm text-purple-200 hover:text-white hover:bg-white/10 rounded-lg transition-colors hidden sm:inline-flex">
-                    Skip
+                    <span x-text="skipLabel"></span>
                 </button>
 
                 {{-- Complete Button --}}
@@ -70,7 +84,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    <span class="hidden sm:inline">Done</span>
+                    <span class="hidden sm:inline" x-text="doneLabel"></span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
@@ -80,7 +94,7 @@
                 <button @click="goToNext"
                         :disabled="currentIndex >= queue.length - 1"
                         class="p-2 text-purple-200 hover:text-white hover:bg-white/10 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Next task">
+                        :title="nextTaskLabel">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
@@ -92,7 +106,7 @@
                 {{-- Exit Button --}}
                 <button @click="exitFlow()"
                         class="p-2 text-purple-200 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                        title="Exit task flow">
+                        :title="exitTaskFlowLabel">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>

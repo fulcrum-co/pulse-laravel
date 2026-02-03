@@ -7,7 +7,7 @@ use App\Models\MiniCourse;
 use App\Models\Program;
 use App\Models\Provider;
 use App\Models\Resource;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Services\Embeddings\EmbeddingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -150,22 +150,22 @@ class VectorSearchService
     }
 
     /**
-     * Get resource recommendations for a learner based on their profile.
+     * Get resource recommendations for a participant based on their profile.
      *
-     * @param  Learner  $learner  The learner to get recommendations for
+     * @param  Participant  $participant  The participant to get recommendations for
      * @param  int  $limit  Maximum results
      */
-    public function getRecommendationsForLearner(Learner $learner, int $limit = 10): Collection
+    public function getRecommendationsForLearner(Participant $participant, int $limit = 10): Collection
     {
-        // Build context text from learner profile
-        $context = $this->buildLearnerContext($learner);
+        // Build context text from participant profile
+        $context = $this->buildLearnerContext($participant);
 
         if (empty($context)) {
             return collect();
         }
 
         try {
-            // Generate embedding for learner context
+            // Generate embedding for participant context
             $result = $this->embeddingService->generateEmbedding($context);
             $contextEmbedding = '['.implode(',', $result['embedding']).']';
 
@@ -173,7 +173,7 @@ class VectorSearchService
             $resources = Resource::query()
                 ->whereNotNull('embedding')
                 ->where('active', true)
-                ->where('org_id', $learner->org_id)
+                ->where('org_id', $participant->org_id)
                 ->selectRaw('*, 1 - (embedding <=> ?) as similarity, ? as type', [$contextEmbedding, 'resource'])
                 ->having('similarity', '>=', 0.3)
                 ->orderByDesc('similarity')
@@ -182,7 +182,7 @@ class VectorSearchService
             $courses = MiniCourse::query()
                 ->whereNotNull('embedding')
                 ->where('status', MiniCourse::STATUS_ACTIVE)
-                ->where('org_id', $learner->org_id)
+                ->where('org_id', $participant->org_id)
                 ->selectRaw('*, 1 - (embedding <=> ?) as similarity, ? as type', [$contextEmbedding, 'course'])
                 ->having('similarity', '>=', 0.3)
                 ->orderByDesc('similarity')
@@ -195,8 +195,8 @@ class VectorSearchService
                 ->take($limit)
                 ->values();
         } catch (\Exception $e) {
-            Log::error('Failed to get learner recommendations', [
-                'learner_id' => $learner->id,
+            Log::error('Failed to get participant recommendations', [
+                'participant_id' => $participant->id,
                 'error' => $e->getMessage(),
             ]);
 
@@ -205,40 +205,41 @@ class VectorSearchService
     }
 
     /**
-     * Build context text from learner profile for recommendations.
+     * Build context text from participant profile for recommendations.
      */
-    protected function buildLearnerContext(Learner $learner): string
+    protected function buildLearnerContext(Participant $participant): string
     {
         $parts = [];
 
-        // Grade level
-        if ($learner->grade_level) {
-            $parts[] = "Grade {$learner->grade_level} learner";
+        // Level level
+        if ($participant->level) {
+            $parts[] = "Level {$participant->level} participant";
         }
 
         // Risk level
-        if ($learner->risk_level) {
-            $parts[] = "Risk level: {$learner->risk_level}";
+        if ($participant->risk_level) {
+            $parts[] = "Risk level: {$participant->risk_level}";
         }
 
         // Tags/needs
-        if (! empty($learner->tags)) {
-            $tags = is_array($learner->tags) ? $learner->tags : json_decode($learner->tags, true);
+        if (! empty($participant->tags)) {
+            $tags = is_array($participant->tags) ? $participant->tags : json_decode($participant->tags, true);
             if (! empty($tags)) {
                 $parts[] = 'Needs: '.implode(', ', $tags);
             }
         }
 
         // IEP/ELL status
-        if ($learner->iep_status) {
+        if ($participant->iep_status) {
             $parts[] = 'Has IEP';
         }
-        if ($learner->ell_status) {
-            $parts[] = 'English Language Learner';
+        if ($participant->ell_status) {
+            $terminology = app(\App\Services\TerminologyService::class);
+            $parts[] = $terminology->get('english_language_participant_label');
         }
 
         // Recent survey data could be added here
-        // $parts[] = $this->getRecentSurveyInsights($learner);
+        // $parts[] = $this->getRecentSurveyInsights($participant);
 
         return implode('. ', $parts);
     }
@@ -256,8 +257,8 @@ class VectorSearchService
                 if (isset($filters['category'])) {
                     $builder->where('category', $filters['category']);
                 }
-                if (isset($filters['target_grades'])) {
-                    $builder->whereJsonContains('target_grades', $filters['target_grades']);
+                if (isset($filters['target_levels'])) {
+                    $builder->whereJsonContains('target_levels', $filters['target_levels']);
                 }
                 $builder->where('active', true);
                 break;

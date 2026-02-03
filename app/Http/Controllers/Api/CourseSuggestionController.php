@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\MiniCourseSuggestion;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Services\AdaptiveTriggerService;
 use App\Services\MiniCourseGenerationService;
 use App\Services\ProviderMatchingService;
@@ -21,7 +21,7 @@ class CourseSuggestionController extends Controller
     ) {}
 
     /**
-     * Get suggestions for a contact (learner).
+     * Get suggestions for a contact (participant).
      */
     public function index(Request $request, string $contactType, int $contactId): JsonResponse
     {
@@ -29,7 +29,7 @@ class CourseSuggestionController extends Controller
 
         // Map contact type
         $fullContactType = match ($contactType) {
-            'learner' => Learner::class,
+            'participant' => Participant::class,
             default => $contactType,
         };
 
@@ -52,25 +52,25 @@ class CourseSuggestionController extends Controller
     }
 
     /**
-     * Generate new suggestions for a learner.
+     * Generate new suggestions for a participant.
      */
-    public function generate(Request $request, Learner $learner): JsonResponse
+    public function generate(Request $request, Participant $participant): JsonResponse
     {
         // Verify org access
-        if ($learner->org_id !== auth()->user()->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ($participant->org_id !== auth()->user()->org_id) {
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         $signals = $request->input('signals', []);
 
         // Generate course suggestions
-        $courseSuggestion = $this->courseGenerationService->generateCourseSuggestion($learner, $signals);
+        $courseSuggestion = $this->courseGenerationService->generateCourseSuggestion($participant, $signals);
 
         // Also get provider recommendations
-        $providerRecommendations = $this->providerMatchingService->findMatchingProviders($learner, [], 3);
+        $providerRecommendations = $this->providerMatchingService->findMatchingProviders($participant, [], 3);
 
         // Get program recommendations
-        $programRecommendations = $this->providerMatchingService->findMatchingPrograms($learner, [], 3);
+        $programRecommendations = $this->providerMatchingService->findMatchingPrograms($participant, [], 3);
 
         return response()->json([
             'success' => true,
@@ -81,16 +81,16 @@ class CourseSuggestionController extends Controller
     }
 
     /**
-     * Evaluate triggers for a learner.
+     * Evaluate triggers for a participant.
      */
-    public function evaluateTriggers(Learner $learner): JsonResponse
+    public function evaluateTriggers(Participant $participant): JsonResponse
     {
         // Verify org access
-        if ($learner->org_id !== auth()->user()->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ($participant->org_id !== auth()->user()->org_id) {
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
-        $results = $this->triggerService->evaluateTriggersForLearner($learner);
+        $results = $this->triggerService->evaluateTriggersForLearner($participant);
 
         return response()->json([
             'success' => true,
@@ -107,7 +107,7 @@ class CourseSuggestionController extends Controller
         $user = auth()->user();
 
         if ($suggestion->org_id !== $user->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         $enrollment = $suggestion->accept($user->id, $request->input('notes'));
@@ -129,7 +129,7 @@ class CourseSuggestionController extends Controller
         $user = auth()->user();
 
         if ($suggestion->org_id !== $user->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         $suggestion->decline($user->id, $request->input('reason'));
@@ -143,13 +143,13 @@ class CourseSuggestionController extends Controller
     }
 
     /**
-     * Get AI provider recommendations for a learner.
+     * Get AI provider recommendations for a participant.
      */
-    public function providerRecommendations(Request $request, Learner $learner): JsonResponse
+    public function providerRecommendations(Request $request, Participant $participant): JsonResponse
     {
         // Verify org access
-        if ($learner->org_id !== auth()->user()->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ($participant->org_id !== auth()->user()->org_id) {
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
         $context = [
@@ -157,25 +157,25 @@ class CourseSuggestionController extends Controller
             'preferences' => $request->input('preferences', []),
         ];
 
-        $recommendations = $this->providerMatchingService->getAiProviderRecommendations($learner, $context);
+        $recommendations = $this->providerMatchingService->getAiProviderRecommendations($participant, $context);
 
         return response()->json($recommendations);
     }
 
     /**
-     * Get learner signals (for debugging/transparency).
+     * Get participant signals (for debugging/transparency).
      */
-    public function signals(Learner $learner): JsonResponse
+    public function signals(Participant $participant): JsonResponse
     {
         // Verify org access
-        if ($learner->org_id !== auth()->user()->org_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ($participant->org_id !== auth()->user()->org_id) {
+            return response()->json(['error' => app(\App\Services\TerminologyService::class)->get('unauthorized_label')], 403);
         }
 
-        $signals = $this->triggerService->gatherInputSignals($learner);
+        $signals = $this->triggerService->gatherInputSignals($participant);
 
         return response()->json([
-            'learner_id' => $learner->id,
+            'participant_id' => $participant->id,
             'signals' => $signals,
         ]);
     }

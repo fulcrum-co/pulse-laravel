@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Learner;
+use App\Models\Participant;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -54,7 +54,7 @@ class ContactList extends Component
         // Get all organization IDs this user can access (includes assigned orgs for consultants)
         $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        $contacts = Learner::with('user')
+        $contacts = Participant::with('user')
             ->whereIn('org_id', $accessibleOrgIds)
             ->when($this->search, function ($query) {
                 $query->whereHas('user', function ($q) {
@@ -67,7 +67,7 @@ class ContactList extends Component
                 $query->where('risk_level', $this->riskFilter);
             })
             ->when($this->gradeFilter, function ($query) {
-                $query->where('grade_level', $this->gradeFilter);
+                $query->where('level', $this->gradeFilter);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(20);

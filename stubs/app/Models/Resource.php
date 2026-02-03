@@ -134,11 +134,11 @@ class Resource extends Model
     }
 
     /**
-     * Scope to filter by grade level.
+     * Scope to filter by level level.
      */
-    public function scopeForGradeLevel($query, string $grade)
+    public function scopeForGradeLevel($query, string $level)
     {
-        return $query->where('tags.grade_level', $grade);
+        return $query->where('tags.level', $level);
     }
 
     /**

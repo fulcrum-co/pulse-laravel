@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\User;
 use Livewire\Component;
 
@@ -15,12 +15,12 @@ class ContactHeader extends Component
     public function mount($contact)
     {
         $this->contact = $contact;
-        $this->contactType = $contact instanceof Learner ? 'learner' : 'user';
+        $this->contactType = $contact instanceof Participant ? 'participant' : 'user';
     }
 
     public function getDisplayNameProperty()
     {
-        if ($this->contact instanceof Learner) {
+        if ($this->contact instanceof Participant) {
             return $this->contact->full_name ?? $this->contact->first_name.' '.$this->contact->last_name;
         }
 
@@ -29,12 +29,12 @@ class ContactHeader extends Component
 
     public function getAvatarUrlProperty()
     {
-        // For learners, avatar is on the related User model
-        if ($this->contact instanceof Learner && $this->contact->user?->avatar_url) {
+        // For participants, avatar is on the related User model
+        if ($this->contact instanceof Participant && $this->contact->user?->avatar_url) {
             return $this->contact->user->avatar_url;
         }
 
-        // For users (teachers, parents), check directly
+        // For users (instructors, direct_supervisors), check directly
         if ($this->contact->avatar_url) {
             return $this->contact->avatar_url;
         }
@@ -51,8 +51,10 @@ class ContactHeader extends Component
 
     public function getRoleDisplayProperty()
     {
-        if ($this->contact instanceof Learner) {
-            return 'Learner';
+        $terminology = app(\App\Services\TerminologyService::class);
+
+        if ($this->contact instanceof Participant) {
+            return $terminology->get('participant_label');
         }
 
         if (method_exists($this->contact, 'getRoleNames')) {
@@ -62,35 +64,36 @@ class ContactHeader extends Component
             }
         }
 
-        return 'User';
+        return $terminology->get('user_label');
     }
 
     public function getContactInfoProperty()
     {
+        $terminology = app(\App\Services\TerminologyService::class);
         $info = [];
 
-        if ($this->contact instanceof Learner) {
-            if ($this->contact->grade_level) {
-                $info[] = ['label' => 'Grade', 'value' => $this->contact->grade_level];
+        if ($this->contact instanceof Participant) {
+            if ($this->contact->level) {
+                $info[] = ['label' => $terminology->get('level_label'), 'value' => $this->contact->level];
             }
-            if ($this->contact->learner_number) {
-                $info[] = ['label' => 'ID', 'value' => $this->contact->learner_number];
+            if ($this->contact->participant_number) {
+                $info[] = ['label' => $terminology->get('id_label'), 'value' => $this->contact->participant_number];
             }
-            // For learners, email/phone are on the User model
+            // For participants, email/phone are on the User model
             $user = $this->contact->user;
             if ($user?->email) {
-                $info[] = ['label' => 'Email', 'value' => $user->email];
+                $info[] = ['label' => $terminology->get('email_label'), 'value' => $user->email];
             }
             if ($user?->phone) {
-                $info[] = ['label' => 'Phone', 'value' => $user->phone];
+                $info[] = ['label' => $terminology->get('phone_label'), 'value' => $user->phone];
             }
         } else {
-            // For users (teachers, parents), check directly
+            // For users (instructors, direct_supervisors), check directly
             if ($this->contact->email) {
-                $info[] = ['label' => 'Email', 'value' => $this->contact->email];
+                $info[] = ['label' => $terminology->get('email_label'), 'value' => $this->contact->email];
             }
             if ($this->contact->phone) {
-                $info[] = ['label' => 'Phone', 'value' => $this->contact->phone];
+                $info[] = ['label' => $terminology->get('phone_label'), 'value' => $this->contact->phone];
             }
         }
 
@@ -99,7 +102,7 @@ class ContactHeader extends Component
 
     public function getRiskLevelProperty()
     {
-        if ($this->contact instanceof Learner) {
+        if ($this->contact instanceof Participant) {
             return $this->contact->risk_level;
         }
 

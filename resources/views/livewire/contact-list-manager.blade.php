@@ -1,9 +1,10 @@
 <div class="space-y-6">
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Contact Lists</h1>
-            <p class="text-sm text-gray-500">Create and manage lists of learners and teachers for targeting courses and collections</p>
+            <h1 class="text-2xl font-bold text-gray-900">@term('contact_lists_label')</h1>
+            <p class="text-sm text-gray-500">@term('contact_lists_intro_label')</p>
         </div>
         <button
             wire:click="openCreateModal"
@@ -12,7 +13,7 @@
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
-            Create List
+            @term('create_list_label')
         </button>
     </div>
 
@@ -25,7 +26,7 @@
             <input
                 type="text"
                 wire:model.live.debounce.300ms="search"
-                placeholder="Search lists..."
+                placeholder="@term('search_lists_placeholder')"
                 class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
             >
         </div>
@@ -34,10 +35,10 @@
             wire:model.live="filterType"
             class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
         >
-            <option value="">All Types</option>
-            <option value="learner">Learners</option>
-            <option value="teacher">Teachers</option>
-            <option value="mixed">Mixed</option>
+            <option value="">@term('all_types_label')</option>
+            <option value="participant">@term('participants_label')</option>
+            <option value="instructor">@term('instructors_label')</option>
+            <option value="mixed">@term('mixed_label')</option>
         </select>
     </div>
 
@@ -47,8 +48,8 @@
         <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
         </svg>
-        <p class="text-gray-500 mb-2">No contact lists yet</p>
-        <p class="text-sm text-gray-400">Create a list to start organizing contacts</p>
+        <p class="text-gray-500 mb-2">@term('no_contact_lists_yet_label')</p>
+        <p class="text-sm text-gray-400">@term('contact_lists_empty_help_label')</p>
     </div>
     @else
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -56,13 +57,13 @@
         <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
             <div class="flex items-start justify-between mb-3">
                 <div class="flex items-center gap-2">
-                    @if($list->list_type === 'learner')
+                    @if($list->list_type === 'participant')
                     <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
                         <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                         </svg>
                     </div>
-                    @elseif($list->list_type === 'teacher')
+                    @elseif($list->list_type === 'instructor')
                     <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
                         <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -77,12 +78,12 @@
                     @endif
                     <div>
                         <h3 class="font-semibold text-gray-900">{{ $list->name }}</h3>
-                        <span class="text-xs text-gray-500">{{ ucfirst($list->list_type) }}</span>
+                        <span class="text-xs text-gray-500">{{ $terminology->get($list->list_type.'_label') }}</span>
                     </div>
                 </div>
 
                 @if($list->is_dynamic)
-                <span class="px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full">Dynamic</span>
+                <span class="px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full">@term('dynamic_label')</span>
                 @endif
             </div>
 
@@ -92,14 +93,14 @@
 
             <div class="flex items-center justify-between text-sm">
                 <span class="text-gray-500">
-                    <span class="font-medium text-gray-900">{{ $list->member_count }}</span> members
+                    <span class="font-medium text-gray-900">{{ $list->member_count }}</span> @term('members_label')
                 </span>
 
                 <div class="flex items-center gap-1">
                     <button
                         wire:click="openMembersModal({{ $list->id }})"
                         class="p-1.5 text-gray-400 hover:text-gray-600 rounded"
-                        title="View members"
+                        title="@term('view_members_label')"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -109,7 +110,7 @@
                     <button
                         wire:click="openEditModal({{ $list->id }})"
                         class="p-1.5 text-gray-400 hover:text-pulse-orange-500 rounded"
-                        title="Edit list"
+                        title="@term('edit_list_label')"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -117,9 +118,9 @@
                     </button>
                     <button
                         wire:click="deleteList({{ $list->id }})"
-                        wire:confirm="Are you sure you want to delete this list?"
+                        wire:confirm="@term('delete_list_confirm_label')"
                         class="p-1.5 text-gray-400 hover:text-red-500 rounded"
-                        title="Delete list"
+                        title="@term('delete_list_label')"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -147,7 +148,7 @@
             <div class="relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-gray-900">
-                        {{ $editingList ? 'Edit Contact List' : 'Create Contact List' }}
+                        {{ $editingList ? $terminology->get('edit_contact_list_label') : $terminology->get('create_contact_list_label') }}
                     </h3>
                     <button wire:click="closeModal" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,50 +160,50 @@
                 <div class="space-y-4">
                     <!-- Name -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('name_label')</label>
                         <input
                             type="text"
                             wire:model="listName"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
-                            placeholder="e.g., High Risk 9th Graders"
+                            placeholder="@term('contact_list_name_placeholder')"
                         >
                         @error('listName') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <!-- Description -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('description_optional_label')</label>
                         <textarea
                             wire:model="listDescription"
                             rows="2"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
-                            placeholder="Brief description of this list's purpose..."
+                            placeholder="@term('contact_list_description_placeholder')"
                         ></textarea>
                     </div>
 
                     <!-- List Type -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">List Type</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('list_type_label')</label>
                         <div class="grid grid-cols-3 gap-2">
                             <button
                                 type="button"
-                                wire:click="$set('listType', 'learner')"
-                                class="p-3 rounded-lg border-2 text-center transition-all {{ $listType === 'learner' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
+                                wire:click="$set('listType', 'participant')"
+                                class="p-3 rounded-lg border-2 text-center transition-all {{ $listType === 'participant' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
                             >
-                                <svg class="w-5 h-5 mx-auto mb-1 {{ $listType === 'learner' ? 'text-pulse-orange-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 mx-auto mb-1 {{ $listType === 'participant' ? 'text-pulse-orange-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                                 </svg>
-                                <span class="text-xs font-medium {{ $listType === 'learner' ? 'text-pulse-orange-600' : 'text-gray-700' }}">Learners</span>
+                                <span class="text-xs font-medium {{ $listType === 'participant' ? 'text-pulse-orange-600' : 'text-gray-700' }}">@term('participants_label')</span>
                             </button>
                             <button
                                 type="button"
-                                wire:click="$set('listType', 'teacher')"
-                                class="p-3 rounded-lg border-2 text-center transition-all {{ $listType === 'teacher' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
+                                wire:click="$set('listType', 'instructor')"
+                                class="p-3 rounded-lg border-2 text-center transition-all {{ $listType === 'instructor' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
                             >
-                                <svg class="w-5 h-5 mx-auto mb-1 {{ $listType === 'teacher' ? 'text-pulse-orange-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 mx-auto mb-1 {{ $listType === 'instructor' ? 'text-pulse-orange-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
-                                <span class="text-xs font-medium {{ $listType === 'teacher' ? 'text-pulse-orange-600' : 'text-gray-700' }}">Teachers</span>
+                                <span class="text-xs font-medium {{ $listType === 'instructor' ? 'text-pulse-orange-600' : 'text-gray-700' }}">@term('instructors_label')</span>
                             </button>
                             <button
                                 type="button"
@@ -212,7 +213,7 @@
                                 <svg class="w-5 h-5 mx-auto mb-1 {{ $listType === 'mixed' ? 'text-pulse-orange-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                 </svg>
-                                <span class="text-xs font-medium {{ $listType === 'mixed' ? 'text-pulse-orange-600' : 'text-gray-700' }}">Mixed</span>
+                                <span class="text-xs font-medium {{ $listType === 'mixed' ? 'text-pulse-orange-600' : 'text-gray-700' }}">@term('mixed_label')</span>
                             </button>
                         </div>
                     </div>
@@ -220,8 +221,8 @@
                     <!-- Dynamic Toggle -->
                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
-                            <label class="text-sm font-medium text-gray-700">Dynamic List</label>
-                            <p class="text-xs text-gray-500">Auto-updates based on filter criteria</p>
+                            <label class="text-sm font-medium text-gray-700">@term('dynamic_list_label')</label>
+                            <p class="text-xs text-gray-500">@term('dynamic_list_help_label')</p>
                         </div>
                         <button
                             type="button"
@@ -232,22 +233,22 @@
                         </button>
                     </div>
 
-                    <!-- Dynamic Filters (only for learner lists) -->
-                    @if($isDynamic && $listType === 'learner')
+                    <!-- Dynamic Filters (only for participant lists) -->
+                    @if($isDynamic && $listType === 'participant')
                     <div class="border border-gray-200 rounded-lg p-4 space-y-3">
-                        <h4 class="text-sm font-medium text-gray-900">Filter Criteria</h4>
+                        <h4 class="text-sm font-medium text-gray-900">@term('filter_criteria_label')</h4>
 
-                        <!-- Grade Levels -->
+                        <!-- Level Levels -->
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-2">Grade Levels</label>
+                            <label class="block text-xs font-medium text-gray-700 mb-2">@term('levels_label')</label>
                             <div class="flex flex-wrap gap-2">
-                                @foreach($availableGrades as $grade)
+                                @foreach($availableGrades as $level)
                                 <button
                                     type="button"
-                                    wire:click="toggleFilterArrayValue('grade_levels', '{{ $grade }}')"
-                                    class="px-2 py-1 text-xs rounded-full border transition-colors {{ in_array($grade, $filterCriteria['grade_levels'] ?? []) ? 'bg-pulse-orange-100 border-pulse-orange-300 text-pulse-orange-700' : 'border-gray-300 text-gray-600 hover:bg-gray-50' }}"
+                                    wire:click="toggleFilterArrayValue('levels', '{{ $level }}')"
+                                    class="px-2 py-1 text-xs rounded-full border transition-colors {{ in_array($level, $filterCriteria['levels'] ?? []) ? 'bg-pulse-orange-100 border-pulse-orange-300 text-pulse-orange-700' : 'border-gray-300 text-gray-600 hover:bg-gray-50' }}"
                                 >
-                                    {{ $grade }}
+                                    {{ $level }}
                                 </button>
                                 @endforeach
                             </div>
@@ -255,7 +256,7 @@
 
                         <!-- Risk Levels -->
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-2">Risk Levels</label>
+                            <label class="block text-xs font-medium text-gray-700 mb-2">@term('risk_levels_label')</label>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($riskLevels as $level)
                                 <button
@@ -269,27 +270,27 @@
                             </div>
                         </div>
 
-                        <!-- Classrooms -->
+                        <!-- LearningGroups -->
                         @if($availableClassrooms->isNotEmpty())
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-2">Classrooms</label>
+                            <label class="block text-xs font-medium text-gray-700 mb-2">@term('learning_groups_label')</label>
                             <select
-                                wire:change="toggleFilterArrayValue('classroom_ids', $event.target.value)"
+                                wire:change="toggleFilterArrayValue('learning_group_ids', $event.target.value)"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
                             >
-                                <option value="">Select classroom...</option>
-                                @foreach($availableClassrooms as $classroom)
-                                <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
+                                <option value="">@term('select_learning_group_placeholder')</option>
+                                @foreach($availableClassrooms as $learning_group)
+                                <option value="{{ $learning_group->id }}">{{ $learning_group->name }}</option>
                                 @endforeach
                             </select>
-                            @if(!empty($filterCriteria['classroom_ids']))
+                            @if(!empty($filterCriteria['learning_group_ids']))
                             <div class="flex flex-wrap gap-1 mt-2">
-                                @foreach($filterCriteria['classroom_ids'] as $classroomId)
-                                @php $classroom = $availableClassrooms->firstWhere('id', $classroomId); @endphp
-                                @if($classroom)
+                                @foreach($filterCriteria['learning_group_ids'] as $learningGroupId)
+                                @php $learning_group = $availableClassrooms->firstWhere('id', $learningGroupId); @endphp
+                                @if($learning_group)
                                 <span class="inline-flex items-center px-2 py-0.5 text-xs bg-gray-100 text-gray-700 rounded">
-                                    {{ $classroom->name }}
-                                    <button wire:click="toggleFilterArrayValue('classroom_ids', {{ $classroomId }})" class="ml-1 text-gray-400 hover:text-gray-600">&times;</button>
+                                    {{ $learning_group->name }}
+                                    <button wire:click="toggleFilterArrayValue('learning_group_ids', {{ $learningGroupId }})" class="ml-1 text-gray-400 hover:text-gray-600">&times;</button>
                                 </span>
                                 @endif
                                 @endforeach
@@ -302,7 +303,7 @@
                         @if($previewCount > 0)
                         <div class="bg-green-50 border border-green-200 rounded-lg p-3">
                             <p class="text-sm text-green-700">
-                                <span class="font-medium">{{ $previewCount }}</span> contacts match these criteria
+                                <span class="font-medium">{{ $previewCount }}</span> @term('contacts_match_criteria_label')
                             </p>
                         </div>
                         @endif
@@ -315,13 +316,13 @@
                         wire:click="closeModal"
                         class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                     >
-                        Cancel
+                        @term('cancel_label')
                     </button>
                     <button
                         wire:click="saveList"
                         class="px-4 py-2 text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600"
                     >
-                        {{ $editingList ? 'Update List' : 'Create List' }}
+                        {{ $editingList ? $terminology->get('update_list_label') : $terminology->get('create_list_label') }}
                     </button>
                 </div>
             </div>
@@ -340,7 +341,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900">{{ $viewingList->name }}</h3>
-                            <p class="text-sm text-gray-500">{{ $viewingList->member_count }} members</p>
+                            <p class="text-sm text-gray-500">{{ $viewingList->member_count }} @term('members_label')</p>
                         </div>
                         <button wire:click="closeMembersModal" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -357,18 +358,18 @@
                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            This is a dynamic list. Members are automatically determined by filter criteria.
+                            @term('dynamic_list_members_help_label')
                         </p>
                     </div>
                     @else
                     <!-- Add Members Section -->
                     <div class="mb-6">
-                        <h4 class="text-sm font-medium text-gray-900 mb-2">Add Members</h4>
+                        <h4 class="text-sm font-medium text-gray-900 mb-2">@term('add_members_label')</h4>
                         <div class="flex gap-2">
                             <input
                                 type="text"
                                 wire:model.live.debounce.300ms="memberSearch"
-                                placeholder="Search by name..."
+                                placeholder="@term('search_by_name_placeholder')"
                                 class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
                             >
                             <button
@@ -376,7 +377,7 @@
                                 @if(empty($selectedMembers)) disabled @endif
                                 class="px-4 py-2 bg-pulse-orange-500 text-white rounded-lg text-sm hover:bg-pulse-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Add Selected
+                                @term('add_selected_label')
                             </button>
                         </div>
 
@@ -401,30 +402,30 @@
 
                     <!-- Current Members -->
                     <div>
-                        <h4 class="text-sm font-medium text-gray-900 mb-2">Current Members</h4>
+                        <h4 class="text-sm font-medium text-gray-900 mb-2">@term('current_members_label')</h4>
                         @php
                             $members = $viewingList->getAllMembers();
                         @endphp
 
                         @if($members->isEmpty())
-                        <p class="text-sm text-gray-500 text-center py-4">No members in this list</p>
+                        <p class="text-sm text-gray-500 text-center py-4">@term('no_members_in_list_label')</p>
                         @else
                         <div class="space-y-2">
                             @foreach($members as $member)
                             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">
-                                        {{ substr($member instanceof \App\Models\Learner ? $member->full_name : $member->first_name, 0, 1) }}
+                                        {{ substr($member instanceof \App\Models\Participant ? $member->full_name : $member->first_name, 0, 1) }}
                                     </div>
                                     <div>
                                         <p class="text-sm font-medium text-gray-900">
-                                            {{ $member instanceof \App\Models\Learner ? $member->full_name : $member->full_name }}
+                                            {{ $member instanceof \App\Models\Participant ? $member->full_name : $member->full_name }}
                                         </p>
                                         <p class="text-xs text-gray-500">
-                                            @if($member instanceof \App\Models\Learner)
-                                            Learner - Grade {{ $member->grade_level }}
+                                            @if($member instanceof \App\Models\Participant)
+                                            @term('participant_label') - {{ $terminology->get('level_label') }} {{ $member->level }}
                                             @else
-                                            {{ ucfirst($member->role) }}
+                                            {{ $terminology->get($member->role.'_label') }}
                                             @endif
                                         </p>
                                     </div>
@@ -432,7 +433,7 @@
 
                                 @if(!$viewingList->is_dynamic)
                                 <button
-                                    wire:click="removeMember('{{ $member instanceof \App\Models\Learner ? 'learner' : 'user' }}', {{ $member->id }})"
+                                    wire:click="removeMember('{{ $member instanceof \App\Models\Participant ? 'participant' : 'user' }}', {{ $member->id }})"
                                     class="p-1 text-gray-400 hover:text-red-500"
                                 >
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -452,7 +453,7 @@
                         wire:click="closeMembersModal"
                         class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                     >
-                        Close
+                        @term('close_label')
                     </button>
                 </div>
             </div>

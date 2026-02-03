@@ -441,7 +441,7 @@ class AlertWizard extends Component
     public function getStaffMembersProperty(): array
     {
         return User::where('org_id', auth()->user()->org_id)
-            ->whereIn('primary_role', ['admin', 'support_rep', 'teacher'])
+            ->whereIn('primary_role', ['admin', 'support_rep', 'instructor'])
             ->get()
             ->map(fn ($user) => [
                 'id' => $user->id,

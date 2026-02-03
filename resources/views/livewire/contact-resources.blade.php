@@ -1,12 +1,13 @@
 <div>
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <!-- Tab Navigation -->
     <div class="flex gap-1 mb-6 border-b border-gray-200 overflow-x-auto">
         @foreach([
-            'assigned' => 'Assigned',
-            'courses' => 'Courses',
-            'suggestions' => 'Suggestions',
-            'providers' => 'Providers',
-            'programs' => 'Programs'
+            'assigned' => $terminology->get('assigned_label'),
+            'courses' => $terminology->get('course_plural'),
+            'suggestions' => $terminology->get('suggestions_label'),
+            'providers' => $terminology->get('provider_plural'),
+            'programs' => $terminology->get('program_plural')
         ] as $tab => $label)
         <button
             wire:click="setActiveTab('{{ $tab }}')"
@@ -28,7 +29,7 @@
         <!-- Action Header -->
         <div class="flex items-center justify-between mb-4">
             <div class="flex gap-2 overflow-x-auto pb-2">
-                @foreach(['all' => 'All', 'pending' => 'Pending', 'in_progress' => 'In Progress', 'completed' => 'Completed'] as $status => $label)
+                @foreach(['all' => $terminology->get('all_label'), 'pending' => $terminology->get('pending_label'), 'in_progress' => $terminology->get('in_progress_label'), 'completed' => $terminology->get('completed_label')] as $status => $label)
                 <button
                     wire:click="setFilterStatus('{{ $status }}')"
                     class="px-3 py-1 text-sm font-medium rounded-lg whitespace-nowrap transition-colors {{ $filterStatus === $status ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
@@ -44,7 +45,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
-                Assign Resource
+                @term('assign_resource_label')
             </button>
         </div>
 
@@ -75,11 +76,11 @@
                             @endif
                         </div>
                         <div>
-                            <div class="text-sm font-medium text-gray-900">{{ $assignment->resource->title ?? 'Unknown Resource' }}</div>
+                            <div class="text-sm font-medium text-gray-900">{{ $assignment->resource->title ?? $terminology->get('unknown_resource_label') }}</div>
                             <div class="text-xs text-gray-500">
-                                Assigned {{ $assignment->assigned_at?->format('M d, Y') ?? 'Unknown' }}
+                                @term('assigned_label') {{ $assignment->assigned_at?->format('M d, Y') ?? $terminology->get('unknown_label') }}
                                 @if($assignment->assigner)
-                                <span class="text-gray-400">by {{ $assignment->assigner->name ?? $assignment->assigner->first_name }}</span>
+                                <span class="text-gray-400">@term('by_label') {{ $assignment->assigner->name ?? $assignment->assigner->first_name }}</span>
                                 @endif
                             </div>
                         </div>
@@ -96,7 +97,7 @@
                         </div>
                         <span class="px-2 py-0.5 text-xs rounded-full
                             {{ $assignment->status === 'completed' ? 'bg-green-100 text-green-700' : ($assignment->status === 'in_progress' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600') }}">
-                            {{ ucfirst(str_replace('_', ' ', $assignment->status ?? 'pending')) }}
+                            {{ $terminology->get(($assignment->status ?? 'pending').'_label') }}
                         </span>
                         <svg class="w-5 h-5 text-gray-400 transition-transform {{ $expandedAssignmentId === $assignment->id ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -115,16 +116,16 @@
                             <img src="{{ $assignment->resource->thumbnail_url }}" alt="" class="w-16 h-16 rounded-lg object-cover">
                             @endif
                             <div class="flex-1">
-                                <p class="text-sm text-gray-600 mb-2">{{ $assignment->resource->description ?? 'No description available.' }}</p>
+                                <p class="text-sm text-gray-600 mb-2">{{ $assignment->resource->description ?? $terminology->get('no_description_available_label') }}</p>
                                 <div class="flex flex-wrap gap-2 text-xs">
-                                    @if($assignment->resource->resource_type)
-                                    <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded">{{ ucfirst($assignment->resource->resource_type) }}</span>
+                                @if($assignment->resource->resource_type)
+                                    <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded">{{ $terminology->get($assignment->resource->resource_type.'_label') }}</span>
                                     @endif
                                     @if($assignment->resource->category)
-                                    <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded">{{ $assignment->resource->category }}</span>
+                                    <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded">{{ $terminology->get('category_' . $assignment->resource->category . '_label') }}</span>
                                     @endif
                                     @if($assignment->resource->estimated_duration_minutes)
-                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded">{{ $assignment->resource->estimated_duration_minutes }} min</span>
+                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded">{{ $assignment->resource->estimated_duration_minutes }} @term('minutes_label')</span>
                                     @endif
                                 </div>
                                 @if($assignment->resource->url)
@@ -132,7 +133,7 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                     </svg>
-                                    Open Resource
+                                    @term('open_resource_label')
                                 </a>
                                 @endif
                             </div>
@@ -142,7 +143,7 @@
 
                     <!-- Actions -->
                     <div class="flex items-center justify-between border-t border-gray-100 pt-4">
-                        <h4 class="text-sm font-medium text-gray-700">Progress & Status</h4>
+                        <h4 class="text-sm font-medium text-gray-700">@term('progress_status_label')</h4>
                         @if($editingAssignmentId !== $assignment->id)
                         <div class="flex gap-2">
                             <button
@@ -152,17 +153,17 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
-                                Update Progress
+                                @term('update_progress_label')
                             </button>
                             <button
                                 wire:click="removeAssignment({{ $assignment->id }})"
-                                wire:confirm="Are you sure you want to remove this resource assignment?"
+                                wire:confirm="@term('remove_resource_assignment_confirm_label')"
                                 class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
-                                Remove
+                                @term('remove_label')
                             </button>
                         </div>
                         @else
@@ -174,13 +175,13 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
-                                Save
+                                @term('save_label')
                             </button>
                             <button
                                 wire:click="cancelEdit"
                                 class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                             >
-                                Cancel
+                                @term('cancel_label')
                             </button>
                         </div>
                         @endif
@@ -191,7 +192,7 @@
                     <div class="mt-4 p-4 bg-gray-50 rounded-lg space-y-4">
                         <!-- Progress Slider -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Progress</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">@term('progress_label')</label>
                             <div class="flex items-center gap-4">
                                 <input
                                     type="range"
@@ -207,9 +208,9 @@
 
                         <!-- Status -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">@term('status_label')</label>
                             <div class="flex gap-2">
-                                @foreach(['pending' => 'Pending', 'in_progress' => 'In Progress', 'completed' => 'Completed'] as $status => $label)
+                                @foreach(['pending' => $terminology->get('pending_label'), 'in_progress' => $terminology->get('in_progress_label'), 'completed' => $terminology->get('completed_label')] as $status => $label)
                                 <button
                                     type="button"
                                     wire:click="$set('editingStatus', '{{ $status }}')"
@@ -223,12 +224,12 @@
 
                         <!-- Notes -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">@term('notes_label')</label>
                             <textarea
                                 wire:model="editingNotes"
                                 rows="2"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
-                                placeholder="Add notes about progress..."
+                                placeholder="@term('progress_notes_placeholder')"
                             ></textarea>
                         </div>
                     </div>
@@ -236,7 +237,7 @@
                     <!-- View Only -->
                     @if($assignment->notes)
                     <div class="mt-4 p-3 bg-gray-50 rounded-lg">
-                        <p class="text-xs font-medium text-gray-500 mb-1">Notes</p>
+                        <p class="text-xs font-medium text-gray-500 mb-1">@term('notes_label')</p>
                         <p class="text-sm text-gray-700">{{ $assignment->notes }}</p>
                     </div>
                     @endif
@@ -244,10 +245,10 @@
                     <!-- Timestamps -->
                     <div class="mt-4 flex gap-4 text-xs text-gray-500">
                         @if($assignment->started_at)
-                        <span>Started: {{ $assignment->started_at->format('M d, Y') }}</span>
+                        <span>@term('started_label'): {{ $assignment->started_at->format('M d, Y') }}</span>
                         @endif
                         @if($assignment->completed_at)
-                        <span>Completed: {{ $assignment->completed_at->format('M d, Y') }}</span>
+                        <span>@term('completed_label'): {{ $assignment->completed_at->format('M d, Y') }}</span>
                         @endif
                     </div>
                     @endif
@@ -259,7 +260,7 @@
                 <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                 </svg>
-                <p>No resources assigned yet.</p>
+                <p>@term('no_resources_assigned_yet_label')</p>
                 <button
                     wire:click="openAssignModal"
                     class="inline-flex items-center gap-1 mt-2 text-sm text-pulse-orange-600 hover:text-pulse-orange-700"
@@ -267,7 +268,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    Assign a Resource
+                    @term('assign_resource_label')
                 </button>
             </div>
             @endforelse
@@ -288,7 +289,7 @@
         <!-- Action Header -->
         <div class="flex items-center justify-between mb-4">
             <div class="flex gap-2 overflow-x-auto pb-2">
-                @foreach(['all' => 'All', 'enrolled' => 'Enrolled', 'in_progress' => 'In Progress', 'completed' => 'Completed', 'paused' => 'Paused'] as $status => $label)
+                @foreach(['all' => $terminology->get('all_label'), 'enrolled' => $terminology->get('enrolled_label'), 'in_progress' => $terminology->get('in_progress_label'), 'completed' => $terminology->get('completed_label'), 'paused' => $terminology->get('paused_label')] as $status => $label)
                 <button
                     wire:click="setEnrollmentFilterStatus('{{ $status }}')"
                     class="px-3 py-1 text-sm font-medium rounded-lg whitespace-nowrap transition-colors {{ $enrollmentFilterStatus === $status ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
@@ -304,7 +305,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
-                Enroll in Course
+                @term('enroll_in_course_label')
             </button>
         </div>
 
@@ -339,15 +340,15 @@
                             @endif
                         </div>
                         <div>
-                            <div class="text-sm font-medium text-gray-900">{{ $enrollment->miniCourse->title ?? 'Unknown Course' }}</div>
+                            <div class="text-sm font-medium text-gray-900">{{ $enrollment->miniCourse->title ?? $terminology->get('unknown_course_label') }}</div>
                             <div class="text-xs text-gray-500">
                                 @if($enrollment->currentStep)
-                                Step {{ $enrollment->currentStep->sort_order }} of {{ $enrollment->miniCourse->steps_count ?? $enrollment->miniCourse->steps()->count() }}
+                                @term('step_label') {{ $enrollment->currentStep->sort_order }} @term('of_label') {{ $enrollment->miniCourse->steps_count ?? $enrollment->miniCourse->steps()->count() }}
                                 @else
-                                Not started
+                                @term('not_started_label')
                                 @endif
                                 @if($enrollment->started_at)
-                                <span class="text-gray-400">Started {{ $enrollment->started_at->format('M d') }}</span>
+                                <span class="text-gray-400">@term('started_label') {{ $enrollment->started_at->format('M d') }}</span>
                                 @endif
                             </div>
                         </div>
@@ -364,7 +365,7 @@
                         </div>
                         <span class="px-2 py-0.5 text-xs rounded-full
                             {{ $enrollment->status === 'completed' ? 'bg-green-100 text-green-700' : ($enrollment->status === 'in_progress' ? 'bg-purple-100 text-purple-700' : ($enrollment->status === 'paused' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600')) }}">
-                            {{ ucfirst(str_replace('_', ' ', $enrollment->status ?? 'enrolled')) }}
+                            {{ $terminology->get(($enrollment->status ?? 'enrolled').'_label') }}
                         </span>
                         <svg class="w-5 h-5 text-gray-400 transition-transform {{ $expandedEnrollmentId === $enrollment->id ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -380,7 +381,7 @@
 
                     <!-- Step Progress -->
                     <div class="mb-4">
-                        <h4 class="text-sm font-medium text-gray-700 mb-2">Step Progress</h4>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">@term('step_progress_label')</h4>
                         <div class="flex gap-1">
                             @foreach($enrollment->miniCourse->steps as $step)
                             @php
@@ -389,7 +390,7 @@
                             @endphp
                             <div
                                 class="flex-1 h-2 rounded {{ $stepStatus === 'completed' ? 'bg-green-500' : ($stepStatus === 'in_progress' ? 'bg-purple-500' : ($stepStatus === 'skipped' ? 'bg-gray-300' : 'bg-gray-200')) }}"
-                                title="Step {{ $step->sort_order }}: {{ $step->title }}"
+                                title="{{ $terminology->get('step_label') }} {{ $step->sort_order }}: {{ $step->title }}"
                             ></div>
                             @endforeach
                         </div>
@@ -403,9 +404,9 @@
                             class="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
                         >
                             @if($enrollment->status === 'in_progress')
-                            Continue Course
+                            @term('continue_course_label')
                             @else
-                            View Course
+                            @term('view_course_label')
                             @endif
                         </a>
                         <div class="flex gap-2">
@@ -418,7 +419,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                Resume
+                                @term('resume_label')
                             </button>
                             @elseif(in_array($enrollment->status, ['enrolled', 'in_progress']))
                             <button
@@ -428,19 +429,19 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                Pause
+                                @term('pause_label')
                             </button>
                             @endif
                             @if($enrollment->status !== 'withdrawn' && $enrollment->status !== 'completed')
                             <button
                                 wire:click="withdrawEnrollment({{ $enrollment->id }})"
-                                wire:confirm="Are you sure you want to withdraw this learner from the course?"
+                                wire:confirm="@term('withdraw_participant_confirm_label')"
                                 class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
-                                Withdraw
+                                @term('withdraw_label')
                             </button>
                             @endif
                         </div>
@@ -453,7 +454,7 @@
                 <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                 </svg>
-                <p>Not enrolled in any courses yet.</p>
+                <p>@term('not_enrolled_courses_yet_label')</p>
                 <button
                     wire:click="openEnrollModal"
                     class="inline-flex items-center gap-1 mt-2 text-sm text-pulse-orange-600 hover:text-pulse-orange-700"
@@ -461,7 +462,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    Enroll in a Course
+                    @term('enroll_in_course_label')
                 </button>
             </div>
             @endforelse
@@ -480,7 +481,7 @@
     @if($activeTab === 'suggestions')
     <div>
         <div class="mb-4">
-            <p class="text-sm text-gray-600">AI-generated course suggestions based on this learner's needs and patterns.</p>
+            <p class="text-sm text-gray-600">@term('ai_course_suggestions_help_label')</p>
         </div>
 
         <div class="space-y-3">
@@ -496,15 +497,15 @@
                             </div>
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <h4 class="text-sm font-medium text-gray-900">{{ $suggestion->miniCourse->title ?? 'Course Suggestion' }}</h4>
-                                    <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">{{ $suggestion->relevance_score }}% match</span>
+                                    <h4 class="text-sm font-medium text-gray-900">{{ $suggestion->miniCourse->title ?? $terminology->get('course_suggestion_label') }}</h4>
+                                    <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">{{ $suggestion->relevance_score }}% @term('match_label')</span>
                                 </div>
                                 @if($suggestion->ai_rationale)
-                                <p class="text-sm text-gray-600 mt-1">{{ $suggestion->ai_rationale }}</p>
+                    <p class="text-sm text-gray-600 mt-1">{{ $suggestion->ai_rationale }}</p>
                                 @endif
                                 @if($suggestion->trigger_signals)
                                 <div class="mt-2 flex flex-wrap gap-1">
-                                    @foreach(array_slice($suggestion->trigger_signals ?? [], 0, 3) as $signal)
+                                @foreach(array_slice($suggestion->trigger_signals ?? [], 0, 3) as $signal)
                                     <span class="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{{ $signal }}</span>
                                     @endforeach
                                 </div>
@@ -519,7 +520,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
-                                Accept
+                                @term('accept_label')
                             </button>
                             <button
                                 wire:click="declineSuggestion({{ $suggestion->id }})"
@@ -528,7 +529,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
-                                Decline
+                                @term('decline_label')
                             </button>
                         </div>
                     </div>
@@ -539,8 +540,8 @@
                 <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                 </svg>
-                <p>No pending suggestions.</p>
-                <p class="text-xs mt-1">Suggestions will appear here based on learner signals and patterns.</p>
+                <p>@term('no_pending_suggestions_label')</p>
+                <p class="text-xs mt-1">@term('suggestions_help_label')</p>
             </div>
             @endforelse
         </div>
@@ -551,7 +552,7 @@
     @if($activeTab === 'providers')
     <div>
         <div class="mb-4">
-            <p class="text-sm text-gray-600">Recommended providers matched to this learner's needs.</p>
+            <p class="text-sm text-gray-600">@term('provider_recommendations_help_label')</p>
         </div>
 
         <div class="space-y-3">
@@ -566,13 +567,13 @@
                             <div class="flex items-center gap-2">
                                 <h4 class="text-sm font-medium text-gray-900">{{ $recommendation['provider']->name }}</h4>
                                 @if($recommendation['provider']->verified_at)
-                                <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20" title="Verified">
+                                <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20" title="@term('verified_label')">
                                     <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
                                 @endif
-                                <span class="px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full">{{ $recommendation['score'] }}% match</span>
+                                <span class="px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full">{{ $recommendation['score'] }}% @term('match_label')</span>
                             </div>
-                            <p class="text-xs text-gray-500 mt-0.5">{{ ucfirst($recommendation['provider']->provider_type ?? 'Provider') }}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">{{ $terminology->get(($recommendation['provider']->provider_type ?? 'provider').'_label') }}</p>
                             @if($recommendation['recommendation_reason'])
                             <p class="text-sm text-gray-600 mt-2">{{ $recommendation['recommendation_reason'] }}</p>
                             @endif
@@ -588,7 +589,7 @@
                             href="{{ route('resources.providers.show', $recommendation['provider']) }}"
                             class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors flex-shrink-0"
                         >
-                            View Profile
+                            @term('view_profile_label')
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
@@ -601,9 +602,9 @@
                 <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                 </svg>
-                <p>No provider recommendations available.</p>
+                <p>@term('no_provider_recommendations_label')</p>
                 <a href="{{ route('resources.index') }}?activeTab=providers" class="inline-flex items-center gap-1 mt-2 text-sm text-pulse-orange-600 hover:text-pulse-orange-700">
-                    Browse all providers
+                    @term('browse_all_providers_label')
                 </a>
             </div>
             @endforelse
@@ -615,7 +616,7 @@
     @if($activeTab === 'programs')
     <div>
         <div class="mb-4">
-            <p class="text-sm text-gray-600">Recommended programs and services matched to this learner's needs.</p>
+            <p class="text-sm text-gray-600">@term('program_recommendations_help_label')</p>
         </div>
 
         <div class="space-y-3">
@@ -631,15 +632,15 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
                                 <h4 class="text-sm font-medium text-gray-900">{{ $recommendation['program']->name }}</h4>
-                                <span class="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">{{ $recommendation['score'] }}% match</span>
+                                <span class="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">{{ $recommendation['score'] }}% @term('match_label')</span>
                                 @if($recommendation['program']->cost_structure === 'free')
-                                <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">Free</span>
+                                <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">@term('free_label')</span>
                                 @endif
                             </div>
                             <p class="text-xs text-gray-500 mt-0.5">
-                                {{ ucfirst(str_replace('_', ' ', $recommendation['program']->program_type ?? 'Program')) }}
+                                {{ $terminology->get(($recommendation['program']->program_type ?? 'program').'_label') }}
                                 @if($recommendation['program']->provider_org_name)
-                                by {{ $recommendation['program']->provider_org_name }}
+                                @term('by_label') {{ $recommendation['program']->provider_org_name }}
                                 @endif
                             </p>
                             @if($recommendation['recommendation_reason'])
@@ -657,7 +658,7 @@
                             href="{{ route('resources.programs.show', $recommendation['program']) }}"
                             class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-green-600 hover:bg-green-50 rounded-lg transition-colors flex-shrink-0"
                         >
-                            View Details
+                            @term('view_details_label')
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
@@ -670,9 +671,9 @@
                 <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                 </svg>
-                <p>No program recommendations available.</p>
+                <p>@term('no_program_recommendations_label')</p>
                 <a href="{{ route('resources.index') }}?activeTab=programs" class="inline-flex items-center gap-1 mt-2 text-sm text-pulse-orange-600 hover:text-pulse-orange-700">
-                    Browse all programs
+                    @term('browse_all_programs_label')
                 </a>
             </div>
             @endforelse
@@ -692,14 +693,14 @@
             <!-- Modal panel -->
             <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
                 <div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Assign Resource</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">@term('assign_resource_label')</h3>
 
                     <!-- Search -->
                     <div class="mb-4">
                         <input
                             type="text"
                             wire:model.live="searchResources"
-                            placeholder="Search resources..."
+                            placeholder="@term('search_resources_placeholder')"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
                         >
                     </div>
@@ -732,7 +733,7 @@
                         </button>
                         @empty
                         <div class="p-4 text-center text-gray-500">
-                            <p class="text-sm">No resources available.</p>
+                            <p class="text-sm">@term('no_resources_available_label')</p>
                         </div>
                         @endforelse
                     </div>
@@ -740,12 +741,12 @@
                     <!-- Notes -->
                     @if($selectedResourceId)
                     <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Assignment Notes (optional)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('assignment_notes_optional_label')</label>
                         <textarea
                             wire:model="assignmentNotes"
                             rows="2"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
-                            placeholder="Add notes about why this resource was assigned..."
+                            placeholder="@term('assignment_notes_placeholder')"
                         ></textarea>
                     </div>
                     @endif
@@ -758,13 +759,13 @@
                         @if(!$selectedResourceId) disabled @endif
                         class="flex-1 px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Assign Resource
+                        @term('assign_resource_label')
                     </button>
                     <button
                         wire:click="closeAssignModal"
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                        Cancel
+                        @term('cancel_label')
                     </button>
                 </div>
             </div>
@@ -784,14 +785,14 @@
             <!-- Modal panel -->
             <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
                 <div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Enroll in Course</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">@term('enroll_in_course_label')</h3>
 
                     <!-- Search -->
                     <div class="mb-4">
                         <input
                             type="text"
                             wire:model.live="searchCourses"
-                            placeholder="Search courses..."
+                            placeholder="@term('search_courses_placeholder')"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
                         >
                     </div>
@@ -811,9 +812,9 @@
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-medium text-gray-900 truncate">{{ $course->title }}</p>
                                 <p class="text-xs text-gray-500">
-                                    {{ $course->steps_count ?? $course->steps()->count() }} steps
+                                    {{ $course->steps_count ?? $course->steps()->count() }} @term('steps_label')
                                     @if($course->estimated_duration_minutes)
-                                    / {{ $course->estimated_duration_minutes }} min
+                                    / {{ $course->estimated_duration_minutes }} @term('minutes_label')
                                     @endif
                                 </p>
                             </div>
@@ -825,7 +826,7 @@
                         </button>
                         @empty
                         <div class="p-4 text-center text-gray-500">
-                            <p class="text-sm">No courses available.</p>
+                            <p class="text-sm">@term('no_courses_available_label')</p>
                         </div>
                         @endforelse
                     </div>
@@ -838,13 +839,13 @@
                         @if(!$selectedCourseId) disabled @endif
                         class="flex-1 px-4 py-2 text-sm font-medium text-white bg-purple-500 rounded-lg hover:bg-purple-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Enroll Learner
+                        @term('enroll_participant_label')
                     </button>
                     <button
                         wire:click="closeEnrollModal"
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                        Cancel
+                        @term('cancel_label')
                     </button>
                 </div>
             </div>

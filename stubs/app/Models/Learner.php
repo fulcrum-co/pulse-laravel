@@ -7,23 +7,23 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use MongoDB\Laravel\Eloquent\Model;
 use MongoDB\Laravel\Eloquent\SoftDeletes;
 
-class Learner extends Model
+class Participant extends Model
 {
     use SoftDeletes;
 
     protected $connection = 'mongodb';
 
-    protected $collection = 'learners';
+    protected $collection = 'participants';
 
     protected $fillable = [
         'user_id',
         'org_id',
-        'district_id',
+        'section_id',
         'consultant_id',
         'learner_number',
-        'grade_level',
+        'level',
         'graduation_year',
-        'current_classrooms',
+        'current_learning_groups',
         'date_of_birth',
         'gender',
         'ethnicity',
@@ -33,10 +33,10 @@ class Learner extends Model
         'ell_status',
         'free_reduced_lunch',
         'emergency_contacts',
-        'parent_ids',
-        'teacher_ids',
+        'direct_supervisor_ids',
+        'instructor_ids',
         'mentor_ids',
-        'counselor_id',
+        'support_person_id',
         'tags',
         'custom_fields',
         'enrollment_date',
@@ -45,11 +45,11 @@ class Learner extends Model
     ];
 
     protected $casts = [
-        'current_classrooms' => 'array',
+        'current_learning_groups' => 'array',
         'date_of_birth' => 'date',
         'emergency_contacts' => 'array',
-        'parent_ids' => 'array',
-        'teacher_ids' => 'array',
+        'direct_supervisor_ids' => 'array',
+        'instructor_ids' => 'array',
         'mentor_ids' => 'array',
         'tags' => 'array',
         'custom_fields' => 'array',
@@ -70,7 +70,7 @@ class Learner extends Model
     }
 
     /**
-     * Get the learner's organization (organization).
+     * Get the participant's organization (organization).
      */
     public function organization(): BelongsTo
     {
@@ -78,15 +78,15 @@ class Learner extends Model
     }
 
     /**
-     * Get the learner's district.
+     * Get the participant's section.
      */
-    public function district(): BelongsTo
+    public function section(): BelongsTo
     {
-        return $this->belongsTo(Organization::class, 'district_id');
+        return $this->belongsTo(Organization::class, 'section_id');
     }
 
     /**
-     * Get survey attempts about this learner.
+     * Get survey attempts about this participant.
      */
     public function surveyAttempts(): HasMany
     {
@@ -94,7 +94,7 @@ class Learner extends Model
     }
 
     /**
-     * Get resource assignments for this learner.
+     * Get resource assignments for this participant.
      */
     public function resourceAssignments(): HasMany
     {
@@ -102,11 +102,11 @@ class Learner extends Model
     }
 
     /**
-     * Get the learner's full name from user.
+     * Get the participant's full name from user.
      */
     public function getFullNameAttribute(): string
     {
-        return $this->user?->full_name ?? 'Unknown Learner';
+        return $this->user?->full_name ?? 'Unknown Participant';
     }
 
     /**
@@ -135,7 +135,7 @@ class Learner extends Model
     }
 
     /**
-     * Scope to filter active learners.
+     * Scope to filter active participants.
      */
     public function scopeActive($query)
     {
@@ -143,34 +143,34 @@ class Learner extends Model
     }
 
     /**
-     * Scope to filter by grade level.
+     * Scope to filter by level.
      */
-    public function scopeGradeLevel($query, int $grade)
+    public function scopeLevel($query, int $level)
     {
-        return $query->where('grade_level', $grade);
+        return $query->where('level', $level);
     }
 
     /**
-     * Scope to filter learners with IEP.
+     * Scope to filter participants with support plans.
      */
-    public function scopeWithIep($query)
+    public function scopeWithSupportPlan($query)
     {
         return $query->where('iep_status', true);
     }
 
     /**
-     * Scope to filter by teacher.
+     * Scope to filter by instructor.
      */
-    public function scopeForTeacher($query, string $teacherId)
+    public function scopeForInstructor($query, string $instructorId)
     {
-        return $query->where('teacher_ids', $teacherId);
+        return $query->where('instructor_ids', $instructorId);
     }
 
     /**
-     * Scope to filter by parent.
+     * Scope to filter by direct supervisor.
      */
-    public function scopeForParent($query, string $parentId)
+    public function scopeForSupervisor($query, string $supervisorId)
     {
-        return $query->where('parent_ids', $parentId);
+        return $query->where('direct_supervisor_ids', $supervisorId);
     }
 }

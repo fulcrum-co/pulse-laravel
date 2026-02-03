@@ -1,4 +1,5 @@
 <div class="space-y-4">
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <!-- Search & Filters -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" data-help="contact-filters">
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -7,7 +8,7 @@
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search contacts..."
+                    placeholder="@term('search_contacts_placeholder')"
                     class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 />
             </div>
@@ -17,21 +18,21 @@
                     wire:model.live="riskFilter"
                     class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 >
-                    <option value="">All Risk Levels</option>
-                    <option value="good">Good Standing</option>
-                    <option value="low">Low Risk</option>
-                    <option value="high">High Risk</option>
+                    <option value="">@term('all_risk_levels_label')</option>
+                    <option value="good">@term('risk_good_standing_label')</option>
+                    <option value="low">@term('risk_low_label')</option>
+                    <option value="high">@term('risk_high_label')</option>
                 </select>
 
                 <select
                     wire:model.live="gradeFilter"
                     class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 >
-                    <option value="">All Grades</option>
-                    <option value="9">Grade 9</option>
-                    <option value="10">Grade 10</option>
-                    <option value="11">Grade 11</option>
-                    <option value="12">Grade 12</option>
+                    <option value="">@term('all_levels_label')</option>
+                    <option value="9">{{ $terminology->get('level_label') }} 9</option>
+                    <option value="10">{{ $terminology->get('level_label') }} 10</option>
+                    <option value="11">{{ $terminology->get('level_label') }} 11</option>
+                    <option value="12">{{ $terminology->get('level_label') }} 12</option>
                 </select>
 
                 @if($search || $riskFilter || $gradeFilter)
@@ -39,7 +40,7 @@
                     wire:click="clearFilters"
                     class="text-sm text-gray-500 hover:text-gray-700"
                 >
-                    Clear
+                    @term('clear_action')
                 </button>
                 @endif
             </div>
@@ -47,7 +48,7 @@
 
         <a href="{{ route('contacts.lists') }}" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors">
             <x-icon name="user-group" class="w-4 h-4" />
-            Manage Lists
+            @term('manage_lists_label')
         </a>
     </div>
 
@@ -60,11 +61,11 @@
                         <th class="px-4 py-2 w-8">
                             <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500" />
                         </th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Level</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('name_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('risk_level_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('level_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('email_label')</th>
+                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">@term('actions_label')</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -93,7 +94,7 @@
                                 </div>
                                 <div>
                                     <div class="font-medium text-gray-900 text-sm">{{ $contact->user->first_name }} {{ $contact->user->last_name }}</div>
-                                    <div class="text-xs text-gray-500">{{ $contact->learner_number }}</div>
+                                    <div class="text-xs text-gray-500">{{ $contact->participant_number }}</div>
                                 </div>
                             </a>
                         </td>
@@ -106,10 +107,10 @@
                                     default => 'gray',
                                 };
                                 $riskLabel = match($contact->risk_level) {
-                                    'good' => 'Good Standing',
-                                    'low' => 'Low Risk',
-                                    'high' => 'High Risk',
-                                    default => 'Unknown',
+                                    'good' => $terminology->get('risk_good_standing_label'),
+                                    'low' => $terminology->get('risk_low_label'),
+                                    'high' => $terminology->get('risk_high_label'),
+                                    default => $terminology->get('unknown_label'),
                                 };
                             @endphp
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $riskColor }}-100 text-{{ $riskColor }}-800">
@@ -117,14 +118,14 @@
                             </span>
                         </td>
                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            Grade {{ $contact->grade_level }}
+                            {{ $terminology->get('level_label') }} {{ $contact->level }}
                         </td>
                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                             {{ $contact->user->email }}
                         </td>
                         <td class="px-4 py-2 whitespace-nowrap text-right">
                             <a href="{{ route('contacts.show', $contact) }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                                View
+                                @term('view_action')
                             </a>
                         </td>
                     </tr>
@@ -132,9 +133,9 @@
                     <tr>
                         <td colspan="6" class="px-4 py-12 text-center">
                             <x-icon name="users" class="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                            <p class="text-sm text-gray-500">No contacts found.</p>
+                            <p class="text-sm text-gray-500">@term('no_contacts_found_label')</p>
                             @if($search || $riskFilter || $gradeFilter)
-                            <p class="text-xs text-gray-400 mt-1">Try adjusting your filters.</p>
+                            <p class="text-xs text-gray-400 mt-1">@term('adjust_filters_label')</p>
                             @endif
                         </td>
                     </tr>

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Domain;
 
 use App\Models\Provider;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\User;
 
 /**
@@ -28,7 +28,7 @@ class StreamIdGeneratorService
     private const USER_PREFIX = 'user_';
 
     /**
-     * Learner ID prefix for Stream.
+     * Participant ID prefix for Stream.
      */
     private const STUDENT_PREFIX = 'learner_';
 
@@ -60,25 +60,25 @@ class StreamIdGeneratorService
     }
 
     /**
-     * Generate Stream user ID for a learner.
+     * Generate Stream user ID for a participant.
      *
-     * @param  Learner  $learner  The learner model
+     * @param  Participant  $participant  The participant model
      * @return string Stream user ID
      */
-    public function getLearnerStreamId(Learner $learner): string
+    public function getLearnerStreamId(Participant $participant): string
     {
-        return self::STUDENT_PREFIX . $learner->id;
+        return self::STUDENT_PREFIX . $participant->id;
     }
 
     /**
-     * Generate Stream user ID for an initiator (User or Learner).
+     * Generate Stream user ID for an initiator (User or Participant).
      *
      * Determines the correct ID prefix based on model type.
      *
-     * @param  User|Learner  $initiator  The initiator model
+     * @param  User|Participant  $initiator  The initiator model
      * @return string Stream user ID
      */
-    public function getInitiatorStreamId(User|Learner $initiator): string
+    public function getInitiatorStreamId(User|Participant $initiator): string
     {
         if ($initiator instanceof User) {
             return $this->getUserStreamId($initiator);
@@ -93,16 +93,16 @@ class StreamIdGeneratorService
      * Creates a unique channel ID combining provider and initiator information.
      *
      * @param  Provider  $provider  The provider
-     * @param  User|Learner  $initiator  The conversation initiator
+     * @param  User|Participant  $initiator  The conversation initiator
      * @return string Unique channel ID
      *
      * @example
      *   'provider_123_user_456'
      *   'provider_123_learner_789'
      */
-    public function generateProviderChannelId(Provider $provider, User|Learner $initiator): string
+    public function generateProviderChannelId(Provider $provider, User|Participant $initiator): string
     {
-        $initiatorPrefix = $initiator instanceof User ? 'user' : 'learner';
+        $initiatorPrefix = $initiator instanceof User ? 'user' : 'participant';
 
         return "provider_{$provider->id}_{$initiatorPrefix}_{$initiator->id}";
     }
@@ -138,10 +138,10 @@ class StreamIdGeneratorService
     }
 
     /**
-     * Extract learner ID from Stream user ID.
+     * Extract participant ID from Stream user ID.
      *
      * @param  string  $streamId  Stream user ID
-     * @return string|null Learner ID or null if not a learner ID
+     * @return string|null Participant ID or null if not a participant ID
      */
     public function extractLearnerIdFromStreamId(string $streamId): ?string
     {
@@ -156,7 +156,7 @@ class StreamIdGeneratorService
      * Determine entity type from Stream user ID.
      *
      * @param  string  $streamId  Stream user ID
-     * @return string|null Entity type: 'provider', 'user', 'learner', or null
+     * @return string|null Entity type: 'provider', 'user', 'participant', or null
      */
     public function getEntityTypeFromStreamId(string $streamId): ?string
     {
@@ -167,7 +167,7 @@ class StreamIdGeneratorService
             return 'user';
         }
         if (str_starts_with($streamId, self::STUDENT_PREFIX)) {
-            return 'learner';
+            return 'participant';
         }
 
         return null;

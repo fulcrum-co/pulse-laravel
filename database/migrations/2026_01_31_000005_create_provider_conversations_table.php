@@ -18,12 +18,12 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->foreignId('provider_id')->constrained()->cascadeOnDelete();
 
-            // Who initiated the conversation (User or Learner)
-            $table->string('initiator_type'); // 'App\Models\User' or 'App\Models\Learner'
+            // Who initiated the conversation (User or Participant)
+            $table->string('initiator_type'); // 'App\Models\User' or 'App\Models\Participant'
             $table->unsignedBigInteger('initiator_id');
 
-            // Optional: specific learner being discussed
-            $table->foreignId('learner_id')->nullable()->constrained()->nullOnDelete();
+            // Optional: specific participant being discussed
+            $table->foreignId('participant_id')->nullable()->constrained()->nullOnDelete();
 
             // GetStream channel identifier
             $table->string('stream_channel_id')->nullable();

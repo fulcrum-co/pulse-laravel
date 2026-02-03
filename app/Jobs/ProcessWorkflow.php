@@ -42,7 +42,7 @@ class ProcessWorkflow implements ShouldQueue
     public function uniqueId(): string
     {
         $entityId = $this->triggerData['entity_id']
-            ?? $this->triggerData['learner_id']
+            ?? $this->triggerData['participant_id']
             ?? $this->triggerData['contact_id']
             ?? 'general';
 

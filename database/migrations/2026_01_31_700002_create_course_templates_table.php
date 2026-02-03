@@ -40,12 +40,12 @@ return new class extends Migration
              *         "topics": ["{primary_topic}"],
              *         "max_duration": 300
              *       },
-             *       "fallback_ai_prompt": "Create an engaging introduction to {topic} for {grade_level} learners"
+             *       "fallback_ai_prompt": "Create an engaging introduction to {topic} for {level} participants"
              *     }
              *   ],
              *   "variables": {
              *     "topic": { "type": "string", "required": true },
-             *     "grade_level": { "type": "string", "required": true },
+             *     "level": { "type": "string", "required": true },
              *     "primary_topic": { "type": "string", "required": false }
              *   }
              * }
@@ -53,7 +53,7 @@ return new class extends Migration
 
             // Targeting
             $table->json('target_risk_factors')->nullable();
-            $table->json('target_grade_levels')->nullable();
+            $table->json('target_levels')->nullable();
             $table->unsignedSmallInteger('estimated_duration_minutes')->nullable();
 
             // Status

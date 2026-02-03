@@ -34,7 +34,7 @@ class AdaptiveTriggerSeeder extends Seeder
         $triggers = [
             [
                 'name' => 'High Risk Wellness Alert',
-                'description' => 'Automatically suggests wellness courses when a learner\'s risk level increases to high and recent survey scores indicate stress or anxiety.',
+                'description' => 'Automatically suggests wellness courses when a participant\'s risk level increases to high and recent survey scores indicate stress or anxiety.',
                 'trigger_type' => AdaptiveTrigger::TYPE_COURSE_SUGGESTION,
                 'input_sources' => [
                     AdaptiveTrigger::INPUT_QUANTITATIVE,
@@ -47,11 +47,11 @@ class AdaptiveTriggerSeeder extends Seeder
                     ],
                 ],
                 'ai_interpretation_enabled' => true,
-                'ai_prompt_context' => 'Analyze the learner\'s survey responses and behavioral patterns to determine if they would benefit from a stress management or wellness intervention. Consider any recent life changes or expressed concerns.',
+                'ai_prompt_context' => 'Analyze the participant\'s survey responses and behavioral patterns to determine if they would benefit from a stress management or wellness intervention. Consider any recent life changes or expressed concerns.',
                 'output_action' => AdaptiveTrigger::ACTION_SUGGEST_FOR_REVIEW,
                 'output_config' => [
                     'course_types' => ['wellness', 'intervention'],
-                    'notification_recipients' => ['counselor', 'assigned_teacher'],
+                    'notification_recipients' => ['support_person', 'assigned_instructor'],
                     'priority' => 'high',
                 ],
                 'cooldown_hours' => 168, // 1 week
@@ -74,7 +74,7 @@ class AdaptiveTriggerSeeder extends Seeder
                 'output_action' => AdaptiveTrigger::ACTION_SUGGEST_FOR_REVIEW,
                 'output_config' => [
                     'course_types' => ['academic', 'skill_building'],
-                    'notification_recipients' => ['counselor'],
+                    'notification_recipients' => ['support_person'],
                     'priority' => 'medium',
                 ],
                 'cooldown_hours' => 336, // 2 weeks
@@ -95,10 +95,10 @@ class AdaptiveTriggerSeeder extends Seeder
                     ],
                 ],
                 'ai_interpretation_enabled' => true,
-                'ai_prompt_context' => 'Review the learner\'s attendance patterns, any documented reasons for absences, and correlate with other data points (grades, behavior) to recommend appropriate interventions.',
+                'ai_prompt_context' => 'Review the participant\'s attendance patterns, any documented reasons for absences, and correlate with other data points (levels, behavior) to recommend appropriate interventions.',
                 'output_action' => AdaptiveTrigger::ACTION_NOTIFY,
                 'output_config' => [
-                    'notification_recipients' => ['counselor', 'admin'],
+                    'notification_recipients' => ['support_person', 'admin'],
                     'notification_template' => 'attendance_concern',
                     'include_ai_analysis' => true,
                 ],
@@ -124,15 +124,15 @@ class AdaptiveTriggerSeeder extends Seeder
                 'output_action' => AdaptiveTrigger::ACTION_SUGGEST_FOR_REVIEW,
                 'output_config' => [
                     'course_types' => ['behavioral', 'intervention'],
-                    'suggest_provider_types' => ['counselor', 'therapist'],
-                    'notification_recipients' => ['counselor'],
+                    'suggest_provider_types' => ['support_person', 'therapist'],
+                    'notification_recipients' => ['support_person'],
                 ],
                 'cooldown_hours' => 168, // 1 week
                 'active' => true,
             ],
             [
                 'name' => 'Positive Progress Recognition',
-                'description' => 'Suggests enrichment opportunities when learners show sustained improvement.',
+                'description' => 'Suggests enrichment opportunities when participants show sustained improvement.',
                 'trigger_type' => AdaptiveTrigger::TYPE_COURSE_SUGGESTION,
                 'input_sources' => [
                     AdaptiveTrigger::INPUT_QUANTITATIVE,
@@ -149,16 +149,16 @@ class AdaptiveTriggerSeeder extends Seeder
                 'output_action' => AdaptiveTrigger::ACTION_SUGGEST_FOR_REVIEW,
                 'output_config' => [
                     'course_types' => ['enrichment', 'skill_building'],
-                    'notification_recipients' => ['counselor'],
+                    'notification_recipients' => ['support_person'],
                     'priority' => 'low',
-                    'message_template' => 'Consider offering enrichment opportunities to recognize this learner\'s positive progress.',
+                    'message_template' => 'Consider offering enrichment opportunities to recognize this participant\'s positive progress.',
                 ],
                 'cooldown_hours' => 720, // 30 days
                 'active' => true,
             ],
             [
-                'name' => 'New Learner Onboarding',
-                'description' => 'Automatically suggests orientation and goal-setting courses for newly enrolled learners.',
+                'name' => 'New Participant Onboarding',
+                'description' => 'Automatically suggests orientation and goal-setting courses for newly enrolled participants.',
                 'trigger_type' => AdaptiveTrigger::TYPE_COURSE_SUGGESTION,
                 'input_sources' => [
                     AdaptiveTrigger::INPUT_EXPLICIT,
@@ -195,20 +195,20 @@ class AdaptiveTriggerSeeder extends Seeder
                     ],
                 ],
                 'ai_interpretation_enabled' => true,
-                'ai_prompt_context' => 'Review the learner\'s full survey responses to understand context. Determine urgency level and recommend appropriate courses or interventions. Flag any responses that require immediate counselor attention.',
+                'ai_prompt_context' => 'Review the participant\'s full survey responses to understand context. Determine urgency level and recommend appropriate courses or interventions. Flag any responses that require immediate support_person attention.',
                 'output_action' => AdaptiveTrigger::ACTION_SUGGEST_FOR_REVIEW,
                 'output_config' => [
                     'course_types' => ['wellness', 'intervention'],
-                    'suggest_provider_types' => ['therapist', 'counselor'],
+                    'suggest_provider_types' => ['therapist', 'support_person'],
                     'priority' => 'high',
-                    'require_counselor_review' => true,
+                    'require_support_person_review' => true,
                 ],
                 'cooldown_hours' => 24,
                 'active' => true,
             ],
             [
                 'name' => 'Provider Recommendation Engine',
-                'description' => 'Recommends appropriate providers when learner needs match provider specialties.',
+                'description' => 'Recommends appropriate providers when participant needs match provider specialties.',
                 'trigger_type' => AdaptiveTrigger::TYPE_PROVIDER_RECOMMENDATION,
                 'input_sources' => [
                     AdaptiveTrigger::INPUT_QUANTITATIVE,
@@ -217,13 +217,13 @@ class AdaptiveTriggerSeeder extends Seeder
                 ],
                 'conditions' => [
                     'any' => [
-                        ['field' => 'counselor_referral_requested', 'operator' => 'equals', 'value' => true],
+                        ['field' => 'support_person_referral_requested', 'operator' => 'equals', 'value' => true],
                         ['field' => 'iep_status', 'operator' => 'equals', 'value' => true],
                         ['field' => 'identified_needs', 'operator' => 'is_not_empty'],
                     ],
                 ],
                 'ai_interpretation_enabled' => true,
-                'ai_prompt_context' => 'Match learner needs with available providers based on specialty areas, availability, insurance acceptance, and location preferences. Prioritize providers with high ratings and relevant experience.',
+                'ai_prompt_context' => 'Match participant needs with available providers based on specialty areas, availability, insurance acceptance, and location preferences. Prioritize providers with high ratings and relevant experience.',
                 'output_action' => AdaptiveTrigger::ACTION_SUGGEST_FOR_REVIEW,
                 'output_config' => [
                     'max_provider_suggestions' => 3,

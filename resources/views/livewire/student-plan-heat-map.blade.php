@@ -1,4 +1,5 @@
 <div>
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <!-- Year Selector -->
     <div class="flex items-center justify-between mb-4">
         <button wire:click="previousYear" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
@@ -35,7 +36,7 @@
                         $status = $cell['status'] ?? null;
                         $color = $cell['color'] ?? '#9ca3af';
                         $value = $cell['value'] ?? null;
-                        $statusLabel = $cell['label'] ?? 'No Data';
+                        $statusLabel = $cell['label'] ?? $terminology->get('no_data_label');
                     @endphp
                     <td class="p-2">
                         <div
@@ -60,19 +61,19 @@
     <div class="flex flex-wrap items-center justify-center gap-4 mt-4 text-sm">
         <div class="flex items-center gap-2">
             <div class="w-4 h-4 rounded" style="background-color: #22c55e"></div>
-            <span class="text-gray-600">On Track</span>
+            <span class="text-gray-600">@term('on_track_label')</span>
         </div>
         <div class="flex items-center gap-2">
             <div class="w-4 h-4 rounded" style="background-color: #eab308"></div>
-            <span class="text-gray-600">At Risk</span>
+            <span class="text-gray-600">@term('at_risk_label')</span>
         </div>
         <div class="flex items-center gap-2">
             <div class="w-4 h-4 rounded" style="background-color: #ef4444"></div>
-            <span class="text-gray-600">Off Track</span>
+            <span class="text-gray-600">@term('off_track_label')</span>
         </div>
         <div class="flex items-center gap-2">
             <div class="w-4 h-4 rounded" style="background-color: #9ca3af"></div>
-            <span class="text-gray-600">No Data</span>
+            <span class="text-gray-600">@term('no_data_label')</span>
         </div>
     </div>
 </div>

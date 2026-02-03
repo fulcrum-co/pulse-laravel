@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('booking_id')->constrained('provider_bookings')->cascadeOnDelete();
             $table->foreignId('provider_id')->constrained()->cascadeOnDelete();
 
-            // Who paid (User or Learner or Organization)
+            // Who paid (User or Participant or Organization)
             $table->string('payer_type');
             $table->unsignedBigInteger('payer_id');
 

@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\AuditLog;
-use App\Models\Learner;
+use App\Models\Participant;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -48,12 +48,12 @@ class AuditAccess
         foreach ($parameters as $key => $model) {
             // Check if it's an Eloquent model
             if (is_object($model) && method_exists($model, 'getKey')) {
-                // Determine if this involves a learner (for FERPA tracking)
+                // Determine if this involves a participant (for FERPA tracking)
                 $contact = null;
-                if ($model instanceof Learner) {
+                if ($model instanceof Participant) {
                     $contact = $model;
-                } elseif (property_exists($model, 'learner_id') || method_exists($model, 'learner')) {
-                    $contact = $model->learner ?? null;
+                } elseif (property_exists($model, 'participant_id') || method_exists($model, 'participant')) {
+                    $contact = $model->participant ?? null;
                 }
 
                 AuditLog::log($action, $model, null, null, $contact);

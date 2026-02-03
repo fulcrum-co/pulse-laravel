@@ -31,9 +31,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'sso_id',
         'preferred_contact_method',
         'contact_preferences',
-        'learner_ids',
+        'participant_ids',
         'department_ids',
-        'classroom_ids',
+        'learning_group_ids',
         'avatar_url',
         'bio',
         'last_login',
@@ -53,9 +53,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'accessible_org_ids' => 'array',
         'role_scopes' => 'array',
         'contact_preferences' => 'array',
-        'learner_ids' => 'array',
+        'participant_ids' => 'array',
         'department_ids' => 'array',
-        'classroom_ids' => 'array',
+        'learning_group_ids' => 'array',
         'last_login' => 'datetime',
         'last_survey_completed' => 'datetime',
         'email_verified_at' => 'datetime',
@@ -82,19 +82,19 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the learners associated with this user (for teachers/parents).
+     * Get the participants associated with this user (for instructors/direct_supervisors).
      */
-    public function learners(): HasMany
+    public function participants(): HasMany
     {
-        return $this->hasMany(Learner::class, 'user_id');
+        return $this->hasMany(Participant::class, 'user_id');
     }
 
     /**
-     * Get the learner profile if this user is a learner.
+     * Get the participant profile if this user is a participant.
      */
     public function learnerProfile(): BelongsTo
     {
-        return $this->belongsTo(Learner::class, 'user_id', '_id');
+        return $this->belongsTo(Participant::class, 'user_id', '_id');
     }
 
     /**
@@ -179,11 +179,11 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Check if user is a teacher.
+     * Check if user is a instructor.
      */
     public function isTeacher(): bool
     {
-        return $this->hasRole('teacher');
+        return $this->hasRole('instructor');
     }
 
     /**
@@ -195,10 +195,10 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Check if user is a parent.
+     * Check if user is a direct_supervisor.
      */
     public function isParent(): bool
     {
-        return $this->hasRole('parent');
+        return $this->hasRole('direct_supervisor');
     }
 }

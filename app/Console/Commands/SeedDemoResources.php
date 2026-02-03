@@ -64,7 +64,7 @@ class SeedDemoResources extends Command
                 'target_risk_levels' => ['low', 'moderate', 'high'],
             ],
             [
-                'title' => 'Mindfulness for Learners',
+                'title' => 'Mindfulness for Participants',
                 'description' => 'A guided introduction to mindfulness practices for teens. Includes 5-minute exercises that can be done anywhere.',
                 'resource_type' => 'video',
                 'category' => 'wellness',
@@ -156,7 +156,7 @@ class SeedDemoResources extends Command
             ],
             [
                 'name' => 'Marcus Williams, LCSW',
-                'provider_type' => 'counselor',
+                'provider_type' => 'support_person',
                 'bio' => 'Organization-based social worker with expertise in family counseling and crisis intervention.',
                 'contact_email' => 'marcus.w@example.com',
                 'specialties' => ['family counseling', 'crisis intervention', 'behavioral'],
@@ -177,7 +177,7 @@ class SeedDemoResources extends Command
             [
                 'name' => 'Coach Mike Thompson',
                 'provider_type' => 'coach',
-                'bio' => 'Life skills coach helping learners build resilience, goal-setting abilities, and leadership skills.',
+                'bio' => 'Life skills coach helping participants build resilience, goal-setting abilities, and leadership skills.',
                 'contact_email' => 'mike.t@example.com',
                 'specialties' => ['leadership', 'goal setting', 'resilience'],
                 'serves_remote' => true,
@@ -215,7 +215,7 @@ class SeedDemoResources extends Command
         $programs = [
             [
                 'name' => 'Anxiety Support Group',
-                'description' => 'Weekly peer support group for learners experiencing anxiety. Facilitated by licensed counselors.',
+                'description' => 'Weekly peer support group for participants experiencing anxiety. Facilitated by licensed support_persons.',
                 'program_type' => 'support_group',
                 'duration_weeks' => 8,
                 'max_participants' => 12,
@@ -289,9 +289,9 @@ class SeedDemoResources extends Command
         $courses = [
             [
                 'title' => 'Managing Test Anxiety',
-                'description' => 'A 5-step course to help learners understand and manage test anxiety using proven techniques.',
+                'description' => 'A 5-step course to help participants understand and manage test anxiety using proven techniques.',
                 'course_type' => 'intervention',
-                'target_audience' => 'learners',
+                'target_audience' => 'participants',
                 'objectives' => [
                     'Understand what causes test anxiety',
                     'Learn breathing techniques for calming',
@@ -310,7 +310,7 @@ class SeedDemoResources extends Command
                 'title' => 'Building Study Skills',
                 'description' => 'Learn essential study skills including note-taking, time management, and active reading strategies.',
                 'course_type' => 'skill_building',
-                'target_audience' => 'learners',
+                'target_audience' => 'participants',
                 'objectives' => [
                     'Master effective note-taking methods',
                     'Create a study schedule',
@@ -327,7 +327,7 @@ class SeedDemoResources extends Command
                 'title' => 'Mindfulness Basics',
                 'description' => 'Introduction to mindfulness meditation for stress reduction and focus improvement.',
                 'course_type' => 'wellness',
-                'target_audience' => 'learners',
+                'target_audience' => 'participants',
                 'objectives' => [
                     'Understand what mindfulness is',
                     'Practice basic meditation',

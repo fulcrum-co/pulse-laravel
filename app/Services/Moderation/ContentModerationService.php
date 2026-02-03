@@ -103,7 +103,7 @@ You are a content moderation specialist for K-12 educational content. Your role 
 You must evaluate content across four dimensions:
 
 1. AGE APPROPRIATENESS (Weight: 30%)
-   - Is the language appropriate for the target grade level?
+   - Is the language appropriate for the target level level?
    - Are topics suitable for the intended audience?
    - Is complexity appropriate for the developmental stage?
 
@@ -150,9 +150,9 @@ PROMPT;
     {
         $contextStr = '';
 
-        if (! empty($context['target_grades'])) {
-            $grades = is_array($context['target_grades']) ? implode(', ', $context['target_grades']) : $context['target_grades'];
-            $contextStr .= "Target grades: {$grades}\n";
+        if (! empty($context['target_levels'])) {
+            $levels = is_array($context['target_levels']) ? implode(', ', $context['target_levels']) : $context['target_levels'];
+            $contextStr .= "Target levels: {$levels}\n";
         }
 
         if (! empty($context['type'])) {

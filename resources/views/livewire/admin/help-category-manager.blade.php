@@ -68,7 +68,7 @@
                                 <code class="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">{{ $category->slug }}</code>
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-500">
-                                {{ $category->parent?->name ?? '—' }}
+                                {{ $category->parent?->name ?? $terminology->get('empty_dash_label') }}
                             </td>
                             <td class="px-4 py-3 text-center">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
@@ -169,7 +169,7 @@
                                 @error('description') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                             </div>
 
-                            {{-- Icon & Parent --}}
+                            {{-- Icon & Direct Supervisor --}}
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label for="icon" class="block text-sm font-medium text-gray-700 mb-1">@term('icon_label')</label>
@@ -191,8 +191,8 @@
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm"
                                     >
                                         <option value="">@term('none_top_level_label')</option>
-                                        @foreach($this->parentCategories as $parent)
-                                            <option value="{{ $parent->id }}">{{ $parent->name }}</option>
+                                        @foreach($this->parentCategories as $parentCategory)
+                                            <option value="{{ $parentCategory->id }}">{{ $parentCategory->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>

@@ -60,8 +60,8 @@
                 {{-- Recipient Type Tabs --}}
                 <div class="flex gap-2 mb-4">
                     <button
-                        wire:click="$set('recipientType', 'learner')"
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $recipientType === 'learner' ? 'bg-pulse-orange-100 text-pulse-orange-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
+                        wire:click="$set('recipientType', 'participant')"
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $recipientType === 'participant' ? 'bg-pulse-orange-100 text-pulse-orange-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
                     >
                         @term('learner_plural')
                     </button>
@@ -126,8 +126,8 @@
                                     @endif
                                 </div>
                             </div>
-                            @if($recipient['grade'] ?? null)
-                                <x-badge color="gray">Grade {{ $recipient['grade'] }}</x-badge>
+                            @if($recipient['level'] ?? null)
+                                <x-badge color="gray">Level {{ $recipient['level'] }}</x-badge>
                             @elseif($recipient['role'] ?? null)
                                 <x-badge color="blue">{{ ucfirst($recipient['role']) }}</x-badge>
                             @endif

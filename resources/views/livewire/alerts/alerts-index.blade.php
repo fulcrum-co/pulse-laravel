@@ -8,7 +8,7 @@
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search alerts..."
+                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('search_alerts_placeholder') }}"
                     class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 />
             </div>
@@ -18,7 +18,7 @@
                 wire:model.live="statusFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">All Statuses</option>
+                <option value="">@term('all_statuses_label')</option>
                 @foreach($statuses as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
@@ -29,7 +29,7 @@
                 wire:model.live="triggerTypeFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">All Triggers</option>
+                <option value="">@term('all_triggers_label')</option>
                 @foreach($triggerTypes as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
@@ -37,7 +37,7 @@
 
             @if($search || $statusFilter || $triggerTypeFilter)
                 <button wire:click="clearFilters" class="text-sm text-gray-500 hover:text-gray-700">
-                    Clear
+                    @term('clear_action')
                 </button>
             @endif
         </div>
@@ -46,35 +46,35 @@
         <div class="flex items-center gap-3">
             @if(count($selected) > 0)
                 <div class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5">
-                    <span class="text-sm text-red-700">{{ count($selected) }} selected</span>
-                    <button wire:click="deselectAll" class="text-xs text-red-600 hover:text-red-800 underline">Clear</button>
+                    <span class="text-sm text-red-700">{{ count($selected) }} @term('selected_label')</span>
+                    <button wire:click="deselectAll" class="text-xs text-red-600 hover:text-red-800 underline">@term('clear_action')</button>
                     <button wire:click="confirmBulkDelete" class="ml-2 px-2 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700">
-                        Delete Selected
+                        @term('delete_selected_label')
                     </button>
                 </div>
             @else
-                <button wire:click="selectAll" class="text-xs text-gray-500 hover:text-gray-700">Select All</button>
+                <button wire:click="selectAll" class="text-xs text-gray-500 hover:text-gray-700">@term('select_all_label')</button>
             @endif
 
             <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
                 <button
                     wire:click="setViewMode('grid')"
                     class="p-1.5 rounded {{ $viewMode === 'grid' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                    title="Grid view"
+                    title="{{ app(\App\Services\TerminologyService::class)->get('grid_view_label') }}"
                 >
                     <x-icon name="squares-2x2" class="w-4 h-4" />
                 </button>
                 <button
                     wire:click="setViewMode('list')"
                     class="p-1.5 rounded {{ $viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                    title="List view"
+                    title="{{ app(\App\Services\TerminologyService::class)->get('list_view_label') }}"
                 >
                     <x-icon name="list-bullet" class="w-4 h-4" />
                 </button>
                 <button
                     wire:click="setViewMode('table')"
                     class="p-1.5 rounded {{ $viewMode === 'table' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700' }}"
-                    title="Table view"
+                    title="{{ app(\App\Services\TerminologyService::class)->get('table_view_label') }}"
                 >
                     <x-icon name="table-cells" class="w-4 h-4" />
                 </button>
@@ -97,16 +97,16 @@
                         <x-icon name="exclamation-triangle" class="h-5 w-5 text-red-600" />
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-base font-medium text-gray-900">Delete Alert</h3>
-                        <p class="mt-1 text-sm text-gray-500">Are you sure? This cannot be undone.</p>
+                        <h3 class="text-base font-medium text-gray-900">@term('delete_alert_label')</h3>
+                        <p class="mt-1 text-sm text-gray-500">@term('delete_alert_confirm_label')</p>
                     </div>
                 </div>
                 <div class="mt-4 sm:flex sm:flex-row-reverse gap-2">
                     <button wire:click="deleteWorkflow" class="w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                        Delete
+                        @term('delete_action')
                     </button>
                     <button wire:click="cancelDelete" class="mt-2 sm:mt-0 w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
+                        @term('cancel_action')
                     </button>
                 </div>
             </div>
@@ -126,16 +126,16 @@
                         <x-icon name="exclamation-triangle" class="h-5 w-5 text-red-600" />
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-base font-medium text-gray-900">Delete {{ count($selected) }} Alert(s)</h3>
-                        <p class="mt-1 text-sm text-gray-500">Are you sure you want to delete all selected alerts? This cannot be undone.</p>
+                        <h3 class="text-base font-medium text-gray-900">@term('delete_selected_alerts_label') {{ count($selected) }}</h3>
+                        <p class="mt-1 text-sm text-gray-500">@term('delete_selected_alerts_confirm_label')</p>
                     </div>
                 </div>
                 <div class="mt-4 sm:flex sm:flex-row-reverse gap-2">
                     <button wire:click="deleteSelected" class="w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                        Delete All
+                        @term('delete_all_label')
                     </button>
                     <button wire:click="cancelBulkDelete" class="mt-2 sm:mt-0 w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
+                        @term('cancel_action')
                     </button>
                 </div>
             </div>

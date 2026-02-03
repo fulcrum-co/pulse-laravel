@@ -95,7 +95,7 @@ class MiniCourseSuggestion extends Model
     }
 
     /**
-     * Polymorphic contact relationship (Learner or User).
+     * Polymorphic contact relationship (Participant or User).
      */
     public function contact(): MorphTo
     {
@@ -199,7 +199,7 @@ class MiniCourseSuggestion extends Model
         $enrollment = MiniCourseEnrollment::create([
             'mini_course_id' => $this->mini_course_id,
             'mini_course_version_id' => $this->miniCourse->current_version_id,
-            'learner_id' => $this->contact_id,
+            'participant_id' => $this->contact_id,
             'enrolled_by' => $userId,
             'enrollment_source' => match ($this->suggestion_source) {
                 self::SOURCE_AI_GENERATED, self::SOURCE_AI_RECOMMENDED => MiniCourseEnrollment::SOURCE_AI_SUGGESTED,
@@ -243,7 +243,7 @@ class MiniCourseSuggestion extends Model
         $enrollment = MiniCourseEnrollment::create([
             'mini_course_id' => $this->mini_course_id,
             'mini_course_version_id' => $this->miniCourse->current_version_id,
-            'learner_id' => $this->contact_id,
+            'participant_id' => $this->contact_id,
             'enrollment_source' => MiniCourseEnrollment::SOURCE_AI_SUGGESTED,
             'suggestion_id' => $this->id,
             'status' => MiniCourseEnrollment::STATUS_ENROLLED,
@@ -271,7 +271,7 @@ class MiniCourseSuggestion extends Model
             return $this->ai_explanation['summary'];
         }
 
-        return 'Suggested based on learner data analysis.';
+        return 'Suggested based on participant data analysis.';
     }
 
     /**

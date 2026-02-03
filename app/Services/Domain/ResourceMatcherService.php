@@ -75,7 +75,7 @@ class ResourceMatcherService
     /**
      * Calculate match score for a provider.
      */
-    public function calculateProviderScore(object $provider, array $needs, object $learner): array
+    public function calculateProviderScore(object $provider, array $needs, object $participant): array
     {
         $score = 0;
         $factors = [];
@@ -91,7 +91,7 @@ class ResourceMatcherService
         $ratingBonus = $this->scoreRating($provider);
         $score += $ratingBonus;
         if ($ratingBonus >= 10) {
-            $factors[] = 'Highly rated by other learners';
+            $factors[] = 'Highly rated by other participants';
         }
 
         // Verification bonus (10 points)
@@ -112,7 +112,7 @@ class ResourceMatcherService
         }
 
         // Insurance bonus
-        if ($this->canInsuranceApply($provider, $learner)) {
+        if ($this->canInsuranceApply($provider, $participant)) {
             $score += self::INSURANCE_BONUS;
             $factors[] = 'Accepts insurance (cost-effective option)';
         }
@@ -129,7 +129,7 @@ class ResourceMatcherService
     /**
      * Calculate match score for a program.
      */
-    public function calculateProgramScore(object $program, array $needs, object $learner): array
+    public function calculateProgramScore(object $program, array $needs, object $participant): array
     {
         $score = 0;
         $factors = [];
@@ -142,7 +142,7 @@ class ResourceMatcherService
         }
 
         // Cost structure bonus
-        $costBonus = $this->scoreCostStructure($program, $learner);
+        $costBonus = $this->scoreCostStructure($program, $participant);
         $score += $costBonus;
         if ($costBonus > 0) {
             $factors[] = $this->getCostLabel($program);
@@ -261,7 +261,7 @@ class ResourceMatcherService
         return min(self::SPECIALTY_MATCH_WEIGHT, $matchCount * self::SPECIALTY_MATCH_POINTS);
     }
 
-    private function scoreCostStructure(object $program, object $learner): int
+    private function scoreCostStructure(object $program, object $participant): int
     {
         $costStructure = $this->getProgramCostStructure($program);
 
@@ -273,7 +273,7 @@ class ResourceMatcherService
             return self::PROGRAM_COST_WEIGHTS['sliding_scale'];
         }
 
-        if ($costStructure === 'insurance' && $this->hasFinancialNeed($learner)) {
+        if ($costStructure === 'insurance' && $this->hasFinancialNeed($participant)) {
             return self::PROGRAM_COST_WEIGHTS['insurance'];
         }
 
@@ -336,17 +336,17 @@ class ResourceMatcherService
         return (bool) ($provider->serves_in_person ?? false);
     }
 
-    private function canInsuranceApply(object $provider, object $learner): bool
+    private function canInsuranceApply(object $provider, object $participant): bool
     {
         $providerAccepts = (bool) ($provider->accepts_insurance ?? false);
-        $learnerNeed = (bool) ($learner->free_reduced_lunch ?? false);
+        $learnerNeed = (bool) ($participant->free_reduced_lunch ?? false);
 
         return $providerAccepts && $learnerNeed;
     }
 
-    private function hasFinancialNeed(object $learner): bool
+    private function hasFinancialNeed(object $participant): bool
     {
-        return (bool) ($learner->free_reduced_lunch ?? false);
+        return (bool) ($participant->free_reduced_lunch ?? false);
     }
 
     private function getProgramCostStructure(object $program): string
@@ -407,7 +407,7 @@ class ResourceMatcherService
     {
         $synonyms = [
             'therapy' => ['therapist', 'therapeutic', 'counseling'],
-            'counseling' => ['counselor', 'therapy', 'support'],
+            'counseling' => ['support_person', 'therapy', 'support'],
             'tutoring' => ['tutor', 'academic support', 'homework help'],
             'mental health' => ['therapy', 'counseling', 'emotional', 'psychological'],
             'anxiety' => ['stress', 'worry', 'nervous'],

@@ -13,7 +13,7 @@ class TriggerLog extends Model
 
     protected $fillable = [
         'trigger_id',
-        'learner_id',
+        'participant_id',
         'org_id',
         'triggering_event',
         'actions_executed',
@@ -33,11 +33,11 @@ class TriggerLog extends Model
     }
 
     /**
-     * Get the learner.
+     * Get the participant.
      */
-    public function learner(): BelongsTo
+    public function participant(): BelongsTo
     {
-        return $this->belongsTo(Learner::class, 'learner_id');
+        return $this->belongsTo(Participant::class, 'participant_id');
     }
 
     /**

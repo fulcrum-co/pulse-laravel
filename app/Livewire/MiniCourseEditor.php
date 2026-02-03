@@ -15,6 +15,11 @@ class MiniCourseEditor extends Component
 {
     use WithFileUploads;
 
+    protected function term(string $key): string
+    {
+        return app(\App\Services\TerminologyService::class)->get($key);
+    }
+
     public ?MiniCourse $course = null;
 
     public bool $isNew = true;
@@ -66,7 +71,7 @@ class MiniCourseEditor extends Component
 
     public string $aiTopic = '';
 
-    public string $aiAudience = 'learners';
+    public string $aiAudience = 'participants';
 
     public ?string $aiGradeLevel = null;
 
@@ -107,7 +112,7 @@ class MiniCourseEditor extends Component
         $this->rationale = $this->course->rationale ?? '';
         $this->expectedExperience = $this->course->expected_experience ?? '';
         $this->courseType = $this->course->course_type;
-        $this->targetGrades = $this->course->target_grades ?? [];
+        $this->targetGrades = $this->course->target_levels ?? [];
         $this->targetRiskLevels = $this->course->target_risk_levels ?? [];
         $this->targetNeeds = $this->course->target_needs ?? [];
         $this->estimatedDuration = $this->course->estimated_duration_minutes;
@@ -142,7 +147,7 @@ class MiniCourseEditor extends Component
             'rationale' => $this->rationale,
             'expected_experience' => $this->expectedExperience,
             'course_type' => $this->courseType,
-            'target_grades' => $this->targetGrades,
+            'target_levels' => $this->targetGrades,
             'target_risk_levels' => $this->targetRiskLevels,
             'target_needs' => $this->targetNeeds,
             'estimated_duration_minutes' => $this->estimatedDuration,
@@ -162,14 +167,14 @@ class MiniCourseEditor extends Component
 
             $this->dispatch('notify', [
                 'type' => 'success',
-                'message' => 'Course created successfully!',
+                'message' => $this->term('course_created_success_label'),
             ]);
         } else {
             $this->course->update($data);
 
             $this->dispatch('notify', [
                 'type' => 'success',
-                'message' => 'Course saved successfully!',
+                'message' => $this->term('course_saved_success_label'),
             ]);
         }
     }
@@ -248,7 +253,7 @@ class MiniCourseEditor extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => $this->editingStepId ? 'Step updated!' : 'Step added!',
+            'message' => $this->editingStepId ? $this->term('step_updated_success_label') : $this->term('step_added_success_label'),
         ]);
     }
 
@@ -259,7 +264,7 @@ class MiniCourseEditor extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Step deleted.',
+            'message' => $this->term('step_deleted_success_label'),
         ]);
     }
 
@@ -282,7 +287,7 @@ class MiniCourseEditor extends Component
         if (! $this->course || $this->course->steps->isEmpty()) {
             $this->dispatch('notify', [
                 'type' => 'error',
-                'message' => 'Add at least one step before publishing.',
+                'message' => $this->term('publish_requires_step_label'),
             ]);
 
             return;
@@ -293,7 +298,7 @@ class MiniCourseEditor extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Course published successfully!',
+            'message' => $this->term('course_published_success_label'),
         ]);
     }
 
@@ -321,37 +326,37 @@ class MiniCourseEditor extends Component
     public function getStepTypesProperty(): array
     {
         return [
-            MiniCourseStep::TYPE_CONTENT => 'Content',
-            MiniCourseStep::TYPE_REFLECTION => 'Reflection',
-            MiniCourseStep::TYPE_ACTION => 'Action',
-            MiniCourseStep::TYPE_PRACTICE => 'Practice',
-            MiniCourseStep::TYPE_HUMAN_CONNECTION => 'Human Connection',
-            MiniCourseStep::TYPE_ASSESSMENT => 'Assessment',
-            MiniCourseStep::TYPE_CHECKPOINT => 'Checkpoint',
+            MiniCourseStep::TYPE_CONTENT => $this->term('step_type_content_label'),
+            MiniCourseStep::TYPE_REFLECTION => $this->term('step_type_reflection_label'),
+            MiniCourseStep::TYPE_ACTION => $this->term('step_type_action_label'),
+            MiniCourseStep::TYPE_PRACTICE => $this->term('step_type_practice_label'),
+            MiniCourseStep::TYPE_HUMAN_CONNECTION => $this->term('step_type_human_connection_label'),
+            MiniCourseStep::TYPE_ASSESSMENT => $this->term('step_type_assessment_label'),
+            MiniCourseStep::TYPE_CHECKPOINT => $this->term('step_type_checkpoint_label'),
         ];
     }
 
     public function getContentTypesProperty(): array
     {
         return [
-            MiniCourseStep::CONTENT_TEXT => 'Text',
-            MiniCourseStep::CONTENT_VIDEO => 'Video',
-            MiniCourseStep::CONTENT_DOCUMENT => 'Document',
-            MiniCourseStep::CONTENT_LINK => 'Link',
-            MiniCourseStep::CONTENT_EMBEDDED => 'Embedded',
-            MiniCourseStep::CONTENT_INTERACTIVE => 'Interactive',
+            MiniCourseStep::CONTENT_TEXT => $this->term('content_type_text_label'),
+            MiniCourseStep::CONTENT_VIDEO => $this->term('content_type_video_label'),
+            MiniCourseStep::CONTENT_DOCUMENT => $this->term('content_type_document_label'),
+            MiniCourseStep::CONTENT_LINK => $this->term('content_type_link_label'),
+            MiniCourseStep::CONTENT_EMBEDDED => $this->term('content_type_embedded_label'),
+            MiniCourseStep::CONTENT_INTERACTIVE => $this->term('content_type_interactive_label'),
         ];
     }
 
     public function getCourseTypesProperty(): array
     {
         return [
-            MiniCourse::TYPE_INTERVENTION => 'Intervention',
-            MiniCourse::TYPE_ENRICHMENT => 'Enrichment',
-            MiniCourse::TYPE_SKILL_BUILDING => 'Skill Building',
-            MiniCourse::TYPE_WELLNESS => 'Wellness',
-            MiniCourse::TYPE_ACADEMIC => 'Academic',
-            MiniCourse::TYPE_BEHAVIORAL => 'Behavioral',
+            MiniCourse::TYPE_INTERVENTION => $this->term('course_type_intervention_label'),
+            MiniCourse::TYPE_ENRICHMENT => $this->term('course_type_enrichment_label'),
+            MiniCourse::TYPE_SKILL_BUILDING => $this->term('course_type_skill_building_label'),
+            MiniCourse::TYPE_WELLNESS => $this->term('course_type_wellness_label'),
+            MiniCourse::TYPE_ACADEMIC => $this->term('course_type_academic_label'),
+            MiniCourse::TYPE_BEHAVIORAL => $this->term('course_type_behavioral_label'),
         ];
     }
 
@@ -371,7 +376,7 @@ class MiniCourseEditor extends Component
     public function generateFullCourse(): void
     {
         if (empty($this->aiTopic)) {
-            $this->aiError = 'Please enter a topic for the course.';
+            $this->aiError = $this->term('ai_topic_required_label');
 
             return;
         }
@@ -385,7 +390,7 @@ class MiniCourseEditor extends Component
             $result = $aiService->generateCompleteCourse([
                 'topic' => $this->aiTopic,
                 'audience' => $this->aiAudience,
-                'grade_level' => $this->aiGradeLevel,
+                'level' => $this->aiGradeLevel,
                 'course_type' => $this->courseType,
                 'duration_minutes' => $this->aiDurationMinutes,
                 'objectives' => $this->objectives,
@@ -395,13 +400,13 @@ class MiniCourseEditor extends Component
                 $this->applyAICourse($result['course']);
                 $this->dispatch('notify', [
                     'type' => 'success',
-                    'message' => 'AI generated course draft! Review and customize.',
+                    'message' => $this->term('ai_course_generated_success_label'),
                 ]);
             } else {
-                $this->aiError = $result['error'] ?? 'Failed to generate course.';
+                $this->aiError = $result['error'] ?? $this->term('ai_generate_course_failed_label');
             }
         } catch (\Exception $e) {
-            $this->aiError = 'An error occurred while generating the course.';
+            $this->aiError = $this->term('ai_generate_course_error_label');
             \Log::error('AI course generation failed', ['error' => $e->getMessage()]);
         } finally {
             $this->aiGenerating = false;
@@ -437,7 +442,7 @@ class MiniCourseEditor extends Component
                 $this->course->steps()->create([
                     'sort_order' => $index + 1,
                     'step_type' => $stepData['step_type'] ?? MiniCourseStep::TYPE_CONTENT,
-                    'title' => $stepData['title'] ?? 'Step '.($index + 1),
+                    'title' => $stepData['title'] ?? $this->term('step_label').' '.($index + 1),
                     'description' => $stepData['description'] ?? null,
                     'instructions' => $stepData['instructions'] ?? null,
                     'content_type' => $stepData['content_type'] ?? MiniCourseStep::CONTENT_TEXT,
@@ -473,7 +478,7 @@ class MiniCourseEditor extends Component
             $context = [
                 'course_type' => $this->courseType,
                 'audience' => $this->aiAudience,
-                'grade_level' => $this->aiGradeLevel,
+                'level' => $this->aiGradeLevel,
                 'objectives' => $this->objectives,
             ];
 
@@ -483,20 +488,20 @@ class MiniCourseEditor extends Component
                 'reflection' => $aiService->generateReflectionPrompts($topic, $context),
                 'assessment' => $aiService->generateAssessment($this->objectives, 'quiz', $context),
                 'action' => $aiService->generateActionPlan($topic, $context),
-                default => ['success' => false, 'error' => 'Unknown section type'],
+                default => ['success' => false, 'error' => $this->term('unknown_section_type_error_label')],
             };
 
             if ($result['success']) {
                 $this->aiSuggestions = $result[$sectionType] ?? $result['data'] ?? $result;
                 $this->dispatch('notify', [
                     'type' => 'success',
-                    'message' => ucfirst($sectionType).' content generated! Click to apply.',
+                    'message' => $this->term('ai_section_generated_success_label'),
                 ]);
             } else {
-                $this->aiError = $result['error'] ?? 'Failed to generate content.';
+                $this->aiError = $result['error'] ?? $this->term('ai_generate_content_failed_label');
             }
         } catch (\Exception $e) {
-            $this->aiError = 'An error occurred while generating content.';
+            $this->aiError = $this->term('ai_generate_content_error_label');
             \Log::error('AI section generation failed', ['error' => $e->getMessage()]);
         } finally {
             $this->aiGenerating = false;
@@ -535,7 +540,7 @@ class MiniCourseEditor extends Component
             $this->course->steps()->create([
                 'sort_order' => $maxSort + 1,
                 'step_type' => $stepData['step_type'] ?? MiniCourseStep::TYPE_CONTENT,
-                'title' => $stepData['title'] ?? 'New Step',
+                'title' => $stepData['title'] ?? $this->term('new_step_label'),
                 'description' => $stepData['description'] ?? null,
                 'instructions' => $stepData['instructions'] ?? null,
                 'content_type' => $stepData['content_type'] ?? MiniCourseStep::CONTENT_TEXT,
@@ -549,7 +554,7 @@ class MiniCourseEditor extends Component
 
             $this->dispatch('notify', [
                 'type' => 'success',
-                'message' => 'Step added from AI suggestion!',
+                'message' => $this->term('ai_step_added_success_label'),
             ]);
         }
     }
@@ -560,7 +565,7 @@ class MiniCourseEditor extends Component
     public function processDocument(): void
     {
         if (! $this->uploadedDocument) {
-            $this->aiError = 'Please upload a document first.';
+            $this->aiError = $this->term('upload_document_required_label');
 
             return;
         }
@@ -577,7 +582,7 @@ class MiniCourseEditor extends Component
             $text = $this->extractTextFromDocument($this->uploadedDocument);
 
             if (empty($text)) {
-                $this->aiError = 'Could not extract text from the document.';
+                $this->aiError = $this->term('document_extract_failed_label');
 
                 return;
             }
@@ -587,7 +592,7 @@ class MiniCourseEditor extends Component
             $result = $aiService->extractCourseFromDocument($text, [
                 'course_type' => $this->courseType,
                 'audience' => $this->aiAudience,
-                'grade_level' => $this->aiGradeLevel,
+                'level' => $this->aiGradeLevel,
             ]);
 
             if ($result['success']) {
@@ -595,13 +600,13 @@ class MiniCourseEditor extends Component
                 $this->uploadedDocument = null;
                 $this->dispatch('notify', [
                     'type' => 'success',
-                    'message' => 'Course extracted from document! Review and customize.',
+                    'message' => $this->term('course_extracted_success_label'),
                 ]);
             } else {
-                $this->aiError = $result['error'] ?? 'Failed to extract course from document.';
+                $this->aiError = $result['error'] ?? $this->term('course_extract_failed_label');
             }
         } catch (\Exception $e) {
-            $this->aiError = 'An error occurred while processing the document.';
+            $this->aiError = $this->term('document_processing_error_label');
             \Log::error('Document processing failed', ['error' => $e->getMessage()]);
         } finally {
             $this->processingDocument = false;
@@ -641,7 +646,7 @@ class MiniCourseEditor extends Component
     public function generateStepContent(): void
     {
         if (empty($this->stepForm['title'])) {
-            $this->aiError = 'Please enter a step title first.';
+            $this->aiError = $this->term('step_title_required_label');
 
             return;
         }
@@ -659,7 +664,7 @@ class MiniCourseEditor extends Component
                 'course_title' => $this->title,
                 'course_type' => $this->courseType,
                 'objectives' => $this->objectives,
-                'grade_level' => $this->aiGradeLevel,
+                'level' => $this->aiGradeLevel,
             ];
 
             // Generate content based on step type
@@ -692,13 +697,13 @@ class MiniCourseEditor extends Component
 
                 $this->dispatch('notify', [
                     'type' => 'success',
-                    'message' => 'Content generated for step!',
+                    'message' => $this->term('step_content_generated_success_label'),
                 ]);
             } else {
-                $this->aiError = $result['error'] ?? 'Failed to generate step content.';
+                $this->aiError = $result['error'] ?? $this->term('step_content_generate_failed_label');
             }
         } catch (\Exception $e) {
-            $this->aiError = 'An error occurred while generating content.';
+            $this->aiError = $this->term('step_content_generate_error_label');
             \Log::error('AI step content generation failed', ['error' => $e->getMessage()]);
         } finally {
             $this->aiGenerating = false;
@@ -719,7 +724,7 @@ class MiniCourseEditor extends Component
         };
 
         if (empty($content)) {
-            $this->aiError = 'Please enter some content first.';
+            $this->aiError = $this->term('ai_suggestions_content_required_label');
 
             return;
         }
@@ -737,10 +742,10 @@ class MiniCourseEditor extends Component
             if ($result['success']) {
                 $this->aiSuggestions = $result['data'];
             } else {
-                $this->aiError = $result['error'] ?? 'Failed to get suggestions.';
+                $this->aiError = $result['error'] ?? $this->term('ai_suggestions_failed_label');
             }
         } catch (\Exception $e) {
-            $this->aiError = 'An error occurred.';
+            $this->aiError = $this->term('ai_suggestions_error_label');
         } finally {
             $this->aiGenerating = false;
         }
@@ -761,6 +766,6 @@ class MiniCourseEditor extends Component
             'availableResources' => $this->availableResources,
             'availableProviders' => $this->availableProviders,
             'availablePrograms' => $this->availablePrograms,
-        ])->layout('layouts.dashboard', ['title' => 'Mini-Course Editor']);
+        ])->layout('layouts.dashboard', ['title' => $this->term('mini_course_editor_label')]);
     }
 }

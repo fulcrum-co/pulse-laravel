@@ -410,7 +410,7 @@ class ModerationQueueService
     protected function findSupervisor(int $orgId): ?User
     {
         return User::where('org_id', $orgId)
-            ->whereIn('primary_role', ['admin', 'superintendent'])
+            ->whereIn('primary_role', ['admin', 'administrative_role'])
             ->first();
     }
 

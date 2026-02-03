@@ -1,37 +1,38 @@
 <div>
+    @php($terminology = app(\App\Services\TerminologyService::class))
     {{-- Search & Filters --}}
     <div class="mb-4 flex items-center gap-2" data-help="plan-filters">
         <div class="relative flex-1 max-w-xs" data-help="search-plans">
             <x-icon name="search" class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input type="text" wire:model.live.debounce.300ms="search"
                 class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                placeholder="Search plans...">
+                placeholder="@term('search_plans_placeholder')">
         </div>
 
         <select wire:model.live="typeFilter"
             class="px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
-            <option value="all">All Types</option>
-            <option value="organizational">Organizational</option>
-            <option value="teacher">Teacher</option>
-            <option value="learner">Learner</option>
-            <option value="department">Department</option>
-            <option value="improvement">PIP</option>
-            <option value="growth">Growth</option>
-            <option value="strategic">OKR</option>
-            <option value="action">Action</option>
+            <option value="all">@term('all_types_label')</option>
+            <option value="organizational">@term('plan_type_organizational_label')</option>
+            <option value="instructor">@term('plan_type_instructor_label')</option>
+            <option value="participant">@term('plan_type_participant_label')</option>
+            <option value="department">@term('plan_type_department_label')</option>
+            <option value="improvement">@term('plan_type_improvement_label')</option>
+            <option value="growth">@term('plan_type_growth_label')</option>
+            <option value="strategic">@term('plan_type_strategic_label')</option>
+            <option value="action">@term('plan_type_action_label')</option>
         </select>
 
         <select wire:model.live="statusFilter"
             class="px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-            <option value="completed">Completed</option>
+            <option value="">@term('all_status_label')</option>
+            <option value="active">@term('active_label')</option>
+            <option value="draft">@term('draft_label')</option>
+            <option value="completed">@term('completed_label')</option>
         </select>
 
         @if($search || $statusFilter || $typeFilter !== 'all')
             <button wire:click="clearFilters" class="text-xs text-gray-400 hover:text-gray-600">
-                Clear
+                @term('clear_action')
             </button>
         @endif
 
@@ -54,11 +55,11 @@
     @if($plans->isEmpty())
         <div class="text-center py-12">
             <x-icon name="clipboard-document-list" class="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p class="text-sm text-gray-500 mb-1">No plans found</p>
-            <p class="text-xs text-gray-400 mb-3">Create your first plan to get started</p>
+            <p class="text-sm text-gray-500 mb-1">@term('no_plans_found_label')</p>
+            <p class="text-xs text-gray-400 mb-3">@term('create_first_plan_help_label')</p>
             <a href="{{ route('plans.create') }}" class="inline-flex items-center px-3 py-1.5 bg-pulse-orange-500 text-white rounded text-xs font-medium hover:bg-pulse-orange-600">
                 <x-icon name="plus" class="w-3.5 h-3.5 mr-1" />
-                New Plan
+                @term('new_plan_label')
             </a>
         </div>
 
@@ -74,7 +75,7 @@
                             'draft' => 'bg-gray-100 text-gray-600',
                             'completed' => 'bg-blue-100 text-blue-700',
                             default => 'bg-gray-100 text-gray-600'
-                        } }}">{{ ucfirst($plan->status) }}</span>
+                        } }}">{{ $terminology->get($plan->status.'_label') }}</span>
                     </div>
 
                     @if($plan->description)
@@ -83,13 +84,13 @@
 
                     <div class="flex items-center justify-between text-[10px] text-gray-400">
                         <span>{{ $plan->start_date->format('M j') }} - {{ $plan->end_date->format('M j, Y') }}</span>
-                        <span class="capitalize">{{ str_replace('_', ' ', $plan->plan_type) }}</span>
+                        <span class="capitalize">{{ $terminology->get('plan_type_'.$plan->plan_type.'_label') }}</span>
                     </div>
 
                     @if($plan->isOkrStyle() && $plan->goals->count() > 0)
                         <div class="mt-2 pt-2 border-t border-gray-100">
                             <div class="flex items-center justify-between text-[10px] mb-1">
-                                <span class="text-gray-500">{{ $plan->goals->count() }} goals</span>
+                                <span class="text-gray-500">{{ $plan->goals->count() }} @term('goals_label')</span>
                                 <span class="font-medium text-gray-600">{{ number_format($plan->progress, 0) }}%</span>
                             </div>
                             <div class="h-1 bg-gray-100 rounded-full overflow-hidden">
@@ -98,7 +99,7 @@
                         </div>
                     @elseif($plan->focusAreas->count() > 0)
                         <div class="mt-2 pt-2 border-t border-gray-100">
-                            <span class="text-[10px] text-gray-400">{{ $plan->focusAreas->count() }} focus areas</span>
+                            <span class="text-[10px] text-gray-400">{{ $plan->focusAreas->count() }} @term('focus_areas_label')</span>
                         </div>
                     @endif
                 </a>
@@ -118,15 +119,15 @@
                                 'draft' => 'bg-gray-100 text-gray-600',
                                 'completed' => 'bg-blue-100 text-blue-700',
                                 default => 'bg-gray-100 text-gray-600'
-                            } }}">{{ ucfirst($plan->status) }}</span>
+                            } }}">{{ $terminology->get($plan->status.'_label') }}</span>
                         </div>
                         <div class="flex items-center gap-3 text-[10px] text-gray-400">
-                            <span class="capitalize">{{ str_replace('_', ' ', $plan->plan_type) }}</span>
+                            <span class="capitalize">{{ $terminology->get('plan_type_'.$plan->plan_type.'_label') }}</span>
                             <span>{{ $plan->start_date->format('M j') }} - {{ $plan->end_date->format('M j, Y') }}</span>
                             @if($plan->isOkrStyle())
-                                <span>{{ $plan->goals->count() }} goals</span>
+                                <span>{{ $plan->goals->count() }} @term('goals_label')</span>
                             @else
-                                <span>{{ $plan->focusAreas->count() }} focus areas</span>
+                                <span>{{ $plan->focusAreas->count() }} @term('focus_areas_label')</span>
                             @endif
                         </div>
                     </div>
@@ -134,7 +135,7 @@
                     @if($plan->isOkrStyle())
                         <div class="w-20 mr-3">
                             <div class="flex items-center justify-between text-[10px] mb-0.5">
-                                <span class="text-gray-400">Progress</span>
+                                <span class="text-gray-400">@term('progress_label')</span>
                                 <span class="font-medium text-gray-600">{{ number_format($plan->progress, 0) }}%</span>
                             </div>
                             <div class="h-1 bg-gray-100 rounded-full overflow-hidden">

@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('resource_assignments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('resource_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('learner_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('participant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('assigned_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('status')->default('assigned'); // assigned, in_progress, completed, dismissed
             $table->text('notes')->nullable();
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->json('feedback')->nullable();
             $table->timestamps();
 
-            $table->index(['learner_id', 'status']);
+            $table->index(['participant_id', 'status']);
             $table->index(['resource_id', 'status']);
         });
     }

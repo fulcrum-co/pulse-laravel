@@ -7,9 +7,9 @@ namespace App\Services\Domain;
 /**
  * LearnerNeedsInferenceService
  *
- * Centralizes learner needs inference logic used across multiple services.
- * This domain service analyzes learner metrics and behavioral patterns to identify
- * learner needs, concerns, and areas requiring intervention.
+ * Centralizes participant needs inference logic used across multiple services.
+ * This domain service analyzes participant metrics and behavioral patterns to identify
+ * participant needs, concerns, and areas requiring intervention.
  *
  * @package App\Services\Domain
  */
@@ -35,23 +35,23 @@ class LearnerNeedsInferenceService
     ];
 
     /**
-     * Infer learner needs based on current metrics and optional additional data
+     * Infer participant needs based on current metrics and optional additional data
      *
-     * Analyzes learner metrics against severity thresholds and patterns to identify
+     * Analyzes participant metrics against severity thresholds and patterns to identify
      * areas of concern that require support or intervention.
      *
-     * @param object $learner Learner object with metrics data
+     * @param object $participant Participant object with metrics data
      * @param array<string, mixed> $metrics Optional additional metrics to consider
      * @return array<string, mixed> Array of inferred needs with severity and context
      *
      * @example
-     *   $needs = $service->inferNeeds($learner, ['custom_metric' => 85]);
+     *   $needs = $service->inferNeeds($participant, ['custom_metric' => 85]);
      *   // Returns: ['academic_support' => ['severity' => 'high', ...], ...]
      */
-    public function inferNeeds(object $learner, array $metrics = []): array
+    public function inferNeeds(object $participant, array $metrics = []): array
     {
         $needs = [];
-        $allMetrics = $this->normalizeMetrics($learner, $metrics);
+        $allMetrics = $this->normalizeMetrics($participant, $metrics);
 
         foreach ($allMetrics as $metricKey => $value) {
             $severity = $this->classifySeverity($metricKey, $value);
@@ -78,18 +78,18 @@ class LearnerNeedsInferenceService
      * Compares historical metric values to identify improving or declining trends.
      * Used to detect patterns that may not be apparent from single-point metrics.
      *
-     * @param object $learner Learner object with historical metrics
+     * @param object $participant Participant object with historical metrics
      * @param int $daysBack Number of days to analyze (default: 30)
      * @return array<string, mixed> Array with trend analysis per metric
      *
      * @example
-     *   $trends = $service->analyzeTrends($learner, 14);
+     *   $trends = $service->analyzeTrends($participant, 14);
      *   // Returns: ['attendance_rate' => ['trend' => 'declining', 'change' => -8.5], ...]
      */
-    public function analyzeTrends(object $learner, int $daysBack = 30): array
+    public function analyzeTrends(object $participant, int $daysBack = 30): array
     {
         $trends = [];
-        $historicalMetrics = $this->getHistoricalMetrics($learner, $daysBack);
+        $historicalMetrics = $this->getHistoricalMetrics($participant, $daysBack);
 
         if (empty($historicalMetrics)) {
             return $trends;
@@ -206,21 +206,21 @@ class LearnerNeedsInferenceService
     }
 
     /**
-     * Normalize metrics from learner object and merge with additional metrics
+     * Normalize metrics from participant object and merge with additional metrics
      *
-     * @param object $learner
+     * @param object $participant
      * @param array<string, mixed> $additionalMetrics
      * @return array<string, mixed>
      */
-    private function normalizeMetrics(object $learner, array $additionalMetrics = []): array
+    private function normalizeMetrics(object $participant, array $additionalMetrics = []): array
     {
         $metrics = [];
 
-        // Extract standard metrics from learner object if available
-        if (method_exists($learner, 'getMetrics')) {
-            $metrics = $learner->getMetrics();
-        } elseif (property_exists($learner, 'metrics')) {
-            $metrics = (array) $learner->metrics;
+        // Extract standard metrics from participant object if available
+        if (method_exists($participant, 'getMetrics')) {
+            $metrics = $participant->getMetrics();
+        } elseif (property_exists($participant, 'metrics')) {
+            $metrics = (array) $participant->metrics;
         }
 
         // Merge with additional metrics
@@ -232,17 +232,17 @@ class LearnerNeedsInferenceService
     /**
      * Get historical metrics for trend analysis
      *
-     * @param object $learner
+     * @param object $participant
      * @param int $daysBack
      * @return array<string, array>
      */
-    private function getHistoricalMetrics(object $learner, int $daysBack): array
+    private function getHistoricalMetrics(object $participant, int $daysBack): array
     {
-        if (!method_exists($learner, 'getHistoricalMetrics')) {
+        if (!method_exists($participant, 'getHistoricalMetrics')) {
             return [];
         }
 
-        return $learner->getHistoricalMetrics($daysBack) ?? [];
+        return $participant->getHistoricalMetrics($daysBack) ?? [];
     }
 
     /**

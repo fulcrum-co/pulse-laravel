@@ -15,7 +15,7 @@
         @mouseleave="showTooltip = false"
         @click="$dispatch('start-page-help', { section: '{{ $section }}' })"
         class="relative flex items-center justify-center"
-        title="Click for guided help"
+        title="@term('guided_help_title')"
     >
         <!-- Pulsating Blue Dot -->
         <span class="relative flex h-3 w-3">
@@ -55,7 +55,7 @@
 
             <!-- Footer with navigation hint -->
             <div class="mt-3 pt-3 border-t border-gray-700 flex items-center justify-between">
-                <span class="text-xs text-gray-400">Click for full tutorial</span>
+                <span class="text-xs text-gray-400">@term('click_full_tutorial_label')</span>
                 <div class="flex items-center gap-1">
                     <span class="w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center">
                         <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

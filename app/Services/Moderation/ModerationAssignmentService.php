@@ -80,7 +80,7 @@ class ModerationAssignmentService
     public function getEligibleModerators(int $orgId): Collection
     {
         return User::where('org_id', $orgId)
-            ->whereIn('primary_role', ['admin', 'consultant', 'superintendent', 'organization_admin'])
+            ->whereIn('primary_role', ['admin', 'consultant', 'administrative_role', 'organization_admin'])
             ->orderBy('last_name')
             ->get(['id', 'first_name', 'last_name', 'primary_role', 'email']);
     }

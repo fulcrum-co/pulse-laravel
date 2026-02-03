@@ -192,7 +192,7 @@
                                 </div>
                             </td>
                             <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
-                                {{ $article->category?->name ?? '—' }}
+                                {{ $article->category?->name ?? $terminology->get('empty_value_placeholder') }}
                             </td>
                             <td class="px-6 py-3 whitespace-nowrap">
                                 @if($article->is_published)

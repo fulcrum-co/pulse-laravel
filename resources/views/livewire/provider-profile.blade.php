@@ -1,8 +1,9 @@
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <!-- Breadcrumbs -->
     <x-breadcrumbs :items="[
-        ['label' => 'Resources', 'url' => route('resources.index')],
-        ['label' => 'Providers', 'url' => route('resources.index') . '?activeTab=providers'],
+        ['label' => $terminology->get('resources_label'), 'url' => route('resources.index')],
+        ['label' => $terminology->get('provider_plural'), 'url' => route('resources.index') . '?activeTab=providers'],
         ['label' => $provider->name],
     ]" />
 
@@ -18,12 +19,12 @@
                     <div class="flex items-center gap-3 mb-2">
                         <h1 class="text-2xl font-bold">{{ $provider->name }}</h1>
                         @if($provider->verified_at)
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20" title="Verified">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20" title="@term('verified_label')">
                             <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                         </svg>
                         @endif
                     </div>
-                    <p class="text-purple-100 mb-2">{{ ucfirst($provider->provider_type) }}</p>
+                    <p class="text-purple-100 mb-2">{{ $terminology->get('provider_type_'.$provider->provider_type.'_label') }}</p>
                     @if($provider->credentials)
                     <p class="text-purple-200 text-sm">{{ $provider->credentials }}</p>
                     @endif
@@ -48,7 +49,7 @@
             <!-- Bio -->
             @if($provider->bio)
             <div>
-                <h2 class="text-lg font-semibold text-gray-900 mb-2">About</h2>
+                <h2 class="text-lg font-semibold text-gray-900 mb-2">@term('about_label')</h2>
                 <p class="text-gray-600">{{ $provider->bio }}</p>
             </div>
             @endif
@@ -56,7 +57,7 @@
             <!-- Specialties -->
             @if($provider->specialty_areas && count($provider->specialty_areas) > 0)
             <div>
-                <h2 class="text-lg font-semibold text-gray-900 mb-2">Specialties</h2>
+                <h2 class="text-lg font-semibold text-gray-900 mb-2">@term('specialties_label')</h2>
                 <div class="flex flex-wrap gap-2">
                     @foreach($provider->specialty_areas as $specialty)
                     <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">{{ $specialty }}</span>
@@ -68,7 +69,7 @@
             <!-- Availability -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-900 mb-2">Availability</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-2">@term('availability_label')</h2>
                     <div class="space-y-2 text-sm">
                         <div class="flex items-center gap-2">
                             @if($provider->serves_remote)
@@ -76,14 +77,14 @@
                                 <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
-                                Remote Sessions Available
+                                @term('remote_sessions_available_label')
                             </span>
                             @else
                             <span class="flex items-center text-gray-400">
                                 <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
-                                No Remote Sessions
+                                @term('no_remote_sessions_label')
                             </span>
                             @endif
                         </div>
@@ -93,14 +94,14 @@
                                 <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
-                                In-Person Sessions Available
+                                @term('in_person_sessions_available_label')
                             </span>
                             @else
                             <span class="flex items-center text-gray-400">
                                 <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
-                                No In-Person Sessions
+                                @term('no_in_person_sessions_label')
                             </span>
                             @endif
                         </div>
@@ -111,10 +112,10 @@
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-900 mb-2">Pricing & Insurance</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-2">@term('pricing_insurance_label')</h2>
                     <div class="space-y-2 text-sm">
                         @if($provider->hourly_rate)
-                        <p class="text-gray-600"><span class="font-medium">${{ number_format($provider->hourly_rate) }}</span> per hour</p>
+                        <p class="text-gray-600"><span class="font-medium">${{ number_format($provider->hourly_rate) }}</span> @term('per_hour_label')</p>
                         @endif
                         <div class="flex items-center gap-2">
                             @if($provider->accepts_insurance)
@@ -122,10 +123,10 @@
                                 <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
-                                Accepts Insurance
+                                @term('accepts_insurance_label')
                             </span>
                             @else
-                            <span class="text-gray-500">Does not accept insurance</span>
+                            <span class="text-gray-500">@term('no_insurance_label')</span>
                             @endif
                         </div>
                     </div>
@@ -134,32 +135,32 @@
 
             <!-- Actions -->
             <div class="border-t border-gray-200 pt-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Actions</h2>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">@term('actions_label')</h2>
                 <div class="flex flex-wrap gap-4">
                     <!-- Push to Organizations -->
                     @if($canPush)
                     <button
                         wire:click="openPushModal"
                         class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                        title="Push to Organizations"
+                        title="@term('push_to_organizations_label')"
                     >
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                         </svg>
-                        Push to Organizations
+                        @term('push_to_organizations_label')
                     </button>
                     @endif
 
-                    <!-- Assign to Learner -->
+                    <!-- Assign to Participant -->
                     <button
                         wire:click="openAssignModal"
                         class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                        title="Assign to Learner"
+                        title="@term('assign_to_participants_label')"
                     >
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
                         </svg>
-                        Assign to Learner
+                        @term('assign_to_participants_label')
                         @if($assignmentCount > 0)
                         <span class="ml-2 px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full">{{ $assignmentCount }}</span>
                         @endif
@@ -174,7 +175,7 @@
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                         </svg>
-                        Message Provider
+                        @term('message_provider_label')
                     </button>
                 </div>
             </div>
@@ -199,34 +200,34 @@
                         </div>
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
                             <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                                Assign Provider
+                                @term('assign_provider_label')
                             </h3>
-                            <p class="text-sm text-gray-500 mt-1">Assign {{ $provider->name }} to a learner or list.</p>
+                            <p class="text-sm text-gray-500 mt-1">@term('assign_provider_help_label')</p>
 
                             <div class="mt-4 space-y-4">
                                 <!-- Assignment Type -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Assign to</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">@term('assign_to_label')</label>
                                     <div class="flex gap-4">
                                         <label class="flex items-center">
-                                            <input type="radio" wire:model.live="assignType" value="learner" class="mr-2">
-                                            Individual Learner
+                                            <input type="radio" wire:model.live="assignType" value="participant" class="mr-2">
+                                            @term('individual_participant_label')
                                         </label>
                                         <label class="flex items-center">
                                             <input type="radio" wire:model.live="assignType" value="list" class="mr-2">
-                                            Contact List
+                                            @term('contact_list_label')
                                         </label>
                                     </div>
                                 </div>
 
-                                <!-- Learner Select -->
-                                @if($assignType === 'learner')
+                                <!-- Participant Select -->
+                                @if($assignType === 'participant')
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Learner</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">@term('select_participant_label')</label>
                                     <select wire:model="selectedLearnerId" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
-                                        <option value="">Choose a learner...</option>
-                                        @foreach($learners as $learner)
-                                        <option value="{{ $learner->id }}">{{ $learner->user?->name ?? 'Learner #' . $learner->id }}</option>
+                                        <option value="">@term('choose_participant_placeholder')</option>
+                                        @foreach($participants as $participant)
+                                        <option value="{{ $participant->id }}">{{ $participant->user?->name ?? $terminology->get('participant_label').' #'.$participant->id }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -235,11 +236,11 @@
                                 <!-- List Select -->
                                 @if($assignType === 'list')
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Contact List</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">@term('select_contact_list_label')</label>
                                     <select wire:model="selectedListId" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
-                                        <option value="">Choose a list...</option>
+                                        <option value="">@term('choose_list_placeholder')</option>
                                         @foreach($contactLists as $list)
-                                        <option value="{{ $list->id }}">{{ $list->name }} ({{ $list->learners_count ?? $list->learners->count() }} learners)</option>
+                                        <option value="{{ $list->id }}">{{ $list->name }} ({{ $list->learners_count ?? $list->participants->count() }} {{ $terminology->get('participants_label') }})</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -247,8 +248,8 @@
 
                                 <!-- Note -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Note (optional)</label>
-                                    <textarea wire:model="assignNote" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500" placeholder="Add a note about this assignment..."></textarea>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">@term('note_optional_label')</label>
+                                    <textarea wire:model="assignNote" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500" placeholder="@term('assignment_note_placeholder')"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -260,14 +261,14 @@
                         type="button"
                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm"
                     >
-                        Assign Provider
+                        @term('assign_provider_label')
                     </button>
                     <button
                         wire:click="closeAssignModal"
                         type="button"
                         class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                     >
-                        Cancel
+                        @term('cancel_label')
                     </button>
                 </div>
             </div>

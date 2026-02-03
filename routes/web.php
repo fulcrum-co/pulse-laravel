@@ -23,7 +23,7 @@ use App\Models\UserNotification;
 // Notification unsubscribe - signed URL, no auth required
 Route::get('/notifications/unsubscribe/{user}', [NotificationController::class, 'unsubscribe'])
     ->name('notifications.unsubscribe')
-    ->middleware('signed');
+    ->middleware(['signed', 'throttle:public']);
 
 // Notification resolve API - for task flow
 Route::post('/api/notifications/{id}/resolve', function (int $id) {
@@ -58,338 +58,6 @@ Route::get('/', function () {
     return redirect('/dashboard');
 })->name('home');
 
-// Temporary route to fix avatars - visit once then remove
-Route::get('/fix-avatars-temp', function () {
-    // Set up error handling
-    set_time_limit(300); // 5 minutes
-
-    $output = [];
-    $output[] = 'Starting avatar fix...';
-
-    try {
-        // Common female first names
-        $femaleNames = ['Emma', 'Olivia', 'Ava', 'Sophia', 'Isabella', 'Mia', 'Charlotte', 'Amelia', 'Harper', 'Evelyn', 'Luna', 'Chloe', 'Emily', 'Sarah', 'Maria', 'Jessica', 'Ashley', 'Jennifer', 'Amanda', 'Stephanie', 'Nicole', 'Michelle', 'Elizabeth', 'Heather', 'Melissa', 'Amy', 'Anna', 'Rebecca', 'Katherine', 'Christine', 'Rachel', 'Laura', 'Julia', 'Madison', 'Grace', 'Lily'];
-
-        $maleImg = 1;
-        $femaleImg = 1;
-        $updated = 0;
-        $errors = [];
-
-        // Use chunking to avoid memory issues
-        \App\Models\User::chunk(50, function ($users) use ($femaleNames, &$maleImg, &$femaleImg, &$updated, &$errors) {
-            foreach ($users as $user) {
-                try {
-                    $isFemale = in_array($user->first_name, $femaleNames);
-
-                    if ($isFemale) {
-                        $imgNum = (($femaleImg - 1) % 99) + 1;
-                        $user->avatar_url = 'https://randomuser.me/api/portraits/women/'.$imgNum.'.jpg';
-                        $femaleImg++;
-                    } else {
-                        $imgNum = (($maleImg - 1) % 99) + 1;
-                        $user->avatar_url = 'https://randomuser.me/api/portraits/men/'.$imgNum.'.jpg';
-                        $maleImg++;
-                    }
-
-                    $user->save();
-                    $updated++;
-                } catch (\Exception $e) {
-                    $errors[] = "User {$user->id}: ".$e->getMessage();
-                }
-            }
-        });
-
-        $output[] = "Updated {$updated} user avatars!";
-
-        if (count($errors) > 0) {
-            $output[] = 'Errors encountered:';
-            foreach (array_slice($errors, 0, 10) as $error) {
-                $output[] = '- '.$error;
-            }
-            if (count($errors) > 10) {
-                $output[] = '... and '.(count($errors) - 10).' more errors';
-            }
-        }
-
-        $output[] = '';
-        $output[] = 'You can now visit /contacts to see the avatars.';
-        $output[] = 'After confirming, remove this route from routes/web.php';
-
-    } catch (\Exception $e) {
-        $output[] = 'FATAL ERROR: '.$e->getMessage();
-        $output[] = 'File: '.$e->getFile().':'.$e->getLine();
-    }
-
-    return '<pre>'.implode("\n", $output).'</pre>';
-});
-
-// Temporary route to reset dashboard - visit once then remove
-Route::get('/reset-dashboard-temp', function () {
-    if (! auth()->check()) {
-        return redirect('/login');
-    }
-
-    $user = auth()->user();
-    $output = [];
-    $output[] = 'Resetting dashboard for '.$user->first_name.' '.$user->last_name.'...';
-
-    try {
-        // Delete existing dashboards for this user
-        $deleted = \App\Models\Dashboard::where('user_id', $user->id)->delete();
-        $output[] = "Deleted {$deleted} existing dashboard(s).";
-
-        // Create new default dashboard with updated layout
-        $dashboard = \App\Models\Dashboard::createDefault($user);
-        $output[] = 'Created new dashboard with '.$dashboard->widgets()->count().' widgets.';
-
-        $output[] = '';
-        $output[] = 'Done! Visit /dashboard to see the new layout.';
-        $output[] = 'After confirming, remove this route from routes/web.php';
-
-    } catch (\Exception $e) {
-        $output[] = 'ERROR: '.$e->getMessage();
-    }
-
-    return '<pre>'.implode("\n", $output).'</pre>';
-})->middleware('auth');
-
-// Temporary route to list users - visit once then remove
-Route::get('/list-users-temp', function () {
-    $orgCount = \App\Models\Organization::count();
-    $output = ["=== ORGANIZATIONS ({$orgCount}) ===", ''];
-
-    $orgs = \App\Models\Organization::with('parent')->orderBy('parent_org_id')->orderBy('org_name')->get();
-    if ($orgs->isEmpty()) {
-        $output[] = '(No organizations found - database may need seeding)';
-    }
-    foreach ($orgs as $org) {
-        $parent = $org->parent ? " (child of: {$org->parent->org_name})" : ' [TOP LEVEL]';
-        $output[] = sprintf('%-30s | %-10s%s', $org->org_name, $org->org_type, $parent);
-    }
-
-    $output[] = '';
-    $output[] = '=== ALL USERS ('.\App\Models\User::count().' total) ===';
-    $output[] = '';
-
-    $users = \App\Models\User::with('organization')->limit(50)->get();
-
-    if ($users->isEmpty()) {
-        $output[] = '(No users found - database may need seeding)';
-    }
-
-    foreach ($users as $user) {
-        $org = $user->organization ? $user->organization->org_name : 'No org';
-        $output[] = sprintf('%-40s | %-12s | %s', $user->email, $user->primary_role ?? 'no role', $org);
-    }
-
-    $output[] = '';
-    $output[] = '=== RESET PASSWORD ===';
-    $output[] = 'Visit: /reset-password-temp?email=USER_EMAIL_HERE';
-    $output[] = 'This will set password to: password';
-
-    return '<pre>'.implode("\n", $output).'</pre>';
-});
-
-// Temporary route to reset a user's password - visit once then remove
-Route::get('/reset-password-temp', function () {
-    $email = request('email');
-    if (! $email) {
-        return "<pre>Usage: /reset-password-temp?email=user@example.com\n\nThis will reset the password to 'password'</pre>";
-    }
-
-    $user = \App\Models\User::where('email', $email)->first();
-    if (! $user) {
-        return "<pre>User not found: {$email}</pre>";
-    }
-
-    $user->password = \Illuminate\Support\Facades\Hash::make('password');
-    $user->save();
-
-    return "<pre>Password reset for: {$email}\n\nNew password: password\n\nYou can now log in at /login</pre>";
-});
-
-// Temporary route to seed district/multi-tenancy data
-Route::get('/seed-district-temp', function () {
-    $output = [];
-    $output[] = 'Setting up district and multi-tenancy demo...';
-    $output[] = '';
-
-    try {
-        // Find or create district
-        $district = \App\Models\Organization::where('org_type', 'district')->first();
-        if (! $district) {
-            $district = \App\Models\Organization::create([
-                'org_type' => 'district',
-                'org_name' => 'Lincoln County Organization District',
-                'primary_contact_email' => 'admin@lincolnorganizations.edu',
-                'timezone' => 'America/Los_Angeles',
-                'subscription_plan' => 'enterprise',
-                'subscription_status' => 'active',
-                'active' => true,
-            ]);
-            $output[] = 'Created district: Lincoln County Organization District';
-        } else {
-            $output[] = 'Found existing district: '.$district->org_name;
-        }
-
-        // Find existing organizations and link them to district
-        $organizations = \App\Models\Organization::where('org_type', 'organization')
-            ->whereNull('parent_org_id')
-            ->get();
-
-        if ($organizations->isEmpty()) {
-            $output[] = '';
-            $output[] = 'No organizations found. Creating sample organizations...';
-
-            // Create sample organizations
-            $organizationData = [
-                ['org_name' => 'Lincoln High Organization', 'primary_contact_email' => 'admin@lincolnhs.edu'],
-                ['org_name' => 'Washington Middle Organization', 'primary_contact_email' => 'admin@washingtonms.edu'],
-                ['org_name' => 'Jefferson Elementary', 'primary_contact_email' => 'admin@jeffersonelem.edu'],
-                ['org_name' => 'Roosevelt Elementary', 'primary_contact_email' => 'admin@rooseveltelem.edu'],
-            ];
-
-            foreach ($organizationData as $data) {
-                $organization = \App\Models\Organization::create([
-                    'org_type' => 'organization',
-                    'org_name' => $data['org_name'],
-                    'parent_org_id' => $district->id,
-                    'primary_contact_email' => $data['primary_contact_email'],
-                    'timezone' => 'America/Los_Angeles',
-                    'subscription_status' => 'active',
-                    'active' => true,
-                ]);
-                $output[] = 'Created organization: '.$organization->org_name;
-            }
-        } else {
-            foreach ($organizations as $organization) {
-                $organization->update(['parent_org_id' => $district->id]);
-                $output[] = 'Linked organization to district: '.$organization->org_name;
-            }
-        }
-
-        // Create consultant user at district level
-        $consultant = \App\Models\User::where('email', 'superintendent@lincolnorganizations.edu')->first();
-        if (! $consultant) {
-            $consultant = \App\Models\User::create([
-                'org_id' => $district->id,
-                'first_name' => 'Margaret',
-                'last_name' => 'Chen',
-                'email' => 'superintendent@lincolnorganizations.edu',
-                'password' => \Illuminate\Support\Facades\Hash::make('password'),
-                'primary_role' => 'consultant',
-                'avatar_url' => 'https://randomuser.me/api/portraits/women/79.jpg',
-                'active' => true,
-                'suspended' => false,
-            ]);
-            $output[] = '';
-            $output[] = 'Created consultant: superintendent@lincolnorganizations.edu';
-        } else {
-            // Update existing consultant to district level
-            $consultant->update([
-                'org_id' => $district->id,
-                'primary_role' => 'consultant',
-                'password' => \Illuminate\Support\Facades\Hash::make('password'),
-            ]);
-            $output[] = '';
-            $output[] = 'Updated consultant: '.$consultant->email;
-        }
-
-        // Verify the hierarchy
-        $output[] = '';
-        $output[] = '=== VERIFICATION ===';
-        $childCount = \App\Models\Organization::where('parent_org_id', $district->id)->count();
-        $output[] = 'District: '.$district->org_name.' (ID: '.$district->id.')';
-        $output[] = 'Child organizations: '.$childCount;
-
-        $childOrganizations = \App\Models\Organization::where('parent_org_id', $district->id)->get();
-        foreach ($childOrganizations as $child) {
-            $output[] = '  - '.$child->org_name.' (ID: '.$child->id.')';
-        }
-
-        $output[] = '';
-        $output[] = '=== SUCCESS ===';
-        $output[] = '';
-        $output[] = 'Login as consultant:';
-        $output[] = '  Email: superintendent@lincolnorganizations.edu';
-        $output[] = '  Password: password';
-        $output[] = '';
-        $output[] = 'The consultant can switch between organizations using the dropdown';
-        $output[] = 'in the bottom-left of the sidebar after logging in.';
-
-    } catch (\Exception $e) {
-        $output[] = 'ERROR: '.$e->getMessage();
-        $output[] = 'Line: '.$e->getLine();
-    }
-
-    return '<pre>'.implode("\n", $output).'</pre>';
-});
-
-// Temporary route to seed marketplace - visit once then remove
-Route::get('/seed-marketplace-temp', function () {
-    set_time_limit(300);
-    $output = [];
-    $output[] = 'Seeding marketplace data...';
-    $output[] = '';
-
-    try {
-        // First, ensure listable columns are nullable
-        $output[] = 'Checking database schema...';
-        try {
-            \Illuminate\Support\Facades\DB::statement('ALTER TABLE marketplace_items ALTER COLUMN listable_type DROP NOT NULL');
-            \Illuminate\Support\Facades\DB::statement('ALTER TABLE marketplace_items ALTER COLUMN listable_id DROP NOT NULL');
-            $output[] = '- Made listable columns nullable';
-        } catch (\Exception $e) {
-            // Columns might already be nullable, that's fine
-            $output[] = '- Schema already updated';
-        }
-        $output[] = '';
-
-        $organization = \App\Models\Organization::where('org_type', 'organization')->first();
-        if (! $organization) {
-            $organization = \App\Models\Organization::first();
-        }
-        if (! $organization) {
-            return '<pre>No organization found. Please seed organizations first.</pre>';
-        }
-
-        // Check if already seeded
-        $existingCount = \App\Models\MarketplaceItem::count();
-        if ($existingCount > 0) {
-            $output[] = "Marketplace already has {$existingCount} items.";
-            $output[] = 'Skipping to avoid duplicates.';
-            $output[] = '';
-            $output[] = 'Visit /marketplace to see the items.';
-
-            return '<pre>'.implode("\n", $output).'</pre>';
-        }
-
-        // Run the seeder
-        $seeder = new \Database\Seeders\MarketplaceSeeder;
-        $seeder->run();
-
-        $sellerCount = \App\Models\SellerProfile::count();
-        $itemCount = \App\Models\MarketplaceItem::count();
-        $reviewCount = \App\Models\MarketplaceReview::count();
-
-        $output[] = 'SUCCESS! Marketplace seeded:';
-        $output[] = "- {$sellerCount} seller profiles";
-        $output[] = "- {$itemCount} marketplace items";
-        $output[] = "- {$reviewCount} reviews";
-        $output[] = '';
-        $output[] = 'Visit /marketplace to see the items.';
-        $output[] = 'After confirming, remove this route from routes/web.php';
-
-    } catch (\Exception $e) {
-        $output[] = 'ERROR: '.$e->getMessage();
-        $output[] = 'File: '.$e->getFile().':'.$e->getLine();
-        $output[] = '';
-        $output[] = 'Stack trace:';
-        $output[] = $e->getTraceAsString();
-    }
-
-    return '<pre>'.implode("\n", $output).'</pre>';
-});
 
 // Public dashboard view (shareable reports, no auth required)
 Route::get('/dashboard/{token}', [ReportController::class, 'publicView'])->name('reports.public');
@@ -398,23 +66,23 @@ Route::get('/dashboard/{token}', [ReportController::class, 'publicView'])->name(
 Route::get('/surveys/{survey}/respond/{attempt}', function ($survey, $attempt) {
     // This will be handled by a Livewire component
     return view('surveys.respond', compact('survey', 'attempt'));
-})->name('surveys.respond');
+})->name('surveys.respond')->middleware('throttle:public');
 
 // Public certificate verification (no auth required)
 Route::get('/verify/{uuid}', [App\Http\Controllers\CertificateController::class, 'verify'])->name('certificates.verify');
 
 // Sinch Webhooks (no auth required)
 Route::prefix('webhooks/surveys')->group(function () {
-    Route::post('/sinch/voice', [App\Http\Controllers\SurveyWebhookController::class, 'handleVoice'])->name('webhooks.surveys.voice');
-    Route::post('/sinch/sms', [App\Http\Controllers\SurveyWebhookController::class, 'handleSms'])->name('webhooks.surveys.sms');
+    Route::post('/sinch/voice', [App\Http\Controllers\SurveyWebhookController::class, 'handleVoice'])->name('webhooks.surveys.voice')->middleware('throttle:public');
+    Route::post('/sinch/sms', [App\Http\Controllers\SurveyWebhookController::class, 'handleSms'])->name('webhooks.surveys.sms')->middleware('throttle:public');
 });
 
 // Guest routes (only accessible when not logged in)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth');
 });
 
 // Protected routes (only accessible when logged in)
@@ -426,17 +94,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', App\Livewire\Dashboard\DashboardIndex::class)->name('dashboard');
     Route::get('/dashboards', App\Livewire\Dashboard\DashboardList::class)->name('dashboards.index');
 
-    // Learner Experience - Cohort-based Learning
+    // Participant Experience - Cohort-based Learning
     Route::prefix('learn')->group(function () {
         Route::get('/', App\Livewire\Cohorts\CohortDashboard::class)->name('learn.dashboard');
         Route::get('/cohort/{cohort}', App\Livewire\Cohorts\CohortViewer::class)->name('learn.cohort');
     });
 
-    // Contacts (Learners, Teachers, Parents)
+    // Contacts (Participants, Instructors, Direct Supervisors)
     Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
-    Route::get('/contacts/learners/{learner}', [ContactController::class, 'show'])->name('contacts.show');
-    Route::get('/contacts/teachers/{teacher}', [ContactController::class, 'showTeacher'])->name('contacts.teacher');
-    Route::get('/contacts/parents/{parent}', [ContactController::class, 'showParent'])->name('contacts.parent');
+    Route::get('/contacts/participants/{participant}', [ContactController::class, 'show'])->name('contacts.show');
+    Route::get('/contacts/instructors/{instructor}', [ContactController::class, 'showInstructor'])->name('contacts.instructor');
+    Route::get('/contacts/direct_supervisors/{direct_supervisor}', [ContactController::class, 'showDirectSupervisor'])->name('contacts.direct_supervisor');
 
     // Contact Lists
     Route::get('/contacts/lists', App\Livewire\ContactListManager::class)->name('contacts.lists');
@@ -451,14 +119,14 @@ Route::middleware('auth')->group(function () {
     // Contact Metrics API
     Route::post('/api/metrics/time-series', [ContactMetricController::class, 'timeSeries'])->name('api.metrics.timeSeries');
     Route::post('/api/metrics', [ContactMetricController::class, 'store'])->name('api.metrics.store');
-    Route::get('/api/metrics/heat-map/{learner}', [ContactMetricController::class, 'heatMap'])->name('api.metrics.heatMap');
+    Route::get('/api/metrics/heat-map/{participant}', [ContactMetricController::class, 'heatMap'])->name('api.metrics.heatMap');
     Route::get('/api/metrics/available', [ContactMetricController::class, 'available'])->name('api.metrics.available');
 
     // Resource Suggestions API
     Route::get('/api/suggestions/{contactType}/{contactId}', [ResourceSuggestionController::class, 'index'])->name('api.suggestions.index');
     Route::post('/api/suggestions', [ResourceSuggestionController::class, 'store'])->name('api.suggestions.store');
     Route::put('/api/suggestions/{suggestion}/review', [ResourceSuggestionController::class, 'review'])->name('api.suggestions.review');
-    Route::post('/api/suggestions/generate/{learner}', [ResourceSuggestionController::class, 'generate'])->name('api.suggestions.generate');
+    Route::post('/api/suggestions/generate/{participant}', [ResourceSuggestionController::class, 'generate'])->name('api.suggestions.generate');
 
     // Surveys
     Route::get('/surveys', [SurveyController::class, 'index'])->name('surveys.index');
@@ -602,7 +270,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/{course}/steps/{step}/generate-content', [App\Http\Controllers\Api\MiniCourseStepController::class, 'generateContent'])->name('api.mini-course-steps.generate-content');
 
         // Enrollments
-        Route::post('/{course}/enroll/{learner}', [App\Http\Controllers\Api\EnrollmentController::class, 'enroll'])->name('api.mini-courses.enroll');
+        Route::post('/{course}/enroll/{participant}', [App\Http\Controllers\Api\EnrollmentController::class, 'enroll'])->name('api.mini-courses.enroll');
         Route::get('/{course}/enrollments', [App\Http\Controllers\Api\EnrollmentController::class, 'indexByCourse'])->name('api.mini-courses.enrollments');
     });
 
@@ -619,16 +287,16 @@ Route::middleware('auth')->group(function () {
     // Course Suggestions API
     Route::prefix('api/suggestions')->group(function () {
         Route::get('/{contactType}/{contactId}/courses', [App\Http\Controllers\Api\CourseSuggestionController::class, 'index'])->name('api.suggestions.courses.index');
-        Route::post('/courses/generate/{learner}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'generate'])->name('api.suggestions.courses.generate');
+        Route::post('/courses/generate/{participant}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'generate'])->name('api.suggestions.courses.generate');
         Route::post('/courses/{suggestion}/accept', [App\Http\Controllers\Api\CourseSuggestionController::class, 'accept'])->name('api.suggestions.courses.accept');
         Route::post('/courses/{suggestion}/decline', [App\Http\Controllers\Api\CourseSuggestionController::class, 'decline'])->name('api.suggestions.courses.decline');
-        Route::post('/triggers/evaluate/{learner}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'evaluateTriggers'])->name('api.suggestions.triggers.evaluate');
-        Route::get('/providers/{learner}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'providerRecommendations'])->name('api.suggestions.providers');
-        Route::get('/signals/{learner}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'signals'])->name('api.suggestions.signals');
+        Route::post('/triggers/evaluate/{participant}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'evaluateTriggers'])->name('api.suggestions.triggers.evaluate');
+        Route::get('/providers/{participant}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'providerRecommendations'])->name('api.suggestions.providers');
+        Route::get('/signals/{participant}', [App\Http\Controllers\Api\CourseSuggestionController::class, 'signals'])->name('api.suggestions.signals');
     });
 
-    // Learner Enrollments API
-    Route::get('/api/learners/{learner}/enrollments', [App\Http\Controllers\Api\EnrollmentController::class, 'indexByLearner'])->name('api.learners.enrollments');
+    // Participant Enrollments API
+    Route::get('/api/participants/{participant}/enrollments', [App\Http\Controllers\Api\EnrollmentController::class, 'indexByLearner'])->name('api.participants.enrollments');
 
     // Collect
     Route::get('/collect', App\Livewire\Collect\CollectionList::class)->name('collect.index');

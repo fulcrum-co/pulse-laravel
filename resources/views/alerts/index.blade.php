@@ -1,3 +1,3 @@
-<x-layouts.dashboard title="Alerts & Notifications">
+<x-layouts.dashboard title="{{ app(\App\Services\TerminologyService::class)->get('alerts_notifications_label') }}">
     @livewire('alerts.alerts-hub')
 </x-layouts.dashboard>

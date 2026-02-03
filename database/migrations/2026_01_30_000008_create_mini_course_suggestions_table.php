@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('mini_course_suggestions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('org_id')->constrained('organizations')->cascadeOnDelete();
-            $table->string('contact_type'); // App\Models\Learner or App\Models\User
+            $table->string('contact_type'); // App\Models\Participant or App\Models\User
             $table->unsignedBigInteger('contact_id');
             $table->foreignId('mini_course_id')->constrained('mini_courses')->cascadeOnDelete();
             $table->string('suggestion_source'); // ai_generated, ai_recommended, rule_based, peer_success, manual

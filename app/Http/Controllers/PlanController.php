@@ -64,7 +64,7 @@ class PlanController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'plan_type' => 'required|in:organizational,teacher,learner,department,grade,improvement,growth,strategic,action',
+            'plan_type' => 'required|in:organizational,instructor,participant,department,level,improvement,growth,strategic,action',
             'category' => 'nullable|in:pip,idp,okr,action_plan',
             'target_type' => 'nullable|string',
             'target_id' => 'nullable|integer',

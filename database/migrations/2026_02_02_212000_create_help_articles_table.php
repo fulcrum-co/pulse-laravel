@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('title');
             $table->longText('content')->nullable();
             $table->text('excerpt')->nullable();
-            $table->json('target_roles')->nullable(); // ['admin', 'counselor', 'teacher']
+            $table->json('target_roles')->nullable(); // ['admin', 'support_person', 'instructor']
             $table->json('search_keywords')->nullable(); // Additional search terms
             $table->string('video_url')->nullable();
             $table->unsignedInteger('view_count')->default(0);

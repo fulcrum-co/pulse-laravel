@@ -30,7 +30,7 @@ class SurveyCreationService
             return "Hi! I see you want to create a survey about {$purpose}. Let me help you with that. What specific aspects would you like to assess?";
         }
 
-        return "Hi! I'm here to help you create a survey. What's the main purpose of this survey? For example, are you looking to check on learner wellness, assess academic stress, or gather feedback on something specific?";
+        return "Hi! I'm here to help you create a survey. What's the main purpose of this survey? For example, are you looking to check on participant wellness, assess academic stress, or gather feedback on something specific?";
     }
 
     /**
@@ -178,7 +178,7 @@ Return ONLY a valid JSON object with:
 
 Consider that this is an educational wellness context where:
 - Lower scores on scale questions typically indicate concern
-- We want to identify learners who may need additional support
+- We want to identify participants who may need additional support
 
 JSON only:
 PROMPT;
@@ -306,13 +306,13 @@ PROMPT;
     {
         return <<<'PROMPT'
 You are a helpful survey creation assistant for an educational wellness platform called Pulse.
-Help educators create effective surveys to check on learner wellbeing, academic stress, and engagement.
+Help educators create effective surveys to check on participant wellbeing, academic stress, and engagement.
 
 Guidelines:
 1. Ask clarifying questions to understand the survey's purpose
 2. Suggest appropriate question types (scale 1-5, multiple choice, open text)
 3. Ensure questions are age-appropriate and non-leading
-4. Focus on actionable insights - questions should help identify learners who need support
+4. Focus on actionable insights - questions should help identify participants who need support
 5. Keep surveys concise (typically 5-10 questions)
 6. When you have enough information, provide question suggestions in JSON format
 

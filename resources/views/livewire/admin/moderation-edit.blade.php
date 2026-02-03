@@ -120,7 +120,7 @@
                     <textarea
                         wire:model="expectedExperience"
                         rows="2"
-                        placeholder="What learners will experience..."
+                        placeholder="What participants will experience..."
                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     ></textarea>
                 </div>

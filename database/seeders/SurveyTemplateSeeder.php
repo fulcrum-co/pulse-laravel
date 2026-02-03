@@ -15,7 +15,7 @@ class SurveyTemplateSeeder extends Seeder
             // =====================================
             [
                 'name' => 'Weekly Wellness Check-In',
-                'description' => 'A quick 5-question survey to check in on learner wellbeing. Covers mood, sleep, stress, safety, and open feedback. Ideal for weekly homeroom or advisory periods.',
+                'description' => 'A quick 5-question survey to check in on participant wellbeing. Covers mood, sleep, stress, safety, and open feedback. Ideal for weekly homeroom or advisory periods.',
                 'template_type' => 'wellness_check',
                 'questions' => [
                     [
@@ -99,7 +99,7 @@ class SurveyTemplateSeeder extends Seeder
             // =====================================
             [
                 'name' => 'Academic Stress Assessment',
-                'description' => 'Comprehensive assessment of academic-related stress, workload, confidence, and support needs. Helps identify learners who may need academic intervention or support.',
+                'description' => 'Comprehensive assessment of academic-related stress, workload, confidence, and support needs. Helps identify participants who may need academic intervention or support.',
                 'template_type' => 'academic_stress',
                 'questions' => [
                     [
@@ -219,7 +219,7 @@ class SurveyTemplateSeeder extends Seeder
                     [
                         'id' => 'q2',
                         'type' => 'scale',
-                        'question' => 'How would you describe your relationships with other learners?',
+                        'question' => 'How would you describe your relationships with other participants?',
                         'min' => 1,
                         'max' => 5,
                         'labels' => ['Very Poor', 'Poor', 'Okay', 'Good', 'Excellent'],
@@ -278,7 +278,7 @@ class SurveyTemplateSeeder extends Seeder
                     [
                         'id' => 'q8',
                         'type' => 'multiple_choice',
-                        'question' => 'How often do you get into conflicts or arguments with other learners?',
+                        'question' => 'How often do you get into conflicts or arguments with other participants?',
                         'options' => ['Never', 'Rarely', 'Sometimes', 'Often', 'Very Often'],
                         'category' => 'relationship_skills',
                         'interpretation_rules' => [

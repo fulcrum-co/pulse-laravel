@@ -36,7 +36,7 @@ return new class extends Migration
             'course_generation_settings' => [
                 'enabled' => true,
                 'approval_required' => true,
-                'approval_roles' => ['admin', 'counselor'],
+                'approval_roles' => ['admin', 'support_person'],
                 'auto_approve_templates' => false,
                 'allowed_triggers' => ['risk_threshold', 'workflow', 'manual'],
                 'risk_threshold_config' => [
@@ -142,7 +142,7 @@ return new class extends Migration
             'source_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
             'topics' => ['resilience', 'stress-management'],
             'skills' => ['emotional-awareness'],
-            'grade_levels' => ['6', '7', '8', '9', '10', '11', '12'],
+            'levels' => ['6', '7', '8', '9', '10', '11', '12'],
             'target_risk_factors' => ['academic-risk', 'behavioral-risk'],
             'status' => ContentBlock::STATUS_ACTIVE,
         ]);
@@ -161,7 +161,7 @@ return new class extends Migration
             'source_type' => ContentBlock::SOURCE_YOUTUBE,
             'topics' => ['anxiety', 'stress-management', 'mindfulness'],
             'skills' => ['breathing'],
-            'grade_levels' => ['6', '7', '8', '9', '10', '11', '12'],
+            'levels' => ['6', '7', '8', '9', '10', '11', '12'],
             'status' => ContentBlock::STATUS_ACTIVE,
         ]);
 
@@ -183,7 +183,7 @@ return new class extends Migration
             'source_type' => ContentBlock::SOURCE_INTERNAL,
             'topics' => ['anxiety', 'mindfulness'],
             'skills' => ['emotional-awareness'],
-            'grade_levels' => ['6', '7', '8', '9', '10', '11', '12'],
+            'levels' => ['6', '7', '8', '9', '10', '11', '12'],
             'status' => ContentBlock::STATUS_ACTIVE,
         ]);
 
@@ -208,7 +208,7 @@ return new class extends Migration
             'source_type' => ContentBlock::SOURCE_INTERNAL,
             'topics' => ['stress-management', 'self-care'],
             'skills' => ['journaling', 'emotional-awareness'],
-            'grade_levels' => ['7', '8', '9', '10', '11', '12'],
+            'levels' => ['7', '8', '9', '10', '11', '12'],
             'status' => ContentBlock::STATUS_ACTIVE,
         ]);
 
@@ -276,7 +276,7 @@ return new class extends Migration
             'source_type' => ContentBlock::SOURCE_INTERNAL,
             'topics' => ['resilience'],
             'skills' => ['emotional-awareness'],
-            'grade_levels' => ['6', '7', '8', '9', '10', '11', '12'],
+            'levels' => ['6', '7', '8', '9', '10', '11', '12'],
             'status' => ContentBlock::STATUS_ACTIVE,
         ]);
 
@@ -297,7 +297,7 @@ return new class extends Migration
             'source_type' => ContentBlock::SOURCE_INTERNAL,
             'topics' => ['resilience', 'self-care'],
             'skills' => ['goal-setting'],
-            'grade_levels' => ['7', '8', '9', '10', '11', '12'],
+            'levels' => ['7', '8', '9', '10', '11', '12'],
             'status' => ContentBlock::STATUS_ACTIVE,
         ]);
     }
@@ -328,7 +328,7 @@ return new class extends Migration
                             'block_type' => 'video',
                             'topics' => ['{primary_topic}'],
                         ],
-                        'fallback_ai_prompt' => 'Create a welcoming introduction to {topic} for {grade_level} learners. Explain why this topic matters and what they will learn.',
+                        'fallback_ai_prompt' => 'Create a welcoming introduction to {topic} for {level} participants. Explain why this topic matters and what they will learn.',
                     ],
                     [
                         'order' => 2,
@@ -340,7 +340,7 @@ return new class extends Migration
                             'block_type' => 'text',
                             'topics' => ['{primary_topic}'],
                         ],
-                        'fallback_ai_prompt' => 'Create educational content explaining {topic} in depth for {grade_level} learners.',
+                        'fallback_ai_prompt' => 'Create educational content explaining {topic} in depth for {level} participants.',
                     ],
                     [
                         'order' => 3,
@@ -351,7 +351,7 @@ return new class extends Migration
                             'block_type' => 'assessment',
                             'topics' => ['{primary_topic}'],
                         ],
-                        'fallback_ai_prompt' => 'Create a 5-question self-assessment for learners to reflect on their current experience with {topic}.',
+                        'fallback_ai_prompt' => 'Create a 5-question self-assessment for participants to reflect on their current experience with {topic}.',
                     ],
                     [
                         'order' => 4,
@@ -369,7 +369,7 @@ return new class extends Migration
                         'title_template' => 'Reflection & Journaling',
                         'step_type' => 'reflection',
                         'estimated_duration' => 5,
-                        'fallback_ai_prompt' => 'Create 3 reflection prompts for learners to process what they learned about {topic}.',
+                        'fallback_ai_prompt' => 'Create 3 reflection prompts for participants to process what they learned about {topic}.',
                     ],
                     [
                         'order' => 6,
@@ -380,7 +380,7 @@ return new class extends Migration
                             'block_type' => 'document',
                             'topics' => ['{primary_topic}'],
                         ],
-                        'fallback_ai_prompt' => 'Guide learners to create a personal action plan for applying {topic} strategies.',
+                        'fallback_ai_prompt' => 'Guide participants to create a personal action plan for applying {topic} strategies.',
                     ],
                     [
                         'order' => 7,
@@ -403,11 +403,11 @@ return new class extends Migration
                     'primary_skill' => ['type' => 'string', 'required' => false],
                     'strategy_1' => ['type' => 'string', 'required' => false],
                     'skill_count' => ['type' => 'number', 'required' => false, 'default' => 3],
-                    'grade_level' => ['type' => 'string', 'required' => true],
+                    'level' => ['type' => 'string', 'required' => true],
                 ],
             ],
             'target_risk_factors' => ['academic-risk', 'behavioral-risk', 'attendance-risk'],
-            'target_grade_levels' => ['6', '7', '8', '9', '10', '11', '12'],
+            'target_levels' => ['6', '7', '8', '9', '10', '11', '12'],
             'estimated_duration_minutes' => 45,
             'is_system' => true,
             'status' => CourseTemplate::STATUS_ACTIVE,
@@ -462,11 +462,11 @@ return new class extends Migration
                 ],
                 'variables' => [
                     'topic' => ['type' => 'string', 'required' => true],
-                    'grade_level' => ['type' => 'string', 'required' => true],
+                    'level' => ['type' => 'string', 'required' => true],
                 ],
             ],
             'target_risk_factors' => ['academic-risk'],
-            'target_grade_levels' => ['6', '7', '8', '9', '10', '11', '12'],
+            'target_levels' => ['6', '7', '8', '9', '10', '11', '12'],
             'estimated_duration_minutes' => 36,
             'is_system' => true,
             'status' => CourseTemplate::STATUS_ACTIVE,
@@ -486,11 +486,11 @@ return new class extends Migration
                 'Practice grounding and breathing techniques',
                 'Create a personal resilience action plan',
             ],
-            'rationale' => 'This course was designed to help learners develop essential life skills for managing stress and building mental strength. Research shows that resilience can be learned and strengthened with practice.',
+            'rationale' => 'This course was designed to help participants develop essential life skills for managing stress and building mental strength. Research shows that resilience can be learned and strengthened with practice.',
             'expected_experience' => 'You\'ll watch short videos, try interactive exercises, reflect on your experiences, and create a personal plan. The course takes about 45 minutes but you can go at your own pace.',
             'course_type' => MiniCourse::TYPE_WELLNESS,
             'creation_source' => MiniCourse::SOURCE_HUMAN_CREATED,
-            'target_grades' => ['7', '8', '9', '10', '11', '12'],
+            'target_levels' => ['7', '8', '9', '10', '11', '12'],
             'target_risk_levels' => ['moderate', 'high'],
             'target_needs' => ['stress-management', 'anxiety', 'resilience'],
             'estimated_duration_minutes' => 45,
@@ -530,7 +530,7 @@ return new class extends Migration
             'sort_order' => 2,
             'estimated_duration_minutes' => 8,
             'content_data' => [
-                'body' => "## What is Emotional Resilience?\n\nEmotional resilience is your ability to adapt and recover when things don't go as planned. It's not about avoiding stress or pretending everything is fine — it's about developing the skills to cope, grow, and even thrive in the face of challenges.\n\n### The Four Pillars of Resilience\n\n**1. Self-Awareness**\nUnderstanding your emotions, triggers, and patterns is the first step. When you know how you typically react to stress, you can choose how to respond instead.\n\n**2. Connection**\nHaving supportive relationships gives us strength. Whether it's friends, family, teachers, or counselors — knowing you're not alone makes a huge difference.\n\n**3. Coping Strategies**\nThese are your tools for managing difficult moments. Breathing exercises, grounding techniques, journaling, and physical activity are all examples.\n\n**4. Growth Mindset**\nBelieving that you can learn, grow, and improve — even from failures — is at the heart of resilience.\n\n### Why Does This Matter?\n\nResearch shows that learners with higher resilience:\n- Perform better academically\n- Have better relationships\n- Experience less anxiety and depression\n- Are more likely to achieve their goals\n\nThe good news? **Resilience can be strengthened at any age.** The strategies you'll learn in this course will serve you for life.",
+                'body' => "## What is Emotional Resilience?\n\nEmotional resilience is your ability to adapt and recover when things don't go as planned. It's not about avoiding stress or pretending everything is fine — it's about developing the skills to cope, grow, and even thrive in the face of challenges.\n\n### The Four Pillars of Resilience\n\n**1. Self-Awareness**\nUnderstanding your emotions, triggers, and patterns is the first step. When you know how you typically react to stress, you can choose how to respond instead.\n\n**2. Connection**\nHaving supportive relationships gives us strength. Whether it's friends, family, instructors, or support_persons — knowing you're not alone makes a huge difference.\n\n**3. Coping Strategies**\nThese are your tools for managing difficult moments. Breathing exercises, grounding techniques, journaling, and physical activity are all examples.\n\n**4. Growth Mindset**\nBelieving that you can learn, grow, and improve — even from failures — is at the heart of resilience.\n\n### Why Does This Matter?\n\nResearch shows that participants with higher resilience:\n- Perform better academically\n- Have better relationships\n- Experience less anxiety and depression\n- Are more likely to achieve their goals\n\nThe good news? **Resilience can be strengthened at any age.** The strategies you'll learn in this course will serve you for life.",
                 'key_points' => [
                     'Resilience = the ability to adapt and recover from challenges',
                     'Four pillars: Self-awareness, Connection, Coping strategies, Growth mindset',
@@ -721,11 +721,11 @@ return new class extends Migration
             'sort_order' => 8,
             'estimated_duration_minutes' => 3,
             'content_data' => [
-                'body' => "## You Don't Have to Do This Alone\n\nBuilding resilience is important, but it's also important to know when to ask for help.\n\n### When to Reach Out:\n\n- You're feeling overwhelmed more days than not\n- The strategies in this course aren't enough\n- You're having thoughts of hurting yourself\n- You just want someone to talk to\n\n### Who Can Help:\n\n**At Organization:**\n- Your organization counselor\n- A trusted teacher\n- The main office\n\n**Outside Organization:**\n- A parent or guardian\n- A coach or mentor\n- Crisis Text Line: Text HOME to 741741\n\n### Remember\n\nAsking for help is a **sign of strength**, not weakness. The most resilient people know they don't have to face everything alone.",
+                'body' => "## You Don't Have to Do This Alone\n\nBuilding resilience is important, but it's also important to know when to ask for help.\n\n### When to Reach Out:\n\n- You're feeling overwhelmed more days than not\n- The strategies in this course aren't enough\n- You're having thoughts of hurting yourself\n- You just want someone to talk to\n\n### Who Can Help:\n\n**At Organization:**\n- Your organization support_person\n- A trusted instructor\n- The main office\n\n**Outside Organization:**\n- A direct_supervisor or guardian\n- A coach or mentor\n- Crisis Text Line: Text HOME to 741741\n\n### Remember\n\nAsking for help is a **sign of strength**, not weakness. The most resilient people know they don't have to face everything alone.",
                 'resources' => [
                     [
                         'title' => 'Organization Counseling Office',
-                        'description' => 'Schedule a time to talk with your organization counselor',
+                        'description' => 'Schedule a time to talk with your organization support_person',
                         'action_type' => 'contact',
                     ],
                     [
@@ -748,7 +748,7 @@ return new class extends Migration
             'sort_order' => 9,
             'estimated_duration_minutes' => 2,
             'content_data' => [
-                'body' => "## You Did It!\n\nCongratulations on completing **Building Emotional Resilience**.\n\n### What You Learned:\n\n- What emotional resilience means and the four pillars\n- The 4-7-8 breathing technique for calm\n- The 5-4-3-2-1 grounding technique for anxious moments\n- How to identify your stress patterns\n- When and how to reach out for support\n\n### Your Next Steps:\n\n1. **Practice one technique daily** for the next week\n2. **Complete your resilience plan** if you haven't already\n3. **Share what you learned** with a friend or family member\n4. **Check back in** — resilience grows with practice\n\n### Continue Your Journey:\n\nLook for these related courses:\n- Managing Test Anxiety\n- Mindfulness for Learners\n- Building Better Relationships\n\nYou've taken an important step today. Keep building!",
+                'body' => "## You Did It!\n\nCongratulations on completing **Building Emotional Resilience**.\n\n### What You Learned:\n\n- What emotional resilience means and the four pillars\n- The 4-7-8 breathing technique for calm\n- The 5-4-3-2-1 grounding technique for anxious moments\n- How to identify your stress patterns\n- When and how to reach out for support\n\n### Your Next Steps:\n\n1. **Practice one technique daily** for the next week\n2. **Complete your resilience plan** if you haven't already\n3. **Share what you learned** with a friend or family member\n4. **Check back in** — resilience grows with practice\n\n### Continue Your Journey:\n\nLook for these related courses:\n- Managing Test Anxiety\n- Mindfulness for Participants\n- Building Better Relationships\n\nYou've taken an important step today. Keep building!",
                 'key_points' => [
                     'Resilience grows with consistent practice',
                     'Start with just one technique',

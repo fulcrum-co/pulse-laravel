@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('file_path')->nullable();
             $table->string('thumbnail_url')->nullable();
             $table->integer('estimated_duration_minutes')->nullable();
-            $table->json('target_grades')->nullable();
+            $table->json('target_levels')->nullable();
             $table->json('target_risk_levels')->nullable();
             $table->boolean('is_public')->default(false);
             $table->boolean('active')->default(true);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\User;
+
 class RolePermissions
 {
     /**
@@ -12,49 +14,54 @@ class RolePermissions
      */
     public const NAV_PERMISSIONS = [
         // Quick Access Grid
-        'home' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher', 'learner', 'parent'],
-        'contacts' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher'],
-        'surveys' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher', 'learner'],
-        'dashboards' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher', 'learner', 'parent'],
+        'home' => ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person', 'instructor', 'participant', 'direct_supervisor'],
+        'contacts' => ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person', 'instructor'],
+        'surveys' => ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person', 'instructor', 'participant'],
+        'dashboards' => ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person', 'instructor', 'participant', 'direct_supervisor'],
 
         // Workspace Navigation
-        'strategy' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
-        'reports' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor'],
-        'collect' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
-        'distribute' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
-        'resources' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher', 'learner', 'parent'],
-        'moderation' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
-        'alerts' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher'],
-        'marketplace' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
+        'strategy' => ['admin', 'consultant', 'administrative_role', 'organization_admin'],
+        'reports' => ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person'],
+        'collect' => ['admin', 'consultant', 'administrative_role', 'organization_admin'],
+        'distribute' => ['admin', 'consultant', 'administrative_role', 'organization_admin'],
+        'resources' => ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person', 'instructor', 'participant', 'direct_supervisor'],
+        'moderation' => ['admin', 'consultant', 'administrative_role', 'organization_admin'],
+        'alerts' => ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person', 'instructor'],
+        'marketplace' => ['admin', 'consultant', 'administrative_role', 'organization_admin'],
 
         // Other
-        'sub_organizations' => ['admin', 'consultant', 'superintendent'],
-        'settings' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher'],
-        'messages' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher', 'learner', 'parent'],
+        'sub_organizations' => ['admin', 'consultant', 'administrative_role'],
+        'settings' => ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person', 'instructor'],
+        'messages' => ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person', 'instructor', 'participant', 'direct_supervisor'],
 
         // Header Actions
-        'create_survey' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher'],
-        'create_collection' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
-        'create_report' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor'],
-        'create_strategy' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
-        'create_alert' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor'],
-        'create_resource' => ['admin', 'consultant', 'superintendent', 'organization_admin', 'counselor', 'teacher'],
-        'create_distribution' => ['admin', 'consultant', 'superintendent', 'organization_admin'],
+        'create_survey' => ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person', 'instructor'],
+        'create_collection' => ['admin', 'consultant', 'administrative_role', 'organization_admin'],
+        'create_report' => ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person'],
+        'create_strategy' => ['admin', 'consultant', 'administrative_role', 'organization_admin'],
+        'create_alert' => ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person'],
+        'create_resource' => ['admin', 'consultant', 'administrative_role', 'organization_admin', 'support_person', 'instructor'],
+        'create_distribution' => ['admin', 'consultant', 'administrative_role', 'organization_admin'],
     ];
 
     /**
      * Role descriptions for UI display.
      */
-    public const ROLE_DESCRIPTIONS = [
-        'admin' => 'Full system access',
-        'consultant' => 'District consultant with cross-organization visibility',
-        'superintendent' => 'District administrator with full oversight',
-        'organization_admin' => 'Organization-level administrator (principal)',
-        'counselor' => 'Learner support and intervention focus',
-        'teacher' => 'Classroom management and learner engagement',
-        'learner' => 'Learner portal for surveys and resources',
-        'parent' => 'Parent portal for child monitoring',
-    ];
+    public static function getRoleDescriptions(): array
+    {
+        $terminology = app(\App\Services\TerminologyService::class);
+
+        return [
+            'admin' => $terminology->get('role_description_admin_label'),
+            'consultant' => $terminology->get('role_description_consultant_label'),
+            'administrative_role' => $terminology->get('role_description_administrative_label'),
+            'organization_admin' => $terminology->get('role_description_organization_admin_label'),
+            'support_person' => $terminology->get('role_description_support_person_label'),
+            'instructor' => $terminology->get('role_description_instructor_label'),
+            'participant' => $terminology->get('role_description_participant_label'),
+            'direct_supervisor' => $terminology->get('role_description_direct_supervisor_label'),
+        ];
+    }
 
     /**
      * Check if a role can access a navigation item.
@@ -63,7 +70,7 @@ class RolePermissions
     {
         $permissions = self::NAV_PERMISSIONS[$navItem] ?? [];
 
-        return in_array($role, $permissions, true);
+        return in_array(User::normalizeRole($role), $permissions, true);
     }
 
     /**
@@ -88,7 +95,7 @@ class RolePermissions
     {
         return array_keys(array_filter(
             self::NAV_PERMISSIONS,
-            fn ($allowedRoles) => in_array($role, $allowedRoles, true)
+            fn ($allowedRoles) => in_array(User::normalizeRole($role), $allowedRoles, true)
         ));
     }
 

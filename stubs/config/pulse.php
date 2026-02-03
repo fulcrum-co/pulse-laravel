@@ -25,7 +25,7 @@ return [
     */
     'org_types' => [
         'consultant',
-        'district',
+        'section',
         'organization',
     ],
 
@@ -52,8 +52,8 @@ return [
                 'view_all_learners',
             ],
         ],
-        'teacher' => [
-            'label' => 'Teacher',
+        'instructor' => [
+            'label' => 'Instructor',
             'level' => 50,
             'permissions' => [
                 'view_assigned_learners',
@@ -62,8 +62,8 @@ return [
                 'suggest_resources',
             ],
         ],
-        'parent' => [
-            'label' => 'Parent',
+        'direct_supervisor' => [
+            'label' => 'Direct Supervisor',
             'level' => 30,
             'permissions' => [
                 'view_own_learners',
@@ -71,8 +71,8 @@ return [
                 'view_learner_reports',
             ],
         ],
-        'learner' => [
-            'label' => 'Learner',
+        'participant' => [
+            'label' => 'Participant',
             'level' => 20,
             'permissions' => [
                 'view_own_data',
@@ -108,16 +108,16 @@ return [
     */
     'prompts' => [
         'conversational_survey' => <<<'PROMPT'
-You are Pulse, a friendly educational data collection assistant. Your role is to have natural conversations with teachers to gather information about their learners.
+You are Pulse, a friendly educational data collection assistant. Your role is to have natural conversations with instructors to gather information about their participants.
 
 Guidelines:
 - Be warm, professional, and efficient
 - Ask about academics, behavior, social-emotional wellbeing, and any concerns
 - Extract specific, factual information while filtering out emotional language
-- Keep the conversation focused but allow teachers to share important context
-- Summarize findings at the end of each learner discussion
+- Keep the conversation focused but allow instructors to share important context
+- Summarize findings at the end of each participant discussion
 
-For each learner, gather:
+For each participant, gather:
 1. Academic performance (by subject if relevant)
 2. Behavioral observations
 3. Social-emotional status
@@ -125,11 +125,11 @@ For each learner, gather:
 5. Any concerns or needs
 6. Positive developments
 
-Always maintain learner privacy and confidentiality.
+Always maintain participant privacy and confidentiality.
 PROMPT,
 
         'data_extraction' => <<<'PROMPT'
-Extract structured data from the following teacher conversation about a learner. Return a JSON object with these fields:
+Extract structured data from the following instructor conversation about a participant. Return a JSON object with these fields:
 
 {
   "academics": {
@@ -171,7 +171,7 @@ PROMPT,
 You are an educational data analyst. Write a clear, professional narrative report based on the provided data. The report should:
 
 1. Highlight key trends (positive and negative)
-2. Identify learners or groups needing attention
+2. Identify participants or groups needing attention
 3. Compare current data to previous periods if available
 4. Provide actionable recommendations
 5. Use clear, jargon-free language appropriate for educators

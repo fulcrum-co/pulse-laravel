@@ -17,8 +17,11 @@ use App\Observers\ObjectiveObserver;
 use App\Observers\SurveyObserver;
 use App\Observers\WorkflowExecutionObserver;
 use App\Services\TerminologyService;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -50,6 +53,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Register terminology Blade directives
         $this->registerTerminologyDirectives();
+
+        // Register rate limiters
+        $this->registerRateLimiters();
     }
 
     /**
@@ -89,5 +95,21 @@ class AppServiceProvider extends ServiceProvider
 
         // Report notifications (published, assigned)
         CustomReport::observe(CustomReportObserver::class);
+    }
+
+    /**
+     * Register rate limiters for public/auth endpoints.
+     */
+    protected function registerRateLimiters(): void
+    {
+        RateLimiter::for('auth', function (Request $request) {
+            $email = (string) $request->input('email');
+
+            return Limit::perMinute(10)->by($email.$request->ip());
+        });
+
+        RateLimiter::for('public', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
+        });
     }
 }

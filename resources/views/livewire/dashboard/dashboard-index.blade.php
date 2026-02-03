@@ -1,3 +1,7 @@
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+@endphp
+
 <div>
     <!-- Dashboard Header -->
     <div class="mb-6" data-help="dashboard-header">
@@ -9,7 +13,7 @@
                         @click="open = !open"
                         class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
-                        <span class="font-medium text-gray-900">{{ $currentDashboard?->name ?? 'Select Dashboard' }}</span>
+                        <span class="font-medium text-gray-900">{{ $currentDashboard?->name ?? $terminology->get('select_dashboard_label') }}</span>
                         <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
@@ -23,7 +27,7 @@
                     >
                         <!-- My Dashboards -->
                         <div class="p-2 border-b border-gray-100">
-                            <div class="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">My Dashboards</div>
+                            <div class="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">@term('my_dashboards_label')</div>
                             @foreach($this->myDashboards as $dashboard)
                                 <button
                                     wire:click="selectDashboard({{ $dashboard->id }})"
@@ -35,7 +39,7 @@
                                     </svg>
                                     <span>{{ $dashboard->name }}</span>
                                     @if($dashboard->is_default)
-                                        <span class="ml-auto text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">Default</span>
+                                        <span class="ml-auto text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">@term('default_label')</span>
                                     @endif
                                 </button>
                             @endforeach
@@ -44,7 +48,7 @@
                         <!-- Shared Dashboards -->
                         @if($this->sharedDashboards->count() > 0)
                             <div class="p-2 border-b border-gray-100">
-                                <div class="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">Shared with Me</div>
+                                <div class="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">@term('shared_with_me_label')</div>
                                 @foreach($this->sharedDashboards as $dashboard)
                                     <button
                                         wire:click="selectDashboard({{ $dashboard->id }})"
@@ -55,7 +59,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                         </svg>
                                         <span>{{ $dashboard->name }}</span>
-                                        <span class="ml-auto text-xs text-gray-500">by {{ $dashboard->user->first_name ?? 'Unknown' }}</span>
+                                        <span class="ml-auto text-xs text-gray-500">@term('by_label') {{ $dashboard->user->first_name ?? $terminology->get('unknown_label') }}</span>
                                     </button>
                                 @endforeach
                             </div>
@@ -71,7 +75,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
-                                <span class="font-medium">Create Dashboard</span>
+                                <span class="font-medium">@term('create_dashboard_label')</span>
                             </button>
                         </div>
                     </div>
@@ -86,19 +90,19 @@
                         wire:click="setDateRange('week')"
                         class="px-3 py-1.5 text-sm rounded-md {{ $dateRange === 'week' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100' }}"
                     >
-                        Week
+                        @term('week_label')
                     </button>
                     <button
                         wire:click="setDateRange('month')"
                         class="px-3 py-1.5 text-sm rounded-md {{ $dateRange === 'month' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100' }}"
                     >
-                        Month
+                        @term('month_label')
                     </button>
                     <button
                         wire:click="setDateRange('quarter')"
                         class="px-3 py-1.5 text-sm rounded-md {{ $dateRange === 'quarter' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100' }}"
                     >
-                        Quarter
+                        @term('quarter_label')
                     </button>
                 </div>
 
@@ -110,7 +114,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    <span>Add Widget</span>
+                    <span>@term('add_widget_label')</span>
                 </button>
 
                 <!-- Actions Menu -->
@@ -139,7 +143,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
                                 </svg>
-                                Set as Default
+                                @term('set_as_default_label')
                             </button>
                             <button
                                 wire:click="toggleShare"
@@ -149,19 +153,19 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
                                 </svg>
-                                {{ $currentDashboard?->is_shared ? 'Make Private' : 'Share with Org' }}
+                                {{ $currentDashboard?->is_shared ? $terminology->get('make_private_label') : $terminology->get('share_with_org_label') }}
                             </button>
                             <hr class="my-1">
                             <button
                                 wire:click="deleteDashboard"
-                                wire:confirm="Are you sure you want to delete this dashboard?"
+                                wire:confirm="{{ $terminology->get('delete_dashboard_confirm_label') }}"
                                 @click="open = false"
                                 class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
-                                Delete Dashboard
+                                @term('delete_dashboard_label')
                             </button>
                         </div>
                     </div>
@@ -192,7 +196,7 @@
                         </button>
                         <button
                             wire:click="deleteWidget({{ $widget->id }})"
-                            wire:confirm="Remove this widget?"
+                            wire:confirm="{{ $terminology->get('remove_widget_confirm_label') }}"
                             class="p-1 text-gray-400 hover:text-red-600 rounded"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -217,7 +221,7 @@
                                         @elseif($data['change'] < 0)
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
                                         @endif
-                                        {{ abs($data['change']) }}% from last period
+                                        {{ abs($data['change']) }}% @term('from_last_period_label')
                                     </div>
                                 @endif
                             </div>
@@ -237,27 +241,27 @@
 
                         @case('learner_list')
                             <div class="space-y-3">
-                                @forelse($data['learners'] ?? [] as $learner)
+                                @forelse($data['participants'] ?? [] as $participant)
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                                            @if($learner['avatar_url'])
-                                                <img src="{{ $learner['avatar_url'] }}" alt="" class="w-full h-full object-cover">
+                                            @if($participant['avatar_url'])
+                                                <img src="{{ $participant['avatar_url'] }}" alt="" class="w-full h-full object-cover">
                                             @else
                                                 <div class="w-full h-full flex items-center justify-center text-gray-500 text-sm font-medium">
-                                                    {{ substr($learner['name'], 0, 1) }}
+                                                    {{ substr($participant['name'], 0, 1) }}
                                                 </div>
                                             @endif
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <div class="font-medium text-gray-900 truncate">{{ $learner['name'] }}</div>
-                                            <div class="text-sm text-gray-500">Grade {{ $learner['grade'] }}</div>
+                                            <div class="font-medium text-gray-900 truncate">{{ $participant['name'] }}</div>
+                                            <div class="text-sm text-gray-500">@term('level_label') {{ $participant['level'] }}</div>
                                         </div>
-                                        <span class="px-2 py-1 text-xs rounded-full {{ $learner['risk_level'] === 'high' ? 'bg-red-100 text-red-700' : ($learner['risk_level'] === 'low' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">
-                                            {{ ucfirst($learner['risk_level']) }}
+                                        <span class="px-2 py-1 text-xs rounded-full {{ $participant['risk_level'] === 'high' ? 'bg-red-100 text-red-700' : ($participant['risk_level'] === 'low' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">
+                                            {{ $terminology->get('risk_' . $participant['risk_level'] . '_label') }}
                                         </span>
                                     </div>
                                 @empty
-                                    <div class="text-center text-gray-500 py-4">No learners found</div>
+                                    <div class="text-center text-gray-500 py-4">@term('no_participants_found_label')</div>
                                 @endforelse
                             </div>
                             @break
@@ -268,14 +272,14 @@
                                     <div class="flex items-center justify-between">
                                         <div class="flex-1 min-w-0">
                                             <div class="font-medium text-gray-900 truncate">{{ $survey['title'] }}</div>
-                                            <div class="text-sm text-gray-500">{{ $survey['completed_count'] }} / {{ $survey['attempts_count'] }} completed</div>
+                                            <div class="text-sm text-gray-500">{{ $survey['completed_count'] }} / {{ $survey['attempts_count'] }} @term('completed_label')</div>
                                         </div>
                                         <div class="text-sm font-medium {{ $survey['completion_rate'] >= 80 ? 'text-green-600' : ($survey['completion_rate'] >= 50 ? 'text-yellow-600' : 'text-red-600') }}">
                                             {{ $survey['completion_rate'] }}%
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="text-center text-gray-500 py-4">No surveys found</div>
+                                    <div class="text-center text-gray-500 py-4">@term('no_surveys_found_label')</div>
                                 @endforelse
                             </div>
                             @break
@@ -296,7 +300,7 @@
                                     </div>
                                 @empty
                                     <div class="text-center text-gray-500 py-4">
-                                        {{ $data['message'] ?? 'No recent alerts' }}
+                                        {{ $data['message'] ?? $terminology->get('no_recent_alerts_label') }}
                                     </div>
                                 @endforelse
                             </div>
@@ -338,14 +342,14 @@
                                         <svg class="mx-auto h-8 w-8 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                                         </svg>
-                                        No notifications
+                                        @term('no_notifications_label')
                                     </div>
                                 @endforelse
                             </div>
                             @break
 
                         @default
-                            <div class="text-center text-gray-500 py-4">Widget type not supported</div>
+                            <div class="text-center text-gray-500 py-4">@term('widget_type_not_supported_label')</div>
                     @endswitch
                 </div>
             </div>
@@ -354,8 +358,8 @@
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No widgets</h3>
-                <p class="mt-1 text-sm text-gray-500">Get started by adding a widget to your dashboard.</p>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">@term('no_widgets_label')</h3>
+                <p class="mt-1 text-sm text-gray-500">@term('add_widget_empty_help_label')</p>
                 <div class="mt-6">
                     <button
                         wire:click="openWidgetPanel"
@@ -364,7 +368,7 @@
                         <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
-                        Add Widget
+                        @term('add_widget_label')
                     </button>
                 </div>
             </div>
@@ -386,28 +390,28 @@
                 x-transition
                 class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6"
             >
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Create Dashboard</h3>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">@term('create_dashboard_label')</h3>
 
                 <form wire:submit="createDashboard">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Dashboard Name</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('dashboard_name_label')</label>
                             <input
                                 type="text"
                                 wire:model="newDashboardName"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="e.g., Weekly Overview"
+                                placeholder="{{ $terminology->get('dashboard_name_placeholder') }}"
                             >
                             @error('newDashboardName') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('description_optional_label')</label>
                             <textarea
                                 wire:model="newDashboardDescription"
                                 rows="2"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="What is this dashboard for?"
+                                placeholder="{{ $terminology->get('dashboard_description_placeholder') }}"
                             ></textarea>
                         </div>
 
@@ -419,7 +423,7 @@
                                 class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                             >
                             <label for="createFromTemplate" class="text-sm text-gray-700">
-                                Start with default widgets
+                                @term('start_with_default_widgets_label')
                             </label>
                         </div>
                     </div>
@@ -430,13 +434,13 @@
                             wire:click="$set('showCreateModal', false)"
                             class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
                         >
-                            Cancel
+                            @term('cancel_label')
                         </button>
                         <button
                             type="submit"
                             class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
                         >
-                            Create Dashboard
+                            @term('create_dashboard_label')
                         </button>
                     </div>
                 </form>
@@ -466,7 +470,7 @@
             >
                 <!-- Panel Header -->
                 <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                    <h3 class="text-lg font-medium text-gray-900">Add Widget</h3>
+                    <h3 class="text-lg font-medium text-gray-900">@term('add_widget_label')</h3>
                     <button @click="show = false" class="text-gray-400 hover:text-gray-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -477,7 +481,7 @@
                 <!-- Widget Types -->
                 <div class="flex-1 overflow-y-auto p-6">
                     @if(!$newWidgetType)
-                        <p class="text-sm text-gray-500 mb-4">Choose a widget type to add to your dashboard.</p>
+                        <p class="text-sm text-gray-500 mb-4">@term('choose_widget_type_help_label')</p>
 
                         <div class="space-y-3">
                             @foreach($this->widgetTypes as $type => $info)
@@ -507,11 +511,11 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
-                                Back to widget types
+                                @term('back_to_widget_types_label')
                             </button>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Widget Title</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">@term('widget_title_label')</label>
                                 <input
                                     type="text"
                                     wire:model="newWidgetTitle"
@@ -521,49 +525,49 @@
 
                             @if($newWidgetType === 'metric_card')
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Source</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">@term('data_source_label')</label>
                                     <select
                                         wire:model="newWidgetConfig.data_source"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                                     >
-                                        <option value="learners_total">Total Learners</option>
-                                        <option value="learners_at_risk">At-Risk Learners</option>
-                                        <option value="learners_good">Learners in Good Standing</option>
-                                        <option value="surveys_active">Active Surveys</option>
-                                        <option value="responses_today">Responses Today</option>
-                                        <option value="responses_week">Responses This Week</option>
+                                        <option value="learners_total">@term('total_participants_label')</option>
+                                        <option value="learners_at_risk">@term('at_risk_participants_label')</option>
+                                        <option value="learners_good">@term('participants_good_standing_label')</option>
+                                        <option value="surveys_active">@term('active_surveys_label')</option>
+                                        <option value="responses_today">@term('responses_today_label')</option>
+                                        <option value="responses_week">@term('responses_this_week_label')</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">@term('color_label')</label>
                                     <select
                                         wire:model="newWidgetConfig.color"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                                     >
-                                        <option value="blue">Blue</option>
-                                        <option value="green">Green</option>
-                                        <option value="yellow">Yellow</option>
-                                        <option value="red">Red</option>
-                                        <option value="indigo">Indigo</option>
+                                        <option value="blue">@term('color_blue_label')</option>
+                                        <option value="green">@term('color_green_label')</option>
+                                        <option value="yellow">@term('color_yellow_label')</option>
+                                        <option value="red">@term('color_red_label')</option>
+                                        <option value="indigo">@term('color_indigo_label')</option>
                                     </select>
                                 </div>
                             @endif
 
                             @if($newWidgetType === 'learner_list')
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Filter</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">@term('filter_label')</label>
                                     <select
                                         wire:model="newWidgetConfig.filter"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                                     >
-                                        <option value="high_risk">High Risk Learners</option>
-                                        <option value="low_risk">Low Risk Learners</option>
-                                        <option value="good">Learners in Good Standing</option>
-                                        <option value="all">All Learners</option>
+                                        <option value="high_risk">@term('high_risk_participants_label')</option>
+                                        <option value="low_risk">@term('low_risk_participants_label')</option>
+                                        <option value="good">@term('participants_good_standing_label')</option>
+                                        <option value="all">@term('all_participants_label')</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Limit</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">@term('limit_label')</label>
                                     <input
                                         type="number"
                                         wire:model="newWidgetConfig.limit"
@@ -576,13 +580,13 @@
 
                             @if($newWidgetType === 'bar_chart')
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Source</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">@term('data_source_label')</label>
                                     <select
                                         wire:model="newWidgetConfig.data_source"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                                     >
-                                        <option value="survey_responses_weekly">Survey Responses (Weekly)</option>
-                                        <option value="risk_distribution">Risk Level Distribution</option>
+                                        <option value="survey_responses_weekly">@term('survey_responses_weekly_label')</option>
+                                        <option value="risk_distribution">@term('risk_level_distribution_label')</option>
                                     </select>
                                 </div>
                                 <div class="flex items-center gap-2">
@@ -593,7 +597,7 @@
                                         class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                     >
                                     <label for="compareData" class="text-sm text-gray-700">
-                                        Compare with previous period
+                                        @term('compare_previous_period_label')
                                     </label>
                                 </div>
                             @endif
@@ -608,7 +612,7 @@
                             wire:click="addWidget"
                             class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
                         >
-                            Add Widget
+                            @term('add_widget_label')
                         </button>
                     </div>
                 @endif
@@ -631,12 +635,12 @@
                 x-transition
                 class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6"
             >
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Edit Widget</h3>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">@term('edit_widget_label')</h3>
 
                 <form wire:submit="updateWidget">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Widget Title</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">@term('widget_title_label')</label>
                             <input
                                 type="text"
                                 wire:model="editWidgetTitle"
@@ -651,13 +655,13 @@
                             wire:click="$set('showEditWidgetModal', false)"
                             class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
                         >
-                            Cancel
+                            @term('cancel_label')
                         </button>
                         <button
                             type="submit"
                             class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
                         >
-                            Save Changes
+                            @term('save_changes_label')
                         </button>
                     </div>
                 </form>
@@ -685,12 +689,12 @@
                         labels: data.map(d => d.label),
                         datasets: [
                             {
-                                label: 'This Week',
+                                label: @js($terminology->get('this_week_label')),
                                 data: data.map(d => d.value),
                                 backgroundColor: 'rgba(79, 70, 229, 0.8)',
                             },
                             ...(data[0]?.compare_value !== undefined ? [{
-                                label: 'Last Week',
+                                label: @js($terminology->get('last_week_label')),
                                 data: data.map(d => d.compare_value),
                                 backgroundColor: 'rgba(79, 70, 229, 0.3)',
                             }] : [])
@@ -731,7 +735,7 @@
                     data: {
                         labels: data.map(d => d.label),
                         datasets: [{
-                            label: 'Responses',
+                            label: @js($terminology->get('responses_label')),
                             data: data.map(d => d.value),
                             borderColor: 'rgb(79, 70, 229)',
                             backgroundColor: 'rgba(79, 70, 229, 0.1)',

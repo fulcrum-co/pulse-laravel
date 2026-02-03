@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('template_id')->nullable()->after('creation_mode')->constrained('survey_templates')->nullOnDelete();
             $table->foreignId('creation_session_id')->nullable()->after('template_id')->constrained('survey_creation_sessions')->nullOnDelete();
             $table->json('interpretation_config')->nullable()->after('questions'); // AI interpretation rules
-            $table->json('delivery_channels')->nullable()->after('target_classrooms'); // ['web', 'sms', 'voice']
+            $table->json('delivery_channels')->nullable()->after('target_learning_groups'); // ['web', 'sms', 'voice']
             $table->json('voice_config')->nullable()->after('delivery_channels'); // TTS voice, pace, language
             $table->boolean('allow_voice_responses')->default(false)->after('voice_config');
             $table->boolean('ai_follow_up_enabled')->default(false)->after('allow_voice_responses');

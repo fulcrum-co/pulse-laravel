@@ -8,12 +8,12 @@ use App\Models\MiniCourse;
 
 /**
  * Domain service for course generation business rules.
- * Handles all course focus determination logic and grade conversion rules.
+ * Handles all course focus determination logic and level conversion rules.
  */
 class CourseGenerationRuleDomainService
 {
     /**
-     * Determine course focus for a learner based on context.
+     * Determine course focus for a participant based on context.
      */
     public function determineLearnerCourseFocus(array $context): array
     {
@@ -51,7 +51,7 @@ class CourseGenerationRuleDomainService
             $objectives = [
                 'Strengthen academic vocabulary',
                 'Improve reading comprehension strategies',
-                'Build confidence in classroom participation',
+                'Build confidence in learning_group participation',
             ];
         }
 
@@ -88,7 +88,7 @@ class CourseGenerationRuleDomainService
     }
 
     /**
-     * Determine course focus for a teacher based on context.
+     * Determine course focus for a instructor based on context.
      */
     public function determineTeacherCourseFocus(array $context): array
     {
@@ -96,30 +96,31 @@ class CourseGenerationRuleDomainService
         $learnerOutcomes = $context['learner_outcomes'] ?? [];
 
         // Default focus
-        $topic = 'Enhancing Learner Engagement and Achievement';
+        $terminology = app(\App\Services\TerminologyService::class);
+        $topic = $terminology->get('auto_course_topic_engagement_label');
         $courseType = MiniCourse::TYPE_SKILL_BUILDING;
         $objectives = [
             'Implement evidence-based engagement strategies',
-            'Differentiate instruction for diverse learners',
+            'Differentiate instruction for diverse participants',
             'Use data to drive instructional decisions',
         ];
         $duration = 45;
 
-        // Customize based on learner outcomes
+        // Customize based on participant outcomes
         foreach ($learnerOutcomes as $type => $data) {
             if (($data['trend'] ?? '') === 'declining') {
                 if (str_contains($type, 'behavioral') || str_contains($type, 'social')) {
-                    $topic = 'Building a Positive Classroom Environment';
+                    $topic = 'Building a Positive LearningGroup Environment';
                     $courseType = MiniCourse::TYPE_BEHAVIORAL;
                     $objectives = [
-                        'Implement proactive classroom management strategies',
-                        'Build positive learner-teacher relationships',
+                        'Implement proactive learning_group management strategies',
+                        'Build positive participant-instructor relationships',
                         'Address challenging behaviors constructively',
                     ];
                     break;
                 }
-                if (str_contains($type, 'academic') || str_contains($type, 'grade')) {
-                    $topic = 'Strategies for Improving Learner Academic Performance';
+                if (str_contains($type, 'academic') || str_contains($type, 'level')) {
+                    $topic = $terminology->get('auto_course_topic_performance_label');
                     $courseType = MiniCourse::TYPE_ACADEMIC;
                     $objectives = [
                         'Identify root causes of academic struggles',
@@ -169,13 +170,13 @@ class CourseGenerationRuleDomainService
                 $objectives = [
                     'Establish consistent behavior expectations',
                     'Implement department-wide PBIS strategies',
-                    'Support each other with challenging learners',
+                    'Support each other with challenging participants',
                 ];
             } elseif (str_contains(strtolower($primaryChallenge), 'academic')) {
                 $topic = "$department Department: Raising Academic Standards Together";
                 $courseType = MiniCourse::TYPE_ACADEMIC;
                 $objectives = [
-                    'Analyze learner performance data as a team',
+                    'Analyze participant performance data as a team',
                     'Develop targeted intervention strategies',
                     'Monitor progress and adjust approaches',
                 ];
@@ -191,22 +192,22 @@ class CourseGenerationRuleDomainService
     }
 
     /**
-     * Convert grade level number to grade range string.
-     * Business rule for grade-level grouping.
+     * Convert level level number to level range string.
+     * Business rule for level-level grouping.
      */
-    public function gradeToRange(?int $grade): ?string
+    public function gradeToRange(?int $level): ?string
     {
-        if ($grade === null) {
+        if ($level === null) {
             return null;
         }
 
-        if ($grade <= 2) {
+        if ($level <= 2) {
             return 'K-2';
         }
-        if ($grade <= 5) {
+        if ($level <= 5) {
             return '3-5';
         }
-        if ($grade <= 8) {
+        if ($level <= 8) {
             return '6-8';
         }
 

@@ -23,7 +23,7 @@ class ContactNoteController extends Controller
 
         // Map shorthand contact type to full class name
         $typeMap = [
-            'learner' => 'App\\Models\\Learner',
+            'participant' => 'App\\Models\\Participant',
             'user' => 'App\\Models\\User',
         ];
         $fullType = $typeMap[$contactType] ?? $contactType;
@@ -44,7 +44,7 @@ class ContactNoteController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'contact_type' => 'required|string|in:learner,user,App\\Models\\Learner,App\\Models\\User',
+            'contact_type' => 'required|string|in:participant,user,App\\Models\\Participant,App\\Models\\User',
             'contact_id' => 'required|integer',
             'note_type' => 'required|string|in:general,follow_up,concern,milestone,voice_memo',
             'content' => 'required_without:voice_memo|string|min:1',
@@ -58,7 +58,7 @@ class ContactNoteController extends Controller
 
         // Map shorthand contact type to full class name
         $typeMap = [
-            'learner' => 'App\\Models\\Learner',
+            'participant' => 'App\\Models\\Participant',
             'user' => 'App\\Models\\User',
         ];
         $contactType = $typeMap[$validated['contact_type']] ?? $validated['contact_type'];

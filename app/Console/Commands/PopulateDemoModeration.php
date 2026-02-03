@@ -48,12 +48,12 @@ class PopulateDemoModeration extends Command
         ];
 
         $flagExamples = [
-            'Content may contain age-inappropriate vocabulary for younger grades',
+            'Content may contain age-inappropriate vocabulary for younger levels',
             'Health advice should include disclaimer about consulting professionals',
             'Consider adding more diverse examples and perspectives',
             'Some claims need citation or verification',
             'Tone may be too casual for educational context',
-            'Content complexity exceeds target grade level',
+            'Content complexity exceeds target level level',
             'Mental health topic requires sensitivity review',
         ];
 

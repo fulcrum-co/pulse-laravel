@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\ContactMetric;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Services\ContactMetricService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +22,7 @@ class ContactMetricController extends Controller
     public function timeSeries(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'contact_type' => 'required|string|in:learner,user,App\\Models\\Learner,App\\Models\\User',
+            'contact_type' => 'required|string|in:participant,user,App\\Models\\Participant,App\\Models\\User',
             'contact_id' => 'required|integer',
             'metrics' => 'required|array',
             'metrics.*' => 'string',
@@ -33,7 +33,7 @@ class ContactMetricController extends Controller
 
         // Map shorthand contact type to full class name
         $typeMap = [
-            'learner' => 'App\\Models\\Learner',
+            'participant' => 'App\\Models\\Participant',
             'user' => 'App\\Models\\User',
         ];
         $contactType = $typeMap[$validated['contact_type']] ?? $validated['contact_type'];
@@ -56,7 +56,7 @@ class ContactMetricController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'contact_type' => 'required|string|in:learner,user,App\\Models\\Learner,App\\Models\\User',
+            'contact_type' => 'required|string|in:participant,user,App\\Models\\Participant,App\\Models\\User',
             'contact_id' => 'required|integer',
             'metric_category' => 'required|string',
             'metric_key' => 'required|string',
@@ -72,7 +72,7 @@ class ContactMetricController extends Controller
 
         // Map shorthand contact type to full class name
         $typeMap = [
-            'learner' => 'App\\Models\\Learner',
+            'participant' => 'App\\Models\\Participant',
             'user' => 'App\\Models\\User',
         ];
         $contactType = $typeMap[$validated['contact_type']] ?? $validated['contact_type'];
@@ -104,14 +104,14 @@ class ContactMetricController extends Controller
     }
 
     /**
-     * Get heat map data for a learner.
+     * Get heat map data for a participant.
      */
-    public function heatMap(Request $request, Learner $learner): JsonResponse
+    public function heatMap(Request $request, Participant $participant): JsonResponse
     {
         $organizationYear = $request->get('organization_year', $this->metricService->getCurrentOrganizationYear());
 
         $data = $this->metricService->getHeatMapData(
-            $learner,
+            $participant,
             $organizationYear,
             ['academics', 'attendance', 'behavior', 'life_skills']
         );
@@ -124,23 +124,24 @@ class ContactMetricController extends Controller
      */
     public function available(Request $request): JsonResponse
     {
-        $contactType = $request->get('contact_type', 'learner');
+        $contactType = $request->get('contact_type', 'participant');
+        $terminology = app(\App\Services\TerminologyService::class);
 
         $metrics = match ($contactType) {
-            'learner' => [
-                ['key' => 'gpa', 'label' => 'GPA', 'category' => 'academics'],
-                ['key' => 'wellness_score', 'label' => 'Health & Wellness', 'category' => 'wellness'],
-                ['key' => 'emotional_wellbeing', 'label' => 'Emotional Well-Being', 'category' => 'wellness'],
-                ['key' => 'engagement_score', 'label' => 'Engagement', 'category' => 'engagement'],
-                ['key' => 'plan_progress', 'label' => 'Plan Progress', 'category' => 'academics'],
-                ['key' => 'attendance_rate', 'label' => 'Attendance Rate', 'category' => 'attendance'],
-                ['key' => 'behavior_score', 'label' => 'Behavior', 'category' => 'behavior'],
-                ['key' => 'life_skills_score', 'label' => 'Life Skills', 'category' => 'life_skills'],
+            'participant' => [
+                ['key' => 'gpa', 'label' => $terminology->get('metric_gpa_label'), 'category' => 'academics'],
+                ['key' => 'wellness_score', 'label' => $terminology->get('metric_health_wellness_label'), 'category' => 'wellness'],
+                ['key' => 'emotional_wellbeing', 'label' => $terminology->get('metric_emotional_wellbeing_label'), 'category' => 'wellness'],
+                ['key' => 'engagement_score', 'label' => $terminology->get('metric_engagement_label'), 'category' => 'engagement'],
+                ['key' => 'plan_progress', 'label' => $terminology->get('metric_plan_progress_label'), 'category' => 'academics'],
+                ['key' => 'attendance_rate', 'label' => $terminology->get('metric_attendance_rate_label'), 'category' => 'attendance'],
+                ['key' => 'behavior_score', 'label' => $terminology->get('metric_behavior_label'), 'category' => 'behavior'],
+                ['key' => 'life_skills_score', 'label' => $terminology->get('metric_life_skills_label'), 'category' => 'life_skills'],
             ],
-            'teacher' => [
-                ['key' => 'classroom_performance', 'label' => 'Classroom Performance', 'category' => 'classroom'],
-                ['key' => 'learner_growth', 'label' => 'Learner Growth', 'category' => 'classroom'],
-                ['key' => 'pd_progress', 'label' => 'PD Progress', 'category' => 'professional_development'],
+            'instructor' => [
+                ['key' => 'learning_group_performance', 'label' => $terminology->get('metric_learning_group_performance_label'), 'category' => 'learning_group'],
+                ['key' => 'learner_growth', 'label' => $terminology->get('metric_participant_growth_label'), 'category' => 'learning_group'],
+                ['key' => 'pd_progress', 'label' => $terminology->get('metric_pd_progress_label'), 'category' => 'professional_development'],
             ],
             default => [],
         };

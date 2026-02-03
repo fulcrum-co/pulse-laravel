@@ -120,7 +120,13 @@ class TriggerEvaluationRuleDomainService
      */
     public function generateCallAlertMessage(string $learnerName): string
     {
-        return "This is an automated alert from Pulse. Learner {$learnerName} requires attention based on a recent check-in. Please log in to Pulse for details.";
+        $terminology = app(\App\Services\TerminologyService::class);
+
+        return str_replace(
+            [':platform', ':participant'],
+            [$terminology->get('platform_name_label'), $learnerName],
+            $terminology->get('automated_alert_message_label')
+        );
     }
 
     /**

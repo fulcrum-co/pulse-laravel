@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Models\ContactMetric;
 use App\Models\MetricThreshold;
-use App\Models\Learner;
+use App\Models\Participant;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -68,19 +68,19 @@ use Illuminate\Support\Collection;
     }
 
     /**
-     * Get heat map data for learner plan progress.
+     * Get heat map data for participant plan progress.
      */
     public function getHeatMapData(
-        Learner $learner,
+        Participant $participant,
         string $organizationYear,
         array $categories = ['academics', 'attendance', 'behavior', 'life_skills']
     ): array {
-        $metrics = ContactMetric::forContact(Learner::class, $learner->id)
+        $metrics = ContactMetric::forContact(Participant::class, $participant->id)
             ->forOrganizationYear($organizationYear)
             ->whereIn('metric_category', $categories)
             ->get();
 
-        $thresholds = MetricThreshold::where('org_id', $learner->org_id)
+        $thresholds = MetricThreshold::where('org_id', $participant->org_id)
             ->whereIn('metric_category', $categories)
             ->active()
             ->get()
@@ -158,8 +158,8 @@ use Illuminate\Support\Collection;
         foreach ($sisData as $record) {
             $this->ingestMetric([
                 'org_id' => $orgId,
-                'contact_type' => Learner::class,
-                'contact_id' => $record['learner_id'],
+                'contact_type' => Participant::class,
+                'contact_id' => $record['participant_id'],
                 'metric_category' => $record['category'],
                 'metric_key' => $record['metric'],
                 'numeric_value' => $record['value'],
@@ -178,7 +178,7 @@ use Illuminate\Support\Collection;
     /**
      * Import metrics from survey response.
      */
-    public function importFromSurvey(int $orgId, int $learnerId, int $surveyAttemptId, array $scores): int
+    public function importFromSurvey(int $orgId, int $participantId, int $surveyAttemptId, array $scores): int
     {
         $count = 0;
         foreach ($scores as $key => $value) {
@@ -186,8 +186,8 @@ use Illuminate\Support\Collection;
 
             $this->ingestMetric([
                 'org_id' => $orgId,
-                'contact_type' => Learner::class,
-                'contact_id' => $learnerId,
+                'contact_type' => Participant::class,
+                'contact_id' => $participantId,
                 'metric_category' => $category,
                 'metric_key' => $key,
                 'numeric_value' => $value,

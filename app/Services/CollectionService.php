@@ -9,7 +9,7 @@ use App\Models\CollectionEntry;
 use App\Models\CollectionQueueItem;
 use App\Models\CollectionSchedule;
 use App\Models\CollectionSession;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection as SupportCollection;
@@ -200,20 +200,20 @@ class CollectionService
     protected function getEligibleContacts(Collection $collection): SupportCollection
     {
         $scope = $collection->contact_scope ?? [];
-        $targetType = $scope['target_type'] ?? 'learners';
+        $targetType = $scope['target_type'] ?? 'participants';
 
-        if ($targetType === 'learners') {
-            $query = Learner::where('org_id', $collection->org_id)
+        if ($targetType === 'participants') {
+            $query = Participant::where('org_id', $collection->org_id)
                 ->whereNull('deleted_at');
 
-            // Filter by grades
-            if (! empty($scope['grades'])) {
-                $query->whereIn('grade_level', $scope['grades']);
+            // Filter by levels
+            if (! empty($scope['levels'])) {
+                $query->whereIn('level', $scope['levels']);
             }
 
-            // Filter by classrooms (homeroom)
-            if (! empty($scope['classrooms'])) {
-                $query->whereIn('homeroom_classroom_id', $scope['classrooms']);
+            // Filter by learning_groups (homeroom)
+            if (! empty($scope['learning_groups'])) {
+                $query->whereIn('homeroom_learning_group_id', $scope['learning_groups']);
             }
 
             // Filter by tags
@@ -228,7 +228,7 @@ class CollectionService
             return $query->get();
         }
 
-        // For user-based collections (parents, staff)
+        // For user-based collections (direct_supervisors, staff)
         if ($targetType === 'users') {
             $query = User::where('org_id', $collection->org_id);
 
@@ -253,14 +253,14 @@ class CollectionService
             $priority = CollectionQueueItem::PRIORITY_NORMAL;
             $reason = null;
 
-            // High-risk learners get highest priority
-            if ($contact instanceof Learner) {
+            // High-risk participants get highest priority
+            if ($contact instanceof Participant) {
                 if ($contact->risk_level === 'high') {
                     $priority = CollectionQueueItem::PRIORITY_CRITICAL;
-                    $reason = 'High risk learner';
+                    $reason = 'High risk participant';
                 } elseif ($contact->risk_level === 'medium') {
                     $priority = CollectionQueueItem::PRIORITY_HIGH;
-                    $reason = 'Medium risk learner';
+                    $reason = 'Medium risk participant';
                 }
 
                 // Check for recent flags

@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone')->nullable();
             $table->string('password');
-            $table->string('primary_role')->default('admin'); // consultant, admin, teacher, parent, learner, volunteer
+            $table->string('primary_role')->default('admin'); // consultant, admin, instructor, direct_supervisor, participant, volunteer
             $table->string('preferred_contact_method')->nullable();
             $table->string('avatar_url')->nullable();
             $table->text('bio')->nullable();

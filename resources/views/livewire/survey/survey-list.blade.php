@@ -16,7 +16,7 @@
                 wire:model.live="statusFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">{{ app(\App\Services\TerminologyService::class)->get('all_label') }} {{ app(\App\Services\TerminologyService::class)->get('status_label') }}es</option>
+                <option value="">{{ app(\App\Services\TerminologyService::class)->get('all_statuses_label') }}</option>
                 @foreach($statuses as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
@@ -26,7 +26,7 @@
                 wire:model.live="typeFilter"
                 class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
-                <option value="">{{ app(\App\Services\TerminologyService::class)->get('all_label') }} {{ app(\App\Services\TerminologyService::class)->get('type_label') }}s</option>
+                <option value="">{{ app(\App\Services\TerminologyService::class)->get('all_types_label') }}</option>
                 @foreach($surveyTypes as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
@@ -148,13 +148,13 @@
                                 <h3 class="font-medium text-gray-900 text-sm truncate group-hover:text-pulse-orange-600 transition-colors">{{ $survey->title }}</h3>
                             </div>
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $statusColor }}-100 text-{{ $statusColor }}-800 flex-shrink-0">
-                                {{ ucfirst($survey->status) }}
+                                {{ $terminology->get(($survey->status ?? 'draft') . '_label') }}
                             </span>
                         </div>
 
                         <div class="flex items-center gap-2 text-xs mb-3">
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-{{ $typeColor }}-100 text-{{ $typeColor }}-700">
-                                {{ ucfirst($survey->survey_type) }}
+                                {{ $terminology->get('survey_type_' . $survey->survey_type . '_label') }}
                             </span>
                             <span class="text-gray-500">{{ $survey->question_count }} @term('questions_label')</span>
                         </div>
@@ -204,7 +204,7 @@
                                 <button wire:click="openPushModal({{ $survey->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-500 rounded" onclick="event.stopPropagation()">
                                     <x-icon name="arrow-up-on-square" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">@term('push_label') to @term('organization_plural')</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">@term('push_label') @term('to_label') @term('organization_plural')</span>
                             </div>
                             @endif
                             <div class="relative group/btn">
@@ -254,20 +254,20 @@
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2">
                             <h3 class="font-medium text-gray-900 text-sm truncate group-hover:text-pulse-orange-600 transition-colors">{{ $survey->title }}</h3>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $statusColor }}-100 text-{{ $statusColor }}-800">
-                                {{ ucfirst($survey->status) }}
-                            </span>
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-{{ $typeColor }}-100 text-{{ $typeColor }}-700">
-                                {{ ucfirst($survey->survey_type) }}
-                            </span>
-                            @if($survey->creation_mode === 'ai_assisted' || $survey->creation_mode === 'chat')
-                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">AI</span>
-                            @endif
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $statusColor }}-100 text-{{ $statusColor }}-800">
+                                {{ $terminology->get(($survey->status ?? 'draft') . '_label') }}
+                        </span>
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-{{ $typeColor }}-100 text-{{ $typeColor }}-700">
+                                {{ $terminology->get('survey_type_' . $survey->survey_type . '_label') }}
+                        </span>
+                        @if($survey->creation_mode === 'ai_assisted' || $survey->creation_mode === 'chat')
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">@term('ai_label')</span>
+                        @endif
                         </div>
                         <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                            <span>{{ $survey->question_count }} questions</span>
-                            <span>{{ number_format($survey->completed_attempts_count ?? 0) }} responses</span>
-                            <span>Created {{ $survey->created_at->diffForHumans() }}</span>
+                            <span>{{ $survey->question_count }} @term('questions_label')</span>
+                            <span>{{ number_format($survey->completed_attempts_count ?? 0) }} @term('responses_label')</span>
+                            <span>@term('created_label') {{ $survey->created_at->diffForHumans() }}</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-1 relative z-10" onclick="event.stopPropagation()">
@@ -275,28 +275,28 @@
                             <button wire:click="toggleStatus('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                 <x-icon name="{{ $survey->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">{{ $survey->status === 'active' ? 'Pause' : 'Activate' }}</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">{{ $survey->status === 'active' ? app(\App\Services\TerminologyService::class)->get('pause_action') : app(\App\Services\TerminologyService::class)->get('activate_action') }}</span>
                         </div>
                         @if($survey->status === 'active')
                         <div class="relative group/btn">
                             <a href="{{ route('surveys.deliver.form', $survey) }}" class="p-1.5 text-gray-400 hover:text-gray-600 rounded inline-block">
                                 <x-icon name="paper-airplane" class="w-4 h-4" />
                             </a>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Send</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">@term('send_action')</span>
                         </div>
                         @endif
                         <div class="relative group/btn">
                             <button wire:click="duplicate('{{ $survey->id }}')" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
                                 <x-icon name="document-duplicate" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">@term('duplicate_action')</span>
                         </div>
                         @if($canPush)
                         <div class="relative group/btn">
                             <button wire:click="openPushModal({{ $survey->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-500 rounded">
                                 <x-icon name="arrow-up-on-square" class="w-4 h-4" />
                             </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">Push to Organizations</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">@term('push_label') @term('to_label') @term('organization_plural')</span>
                         </div>
                         @endif
                         <div class="relative group/btn">
@@ -306,7 +306,7 @@
                             <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none">@term('delete_action')</span>
                         </div>
                         <span class="ml-2 px-3 py-1 text-xs font-medium text-pulse-orange-600">
-                            View →
+                            @term('view_action') →
                         </span>
                     </div>
                 </div>
@@ -328,12 +328,12 @@
                             />
                         </th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('survey_singular')</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responses</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('type_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('status_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('questions_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('responses_label')</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('created_label')</th>
+                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">@term('actions_label')</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -367,18 +367,18 @@
                                 <div class="flex items-center gap-2">
                                     <span class="text-sm font-medium text-gray-900">{{ $survey->title }}</span>
                                     @if($survey->creation_mode === 'ai_assisted' || $survey->creation_mode === 'chat')
-                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">AI</span>
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">@term('ai_label')</span>
                                     @endif
                                 </div>
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap">
                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-{{ $typeColor }}-100 text-{{ $typeColor }}-700">
-                                    {{ ucfirst($survey->survey_type) }}
+                                    {{ $terminology->get('survey_type_' . $survey->survey_type . '_label') }}
                                 </span>
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $statusColor }}-100 text-{{ $statusColor }}-800">
-                                    {{ ucfirst($survey->status) }}
+                                    {{ $terminology->get(($survey->status ?? 'draft') . '_label') }}
                                 </span>
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
@@ -396,28 +396,28 @@
                                         <button wire:click="toggleStatus('{{ $survey->id }}')" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                                             <x-icon name="{{ $survey->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
                                         </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">{{ $survey->status === 'active' ? 'Pause' : 'Activate' }}</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">{{ $survey->status === 'active' ? app(\App\Services\TerminologyService::class)->get('pause_action') : app(\App\Services\TerminologyService::class)->get('activate_action') }}</span>
                                     </div>
                                     @if($survey->status === 'active')
                                     <div class="relative group">
                                         <a href="{{ route('surveys.deliver.form', $survey) }}" class="p-1 text-gray-400 hover:text-gray-600 rounded inline-block">
                                             <x-icon name="paper-airplane" class="w-4 h-4" />
                                         </a>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Send</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">@term('send_action')</span>
                                     </div>
                                     @endif
                                     <div class="relative group">
                                         <button wire:click="duplicate('{{ $survey->id }}')" class="p-1 text-gray-400 hover:text-gray-600 rounded">
                                             <x-icon name="document-duplicate" class="w-4 h-4" />
                                         </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Duplicate</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">@term('duplicate_action')</span>
                                     </div>
                                     @if($canPush)
                                     <div class="relative group">
                                         <button wire:click="openPushModal({{ $survey->id }})" class="p-1 text-gray-400 hover:text-pulse-orange-500 rounded">
                                             <x-icon name="arrow-up-on-square" class="w-4 h-4" />
                                         </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Push to Organizations</span>
+                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">@term('push_label') @term('to_label') @term('organization_plural')</span>
                                     </div>
                                     @endif
                                     <div class="relative group">
@@ -427,7 +427,7 @@
                                         <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">@term('delete_action')</span>
                                     </div>
                                     <a href="{{ route('surveys.show', $survey) }}" class="ml-1 px-2 py-1 text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                                        View
+                                        @term('view_action')
                                     </a>
                                 </div>
                             </td>

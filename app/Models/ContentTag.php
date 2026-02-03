@@ -14,7 +14,7 @@ class ContentTag extends Model
 
     public const CATEGORY_SKILL = 'skill';
 
-    public const CATEGORY_GRADE = 'grade';
+    public const CATEGORY_GRADE = 'level';
 
     public const CATEGORY_SUBJECT = 'subject';
 
@@ -39,7 +39,7 @@ class ContentTag extends Model
         return [
             self::CATEGORY_TOPIC => 'Topic',
             self::CATEGORY_SKILL => 'Skill',
-            self::CATEGORY_GRADE => 'Grade Level',
+            self::CATEGORY_GRADE => 'Level Level',
             self::CATEGORY_SUBJECT => 'Subject Area',
             self::CATEGORY_RISK_FACTOR => 'Risk Factor',
         ];

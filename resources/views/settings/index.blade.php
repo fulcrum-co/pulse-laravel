@@ -1,4 +1,4 @@
-<x-layouts.dashboard title="Settings">
+<x-layouts.dashboard title="@term('settings_label')">
     <div x-data="{ activeTab: 'notifications' }" class="space-y-6">
         {{-- Settings Navigation --}}
         <div class="border-b border-gray-200">
@@ -47,8 +47,8 @@
             <x-card>
                 <div class="text-center py-12">
                     <x-icon name="user" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p class="text-gray-500">Profile settings coming soon.</p>
-                    <p class="text-gray-400 text-sm mt-1">Profile management features are coming soon.</p>
+                    <p class="text-gray-500">@term('profile_settings_coming_soon_label')</p>
+                    <p class="text-gray-400 text-sm mt-1">@term('profile_settings_coming_soon_body')</p>
                 </div>
             </x-card>
         </div>
@@ -57,8 +57,8 @@
             <x-card>
                 <div class="text-center py-12">
                     <x-icon name="shield-check" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p class="text-gray-500">Security settings coming soon.</p>
-                    <p class="text-gray-400 text-sm mt-1">Password and two-factor authentication options will be available here.</p>
+                    <p class="text-gray-500">@term('security_settings_coming_soon_label')</p>
+                    <p class="text-gray-400 text-sm mt-1">@term('security_settings_coming_soon_body')</p>
                 </div>
             </x-card>
         </div>

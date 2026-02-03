@@ -15,7 +15,7 @@ return new class extends Migration
              * {
              *   "enabled": true,
              *   "approval_required": true,
-             *   "approval_roles": ["admin", "counselor"],
+             *   "approval_roles": ["admin", "support_person"],
              *   "auto_approve_templates": false,
              *   "allowed_triggers": ["risk_threshold", "workflow", "manual"],
              *   "risk_threshold_config": {
@@ -38,7 +38,7 @@ return new class extends Migration
              *   "notification_settings": {
              *     "notify_on_generation": true,
              *     "notify_on_approval_needed": true,
-             *     "notify_roles": ["admin", "counselor"]
+             *     "notify_roles": ["admin", "support_person"]
              *   }
              * }
              */

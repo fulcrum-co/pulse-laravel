@@ -18,8 +18,8 @@ class CourseContentAIService
     public function generateCompleteCourse(array $params): array
     {
         $topic = $params['topic'] ?? '';
-        $audience = $params['audience'] ?? 'learners';
-        $gradeLevel = $params['grade_level'] ?? null;
+        $audience = $params['audience'] ?? 'participants';
+        $gradeLevel = $params['level'] ?? null;
         $courseType = $params['course_type'] ?? 'skill_building';
         $duration = $params['duration_minutes'] ?? 30;
         $objectives = $params['objectives'] ?? [];
@@ -31,8 +31,8 @@ Return a JSON object with:
 - title: Engaging course title
 - description: 2-3 sentence description
 - objectives: Array of 3-5 clear learning objectives
-- rationale: Why this course is valuable (for staff/parents)
-- expected_experience: What the learner will do (written for the learner)
+- rationale: Why this course is valuable (for staff/direct_supervisors)
+- expected_experience: What the participant will do (written for the participant)
 - course_type: One of: intervention, enrichment, skill_building, wellness, academic, behavioral
 - target_needs: Array of needs/skills this addresses
 - estimated_duration_minutes: Total time (should match requested duration)
@@ -41,7 +41,7 @@ Return a JSON object with:
   - step_type: One of: content, reflection, action, practice, human_connection, assessment, checkpoint
   - content_type: One of: text, video, document, link, embedded, interactive
   - description: What this step covers
-  - instructions: Clear instructions for the learner
+  - instructions: Clear instructions for the participant
   - content_data: Object with:
     - body: Main content text (use markdown)
     - key_points: Array of key takeaways
@@ -62,7 +62,7 @@ PROMPT;
         $userMessage = "Create a mini-course about: {$topic}\n\n";
         $userMessage .= "Target audience: {$audience}\n";
         if ($gradeLevel) {
-            $userMessage .= "Grade level: {$gradeLevel}\n";
+            $userMessage .= "Level level: {$gradeLevel}\n";
         }
         $userMessage .= "Course type: {$courseType}\n";
         $userMessage .= "Target duration: {$duration} minutes\n";
@@ -108,20 +108,20 @@ You are an educational content writer. Create an engaging introduction for a min
 Return a JSON object with:
 - title: Attention-grabbing introduction title
 - hook: Opening statement to capture interest (1-2 sentences)
-- overview: What the learner will learn (2-3 sentences)
+- overview: What the participant will learn (2-3 sentences)
 - why_it_matters: Why this topic is important (2-3 sentences)
 - what_to_expect: Brief preview of course structure
-- success_criteria: How learners will know they've succeeded
+- success_criteria: How participants will know they've succeeded
 PROMPT;
 
         $courseType = $context['course_type'] ?? 'skill_building';
-        $audience = $context['audience'] ?? 'learners';
-        $gradeLevel = $context['grade_level'] ?? null;
+        $audience = $context['audience'] ?? 'participants';
+        $gradeLevel = $context['level'] ?? null;
 
         $userMessage = "Create an introduction for a {$courseType} course about: {$topic}\n";
         $userMessage .= "Audience: {$audience}\n";
         if ($gradeLevel) {
-            $userMessage .= "Grade level: {$gradeLevel}\n";
+            $userMessage .= "Level level: {$gradeLevel}\n";
         }
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
@@ -164,7 +164,7 @@ Return a JSON object with:
 - vocabulary: Object of key terms and definitions (if applicable)
 PROMPT;
 
-        $gradeLevel = $context['grade_level'] ?? null;
+        $gradeLevel = $context['level'] ?? null;
         $courseType = $context['course_type'] ?? 'skill_building';
 
         $userMessage = "Create educational content about: {$topic}\n\n";
@@ -173,7 +173,7 @@ PROMPT;
         }
         $userMessage .= "Course type: {$courseType}\n";
         if ($gradeLevel) {
-            $userMessage .= "Grade level: {$gradeLevel}\n";
+            $userMessage .= "Level level: {$gradeLevel}\n";
         }
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
@@ -203,7 +203,7 @@ PROMPT;
     public function generateReflectionPrompts(string $topic, array $context = []): array
     {
         $systemPrompt = <<<'PROMPT'
-You are an educational coach. Create thoughtful reflection prompts for learners.
+You are an educational coach. Create thoughtful reflection prompts for participants.
 
 Return a JSON object with:
 - title: Reflection section title
@@ -219,7 +219,7 @@ PROMPT;
         $contentCovered = $context['content_covered'] ?? $topic;
         $objectives = $context['objectives'] ?? [];
 
-        $userMessage = "Create reflection prompts for learners after studying: {$contentCovered}\n\n";
+        $userMessage = "Create reflection prompts for participants after studying: {$contentCovered}\n\n";
         if (! empty($objectives)) {
             $userMessage .= "Learning objectives covered:\n".implode("\n", array_map(fn ($o) => "- {$o}", $objectives));
         }
@@ -255,7 +255,7 @@ You are an assessment designer. Create appropriate assessment items.
 
 Return a JSON object with:
 - title: Assessment title
-- instructions: Instructions for the learner
+- instructions: Instructions for the participant
 - questions: Array of questions, each with:
   - type: "multiple_choice" | "true_false" | "short_answer" | "reflection"
   - question: The question text
@@ -303,7 +303,7 @@ PROMPT;
     public function generateActionPlan(string $topic, array $context = []): array
     {
         $systemPrompt = <<<'PROMPT'
-You are a learning coach. Create an action plan template for learners to apply what they've learned.
+You are a learning coach. Create an action plan template for participants to apply what they've learned.
 
 Return a JSON object with:
 - title: Action plan title
@@ -408,7 +408,7 @@ Return a JSON object with:
 PROMPT;
 
         $courseType = $context['course_type'] ?? 'skill_building';
-        $audience = $context['audience'] ?? 'learners';
+        $audience = $context['audience'] ?? 'participants';
 
         $userMessage = "Complete this {$fieldType} text for a {$courseType} course aimed at {$audience}:\n\n";
         $userMessage .= "Partial text: \"{$partial}\"";
@@ -445,7 +445,7 @@ Return a JSON object with:
 - description: Course description
 - objectives: Array of 3-5 learning objectives (extracted from document)
 - rationale: Why this content is valuable
-- expected_experience: What learners will do
+- expected_experience: What participants will do
 - course_type: Best fit from: intervention, enrichment, skill_building, wellness, academic, behavioral
 - estimated_duration_minutes: Based on content length
 - steps: Array of 4-7 steps extracted from the document, each with:
@@ -453,7 +453,7 @@ Return a JSON object with:
   - step_type: Best fit from: content, reflection, action, practice, assessment, checkpoint
   - content_type: text (default for document extraction)
   - description: What this section covers
-  - instructions: Instructions for the learner
+  - instructions: Instructions for the participant
   - content_data:
     - body: Extracted/adapted content (markdown)
     - key_points: Key takeaways from this section
@@ -463,8 +463,8 @@ Return a JSON object with:
 PROMPT;
 
         $courseType = $params['course_type'] ?? null;
-        $audience = $params['audience'] ?? 'learners';
-        $gradeLevel = $params['grade_level'] ?? null;
+        $audience = $params['audience'] ?? 'participants';
+        $gradeLevel = $params['level'] ?? null;
 
         $userMessage = "Convert this document into a mini-course structure:\n\n";
         $userMessage .= "---BEGIN DOCUMENT---\n{$documentText}\n---END DOCUMENT---\n\n";
@@ -474,7 +474,7 @@ PROMPT;
         }
         $userMessage .= "Target audience: {$audience}\n";
         if ($gradeLevel) {
-            $userMessage .= "Grade level: {$gradeLevel}\n";
+            $userMessage .= "Level level: {$gradeLevel}\n";
         }
 
         $response = $this->claudeService->sendMessage($userMessage, $systemPrompt);
@@ -553,7 +553,7 @@ PROMPT;
         $improvements = [
             'clarity' => 'Make this content clearer and easier to understand',
             'engagement' => 'Make this content more engaging and interesting',
-            'simplify' => 'Simplify this content for younger or struggling learners',
+            'simplify' => 'Simplify this content for younger or struggling participants',
             'expand' => 'Expand this content with more detail and examples',
             'academic' => 'Make this content more academically rigorous',
             'practical' => 'Add more practical, real-world applications',

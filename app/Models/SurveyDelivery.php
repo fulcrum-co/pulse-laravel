@@ -77,7 +77,7 @@ class SurveyDelivery extends Model
     }
 
     /**
-     * Get the recipient (polymorphic - learner, user, etc.).
+     * Get the recipient (polymorphic - participant, user, etc.).
      */
     public function recipient(): MorphTo
     {

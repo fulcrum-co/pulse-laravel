@@ -147,7 +147,7 @@ GET /api/courses
       "status": "published",
       "difficulty_level": "beginner",
       "course_type": "standard",
-      "target_grades": ["6", "7", "8"],
+      "target_levels": ["6", "7", "8"],
       "objectives": [
         "Understand basic arithmetic",
         "Learn fractions and decimals"
@@ -232,7 +232,7 @@ Content-Type: application/json
   "description": "A comprehensive introduction to basic math concepts.",
   "short_description": "Learn math basics",
   "difficulty_level": "beginner",
-  "target_grades": ["6", "7", "8"],
+  "target_levels": ["6", "7", "8"],
   "objectives": [
     "Understand basic arithmetic",
     "Learn fractions and decimals"
@@ -612,7 +612,7 @@ GET /api/user
     "role": "admin",
     "organization": {
       "id": 1,
-      "name": "Example Organization District"
+      "name": "Example Organization Section"
     },
     "created_at": "2026-01-01T00:00:00Z"
   }
@@ -663,7 +663,7 @@ Pulse can send webhooks for various events.
 | `course.archived` | Course archived |
 | `moderation.completed` | Moderation decision made |
 | `enrollment.created` | New enrollment |
-| `enrollment.completed` | Learner completed course |
+| `enrollment.completed` | Participant completed course |
 
 ### Webhook Security
 

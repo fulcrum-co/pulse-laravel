@@ -1,9 +1,10 @@
 <div class="min-h-screen bg-gray-50">
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <!-- Breadcrumbs -->
         <x-breadcrumbs :items="[
-            ['label' => 'Resources', 'url' => route('resources.index')],
-            ['label' => 'Courses', 'url' => route('resources.index') . '?activeTab=courses'],
+            ['label' => $terminology->get('resources_label'), 'url' => route('resources.index')],
+            ['label' => $terminology->get('course_plural'), 'url' => route('resources.index') . '?activeTab=courses'],
             ['label' => $course->title],
         ]" />
 
@@ -16,7 +17,7 @@
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
                                 <span class="px-3 py-1 bg-white/20 text-white text-xs rounded-full mb-3 inline-block">
-                                    {{ ucfirst(str_replace('_', ' ', $course->course_type)) }}
+                                    {{ $terminology->get('course_type_'.$course->course_type.'_label') }}
                                 </span>
                                 <h1 class="text-2xl font-bold text-white mb-2">{{ $course->title }}</h1>
                                 <p class="text-orange-100">{{ $course->description }}</p>
@@ -25,12 +26,12 @@
                                 @if($enrollment)
                                 <div class="text-right">
                                     <div class="text-3xl font-bold text-white">{{ $enrollment->progress_percent }}%</div>
-                                    <div class="text-orange-200 text-sm">Complete</div>
+                                    <div class="text-orange-200 text-sm">@term('complete_label')</div>
                                 </div>
                                 @elseif($previewMode)
                                 <div class="text-right">
                                     <span class="px-3 py-1.5 bg-white/20 text-white text-sm font-medium rounded-lg">
-                                        Previewing
+                                        @term('previewing_label')
                                     </span>
                                 </div>
                                 @else
@@ -39,7 +40,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
-                                    Start This Course
+                                    @term('start_course_label')
                                 </button>
                                 @endif
                             </div>
@@ -56,7 +57,7 @@
                     <!-- Objectives -->
                     @if($course->objectives && count($course->objectives) > 0)
                     <div class="p-6 border-b border-gray-200">
-                        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Objectives</h2>
+                        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">@term('objectives_label')</h2>
                         <ul class="space-y-2">
                             @foreach($course->objectives as $index => $objective)
                             <li class="flex items-start gap-2 text-sm">
@@ -85,7 +86,7 @@
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <span class="px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-600 mb-2 inline-block">
-                                    Step {{ $course->steps->search(fn($s) => $s->id === $currentStep->id) + 1 }} of {{ $course->steps->count() }}
+                                    @term('step_label') {{ $course->steps->search(fn($s) => $s->id === $currentStep->id) + 1 }} @term('of_label') {{ $course->steps->count() }}
                                 </span>
                                 <h2 class="text-xl font-bold text-gray-900">{{ $currentStep->title }}</h2>
                             </div>
@@ -94,7 +95,7 @@
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                {{ $currentStep->estimated_duration_minutes }} min
+                                {{ $currentStep->estimated_duration_minutes }} @term('minutes_label')
                             </span>
                             @endif
                         </div>
@@ -138,7 +139,7 @@
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                                     </svg>
-                                    Key Takeaways
+                                    @term('key_takeaways_label')
                                 </h4>
                                 <ul class="space-y-2">
                                     @foreach($currentStep->content_data['key_points'] as $point)
@@ -160,7 +161,7 @@
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
-                                    Downloadable Resources
+                                    @term('downloadable_resources_label')
                                 </h4>
                                 <div class="space-y-2">
                                     @foreach($currentStep->content_data['downloads'] as $download)
@@ -179,7 +180,7 @@
                                             </div>
                                             <div>
                                                 <p class="text-sm font-medium text-gray-900 group-hover:text-blue-700">{{ $download['title'] }}</p>
-                                                <p class="text-xs text-gray-500">{{ strtoupper($download['type'] ?? 'PDF') }} &bull; {{ $download['size'] ?? 'Unknown size' }}</p>
+                                                <p class="text-xs text-gray-500">{{ strtoupper($download['type'] ?? 'PDF') }} &bull; {{ $download['size'] ?? $terminology->get('unknown_size_label') }}</p>
                                             </div>
                                         </div>
                                         <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,8 +215,8 @@
                                     @elseif(($question['type'] ?? '') === 'scale')
                                     <div class="space-y-2">
                                         <div class="flex items-center justify-between text-xs text-gray-500">
-                                            <span>{{ $question['min_label'] ?? 'Low' }}</span>
-                                            <span>{{ $question['max_label'] ?? 'High' }}</span>
+                                            <span>{{ $question['min_label'] ?? $terminology->get('low_label') }}</span>
+                                            <span>{{ $question['max_label'] ?? $terminology->get('high_label') }}</span>
                                         </div>
                                         <div class="flex items-center justify-between gap-2">
                                             @for($i = ($question['min'] ?? 1); $i <= ($question['max'] ?? 5); $i++)
@@ -242,7 +243,7 @@
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
-                                    {{ $activity['title'] ?? 'Interactive Activity' }}
+                                    {{ $activity['title'] ?? $terminology->get('interactive_activity_label') }}
                                 </h4>
                                 <p class="text-sm text-indigo-700 mb-4">{{ $activity['instructions'] ?? '' }}</p>
 
@@ -255,7 +256,7 @@
                                                 <span class="text-2xl font-bold text-indigo-600">{{ $step['duration'] }}</span>
                                             </div>
                                             <p class="text-sm font-medium text-indigo-900">{{ $step['action'] }}</p>
-                                            <p class="text-xs text-indigo-600">seconds</p>
+                                            <p class="text-xs text-indigo-600">@term('seconds_label')</p>
                                         </div>
                                         @if(!$loop->last)
                                         <svg class="w-6 h-6 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -265,7 +266,7 @@
                                         @endforeach
                                     </div>
                                     @if(isset($activity['cycles']))
-                                    <p class="text-center text-sm text-indigo-600 mt-4">Repeat {{ $activity['cycles'] }} times</p>
+                                    <p class="text-center text-sm text-indigo-600 mt-4">@term('repeat_label') {{ $activity['cycles'] }} @term('times_label')</p>
                                     @endif
                                 </div>
                                 @endif
@@ -279,7 +280,7 @@
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                     </svg>
-                                    Support Resources
+                                    @term('support_resources_label')
                                 </h4>
                                 <div class="space-y-2">
                                     @foreach($currentStep->content_data['resources'] as $resource)
@@ -290,11 +291,11 @@
                                         </div>
                                         @if(isset($resource['url']))
                                         <a href="{{ $resource['url'] }}" target="_blank" class="px-3 py-1.5 text-xs font-medium text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition-colors">
-                                            Visit
+                                            @term('visit_label')
                                         </a>
                                         @else
                                         <button class="px-3 py-1.5 text-xs font-medium text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition-colors">
-                                            Connect
+                                            @term('connect_label')
                                         </button>
                                         @endif
                                     </div>
@@ -310,12 +311,12 @@
                                     <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
                                     </svg>
-                                    Reflection Prompts
+                                    @term('reflection_prompts_label')
                                 </h4>
                                 @foreach($currentStep->content_data['prompts'] as $prompt)
                                 <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
                                     <label class="block text-sm font-medium text-purple-900 mb-2">{{ $prompt }}</label>
-                                    <textarea class="w-full px-3 py-2 border border-purple-200 rounded-lg text-sm resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white" rows="3" placeholder="Write your thoughts here..."></textarea>
+                                    <textarea class="w-full px-3 py-2 border border-purple-200 rounded-lg text-sm resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white" rows="3" placeholder="@term('reflection_placeholder')"></textarea>
                                 </div>
                                 @endforeach
                             </div>
@@ -329,7 +330,7 @@
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
-                                Previous
+                                @term('previous_label')
                             </button>
                             @else
                             <div></div>
@@ -338,12 +339,12 @@
                             @if($enrollment)
                             <button wire:click="completeCurrentStep" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 transition-colors">
                                 @if($this->nextStep)
-                                Mark Complete & Continue
+                                @term('mark_complete_continue_label')
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
                                 @else
-                                Complete Course
+                                @term('complete_course_label')
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
@@ -352,12 +353,12 @@
                             @elseif($previewMode)
                             <button wire:click="advanceToNextStep" class="inline-flex items-center px-4 py-2 bg-pulse-blue-500 text-white rounded-lg hover:bg-pulse-blue-600 transition-colors">
                                 @if($this->nextStep)
-                                Next Step
+                                @term('next_step_label')
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
                                 @else
-                                End Preview
+                                @term('end_preview_label')
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
@@ -365,7 +366,7 @@
                             </button>
                             @else
                             <button wire:click="startEnrollment" class="inline-flex items-center px-4 py-2 bg-pulse-orange-500 text-white rounded-lg hover:bg-pulse-orange-600 transition-colors">
-                                Start This Course
+                                @term('start_course_label')
                             </button>
                             @endif
                         </div>
@@ -376,7 +377,7 @@
                 <!-- Why This Course? (Explainability) -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <button wire:click="toggleRationale" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
-                        <span class="font-medium text-gray-900">Why This Course?</span>
+                        <span class="font-medium text-gray-900">@term('why_this_course_label')</span>
                         <svg class="w-5 h-5 text-gray-400 transition-transform {{ $showRationale ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
@@ -388,7 +389,7 @@
                         @endif
                         @if($course->expected_experience)
                         <div class="mt-4">
-                            <h4 class="text-sm font-medium text-gray-900 mb-2">What to Expect</h4>
+                            <h4 class="text-sm font-medium text-gray-900 mb-2">@term('what_to_expect_label')</h4>
                             <p class="text-gray-600 text-sm">{{ $course->expected_experience }}</p>
                         </div>
                         @endif
@@ -409,14 +410,14 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                         </svg>
-                        Push to Organizations
+                        @term('push_to_organizations_label')
                     </button>
                 </div>
                 @endif
 
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden sticky top-6">
                     <div class="p-4 border-b border-gray-200">
-                        <h3 class="font-semibold text-gray-900">Course Steps</h3>
+                        <h3 class="font-semibold text-gray-900">@term('course_steps_label')</h3>
                     </div>
                     <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
                         @foreach($course->steps as $index => $step)
@@ -446,12 +447,12 @@
                             <!-- Step Info -->
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-medium text-gray-900 truncate">{{ $step->title }}</p>
-                                <p class="text-xs text-gray-500">{{ ucfirst($step->step_type) }}</p>
+                                <p class="text-xs text-gray-500">{{ $terminology->get('step_type_'.$step->step_type.'_label') }}</p>
                             </div>
 
                             <!-- Duration -->
                             @if($step->estimated_duration_minutes)
-                            <span class="text-xs text-gray-400">{{ $step->estimated_duration_minutes }}m</span>
+                            <span class="text-xs text-gray-400">{{ $step->estimated_duration_minutes }}@term('minute_short_label')</span>
                             @endif
                         </button>
                         @endforeach

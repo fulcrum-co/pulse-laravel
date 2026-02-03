@@ -19,11 +19,11 @@ class OrganizationFactory extends Factory
      */
     public function definition(): array
     {
-        $types = ['district', 'organization', 'pulse_admin'];
+        $types = ['section', 'organization', 'pulse_admin'];
 
         return [
             'name' => $this->faker->company(),
-            'type' => $this->faker->randomElement($types),
+            'org_type' => $this->faker->randomElement($types),
             'slug' => $this->faker->unique()->slug(),
             'settings' => [],
             'metadata' => [],
@@ -31,12 +31,12 @@ class OrganizationFactory extends Factory
     }
 
     /**
-     * Indicate that the organization is a district.
+     * Indicate that the organization is a section.
      */
-    public function district(): static
+    public function section(): static
     {
         return $this->state(fn (array $attributes) => [
-            'type' => 'district',
+            'org_type' => 'section',
         ]);
     }
 
@@ -46,7 +46,7 @@ class OrganizationFactory extends Factory
     public function organization(): static
     {
         return $this->state(fn (array $attributes) => [
-            'type' => 'organization',
+            'org_type' => 'organization',
         ]);
     }
 
@@ -56,17 +56,17 @@ class OrganizationFactory extends Factory
     public function pulseAdmin(): static
     {
         return $this->state(fn (array $attributes) => [
-            'type' => 'pulse_admin',
+            'org_type' => 'pulse_admin',
         ]);
     }
 
     /**
-     * Set the parent organization (for organizations under districts).
+     * Set the parent organization (for organizations under sections).
      */
-    public function withParent(Organization $parent): static
+    public function withParent(Organization $parentOrganization): static
     {
         return $this->state(fn (array $attributes) => [
-            'parent_id' => $parent->id,
+            'parent_org_id' => $parentOrganization->id,
         ]);
     }
 }

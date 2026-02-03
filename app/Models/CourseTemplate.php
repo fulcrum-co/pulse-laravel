@@ -27,7 +27,7 @@ class CourseTemplate extends Model
         'course_type',
         'template_data',
         'target_risk_factors',
-        'target_grade_levels',
+        'target_levels',
         'estimated_duration_minutes',
         'is_system',
         'status',
@@ -38,7 +38,7 @@ class CourseTemplate extends Model
     protected $casts = [
         'template_data' => 'array',
         'target_risk_factors' => 'array',
-        'target_grade_levels' => 'array',
+        'target_levels' => 'array',
         'is_system' => 'boolean',
     ];
 
@@ -148,15 +148,23 @@ class CourseTemplate extends Model
     }
 
     /**
-     * Scope by grade levels.
+     * Scope by level levels.
      */
-    public function scopeForGradeLevels(Builder $query, array $grades): Builder
+    public function scopeForLevels(Builder $query, array $levels): Builder
     {
-        return $query->where(function ($q) use ($grades) {
-            foreach ($grades as $grade) {
-                $q->orWhereJsonContains('target_grade_levels', $grade);
+        return $query->where(function ($q) use ($levels) {
+            foreach ($levels as $level) {
+                $q->orWhereJsonContains('target_levels', $level);
             }
         });
+    }
+
+    /**
+     * Legacy compatibility.
+     */
+    public function scopeForGradeLevels(Builder $query, array $levels): Builder
+    {
+        return $this->scopeForLevels($query, $levels);
     }
 
     /**

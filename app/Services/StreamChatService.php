@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Models\Provider;
 use App\Models\ProviderConversation;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\User;
 use App\Services\Domain\StreamIdGeneratorService;
 use Illuminate\Support\Facades\Log;
@@ -120,7 +120,7 @@ class StreamChatService
     /**
      * Create a channel for provider conversation.
      */
-    public function createProviderChannel(Provider $provider, User|Learner $initiator): array
+    public function createProviderChannel(Provider $provider, User|Participant $initiator): array
     {
         if (! $this->isConfigured()) {
             throw new \Exception('StreamChatService is not configured');
@@ -409,7 +409,7 @@ class StreamChatService
     /**
      * Ensure a user exists in Stream.
      */
-    protected function ensureUserExists(Provider|User|Learner $entity): void
+    protected function ensureUserExists(Provider|User|Participant $entity): void
     {
         if ($entity instanceof Provider) {
             $this->createOrUpdateUser($this->idGenerator->getProviderStreamId($entity), [
@@ -424,10 +424,10 @@ class StreamChatService
                 'image' => $entity->avatar_url,
                 'role' => $entity->primary_role,
             ]);
-        } elseif ($entity instanceof Learner) {
+        } elseif ($entity instanceof Participant) {
             $this->createOrUpdateUser($this->idGenerator->getLearnerStreamId($entity), [
                 'name' => $entity->full_name,
-                'role' => 'learner',
+                'role' => 'participant',
             ]);
         }
     }
@@ -449,17 +449,17 @@ class StreamChatService
     }
 
     /**
-     * Get Stream user ID for a learner.
+     * Get Stream user ID for a participant.
      */
-    public function getLearnerStreamId(Learner $learner): string
+    public function getLearnerStreamId(Participant $participant): string
     {
-        return $this->idGenerator->getLearnerStreamId($learner);
+        return $this->idGenerator->getLearnerStreamId($participant);
     }
 
     /**
-     * Get Stream user ID for an initiator (User or Learner).
+     * Get Stream user ID for an initiator (User or Participant).
      */
-    public function getInitiatorStreamId(User|Learner $initiator): string
+    public function getInitiatorStreamId(User|Participant $initiator): string
     {
         return $this->idGenerator->getInitiatorStreamId($initiator);
     }
@@ -467,7 +467,7 @@ class StreamChatService
     /**
      * Generate channel ID for provider conversation.
      */
-    public function generateChannelId(Provider $provider, User|Learner $initiator): string
+    public function generateChannelId(Provider $provider, User|Participant $initiator): string
     {
         return $this->idGenerator->generateProviderChannelId($provider, $initiator);
     }

@@ -1,3 +1,19 @@
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+    $enrollmentStatusLabels = [
+        'active' => $terminology->get('enrollment_status_active_label'),
+        'completed' => $terminology->get('enrollment_status_completed_label'),
+        'paused' => $terminology->get('enrollment_status_paused_label'),
+    ];
+    $approvalStatusLabels = [
+        'approved' => $terminology->get('course_approval_approved_label'),
+        'pending_review' => $terminology->get('course_approval_pending_review_label'),
+        'rejected' => $terminology->get('course_approval_rejected_label'),
+        'revision_requested' => $terminology->get('course_approval_revision_requested_label'),
+        'draft' => $terminology->get('draft_label'),
+    ];
+@endphp
+
 <div class="bg-white rounded-lg shadow-sm border border-gray-200">
     <div class="px-4 py-3 border-b border-gray-200">
         <div class="flex items-center justify-between">
@@ -5,7 +21,7 @@
                 <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                 </svg>
-                AI Course Suggestions
+                @term('ai_course_suggestions_label')
             </h3>
             <button
                 wire:click="generateCourse"
@@ -17,14 +33,14 @@
                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
-                    Generate Course
+                    @term('generate_course_label')
                 </span>
                 <span wire:loading wire:target="generateCourse" class="flex items-center">
                     <svg class="animate-spin mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                     </svg>
-                    Generating...
+                    @term('generating_label')
                 </span>
             </button>
         </div>
@@ -41,7 +57,7 @@
         <!-- Active Enrollments -->
         @if($activeEnrollments->count() > 0)
         <div>
-            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Active Courses</h4>
+            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">@term('active_courses_label')</h4>
             <div class="space-y-2">
                 @foreach($activeEnrollments as $enrollment)
                 <div class="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-100">
@@ -52,13 +68,13 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-medium text-gray-900">{{ $enrollment->course->title ?? 'Course' }}</p>
-                            <p class="text-xs text-gray-500">{{ ucfirst($enrollment->status) }} - {{ $enrollment->progress_percentage ?? 0 }}% complete</p>
+                            <p class="text-sm font-medium text-gray-900">{{ $enrollment->course->title ?? $terminology->get('course_singular') }}</p>
+                            <p class="text-xs text-gray-500">{{ $enrollmentStatusLabels[$enrollment->status] ?? ucfirst($enrollment->status) }} - {{ $enrollment->progress_percentage ?? 0 }}% @term('complete_label')</p>
                         </div>
                     </div>
                     @if($enrollment->course)
                     <a href="{{ route('resources.courses.show', $enrollment->course) }}" class="text-xs text-green-600 hover:underline">
-                        View
+                        @term('view_action')
                     </a>
                     @endif
                 </div>
@@ -70,14 +86,14 @@
         <!-- Pending Suggestions -->
         @if($suggestions->count() > 0)
         <div>
-            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Pending Suggestions</h4>
+            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">@term('pending_suggestions_label')</h4>
             <div class="space-y-2">
                 @foreach($suggestions as $suggestion)
                 <div class="p-3 bg-yellow-50 rounded-lg border border-yellow-100">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
-                            <p class="text-sm font-medium text-gray-900">{{ $suggestion->miniCourse->title ?? 'Suggested Course' }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ $suggestion->reason ?? 'AI recommended based on profile data' }}</p>
+                            <p class="text-sm font-medium text-gray-900">{{ $suggestion->miniCourse->title ?? $terminology->get('suggested_course_label') }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ $suggestion->reason ?? $terminology->get('ai_recommended_reason_label') }}</p>
                         </div>
                     </div>
                     <div class="flex gap-2 mt-2">
@@ -88,7 +104,7 @@
                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            Accept
+                            @term('accept_action')
                         </button>
                         <button
                             wire:click="declineSuggestion({{ $suggestion->id }})"
@@ -97,7 +113,7 @@
                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
-                            Decline
+                            @term('decline_action')
                         </button>
                     </div>
                 </div>
@@ -109,7 +125,7 @@
         <!-- AI-Generated Courses -->
         @if($existingCourses->count() > 0)
         <div>
-            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">AI-Generated Courses</h4>
+            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">@term('ai_generated_courses_label')</h4>
             <div class="space-y-2">
                 @foreach($existingCourses as $course)
                 <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-100">
@@ -132,23 +148,13 @@
                         <div>
                             <p class="text-sm font-medium text-gray-900">{{ $course->title }}</p>
                             <p class="text-xs text-gray-500">
-                                @if($course->approval_status === 'approved')
-                                    <span class="text-green-600">Approved</span>
-                                @elseif($course->approval_status === 'pending_review')
-                                    <span class="text-yellow-600">Pending Review</span>
-                                @elseif($course->approval_status === 'rejected')
-                                    <span class="text-red-600">Rejected</span>
-                                @elseif($course->approval_status === 'revision_requested')
-                                    <span class="text-orange-600">Revision Requested</span>
-                                @else
-                                    <span class="text-gray-500">Draft</span>
-                                @endif
+                                <span class="text-gray-500">{{ $approvalStatusLabels[$course->approval_status] ?? ucfirst($course->approval_status) }}</span>
                                 - {{ $course->created_at->diffForHumans() }}
                             </p>
                         </div>
                     </div>
                     <a href="{{ route('resources.courses.edit', $course) }}" class="text-xs text-purple-600 hover:underline">
-                        Edit
+                        @term('edit_action')
                     </a>
                 </div>
                 @endforeach
@@ -164,8 +170,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                 </svg>
             </div>
-            <p class="text-sm text-gray-600 mb-2">No AI courses yet</p>
-            <p class="text-xs text-gray-500">Click "Generate Course" to create a personalized course based on this profile's data.</p>
+            <p class="text-sm text-gray-600 mb-2">@term('no_ai_courses_yet_label')</p>
+            <p class="text-xs text-gray-500">@term('generate_course_empty_help_label')</p>
         </div>
         @endif
     </div>

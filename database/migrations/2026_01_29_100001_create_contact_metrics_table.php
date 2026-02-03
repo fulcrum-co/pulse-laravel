@@ -19,7 +19,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('org_id')->constrained('organizations')->cascadeOnDelete();
 
-            // Polymorphic contact reference (Learner or User)
+            // Polymorphic contact reference (Participant or User)
             $table->string('contact_type');
             $table->unsignedBigInteger('contact_id');
 

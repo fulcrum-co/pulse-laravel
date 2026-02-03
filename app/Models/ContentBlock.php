@@ -62,7 +62,7 @@ class ContentBlock extends Model
         'source_metadata',
         'topics',
         'skills',
-        'grade_levels',
+        'levels',
         'subject_areas',
         'target_risk_factors',
         'target_demographics',
@@ -81,7 +81,7 @@ class ContentBlock extends Model
         'source_metadata' => 'array',
         'topics' => 'array',
         'skills' => 'array',
-        'grade_levels' => 'array',
+        'levels' => 'array',
         'subject_areas' => 'array',
         'target_risk_factors' => 'array',
         'target_demographics' => 'array',
@@ -242,15 +242,23 @@ class ContentBlock extends Model
     }
 
     /**
-     * Scope by grade levels.
+     * Scope by levels.
      */
-    public function scopeForGradeLevels(Builder $query, array $grades): Builder
+    public function scopeForLevels(Builder $query, array $levels): Builder
     {
-        return $query->where(function ($q) use ($grades) {
-            foreach ($grades as $grade) {
-                $q->orWhereJsonContains('grade_levels', $grade);
+        return $query->where(function ($q) use ($levels) {
+            foreach ($levels as $level) {
+                $q->orWhereJsonContains('levels', $level);
             }
         });
+    }
+
+    /**
+     * Legacy compatibility.
+     */
+    public function scopeForGradeLevels(Builder $query, array $levels): Builder
+    {
+        return $this->scopeForLevels($query, $levels);
     }
 
     /**
@@ -380,7 +388,7 @@ class ContentBlock extends Model
             'status' => $this->status,
             'topics' => $this->topics ?? [],
             'skills' => $this->skills ?? [],
-            'grade_levels' => $this->grade_levels ?? [],
+            'levels' => $this->levels ?? [],
             'subject_areas' => $this->subject_areas ?? [],
             'target_risk_factors' => $this->target_risk_factors ?? [],
             'iep_appropriate' => (bool) $this->iep_appropriate,
@@ -420,9 +428,9 @@ class ContentBlock extends Model
             $parts[] = 'Skills: '.implode(', ', $skills);
         }
 
-        if (! empty($this->grade_levels)) {
-            $grades = is_array($this->grade_levels) ? $this->grade_levels : [];
-            $parts[] = 'Grades: '.implode(', ', $grades);
+        if (! empty($this->levels)) {
+            $levels = is_array($this->levels) ? $this->levels : [];
+            $parts[] = 'Levels: '.implode(', ', $levels);
         }
 
         if (! empty($this->subject_areas)) {
@@ -443,7 +451,7 @@ class ContentBlock extends Model
      */
     protected function getEmbeddingTextFields(): array
     {
-        return ['title', 'description', 'topics', 'skills', 'grade_levels', 'subject_areas', 'target_risk_factors'];
+        return ['title', 'description', 'topics', 'skills', 'levels', 'subject_areas', 'target_risk_factors'];
     }
 
     /**
@@ -484,7 +492,7 @@ class ContentBlock extends Model
             'type' => 'ContentBlock',
             'id' => $this->id,
             'org_id' => $this->org_id,
-            'target_grades' => $this->grade_levels ?? [],
+            'target_levels' => $this->levels ?? [],
             'block_type' => $this->block_type,
             'is_ai_generated' => false, // Content blocks are typically not AI-generated
         ];

@@ -1,8 +1,102 @@
 @props(['user' => auth()->user()])
 
+@php
+    $helpOverlayLabels = [
+        'of_label' => app(\App\Services\TerminologyService::class)->get('help_overlay_of_label'),
+        'back_label' => app(\App\Services\TerminologyService::class)->get('back_label'),
+        'next_label' => app(\App\Services\TerminologyService::class)->get('help_overlay_next_label'),
+        'got_it_label' => app(\App\Services\TerminologyService::class)->get('help_overlay_got_it_label'),
+        'dashboard_intro_title' => app(\App\Services\TerminologyService::class)->get('help_tour_dashboard_intro_title'),
+        'dashboard_intro_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_dashboard_intro_desc'),
+        'dashboard_selector_title' => app(\App\Services\TerminologyService::class)->get('help_tour_dashboard_selector_title'),
+        'dashboard_selector_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_dashboard_selector_desc'),
+        'dashboard_selector_tip' => app(\App\Services\TerminologyService::class)->get('help_tour_dashboard_selector_tip'),
+        'dashboard_actions_title' => app(\App\Services\TerminologyService::class)->get('help_tour_dashboard_actions_title'),
+        'dashboard_actions_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_dashboard_actions_desc'),
+        'dashboard_date_range_title' => app(\App\Services\TerminologyService::class)->get('help_tour_dashboard_date_range_title'),
+        'dashboard_date_range_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_dashboard_date_range_desc'),
+        'dashboard_date_range_tip' => app(\App\Services\TerminologyService::class)->get('help_tour_dashboard_date_range_tip'),
+        'dashboard_widgets_title' => app(\App\Services\TerminologyService::class)->get('help_tour_dashboard_widgets_title'),
+        'dashboard_widgets_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_dashboard_widgets_desc'),
+        'dashboard_widgets_tip' => app(\App\Services\TerminologyService::class)->get('help_tour_dashboard_widgets_tip'),
+        'surveys_intro_title' => app(\App\Services\TerminologyService::class)->get('help_tour_surveys_intro_title'),
+        'surveys_intro_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_surveys_intro_desc'),
+        'surveys_create_title' => app(\App\Services\TerminologyService::class)->get('help_tour_surveys_create_title'),
+        'surveys_create_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_surveys_create_desc'),
+        'surveys_create_tip' => app(\App\Services\TerminologyService::class)->get('help_tour_surveys_create_tip'),
+        'surveys_list_title' => app(\App\Services\TerminologyService::class)->get('help_tour_surveys_list_title'),
+        'surveys_list_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_surveys_list_desc'),
+        'alerts_intro_title' => app(\App\Services\TerminologyService::class)->get('help_tour_alerts_intro_title'),
+        'alerts_intro_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_alerts_intro_desc'),
+        'alerts_filters_title' => app(\App\Services\TerminologyService::class)->get('help_tour_alerts_filters_title'),
+        'alerts_filters_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_alerts_filters_desc'),
+        'alerts_list_title' => app(\App\Services\TerminologyService::class)->get('help_tour_alerts_list_title'),
+        'alerts_list_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_alerts_list_desc'),
+        'alerts_list_tip' => app(\App\Services\TerminologyService::class)->get('help_tour_alerts_list_tip'),
+        'contacts_intro_title' => app(\App\Services\TerminologyService::class)->get('help_tour_contacts_intro_title'),
+        'contacts_intro_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_contacts_intro_desc'),
+        'contacts_search_title' => app(\App\Services\TerminologyService::class)->get('help_tour_contacts_search_title'),
+        'contacts_search_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_contacts_search_desc'),
+        'contacts_list_title' => app(\App\Services\TerminologyService::class)->get('help_tour_contacts_list_title'),
+        'contacts_list_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_contacts_list_desc'),
+        'plans_intro_title' => app(\App\Services\TerminologyService::class)->get('help_tour_plans_intro_title'),
+        'plans_intro_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_plans_intro_desc'),
+        'plans_search_title' => app(\App\Services\TerminologyService::class)->get('help_tour_plans_search_title'),
+        'plans_search_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_plans_search_desc'),
+        'plans_filters_title' => app(\App\Services\TerminologyService::class)->get('help_tour_plans_filters_title'),
+        'plans_filters_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_plans_filters_desc'),
+        'plans_list_title' => app(\App\Services\TerminologyService::class)->get('help_tour_plans_list_title'),
+        'plans_list_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_plans_list_desc'),
+        'plans_list_tip' => app(\App\Services\TerminologyService::class)->get('help_tour_plans_list_tip'),
+        'resources_intro_title' => app(\App\Services\TerminologyService::class)->get('help_tour_resources_intro_title'),
+        'resources_intro_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_resources_intro_desc'),
+        'resources_search_title' => app(\App\Services\TerminologyService::class)->get('help_tour_resources_search_title'),
+        'resources_search_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_resources_search_desc'),
+        'resources_filters_title' => app(\App\Services\TerminologyService::class)->get('help_tour_resources_filters_title'),
+        'resources_filters_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_resources_filters_desc'),
+        'resources_filters_tip' => app(\App\Services\TerminologyService::class)->get('help_tour_resources_filters_tip'),
+        'resources_categories_title' => app(\App\Services\TerminologyService::class)->get('help_tour_resources_categories_title'),
+        'resources_categories_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_resources_categories_desc'),
+        'collect_intro_title' => app(\App\Services\TerminologyService::class)->get('help_tour_collect_intro_title'),
+        'collect_intro_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_collect_intro_desc'),
+        'collect_search_title' => app(\App\Services\TerminologyService::class)->get('help_tour_collect_search_title'),
+        'collect_search_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_collect_search_desc'),
+        'collect_filters_title' => app(\App\Services\TerminologyService::class)->get('help_tour_collect_filters_title'),
+        'collect_filters_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_collect_filters_desc'),
+        'collect_filters_tip' => app(\App\Services\TerminologyService::class)->get('help_tour_collect_filters_tip'),
+        'collect_list_title' => app(\App\Services\TerminologyService::class)->get('help_tour_collect_list_title'),
+        'collect_list_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_collect_list_desc'),
+        'collect_list_tip' => app(\App\Services\TerminologyService::class)->get('help_tour_collect_list_tip'),
+        'distribute_intro_title' => app(\App\Services\TerminologyService::class)->get('help_tour_distribute_intro_title'),
+        'distribute_intro_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_distribute_intro_desc'),
+        'distribute_search_title' => app(\App\Services\TerminologyService::class)->get('help_tour_distribute_search_title'),
+        'distribute_search_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_distribute_search_desc'),
+        'distribute_filters_title' => app(\App\Services\TerminologyService::class)->get('help_tour_distribute_filters_title'),
+        'distribute_filters_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_distribute_filters_desc'),
+        'distribute_filters_tip' => app(\App\Services\TerminologyService::class)->get('help_tour_distribute_filters_tip'),
+        'distribute_list_title' => app(\App\Services\TerminologyService::class)->get('help_tour_distribute_list_title'),
+        'distribute_list_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_distribute_list_desc'),
+        'distribute_list_tip' => app(\App\Services\TerminologyService::class)->get('help_tour_distribute_list_tip'),
+        'reports_intro_title' => app(\App\Services\TerminologyService::class)->get('help_tour_reports_intro_title'),
+        'reports_intro_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_reports_intro_desc'),
+        'reports_search_title' => app(\App\Services\TerminologyService::class)->get('help_tour_reports_search_title'),
+        'reports_search_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_reports_search_desc'),
+        'reports_filters_title' => app(\App\Services\TerminologyService::class)->get('help_tour_reports_filters_title'),
+        'reports_filters_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_reports_filters_desc'),
+        'reports_filters_tip' => app(\App\Services\TerminologyService::class)->get('help_tour_reports_filters_tip'),
+        'reports_list_title' => app(\App\Services\TerminologyService::class)->get('help_tour_reports_list_title'),
+        'reports_list_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_reports_list_desc'),
+        'reports_list_tip' => app(\App\Services\TerminologyService::class)->get('help_tour_reports_list_tip'),
+        'general_intro_title' => app(\App\Services\TerminologyService::class)->get('help_tour_general_intro_title'),
+        'general_intro_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_general_intro_desc'),
+        'general_navigation_title' => app(\App\Services\TerminologyService::class)->get('help_tour_general_navigation_title'),
+        'general_navigation_desc' => app(\App\Services\TerminologyService::class)->get('help_tour_general_navigation_desc'),
+    ];
+@endphp
+
 {{-- Page Help Overlay - Guided walkthrough for current page --}}
 <div
-    x-data="pageHelpOverlay()"
+    x-data="pageHelpOverlay(@js($helpOverlayLabels))"
     x-show="active"
     x-cloak
     @start-page-help.window="startHelp($event.detail?.context, $event.detail?.section)"
@@ -45,7 +139,7 @@
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <span class="flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 text-purple-700 text-xs font-bold" x-text="currentIndex + 1"></span>
-                    <span class="text-xs text-gray-500">of <span x-text="steps.length"></span></span>
+                    <span class="text-xs text-gray-500"><span x-text="labels.of_label"></span> <span x-text="steps.length"></span></span>
                 </div>
                 <button
                     @click="close()"
@@ -89,14 +183,14 @@
                     x-show="currentIndex > 0"
                     class="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
                 >
-                    ← Back
+                    ← <span x-text="labels.back_label"></span>
                 </button>
                 <div x-show="currentIndex === 0"></div>
 
                 <button
                     @click="nextStep()"
                     class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors"
-                    x-text="currentIndex === steps.length - 1 ? 'Got it!' : 'Next →'"
+                    x-text="currentIndex === steps.length - 1 ? labels.got_it_label : labels.next_label"
                 ></button>
             </div>
         </div>
@@ -104,8 +198,9 @@
 </div>
 
 <script>
-function pageHelpOverlay() {
+function pageHelpOverlay(labels) {
     return {
+        labels,
         active: false,
         steps: [],
         currentIndex: 0,
@@ -120,39 +215,39 @@ function pageHelpOverlay() {
                 {
                     section: 'intro',
                     selector: null,
-                    title: 'Welcome to your Dashboard',
-                    description: 'This is your central hub for monitoring learner wellness across your organization. Let me show you around.',
+                    title: labels.dashboard_intro_title,
+                    description: labels.dashboard_intro_desc,
                     position: 'center'
                 },
                 {
                     section: 'selector',
                     selector: '[data-help="dashboard-selector"]',
-                    title: 'Dashboard Selector',
-                    description: 'Switch between different dashboards or create new ones. Each dashboard can have its own set of customized widgets.',
-                    tip: 'Create multiple dashboards for different purposes - one for daily monitoring, one for weekly reviews.',
+                    title: labels.dashboard_selector_title,
+                    description: labels.dashboard_selector_desc,
+                    tip: labels.dashboard_selector_tip,
                     position: 'bottom'
                 },
                 {
                     section: 'actions',
                     selector: '[data-help="dashboard-actions"]',
-                    title: 'Dashboard Actions',
-                    description: 'Add widgets, set date ranges, and manage your dashboard settings. Customize your view to focus on what matters most.',
+                    title: labels.dashboard_actions_title,
+                    description: labels.dashboard_actions_desc,
                     position: 'bottom'
                 },
                 {
                     section: 'date-range',
                     selector: '[data-help="date-range"]',
-                    title: 'Date Range Filter',
-                    description: 'Filter your dashboard data by week, month, or quarter to see trends over different time periods.',
-                    tip: 'Use the quarter view for strategic planning and the week view for daily operations.',
+                    title: labels.dashboard_date_range_title,
+                    description: labels.dashboard_date_range_desc,
+                    tip: labels.dashboard_date_range_tip,
                     position: 'bottom'
                 },
                 {
                     section: 'widgets',
                     selector: '[data-help="widgets-grid"]',
-                    title: 'Dashboard Widgets',
-                    description: 'Your customizable widgets display key metrics, charts, and lists. Add, remove, or rearrange widgets to build your perfect dashboard.',
-                    tip: 'Click the Add Widget button to explore available widget types.',
+                    title: labels.dashboard_widgets_title,
+                    description: labels.dashboard_widgets_desc,
+                    tip: labels.dashboard_widgets_tip,
                     position: 'top'
                 }
             ],
@@ -160,23 +255,23 @@ function pageHelpOverlay() {
                 {
                     section: 'intro',
                     selector: null,
-                    title: 'Surveys & Assessments',
-                    description: 'Create and manage wellness surveys to check in with your learners. This is where you\'ll build, distribute, and analyze survey results.',
+                    title: labels.surveys_intro_title,
+                    description: labels.surveys_intro_desc,
                     position: 'center'
                 },
                 {
                     section: 'create',
                     selector: '[data-help="create-survey"], button:contains("Create"), a[href*="create"]',
-                    title: 'Creating Surveys',
-                    description: 'Click here to build a new survey. You can choose from templates or create custom questions.',
-                    tip: 'Start with a template to save time!',
+                    title: labels.surveys_create_title,
+                    description: labels.surveys_create_desc,
+                    tip: labels.surveys_create_tip,
                     position: 'bottom'
                 },
                 {
                     section: 'list',
                     selector: '[data-help="survey-list"], .survey-list, table',
-                    title: 'Your Surveys',
-                    description: 'View all your surveys here. You can see their status, response rates, and take quick actions.',
+                    title: labels.surveys_list_title,
+                    description: labels.surveys_list_desc,
                     position: 'top'
                 }
             ],
@@ -184,23 +279,23 @@ function pageHelpOverlay() {
                 {
                     section: 'intro',
                     selector: null,
-                    title: 'Alert Management',
-                    description: 'Alerts help you identify learners who may need support. This system monitors survey responses and flags concerning patterns.',
+                    title: labels.alerts_intro_title,
+                    description: labels.alerts_intro_desc,
                     position: 'center'
                 },
                 {
                     section: 'filters',
                     selector: '[data-help="alert-filters"], .filters, [class*="filter"]',
-                    title: 'Filter Alerts',
-                    description: 'Use these filters to focus on specific alert types, severity levels, or time periods.',
+                    title: labels.alerts_filters_title,
+                    description: labels.alerts_filters_desc,
                     position: 'bottom'
                 },
                 {
                     section: 'list',
                     selector: '[data-help="alert-list"], .alert-list, [class*="alert-item"]',
-                    title: 'Alert Details',
-                    description: 'Each alert shows the learner, the trigger, and recommended actions. Click to view more details.',
-                    tip: 'Prioritize high-severity alerts first.',
+                    title: labels.alerts_list_title,
+                    description: labels.alerts_list_desc,
+                    tip: labels.alerts_list_tip,
                     position: 'top'
                 }
             ],
@@ -208,22 +303,22 @@ function pageHelpOverlay() {
                 {
                     section: 'intro',
                     selector: null,
-                    title: 'Contact Management',
-                    description: 'View and manage all contacts including learners, teachers, and parents. Track their information and engagement.',
+                    title: labels.contacts_intro_title,
+                    description: labels.contacts_intro_desc,
                     position: 'center'
                 },
                 {
                     section: 'search',
                     selector: '[data-help="search-contacts"], input[type="search"], .search',
-                    title: 'Find Contacts',
-                    description: 'Search by name, email, or other criteria to quickly find specific contacts.',
+                    title: labels.contacts_search_title,
+                    description: labels.contacts_search_desc,
                     position: 'bottom'
                 },
                 {
                     section: 'list',
                     selector: '[data-help="contact-list"], .contact-list, table',
-                    title: 'Contact Directory',
-                    description: 'Browse all contacts in your organization. Click on a contact to view their full profile.',
+                    title: labels.contacts_list_title,
+                    description: labels.contacts_list_desc,
                     position: 'top'
                 }
             ],
@@ -231,30 +326,30 @@ function pageHelpOverlay() {
                 {
                     section: 'intro',
                     selector: null,
-                    title: 'Strategic Plans',
-                    description: 'Create and track organizational wellness goals and initiatives. Strategic plans help align your team around shared objectives.',
+                    title: labels.plans_intro_title,
+                    description: labels.plans_intro_desc,
                     position: 'center'
                 },
                 {
                     section: 'search',
                     selector: '[data-help="search-plans"], input[placeholder*="Search"]',
-                    title: 'Search Plans',
-                    description: 'Quickly find specific plans by searching for keywords in the plan name or description.',
+                    title: labels.plans_search_title,
+                    description: labels.plans_search_desc,
                     position: 'bottom'
                 },
                 {
                     section: 'filters',
                     selector: '[data-help="plan-filters"], select',
-                    title: 'Filter Plans',
-                    description: 'Filter plans by type (Growth, Strategic, Action, etc.) or status (Active, Draft, Completed).',
+                    title: labels.plans_filters_title,
+                    description: labels.plans_filters_desc,
                     position: 'bottom'
                 },
                 {
                     section: 'list',
                     selector: '[data-help="plan-list"], .plan-list, [class*="plan-card"]',
-                    title: 'Your Plans',
-                    description: 'View all strategic plans here. Each card shows the plan name, progress, goals, and key dates.',
-                    tip: 'Click on any plan card to view details and track progress.',
+                    title: labels.plans_list_title,
+                    description: labels.plans_list_desc,
+                    tip: labels.plans_list_tip,
                     position: 'top'
                 }
             ],
@@ -262,30 +357,30 @@ function pageHelpOverlay() {
                 {
                     section: 'intro',
                     selector: null,
-                    title: 'Resource Library',
-                    description: 'Access and share educational resources, intervention materials, and support documents with your team.',
+                    title: labels.resources_intro_title,
+                    description: labels.resources_intro_desc,
                     position: 'center'
                 },
                 {
                     section: 'search',
                     selector: '[data-help="search-resources"]',
-                    title: 'Search Resources',
-                    description: 'Search across all resource types including content, providers, programs, and courses to quickly find what you need.',
+                    title: labels.resources_search_title,
+                    description: labels.resources_search_desc,
                     position: 'bottom'
                 },
                 {
                     section: 'filters',
                     selector: '[data-help="resource-filters"]',
-                    title: 'Filter & Sort',
-                    description: 'Use the sidebar to filter by category, content type, and sort order to narrow down your resource search.',
-                    tip: 'Combine multiple filters to find exactly what you\'re looking for.',
+                    title: labels.resources_filters_title,
+                    description: labels.resources_filters_desc,
+                    tip: labels.resources_filters_tip,
                     position: 'right'
                 },
                 {
                     section: 'categories',
                     selector: '[data-help="resource-categories"]',
-                    title: 'Resource Categories',
-                    description: 'Browse resources by category - Content, Providers, Programs, and Courses. Click any card to explore that category.',
+                    title: labels.resources_categories_title,
+                    description: labels.resources_categories_desc,
                     position: 'top'
                 }
             ],
@@ -293,31 +388,31 @@ function pageHelpOverlay() {
                 {
                     section: 'intro',
                     selector: null,
-                    title: 'Data Collections',
-                    description: 'Set up recurring data collection to systematically gather progress monitoring data, check-ins, and insights from learners, staff, or parents.',
+                    title: labels.collect_intro_title,
+                    description: labels.collect_intro_desc,
                     position: 'center'
                 },
                 {
                     section: 'search',
                     selector: '[data-help="search-collections"]',
-                    title: 'Search Collections',
-                    description: 'Quickly find specific data collections by searching for keywords in the collection name.',
+                    title: labels.collect_search_title,
+                    description: labels.collect_search_desc,
                     position: 'bottom'
                 },
                 {
                     section: 'filters',
                     selector: '[data-help="collection-filters"]',
-                    title: 'Filter Collections',
-                    description: 'Filter by status (Active, Paused, Draft) or type (Recurring, One-time, Event-triggered) to narrow your view.',
-                    tip: 'Use the status filter to focus on active collections that need attention.',
+                    title: labels.collect_filters_title,
+                    description: labels.collect_filters_desc,
+                    tip: labels.collect_filters_tip,
                     position: 'bottom'
                 },
                 {
                     section: 'list',
                     selector: '[data-help="collection-list"]',
-                    title: 'Your Collections',
-                    description: 'View all data collections here. Each card shows session counts, entries, and next scheduled run time.',
-                    tip: 'Click on a collection to view its sessions and collected data.',
+                    title: labels.collect_list_title,
+                    description: labels.collect_list_desc,
+                    tip: labels.collect_list_tip,
                     position: 'top'
                 }
             ],
@@ -325,31 +420,31 @@ function pageHelpOverlay() {
                 {
                     section: 'intro',
                     selector: null,
-                    title: 'Distributions',
-                    description: 'Send reports and messages to targeted groups via email or SMS. Set up one-time or recurring campaigns.',
+                    title: labels.distribute_intro_title,
+                    description: labels.distribute_intro_desc,
                     position: 'center'
                 },
                 {
                     section: 'search',
                     selector: '[data-help="search-distributions"]',
-                    title: 'Search Distributions',
-                    description: 'Quickly find specific distributions by searching for keywords in the distribution name.',
+                    title: labels.distribute_search_title,
+                    description: labels.distribute_search_desc,
                     position: 'bottom'
                 },
                 {
                     section: 'filters',
                     selector: '[data-help="distribution-filters"]',
-                    title: 'Filter Distributions',
-                    description: 'Filter by status or channel (Email, SMS) to find specific distributions quickly.',
-                    tip: 'Filter by channel to review all email or SMS campaigns separately.',
+                    title: labels.distribute_filters_title,
+                    description: labels.distribute_filters_desc,
+                    tip: labels.distribute_filters_tip,
                     position: 'bottom'
                 },
                 {
                     section: 'list',
                     selector: '[data-help="distribution-list"]',
-                    title: 'Your Distributions',
-                    description: 'Track all distributions here. See delivery counts, recipient lists, and next scheduled send time.',
-                    tip: 'Hover over a distribution card to see quick action buttons.',
+                    title: labels.distribute_list_title,
+                    description: labels.distribute_list_desc,
+                    tip: labels.distribute_list_tip,
                     position: 'top'
                 }
             ],
@@ -357,31 +452,31 @@ function pageHelpOverlay() {
                 {
                     section: 'intro',
                     selector: null,
-                    title: 'Reports',
-                    description: 'Build beautiful, data-driven reports with our drag-and-drop editor. Share insights with stakeholders.',
+                    title: labels.reports_intro_title,
+                    description: labels.reports_intro_desc,
                     position: 'center'
                 },
                 {
                     section: 'search',
                     selector: '[data-help="search-reports"]',
-                    title: 'Search Reports',
-                    description: 'Quickly find specific reports by searching for keywords in the report name.',
+                    title: labels.reports_search_title,
+                    description: labels.reports_search_desc,
                     position: 'bottom'
                 },
                 {
                     section: 'filters',
                     selector: '[data-help="report-filters"]',
-                    title: 'Filter Reports',
-                    description: 'Filter reports by status (Draft or Published) and switch between grid, list, and table views.',
-                    tip: 'Use the Published filter to see reports ready for sharing.',
+                    title: labels.reports_filters_title,
+                    description: labels.reports_filters_desc,
+                    tip: labels.reports_filters_tip,
                     position: 'bottom'
                 },
                 {
                     section: 'list',
                     selector: '[data-help="report-list"]',
-                    title: 'Your Reports',
-                    description: 'View all your reports here. Click to edit, duplicate, or delete reports. Published reports can be shared with stakeholders.',
-                    tip: 'Click "Duplicate" to create a new report based on an existing template.',
+                    title: labels.reports_list_title,
+                    description: labels.reports_list_desc,
+                    tip: labels.reports_list_tip,
                     position: 'top'
                 }
             ],
@@ -389,15 +484,15 @@ function pageHelpOverlay() {
                 {
                     section: 'intro',
                     selector: null,
-                    title: 'Page Help',
-                    description: 'Welcome! This guided tour will help you understand the features on this page.',
+                    title: labels.general_intro_title,
+                    description: labels.general_intro_desc,
                     position: 'center'
                 },
                 {
                     section: 'navigation',
                     selector: 'header, [class*="header"]',
-                    title: 'Navigation',
-                    description: 'Use the header to navigate between different sections of Pulse. The sidebar provides quick access to all main features.',
+                    title: labels.general_navigation_title,
+                    description: labels.general_navigation_desc,
                     position: 'bottom'
                 }
             ]
@@ -463,7 +558,7 @@ function pageHelpOverlay() {
             if (path.includes('/plans')) return 'plans';
             if (path.includes('/surveys')) return 'surveys';
             if (path.includes('/alerts')) return 'alerts';
-            if (path.includes('/learners') || path.includes('/contacts')) return 'contacts';
+            if (path.includes('/participants') || path.includes('/contacts')) return 'contacts';
             if (path.includes('/resources')) return 'resources';
             if (path.includes('/collect')) return 'collect';
             if (path.includes('/distribute')) return 'distribute';

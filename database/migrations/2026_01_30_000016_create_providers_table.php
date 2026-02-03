@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('org_id')->constrained('organizations')->cascadeOnDelete();
             $table->string('name');
-            $table->string('provider_type'); // therapist, tutor, coach, mentor, counselor, specialist
+            $table->string('provider_type'); // therapist, tutor, coach, mentor, support_person, specialist
             $table->json('specialty_areas')->nullable();
             $table->string('credentials')->nullable();
             $table->text('bio')->nullable();

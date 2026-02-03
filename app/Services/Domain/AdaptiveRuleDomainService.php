@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 /**
  * Domain service for adaptive trigger rules and evaluations.
  * Handles all business logic for trigger condition evaluation, signal analysis,
- * and theme extraction from learner data.
+ * and theme extraction from participant data.
  */
 class AdaptiveRuleDomainService
 {
@@ -43,11 +43,11 @@ class AdaptiveRuleDomainService
         $keywords = [
             'anxiety' => ['anxiety', 'anxious', 'worried', 'nervous', 'stressed'],
             'depression' => ['depression', 'depressed', 'sad', 'hopeless', 'withdrawn'],
-            'academic' => ['grades', 'homework', 'studying', 'test', 'failing', 'academic'],
+            'academic' => ['levels', 'homework', 'studying', 'test', 'failing', 'academic'],
             'behavior' => ['behavior', 'conduct', 'discipline', 'outburst', 'disruptive'],
             'attendance' => ['absence', 'absent', 'tardy', 'late', 'attendance', 'missing'],
             'social' => ['friends', 'bullying', 'isolated', 'social', 'peer'],
-            'family' => ['family', 'home', 'parents', 'divorce', 'custody'],
+            'family' => ['family', 'home', 'direct_supervisors', 'divorce', 'custody'],
         ];
 
         $lowerText = strtolower($text);

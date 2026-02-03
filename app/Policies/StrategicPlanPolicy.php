@@ -45,8 +45,8 @@ class StrategicPlanPolicy
      */
     public function create(User $user): bool
     {
-        // Admins, consultants, and teachers can create
-        return $user->isAdmin() || in_array($user->primary_role, ['consultant', 'teacher']);
+        // Admins, consultants, and instructors can create
+        return $user->isAdmin() || in_array($user->primary_role, ['consultant', 'instructor']);
     }
 
     /**

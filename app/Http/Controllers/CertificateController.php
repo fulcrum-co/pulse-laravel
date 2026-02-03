@@ -50,7 +50,7 @@ class CertificateController extends Controller
             return redirect($url);
         }
 
-        abort(403, 'Unauthorized');
+        abort(403, app(\App\Services\TerminologyService::class)->get('unauthorized_label'));
     }
 
     /**
@@ -62,7 +62,7 @@ class CertificateController extends Controller
 
         $user = auth()->user();
         if (!$user || $user->id !== $certificate->user_id) {
-            abort(403, 'Unauthorized');
+            abort(403, app(\App\Services\TerminologyService::class)->get('unauthorized_label'));
         }
 
         $url = $this->certificateService->getLinkedInShareUrl($certificate);
@@ -98,7 +98,7 @@ class CertificateController extends Controller
 
         $user = auth()->user();
         if (!$user || ($user->id !== $certificate->user_id && !$user->isAdmin())) {
-            abort(403, 'Unauthorized');
+            abort(403, app(\App\Services\TerminologyService::class)->get('unauthorized_label'));
         }
 
         return view('certificates.show', [

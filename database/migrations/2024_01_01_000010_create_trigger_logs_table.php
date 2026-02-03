@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('trigger_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('trigger_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('learner_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('participant_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('conversation_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('survey_attempt_id')->nullable()->constrained()->nullOnDelete();
             $table->string('status')->default('triggered'); // triggered, acknowledged, resolved, dismissed
@@ -30,7 +30,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['trigger_id', 'status']);
-            $table->index(['learner_id', 'created_at']);
+            $table->index(['participant_id', 'created_at']);
         });
     }
 

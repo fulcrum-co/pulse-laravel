@@ -87,10 +87,10 @@ class PlanList extends Component
         $counts = [
             'all' => StrategicPlan::where('org_id', $user->org_id)->count(),
             'organizational' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'organizational')->count(),
-            'teacher' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'teacher')->count(),
-            'learner' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'learner')->count(),
+            'instructor' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'instructor')->count(),
+            'participant' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'participant')->count(),
             'department' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'department')->count(),
-            'grade' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'grade')->count(),
+            'level' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'level')->count(),
             'improvement' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'improvement')->count(),
             'growth' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'growth')->count(),
             'strategic' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'strategic')->count(),

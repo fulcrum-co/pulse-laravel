@@ -7,13 +7,13 @@
                 <span>/</span>
                 <a href="{{ route('admin.cohorts.show', $cohort) }}" class="hover:text-purple-600">{{ $cohort->name }}</a>
                 <span>/</span>
-                <span>Enroll</span>
+                <span>@term('enroll_action')</span>
             </div>
-            <h1 class="text-2xl font-bold text-gray-900">Add @term('learner_plural')</h1>
-            <p class="text-gray-600 mt-1">Enroll users in {{ $cohort->name }}</p>
+            <h1 class="text-2xl font-bold text-gray-900">@term('add_action') @term('learner_plural')</h1>
+            <p class="text-gray-600 mt-1">@term('enroll_users_in_label') {{ $cohort->name }}</p>
         </div>
         <a href="{{ route('admin.cohorts.show', $cohort) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-            Back to @term('cohort_singular')
+            @term('back_to_cohort_label')
         </a>
     </div>
 
@@ -23,8 +23,8 @@
             <!-- Search Users -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div class="px-4 py-3 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Search Users</h2>
-                    <p class="text-sm text-gray-500 mt-1">Find and select users to enroll</p>
+                    <h2 class="text-lg font-semibold text-gray-900">@term('search_users_label')</h2>
+                    <p class="text-sm text-gray-500 mt-1">@term('find_select_users_label')</p>
                 </div>
                 <div class="p-4">
                     <div class="flex items-center space-x-3 mb-4">
@@ -32,7 +32,7 @@
                             <input
                                 type="text"
                                 wire:model.live.debounce.300ms="userSearch"
-                                placeholder="Search by name or email..."
+                                placeholder="{{ app(\App\Services\TerminologyService::class)->get('search_by_name_or_email_placeholder') }}"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                             >
                         </div>
@@ -41,7 +41,7 @@
                                 wire:click="clearSelection"
                                 class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800"
                             >
-                                Clear ({{ count($selectedUsers) }})
+                                @term('clear_action') ({{ count($selectedUsers) }})
                             </button>
                         @endif
                     </div>
@@ -68,12 +68,12 @@
                                 @endforeach
                             </div>
                             <div class="mt-2 flex items-center justify-between text-sm text-gray-500">
-                                <span>{{ $searchResults->count() }} results</span>
-                                <button wire:click="selectAll" class="text-purple-600 hover:text-purple-700">Select all visible</button>
+                                <span>{{ $searchResults->count() }} @term('results_label')</span>
+                                <button wire:click="selectAll" class="text-purple-600 hover:text-purple-700">@term('select_all_visible_label')</button>
                             </div>
                         @else
                             <div class="text-center py-8 text-gray-500">
-                                <p>No users found matching "{{ $userSearch }}"</p>
+                                <p>@term('no_users_found_label') "{{ $userSearch }}"</p>
                             </div>
                         @endif
                     @else
@@ -81,7 +81,7 @@
                             <svg class="mx-auto h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
-                            <p class="mt-2">Type at least 2 characters to search</p>
+                            <p class="mt-2">@term('type_to_search_help_label')</p>
                         </div>
                     @endif
                 </div>
@@ -90,8 +90,8 @@
             <!-- CSV Import -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div class="px-4 py-3 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Bulk Import</h2>
-                    <p class="text-sm text-gray-500 mt-1">Upload a CSV file to enroll multiple users at once</p>
+                    <h2 class="text-lg font-semibold text-gray-900">@term('bulk_import_label')</h2>
+                    <p class="text-sm text-gray-500 mt-1">@term('bulk_import_body_label')</p>
                 </div>
                 <div class="p-4">
                     @if(!$showCsvPreview)
@@ -102,7 +102,7 @@
                                 </svg>
                                 <div class="mt-3">
                                     <label for="csv-upload" class="cursor-pointer">
-                                        <span class="text-purple-600 hover:text-purple-700 font-medium">Upload a CSV file</span>
+                                        <span class="text-purple-600 hover:text-purple-700 font-medium">@term('upload_csv_label')</span>
                                         <input
                                             id="csv-upload"
                                             type="file"
@@ -111,7 +111,7 @@
                                             class="sr-only"
                                         >
                                     </label>
-                                    <p class="text-xs text-gray-500 mt-1">CSV with email column required. Optional: name, first_name, last_name, role</p>
+                                    <p class="text-xs text-gray-500 mt-1">@term('csv_required_columns_label')</p>
                                 </div>
                             </div>
                         </div>
@@ -121,23 +121,23 @@
 
                         <!-- CSV Template -->
                         <div class="mt-4 p-3 bg-gray-50 rounded-lg">
-                            <p class="text-sm font-medium text-gray-700 mb-2">CSV Template</p>
-                            <code class="text-xs text-gray-600 block">email,name,role</code>
-                            <code class="text-xs text-gray-600 block">john@example.com,John Doe,learner</code>
-                            <code class="text-xs text-gray-600 block">jane@example.com,Jane Smith,mentor</code>
+                            <p class="text-sm font-medium text-gray-700 mb-2">@term('csv_template_label')</p>
+                            <code class="text-xs text-gray-600 block">{{ app(\App\Services\TerminologyService::class)->get('csv_template_header_label') }}</code>
+                            <code class="text-xs text-gray-600 block">{{ app(\App\Services\TerminologyService::class)->get('csv_template_row_one_label') }}</code>
+                            <code class="text-xs text-gray-600 block">{{ app(\App\Services\TerminologyService::class)->get('csv_template_row_two_label') }}</code>
                         </div>
                     @else
                         <!-- CSV Preview -->
                         <div>
                             @if(count($csvErrors) > 0)
                                 <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                    <p class="text-sm font-medium text-red-800 mb-2">Errors found:</p>
+                                    <p class="text-sm font-medium text-red-800 mb-2">@term('errors_found_label')</p>
                                     <ul class="text-sm text-red-700 list-disc list-inside">
                                         @foreach(array_slice($csvErrors, 0, 5) as $error)
                                             <li>{{ $error }}</li>
                                         @endforeach
                                         @if(count($csvErrors) > 5)
-                                            <li>...and {{ count($csvErrors) - 5 }} more errors</li>
+                                            <li>@term('more_errors_label') {{ count($csvErrors) - 5 }}</li>
                                         @endif
                                     </ul>
                                 </div>
@@ -148,10 +148,10 @@
                                     <table class="min-w-full divide-y divide-gray-200">
                                         <thead class="bg-gray-50">
                                             <tr>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">@term('email_label')</th>
+                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">@term('name_label')</th>
+                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">@term('role_label')</th>
+                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">@term('status_label')</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-200">
@@ -162,11 +162,11 @@
                                                     <td class="px-4 py-2 text-sm text-gray-600 capitalize">{{ $row['role'] }}</td>
                                                     <td class="px-4 py-2">
                                                         @if($row['already_enrolled'])
-                                                            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Already enrolled</span>
+                                                            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">@term('already_enrolled_label')</span>
                                                         @elseif($row['user_exists'])
-                                                            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">Ready</span>
+                                                            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">@term('ready_label')</span>
                                                         @else
-                                                            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">Will invite</span>
+                                                            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">@term('will_invite_label')</span>
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -175,7 +175,7 @@
                                     </table>
                                 </div>
                                 @if(count($csvPreview) > 10)
-                                    <p class="mt-2 text-sm text-gray-500">Showing 10 of {{ count($csvPreview) }} records</p>
+                                    <p class="mt-2 text-sm text-gray-500">@term('showing_label') 10 @term('of_label') {{ count($csvPreview) }} @term('records_label')</p>
                                 @endif
 
                                 <div class="mt-4 flex items-center justify-end space-x-3">
@@ -183,13 +183,13 @@
                                         wire:click="cancelCsvImport"
                                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                                     >
-                                        Cancel
+                                        @term('cancel_action')
                                     </button>
                                     <button
                                         wire:click="importCsv"
                                         class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700"
                                     >
-                                        Import {{ count($csvPreview) }} @term('learner_plural')
+                                        @term('import_action') {{ count($csvPreview) }} @term('learner_plural')
                                     </button>
                                 </div>
                             @endif
@@ -204,11 +204,11 @@
             <!-- Enrollment Options -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div class="px-4 py-3 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Enrollment Options</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">@term('enrollment_options_label')</h2>
                 </div>
                 <div class="p-4 space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Default Role</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">@term('default_role_label')</label>
                         <select wire:model="bulkRole" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
                             @foreach($roleOptions as $value => $label)
                                 <option value="{{ $value }}">{{ $label }}</option>
@@ -223,7 +223,7 @@
                                 wire:model="sendWelcomeEmail"
                                 class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                             >
-                            <span class="ml-2 text-sm text-gray-700">Send welcome email</span>
+                            <span class="ml-2 text-sm text-gray-700">@term('send_welcome_email_label')</span>
                         </label>
                     </div>
 
@@ -232,14 +232,14 @@
                             wire:click="enrollSelected"
                             class="w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700"
                         >
-                            Enroll {{ count($selectedUsers) }} Selected
+                            @term('enroll_action') {{ count($selectedUsers) }} @term('selected_label')
                         </button>
                     @else
                         <button
                             disabled
                             class="w-full px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed"
                         >
-                            Select users to enroll
+                            @term('select_users_to_enroll_label')
                         </button>
                     @endif
                 </div>
@@ -248,21 +248,21 @@
             <!-- Recent Enrollments -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div class="px-4 py-3 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Recently Enrolled</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">@term('recently_enrolled_label')</h2>
                 </div>
                 <div class="divide-y divide-gray-200">
                     @forelse($currentMembers as $member)
                         <div class="px-4 py-3 flex items-center">
                             <img class="w-8 h-8 rounded-full" src="{{ $member->user?->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($member->user?->name ?? 'U') }}" alt="">
                             <div class="ml-3 flex-1 min-w-0">
-                                <p class="text-sm font-medium text-gray-900 truncate">{{ $member->user?->name ?? 'Unknown' }}</p>
+                                <p class="text-sm font-medium text-gray-900 truncate">{{ $member->user?->name ?? app(\App\Services\TerminologyService::class)->get('unknown_label') }}</p>
                                 <p class="text-xs text-gray-500">{{ $member->enrolled_at?->diffForHumans() }}</p>
                             </div>
                             <span class="text-xs text-gray-500 capitalize">{{ $member->role }}</span>
                         </div>
                     @empty
                         <div class="px-4 py-6 text-center text-gray-500 text-sm">
-                            No @term('learner_plural') enrolled yet
+                            @term('no_label') @term('learner_plural') @term('enrolled_label') @term('yet_label')
                         </div>
                     @endforelse
                 </div>
@@ -270,18 +270,18 @@
 
             <!-- Cohort Info -->
             <div class="bg-gray-50 rounded-lg p-4">
-                <h3 class="text-sm font-medium text-gray-700 mb-2">@term('cohort_singular') Info</h3>
+                <h3 class="text-sm font-medium text-gray-700 mb-2">@term('cohort_info_label')</h3>
                 <dl class="space-y-2 text-sm">
                     <div class="flex justify-between">
-                        <dt class="text-gray-500">Capacity</dt>
-                        <dd class="text-gray-900">{{ $cohort->max_capacity ?? 'Unlimited' }}</dd>
+                        <dt class="text-gray-500">@term('capacity_label')</dt>
+                        <dd class="text-gray-900">{{ $cohort->max_capacity ?? app(\App\Services\TerminologyService::class)->get('unlimited_label') }}</dd>
                     </div>
                     <div class="flex justify-between">
-                        <dt class="text-gray-500">Enrolled</dt>
+                        <dt class="text-gray-500">@term('enrolled_label')</dt>
                         <dd class="text-gray-900">{{ $cohort->members_count ?? $cohort->members()->count() }}</dd>
                     </div>
                     <div class="flex justify-between">
-                        <dt class="text-gray-500">Start Date</dt>
+                        <dt class="text-gray-500">@term('start_date_label')</dt>
                         <dd class="text-gray-900">{{ $cohort->start_date->format('M d, Y') }}</dd>
                     </div>
                 </dl>

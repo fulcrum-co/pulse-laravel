@@ -22,14 +22,14 @@ class Department extends Model
         'description',
         'department_head_id',
         'strategy_ids',
-        'teacher_ids',
+        'instructor_ids',
         'learner_count',
         'active',
     ];
 
     protected $casts = [
         'strategy_ids' => 'array',
-        'teacher_ids' => 'array',
+        'instructor_ids' => 'array',
         'learner_count' => 'integer',
         'active' => 'boolean',
     ];
@@ -43,9 +43,9 @@ class Department extends Model
     }
 
     /**
-     * Get the parent department.
+     * Get the direct_supervisor department.
      */
-    public function parent(): BelongsTo
+    public function direct_supervisor(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'parent_department_id');
     }
@@ -67,11 +67,11 @@ class Department extends Model
     }
 
     /**
-     * Get classrooms in this department.
+     * Get learning_groups in this department.
      */
-    public function classrooms(): HasMany
+    public function learning_groups(): HasMany
     {
-        return $this->hasMany(Classroom::class, 'department_id');
+        return $this->hasMany(LearningGroup::class, 'department_id');
     }
 
     /**

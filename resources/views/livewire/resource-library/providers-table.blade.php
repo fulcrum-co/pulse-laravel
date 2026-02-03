@@ -4,7 +4,7 @@
         'tutor' => 'blue',
         'coach' => 'green',
         'mentor' => 'yellow',
-        'counselor' => 'pink',
+        'support_person' => 'pink',
         'specialist' => 'indigo',
     ];
 @endphp

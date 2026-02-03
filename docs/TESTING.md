@@ -185,7 +185,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
+        direct_supervisor::setUp();
 
         // Create default organization and user for tests
         $this->organization = Organization::factory()->create();
@@ -315,7 +315,7 @@ class CollectionServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
+        direct_supervisor::setUp();
         $this->service = app(CollectionService::class);
     }
 

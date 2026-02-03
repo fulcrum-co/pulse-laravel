@@ -1,11 +1,28 @@
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+    $priorityLabels = [
+        'low' => $terminology->get('priority_low_label'),
+        'normal' => $terminology->get('priority_normal_label'),
+        'high' => $terminology->get('priority_high_label'),
+        'urgent' => $terminology->get('priority_urgent_label'),
+    ];
+    $statusLabels = [
+        'unread' => $terminology->get('unread_label'),
+        'read' => $terminology->get('read_label'),
+        'snoozed' => $terminology->get('snoozed_label'),
+        'resolved' => $terminology->get('resolved_label'),
+        'dismissed' => $terminology->get('dismissed_label'),
+    ];
+@endphp
+
 <div class="space-y-4">
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <h2 class="text-lg font-semibold text-gray-900">Notifications</h2>
+            <h2 class="text-lg font-semibold text-gray-900">@term('notifications_label')</h2>
             @if($unreadCount > 0)
                 <span class="px-2.5 py-1 text-xs font-medium bg-pulse-orange-100 text-pulse-orange-700 rounded-full">
-                    {{ $unreadCount }} unread
+                    {{ $unreadCount }} @term('unread_label')
                 </span>
             @endif
         </div>
@@ -16,7 +33,7 @@
                     type="button"
                     wire:click="setViewMode('list')"
                     class="p-2 transition-colors {{ $viewMode === 'list' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }}"
-                    title="List view"
+                    title="{{ $terminology->get('list_view_label') }}"
                 >
                     <x-icon name="bars-3" class="w-4 h-4" />
                 </button>
@@ -24,7 +41,7 @@
                     type="button"
                     wire:click="setViewMode('grouped')"
                     class="p-2 border-l border-gray-300 transition-colors {{ $viewMode === 'grouped' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }}"
-                    title="Grouped view"
+                    title="{{ $terminology->get('grouped_view_label') }}"
                 >
                     <x-icon name="squares-2x2" class="w-4 h-4" />
                 </button>
@@ -32,14 +49,14 @@
                     type="button"
                     wire:click="setViewMode('table')"
                     class="p-2 border-l border-gray-300 transition-colors {{ $viewMode === 'table' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }}"
-                    title="Table view"
+                    title="{{ $terminology->get('table_view_label') }}"
                 >
                     <x-icon name="table-cells" class="w-4 h-4" />
                 </button>
             </div>
             @if($unreadCount > 0)
                 <button wire:click="markAllAsRead" class="text-sm text-pulse-orange-600 hover:text-pulse-orange-700 font-medium">
-                    Mark all as read
+                    @term('mark_all_as_read_label')
                 </button>
             @endif
             {{-- Start Tasks Button --}}
@@ -52,7 +69,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    Start Tasks ({{ count($this->actionableNotifications) }})
+                    @term('start_tasks_label') ({{ count($this->actionableNotifications) }})
                 </button>
             @endif
         </div>
@@ -66,7 +83,7 @@
             <input
                 type="text"
                 wire:model.live.debounce.300ms="search"
-                placeholder="Search notifications..."
+                placeholder="{{ $terminology->get('search_notifications_placeholder') }}"
                 class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             />
         </div>
@@ -88,13 +105,13 @@
     <!-- Category Filter Pills -->
     @if(count($categoryCounts) > 0)
         <div class="flex flex-wrap items-center gap-2">
-            <span class="text-xs text-gray-500 mr-1">Category:</span>
+            <span class="text-xs text-gray-500 mr-1">@term('category_label'):</span>
             <button
                 type="button"
                 wire:click="setCategoryFilter('')"
                 class="px-2.5 py-1 text-xs font-medium rounded-full transition-colors {{ $categoryFilter === '' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
             >
-                All
+                @term('all_label')
             </button>
             @foreach($categories as $key => $category)
                 @if(isset($categoryCounts[$key]))
@@ -114,17 +131,17 @@
     <!-- Bulk Actions Bar -->
     @if(count($selected) > 0)
         <div class="flex items-center gap-3 p-3 bg-pulse-orange-50 border border-pulse-orange-200 rounded-lg">
-            <span class="text-sm font-medium text-pulse-orange-700">{{ count($selected) }} selected</span>
-            <button wire:click="deselectAll" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-800 underline">Clear</button>
+            <span class="text-sm font-medium text-pulse-orange-700">{{ count($selected) }} @term('selected_label')</span>
+            <button wire:click="deselectAll" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-800 underline">@term('clear_action')</button>
             <div class="flex items-center gap-2 ml-auto">
                 <button wire:click="markSelectedAsRead" class="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
-                    Mark as Read
+                    @term('mark_as_read_label')
                 </button>
                 <button wire:click="resolveSelected" class="px-3 py-1 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700">
-                    Resolve
+                    @term('resolve_label')
                 </button>
                 <button wire:click="dismissSelected" class="px-3 py-1 text-xs font-medium text-white bg-gray-600 rounded hover:bg-gray-700">
-                    Dismiss
+                    @term('dismiss_label')
                 </button>
             </div>
         </div>
@@ -146,22 +163,22 @@
                                 />
                             </th>
                             <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Title
+                                @term('title_label')
                             </th>
                             <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Category
+                                @term('category_label')
                             </th>
                             <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Priority
+                                @term('priority_label')
                             </th>
                             <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
+                                @term('status_label')
                             </th>
                             <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Date
+                                @term('date_label')
                             </th>
                             <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
+                                @term('actions_label')
                             </th>
                         </tr>
                     </thead>
@@ -216,12 +233,12 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <span class="px-2 py-0.5 text-xs font-medium rounded-full {{ $priorityColors[$notification->priority] ?? 'bg-gray-100 text-gray-600' }}">
-                                        {{ ucfirst($notification->priority) }}
+                                        {{ $priorityLabels[$notification->priority] ?? $priorityLabels[$notification->priority] ?? ucfirst($notification->priority) }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
                                     <span class="px-2 py-0.5 text-xs font-medium rounded-full {{ $statusColors[$notification->status] ?? 'bg-gray-100 text-gray-600' }}">
-                                        {{ ucfirst($notification->status) }}
+                                        {{ $statusLabels[$notification->status] ?? $statusLabels[$notification->status] ?? ucfirst($notification->status) }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
@@ -234,7 +251,7 @@
                                                 href="{{ $notification->action_url }}"
                                                 class="px-2 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600"
                                             >
-                                                {{ $notification->action_label ?? 'View' }}
+                                                {{ $notification->action_label ?? $terminology->get('view_action') }}
                                             </a>
                                         @endif
                                         <div class="relative" x-data="{ open: false }">
@@ -256,7 +273,7 @@
                                                         @click="open = false"
                                                         class="w-full px-3 py-1.5 text-left text-xs text-gray-700 hover:bg-gray-50"
                                                     >
-                                                        Mark as read
+                                                        @term('mark_as_read_label')
                                                     </button>
                                                 @else
                                                     <button
@@ -264,7 +281,7 @@
                                                         @click="open = false"
                                                         class="w-full px-3 py-1.5 text-left text-xs text-gray-700 hover:bg-gray-50"
                                                     >
-                                                        Mark as unread
+                                                        @term('mark_as_unread_label')
                                                     </button>
                                                 @endif
                                                 @if($notification->isActive())
@@ -273,14 +290,14 @@
                                                         @click="open = false"
                                                         class="w-full px-3 py-1.5 text-left text-xs text-green-700 hover:bg-green-50"
                                                     >
-                                                        Resolve
+                                                        @term('resolve_label')
                                                     </button>
                                                     <button
                                                         wire:click.stop="dismiss({{ $notification->id }})"
                                                         @click="open = false"
                                                         class="w-full px-3 py-1.5 text-left text-xs text-gray-700 hover:bg-gray-50"
                                                     >
-                                                        Dismiss
+                                                        @term('dismiss_label')
                                                     </button>
                                                 @endif
                                             </div>
@@ -303,8 +320,8 @@
                 <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                     <x-icon name="bell-slash" class="w-8 h-8 text-gray-400" />
                 </div>
-                <h3 class="text-sm font-medium text-gray-900 mb-1">No notifications</h3>
-                <p class="text-sm text-gray-500">You're all caught up!</p>
+                <h3 class="text-sm font-medium text-gray-900 mb-1">@term('no_notifications_label')</h3>
+                <p class="text-sm text-gray-500">@term('caught_up_label')</p>
             </div>
         @endif
     @elseif($viewMode === 'grouped')
@@ -324,7 +341,7 @@
                             <span class="text-sm text-gray-500">({{ $group['total_count'] }})</span>
                             @if($group['unread_count'] > 0)
                                 <span class="px-2 py-0.5 text-xs font-medium bg-pulse-orange-100 text-pulse-orange-700 rounded-full">
-                                    {{ $group['unread_count'] }} unread
+                                    {{ $group['unread_count'] }} @term('unread_label')
                                 </span>
                             @endif
                         </div>
@@ -416,7 +433,7 @@
                                                     </h4>
                                                     @if($cardIsHighPriority)
                                                         <span class="px-1.5 py-0.5 text-xs font-medium rounded {{ $cardPriorityColors[$notification->priority] ?? '' }}">
-                                                            {{ ucfirst($notification->priority) }}
+                                                            {{ $priorityLabels[$notification->priority] ?? $priorityLabels[$notification->priority] ?? ucfirst($notification->priority) }}
                                                         </span>
                                                     @endif
                                                 </div>
@@ -437,7 +454,7 @@
                                                     <span>{{ $notification->created_at->diffForHumans() }}</span>
                                                     @if($notification->status === 'snoozed' && $notification->snoozed_until)
                                                         <span class="text-amber-600">
-                                                            Snoozed until {{ $notification->snoozed_until->format('M j, g:i A') }}
+                                                            @term('snoozed_until_label') {{ $notification->snoozed_until->format('M j, g:i A') }}
                                                         </span>
                                                     @endif
                                                 </div>
@@ -452,7 +469,7 @@
                                                         wire:click.stop
                                                         class="px-3 py-1.5 text-xs font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors"
                                                     >
-                                                        {{ $notification->action_label ?? 'View' }}
+                                                        {{ $notification->action_label ?? $terminology->get('view_action') }}
                                                     </a>
                                                 @endif
 
@@ -476,21 +493,21 @@
                                                             <button
                                                                 wire:click.stop="markAsRead({{ $notification->id }})"
                                                                 @click="open = false"
-                                                                class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                                            >
-                                                                <x-icon name="eye" class="w-4 h-4" />
-                                                                Mark as read
-                                                            </button>
-                                                        @else
-                                                            <button
+                                                            class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                                        >
+                                                            <x-icon name="eye" class="w-4 h-4" />
+                                                            @term('mark_as_read_label')
+                                                        </button>
+                                                    @else
+                                                        <button
                                                                 wire:click.stop="markAsUnread({{ $notification->id }})"
                                                                 @click="open = false"
-                                                                class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                                            >
-                                                                <x-icon name="eye-slash" class="w-4 h-4" />
-                                                                Mark as unread
-                                                            </button>
-                                                        @endif
+                                                            class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                                        >
+                                                            <x-icon name="eye-slash" class="w-4 h-4" />
+                                                            @term('mark_as_unread_label')
+                                                        </button>
+                                                    @endif
 
                                                         @if($notification->isActive())
                                                             <div x-data="{ snoozeOpen: false }" class="relative">
@@ -500,7 +517,7 @@
                                                                 >
                                                                     <span class="flex items-center gap-2">
                                                                         <x-icon name="clock" class="w-4 h-4" />
-                                                                        Snooze
+                                                                        @term('snooze_label')
                                                                     </span>
                                                                     <x-icon name="chevron-right" class="w-3 h-3" />
                                                                 </button>
@@ -513,51 +530,51 @@
                                                                     <button
                                                                         wire:click.stop="snooze({{ $notification->id }}, '1_hour')"
                                                                         @click="open = false; snoozeOpen = false"
-                                                                        class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                                                                    >
-                                                                        1 hour
-                                                                    </button>
-                                                                    <button
-                                                                        wire:click.stop="snooze({{ $notification->id }}, '4_hours')"
-                                                                        @click="open = false; snoozeOpen = false"
-                                                                        class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                                                                    >
-                                                                        4 hours
-                                                                    </button>
-                                                                    <button
-                                                                        wire:click.stop="snooze({{ $notification->id }}, 'tomorrow')"
-                                                                        @click="open = false; snoozeOpen = false"
-                                                                        class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                                                                    >
-                                                                        Tomorrow morning
-                                                                    </button>
-                                                                    <button
-                                                                        wire:click.stop="snooze({{ $notification->id }}, 'next_monday')"
-                                                                        @click="open = false; snoozeOpen = false"
-                                                                        class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                                                                    >
-                                                                        Next Monday
-                                                                    </button>
+                                                                    class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                                                                >
+                                                                    @term('snooze_one_hour_label')
+                                                                </button>
+                                                                <button
+                                                                    wire:click.stop="snooze({{ $notification->id }}, '4_hours')"
+                                                                    @click="open = false; snoozeOpen = false"
+                                                                    class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                                                                >
+                                                                    @term('snooze_four_hours_label')
+                                                                </button>
+                                                                <button
+                                                                    wire:click.stop="snooze({{ $notification->id }}, 'tomorrow')"
+                                                                    @click="open = false; snoozeOpen = false"
+                                                                    class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                                                                >
+                                                                    @term('snooze_tomorrow_label')
+                                                                </button>
+                                                                <button
+                                                                    wire:click.stop="snooze({{ $notification->id }}, 'next_monday')"
+                                                                    @click="open = false; snoozeOpen = false"
+                                                                    class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                                                                >
+                                                                    @term('snooze_next_monday_label')
+                                                                </button>
                                                                 </div>
                                                             </div>
 
                                                             <button
                                                                 wire:click.stop="resolve({{ $notification->id }})"
                                                                 @click="open = false"
-                                                                class="w-full px-3 py-2 text-left text-sm text-green-700 hover:bg-green-50 flex items-center gap-2"
-                                                            >
-                                                                <x-icon name="check-circle" class="w-4 h-4" />
-                                                                Mark as resolved
-                                                            </button>
+                                                            class="w-full px-3 py-2 text-left text-sm text-green-700 hover:bg-green-50 flex items-center gap-2"
+                                                        >
+                                                            <x-icon name="check-circle" class="w-4 h-4" />
+                                                            @term('mark_as_resolved_label')
+                                                        </button>
 
                                                             <button
                                                                 wire:click.stop="dismiss({{ $notification->id }})"
                                                                 @click="open = false"
-                                                                class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                                            >
-                                                                <x-icon name="x-circle" class="w-4 h-4" />
-                                                                Dismiss
-                                                            </button>
+                                                            class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                                        >
+                                                            <x-icon name="x-circle" class="w-4 h-4" />
+                                                            @term('dismiss_label')
+                                                        </button>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -577,8 +594,8 @@
                 <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                     <x-icon name="bell-slash" class="w-8 h-8 text-gray-400" />
                 </div>
-                <h3 class="text-sm font-medium text-gray-900 mb-1">No notifications</h3>
-                <p class="text-sm text-gray-500">You're all caught up!</p>
+                <h3 class="text-sm font-medium text-gray-900 mb-1">@term('no_notifications_label')</h3>
+                <p class="text-sm text-gray-500">@term('caught_up_label')</p>
             </div>
         @endif
     @elseif($notifications->count() > 0)
@@ -653,7 +670,7 @@
                                     </h4>
                                     @if($cardIsHighPriority)
                                         <span class="px-1.5 py-0.5 text-xs font-medium rounded {{ $cardPriorityColors[$notification->priority] ?? '' }}">
-                                            {{ ucfirst($notification->priority) }}
+                                            {{ $priorityLabels[$notification->priority] ?? ucfirst($notification->priority) }}
                                         </span>
                                     @endif
                                 </div>
@@ -674,7 +691,7 @@
                                     <span>{{ $notification->created_at->diffForHumans() }}</span>
                                     @if($notification->status === 'snoozed' && $notification->snoozed_until)
                                         <span class="text-amber-600">
-                                            Snoozed until {{ $notification->snoozed_until->format('M j, g:i A') }}
+                                            @term('snoozed_until_label') {{ $notification->snoozed_until->format('M j, g:i A') }}
                                         </span>
                                     @endif
                                 </div>
@@ -689,7 +706,7 @@
                                         wire:click.stop
                                         class="px-3 py-1.5 text-xs font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors"
                                     >
-                                        {{ $notification->action_label ?? 'View' }}
+                                        {{ $notification->action_label ?? $terminology->get('view_action') }}
                                     </a>
                                 @endif
 
@@ -716,7 +733,7 @@
                                                 class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                             >
                                                 <x-icon name="eye" class="w-4 h-4" />
-                                                Mark as read
+                                                @term('mark_as_read_label')
                                             </button>
                                         @else
                                             <button
@@ -725,7 +742,7 @@
                                                 class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                             >
                                                 <x-icon name="eye-slash" class="w-4 h-4" />
-                                                Mark as unread
+                                                @term('mark_as_unread_label')
                                             </button>
                                         @endif
 
@@ -737,7 +754,7 @@
                                                 >
                                                     <span class="flex items-center gap-2">
                                                         <x-icon name="clock" class="w-4 h-4" />
-                                                        Snooze
+                                                        @term('snooze_label')
                                                     </span>
                                                     <x-icon name="chevron-right" class="w-3 h-3" />
                                                 </button>
@@ -752,28 +769,28 @@
                                                         @click="open = false; snoozeOpen = false"
                                                         class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
                                                     >
-                                                        1 hour
+                                                        @term('snooze_one_hour_label')
                                                     </button>
                                                     <button
                                                         wire:click.stop="snooze({{ $notification->id }}, '4_hours')"
                                                         @click="open = false; snoozeOpen = false"
                                                         class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
                                                     >
-                                                        4 hours
+                                                        @term('snooze_four_hours_label')
                                                     </button>
                                                     <button
                                                         wire:click.stop="snooze({{ $notification->id }}, 'tomorrow')"
                                                         @click="open = false; snoozeOpen = false"
                                                         class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
                                                     >
-                                                        Tomorrow morning
+                                                        @term('snooze_tomorrow_label')
                                                     </button>
                                                     <button
                                                         wire:click.stop="snooze({{ $notification->id }}, 'next_monday')"
                                                         @click="open = false; snoozeOpen = false"
                                                         class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
                                                     >
-                                                        Next Monday
+                                                        @term('snooze_next_monday_label')
                                                     </button>
                                                 </div>
                                             </div>
@@ -784,7 +801,7 @@
                                                 class="w-full px-3 py-2 text-left text-sm text-green-700 hover:bg-green-50 flex items-center gap-2"
                                             >
                                                 <x-icon name="check-circle" class="w-4 h-4" />
-                                                Mark as resolved
+                                                @term('mark_as_resolved_label')
                                             </button>
 
                                             <button
@@ -793,7 +810,7 @@
                                                 class="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                             >
                                                 <x-icon name="x-circle" class="w-4 h-4" />
-                                                Dismiss
+                                                @term('dismiss_label')
                                             </button>
                                         @endif
                                     </div>
@@ -817,29 +834,29 @@
             </div>
             <h3 class="text-sm font-medium text-gray-900 mb-1">
                 @if($statusFilter === 'all_active')
-                    You're all caught up!
+                    @term('caught_up_label')
                 @elseif($statusFilter === 'unread')
-                    No unread notifications
+                    @term('no_unread_notifications_label')
                 @elseif($statusFilter === 'snoozed')
-                    No snoozed notifications
+                    @term('no_snoozed_notifications_label')
                 @elseif($statusFilter === 'resolved')
-                    No resolved notifications
+                    @term('no_resolved_notifications_label')
                 @elseif($statusFilter === 'dismissed')
-                    No dismissed notifications
+                    @term('no_dismissed_notifications_label')
                 @endif
             </h3>
             <p class="text-sm text-gray-500">
                 @if($statusFilter === 'all_active')
-                    No actions needed right now.
+                    @term('no_actions_needed_label')
                 @elseif($search || $categoryFilter)
-                    Try adjusting your filters.
+                    @term('adjust_filters_label')
                 @else
-                    Check back later for updates.
+                    @term('check_back_later_label')
                 @endif
             </p>
             @if($search || $categoryFilter)
                 <button wire:click="clearFilters" class="mt-4 text-sm text-pulse-orange-600 hover:text-pulse-orange-700 font-medium">
-                    Clear filters
+                    @term('clear_filters_action_label')
                 </button>
             @endif
         </div>

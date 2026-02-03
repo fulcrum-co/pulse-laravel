@@ -22,7 +22,7 @@ class CollectionServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
+        direct_supervisor::setUp();
 
         $this->service = app(CollectionService::class);
         $this->organization = Organization::factory()->create();
@@ -235,7 +235,7 @@ class CollectionServiceTest extends TestCase
             ->forOrganization($this->organization)
             ->smart([
                 'difficulty_level' => 'beginner',
-                'target_grades' => ['6', '7', '8'],
+                'target_levels' => ['6', '7', '8'],
             ])
             ->create();
 
@@ -245,14 +245,14 @@ class CollectionServiceTest extends TestCase
             ->published()
             ->beginner()
             ->count(3)
-            ->create(['target_grades' => ['6', '7']]);
+            ->create(['target_levels' => ['6', '7']]);
 
         // Create non-matching course
         MiniCourse::factory()
             ->forOrganization($this->organization)
             ->published()
             ->advanced()
-            ->create(['target_grades' => ['11', '12']]);
+            ->create(['target_levels' => ['11', '12']]);
 
         $this->service->refreshSmartCollection($collection);
 

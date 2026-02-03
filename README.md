@@ -1,6 +1,6 @@
-# Pulse - K-12 Educational Content Platform
+# Pulse - Enterprise Organizational Content Platform
 
-Pulse is a comprehensive educational content management platform designed for K-12 wellness and mental health education. It provides AI-powered content generation, moderation workflows, and resource management tools.
+Pulse is a comprehensive organizational content management platform designed for Enterprise wellness and mental health organization. It provides AI-powered content generation, moderation workflows, and resource management tools.
 
 ## Table of Contents
 
@@ -20,9 +20,9 @@ Pulse is a comprehensive educational content management platform designed for K-
 
 ### Core Platform
 - **Multi-tenant Architecture**: Organization-based data isolation
-- **Role-based Access Control**: Granular permissions for admins, moderators, educators, and learners
+- **Role-based Access Control**: Granular permissions for admins, moderators, educators, and users
 - **MiniCourses**: AI-generated microlearning courses with structured modules
-- **Content Blocks**: Reusable educational content components
+- **Content Blocks**: Reusable organizational content components
 - **Resource Hub**: Curated external resources and materials
 
 ### AI-Powered Features
@@ -128,7 +128,7 @@ docker compose exec app php artisan db:seed
 
 ## AI Content Moderation
 
-Pulse includes a comprehensive AI-powered content moderation system designed specifically for K-12 educational content.
+Pulse includes a comprehensive AI-powered content moderation system designed specifically for Enterprise organizational content.
 
 ### Moderation Dimensions
 
@@ -136,7 +136,7 @@ Content is scored across four key dimensions:
 
 | Dimension | Description | Weight |
 |-----------|-------------|--------|
-| **Age Appropriateness** | Vocabulary, concepts, and complexity suitable for target grade level | 25% |
+| **Age Appropriateness** | Vocabulary, concepts, and complexity suitable for target level level | 25% |
 | **Clinical Safety** | Health/mental health advice safety, crisis resource inclusion | 30% |
 | **Cultural Sensitivity** | Inclusive language, diverse representation, bias detection | 20% |
 | **Accuracy** | Factual correctness, source credibility, claim verification | 25% |
@@ -190,7 +190,7 @@ class MiniCourse extends Model
     public function getModerationMetadata(): array
     {
         return [
-            'target_grades' => $this->target_grades,
+            'target_levels' => $this->target_levels,
             'content_type' => 'mini_course',
         ];
     }
@@ -377,9 +377,9 @@ The Resource Hub provides curated external resources for educators.
 
 ### Features
 
-- **Categorization**: Topics, grade levels, resource types
+- **Categorization**: Topics, level levels, resource types
 - **Search**: Full-text and semantic search
-- **Filtering**: By category, grade, type, favorites
+- **Filtering**: By category, level, type, favorites
 - **Bookmarking**: Personal resource collections
 - **AI Recommendations**: "Similar resources" based on embeddings
 
@@ -492,4 +492,4 @@ REDIS_HOST=127.0.0.1
 
 ## License
 
-Proprietary - Fulcrum Education Inc.
+Proprietary - Fulcrum Organization Inc.

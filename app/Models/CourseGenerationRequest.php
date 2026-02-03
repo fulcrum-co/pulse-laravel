@@ -84,10 +84,12 @@ class CourseGenerationRequest extends Model
      */
     public static function getTriggerTypes(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
-            self::TRIGGER_RISK_THRESHOLD => 'Risk Threshold',
-            self::TRIGGER_WORKFLOW => 'Alert Workflow',
-            self::TRIGGER_MANUAL => 'Manual Request',
+            self::TRIGGER_RISK_THRESHOLD => $terminology->get('trigger_risk_threshold_label'),
+            self::TRIGGER_WORKFLOW => $terminology->get('trigger_alert_workflow_label'),
+            self::TRIGGER_MANUAL => $terminology->get('trigger_manual_request_label'),
         ];
     }
 
@@ -96,9 +98,11 @@ class CourseGenerationRequest extends Model
      */
     public static function getAssignmentTypes(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
-            self::ASSIGNMENT_INDIVIDUAL => 'Individual Learner(s)',
-            self::ASSIGNMENT_GROUP => 'Learner Group',
+            self::ASSIGNMENT_INDIVIDUAL => $terminology->get('assignment_individual_participants_label'),
+            self::ASSIGNMENT_GROUP => $terminology->get('assignment_participant_group_label'),
         ];
     }
 
@@ -107,10 +111,12 @@ class CourseGenerationRequest extends Model
      */
     public static function getStrategies(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
-            self::STRATEGY_TEMPLATE_FILL => 'Template-Based',
-            self::STRATEGY_AI_FULL => 'Full AI Generation',
-            self::STRATEGY_HYBRID => 'Hybrid (Template + AI)',
+            self::STRATEGY_TEMPLATE_FILL => $terminology->get('strategy_template_based_label'),
+            self::STRATEGY_AI_FULL => $terminology->get('strategy_full_ai_generation_label'),
+            self::STRATEGY_HYBRID => $terminology->get('strategy_hybrid_label'),
         ];
     }
 
@@ -119,13 +125,15 @@ class CourseGenerationRequest extends Model
      */
     public static function getStatuses(): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return [
-            self::STATUS_PENDING => 'Pending',
-            self::STATUS_GENERATING => 'Generating',
-            self::STATUS_PENDING_APPROVAL => 'Pending Approval',
-            self::STATUS_APPROVED => 'Approved',
-            self::STATUS_REJECTED => 'Rejected',
-            self::STATUS_FAILED => 'Failed',
+            self::STATUS_PENDING => $terminology->get('pending_label'),
+            self::STATUS_GENERATING => $terminology->get('generating_label'),
+            self::STATUS_PENDING_APPROVAL => $terminology->get('pending_approval_label'),
+            self::STATUS_APPROVED => $terminology->get('course_approval_approved_label'),
+            self::STATUS_REJECTED => $terminology->get('course_approval_rejected_label'),
+            self::STATUS_FAILED => $terminology->get('failed_label'),
         ];
     }
 
@@ -353,7 +361,7 @@ class CourseGenerationRequest extends Model
     }
 
     /**
-     * Get risk signals from learner context.
+     * Get risk signals from participant context.
      */
     public function getRiskSignalsAttribute(): array
     {
@@ -361,7 +369,7 @@ class CourseGenerationRequest extends Model
     }
 
     /**
-     * Get demographics from learner context.
+     * Get demographics from participant context.
      */
     public function getDemographicsAttribute(): array
     {
@@ -369,7 +377,7 @@ class CourseGenerationRequest extends Model
     }
 
     /**
-     * Get target learner count.
+     * Get target participant count.
      */
     public function getLearnerCountAttribute(): int
     {

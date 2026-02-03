@@ -13,7 +13,7 @@ use App\Livewire\Reports\Concerns\WithMultiPageSupport;
 use App\Livewire\Reports\Concerns\WithReportPersistence;
 use App\Livewire\Reports\Concerns\WithSmartBlocks;
 use App\Models\CustomReport;
-use App\Models\Learner;
+use App\Models\Participant;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -76,7 +76,7 @@ class ReportBuilder extends Component
         'list_id' => null, // Single list mode
         'list_a_id' => null, // Compare mode - left side
         'list_b_id' => null, // Compare mode - right side
-        'grade_level' => null,
+        'level' => null,
         'risk_level' => null,
     ];
 
@@ -302,7 +302,7 @@ class ReportBuilder extends Component
     {
         $user = auth()->user();
 
-        $query = Learner::where('org_id', $user->org_id)
+        $query = Participant::where('org_id', $user->org_id)
             ->with('user');
 
         // Apply search filter if present

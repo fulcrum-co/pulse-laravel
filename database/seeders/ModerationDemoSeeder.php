@@ -34,7 +34,7 @@ class ModerationDemoSeeder extends Seeder
 
         // Get eligible moderators for assignment demo
         $moderators = User::where('org_id', $organization->id)
-            ->whereIn('primary_role', ['admin', 'counselor', 'organization_admin'])
+            ->whereIn('primary_role', ['admin', 'support_person', 'organization_admin'])
             ->limit(3)
             ->get();
 
@@ -52,7 +52,7 @@ class ModerationDemoSeeder extends Seeder
             ],
             [
                 'title' => 'Building Healthy Friendships',
-                'description' => 'Discover how to build meaningful relationships, set boundaries, and be a supportive friend. Perfect for learners navigating social dynamics.',
+                'description' => 'Discover how to build meaningful relationships, set boundaries, and be a supportive friend. Perfect for participants navigating social dynamics.',
                 'status' => ContentModerationResult::STATUS_PASSED,
                 'score' => 0.92,
                 'flags' => [],
@@ -60,11 +60,11 @@ class ModerationDemoSeeder extends Seeder
             ],
             [
                 'title' => 'Coping with Academic Pressure',
-                'description' => 'When grades feel overwhelming, this course teaches practical strategies for managing academic stress while maintaining well-being.',
+                'description' => 'When levels feel overwhelming, this course teaches practical strategies for managing academic stress while maintaining well-being.',
                 'status' => ContentModerationResult::STATUS_FLAGGED,
                 'score' => 0.68,
                 'flags' => [
-                    'age_appropriateness' => 'Some concepts may be advanced for younger grades',
+                    'age_appropriateness' => 'Some concepts may be advanced for younger levels',
                     'clinical_safety' => 'Mentions of stress symptoms should include disclaimers',
                 ],
                 'priority' => 'urgent',
@@ -79,7 +79,7 @@ class ModerationDemoSeeder extends Seeder
             ],
             [
                 'title' => 'Understanding Your Emotions',
-                'description' => 'A foundational course on emotional intelligence, helping learners identify, understand, and express their feelings appropriately.',
+                'description' => 'A foundational course on emotional intelligence, helping participants identify, understand, and express their feelings appropriately.',
                 'status' => ContentModerationResult::STATUS_REJECTED,
                 'score' => 0.35,
                 'flags' => [
@@ -98,7 +98,7 @@ class ModerationDemoSeeder extends Seeder
                 'priority' => 'low',
             ],
             [
-                'title' => 'Mindfulness for Learners',
+                'title' => 'Mindfulness for Participants',
                 'description' => 'Introduction to mindfulness practices including breathing exercises, body scans, and present-moment awareness techniques.',
                 'status' => ContentModerationResult::STATUS_FLAGGED,
                 'score' => 0.78,
@@ -107,7 +107,7 @@ class ModerationDemoSeeder extends Seeder
             ],
             [
                 'title' => 'Navigating Family Changes',
-                'description' => 'Support for learners dealing with family transitions like divorce, moving, or new siblings. Focuses on emotional processing and adaptation.',
+                'description' => 'Support for participants dealing with family transitions like divorce, moving, or new siblings. Focuses on emotional processing and adaptation.',
                 'status' => ContentModerationResult::STATUS_FLAGGED,
                 'score' => 0.65,
                 'flags' => [
@@ -127,7 +127,7 @@ class ModerationDemoSeeder extends Seeder
             ],
             [
                 'title' => 'Conflict Resolution Skills',
-                'description' => 'Learn to handle disagreements constructively, whether with peers, teachers, or family members. Practice de-escalation and communication.',
+                'description' => 'Learn to handle disagreements constructively, whether with peers, instructors, or family members. Practice de-escalation and communication.',
                 'status' => ContentModerationResult::STATUS_PENDING,
                 'score' => 0.70,
                 'flags' => ['content_review' => 'Awaiting initial moderation'],
@@ -162,7 +162,7 @@ class ModerationDemoSeeder extends Seeder
                     'Practice practical techniques',
                     'Develop personal action plan',
                 ],
-                'rationale' => 'AI-generated course based on learner needs assessment data.',
+                'rationale' => 'AI-generated course based on participant needs assessment data.',
                 'expected_experience' => 'Interactive learning with reflections and practice exercises.',
                 'course_type' => MiniCourse::TYPE_WELLNESS,
                 'creation_source' => MiniCourse::SOURCE_AI_GENERATED,
@@ -170,7 +170,7 @@ class ModerationDemoSeeder extends Seeder
                     'trigger' => 'assessment_signals',
                     'generated_at' => now()->subDays(rand(1, 14))->toISOString(),
                 ],
-                'target_grades' => ['9', '10', '11', '12'],
+                'target_levels' => ['9', '10', '11', '12'],
                 'target_risk_levels' => ['low', 'high'],
                 'estimated_duration_minutes' => rand(20, 45),
                 'status' => MiniCourse::STATUS_DRAFT,

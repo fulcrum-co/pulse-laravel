@@ -26,7 +26,7 @@ class Resource extends Model
         'file_path',
         'thumbnail_url',
         'estimated_duration_minutes',
-        'target_grades',
+        'target_levels',
         'target_risk_levels',
         'is_public',
         'active',
@@ -35,7 +35,7 @@ class Resource extends Model
 
     protected $casts = [
         'tags' => 'array',
-        'target_grades' => 'array',
+        'target_levels' => 'array',
         'target_risk_levels' => 'array',
         'is_public' => 'boolean',
         'active' => 'boolean',
@@ -165,7 +165,7 @@ class Resource extends Model
             'resource_type' => $this->resource_type,
             'category' => $this->category,
             'tags' => $this->tags ?? [],
-            'target_grades' => $this->target_grades ?? [],
+            'target_levels' => $this->target_levels ?? [],
             'target_risk_levels' => $this->target_risk_levels ?? [],
             'is_active' => (bool) $this->active,
             'is_public' => (bool) $this->is_public,
@@ -200,9 +200,9 @@ class Resource extends Model
             $parts[] = 'Tags: '.implode(', ', $tags);
         }
 
-        if (! empty($this->target_grades)) {
-            $grades = is_array($this->target_grades) ? $this->target_grades : [];
-            $parts[] = 'Grades: '.implode(', ', $grades);
+        if (! empty($this->target_levels)) {
+            $levels = is_array($this->target_levels) ? $this->target_levels : [];
+            $parts[] = 'Levels: '.implode(', ', $levels);
         }
 
         if (! empty($this->target_risk_levels)) {
@@ -218,6 +218,6 @@ class Resource extends Model
      */
     protected function getEmbeddingTextFields(): array
     {
-        return ['title', 'description', 'category', 'resource_type', 'tags', 'target_grades', 'target_risk_levels'];
+        return ['title', 'description', 'category', 'resource_type', 'tags', 'target_levels', 'target_risk_levels'];
     }
 }

@@ -28,13 +28,15 @@ class MetricNormalizationService
      */
     public function getMetricLabel(string $key): string
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         return match ($key) {
-            'gpa' => 'GPA',
-            'wellness_score' => 'Health & Wellness',
-            'emotional_wellbeing' => 'Emotional Well-Being',
-            'engagement_score' => 'Engagement',
-            'plan_progress' => 'Learner Plan Progress',
-            'attendance_rate' => 'Attendance',
+            'gpa' => $terminology->get('metric_gpa_label'),
+            'wellness_score' => $terminology->get('metric_health_wellness_label'),
+            'emotional_wellbeing' => $terminology->get('metric_emotional_wellbeing_label'),
+            'engagement_score' => $terminology->get('metric_engagement_label'),
+            'plan_progress' => $terminology->get('participant_plan_progress_label'),
+            'attendance_rate' => $terminology->get('metric_attendance_label'),
             default => ucwords(str_replace('_', ' ', $key)),
         };
     }

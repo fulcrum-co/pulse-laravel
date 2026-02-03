@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Reports\Concerns;
 
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Services\ContactMetricService;
 use App\Services\ReportAIService;
 use App\Services\ReportDataService;
@@ -32,7 +32,7 @@ trait WithChartData
             $dateRange = $this->getDateRangeForFilters();
 
             if ($this->filters['scope'] === 'individual' && $this->filters['contact_id']) {
-                $contactType = $this->filters['contact_type'] === 'learner' ? Learner::class : 'App\\Models\\User';
+                $contactType = $this->filters['contact_type'] === 'participant' ? Participant::class : 'App\\Models\\User';
                 $data = $metricService->getChartData(
                     $contactType,
                     (int) $this->filters['contact_id'],
@@ -72,7 +72,7 @@ trait WithChartData
         $metricsData = [];
         if ($this->filters['scope'] === 'individual' && $this->filters['contact_id']) {
             $metricsData = $aiService->getMetricsForContext(
-                $this->filters['contact_type'] === 'learner' ? Learner::class : 'App\\Models\\User',
+                $this->filters['contact_type'] === 'participant' ? Participant::class : 'App\\Models\\User',
                 (int) $this->filters['contact_id'],
                 $contextMetrics,
             );
@@ -174,7 +174,7 @@ trait WithChartData
 
         if ($this->filters['scope'] === 'individual' && $this->filters['contact_id']) {
             $metric = \App\Models\ContactMetric::forContact(
-                $this->filters['contact_type'] === 'learner' ? Learner::class : 'App\\Models\\User',
+                $this->filters['contact_type'] === 'participant' ? Participant::class : 'App\\Models\\User',
                 (int) $this->filters['contact_id'],
             )
                 ->where('metric_key', $metricKey)

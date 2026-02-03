@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Pulse' }} - Learner Wellness Platform</title>
+    <title>{{ $title ?? $terminology->get('platform_name_label') }} - {{ $terminology->get('platform_tagline_label') }}</title>
 
     <!-- Microsoft Clarity -->
     <script type="text/javascript">
@@ -62,14 +63,14 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     @auth
-                        <a href="/dashboard" class="text-gray-600 hover:text-gray-900 font-medium">Dashboard</a>
+                        <a href="/dashboard" class="text-gray-600 hover:text-gray-900 font-medium">@term('dashboard_label')</a>
                         <form method="POST" action="/logout" class="inline">
                             @csrf
-                            <button type="submit" class="text-gray-600 hover:text-gray-900 font-medium">Logout</button>
+                            <button type="submit" class="text-gray-600 hover:text-gray-900 font-medium">@term('logout_label')</button>
                         </form>
                     @else
-                        <a href="/login" class="text-gray-600 hover:text-gray-900 font-medium">Login</a>
-                        <a href="/register" class="bg-pulse-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">Get Started</a>
+                        <a href="/login" class="text-gray-600 hover:text-gray-900 font-medium">@term('login_label')</a>
+                        <a href="/register" class="bg-pulse-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">@term('get_started_label')</a>
                     @endauth
                 </div>
             </div>
@@ -85,7 +86,7 @@
     <footer class="bg-white border-t border-gray-200 mt-auto">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="text-center text-gray-500 text-sm">
-                &copy; {{ date('Y') }} Pulse. Supporting learner wellness through meaningful conversations.
+                &copy; {{ date('Y') }} Pulse. Supporting participant wellness through meaningful conversations.
             </div>
         </div>
     </footer>

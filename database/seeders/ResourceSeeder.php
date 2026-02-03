@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Organization;
 use App\Models\Resource;
 use App\Models\ResourceAssignment;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -27,7 +27,7 @@ class ResourceSeeder extends Seeder
                 'target_risk_levels' => ['low', 'high'],
             ],
             [
-                'title' => 'Mindfulness for Learners',
+                'title' => 'Mindfulness for Participants',
                 'description' => 'A guided introduction to mindfulness practices for teens.',
                 'resource_type' => 'video',
                 'category' => 'stress',
@@ -107,20 +107,20 @@ class ResourceSeeder extends Seeder
             ]);
         }
 
-        // Assign some resources to high-risk learners
-        $highRiskLearners = Learner::where('org_id', $organization->id)->where('risk_level', 'high')->get();
+        // Assign some resources to high-risk participants
+        $highRiskLearners = Participant::where('org_id', $organization->id)->where('risk_level', 'high')->get();
         $supportResources = Resource::where('org_id', $organization->id)
             ->whereJsonContains('target_risk_levels', 'high')
             ->get();
 
-        foreach ($highRiskLearners as $learner) {
-            // Assign 2-3 random resources to each high-risk learner
+        foreach ($highRiskLearners as $participant) {
+            // Assign 2-3 random resources to each high-risk participant
             $assignedResources = $supportResources->random(min(rand(2, 3), $supportResources->count()));
 
             foreach ($assignedResources as $resource) {
                 ResourceAssignment::create([
                     'resource_id' => $resource->id,
-                    'learner_id' => $learner->id,
+                    'participant_id' => $participant->id,
                     'assigned_by' => $admin->id,
                     'status' => collect(['assigned', 'in_progress', 'completed'])->random(),
                     'assigned_at' => now()->subDays(rand(1, 14)),

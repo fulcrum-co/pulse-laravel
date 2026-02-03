@@ -46,13 +46,15 @@ class ReportAIService
      */
     public function generateLayoutFromPrompt(string $userPrompt, string $reportType = 'custom'): array
     {
+        $terminology = app(\App\Services\TerminologyService::class);
+
         $availableMetrics = [
-            'gpa' => 'GPA (Grade Point Average)',
-            'attendance_rate' => 'Attendance Rate',
-            'wellness_score' => 'Health & Wellness Score',
-            'engagement_score' => 'Engagement Score',
-            'emotional_wellbeing' => 'Emotional Well-Being',
-            'plan_progress' => 'Learner Plan Progress',
+            'gpa' => $terminology->get('metric_gpa_label').' ('.$terminology->get('level_point_average_label').')',
+            'attendance_rate' => $terminology->get('metric_attendance_rate_label'),
+            'wellness_score' => $terminology->get('metric_health_wellness_label').' '.$terminology->get('score_label'),
+            'engagement_score' => $terminology->get('metric_engagement_label').' '.$terminology->get('score_label'),
+            'emotional_wellbeing' => $terminology->get('metric_emotional_wellbeing_label'),
+            'plan_progress' => $terminology->get('participant_plan_progress_label'),
         ];
 
         $prompt = $this->buildLayoutPrompt($userPrompt, $reportType, $availableMetrics);
@@ -189,7 +191,7 @@ Element type configs:
 - text: {content: "HTML content", format: "html"}
 - chart: {chart_type: "line|bar|pie", title: "string", metric_keys: ["gpa"], colors: ["#hex"]}
 - metric_card: {metric_key: "gpa", label: "GPA", show_trend: true}
-- table: {title: "string", columns: ["name", "gpa"], data_source: "learners"}
+- table: {title: "string", columns: ["name", "gpa"], data_source: "participants"}
 - ai_text: {prompt: "Write about...", format: "narrative|bullets"}
 
 Create a professional, balanced layout. Start elements at y=40, leave space between elements.
@@ -216,7 +218,7 @@ Context:
 
 For each insight, provide:
 1. finding: One sentence describing what you observed
-2. significance: Why this matters for learner success
+2. significance: Why this matters for participant success
 3. action: A specific recommended action
 
 Return as a JSON array:

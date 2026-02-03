@@ -71,7 +71,7 @@ class ContactNotes extends Component
 
         // Map shorthand contact type to full class name
         $typeMap = [
-            'learner' => 'App\\Models\\Learner',
+            'participant' => 'App\\Models\\Participant',
             'user' => 'App\\Models\\User',
         ];
         $fullContactType = $typeMap[$this->contactType] ?? $this->contactType;
@@ -171,7 +171,7 @@ class ContactNotes extends Component
 
         // Map shorthand contact type to full class name
         $typeMap = [
-            'learner' => 'App\\Models\\Learner',
+            'participant' => 'App\\Models\\Participant',
             'user' => 'App\\Models\\User',
         ];
         $fullContactType = $typeMap[$this->contactType] ?? $this->contactType;

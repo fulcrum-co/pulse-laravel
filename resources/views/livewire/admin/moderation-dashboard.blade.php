@@ -4,8 +4,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Moderation Dashboard</h1>
-                    <p class="text-gray-500 mt-1">Monitor team performance and queue health</p>
+                    <h1 class="text-2xl font-bold text-gray-900">@term('moderation_dashboard_label')</h1>
+                    <p class="text-gray-500 mt-1">@term('moderation_dashboard_subtitle')</p>
                 </div>
 
                 <div class="flex items-center space-x-4">
@@ -14,35 +14,35 @@
                         <button wire:click="setTimeRange('24h')"
                                 class="px-3 py-1 text-sm font-medium rounded-md transition-colors
                                     {{ $timeRange === '24h' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900' }}"
-                                title="Last 24 hours">
-                            24h
+                                title="@term('last_24_hours_label')">
+                            @term('last_24_hours_short_label')
                         </button>
                         <button wire:click="setTimeRange('7d')"
                                 class="px-3 py-1 text-sm font-medium rounded-md transition-colors
                                     {{ $timeRange === '7d' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900' }}"
-                                title="Last 7 days">
-                            7d
+                                title="@term('last_7_days_label')">
+                            @term('last_7_days_short_label')
                         </button>
                         <button wire:click="setTimeRange('30d')"
                                 class="px-3 py-1 text-sm font-medium rounded-md transition-colors
                                     {{ $timeRange === '30d' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900' }}"
-                                title="Last 30 days">
-                            30d
+                                title="@term('last_30_days_label')">
+                            @term('last_30_days_short_label')
                         </button>
                     </div>
 
                     {{-- Navigation --}}
                     <a href="{{ route('admin.moderation') }}"
                        class="px-4 py-2 text-gray-700 hover:text-gray-900 flex items-center text-sm"
-                       title="View moderation queue">
+                       title="@term('view_moderation_queue_label')">
                         <x-icon name="queue-list" class="w-5 h-5 mr-2" />
-                        Queue
+                        @term('queue_label')
                     </a>
                     <a href="{{ route('admin.moderation.task-flow') }}"
                        class="px-4 py-2 bg-pulse-orange-500 text-white rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors flex items-center text-sm"
-                       title="Start reviewing items in task flow mode">
+                       title="@term('start_reviewing_task_flow_label')">
                         <x-icon name="play" class="w-5 h-5 mr-2" />
-                        Start Reviewing
+                        @term('start_reviewing_label')
                     </a>
                 </div>
             </div>
@@ -55,36 +55,36 @@
             {{-- Queue Depth --}}
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-gray-500 text-sm font-medium">Queue Depth</span>
-                    <x-icon name="inbox-stack" class="w-5 h-5 text-gray-400" title="Total items in queue" />
+                    <span class="text-gray-500 text-sm font-medium">@term('queue_depth_label')</span>
+                    <x-icon name="inbox-stack" class="w-5 h-5 text-gray-400" title="@term('total_items_in_queue_label')" />
                 </div>
                 <div class="text-3xl font-bold text-gray-900">{{ $this->queueStats['total'] }}</div>
                 <div class="mt-2 flex items-center text-sm">
-                    <span class="text-red-600 mr-2">{{ $this->queueStats['overdue'] }} overdue</span>
+                    <span class="text-red-600 mr-2">{{ $this->queueStats['overdue'] }} @term('overdue_label')</span>
                     <span class="text-gray-400">·</span>
-                    <span class="text-yellow-600 ml-2">{{ $this->queueStats['by_priority']['urgent'] ?? 0 }} urgent</span>
+                    <span class="text-yellow-600 ml-2">{{ $this->queueStats['by_priority']['urgent'] ?? 0 }} @term('priority_urgent_label')</span>
                 </div>
             </div>
 
             {{-- SLA Compliance --}}
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-gray-500 text-sm font-medium">SLA Compliance</span>
-                    <x-icon name="clock" class="w-5 h-5 text-gray-400" title="Percentage of items completed within SLA" />
+                    <span class="text-gray-500 text-sm font-medium">@term('sla_compliance_label')</span>
+                    <x-icon name="clock" class="w-5 h-5 text-gray-400" title="@term('items_completed_within_sla_label')" />
                 </div>
                 <div class="text-3xl font-bold {{ ($this->queueStats['sla_compliance'] ?? 0) >= 90 ? 'text-green-600' : (($this->queueStats['sla_compliance'] ?? 0) >= 75 ? 'text-yellow-600' : 'text-red-600') }}">
                     {{ $this->queueStats['sla_compliance'] ?? 0 }}%
                 </div>
                 <div class="mt-2 text-sm text-gray-500">
-                    Last 30 days
+                    @term('last_30_days_label')
                 </div>
             </div>
 
             {{-- Average Review Time --}}
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-gray-500 text-sm font-medium">Avg Review Time</span>
-                    <x-icon name="arrow-trending-down" class="w-5 h-5 text-gray-400" title="Average time spent per review" />
+                    <span class="text-gray-500 text-sm font-medium">@term('avg_review_time_label')</span>
+                    <x-icon name="arrow-trending-down" class="w-5 h-5 text-gray-400" title="@term('average_time_per_review_label')" />
                 </div>
                 @php
                     $avgSeconds = $this->queueStats['avg_review_time'] ?? 0;
@@ -95,19 +95,19 @@
                     {{ $avgMinutes }}:{{ str_pad($avgRemainingSeconds, 2, '0', STR_PAD_LEFT) }}
                 </div>
                 <div class="mt-2 text-sm text-gray-500">
-                    Minutes per review
+                    @term('minutes_per_review_label')
                 </div>
             </div>
 
             {{-- Today's Reviews --}}
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-gray-500 text-sm font-medium">Today's Reviews</span>
-                    <x-icon name="check-circle" class="w-5 h-5 text-gray-400" title="Reviews completed today" />
+                    <span class="text-gray-500 text-sm font-medium">@term('todays_reviews_label')</span>
+                    <x-icon name="check-circle" class="w-5 h-5 text-gray-400" title="@term('reviews_completed_today_label')" />
                 </div>
                 <div class="text-3xl font-bold text-gray-900">{{ $this->queueStats['completed_today'] ?? 0 }}</div>
                 <div class="mt-2 text-sm text-gray-500">
-                    {{ $this->queueStats['in_progress'] ?? 0 }} in progress
+                    {{ $this->queueStats['in_progress'] ?? 0 }} @term('in_progress_label')
                 </div>
             </div>
         </div>
@@ -117,7 +117,7 @@
             <div class="lg:col-span-2 space-y-8">
                 {{-- Priority Distribution --}}
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Queue by Priority</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">@term('queue_by_priority_label')</h2>
                     <div class="space-y-4">
                         @foreach(['urgent' => 'red', 'high' => 'orange', 'normal' => 'blue', 'low' => 'gray'] as $priority => $color)
                             @php
@@ -127,7 +127,7 @@
                             @endphp
                             <div>
                                 <div class="flex items-center justify-between mb-1">
-                                    <span class="text-sm font-medium text-gray-700 capitalize">{{ $priority }}</span>
+                                    <span class="text-sm font-medium text-gray-700 capitalize">{{ $terminology->get('priority_' . $priority . '_label') }}</span>
                                     <span class="text-sm text-gray-500">{{ $count }}</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
@@ -142,29 +142,29 @@
                 {{-- Team Performance --}}
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Team Performance</h2>
+                        <h2 class="text-lg font-semibold text-gray-900">@term('team_performance_label')</h2>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Team Member
+                                        @term('team_member_label')
                                     </th>
                                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Today
+                                        @term('today_label')
                                     </th>
                                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        This Week
+                                        @term('this_week_label')
                                     </th>
                                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Avg Time
+                                        @term('avg_time_label')
                                     </th>
                                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Current Load
+                                        @term('current_load_label')
                                     </th>
                                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Approval Rate
+                                        @term('approval_rate_label')
                                     </th>
                                 </tr>
                             </thead>
@@ -204,7 +204,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                                            No team members configured
+                                            @term('no_team_members_configured_label')
                                         </td>
                                     </tr>
                                 @endforelse
@@ -219,7 +219,7 @@
                 {{-- SLA Warnings --}}
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200">
                     <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-gray-900">SLA Warnings</h2>
+                        <h2 class="text-lg font-semibold text-gray-900">@term('sla_warnings_label')</h2>
                         <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-700">
                             {{ $this->slaWarnings->count() }}
                         </span>
@@ -244,8 +244,8 @@
                             </div>
                         @empty
                             <div class="px-6 py-8 text-center text-gray-500">
-                                <x-icon name="check-circle" class="w-8 h-8 mx-auto mb-2 text-green-500" title="All items on track" />
-                                <p class="text-sm">No SLA warnings</p>
+                                <x-icon name="check-circle" class="w-8 h-8 mx-auto mb-2 text-green-500" title="@term('all_items_on_track_label')" />
+                                <p class="text-sm">@term('no_sla_warnings_label')</p>
                             </div>
                         @endforelse
                     </div>
@@ -254,7 +254,7 @@
                 {{-- Recent Activity --}}
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200">
                     <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Recent Decisions</h2>
+                        <h2 class="text-lg font-semibold text-gray-900">@term('recent_decisions_label')</h2>
                     </div>
                     <div class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
                         @forelse($this->recentDecisions as $decision)
@@ -280,7 +280,7 @@
                             </div>
                         @empty
                             <div class="px-6 py-8 text-center text-gray-500">
-                                <p class="text-sm">No recent decisions</p>
+                                <p class="text-sm">@term('no_recent_decisions_label')</p>
                             </div>
                         @endforelse
                     </div>
@@ -288,7 +288,7 @@
 
                 {{-- Content Type Breakdown --}}
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Content Types</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">@term('content_types_label')</h2>
                     <div class="space-y-3">
                         @foreach($this->contentTypeBreakdown as $type => $count)
                             <div class="flex items-center justify-between">

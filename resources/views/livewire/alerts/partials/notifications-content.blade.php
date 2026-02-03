@@ -1,16 +1,17 @@
 {{-- Notifications Tab Content --}}
 
 @php
+    $terminology = app(\App\Services\TerminologyService::class);
     // Helper to get status config
-    $getStatusConfig = function($status) {
+    $getStatusConfig = function($status) use ($terminology) {
         return match($status) {
-            'pending' => ['color' => 'gray', 'icon' => 'clock', 'label' => 'Pending'],
-            'running' => ['color' => 'blue', 'icon' => 'arrow-path', 'label' => 'Running'],
-            'waiting' => ['color' => 'yellow', 'icon' => 'pause', 'label' => 'Waiting'],
-            'completed' => ['color' => 'green', 'icon' => 'check-circle', 'label' => 'Completed'],
-            'failed' => ['color' => 'red', 'icon' => 'exclamation-circle', 'label' => 'Failed'],
-            'cancelled' => ['color' => 'gray', 'icon' => 'x-circle', 'label' => 'Cancelled'],
-            default => ['color' => 'gray', 'icon' => 'question-mark-circle', 'label' => 'Unknown'],
+            'pending' => ['color' => 'gray', 'icon' => 'clock', 'label' => $terminology->get('pending_label')],
+            'running' => ['color' => 'blue', 'icon' => 'arrow-path', 'label' => $terminology->get('execution_status_running_label')],
+            'waiting' => ['color' => 'yellow', 'icon' => 'pause', 'label' => $terminology->get('execution_status_waiting_label')],
+            'completed' => ['color' => 'green', 'icon' => 'check-circle', 'label' => $terminology->get('completed_label')],
+            'failed' => ['color' => 'red', 'icon' => 'exclamation-circle', 'label' => $terminology->get('failed_label')],
+            'cancelled' => ['color' => 'gray', 'icon' => 'x-circle', 'label' => $terminology->get('execution_status_cancelled_label')],
+            default => ['color' => 'gray', 'icon' => 'question-mark-circle', 'label' => $terminology->get('unknown_label')],
         };
     };
 @endphp
@@ -22,9 +23,9 @@
             <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <x-icon name="check-circle" class="w-8 h-8 text-green-500" />
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-1">All caught up!</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-1">@term('all_caught_up_label')</h3>
             <p class="text-gray-500 text-sm max-w-sm mx-auto">
-                No workflow executions to display. Executions will appear here when your alerts are triggered.
+                @term('no_workflow_executions_label')
             </p>
         </div>
     </x-card>
@@ -46,7 +47,7 @@
                             </div>
                             <div class="min-w-0">
                                 <h3 class="font-medium text-gray-900 text-sm truncate">
-                                    {{ $notification->workflow->name ?? 'Unknown Workflow' }}
+                                    {{ $notification->workflow->name ?? $terminology->get('unknown_workflow_label') }}
                                 </h3>
                                 <p class="text-xs text-gray-500">
                                     {{ $notification->created_at->diffForHumans() }}
@@ -61,7 +62,7 @@
                     <!-- Action Summary -->
                     @if(count($actionSummary) > 0)
                         <div class="text-xs text-gray-600 bg-gray-50 rounded p-2 mb-3">
-                            <div class="font-medium text-gray-700 mb-1">Actions taken:</div>
+                            <div class="font-medium text-gray-700 mb-1">@term('actions_taken_label'):</div>
                             <ul class="space-y-0.5">
                                 @foreach($actionSummary as $action)
                                     <li class="flex items-center gap-1">
@@ -81,7 +82,7 @@
                     @endif
 
                     <div class="text-xs text-gray-500">
-                        <span>Triggered by: {{ ucfirst(str_replace('_', ' ', $notification->triggered_by ?? 'unknown')) }}</span>
+                        <span>@term('triggered_by_label'): {{ ucfirst(str_replace('_', ' ', $notification->triggered_by ?? $terminology->get('unknown_label'))) }}</span>
                     </div>
                 </div>
 
@@ -89,15 +90,15 @@
                     <div class="flex items-center gap-1">
                         @if($notification->status === 'failed')
                             <div class="relative group">
-                                <button wire:click="retryExecution('{{ $notification->id }}')" class="p-1.5 text-gray-400 hover:text-blue-600 rounded" title="Retry">
+                                <button wire:click="retryExecution('{{ $notification->id }}')" class="p-1.5 text-gray-400 hover:text-blue-600 rounded" title="@term('retry_label')">
                                     <x-icon name="arrow-path" class="w-4 h-4" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Retry</span>
+                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">@term('retry_label')</span>
                             </div>
                         @endif
                     </div>
                     <a href="{{ route('alerts.execution', [$notification->workflow_id, $notification->id]) }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                        View Details
+                        @term('view_details_label')
                     </a>
                 </div>
             </div>
@@ -118,7 +119,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
-                        <h3 class="font-medium text-gray-900 text-sm truncate">{{ $notification->workflow->name ?? 'Unknown Workflow' }}</h3>
+                        <h3 class="font-medium text-gray-900 text-sm truncate">{{ $notification->workflow->name ?? $terminology->get('unknown_workflow_label') }}</h3>
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $statusConfig['color'] }}-100 text-{{ $statusConfig['color'] }}-800">
                             {{ $statusConfig['label'] }}
                         </span>
@@ -135,12 +136,12 @@
                 </div>
                 <div class="flex items-center gap-2">
                     @if($notification->status === 'failed')
-                        <button wire:click="retryExecution('{{ $notification->id }}')" class="p-1.5 text-gray-400 hover:text-blue-600 rounded" title="Retry">
+                        <button wire:click="retryExecution('{{ $notification->id }}')" class="p-1.5 text-gray-400 hover:text-blue-600 rounded" title="@term('retry_label')">
                             <x-icon name="arrow-path" class="w-4 h-4" />
                         </button>
                     @endif
                     <a href="{{ route('alerts.execution', [$notification->workflow_id, $notification->id]) }}" class="px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600">
-                        Details
+                        @term('details_label')
                     </a>
                 </div>
             </div>
@@ -153,12 +154,12 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Workflow</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions Taken</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Triggered By</th>
-                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('workflow_label')</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('status_label')</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('actions_taken_label')</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('triggered_by_label')</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('time_label')</th>
+                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">@term('details_label')</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -173,7 +174,7 @@
                                 <div class="w-6 h-6 rounded-full bg-{{ $statusConfig['color'] }}-100 flex items-center justify-center flex-shrink-0">
                                     <x-icon name="{{ $statusConfig['icon'] }}" class="w-3 h-3 text-{{ $statusConfig['color'] }}-600" />
                                 </div>
-                                <span class="text-sm font-medium text-gray-900">{{ $notification->workflow->name ?? 'Unknown' }}</span>
+                                <span class="text-sm font-medium text-gray-900">{{ $notification->workflow->name ?? $terminology->get('unknown_label') }}</span>
                             </div>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap">
@@ -191,11 +192,11 @@
                                     {{ Str::limit($notification->error_message, 40) }}
                                 </div>
                             @else
-                                <span class="text-sm text-gray-400">-</span>
+                                <span class="text-sm text-gray-400">@term('empty_dash_label')</span>
                             @endif
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                            {{ ucfirst(str_replace('_', ' ', $notification->triggered_by ?? 'unknown')) }}
+                            {{ ucfirst(str_replace('_', ' ', $notification->triggered_by ?? $terminology->get('unknown_label'))) }}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                             {{ $notification->created_at->diffForHumans() }}
@@ -203,12 +204,12 @@
                         <td class="px-4 py-3 whitespace-nowrap text-right">
                             <div class="flex items-center justify-end gap-2">
                                 @if($notification->status === 'failed')
-                                    <button wire:click="retryExecution('{{ $notification->id }}')" class="p-1 text-gray-400 hover:text-blue-600 rounded" title="Retry">
+                                    <button wire:click="retryExecution('{{ $notification->id }}')" class="p-1 text-gray-400 hover:text-blue-600 rounded" title="@term('retry_label')">
                                         <x-icon name="arrow-path" class="w-4 h-4" />
                                     </button>
                                 @endif
                                 <a href="{{ route('alerts.execution', [$notification->workflow_id, $notification->id]) }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
-                                    View
+                                    @term('view_action')
                                 </a>
                             </div>
                         </td>

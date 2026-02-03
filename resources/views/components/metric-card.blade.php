@@ -30,7 +30,7 @@ $colorClasses = match($color) {
             <div class="text-sm font-medium {{ $changeType === 'positive' ? 'text-green-600' : 'text-red-600' }}">
                 {{ $changeType === 'positive' ? '↑' : '↓' }} {{ $change }}
             </div>
-            <div class="text-xs text-gray-500">from last month</div>
+            <div class="text-xs text-gray-500">@term('from_last_month_label')</div>
         </div>
         @endif
     </div>

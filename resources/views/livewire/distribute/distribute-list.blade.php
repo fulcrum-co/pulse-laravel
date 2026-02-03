@@ -380,7 +380,7 @@
                         <x-icon name="exclamation-triangle" class="h-5 w-5 text-red-600" />
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-base font-medium text-gray-900">Delete Distribution</h3>
+                        <h3 class="text-base font-medium text-gray-900">@term('delete_distribution_label')</h3>
                         <p class="mt-1 text-sm text-gray-500">@term('delete_distribution_confirm_label')</p>
                     </div>
                 </div>

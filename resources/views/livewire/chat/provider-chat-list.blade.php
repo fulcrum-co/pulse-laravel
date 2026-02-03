@@ -1,3 +1,17 @@
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+    $providerTypeLabels = [
+        'coach' => $terminology->get('provider_type_coach_label'),
+        'mentor' => $terminology->get('provider_type_mentor_label'),
+        'specialist' => $terminology->get('provider_type_specialist_label'),
+        'consultant' => $terminology->get('provider_type_consultant_label'),
+        'advisor' => $terminology->get('provider_type_advisor_label'),
+        'organization' => $terminology->get('provider_type_organization_label'),
+        'section' => $terminology->get('provider_type_section_label'),
+        'learning_group' => $terminology->get('provider_type_learning_group_label'),
+    ];
+@endphp
+
 <div class="flex h-[calc(100vh-8rem)]" x-data="{ showSidebar: window.innerWidth >= 768 || !{{ $selectedConversationId ? 'true' : 'false' }} }" x-on:resize.window="showSidebar = window.innerWidth >= 768 || !{{ $selectedConversationId ? 'true' : 'false' }}">
     <!-- Conversations Sidebar -->
     <div
@@ -7,16 +21,16 @@
         <!-- Header -->
         <div class="p-3 md:p-4 border-b border-gray-200">
             <div class="flex items-center justify-between mb-3 md:mb-4">
-                <h2 class="text-base md:text-lg font-semibold text-gray-900">Messages</h2>
+                <h2 class="text-base md:text-lg font-semibold text-gray-900">@term('messages_label')</h2>
                 <div class="flex items-center gap-1.5 md:gap-2">
                     @if($unreadCount > 0)
                     <span class="px-1.5 md:px-2 py-0.5 md:py-1 bg-pulse-orange-100 text-pulse-orange-600 text-xs font-medium rounded-full">
-                        {{ $unreadCount }} unread
+                        {{ $unreadCount }} @term('unread_label')
                     </span>
                     @endif
                     @if($useDemoData)
                     <span class="px-1.5 md:px-2 py-0.5 md:py-1 bg-purple-100 text-purple-600 text-xs font-medium rounded-full">
-                        Demo
+                        @term('demo_label')
                     </span>
                     @endif
                 </div>
@@ -27,7 +41,7 @@
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search conversations..."
+                    placeholder="{{ $terminology->get('search_conversations_placeholder') }}"
                     class="w-full pl-9 md:pl-10 pr-3 md:pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-transparent"
                 >
                 <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,15 +81,15 @@
                         @endif
                     </div>
                     <div class="flex items-center gap-1 text-xs text-gray-500 mb-1">
-                        <span>{{ ucfirst($conv->provider->provider_type) }}</span>
+                        <span>{{ $providerTypeLabels[$conv->provider->provider_type] ?? ucfirst($conv->provider->provider_type) }}</span>
                         @if($conv->provider->verified ?? false)
                         <svg class="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                         </svg>
                         @endif
                     </div>
-                    @if($conv->learner)
-                    <p class="text-xs text-blue-600 mb-1 truncate">Re: {{ $conv->learner->name }}</p>
+                    @if($conv->participant)
+                    <p class="text-xs text-blue-600 mb-1 truncate">@term('re_label') {{ $conv->participant->name }}</p>
                     @endif
                     @if($conv->last_message_preview)
                     <p class="text-sm text-gray-600 truncate">{{ $conv->last_message_preview }}</p>
@@ -94,8 +108,8 @@
                 <svg class="w-10 h-10 md:w-12 md:h-12 mx-auto text-gray-300 mb-3 md:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                 </svg>
-                <p class="text-gray-500 text-sm">No conversations yet</p>
-                <p class="text-gray-400 text-xs mt-1">Start a conversation with a provider below</p>
+                <p class="text-gray-500 text-sm">@term('no_conversations_yet_label')</p>
+                <p class="text-gray-400 text-xs mt-1">@term('start_conversation_help_label')</p>
             </div>
             @endforelse
         </div>
@@ -103,7 +117,7 @@
         <!-- New Conversation Section -->
         @if($availableProviders->count() > 0)
         <div class="p-4 border-t border-gray-200 bg-gray-50">
-            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Start New Conversation</p>
+            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">@term('start_new_conversation_label')</p>
             <div class="space-y-2 max-h-32 overflow-y-auto">
                 @foreach($availableProviders as $provider)
                 <button
@@ -119,7 +133,7 @@
                     @endif
                     <div class="flex-1 min-w-0">
                         <p class="font-medium text-gray-900 truncate">{{ $provider->name }}</p>
-                        <p class="text-xs text-gray-500">{{ ucfirst($provider->provider_type) }}</p>
+                        <p class="text-xs text-gray-500">{{ $providerTypeLabels[$provider->provider_type] ?? ucfirst($provider->provider_type) }}</p>
                     </div>
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -139,7 +153,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
-                Back to conversations
+                @term('back_to_conversations_label')
             </button>
         </div>
         <div class="flex-1">

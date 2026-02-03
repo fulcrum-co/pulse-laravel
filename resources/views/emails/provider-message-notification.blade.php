@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html>
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+@endphp
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>New Message - Pulse</title>
+    <title>{{ $terminology->get('email_provider_message_title') }} - {{ $terminology->get('app_name_label') }}</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -85,35 +88,35 @@
     <div class="container">
         <div class="card">
             <div class="logo">
-                <span>Pulse</span>
+                <span>{{ $terminology->get('app_name_label') }}</span>
             </div>
 
-            <h1>Hi {{ $providerName }},</h1>
+            <h1>{{ $terminology->get('email_greeting_label') }} {{ $providerName }},</h1>
 
-            <p>You have a new message on Pulse:</p>
+            <p>{{ $terminology->get('email_provider_message_intro') }} {{ $terminology->get('app_name_label') }}:</p>
 
             <div class="message-box">
                 <div class="sender">{{ $senderName }}</div>
                 <div class="preview">"{{ $messagePreview }}"</div>
             </div>
 
-            <p>Click the button below to view the full message and reply:</p>
+            <p>{{ $terminology->get('email_provider_message_cta_prompt') }}</p>
 
             <div style="text-align: center;">
-                <a href="{{ $replyLink }}" class="button">View & Reply</a>
+                <a href="{{ $replyLink }}" class="button">{{ $terminology->get('email_provider_message_cta_label') }}</a>
             </div>
 
             <p style="color: #6b7280; font-size: 14px;">
-                This link will expire in 7 days. If you have any questions, please contact support.
+                {{ $terminology->get('email_provider_message_expiry_notice') }}
             </p>
         </div>
 
         <div class="footer">
             <p>
-                You're receiving this because you're registered as a provider on Pulse.<br>
-                <a href="#">Manage notification preferences</a>
+                {{ $terminology->get('email_provider_message_footer_reason') }}<br>
+                <a href="#">{{ $terminology->get('email_manage_notification_preferences_label') }}</a>
             </p>
-            <p>&copy; {{ date('Y') }} Pulse. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} {{ $terminology->get('email_footer_brand_label') }} {{ $terminology->get('email_rights_reserved_label') }}</p>
         </div>
     </div>
 </body>

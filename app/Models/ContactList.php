@@ -13,11 +13,15 @@ class ContactList extends Model
     use SoftDeletes;
 
     // List types
-    const TYPE_STUDENT = 'learner';
+    const TYPE_PARTICIPANT = 'participant';
 
-    const TYPE_TEACHER = 'teacher';
+    const TYPE_INSTRUCTOR = 'instructor';
 
     const TYPE_MIXED = 'mixed';
+
+    // Legacy compatibility
+    const TYPE_STUDENT = self::TYPE_PARTICIPANT;
+    const TYPE_TEACHER = self::TYPE_INSTRUCTOR;
 
     protected $fillable = [
         'org_id',
@@ -51,17 +55,17 @@ class ContactList extends Model
     }
 
     /**
-     * Get all learners in this list.
+     * Get all participants in this list.
      */
-    public function learners(): MorphToMany
+    public function participants(): MorphToMany
     {
-        return $this->morphedByMany(Learner::class, 'contact', 'contact_list_members')
+        return $this->morphedByMany(Participant::class, 'contact', 'contact_list_members')
             ->withPivot('added_at', 'added_by')
             ->withTimestamps();
     }
 
     /**
-     * Get all users (teachers) in this list.
+     * Get all users (instructors) in this list.
      */
     public function users(): MorphToMany
     {
@@ -79,11 +83,11 @@ class ContactList extends Model
             return $this->getContactsQuery()->count();
         }
 
-        return $this->learners()->count() + $this->users()->count();
+        return $this->participants()->count() + $this->users()->count();
     }
 
     /**
-     * Get all contacts (learners and/or users based on list type).
+     * Get all contacts (participants and/or users based on list type).
      */
     public function getAllMembers(): \Illuminate\Support\Collection
     {
@@ -93,11 +97,11 @@ class ContactList extends Model
 
         $members = collect();
 
-        if (in_array($this->list_type, [self::TYPE_STUDENT, self::TYPE_MIXED])) {
-            $members = $members->merge($this->learners);
+        if (in_array($this->list_type, [self::TYPE_PARTICIPANT, self::TYPE_MIXED])) {
+            $members = $members->merge($this->participants);
         }
 
-        if (in_array($this->list_type, [self::TYPE_TEACHER, self::TYPE_MIXED])) {
+        if (in_array($this->list_type, [self::TYPE_INSTRUCTOR, self::TYPE_MIXED])) {
             $members = $members->merge($this->users);
         }
 
@@ -111,27 +115,27 @@ class ContactList extends Model
     {
         $criteria = $this->filter_criteria ?? [];
 
-        if ($this->list_type === self::TYPE_STUDENT) {
-            return $this->buildLearnerQuery($criteria);
-        } elseif ($this->list_type === self::TYPE_TEACHER) {
-            return $this->buildTeacherQuery($criteria);
+        if ($this->list_type === self::TYPE_PARTICIPANT) {
+            return $this->buildParticipantQuery($criteria);
+        } elseif ($this->list_type === self::TYPE_INSTRUCTOR) {
+            return $this->buildInstructorQuery($criteria);
         }
 
         // For mixed, we'd need to handle differently
-        return Learner::where('org_id', $this->org_id);
+        return Participant::where('org_id', $this->org_id);
     }
 
     /**
-     * Build learner query from filter criteria.
+     * Build participant query from filter criteria.
      */
-    protected function buildLearnerQuery(array $criteria): Builder
+    protected function buildParticipantQuery(array $criteria): Builder
     {
-        $query = Learner::where('org_id', $this->org_id)
+        $query = Participant::where('org_id', $this->org_id)
             ->whereNull('deleted_at');
 
-        // Grade level filter
-        if (! empty($criteria['grade_levels'])) {
-            $query->whereIn('grade_level', $criteria['grade_levels']);
+        // Level level filter
+        if (! empty($criteria['levels'])) {
+            $query->whereIn('level', $criteria['levels']);
         }
 
         // Risk level filter
@@ -139,17 +143,17 @@ class ContactList extends Model
             $query->whereIn('risk_level', $criteria['risk_levels']);
         }
 
-        // Classroom filter
-        if (! empty($criteria['classroom_ids'])) {
-            $query->whereIn('homeroom_classroom_id', $criteria['classroom_ids']);
+        // LearningGroup filter
+        if (! empty($criteria['learning_group_ids'])) {
+            $query->whereIn('homeroom_learning_group_id', $criteria['learning_group_ids']);
         }
 
-        // IEP status filter
+        // Support plan status filter
         if (isset($criteria['has_iep'])) {
             $query->where('iep_status', $criteria['has_iep']);
         }
 
-        // ELL status filter
+        // Language support status filter
         if (isset($criteria['is_ell'])) {
             $query->where('ell_status', $criteria['is_ell']);
         }
@@ -166,18 +170,18 @@ class ContactList extends Model
             }
         }
 
-        // Counselor filter
-        if (! empty($criteria['counselor_ids'])) {
-            $query->whereIn('counselor_user_id', $criteria['counselor_ids']);
+        // Support Person filter
+        if (! empty($criteria['support_person_ids'])) {
+            $query->whereIn('support_person_user_id', $criteria['support_person_ids']);
         }
 
         return $query;
     }
 
     /**
-     * Build teacher/user query from filter criteria.
+     * Build instructor/user query from filter criteria.
      */
-    protected function buildTeacherQuery(array $criteria): Builder
+    protected function buildInstructorQuery(array $criteria): Builder
     {
         $query = User::where('org_id', $this->org_id)
             ->whereNull('deleted_at');
@@ -216,16 +220,16 @@ class ContactList extends Model
     }
 
     /**
-     * Add a learner to the list.
+     * Add a participant to the list.
      */
-    public function addLearner(Learner $learner, ?int $addedBy = null): void
+    public function addLearner(Participant $participant, ?int $addedBy = null): void
     {
         if ($this->list_type === self::TYPE_TEACHER) {
-            throw new \InvalidArgumentException('Cannot add learner to teacher-only list');
+            throw new \InvalidArgumentException('Cannot add participant to instructor-only list');
         }
 
-        $this->learners()->syncWithoutDetaching([
-            $learner->id => [
+        $this->participants()->syncWithoutDetaching([
+            $participant->id => [
                 'added_at' => now(),
                 'added_by' => $addedBy,
             ],
@@ -233,12 +237,12 @@ class ContactList extends Model
     }
 
     /**
-     * Add a user/teacher to the list.
+     * Add a user/instructor to the list.
      */
     public function addUser(User $user, ?int $addedBy = null): void
     {
         if ($this->list_type === self::TYPE_STUDENT) {
-            throw new \InvalidArgumentException('Cannot add teacher to learner-only list');
+            throw new \InvalidArgumentException('Cannot add instructor to participant-only list');
         }
 
         $this->users()->syncWithoutDetaching([
@@ -250,11 +254,11 @@ class ContactList extends Model
     }
 
     /**
-     * Remove a learner from the list.
+     * Remove a participant from the list.
      */
-    public function removeLearner(Learner $learner): void
+    public function removeLearner(Participant $participant): void
     {
-        $this->learners()->detach($learner->id);
+        $this->participants()->detach($participant->id);
     }
 
     /**
@@ -268,14 +272,14 @@ class ContactList extends Model
     /**
      * Add multiple contacts at once.
      */
-    public function addContacts(array $learnerIds = [], array $userIds = [], ?int $addedBy = null): void
+    public function addContacts(array $participantIds = [], array $userIds = [], ?int $addedBy = null): void
     {
-        if (! empty($learnerIds) && $this->list_type !== self::TYPE_TEACHER) {
+        if (! empty($participantIds) && $this->list_type !== self::TYPE_TEACHER) {
             $syncData = [];
-            foreach ($learnerIds as $id) {
+            foreach ($participantIds as $id) {
                 $syncData[$id] = ['added_at' => now(), 'added_by' => $addedBy];
             }
-            $this->learners()->syncWithoutDetaching($syncData);
+            $this->participants()->syncWithoutDetaching($syncData);
         }
 
         if (! empty($userIds) && $this->list_type !== self::TYPE_STUDENT) {
@@ -292,12 +296,12 @@ class ContactList extends Model
      */
     public function hasContact($contact): bool
     {
-        if ($contact instanceof Learner) {
+        if ($contact instanceof Participant) {
             if ($this->is_dynamic) {
                 return $this->getContactsQuery()->where('id', $contact->id)->exists();
             }
 
-            return $this->learners()->where('learners.id', $contact->id)->exists();
+            return $this->participants()->where('participants.id', $contact->id)->exists();
         }
 
         if ($contact instanceof User) {

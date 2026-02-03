@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Add source tracking columns to surveys, custom_reports, and resources
-     * to enable push/distribution from parent organizations to child organizations.
+     * to enable push/distribution from direct_supervisor organizations to child organizations.
      */
     public function up(): void
     {

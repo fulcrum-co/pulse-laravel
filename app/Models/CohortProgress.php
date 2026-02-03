@@ -124,7 +124,7 @@ class CohortProgress extends Model
 
         $this->update($data);
 
-        // Update parent member's progress
+        // Update member's progress
         $this->member->updateProgress();
     }
 

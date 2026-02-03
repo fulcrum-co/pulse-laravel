@@ -76,7 +76,7 @@ class HelpContentSeeder extends Seeder
                 'category_id' => $gettingStartedCategory?->id,
                 'title' => 'Welcome to Pulse',
                 'slug' => 'welcome-to-pulse',
-                'content' => "# Welcome to Pulse\n\nPulse is your comprehensive platform for learner wellness monitoring and support. This guide will help you get started quickly.\n\n## What you can do with Pulse\n\n- **Monitor learner wellness** through surveys and assessments\n- **Track trends** with customizable dashboards\n- **Generate reports** for stakeholders\n- **Distribute communications** to learners and staff\n- **Manage resources** and support materials\n\n## Next Steps\n\n1. Set up your dashboard with the widgets you need\n2. Create your first survey\n3. Explore the resource hub\n\nNeed help? Click the help button in the bottom right corner anytime.",
+                'content' => "# Welcome to Pulse\n\nPulse is your comprehensive platform for participant wellness monitoring and support. This guide will help you get started quickly.\n\n## What you can do with Pulse\n\n- **Monitor participant wellness** through surveys and assessments\n- **Track trends** with customizable dashboards\n- **Generate reports** for stakeholders\n- **Distribute communications** to participants and staff\n- **Manage resources** and support materials\n\n## Next Steps\n\n1. Set up your dashboard with the widgets you need\n2. Create your first survey\n3. Explore the resource hub\n\nNeed help? Click the help button in the bottom right corner anytime.",
                 'excerpt' => 'Learn the basics of Pulse and what you can accomplish with the platform.',
                 'is_published' => true,
                 'is_featured' => true,

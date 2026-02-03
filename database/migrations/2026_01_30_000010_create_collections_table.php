@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('format_mode')->default('form'); // conversational, form, grid
             $table->string('status')->default('draft'); // draft, active, paused, archived
             $table->json('settings')->nullable(); // voice_enabled, ai_follow_up, etc.
-            $table->json('contact_scope')->nullable(); // target_grades, classrooms, tags, filters
+            $table->json('contact_scope')->nullable(); // target_levels, learning_groups, tags, filters
             $table->json('reminder_config')->nullable(); // reminder settings
             $table->foreignId('created_by')->constrained('users');
             $table->timestamp('archived_at')->nullable();

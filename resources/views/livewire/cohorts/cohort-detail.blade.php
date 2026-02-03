@@ -12,10 +12,10 @@
         </div>
         <div class="flex items-center space-x-3">
             <a href="{{ route('admin.cohorts.enroll', $cohort) }}" class="px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 rounded-lg hover:bg-purple-100">
-                Add @term('learner_plural')
+                @term('add_action') @term('learner_plural')
             </a>
             <a href="{{ route('admin.cohorts.schedule', $cohort) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                Drip Schedule
+                @term('drip_schedule_label')
             </a>
         </div>
     </div>
@@ -31,7 +31,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-2xl font-bold text-gray-900">{{ $stats['total_members'] }}</p>
-                    <p class="text-xs text-gray-500">Total @term('learner_plural')</p>
+                    <p class="text-xs text-gray-500">@term('total_label') @term('learner_plural')</p>
                 </div>
             </div>
         </div>
@@ -45,7 +45,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-2xl font-bold text-gray-900">{{ $stats['active_members'] }}</p>
-                    <p class="text-xs text-gray-500">Active</p>
+                    <p class="text-xs text-gray-500">@term('active_label')</p>
                 </div>
             </div>
         </div>
@@ -59,7 +59,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-2xl font-bold text-gray-900">{{ $stats['completed'] }}</p>
-                    <p class="text-xs text-gray-500">Completed</p>
+                    <p class="text-xs text-gray-500">@term('completed_label')</p>
                 </div>
             </div>
         </div>
@@ -73,7 +73,7 @@
                 </div>
                 <div class="ml-3">
                     <p class="text-2xl font-bold text-gray-900">{{ $stats['avg_progress'] }}%</p>
-                    <p class="text-xs text-gray-500">Avg @term('progress_label')</p>
+                    <p class="text-xs text-gray-500">@term('avg_progress_label')</p>
                 </div>
             </div>
         </div>
@@ -82,37 +82,37 @@
     <!-- Cohort Info & Status -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">@term('cohort_singular') Details</h2>
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">@term('cohort_details_label')</h2>
             <dl class="grid grid-cols-2 gap-4 text-sm">
                 <div>
                     <dt class="text-gray-500">@term('period_singular')</dt>
-                    <dd class="font-medium text-gray-900">{{ $cohort->semester?->display_name ?? 'None' }}</dd>
+                    <dd class="font-medium text-gray-900">{{ $cohort->semester?->display_name ?? app(\App\Services\TerminologyService::class)->get('none_label') }}</dd>
                 </div>
                 <div>
-                    <dt class="text-gray-500">Dates</dt>
+                    <dt class="text-gray-500">@term('dates_label')</dt>
                     <dd class="font-medium text-gray-900">{{ $cohort->start_date->format('M d, Y') }} - {{ $cohort->end_date->format('M d, Y') }}</dd>
                 </div>
                 <div>
-                    <dt class="text-gray-500">Capacity</dt>
-                    <dd class="font-medium text-gray-900">{{ $cohort->max_capacity ? $stats['total_members'] . '/' . $cohort->max_capacity : 'Unlimited' }}</dd>
+                    <dt class="text-gray-500">@term('capacity_label')</dt>
+                    <dd class="font-medium text-gray-900">{{ $cohort->max_capacity ? $stats['total_members'] . '/' . $cohort->max_capacity : app(\App\Services\TerminologyService::class)->get('unlimited_label') }}</dd>
                 </div>
                 <div>
-                    <dt class="text-gray-500">Self-Enrollment</dt>
-                    <dd class="font-medium text-gray-900">{{ $cohort->allow_self_enrollment ? 'Enabled' : 'Disabled' }}</dd>
+                    <dt class="text-gray-500">@term('self_enrollment_label')</dt>
+                    <dd class="font-medium text-gray-900">{{ $cohort->allow_self_enrollment ? app(\App\Services\TerminologyService::class)->get('enabled_label') : app(\App\Services\TerminologyService::class)->get('disabled_label') }}</dd>
                 </div>
                 <div>
-                    <dt class="text-gray-500">Drip Content</dt>
-                    <dd class="font-medium text-gray-900">{{ $cohort->drip_content ? 'Enabled' : 'Disabled' }}</dd>
+                    <dt class="text-gray-500">@term('drip_content_label')</dt>
+                    <dd class="font-medium text-gray-900">{{ $cohort->drip_content ? app(\App\Services\TerminologyService::class)->get('enabled_label') : app(\App\Services\TerminologyService::class)->get('disabled_label') }}</dd>
                 </div>
                 <div>
-                    <dt class="text-gray-500">Created By</dt>
-                    <dd class="font-medium text-gray-900">{{ $cohort->creator?->name ?? 'System' }}</dd>
+                    <dt class="text-gray-500">@term('created_by_label')</dt>
+                    <dd class="font-medium text-gray-900">{{ $cohort->creator?->name ?? app(\App\Services\TerminologyService::class)->get('system_label') }}</dd>
                 </div>
             </dl>
         </div>
 
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Status</h2>
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">@term('status_label')</h2>
             <div class="space-y-3">
                 @foreach($statusOptions as $value => $label)
                 <button
@@ -137,11 +137,11 @@
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="memberSearch"
-                    placeholder="Search..."
+                    placeholder="{{ app(\App\Services\TerminologyService::class)->get('member_search_placeholder') }}"
                     class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg"
                 >
                 <select wire:model.live="memberStatusFilter" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg">
-                    <option value="">All Statuses</option>
+                    <option value="">@term('all_statuses_label')</option>
                     @foreach($memberStatusOptions as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
@@ -153,11 +153,11 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">@term('learner_singular')</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">@term('role_label')</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">@term('progress_label')</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Enrolled</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">@term('status_label')</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">@term('enrolled_label')</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">@term('actions_label')</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -167,7 +167,7 @@
                         <div class="flex items-center">
                             <img class="w-8 h-8 rounded-full" src="{{ $member->user?->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($member->user?->name ?? 'U') }}" alt="">
                             <div class="ml-3">
-                                <p class="text-sm font-medium text-gray-900">{{ $member->user?->name ?? 'Unknown' }}</p>
+                                <p class="text-sm font-medium text-gray-900">{{ $member->user?->name ?? app(\App\Services\TerminologyService::class)->get('unknown_label') }}</p>
                                 <p class="text-xs text-gray-500">{{ $member->user?->email }}</p>
                             </div>
                         </div>
@@ -203,18 +203,18 @@
                     <td class="px-6 py-4 text-right">
                         <button
                             wire:click="removeMember({{ $member->id }})"
-                            wire:confirm="Remove this @term('learner_singular') from the @term('cohort_singular')?"
+                            wire:confirm="{{ app(\App\Services\TerminologyService::class)->get('remove_member_confirm_label') }}"
                             class="text-red-600 hover:text-red-800 text-sm"
                         >
-                            Remove
+                            @term('remove_action')
                         </button>
                     </td>
                 </tr>
                 @empty
                 <tr>
                     <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                        No @term('learner_plural') enrolled yet.
-                        <a href="{{ route('admin.cohorts.enroll', $cohort) }}" class="text-purple-600 hover:underline">Add @term('learner_plural')</a>
+                        @term('no_label') @term('learner_plural') @term('enrolled_label') @term('yet_label').
+                        <a href="{{ route('admin.cohorts.enroll', $cohort) }}" class="text-purple-600 hover:underline">@term('add_action') @term('learner_plural')</a>
                     </td>
                 </tr>
                 @endforelse

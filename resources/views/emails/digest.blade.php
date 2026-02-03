@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+@php
+    $terminology = app(\App\Services\TerminologyService::class);
+@endphp
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your {{ ucfirst($digestType) }} Digest</title>
+    <title>{{ $terminology->get('email_digest_title_prefix') }} {{ ucfirst($digestType) }} {{ $terminology->get('email_digest_title_suffix') }}</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -187,32 +190,32 @@
     <div class="container">
         <div class="card">
             <div class="header">
-                <h1>Pulse</h1>
-                <div class="subtitle">Your {{ ucfirst($digestType) }} Notification Digest</div>
+                <h1>{{ $terminology->get('app_name_label') }}</h1>
+                <div class="subtitle">{{ $terminology->get('email_digest_subtitle_prefix') }} {{ ucfirst($digestType) }} {{ $terminology->get('email_digest_subtitle_suffix') }}</div>
             </div>
 
             <div class="content">
-                <p class="greeting">Hi {{ $user->first_name ?? 'there' }},</p>
+                <p class="greeting">{{ $terminology->get('email_greeting_label') }} {{ $user->first_name ?? $terminology->get('email_greeting_fallback_label') }},</p>
 
                 <p style="color: #4b5563; margin-bottom: 24px;">
-                    Here's a summary of your unread notifications from the past {{ $digestType === 'weekly' ? 'week' : 'day' }}.
+                    {{ $terminology->get('email_digest_summary_prefix') }} {{ $digestType === 'weekly' ? $terminology->get('email_digest_week_label') : $terminology->get('email_digest_day_label') }}.
                 </p>
 
                 {{-- Summary Stats --}}
                 <div class="stats">
                     <div class="stat-box">
                         <div class="stat-number">{{ $totalCount }}</div>
-                        <div class="stat-label">Total</div>
+                        <div class="stat-label">{{ $terminology->get('email_digest_total_label') }}</div>
                     </div>
                     @if($highPriorityCount > 0)
                     <div class="stat-box">
                         <div class="stat-number" style="color: #dc2626;">{{ $highPriorityCount }}</div>
-                        <div class="stat-label">High Priority</div>
+                        <div class="stat-label">{{ $terminology->get('email_digest_high_priority_label') }}</div>
                     </div>
                     @endif
                     <div class="stat-box">
                         <div class="stat-number">{{ $groupedNotifications->count() }}</div>
-                        <div class="stat-label">Categories</div>
+                        <div class="stat-label">{{ $terminology->get('email_digest_categories_label') }}</div>
                     </div>
                 </div>
 
@@ -235,7 +238,7 @@
                                         {{ $notification->created_at->diffForHumans() }}
                                         @if(in_array($notification->priority, ['high', 'urgent']))
                                             &bull; <span style="color: {{ $notification->priority === 'urgent' ? '#dc2626' : '#d97706' }};">
-                                                {{ ucfirst($notification->priority) }} Priority
+                                                {{ ucfirst($notification->priority) }} {{ $terminology->get('priority_label') }}
                                             </span>
                                         @endif
                                     </div>
@@ -245,7 +248,7 @@
 
                         @if($notifications->count() > 5)
                             <p class="more-count">
-                                + {{ $notifications->count() - 5 }} more in this category
+                                + {{ $notifications->count() - 5 }} {{ $terminology->get('email_digest_more_in_category_label') }}
                             </p>
                         @endif
                     </div>
@@ -253,21 +256,21 @@
 
                 <div class="actions">
                     <a href="{{ $notificationCenterUrl }}" class="button">
-                        View All Notifications
+                        {{ $terminology->get('email_digest_view_all_label') }}
                     </a>
                 </div>
             </div>
 
             <div class="footer">
                 <p>
-                    You're receiving this {{ $digestType }} digest based on your notification preferences.
+                    {{ $terminology->get('email_digest_receiving_prefix') }} {{ $digestType }} {{ $terminology->get('email_digest_receiving_suffix') }}
                     <br>
-                    <a href="{{ $preferencesUrl }}">Change preferences</a>
+                    <a href="{{ $preferencesUrl }}">{{ $terminology->get('email_change_preferences_label') }}</a>
                     &bull;
-                    <a href="{{ $unsubscribeUrl }}">Unsubscribe from digests</a>
+                    <a href="{{ $unsubscribeUrl }}">{{ $terminology->get('email_unsubscribe_digests_label') }}</a>
                 </p>
                 <p style="margin-top: 16px;">
-                    &copy; {{ date('Y') }} Pulse Education Platform
+                    &copy; {{ date('Y') }} {{ $terminology->get('email_footer_brand_label') }}
                 </p>
             </div>
         </div>

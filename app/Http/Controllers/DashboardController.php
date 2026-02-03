@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Resource;
 use App\Models\ResourceAssignment;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\Survey;
 use App\Models\SurveyAttempt;
 use Illuminate\Http\Request;
@@ -16,12 +16,12 @@ class DashboardController extends Controller
         $user = $request->user();
         $orgId = $user->org_id;
 
-        // Get learner metrics
+        // Get participant metrics
         $learnerMetrics = [
-            'good' => Learner::forOrganization($orgId)->riskLevel('good')->count(),
-            'low' => Learner::forOrganization($orgId)->riskLevel('low')->count(),
-            'high' => Learner::forOrganization($orgId)->riskLevel('high')->count(),
-            'total' => Learner::forOrganization($orgId)->count(),
+            'good' => Participant::forOrganization($orgId)->riskLevel('good')->count(),
+            'low' => Participant::forOrganization($orgId)->riskLevel('low')->count(),
+            'high' => Participant::forOrganization($orgId)->riskLevel('high')->count(),
+            'total' => Participant::forOrganization($orgId)->count(),
         ];
 
         // Get survey metrics
@@ -36,7 +36,7 @@ class DashboardController extends Controller
         $suggestedResourcesCount = Resource::forOrganization($orgId)->active()->count();
 
         // Get resource assignments pending
-        $pendingAssignments = ResourceAssignment::whereHas('learner', function ($q) use ($orgId) {
+        $pendingAssignments = ResourceAssignment::whereHas('participant', function ($q) use ($orgId) {
             $q->where('org_id', $orgId);
         })->where('status', 'assigned')->count();
 

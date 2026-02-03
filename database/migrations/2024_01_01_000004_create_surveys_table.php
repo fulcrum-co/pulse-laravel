@@ -25,8 +25,8 @@ return new class extends Migration
             $table->integer('estimated_duration_minutes')->nullable();
             $table->timestamp('start_date')->nullable();
             $table->timestamp('end_date')->nullable();
-            $table->json('target_grades')->nullable();
-            $table->json('target_classrooms')->nullable();
+            $table->json('target_levels')->nullable();
+            $table->json('target_learning_groups')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();

@@ -2,13 +2,13 @@
 
 namespace App\Livewire;
 
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Services\ContactMetricService;
 use Livewire\Component;
 
 class LearnerPlanHeatMap extends Component
 {
-    public Learner $learner;
+    public Participant $participant;
 
     public string $organizationYear;
 
@@ -19,9 +19,9 @@ class LearnerPlanHeatMap extends Component
         $this->metricService = $metricService;
     }
 
-    public function mount(Learner $learner, ?string $organizationYear = null)
+    public function mount(Participant $participant, ?string $organizationYear = null)
     {
-        $this->learner = $learner;
+        $this->participant = $participant;
         $this->organizationYear = $organizationYear ?? $this->metricService->getCurrentOrganizationYear();
     }
 
@@ -48,7 +48,7 @@ class LearnerPlanHeatMap extends Component
     public function getHeatMapDataProperty()
     {
         return $this->metricService->getHeatMapData(
-            $this->learner,
+            $this->participant,
             $this->organizationYear,
             ['academics', 'attendance', 'behavior', 'life_skills']
         );
@@ -76,7 +76,7 @@ class LearnerPlanHeatMap extends Component
 
     public function render()
     {
-        return view('livewire.learner-plan-heat-map', [
+        return view('livewire.participant-plan-heat-map', [
             'heatMapData' => $this->heatMapData,
             'categories' => $this->categories,
             'quarters' => $this->quarters,

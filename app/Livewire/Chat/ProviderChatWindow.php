@@ -82,7 +82,7 @@ class ProviderChatWindow extends Component
             return;
         }
 
-        $this->conversation = ProviderConversation::with(['provider', 'learner'])
+        $this->conversation = ProviderConversation::with(['provider', 'participant'])
             ->find($conversationId);
 
         if (! $this->conversation) {
@@ -140,6 +140,38 @@ class ProviderChatWindow extends Component
         } catch (\Exception $e) {
             $this->messages = [];
         }
+    }
+
+    /**
+     * Archive a conversation.
+     */
+    public function archiveConversation(string $conversationId): void
+    {
+        if ($this->isDemo || str_starts_with($conversationId, 'conv_')) {
+            if ($this->conversation && $this->conversation->id === $conversationId) {
+                $this->conversation = null;
+                $this->messages = [];
+            }
+
+            $this->dispatch('conversation-archived', id: $conversationId);
+
+            return;
+        }
+
+        $conversation = ProviderConversation::find($conversationId);
+
+        if (! $conversation) {
+            return;
+        }
+
+        $conversation->archive();
+
+        if ($this->conversation && $this->conversation->id === $conversationId) {
+            $this->conversation = null;
+            $this->messages = [];
+        }
+
+        $this->dispatch('conversation-archived', id: $conversationId);
     }
 
     /**

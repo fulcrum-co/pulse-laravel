@@ -388,9 +388,9 @@ function inlineTooltipCreator() {
                 }
 
                 // Add nth-child for uniqueness
-                const parent = current.parentElement;
-                if (parent) {
-                    const siblings = Array.from(parent.children).filter(c => c.tagName === current.tagName);
+                const parentElement = current.parentElement;
+                if (parentElement) {
+                    const siblings = Array.from(parentElement.children).filter(c => c.tagName === current.tagName);
                     if (siblings.length > 1) {
                         const index = siblings.indexOf(current) + 1;
                         selector += `:nth-child(${index})`;
@@ -398,7 +398,7 @@ function inlineTooltipCreator() {
                 }
 
                 path.unshift(selector);
-                current = parent;
+                current = parentElement;
             }
 
             return path.join(' > ');
@@ -426,7 +426,7 @@ function inlineTooltipCreator() {
             if (path.includes('/plans')) return 'plans';
             if (path.includes('/surveys')) return 'surveys';
             if (path.includes('/alerts')) return 'alerts';
-            if (path.includes('/learners') || path.includes('/contacts')) return 'contacts';
+            if (path.includes('/participants') || path.includes('/contacts')) return 'contacts';
             if (path.includes('/resources')) return 'resources';
             if (path.includes('/collect')) return 'collect';
             if (path.includes('/distribute')) return 'distribute';

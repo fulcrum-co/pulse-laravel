@@ -251,7 +251,7 @@ class PageHelpHintSeeder extends Seeder
                 'section' => 'list',
                 'selector' => '[data-help="alert-list"], .alert-list, [class*="alert-item"]',
                 'title' => 'Alert List',
-                'description' => 'Each alert shows the learner, the trigger, and recommended actions. Click to view more details.',
+                'description' => 'Each alert shows the participant, the trigger, and recommended actions. Click to view more details.',
                 'position' => 'top',
                 'sort_order' => 1,
             ],

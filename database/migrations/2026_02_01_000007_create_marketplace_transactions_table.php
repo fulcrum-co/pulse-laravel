@@ -38,7 +38,7 @@ return new class extends Migration
             $table->string('currency', 3)->default('USD');
 
             // License
-            $table->string('license_type')->nullable(); // single, team, site, district
+            $table->string('license_type')->nullable(); // single, team, site, section
             $table->integer('seat_count')->nullable();
             $table->timestamp('license_expires_at')->nullable();
 

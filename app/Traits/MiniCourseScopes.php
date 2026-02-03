@@ -126,13 +126,13 @@ trait MiniCourseScopes
     }
 
     /**
-     * Scope to courses for specific target grades.
+     * Scope to courses for specific target levels.
      */
-    public function scopeForGrades(Builder $query, array $grades): Builder
+    public function scopeForGrades(Builder $query, array $levels): Builder
     {
-        return $query->where(function ($q) use ($grades) {
-            foreach ($grades as $grade) {
-                $q->orWhereJsonContains('target_grades', $grade);
+        return $query->where(function ($q) use ($levels) {
+            foreach ($levels as $level) {
+                $q->orWhereJsonContains('target_levels', $level);
             }
         });
     }

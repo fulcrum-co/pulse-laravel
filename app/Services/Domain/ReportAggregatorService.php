@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Domain;
 
 use App\Models\ContactMetric;
-use App\Models\Learner;
+use App\Models\Participant;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -97,14 +97,14 @@ class ReportAggregatorService
     }
 
     /**
-     * Calculate learner count aggregates by risk level.
+     * Calculate participant count aggregates by risk level.
      *
      * @param  int  $orgId  Organization ID
      * @return array{total: int, good_standing: int, at_risk: int, risk_distribution: array}
      */
     public function getLearnerCountAggregates(int $orgId): array
     {
-        $learnerCounts = Learner::where('org_id', $orgId)
+        $learnerCounts = Participant::where('org_id', $orgId)
             ->selectRaw('
                 COUNT(*) as total,
                 SUM(CASE WHEN risk_level = "good" THEN 1 ELSE 0 END) as good_standing,
@@ -112,7 +112,7 @@ class ReportAggregatorService
             ')
             ->first();
 
-        $riskDistribution = Learner::where('org_id', $orgId)
+        $riskDistribution = Participant::where('org_id', $orgId)
             ->select('risk_level')
             ->selectRaw('COUNT(*) as count')
             ->groupBy('risk_level')
@@ -162,18 +162,18 @@ class ReportAggregatorService
     }
 
     /**
-     * Build learner table row data from loaded metrics.
+     * Build participant table row data from loaded metrics.
      *
-     * Transforms learner data and metric values into table row format.
+     * Transforms participant data and metric values into table row format.
      *
-     * @param  Learner  $learner
+     * @param  Participant  $participant
      * @param  array<string>  $columns  Columns to include
      * @param  array  $userMap  User data map (id => user)
-     * @param  array  $latestMetrics  Latest metrics map (learner_id => Collection)
+     * @param  array  $latestMetrics  Latest metrics map (participant_id => Collection)
      * @return array Row data
      */
     public function buildLearnerTableRow(
-        Learner $learner,
+        Participant $participant,
         array $columns,
         array $userMap,
         array $latestMetrics
@@ -182,14 +182,14 @@ class ReportAggregatorService
 
         foreach ($columns as $column) {
             $row[$column] = match ($column) {
-                'name' => $userMap[$learner->id]?->full_name ?? 'Unknown',
-                'email' => $userMap[$learner->id]?->email,
-                'grade_level' => $learner->grade_level,
-                'risk_level' => $learner->risk_level,
-                'gpa' => $latestMetrics[$learner->id]?->get('gpa')?->numeric_value,
-                'attendance', 'attendance_rate' => $latestMetrics[$learner->id]?->get('attendance_rate')?->numeric_value,
-                'wellness_score' => $latestMetrics[$learner->id]?->get('wellness_score')?->numeric_value,
-                'engagement_score' => $latestMetrics[$learner->id]?->get('engagement_score')?->numeric_value,
+                'name' => $userMap[$participant->id]?->full_name ?? 'Unknown',
+                'email' => $userMap[$participant->id]?->email,
+                'level' => $participant->level,
+                'risk_level' => $participant->risk_level,
+                'gpa' => $latestMetrics[$participant->id]?->get('gpa')?->numeric_value,
+                'attendance', 'attendance_rate' => $latestMetrics[$participant->id]?->get('attendance_rate')?->numeric_value,
+                'wellness_score' => $latestMetrics[$participant->id]?->get('wellness_score')?->numeric_value,
+                'engagement_score' => $latestMetrics[$participant->id]?->get('engagement_score')?->numeric_value,
                 default => null,
             };
         }
@@ -216,7 +216,7 @@ class ReportAggregatorService
     }
 
     /**
-     * Extract learner filter criteria from raw filter array.
+     * Extract participant filter criteria from raw filter array.
      *
      * Validates and normalizes filter values.
      *
@@ -227,8 +227,8 @@ class ReportAggregatorService
     {
         $learnerFilters = [];
 
-        if (! empty($filters['grade_level'])) {
-            $learnerFilters['grade_level'] = $filters['grade_level'];
+        if (! empty($filters['level'])) {
+            $learnerFilters['level'] = $filters['level'];
         }
 
         if (! empty($filters['risk_level'])) {

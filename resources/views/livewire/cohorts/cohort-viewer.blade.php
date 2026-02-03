@@ -84,12 +84,12 @@
                                             $releaseDate = $schedule ? $cohort->start_date->copy()->addDays($schedule['days_after_start'] ?? 0) : null;
                                         @endphp
                                         @if($releaseDate)
-                                            <p class="text-xs text-gray-400">Unlocks {{ $releaseDate->format('M d') }}</p>
+                                            <p class="text-xs text-gray-400">@term('unlocks_label') {{ $releaseDate->format('M d') }}</p>
                                         @endif
                                     @elseif($status === 'completed')
-                                        <p class="text-xs text-green-600">Completed</p>
+                                        <p class="text-xs text-green-600">@term('completed_label')</p>
                                     @elseif($status === 'in_progress')
-                                        <p class="text-xs text-purple-600">In @term('progress_label')</p>
+                                        <p class="text-xs text-purple-600">@term('in_progress_label')</p>
                                     @endif
                                 </div>
                             </button>
@@ -119,11 +119,11 @@
                                         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                         </svg>
-                                        Completed
+                                        @term('completed_label')
                                     </span>
                                 @elseif($currentStatus === 'in_progress')
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                                        In @term('progress_label')
+                                        @term('in_progress_label')
                                     </span>
                                 @endif
                             </div>
@@ -159,14 +159,14 @@
                             <!-- Downloadable Resources -->
                             @if($currentStep->resources && count($currentStep->resources) > 0)
                                 <div class="mt-6 pt-6 border-t border-gray-200">
-                                    <h3 class="text-sm font-medium text-gray-900 mb-3">Resources</h3>
+                                    <h3 class="text-sm font-medium text-gray-900 mb-3">@term('resources_label')</h3>
                                     <div class="space-y-2">
                                         @foreach($currentStep->resources as $resource)
                                             <a href="{{ $resource['url'] ?? '#' }}" target="_blank" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                                                 <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                                 </svg>
-                                                <span class="text-sm text-gray-700">{{ $resource['name'] ?? 'Download' }}</span>
+                                                <span class="text-sm text-gray-700">{{ $resource['name'] ?? app(\App\Services\TerminologyService::class)->get('download_action') }}</span>
                                             </a>
                                         @endforeach
                                     </div>
@@ -192,7 +192,7 @@
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                                             </svg>
-                                            Previous
+                                            @term('previous_label')
                                         </button>
                                     @endif
                                 </div>
@@ -204,7 +204,7 @@
                                             wire:click="startStep"
                                             class="inline-flex items-center px-6 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700"
                                         >
-                                            Start @term('step_singular')
+                                            @term('start_step_label')
                                         </button>
                                     @elseif($currentStatus === 'in_progress')
                                         <button
@@ -214,14 +214,14 @@
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                             </svg>
-                                            Mark Complete
+                                            @term('mark_complete_label')
                                         </button>
                                     @elseif($currentStatus === 'completed' && $nextStep && $this->isStepAvailable($nextStep))
                                         <button
                                             wire:click="selectStep({{ $nextStep->id }})"
                                             class="inline-flex items-center px-6 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700"
                                         >
-                                            Next @term('step_singular')
+                                            @term('next_step_label')
                                             <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                             </svg>
@@ -230,9 +230,9 @@
                                         <!-- Course Complete -->
                                         <span class="inline-flex items-center px-6 py-2 text-sm font-medium text-green-700 bg-green-100 rounded-lg">
                                             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                             </svg>
-                                            @term('course_singular') Complete!
+                                            @term('course_complete_label')
                                         </span>
                                     @endif
                                 </div>
@@ -250,12 +250,12 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <h3 class="text-lg font-semibold">Congratulations!</h3>
-                                    <p class="text-purple-100">You've completed all @term('step_plural') in this @term('course_singular').</p>
+                                    <h3 class="text-lg font-semibold">@term('congratulations_label')</h3>
+                                    <p class="text-purple-100">@term('completed_all_steps_label')</p>
                                 </div>
                                 @if($cohort->course?->certificate_enabled)
                                     <a href="#" class="px-4 py-2 bg-white text-purple-600 rounded-lg font-medium hover:bg-purple-50">
-                                        View @term('certificate_singular')
+                                        @term('view_certificate_label')
                                     </a>
                                 @endif
                             </div>
@@ -267,8 +267,8 @@
                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        <h3 class="mt-4 text-lg font-medium text-gray-900">No content yet</h3>
-                        <p class="mt-1 text-gray-500">This @term('course_singular') doesn't have any @term('step_plural') configured yet.</p>
+                        <h3 class="mt-4 text-lg font-medium text-gray-900">@term('no_content_yet_label')</h3>
+                        <p class="mt-1 text-gray-500">@term('course_missing_steps_label')</p>
                     </div>
                 @endif
             </div>

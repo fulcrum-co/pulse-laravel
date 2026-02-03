@@ -48,7 +48,7 @@ class NotificationFormatterService
     /**
      * Format a booking reminder for SMS delivery.
      *
-     * @param  string  $learnerName  Name of the learner
+     * @param  string  $learnerName  Name of the participant
      * @param  string  $scheduledTime  When the appointment is scheduled
      * @return string Formatted SMS reminder message
      */

@@ -47,6 +47,14 @@ class Organization extends Model
     }
 
     /**
+     * Legacy compatibility: direct_supervisor organization.
+     */
+    public function direct_supervisor(): BelongsTo
+    {
+        return $this->parent();
+    }
+
+    /**
      * Get child organizations.
      */
     public function children(): HasMany

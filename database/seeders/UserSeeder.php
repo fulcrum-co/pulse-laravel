@@ -11,27 +11,27 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $district = Organization::where('org_type', 'district')->first();
+        $section = Organization::where('org_type', 'section')->first();
         $organization = Organization::where('org_type', 'organization')->first();
 
-        // Create superintendent at district level - Dr. Margaret Chen
-        // An experienced educator in her late 50s who oversees the entire district
-        $superintendent = User::create([
-            'org_id' => $district->id,
+        // Create administrative_role at section level - Dr. Margaret Chen
+        // An experienced educator in her late 50s who oversees the entire section
+        $administrative_role = User::create([
+            'org_id' => $section->id,
             'first_name' => 'Margaret',
             'last_name' => 'Chen',
             'email' => 'mchen@lincolnorganizations.edu',
             'password' => Hash::make('password'),
             'primary_role' => 'consultant', // Consultant role to see sub-organizations
             'phone' => '(555) 123-4567',
-            'bio' => 'Superintendent of Lincoln County Organization District. 30+ years in education. Passionate about data-driven learner success.',
+            'bio' => 'Administrative Role of Lincoln County Organization Section. 30+ years in education. Passionate about data-driven participant success.',
             'avatar_url' => 'https://randomuser.me/api/portraits/women/79.jpg',
             'active' => true,
             'suspended' => false,
         ]);
 
         // Assign consultant access to Lincoln High Organization (can view and push content)
-        $superintendent->organizations()->attach($organization->id, [
+        $administrative_role->organizations()->attach($organization->id, [
             'role' => 'consultant',
             'is_primary' => false,
             'can_manage' => true,
@@ -46,14 +46,14 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'primary_role' => 'admin',
             'phone' => '(555) 234-5678',
-            'bio' => 'Principal of Lincoln High Organization. Dedicated to fostering academic excellence and learner well-being.',
+            'bio' => 'Principal of Lincoln High Organization. Dedicated to fostering academic excellence and participant well-being.',
             'avatar_url' => 'https://randomuser.me/api/portraits/men/52.jpg',
             'active' => true,
             'suspended' => false,
         ]);
 
-        // Create counselor
-        $counselor = User::create([
+        // Create support_person
+        $support_person = User::create([
             'org_id' => $organization->id,
             'first_name' => 'Emily',
             'last_name' => 'Rodriguez',
@@ -66,29 +66,29 @@ class UserSeeder extends Seeder
             'suspended' => false,
         ]);
 
-        // Create teachers with gender-appropriate avatars
-        $teachers = [
+        // Create instructors with gender-appropriate avatars
+        $instructors = [
             ['first_name' => 'James', 'last_name' => 'Wilson', 'email' => 'jwilson@lincolnhigh.edu', 'gender' => 'men', 'img' => 32],
             ['first_name' => 'Maria', 'last_name' => 'Garcia', 'email' => 'mgarcia@lincolnhigh.edu', 'gender' => 'women', 'img' => 44],
             ['first_name' => 'David', 'last_name' => 'Lee', 'email' => 'dlee@lincolnhigh.edu', 'gender' => 'men', 'img' => 45],
             ['first_name' => 'Sarah', 'last_name' => 'Thompson', 'email' => 'sthompson@lincolnhigh.edu', 'gender' => 'women', 'img' => 28],
         ];
 
-        foreach ($teachers as $teacher) {
+        foreach ($instructors as $instructor) {
             User::create([
                 'org_id' => $organization->id,
-                'first_name' => $teacher['first_name'],
-                'last_name' => $teacher['last_name'],
-                'email' => $teacher['email'],
+                'first_name' => $instructor['first_name'],
+                'last_name' => $instructor['last_name'],
+                'email' => $instructor['email'],
                 'password' => Hash::make('password'),
-                'primary_role' => 'teacher',
-                'avatar_url' => 'https://randomuser.me/api/portraits/'.$teacher['gender'].'/'.$teacher['img'].'.jpg',
+                'primary_role' => 'instructor',
+                'avatar_url' => 'https://randomuser.me/api/portraits/'.$instructor['gender'].'/'.$instructor['img'].'.jpg',
                 'active' => true,
                 'suspended' => false,
             ]);
         }
 
-        // Create learner users (these will be linked to Learner records)
+        // Create participant users (these will be linked to Participant records)
         // Using randomuser.me portraits - reliable static URLs
         $learnerData = [
             ['first_name' => 'Alex', 'last_name' => 'Johnson', 'gender' => 'men', 'img' => 1],
@@ -118,16 +118,16 @@ class UserSeeder extends Seeder
             ['first_name' => 'Daniel', 'last_name' => 'King', 'gender' => 'men', 'img' => 13],
         ];
 
-        foreach ($learnerData as $learner) {
-            $email = strtolower($learner['first_name'][0].$learner['last_name']).'@learner.lincolnhigh.edu';
-            $avatarUrl = 'https://randomuser.me/api/portraits/'.$learner['gender'].'/'.$learner['img'].'.jpg';
+        foreach ($learnerData as $participant) {
+            $email = strtolower($participant['first_name'][0].$participant['last_name']).'@participant.lincolnhigh.edu';
+            $avatarUrl = 'https://randomuser.me/api/portraits/'.$participant['gender'].'/'.$participant['img'].'.jpg';
             User::create([
                 'org_id' => $organization->id,
-                'first_name' => $learner['first_name'],
-                'last_name' => $learner['last_name'],
+                'first_name' => $participant['first_name'],
+                'last_name' => $participant['last_name'],
                 'email' => $email,
                 'password' => Hash::make('password'),
-                'primary_role' => 'learner',
+                'primary_role' => 'participant',
                 'avatar_url' => $avatarUrl,
                 'active' => true,
                 'suspended' => false,

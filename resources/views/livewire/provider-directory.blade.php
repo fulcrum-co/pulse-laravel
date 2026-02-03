@@ -1,4 +1,5 @@
 <div class="min-h-screen bg-gray-50">
+    @php($terminology = app(\App\Services\TerminologyService::class))
     <!-- Header Banner -->
     <div class="bg-white border-b border-gray-200">
         <div class="px-6 py-4 flex items-center justify-between">
@@ -8,11 +9,11 @@
                 </a>
                 <div>
                     <nav class="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                        <a href="{{ route('resources.index') }}" class="hover:text-gray-700">Resources</a>
-                        <span>/</span>
-                        <span class="text-gray-900">Providers</span>
+                        <a href="{{ route('resources.index') }}" class="hover:text-gray-700">@term('resources_label')</a>
+                        <span>@term('breadcrumb_separator_label')</span>
+                        <span class="text-gray-900">@term('provider_plural')</span>
                     </nav>
-                    <h1 class="text-2xl font-semibold text-gray-900">Provider Directory</h1>
+                    <h1 class="text-2xl font-semibold text-gray-900">@term('provider_directory_label')</h1>
                 </div>
             </div>
             <button
@@ -20,7 +21,7 @@
                 class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
             >
                 <x-icon name="plus" class="w-4 h-4" />
-                Add Provider
+                @term('add_provider_label')
             </button>
         </div>
     </div>
@@ -38,7 +39,7 @@
                         <input
                             type="text"
                             wire:model.live.debounce.300ms="search"
-                            placeholder="Search providers by name, specialty, or bio..."
+                            placeholder="@term('search_providers_placeholder')"
                             class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                         >
                     </div>
@@ -50,7 +51,7 @@
                         wire:model.live="filterType"
                         class="border-gray-300 rounded-lg text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                     >
-                        <option value="">All Types</option>
+                        <option value="">@term('all_types_label')</option>
                         @foreach($this->providerTypes as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
@@ -60,7 +61,7 @@
                         wire:model.live="filterAvailability"
                         class="border-gray-300 rounded-lg text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                     >
-                        <option value="">Any Availability</option>
+                        <option value="">@term('any_availability_label')</option>
                         @foreach($this->availabilityOptions as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
@@ -70,9 +71,9 @@
                         wire:model.live="filterLocation"
                         class="border-gray-300 rounded-lg text-sm focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                     >
-                        <option value="">Any Location</option>
-                        <option value="remote">Remote Available</option>
-                        <option value="in_person">In-Person Only</option>
+                        <option value="">@term('any_location_label')</option>
+                        <option value="remote">@term('remote_available_label')</option>
+                        <option value="in_person">@term('in_person_only_label')</option>
                     </select>
 
                     @if($this->hasActiveFilters)
@@ -80,7 +81,7 @@
                             wire:click="clearFilters"
                             class="px-3 py-2 text-sm text-gray-600 hover:text-gray-900"
                         >
-                            Clear
+                            @term('clear_action')
                         </button>
                     @endif
 
@@ -92,21 +93,21 @@
                         <button
                             wire:click="$set('viewMode', 'grid')"
                             class="p-2 {{ $viewMode === 'grid' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }} transition-colors"
-                            title="Grid view"
+                            title="@term('grid_view_label')"
                         >
                             <x-icon name="squares-2x2" class="w-4 h-4" />
                         </button>
                         <button
                             wire:click="$set('viewMode', 'list')"
                             class="p-2 border-l border-gray-300 {{ $viewMode === 'list' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }} transition-colors"
-                            title="List view"
+                            title="@term('list_view_label')"
                         >
                             <x-icon name="bars-3" class="w-4 h-4" />
                         </button>
                         <button
                             wire:click="$set('viewMode', 'table')"
                             class="p-2 border-l border-gray-300 {{ $viewMode === 'table' ? 'bg-pulse-orange-100 text-pulse-orange-600' : 'bg-white text-gray-500 hover:bg-gray-50' }} transition-colors"
-                            title="Table view"
+                            title="@term('table_view_label')"
                         >
                             <x-icon name="table-cells" class="w-4 h-4" />
                         </button>
@@ -118,7 +119,7 @@
         <!-- Results Count -->
         <div class="mb-4">
             <p class="text-sm text-gray-600">
-                Showing <span class="font-medium">{{ $providers->count() }}</span> of <span class="font-medium">{{ $providers->total() }}</span> providers
+                @term('showing_label') <span class="font-medium">{{ $providers->count() }}</span> @term('of_label') <span class="font-medium">{{ $providers->total() }}</span> @term('provider_plural')
             </p>
         </div>
 
@@ -152,7 +153,7 @@
                                             <p class="text-sm text-gray-500 truncate">{{ $provider->credentials }}</p>
                                         @endif
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 mt-1">
-                                            {{ ucfirst($provider->provider_type) }}
+                                            {{ $terminology->get('provider_type_'.$provider->provider_type.'_label') }}
                                         </span>
                                     </div>
                                 </div>
@@ -177,11 +178,11 @@
                             <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between mt-auto">
                                 <div class="flex items-center gap-3 text-xs text-gray-500">
                                     @if($provider->serves_remote)
-                                        <span class="inline-flex items-center gap-1">
-                                            <x-icon name="globe-alt" class="w-3.5 h-3.5" />
-                                            Remote
-                                        </span>
-                                    @endif
+                                            <span class="inline-flex items-center gap-1">
+                                                <x-icon name="globe-alt" class="w-3.5 h-3.5" />
+                                                @term('remote_label')
+                                            </span>
+                                        @endif
                                     @if($provider->ratings_count > 0)
                                         <span class="inline-flex items-center gap-1 font-medium text-yellow-700">
                                             <x-icon name="star" class="w-3.5 h-3.5 text-yellow-500" />
@@ -190,7 +191,7 @@
                                     @endif
                                 </div>
                                 <span class="text-xs font-medium text-pulse-orange-600 group-hover:text-pulse-orange-700">
-                                    View Profile &rarr;
+                                    @term('view_profile_label') &rarr;
                                 </span>
                             </div>
                         </a>
@@ -226,13 +227,13 @@
                                     @if($provider->isVerified())
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
                                             <x-icon name="check-badge" class="w-3.5 h-3.5" />
-                                            Verified
+                                            @term('verified_label')
                                         </span>
                                     @endif
                                 </div>
                                 <div class="flex items-center gap-2 text-sm text-gray-600">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                                        {{ ucfirst($provider->provider_type) }}
+                                        {{ $terminology->get('provider_type_'.$provider->provider_type.'_label') }}
                                     </span>
                                     @if($provider->specialty_areas && count($provider->specialty_areas) > 0)
                                         <span class="text-gray-400">&bull;</span>
@@ -251,7 +252,7 @@
                                     @if($provider->serves_remote)
                                         <span class="inline-flex items-center gap-1 text-xs text-gray-600">
                                             <x-icon name="globe-alt" class="w-3.5 h-3.5" />
-                                            Remote
+                                            @term('remote_label')
                                         </span>
                                     @endif
                                     @if($provider->location_address)
@@ -283,14 +284,14 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provider</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialties</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('provider_label')</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('type_label')</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('specialties_label')</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('location_label')</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('status_label')</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">@term('rating_label')</th>
                                     <th scope="col" class="relative px-6 py-3">
-                                        <span class="sr-only">Actions</span>
+                                        <span class="sr-only">@term('actions_label')</span>
                                     </th>
                                 </tr>
                             </thead>
@@ -316,7 +317,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                                                {{ ucfirst($provider->provider_type) }}
+                                                {{ $terminology->get('provider_type_'.$provider->provider_type.'_label') }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4">
@@ -328,7 +329,7 @@
                                                     @endif
                                                 </div>
                                             @else
-                                                <span class="text-sm text-gray-400">—</span>
+                                                <span class="text-sm text-gray-400">@term('empty_value_placeholder')</span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -336,13 +337,13 @@
                                                 @if($provider->serves_remote)
                                                     <span class="inline-flex items-center gap-1 text-xs">
                                                         <x-icon name="globe-alt" class="w-3.5 h-3.5" />
-                                                        Remote
+                                                        @term('remote_label')
                                                     </span>
                                                 @endif
                                                 @if($provider->serves_in_person)
                                                     <span class="inline-flex items-center gap-1 text-xs">
                                                         <x-icon name="map-pin" class="w-3.5 h-3.5" />
-                                                        In-Person
+                                                        @term('in_person_label')
                                                     </span>
                                                 @endif
                                             </div>
@@ -351,11 +352,11 @@
                                             @if($provider->isVerified())
                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
                                                     <x-icon name="check-badge" class="w-3.5 h-3.5" />
-                                                    Verified
+                                                    @term('verified_label')
                                                 </span>
                                             @else
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                                    Unverified
+                                                    @term('unverified_label')
                                                 </span>
                                             @endif
                                         </td>
@@ -367,12 +368,12 @@
                                                     <span class="text-gray-400 font-normal">({{ $provider->ratings_count }})</span>
                                                 </span>
                                             @else
-                                                <span class="text-sm text-gray-400">—</span>
+                                                <span class="text-sm text-gray-400">@term('empty_dash_label')</span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <a href="{{ route('resources.providers.show', $provider) }}" class="text-pulse-orange-600 hover:text-pulse-orange-700">
-                                                View
+                                                @term('view_action')
                                             </a>
                                         </td>
                                     </tr>
@@ -394,23 +395,23 @@
                     <x-icon name="users" class="w-8 h-8 text-purple-400" />
                 </div>
                 @if($this->hasActiveFilters)
-                    <h3 class="text-lg font-medium text-gray-900 mb-1">No providers match your filters</h3>
-                    <p class="text-gray-500 mb-4">Try adjusting your search or filter criteria.</p>
+                    <h3 class="text-lg font-medium text-gray-900 mb-1">@term('no_providers_match_filters_label')</h3>
+                    <p class="text-gray-500 mb-4">@term('adjust_search_or_filters_label')</p>
                     <button
                         wire:click="clearFilters"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                        Clear filters
+                        @term('clear_filters_label')
                     </button>
                 @else
-                    <h3 class="text-lg font-medium text-gray-900 mb-1">No providers yet</h3>
-                    <p class="text-gray-500 mb-4">Add therapists, tutors, coaches, and other service providers to your directory.</p>
+                    <h3 class="text-lg font-medium text-gray-900 mb-1">@term('no_providers_yet_label')</h3>
+                    <p class="text-gray-500 mb-4">@term('provider_directory_empty_help_label')</p>
                     <button
                         wire:click="$dispatch('openAddResourceModal')"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-pulse-orange-500 text-white text-sm font-medium rounded-lg hover:bg-pulse-orange-600 transition-colors"
                     >
                         <x-icon name="plus" class="w-4 h-4" />
-                        Add Provider
+                        @term('add_provider_label')
                     </button>
                 @endif
             </div>

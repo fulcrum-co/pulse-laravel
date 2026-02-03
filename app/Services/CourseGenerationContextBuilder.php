@@ -4,49 +4,49 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Classroom;
+use App\Models\LearningGroup;
 use App\Models\ContactList;
-use App\Models\Learner;
+use App\Models\Participant;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
 class CourseGenerationContextBuilder
 {
     /**
-     * Build context for generating a learner-focused course.
+     * Build context for generating a participant-focused course.
      */
-    public function buildLearnerContext(Learner $learner): array
+    public function buildLearnerContext(Participant $participant): array
     {
         $context = [
-            'entity_type' => 'learner',
-            'entity_id' => $learner->id,
-            'basic_info' => $this->getLearnerBasicInfo($learner),
-            'academic_profile' => $this->getLearnerAcademicProfile($learner),
-            'behavioral_profile' => $this->getLearnerBehavioralProfile($learner),
-            'support_needs' => $this->getLearnerSupportNeeds($learner),
-            'recent_data' => $this->getLearnerRecentData($learner),
-            'improvement_areas' => $this->identifyLearnerImprovementAreas($learner),
-            'strengths' => $this->identifyLearnerStrengths($learner),
+            'entity_type' => 'participant',
+            'entity_id' => $participant->id,
+            'basic_info' => $this->getLearnerBasicInfo($participant),
+            'academic_profile' => $this->getLearnerAcademicProfile($participant),
+            'behavioral_profile' => $this->getLearnerBehavioralProfile($participant),
+            'support_needs' => $this->getLearnerSupportNeeds($participant),
+            'recent_data' => $this->getLearnerRecentData($participant),
+            'improvement_areas' => $this->identifyLearnerImprovementAreas($participant),
+            'strengths' => $this->identifyLearnerStrengths($participant),
         ];
 
         return $context;
     }
 
     /**
-     * Build context for generating a teacher-focused course.
+     * Build context for generating an instructor-focused course.
      */
-    public function buildTeacherContext(User $teacher): array
+    public function buildInstructorContext(User $instructor): array
     {
         $context = [
-            'entity_type' => 'teacher',
-            'entity_id' => $teacher->id,
-            'basic_info' => $this->getTeacherBasicInfo($teacher),
-            'classroom_data' => $this->getTeacherClassroomData($teacher),
-            'learner_outcomes' => $this->getTeacherLearnerOutcomes($teacher),
-            'survey_feedback' => $this->getTeacherSurveyFeedback($teacher),
-            'observation_data' => $this->getTeacherObservationData($teacher),
-            'improvement_areas' => $this->identifyTeacherImprovementAreas($teacher),
-            'professional_goals' => $this->getTeacherProfessionalGoals($teacher),
+            'entity_type' => 'instructor',
+            'entity_id' => $instructor->id,
+            'basic_info' => $this->getInstructorBasicInfo($instructor),
+            'learning_group_data' => $this->getInstructorLearningGroupData($instructor),
+            'learner_outcomes' => $this->getInstructorLearnerOutcomes($instructor),
+            'survey_feedback' => $this->getInstructorSurveyFeedback($instructor),
+            'observation_data' => $this->getInstructorObservationData($instructor),
+            'improvement_areas' => $this->identifyInstructorImprovementAreas($instructor),
+            'professional_goals' => $this->getInstructorProfessionalGoals($instructor),
         ];
 
         return $context;
@@ -64,7 +64,7 @@ class CourseGenerationContextBuilder
             'aggregate_metrics' => $this->getDepartmentAggregateMetrics($orgId, $departmentCriteria),
             'common_challenges' => $this->getDepartmentCommonChallenges($orgId, $departmentCriteria),
             'improvement_priorities' => $this->getDepartmentImprovementPriorities($orgId, $departmentCriteria),
-            'teacher_data' => $this->getDepartmentTeacherData($orgId, $departmentCriteria),
+            'instructor_data' => $this->getDepartmentInstructorData($orgId, $departmentCriteria),
         ];
 
         return $context;
@@ -89,41 +89,41 @@ class CourseGenerationContextBuilder
     }
 
     // ========================================
-    // STUDENT CONTEXT METHODS
+    // PARTICIPANT CONTEXT METHODS
     // ========================================
 
-    protected function getLearnerBasicInfo(Learner $learner): array
+    protected function getLearnerBasicInfo(Participant $participant): array
     {
         return [
-            'grade_level' => $learner->grade_level,
-            'enrollment_status' => $learner->enrollment_status,
-            'has_iep' => $learner->has_iep ?? false,
-            'is_ell' => $learner->is_ell ?? false,
-            'is_504' => $learner->is_504 ?? false,
-            'tags' => $learner->tags ?? [],
+            'level' => $participant->level,
+            'enrollment_status' => $participant->enrollment_status,
+            'has_iep' => $participant->has_iep ?? false,
+            'is_ell' => $participant->is_ell ?? false,
+            'is_504' => $participant->is_504 ?? false,
+            'tags' => $participant->tags ?? [],
         ];
     }
 
-    protected function getLearnerAcademicProfile(Learner $learner): array
+    protected function getLearnerAcademicProfile(Participant $participant): array
     {
         // Use aggregation pipeline for efficient metric retrieval
         $threeMonthsAgo = now()->subMonths(3)->timestamp;
 
-        $academicMetrics = $learner->metrics()
-            ->whereIn('metric_type', ['academic', 'grade', 'assessment'])
+        $academicMetrics = $participant->metrics()
+            ->whereIn('metric_type', ['academic', 'level', 'assessment'])
             ->where('recorded_at', '>=', now()->subMonths(3))
             ->orderByDesc('recorded_at')
             ->limit(20)
             ->select(['metric_type', 'metric_name', 'metric_value', 'recorded_at'])
             ->get();
 
-        $avgPerformance = $learner->metrics()
-            ->whereIn('metric_type', ['academic', 'grade', 'assessment'])
+        $avgPerformance = $participant->metrics()
+            ->whereIn('metric_type', ['academic', 'level', 'assessment'])
             ->where('recorded_at', '>=', now()->subMonths(3))
             ->raw(function ($collection) {
                 return $collection->aggregate([
                     ['$match' => [
-                        'metric_type' => ['$in' => ['academic', 'grade', 'assessment']],
+                        'metric_type' => ['$in' => ['academic', 'level', 'assessment']],
                         'recorded_at' => ['$gte' => new \MongoDB\BSON\UTCDateTime(now()->subMonths(3)->timestamp * 1000)]
                     ]],
                     ['$group' => [
@@ -150,10 +150,10 @@ class CourseGenerationContextBuilder
         ];
     }
 
-    protected function getLearnerBehavioralProfile(Learner $learner): array
+    protected function getLearnerBehavioralProfile(Participant $participant): array
     {
         // Optimized with column selection and pagination
-        $behavioralMetrics = $learner->metrics()
+        $behavioralMetrics = $participant->metrics()
             ->whereIn('metric_type', ['behavioral', 'social_emotional', 'attendance'])
             ->where('recorded_at', '>=', now()->subMonths(3))
             ->orderByDesc('recorded_at')
@@ -168,29 +168,29 @@ class CourseGenerationContextBuilder
                 'value' => $m->metric_value,
                 'date' => $m->recorded_at->format('Y-m-d'),
             ])->toArray(),
-            'risk_level' => $learner->risk_level ?? 'unknown',
+            'risk_level' => $participant->risk_level ?? 'unknown',
         ];
     }
 
-    protected function getLearnerSupportNeeds(Learner $learner): array
+    protected function getLearnerSupportNeeds(Participant $participant): array
     {
         $needs = [];
 
-        if ($learner->has_iep) {
+        if ($participant->has_iep) {
             $needs[] = 'IEP accommodations';
         }
-        if ($learner->is_ell) {
+        if ($participant->is_ell) {
             $needs[] = 'English language support';
         }
-        if ($learner->is_504) {
+        if ($participant->is_504) {
             $needs[] = '504 accommodations';
         }
 
         // Get active interventions with column selection optimization
-        $enrollments = $learner->enrollments()
+        $enrollments = $participant->enrollments()
             ->with(['course:id,title'])
             ->whereIn('status', ['active', 'in_progress'])
-            ->select(['id', 'learner_id', 'course_id', 'status'])
+            ->select(['id', 'participant_id', 'course_id', 'status'])
             ->get();
 
         foreach ($enrollments as $enrollment) {
@@ -202,17 +202,17 @@ class CourseGenerationContextBuilder
         return $needs;
     }
 
-    protected function getLearnerRecentData(Learner $learner): array
+    protected function getLearnerRecentData(Participant $participant): array
     {
         // Get recent notes
-        $recentNotes = $learner->notes()
+        $recentNotes = $participant->notes()
             ->where('created_at', '>=', now()->subMonths(1))
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();
 
         // Get recent survey responses
-        $recentSurveys = $learner->surveyAttempts()
+        $recentSurveys = $participant->surveyAttempts()
             ->with('survey')
             ->where('completed_at', '>=', now()->subMonths(3))
             ->where('status', 'completed')
@@ -232,17 +232,17 @@ class CourseGenerationContextBuilder
         ];
     }
 
-    protected function identifyLearnerImprovementAreas(Learner $learner): array
+    protected function identifyLearnerImprovementAreas(Participant $participant): array
     {
         $areas = [];
 
         // Based on risk level
-        if (in_array($learner->risk_level, ['high', 'critical'])) {
+        if (in_array($participant->risk_level, ['high', 'critical'])) {
             $areas[] = 'Overall academic support needed';
         }
 
         // Based on metrics trends
-        $recentMetrics = $learner->metrics()
+        $recentMetrics = $participant->metrics()
             ->where('recorded_at', '>=', now()->subMonths(3))
             ->get()
             ->groupBy('metric_type');
@@ -255,7 +255,7 @@ class CourseGenerationContextBuilder
         }
 
         // Based on tags/flags
-        $tags = $learner->tags ?? [];
+        $tags = $participant->tags ?? [];
         foreach ($tags as $tag) {
             if (str_contains(strtolower($tag), 'struggling') ||
                 str_contains(strtolower($tag), 'intervention') ||
@@ -267,12 +267,12 @@ class CourseGenerationContextBuilder
         return array_unique($areas);
     }
 
-    protected function identifyLearnerStrengths(Learner $learner): array
+    protected function identifyLearnerStrengths(Participant $participant): array
     {
         $strengths = [];
 
         // Based on metrics trends
-        $recentMetrics = $learner->metrics()
+        $recentMetrics = $participant->metrics()
             ->where('recorded_at', '>=', now()->subMonths(3))
             ->get()
             ->groupBy('metric_type');
@@ -285,7 +285,7 @@ class CourseGenerationContextBuilder
         }
 
         // Based on tags
-        $tags = $learner->tags ?? [];
+        $tags = $participant->tags ?? [];
         foreach ($tags as $tag) {
             if (str_contains(strtolower($tag), 'gifted') ||
                 str_contains(strtolower($tag), 'honors') ||
@@ -298,62 +298,62 @@ class CourseGenerationContextBuilder
     }
 
     // ========================================
-    // TEACHER CONTEXT METHODS
+    // INSTRUCTOR CONTEXT METHODS
     // ========================================
 
-    protected function getTeacherBasicInfo(User $teacher): array
+    protected function getInstructorBasicInfo(User $instructor): array
     {
         return [
-            'name' => $teacher->first_name.' '.$teacher->last_name,
-            'role' => $teacher->role,
-            'department' => $teacher->department ?? null,
+            'name' => $instructor->first_name.' '.$instructor->last_name,
+            'role' => $instructor->role,
+            'department' => $instructor->department ?? null,
         ];
     }
 
-    protected function getTeacherClassroomData(User $teacher): array
+    protected function getInstructorLearningGroupData(User $instructor): array
     {
-        // Use aggregation pipeline for efficient classroom data retrieval
-        $classrooms = Classroom::where('teacher_id', $teacher->id)
-            ->select(['id', 'name', 'grade_level'])
-            ->with(['learners:id,classroom_id,risk_level'])
+        // Use aggregation pipeline for efficient learning_group data retrieval
+        $learning_groups = LearningGroup::where('instructor_user_id', $instructor->id)
+            ->select(['id', 'name', 'level'])
+            ->with(['participants:id,learning_group_id,risk_level'])
             ->get();
 
-        return $classrooms->map(function ($classroom) {
-            $learners = $classroom->learners ?? collect();
-            $highRiskCount = $learners->where('risk_level', 'high')->count();
+        return $learning_groups->map(function ($learning_group) {
+            $participants = $learning_group->participants ?? collect();
+            $highRiskCount = $participants->where('risk_level', 'high')->count();
 
             return [
-                'name' => $classroom->name,
-                'grade_level' => $classroom->grade_level,
-                'learner_count' => $learners->count(),
+                'name' => $learning_group->name,
+                'level' => $learning_group->level,
+                'learner_count' => $participants->count(),
                 'high_risk_count' => $highRiskCount,
             ];
         })->toArray();
     }
 
-    protected function getTeacherLearnerOutcomes(User $teacher): array
+    protected function getInstructorLearnerOutcomes(User $instructor): array
     {
-        // Optimized with aggregation pipeline for teacher's classrooms
-        $classroomIds = Classroom::where('teacher_id', $teacher->id)
+        // Optimized with aggregation pipeline for instructor's learning_groups
+        $learningGroupIds = LearningGroup::where('instructor_user_id', $instructor->id)
             ->select(['id'])
             ->pluck('id')
             ->toArray();
 
-        if (empty($classroomIds)) {
+        if (empty($learningGroupIds)) {
             return [];
         }
 
         // Use aggregation pipeline with $lookup for JOIN
-        $outcomes = \App\Models\LearnerMetric::raw(function ($collection) use ($classroomIds) {
+        $outcomes = \App\Models\LearnerMetric::raw(function ($collection) use ($learningGroupIds) {
             return $collection->aggregate([
                 ['$lookup' => [
-                    'from' => 'classroom_learner',
-                    'localField' => 'learner_id',
-                    'foreignField' => 'learner_id',
+                    'from' => 'learning_group_participant',
+                    'localField' => 'participant_id',
+                    'foreignField' => 'participant_id',
                     'as' => 'enrollment'
                 ]],
                 ['$match' => [
-                    'enrollment.classroom_id' => ['$in' => $classroomIds],
+                    'enrollment.learning_group_id' => ['$in' => $learningGroupIds],
                     'recorded_at' => ['$gte' => new \MongoDB\BSON\UTCDateTime(now()->subMonths(3)->timestamp * 1000)]
                 ]],
                 ['$group' => [
@@ -383,12 +383,12 @@ class CourseGenerationContextBuilder
         return $result;
     }
 
-    protected function getTeacherSurveyFeedback(User $teacher): array
+    protected function getInstructorSurveyFeedback(User $instructor): array
     {
-        // Get survey responses where teacher was the target or respondent
-        $attempts = \App\Models\SurveyAttempt::where(function ($q) use ($teacher) {
-            $q->where('respondent_id', $teacher->id)
-                ->orWhere('respondent_type', 'teacher');
+        // Get survey responses where instructor was the target or respondent
+        $attempts = \App\Models\SurveyAttempt::where(function ($q) use ($instructor) {
+            $q->where('respondent_id', $instructor->id)
+                ->orWhere('respondent_type', 'instructor');
         })
             ->where('status', 'completed')
             ->where('completed_at', '>=', now()->subMonths(6))
@@ -403,11 +403,11 @@ class CourseGenerationContextBuilder
         ])->toArray();
     }
 
-    protected function getTeacherObservationData(User $teacher): array
+    protected function getInstructorObservationData(User $instructor): array
     {
-        // Get notes/observations about the teacher
+        // Get notes/observations about the instructor
         $notes = \App\Models\ContactNote::where('contact_type', 'user')
-            ->where('contact_id', $teacher->id)
+            ->where('contact_id', $instructor->id)
             ->whereIn('note_type', ['observation', 'feedback', 'evaluation'])
             ->where('created_at', '>=', now()->subMonths(6))
             ->limit(5)
@@ -420,26 +420,27 @@ class CourseGenerationContextBuilder
         ])->toArray();
     }
 
-    protected function identifyTeacherImprovementAreas(User $teacher): array
+    protected function identifyInstructorImprovementAreas(User $instructor): array
     {
         $areas = [];
+        $terminology = app(\App\Services\TerminologyService::class);
 
-        // Based on learner outcomes
-        $outcomes = $this->getTeacherLearnerOutcomes($teacher);
+        // Based on participant outcomes
+        $outcomes = $this->getInstructorLearnerOutcomes($instructor);
         foreach ($outcomes as $type => $data) {
             if (($data['trend'] ?? '') === 'declining') {
-                $areas[] = 'Learner '.str_replace('_', ' ', $type).' declining';
+                $areas[] = $terminology->get('learner_singular').' '.str_replace('_', ' ', $type).' '.$terminology->get('declining_label');
             }
         }
 
         // Based on survey feedback themes (simplified)
-        $feedback = $this->getTeacherSurveyFeedback($teacher);
+        $feedback = $this->getInstructorSurveyFeedback($instructor);
         // In production, you'd use NLP to extract themes
 
         return $areas;
     }
 
-    protected function getTeacherProfessionalGoals(User $teacher): array
+    protected function getInstructorProfessionalGoals(User $instructor): array
     {
         // Would typically come from a professional development tracking system
         // For now, return empty array
@@ -452,47 +453,47 @@ class CourseGenerationContextBuilder
 
     protected function getDepartmentAggregateMetrics(int $orgId, array $criteria): array
     {
-        // Get teachers matching criteria
-        $teacherQuery = User::where('org_id', $orgId)
-            ->where('role', 'teacher');
+        // Get instructors matching criteria
+        $instructorQuery = User::where('org_id', $orgId)
+            ->where('role', 'instructor');
 
         if (! empty($criteria['department'])) {
-            $teacherQuery->where('department', $criteria['department']);
+            $instructorQuery->where('department', $criteria['department']);
         }
 
-        if (! empty($criteria['grade_levels'])) {
-            // Filter by classrooms with matching grade levels
-            $teacherQuery->whereHas('classrooms', function ($q) use ($criteria) {
-                $q->whereIn('grade_level', $criteria['grade_levels']);
+        if (! empty($criteria['levels'])) {
+            // Filter by learning_groups with matching level levels
+            $instructorQuery->whereHas('learning_groups', function ($q) use ($criteria) {
+                $q->whereIn('level', $criteria['levels']);
             });
         }
 
-        $teacherIds = $teacherQuery->select(['id'])->pluck('id')->toArray();
+        $instructorIds = $instructorQuery->select(['id'])->pluck('id')->toArray();
 
-        if (empty($teacherIds)) {
+        if (empty($instructorIds)) {
             return [];
         }
 
         // Optimized aggregation pipeline for all metrics in one query
-        $aggregates = \App\Models\LearnerMetric::raw(function ($collection) use ($teacherIds, $criteria) {
+        $aggregates = \App\Models\LearnerMetric::raw(function ($collection) use ($instructorIds, $criteria) {
             return $collection->aggregate([
                 ['$lookup' => [
-                    'from' => 'classroom_learner',
-                    'localField' => 'learner_id',
-                    'foreignField' => 'learner_id',
+                    'from' => 'learning_group_participant',
+                    'localField' => 'participant_id',
+                    'foreignField' => 'participant_id',
                     'as' => 'enrollment'
                 ]],
                 ['$lookup' => [
-                    'from' => 'classrooms',
-                    'localField' => 'enrollment.classroom_id',
+                    'from' => 'learning_groups',
+                    'localField' => 'enrollment.learning_group_id',
                     'foreignField' => 'id',
-                    'as' => 'classroom'
+                    'as' => 'learning_group'
                 ]],
                 ['$match' => [
-                    'classroom.teacher_id' => ['$in' => $teacherIds],
+                    'learning_group.instructor_user_id' => ['$in' => $instructorIds],
                     'recorded_at' => ['$gte' => new \MongoDB\BSON\UTCDateTime(now()->subMonths(3)->timestamp * 1000)]
                 ]],
-                ['$unwind' => '$classroom'],
+                ['$unwind' => '$learning_group'],
                 ['$group' => [
                     '_id' => '$metric_type',
                     'average' => ['$avg' => '$metric_value'],
@@ -548,17 +549,17 @@ class CourseGenerationContextBuilder
         return array_slice($challenges, 0, 3);
     }
 
-    protected function getDepartmentTeacherData(int $orgId, array $criteria): array
+    protected function getDepartmentInstructorData(int $orgId, array $criteria): array
     {
-        $teacherQuery = User::where('org_id', $orgId)
-            ->where('role', 'teacher');
+        $instructorQuery = User::where('org_id', $orgId)
+            ->where('role', 'instructor');
 
         if (! empty($criteria['department'])) {
-            $teacherQuery->where('department', $criteria['department']);
+            $instructorQuery->where('department', $criteria['department']);
         }
 
         return [
-            'teacher_count' => $teacherQuery->count(),
+            'instructor_count' => $instructorQuery->count(),
         ];
     }
 
@@ -572,8 +573,8 @@ class CourseGenerationContextBuilder
 
         // From filter criteria
         if ($list->filter_criteria) {
-            if (! empty($list->filter_criteria['grade_levels'])) {
-                $characteristics['grade_levels'] = $list->filter_criteria['grade_levels'];
+            if (! empty($list->filter_criteria['levels'])) {
+                $characteristics['levels'] = $list->filter_criteria['levels'];
             }
             if (! empty($list->filter_criteria['risk_levels'])) {
                 $characteristics['risk_levels'] = $list->filter_criteria['risk_levels'];
@@ -590,21 +591,21 @@ class CourseGenerationContextBuilder
     {
         $needs = [];
 
-        if ($list->list_type === ContactList::TYPE_STUDENT) {
-            $learners = $list->learners;
+        if ($list->list_type === ContactList::TYPE_PARTICIPANT) {
+            $participants = $list->participants;
 
-            $iepCount = $learners->where('has_iep', true)->count();
-            $ellCount = $learners->where('is_ell', true)->count();
-            $highRiskCount = $learners->whereIn('risk_level', ['high', 'critical'])->count();
+            $iepCount = $participants->where('has_iep', true)->count();
+            $ellCount = $participants->where('is_ell', true)->count();
+            $highRiskCount = $participants->whereIn('risk_level', ['high', 'critical'])->count();
 
             if ($iepCount > 0) {
-                $needs[] = "$iepCount learners with IEP";
+                $needs[] = "$iepCount participants with support plans";
             }
             if ($ellCount > 0) {
-                $needs[] = "$ellCount ELL learners";
+                $needs[] = "$ellCount participants with language support needs";
             }
             if ($highRiskCount > 0) {
-                $needs[] = "$highRiskCount high-risk learners";
+                $needs[] = "$highRiskCount high-risk participants";
             }
         }
 
@@ -653,57 +654,58 @@ class CourseGenerationContextBuilder
      */
     public function buildPromptContext(array $context): string
     {
+        $terminology = app(\App\Services\TerminologyService::class);
         $lines = [];
 
         $entityType = $context['entity_type'] ?? 'unknown';
-        $lines[] = '## Target: '.ucfirst($entityType);
+        $lines[] = $terminology->get('prompt_target_label').': '.ucfirst($entityType);
 
-        if ($entityType === 'learner') {
+        if ($entityType === 'participant') {
             $basic = $context['basic_info'] ?? [];
-            $lines[] = '- Grade Level: '.($basic['grade_level'] ?? 'Unknown');
-            $lines[] = '- Risk Level: '.($context['behavioral_profile']['risk_level'] ?? 'Unknown');
+            $lines[] = '- '.$terminology->get('level_label').': '.($basic['level'] ?? $terminology->get('unknown_label'));
+            $lines[] = '- '.$terminology->get('risk_level_label').': '.($context['behavioral_profile']['risk_level'] ?? $terminology->get('unknown_label'));
 
             if (! empty($basic['has_iep'])) {
-                $lines[] = '- Has IEP: Yes';
+                $lines[] = '- '.$terminology->get('has_iep_label').': '.$terminology->get('yes_label');
             }
             if (! empty($basic['is_ell'])) {
-                $lines[] = '- ELL Learner: Yes';
+                $lines[] = '- '.$terminology->get('english_language_participant_label').': '.$terminology->get('yes_label');
             }
 
             if (! empty($context['improvement_areas'])) {
-                $lines[] = "\n### Improvement Areas:";
+                $lines[] = "\n### ".$terminology->get('improvement_areas_label').':';
                 foreach ($context['improvement_areas'] as $area) {
                     $lines[] = "- $area";
                 }
             }
 
             if (! empty($context['strengths'])) {
-                $lines[] = "\n### Strengths:";
+                $lines[] = "\n### ".$terminology->get('strengths_label').':';
                 foreach ($context['strengths'] as $strength) {
                     $lines[] = "- $strength";
                 }
             }
-        } elseif ($entityType === 'teacher') {
+        } elseif ($entityType === 'instructor') {
             $basic = $context['basic_info'] ?? [];
-            $lines[] = '- Role: '.($basic['role'] ?? 'Teacher');
+            $lines[] = '- '.$terminology->get('role_label').': '.($basic['role'] ?? $terminology->get('role_instructor_label'));
 
             if (! empty($context['improvement_areas'])) {
-                $lines[] = "\n### Areas for Professional Development:";
+                $lines[] = "\n### ".$terminology->get('professional_development_areas_label').':';
                 foreach ($context['improvement_areas'] as $area) {
                     $lines[] = "- $area";
                 }
             }
 
             if (! empty($context['learner_outcomes'])) {
-                $lines[] = "\n### Learner Outcome Trends:";
+                $lines[] = "\n### ".$terminology->get('participant_outcome_trends_label').':';
                 foreach ($context['learner_outcomes'] as $type => $data) {
-                    $trend = $data['trend'] ?? 'unknown';
+                    $trend = $data['trend'] ?? $terminology->get('unknown_label');
                     $lines[] = '- '.ucfirst(str_replace('_', ' ', $type)).": $trend";
                 }
             }
         } elseif ($entityType === 'department') {
             if (! empty($context['criteria'])) {
-                $lines[] = '- Department: '.($context['criteria']['department'] ?? 'All');
+                $lines[] = '- '.$terminology->get('department_label').': '.($context['criteria']['department'] ?? $terminology->get('all_label'));
             }
 
             if (! empty($context['common_challenges'])) {

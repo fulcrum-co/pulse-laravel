@@ -58,9 +58,9 @@ class Organization extends Model
     ];
 
     /**
-     * Get the parent organization.
+     * Get the direct_supervisor organization.
      */
-    public function parent(): BelongsTo
+    public function direct_supervisor(): BelongsTo
     {
         return $this->belongsTo(Organization::class, 'parent_org_id');
     }
@@ -82,11 +82,11 @@ class Organization extends Model
     }
 
     /**
-     * Get all learners in this organization.
+     * Get all participants in this organization.
      */
-    public function learners(): HasMany
+    public function participants(): HasMany
     {
-        return $this->hasMany(Learner::class, 'org_id');
+        return $this->hasMany(Participant::class, 'org_id');
     }
 
     /**
@@ -133,7 +133,7 @@ class Organization extends Model
                 'name' => $current->org_name,
                 'type' => $current->org_type,
             ]);
-            $current = $current->parent;
+            $current = $current->direct_supervisor;
         }
 
         return $path;

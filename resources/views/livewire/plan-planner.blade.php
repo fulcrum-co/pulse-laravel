@@ -1,4 +1,5 @@
 <div class="space-y-2">
+    @php($terminology = app(\App\Services\TerminologyService::class))
     {{-- Add Focus Area Button --}}
     <div class="mb-4">
         @if($addingTo === 'strategy')
@@ -6,14 +7,14 @@
                 <x-icon name="globe" class="w-5 h-5 text-gray-400" />
                 <input type="text" wire:model="newFocusAreaTitle" wire:keydown.enter="saveFocusArea" wire:keydown.escape="cancelAdd"
                     class="flex-1 px-3 py-1.5 border border-gray-300 rounded focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-sm"
-                    placeholder="Enter focus area title..." autofocus>
-                <button wire:click="saveFocusArea" class="px-3 py-1.5 bg-pulse-orange-500 text-white rounded text-sm font-medium hover:bg-pulse-orange-600">Save</button>
-                <button wire:click="cancelAdd" class="px-3 py-1.5 text-gray-600 hover:text-gray-900 text-sm">Cancel</button>
+                    placeholder="@term('focus_area_title_placeholder')" autofocus>
+                <button wire:click="saveFocusArea" class="px-3 py-1.5 bg-pulse-orange-500 text-white rounded text-sm font-medium hover:bg-pulse-orange-600">@term('save_label')</button>
+                <button wire:click="cancelAdd" class="px-3 py-1.5 text-gray-600 hover:text-gray-900 text-sm">@term('cancel_label')</button>
             </div>
         @else
             <button wire:click="startAddFocusArea" class="flex items-center gap-2 text-pulse-orange-500 hover:text-pulse-orange-600 text-sm font-medium">
                 <x-icon name="plus" class="w-4 h-4" />
-                Add Focus Area
+                @term('add_focus_area_label')
             </button>
         @endif
     </div>
@@ -31,8 +32,8 @@
                 @if($editingType === 'focus_area' && $editingId === $focusArea->id)
                     <input type="text" wire:model="editingTitle" wire:keydown.enter="saveEdit" wire:keydown.escape="cancelEdit"
                         class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" autofocus>
-                    <button wire:click="saveEdit" class="text-pulse-orange-500 hover:text-pulse-orange-600 text-sm">Save</button>
-                    <button wire:click="cancelEdit" class="text-gray-500 hover:text-gray-700 text-sm">Cancel</button>
+                    <button wire:click="saveEdit" class="text-pulse-orange-500 hover:text-pulse-orange-600 text-sm">@term('save_label')</button>
+                    <button wire:click="cancelEdit" class="text-gray-500 hover:text-gray-700 text-sm">@term('cancel_label')</button>
                 @else
                     <span wire:click="startEdit('focus_area', {{ $focusArea->id }}, '{{ addslashes($focusArea->title) }}')"
                         class="flex-1 font-medium text-gray-900 cursor-pointer hover:text-pulse-orange-600">
@@ -42,7 +43,7 @@
 
                 <button wire:click="$dispatch('openSurveyAssignment', { type: 'focus_area', id: {{ $focusArea->id }} })"
                     class="text-sm text-gray-500 hover:text-gray-700">
-                    Assigned Survey(ies) +
+                    @term('assigned_surveys_label') +
                 </button>
 
                 {{-- Status Badge --}}
@@ -56,17 +57,17 @@
                                 'not_started' => 'text-gray-400',
                             ];
                             $statusLabels = [
-                                'on_track' => 'On Track',
-                                'at_risk' => 'At Risk',
-                                'off_track' => 'Off Track',
-                                'not_started' => 'Not Started',
+                                'on_track' => $terminology->get('on_track_label'),
+                                'at_risk' => $terminology->get('at_risk_label'),
+                                'off_track' => $terminology->get('off_track_label'),
+                                'not_started' => $terminology->get('not_started_label'),
                             ];
                         @endphp
                         <x-icon name="trending-up" class="w-4 h-4 {{ $statusColors[$focusArea->status] ?? 'text-gray-400' }}" />
-                        <span class="{{ $statusColors[$focusArea->status] ?? 'text-gray-400' }}">{{ $statusLabels[$focusArea->status] ?? 'Unknown' }}</span>
+                        <span class="{{ $statusColors[$focusArea->status] ?? 'text-gray-400' }}">{{ $statusLabels[$focusArea->status] ?? $terminology->get('unknown_label') }}</span>
                     </button>
                     <div x-show="open" @click.away="open = false" class="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                        @foreach(['on_track' => 'On Track', 'at_risk' => 'At Risk', 'off_track' => 'Off Track', 'not_started' => 'Not Started'] as $status => $label)
+                        @foreach(['on_track' => $terminology->get('on_track_label'), 'at_risk' => $terminology->get('at_risk_label'), 'off_track' => $terminology->get('off_track_label'), 'not_started' => $terminology->get('not_started_label')] as $status => $label)
                             <button wire:click="updateStatus('focus_area', {{ $focusArea->id }}, '{{ $status }}')" @click="open = false"
                                 class="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 {{ $focusArea->status === $status ? 'bg-gray-50' : '' }}">
                                 {{ $label }}
@@ -82,9 +83,9 @@
                     </button>
                     <div x-show="open" @click.away="open = false" class="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                         <button wire:click="deleteFocusArea({{ $focusArea->id }})" @click="open = false"
-                            wire:confirm="Are you sure you want to delete this focus area?"
+                            wire:confirm="@term('delete_focus_area_confirm_label')"
                             class="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50">
-                            Delete
+                            @term('delete_label')
                         </button>
                     </div>
                 </div>
@@ -105,8 +106,8 @@
                                 @if($editingType === 'objective' && $editingId === $objective->id)
                                     <input type="text" wire:model="editingTitle" wire:keydown.enter="saveEdit" wire:keydown.escape="cancelEdit"
                                         class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" autofocus>
-                                    <button wire:click="saveEdit" class="text-pulse-orange-500 hover:text-pulse-orange-600 text-sm">Save</button>
-                                    <button wire:click="cancelEdit" class="text-gray-500 hover:text-gray-700 text-sm">Cancel</button>
+                                    <button wire:click="saveEdit" class="text-pulse-orange-500 hover:text-pulse-orange-600 text-sm">@term('save_label')</button>
+                                    <button wire:click="cancelEdit" class="text-gray-500 hover:text-gray-700 text-sm">@term('cancel_label')</button>
                                 @else
                                     <span wire:click="startEdit('objective', {{ $objective->id }}, '{{ addslashes($objective->title) }}')"
                                         class="flex-1 text-sm text-gray-900 cursor-pointer hover:text-pulse-orange-600">
@@ -124,10 +125,10 @@
                                 <div class="relative" x-data="{ open: false }">
                                     <button @click="open = !open" class="flex items-center gap-1 text-xs">
                                         <x-icon name="trending-up" class="w-3 h-3 {{ $statusColors[$objective->status] ?? 'text-gray-400' }}" />
-                                        <span class="{{ $statusColors[$objective->status] ?? 'text-gray-400' }}">{{ $statusLabels[$objective->status] ?? 'Unknown' }}</span>
+                                        <span class="{{ $statusColors[$objective->status] ?? 'text-gray-400' }}">{{ $statusLabels[$objective->status] ?? $terminology->get('unknown_label') }}</span>
                                     </button>
                                     <div x-show="open" @click.away="open = false" class="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                                        @foreach(['on_track' => 'On Track', 'at_risk' => 'At Risk', 'off_track' => 'Off Track', 'not_started' => 'Not Started'] as $status => $label)
+                                        @foreach(['on_track' => $terminology->get('on_track_label'), 'at_risk' => $terminology->get('at_risk_label'), 'off_track' => $terminology->get('off_track_label'), 'not_started' => $terminology->get('not_started_label')] as $status => $label)
                                             <button wire:click="updateStatus('objective', {{ $objective->id }}, '{{ $status }}')" @click="open = false"
                                                 class="block w-full text-left px-3 py-2 text-xs hover:bg-gray-50">
                                                 {{ $label }}
@@ -137,7 +138,7 @@
                                 </div>
 
                                 <button wire:click="deleteObjective({{ $objective->id }})"
-                                    wire:confirm="Are you sure you want to delete this objective?"
+                                    wire:confirm="@term('delete_objective_confirm_label')"
                                     class="p-1 text-gray-400 hover:text-red-500">
                                     <x-icon name="x" class="w-4 h-4" />
                                 </button>
@@ -152,8 +153,8 @@
                                         @if($editingType === 'activity' && $editingId === $activity->id)
                                             <input type="text" wire:model="editingTitle" wire:keydown.enter="saveEdit" wire:keydown.escape="cancelEdit"
                                                 class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" autofocus>
-                                            <button wire:click="saveEdit" class="text-pulse-orange-500 hover:text-pulse-orange-600 text-sm">Save</button>
-                                            <button wire:click="cancelEdit" class="text-gray-500 hover:text-gray-700 text-sm">Cancel</button>
+                                            <button wire:click="saveEdit" class="text-pulse-orange-500 hover:text-pulse-orange-600 text-sm">@term('save_label')</button>
+                                            <button wire:click="cancelEdit" class="text-gray-500 hover:text-gray-700 text-sm">@term('cancel_label')</button>
                                         @else
                                             <span wire:click="startEdit('activity', {{ $activity->id }}, '{{ addslashes($activity->title) }}')"
                                                 class="flex-1 text-sm text-gray-700 cursor-pointer hover:text-pulse-orange-600">
@@ -171,10 +172,10 @@
                                         <div class="relative" x-data="{ open: false }">
                                             <button @click="open = !open" class="flex items-center gap-1 text-xs">
                                                 <x-icon name="arrow-right" class="w-3 h-3 {{ $statusColors[$activity->status] ?? 'text-gray-400' }}" />
-                                                <span class="{{ $statusColors[$activity->status] ?? 'text-gray-400' }}">{{ $statusLabels[$activity->status] ?? 'Unknown' }}</span>
+                                                <span class="{{ $statusColors[$activity->status] ?? 'text-gray-400' }}">{{ $statusLabels[$activity->status] ?? $terminology->get('unknown_label') }}</span>
                                             </button>
                                             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                                                @foreach(['on_track' => 'On Track', 'at_risk' => 'At Risk', 'off_track' => 'Off Track', 'not_started' => 'Not Started'] as $status => $label)
+                                                @foreach(['on_track' => $terminology->get('on_track_label'), 'at_risk' => $terminology->get('at_risk_label'), 'off_track' => $terminology->get('off_track_label'), 'not_started' => $terminology->get('not_started_label')] as $status => $label)
                                                     <button wire:click="updateStatus('activity', {{ $activity->id }}, '{{ $status }}')" @click="open = false"
                                                         class="block w-full text-left px-3 py-2 text-xs hover:bg-gray-50">
                                                         {{ $label }}
@@ -184,7 +185,7 @@
                                         </div>
 
                                         <button wire:click="deleteActivity({{ $activity->id }})"
-                                            wire:confirm="Are you sure you want to delete this activity?"
+                                            wire:confirm="@term('delete_activity_confirm_label')"
                                             class="p-1 text-gray-400 hover:text-red-500">
                                             <x-icon name="x" class="w-3 h-3" />
                                         </button>
@@ -196,14 +197,14 @@
                                     @if($addingTo === 'objective_' . $objective->id)
                                         <div class="flex items-center gap-2 pr-4">
                                             <input type="text" wire:model="newActivityTitle" wire:keydown.enter="saveActivity({{ $objective->id }})" wire:keydown.escape="cancelAdd"
-                                                class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" placeholder="Activity title..." autofocus>
-                                            <button wire:click="saveActivity({{ $objective->id }})" class="text-pulse-orange-500 hover:text-pulse-orange-600 text-sm">Save</button>
-                                            <button wire:click="cancelAdd" class="text-gray-500 hover:text-gray-700 text-sm">Cancel</button>
+                                                class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" placeholder="@term('activity_title_placeholder')" autofocus>
+                                            <button wire:click="saveActivity({{ $objective->id }})" class="text-pulse-orange-500 hover:text-pulse-orange-600 text-sm">@term('save_label')</button>
+                                            <button wire:click="cancelAdd" class="text-gray-500 hover:text-gray-700 text-sm">@term('cancel_label')</button>
                                         </div>
                                     @else
                                         <button wire:click="startAddActivity({{ $objective->id }})" class="text-xs text-pulse-orange-500 hover:text-pulse-orange-600 flex items-center gap-1">
                                             <x-icon name="plus" class="w-3 h-3" />
-                                            Add Activity
+                                            @term('add_activity_label')
                                         </button>
                                     @endif
                                 </div>
@@ -216,14 +217,14 @@
                         @if($addingTo === 'focus_area_' . $focusArea->id)
                             <div class="flex items-center gap-2">
                                 <input type="text" wire:model="newObjectiveTitle" wire:keydown.enter="saveObjective({{ $focusArea->id }})" wire:keydown.escape="cancelAdd"
-                                    class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" placeholder="Objective title..." autofocus>
-                                <button wire:click="saveObjective({{ $focusArea->id }})" class="text-pulse-orange-500 hover:text-pulse-orange-600 text-sm">Save</button>
-                                <button wire:click="cancelAdd" class="text-gray-500 hover:text-gray-700 text-sm">Cancel</button>
+                                    class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" placeholder="@term('objective_title_placeholder')" autofocus>
+                                <button wire:click="saveObjective({{ $focusArea->id }})" class="text-pulse-orange-500 hover:text-pulse-orange-600 text-sm">@term('save_label')</button>
+                                <button wire:click="cancelAdd" class="text-gray-500 hover:text-gray-700 text-sm">@term('cancel_label')</button>
                             </div>
                         @else
                             <button wire:click="startAddObjective({{ $focusArea->id }})" class="text-sm text-pulse-orange-500 hover:text-pulse-orange-600 flex items-center gap-1">
                                 <x-icon name="plus" class="w-4 h-4" />
-                                Add Objective
+                                @term('add_objective_label')
                             </button>
                         @endif
                     </div>
@@ -235,8 +236,8 @@
     @if($focusAreas->isEmpty())
         <div class="text-center py-12 text-gray-500">
             <x-icon name="clipboard-list" class="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p>No focus areas yet.</p>
-            <p class="text-sm">Click "Add Focus Area" to get started.</p>
+            <p>@term('no_focus_areas_yet_label')</p>
+            <p class="text-sm">@term('add_focus_area_help_label')</p>
         </div>
     @endif
 </div>
