@@ -186,10 +186,22 @@
                                     </span>
                                 @endif
                             </div>
-                            <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
+                            <div class="flex items-center gap-3 mt-1 text-xs text-gray-500">
                                 <span>Updated {{ $report->updated_at?->diffForHumans() ?? 'Unknown' }}</span>
-                                @if($report->report_type)
-                                    <span class="capitalize">{{ str_replace('_', ' ', $report->report_type) }}</span>
+                                @php
+                                    $cardTypeConfig = match($report->report_type) {
+                                        'document' => ['icon' => 'document-text', 'color' => 'text-blue-500', 'label' => 'Document'],
+                                        'widget' => ['icon' => 'squares-2x2', 'color' => 'text-purple-500', 'label' => 'Widget'],
+                                        'social' => ['icon' => 'share', 'color' => 'text-pink-500', 'label' => 'Social'],
+                                        'custom' => ['icon' => 'adjustments-horizontal', 'color' => 'text-pulse-orange-500', 'label' => 'Custom'],
+                                        default => null
+                                    };
+                                @endphp
+                                @if($cardTypeConfig)
+                                    <span class="inline-flex items-center gap-1 {{ $cardTypeConfig['color'] }}">
+                                        <x-icon :name="$cardTypeConfig['icon']" class="w-3 h-3" />
+                                        {{ $cardTypeConfig['label'] }}
+                                    </span>
                                 @endif
                             </div>
                         </div>
@@ -261,9 +273,43 @@
                                 </div>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">
-                                @if($report->report_type)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 capitalize">
-                                        {{ str_replace('_', ' ', $report->report_type) }}
+                                @php
+                                    $typeConfig = match($report->report_type) {
+                                        'document' => [
+                                            'icon' => 'document-text',
+                                            'bg' => 'bg-blue-50',
+                                            'text' => 'text-blue-700',
+                                            'iconColor' => 'text-blue-500',
+                                            'label' => 'Document'
+                                        ],
+                                        'widget' => [
+                                            'icon' => 'squares-2x2',
+                                            'bg' => 'bg-purple-50',
+                                            'text' => 'text-purple-700',
+                                            'iconColor' => 'text-purple-500',
+                                            'label' => 'Widget'
+                                        ],
+                                        'social' => [
+                                            'icon' => 'share',
+                                            'bg' => 'bg-pink-50',
+                                            'text' => 'text-pink-700',
+                                            'iconColor' => 'text-pink-500',
+                                            'label' => 'Social'
+                                        ],
+                                        'custom' => [
+                                            'icon' => 'adjustments-horizontal',
+                                            'bg' => 'bg-pulse-orange-50',
+                                            'text' => 'text-pulse-orange-700',
+                                            'iconColor' => 'text-pulse-orange-500',
+                                            'label' => 'Custom'
+                                        ],
+                                        default => null
+                                    };
+                                @endphp
+                                @if($typeConfig)
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium {{ $typeConfig['bg'] }} {{ $typeConfig['text'] }}">
+                                        <x-icon :name="$typeConfig['icon']" class="w-3.5 h-3.5 {{ $typeConfig['iconColor'] }}" />
+                                        {{ $typeConfig['label'] }}
                                     </span>
                                 @else
                                     <span class="text-sm text-gray-400">-</span>
