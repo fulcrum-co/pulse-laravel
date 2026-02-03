@@ -61,7 +61,7 @@
     @if($reports->isEmpty())
         <x-card>
             <div class="text-center py-12">
-                <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-pulse-orange-100 to-pulse-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                     <x-icon name="chart-pie" class="w-8 h-8 text-pulse-orange-500" />
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-1">Create your first report</h3>
@@ -77,80 +77,82 @@
 
     <!-- Grid View -->
     @elseif($viewMode === 'grid')
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-help="report-list">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" data-help="report-list">
             @foreach($reports as $report)
-                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow group">
-                    <!-- Thumbnail -->
-                    <div class="aspect-video bg-gradient-to-br from-gray-100 to-gray-50 relative">
-                        @if($report->thumbnail_path)
-                            <img src="{{ $report->thumbnail_path }}" alt="{{ $report->report_name ?? 'Report thumbnail' }}" class="w-full h-full object-cover">
-                        @else
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <x-icon name="document-chart-bar" class="w-16 h-16 text-gray-300" />
-                            </div>
-                        @endif
-
-                        <!-- Overlay on hover -->
-                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                            <a href="{{ route('reports.edit', $report) }}" class="bg-white text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
-                                Edit
-                            </a>
-                            @if($report->isPublished())
-                                <a href="{{ $report->getPublicUrl() }}" target="_blank" class="bg-pulse-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">
-                                    View
-                                </a>
-                            @endif
-                        </div>
-                    </div>
-
-                    <!-- Info -->
+                <a href="{{ route('reports.edit', $report) }}" class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md hover:border-gray-300 transition-all group block">
+                    <!-- Content -->
                     <div class="p-4">
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="flex-1 min-w-0">
-                                <h3 class="font-semibold text-gray-900 truncate">{{ $report->report_name ?? 'Untitled Report' }}</h3>
-                                <p class="text-sm text-gray-500 mt-1">
-                                    Updated {{ $report->updated_at?->diffForHumans() ?? 'Unknown' }}
-                                </p>
-                            </div>
-
-                            <!-- Status badge -->
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <h3 class="font-medium text-gray-900 text-sm truncate flex-1">{{ $report->report_name ?? 'Untitled Report' }}</h3>
                             @if($report->isPublished())
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700 flex-shrink-0">
                                     Published
                                 </span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 flex-shrink-0">
                                     Draft
                                 </span>
                             @endif
                         </div>
 
-                        <!-- Actions -->
-                        <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
-                            <a href="{{ route('reports.edit', $report) }}" class="flex-1 text-center py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                                Edit
-                            </a>
-                            <button wire:click="duplicate({{ $report->id }})" class="flex-1 text-center py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                                Duplicate
+                        <!-- Preview placeholder (like dashboard widget grid) -->
+                        <div class="grid grid-cols-4 gap-1 mb-2" style="height: 48px;">
+                            <div class="rounded flex items-center justify-center h-full" style="background: linear-gradient(to bottom right, #eff6ff, #dbeafe);">
+                                <svg class="w-3 h-3" style="color: #60a5fa;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                            <div class="rounded flex items-center justify-center h-full" style="background: linear-gradient(to bottom right, #f0fdf4, #dcfce7);">
+                                <svg class="w-3 h-3" style="color: #4ade80;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <div class="rounded flex items-center justify-center h-full" style="background: linear-gradient(to bottom right, #faf5ff, #f3e8ff);">
+                                <svg class="w-3 h-3" style="color: #c084fc;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div class="rounded flex items-center justify-center h-full" style="background: linear-gradient(to bottom right, #fff7ed, #ffedd5);">
+                                <svg class="w-3 h-3" style="color: #fb923c;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <p class="text-[11px] text-gray-500">
+                            Updated {{ $report->updated_at?->diffForHumans() ?? 'Unknown' }}
+                        </p>
+                    </div>
+
+                    <!-- Actions bar -->
+                    <div class="px-4 py-2 bg-gray-50 border-t border-gray-100 flex items-center justify-between" onclick="event.preventDefault(); event.stopPropagation();">
+                        <div class="flex items-center gap-1">
+                            <button wire:click.prevent="duplicate({{ $report->id }})" class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors" title="Duplicate">
+                                <x-icon name="document-duplicate" class="w-3.5 h-3.5" />
                             </button>
                             @if($canPush)
-                            <div class="relative group">
-                                <button wire:click="openPushModal({{ $report->id }})" class="p-2 text-gray-400 hover:text-pulse-orange-500 hover:bg-pulse-orange-50 rounded-lg transition-colors">
-                                    <x-icon name="arrow-up-on-square" class="w-4 h-4" />
+                            <div class="relative group/push">
+                                <button wire:click.prevent="openPushModal({{ $report->id }})" class="p-1 text-gray-400 hover:text-pulse-orange-500 hover:bg-pulse-orange-50 rounded transition-colors" title="Push to Schools">
+                                    <x-icon name="arrow-up-on-square" class="w-3.5 h-3.5" />
                                 </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none">Push to Schools</span>
                             </div>
                             @endif
-                            <button
-                                wire:click="delete({{ $report->id }})"
-                                wire:confirm="Are you sure you want to delete this report?"
-                                class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            >
-                                <x-icon name="trash" class="w-4 h-4" />
-                            </button>
+                            @if($report->isPublished())
+                            <a href="{{ $report->getPublicUrl() }}" target="_blank" onclick="event.stopPropagation();" class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors" title="View Published">
+                                <x-icon name="arrow-top-right-on-square" class="w-3.5 h-3.5" />
+                            </a>
+                            @endif
                         </div>
+                        <button
+                            wire:click.prevent="delete({{ $report->id }})"
+                            wire:confirm="Are you sure you want to delete this report?"
+                            class="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                            title="Delete"
+                        >
+                            <x-icon name="trash" class="w-3.5 h-3.5" />
+                        </button>
                     </div>
-                </div>
+                </a>
             @endforeach
         </div>
 
