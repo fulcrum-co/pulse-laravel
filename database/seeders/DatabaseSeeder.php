@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             SurveySeeder::class,
             ResourceSeeder::class,
             StrategySeeder::class,
+            OkrPlanSeeder::class,
             ContactMetricSeeder::class,
             // Adaptive LMS seeders
             ProviderSeeder::class,
