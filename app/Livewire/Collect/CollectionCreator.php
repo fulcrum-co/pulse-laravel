@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Collect;
 
+use App\Models\Contact;
 use App\Models\LearningGroup;
 use App\Models\Collection;
 use App\Models\Student;
