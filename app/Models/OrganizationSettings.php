@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\TerminologyService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -40,6 +41,23 @@ class OrganizationSettings extends Model
         'low' => 'Low Risk',
         'high' => 'High Risk',
     ];
+
+    /**
+     * Default terminology - delegates to TerminologyService.
+     */
+    public const DEFAULT_TERMINOLOGY = TerminologyService::DEFAULTS;
+
+    /**
+     * Terminology categories for the admin UI.
+     */
+    public static function getTerminologyCategories(): array
+    {
+        return [
+            'People' => ['student', 'students', 'teacher', 'teachers'],
+            'Academic' => ['grade', 'grade_level', 'school', 'schools'],
+            'Risk Levels' => ['at_risk', 'high_risk', 'low_risk', 'good_standing'],
+        ];
+    }
 
     /**
      * Get the organization.
@@ -112,5 +130,48 @@ class OrganizationSettings extends Model
     public static function forOrganization(int $orgId): self
     {
         return self::firstOrCreate(['org_id' => $orgId]);
+    }
+
+    /**
+     * Get all terminology (custom merged with defaults).
+     */
+    public function getAllTerminology(): array
+    {
+        return array_merge(self::DEFAULT_TERMINOLOGY, $this->getTerminology());
+    }
+
+    /**
+     * Get custom terminology from settings.
+     */
+    public function getTerminology(): array
+    {
+        return $this->getSetting('terminology', []);
+    }
+
+    /**
+     * Set custom terminology in settings.
+     */
+    public function setTerminologyAttribute(array $terminology): void
+    {
+        $this->setSetting('terminology', $terminology);
+    }
+
+    /**
+     * Get terminology attribute (accessor for $settings->terminology).
+     */
+    public function getTerminologyAttribute(): array
+    {
+        return $this->getTerminology();
+    }
+
+    /**
+     * Reset terminology to defaults (clear custom values).
+     */
+    public function resetTerminology(): void
+    {
+        $settings = $this->settings ?? [];
+        unset($settings['terminology']);
+        $this->settings = $settings;
+        $this->save();
     }
 }
