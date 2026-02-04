@@ -28,7 +28,8 @@ Route::get('/notifications/unsubscribe/{user}', [NotificationController::class, 
 // Zero-login collection intake - signed URL, no auth required
 Route::get('/collect/{token}', [\App\Http\Controllers\EphemeralCollectionController::class, 'show'])
     ->name('collect.token')
-    ->middleware('signed');
+    ->middleware('signed')
+    ->where('token', '[A-Za-z0-9]{64}');
 
 // Zero-login plan view - signed URL, no auth required
 Route::get('/plans/view/{plan}', [\App\Http\Controllers\PlanViewController::class, 'show'])
@@ -418,6 +419,16 @@ Route::prefix('webhooks/surveys')->group(function () {
 
 // Public Resource Hub (lead capture, no auth required)
 Route::get('/hub/{orgSlug?}', App\Livewire\PublicResourceHub::class)->name('public.resources');
+
+// Embed routes (for embedding resources/courses on external sites)
+Route::prefix('embed')->group(function () {
+    Route::get('/resource/{resource}', App\Livewire\Embed\EmbedResource::class)->name('embed.resource');
+    Route::get('/course/{course}', App\Livewire\Embed\EmbedCourse::class)->name('embed.course');
+});
+
+// Public user registration (viewer accounts)
+Route::get('/join', App\Livewire\Auth\PublicRegister::class)->name('public.register');
+Route::get('/join/{org}', App\Livewire\Auth\PublicRegister::class)->name('public.register.org');
 
 // Guest routes (only accessible when not logged in)
 Route::middleware('guest')->group(function () {
