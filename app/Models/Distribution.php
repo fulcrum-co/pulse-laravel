@@ -62,12 +62,14 @@ class Distribution extends Model
         'status',
         'content_type',
         'report_id',
+        'report_ids',
         'report_mode',
         'subject',
         'message_body',
         'message_template_id',
         'recipient_type',
         'contact_list_id',
+        'contact_list_ids',
         'recipient_ids',
         'recipient_query',
         'scheduled_for',
@@ -77,6 +79,8 @@ class Distribution extends Model
     ];
 
     protected $casts = [
+        'report_ids' => 'array',
+        'contact_list_ids' => 'array',
         'recipient_ids' => 'array',
         'recipient_query' => 'array',
         'recurrence_config' => 'array',
@@ -96,6 +100,30 @@ class Distribution extends Model
     public function report(): BelongsTo
     {
         return $this->belongsTo(CustomReport::class, 'report_id');
+    }
+
+    /**
+     * Get all linked reports.
+     */
+    public function reports()
+    {
+        if (empty($this->report_ids)) {
+            return collect();
+        }
+
+        return CustomReport::whereIn('id', $this->report_ids)->get();
+    }
+
+    /**
+     * Get all linked contact lists.
+     */
+    public function contactLists()
+    {
+        if (empty($this->contact_list_ids)) {
+            return collect();
+        }
+
+        return ContactList::whereIn('id', $this->contact_list_ids)->get();
     }
 
     public function messageTemplate(): BelongsTo

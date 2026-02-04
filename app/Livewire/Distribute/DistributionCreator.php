@@ -6,6 +6,7 @@ use App\Models\ContactList;
 use App\Models\CustomReport;
 use App\Models\Distribution;
 use App\Models\MessageTemplate;
+use App\Models\Student;
 use Livewire\Component;
 
 class DistributionCreator extends Component
@@ -22,25 +23,21 @@ class DistributionCreator extends Component
 
     public string $distributionType = 'one_time';
 
-    // Content
-    public string $contentType = 'custom';
+    // Recipients (To field) - supports multiple contact lists and/or individual contacts
+    public array $selectedContactListIds = [];
 
-    public ?int $reportId = null;
+    public array $selectedContactIds = [];
+
+    // Content
+    public string $subject = '';
+
+    public array $selectedReportIds = [];
 
     public string $reportMode = 'live';
-
-    public string $subject = '';
 
     public string $messageBody = '';
 
     public ?int $messageTemplateId = null;
-
-    // Recipients
-    public string $recipientType = 'contact_list';
-
-    public ?int $contactListId = null;
-
-    public array $recipientIds = [];
 
     // Schedule
     public bool $sendImmediately = true;
@@ -58,6 +55,9 @@ class DistributionCreator extends Component
     public string $sendTime = '09:00';
 
     public string $timezone = 'America/New_York';
+
+    // Search for contacts
+    public string $contactSearch = '';
 
     public function mount(?int $distribution = null): void
     {
@@ -80,18 +80,31 @@ class DistributionCreator extends Component
         $this->description = $distribution->description ?? '';
         $this->channel = $distribution->channel;
         $this->distributionType = $distribution->distribution_type;
-        $this->contentType = $distribution->content_type;
-        $this->reportId = $distribution->report_id;
+
+        // Load multiple contact lists
+        $this->selectedContactListIds = $distribution->contact_list_ids ?? [];
+        // Fallback to single contact_list_id for backward compatibility
+        if (empty($this->selectedContactListIds) && $distribution->contact_list_id) {
+            $this->selectedContactListIds = [$distribution->contact_list_id];
+        }
+
+        // Load individual contacts
+        $this->selectedContactIds = $distribution->recipient_ids ?? [];
+
+        // Load multiple reports
+        $this->selectedReportIds = $distribution->report_ids ?? [];
+        // Fallback to single report_id for backward compatibility
+        if (empty($this->selectedReportIds) && $distribution->report_id) {
+            $this->selectedReportIds = [$distribution->report_id];
+        }
+
         $this->reportMode = $distribution->report_mode ?? 'live';
         $this->subject = $distribution->subject ?? '';
         $this->messageBody = $distribution->message_body ?? '';
         $this->messageTemplateId = $distribution->message_template_id;
-        $this->recipientType = $distribution->recipient_type;
-        $this->contactListId = $distribution->contact_list_id;
-        $this->recipientIds = $distribution->recipient_ids ?? [];
         $this->scheduledFor = $distribution->scheduled_for?->format('Y-m-d\TH:i');
         $this->sendImmediately = ! $distribution->scheduled_for && $distribution->distribution_type === 'one_time';
-        $this->timezone = $distribution->timezone;
+        $this->timezone = $distribution->timezone ?? 'America/New_York';
 
         if ($distribution->schedule) {
             $this->scheduleType = $distribution->schedule->schedule_type;
@@ -102,35 +115,35 @@ class DistributionCreator extends Component
         }
     }
 
-    protected function validateForm(): void
+    public function toggleContactList(int $listId): void
     {
-        $rules = [
-            'title' => 'required|string|max:255',
-            'channel' => 'required|in:email,sms',
-            'distributionType' => 'required|in:one_time,recurring',
-        ];
-
-        // Content validation
-        if ($this->contentType === 'report') {
-            $rules['reportId'] = 'required|exists:custom_reports,id';
+        if (in_array($listId, $this->selectedContactListIds)) {
+            $this->selectedContactListIds = array_values(array_diff($this->selectedContactListIds, [$listId]));
         } else {
-            if ($this->channel === 'email') {
-                $rules['subject'] = 'required|string|max:255';
-            }
-            $rules['messageBody'] = 'required|string';
+            $this->selectedContactListIds[] = $listId;
         }
+    }
 
-        // Recipients validation
-        if ($this->recipientType === 'contact_list') {
-            $rules['contactListId'] = 'required|exists:contact_lists,id';
+    public function toggleReport(int $reportId): void
+    {
+        if (in_array($reportId, $this->selectedReportIds)) {
+            $this->selectedReportIds = array_values(array_diff($this->selectedReportIds, [$reportId]));
+        } else {
+            $this->selectedReportIds[] = $reportId;
         }
+    }
 
-        $this->validate($rules);
+    public function toggleContact(int $contactId): void
+    {
+        if (in_array($contactId, $this->selectedContactIds)) {
+            $this->selectedContactIds = array_values(array_diff($this->selectedContactIds, [$contactId]));
+        } else {
+            $this->selectedContactIds[] = $contactId;
+        }
     }
 
     public function save(): void
     {
-        // Only validate title for draft saves
         $this->validate([
             'title' => 'required|string|max:255',
         ]);
@@ -142,15 +155,17 @@ class DistributionCreator extends Component
             'distribution_type' => $this->distributionType,
             'channel' => $this->channel,
             'status' => Distribution::STATUS_DRAFT,
-            'content_type' => $this->contentType,
-            'report_id' => $this->contentType === 'report' ? $this->reportId : null,
-            'report_mode' => $this->contentType === 'report' ? $this->reportMode : null,
-            'subject' => $this->contentType === 'custom' && $this->channel === 'email' ? $this->subject : null,
-            'message_body' => $this->contentType === 'custom' ? $this->messageBody : null,
+            'content_type' => ! empty($this->selectedReportIds) ? 'report' : 'custom',
+            'report_ids' => ! empty($this->selectedReportIds) ? $this->selectedReportIds : null,
+            'report_id' => ! empty($this->selectedReportIds) ? $this->selectedReportIds[0] : null, // Keep for backward compat
+            'report_mode' => ! empty($this->selectedReportIds) ? $this->reportMode : null,
+            'subject' => $this->channel === 'email' ? $this->subject : null,
+            'message_body' => $this->messageBody ?: null,
             'message_template_id' => $this->messageTemplateId,
-            'recipient_type' => $this->recipientType,
-            'contact_list_id' => $this->recipientType === 'contact_list' ? $this->contactListId : null,
-            'recipient_ids' => $this->recipientType === 'individual' ? $this->recipientIds : null,
+            'recipient_type' => ! empty($this->selectedContactListIds) ? 'contact_list' : 'individual',
+            'contact_list_ids' => ! empty($this->selectedContactListIds) ? $this->selectedContactListIds : null,
+            'contact_list_id' => ! empty($this->selectedContactListIds) ? $this->selectedContactListIds[0] : null, // Backward compat
+            'recipient_ids' => ! empty($this->selectedContactIds) ? $this->selectedContactIds : null,
             'scheduled_for' => ! $this->sendImmediately && $this->scheduledFor ? $this->scheduledFor : null,
             'timezone' => $this->timezone,
             'created_by' => auth()->id(),
@@ -191,6 +206,24 @@ class DistributionCreator extends Component
         $this->redirect(route('distribute.show', $distribution));
     }
 
+    public function getSelectedRecipientsCountProperty(): int
+    {
+        $count = 0;
+
+        // Count members from selected contact lists
+        foreach ($this->selectedContactListIds as $listId) {
+            $list = ContactList::find($listId);
+            if ($list) {
+                $count += $list->member_count;
+            }
+        }
+
+        // Add individual contacts (excluding duplicates would need more complex logic)
+        $count += count($this->selectedContactIds);
+
+        return $count;
+    }
+
     public function render()
     {
         $contactLists = ContactList::where('org_id', auth()->user()->org_id)->get();
@@ -200,9 +233,24 @@ class DistributionCreator extends Component
             $list->members_count = $list->member_count;
         });
 
+        // Get individual contacts for search
+        $contacts = collect();
+        if ($this->contactSearch) {
+            $contacts = Student::where('org_id', auth()->user()->org_id)
+                ->whereHas('user', function ($q) {
+                    $q->where('first_name', 'like', "%{$this->contactSearch}%")
+                        ->orWhere('last_name', 'like', "%{$this->contactSearch}%")
+                        ->orWhere('email', 'like', "%{$this->contactSearch}%");
+                })
+                ->with('user')
+                ->limit(10)
+                ->get();
+        }
+
         return view('livewire.distribute.distribution-creator', [
             'contactLists' => $contactLists,
             'reports' => CustomReport::where('org_id', auth()->user()->org_id)->get(),
+            'contacts' => $contacts,
             'templates' => MessageTemplate::where('org_id', auth()->user()->org_id)
                 ->where('channel', $this->channel)
                 ->get(),
