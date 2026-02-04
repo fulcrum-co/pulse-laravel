@@ -292,7 +292,7 @@ class OkrPlanSeeder extends Seeder
             'goal_id' => $goal2->id,
             'content' => 'The attendance early warning system is now live. Already identified 23 individuals needing intervention.',
             'update_type' => ProgressUpdate::TYPE_SYSTEM,
-            'created_by' => null,
+            'created_by' => $user->id,
             'created_at' => Carbon::now()->subDays(5),
         ]);
 
@@ -301,7 +301,7 @@ class OkrPlanSeeder extends Seeder
             'goal_id' => null,
             'content' => 'Weekly analysis: Overall plan is 45% complete. Mental health focus area is ahead of schedule, but absenteeism metrics need attention. Recommend prioritizing engagement meetings.',
             'update_type' => ProgressUpdate::TYPE_AI_GENERATED,
-            'created_by' => null,
+            'created_by' => $user->id,
             'created_at' => Carbon::now()->subHours(6),
         ]);
 
