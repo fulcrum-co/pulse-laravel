@@ -16,7 +16,10 @@ use App\Observers\CustomReportObserver;
 use App\Observers\ObjectiveObserver;
 use App\Observers\SurveyObserver;
 use App\Observers\WorkflowExecutionObserver;
+use App\Models\PendingExtraction;
+use App\Policies\PendingExtractionPolicy;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -39,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
             SurveyCompleted::class,
             SurveyCompletedListener::class
         );
+
+        Gate::policy(PendingExtraction::class, PendingExtractionPolicy::class);
 
         // Register notification observers
         $this->registerNotificationObservers();

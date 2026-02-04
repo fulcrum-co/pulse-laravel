@@ -338,6 +338,58 @@
                                 </label>
                             </div>
                         </div>
+
+                        <!-- Linked Resource -->
+                        <div class="pt-4 border-t border-gray-200">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Linked Resource</label>
+                            @if($stepForm['resource_id'] ?? null)
+                                @php
+                                    $linkedResource = \App\Models\Resource::find($stepForm['resource_id']);
+                                @endphp
+                                @if($linkedResource)
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                                                @php
+                                                    $icon = match($linkedResource->resource_type) {
+                                                        'article' => 'document-text',
+                                                        'video' => 'play-circle',
+                                                        'worksheet' => 'clipboard-document-list',
+                                                        'activity' => 'puzzle-piece',
+                                                        'link' => 'link',
+                                                        default => 'document',
+                                                    };
+                                                @endphp
+                                                <x-icon name="{{ $icon }}" class="w-5 h-5 text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900">{{ $linkedResource->title }}</p>
+                                                <p class="text-xs text-gray-500 capitalize">{{ str_replace('_', ' ', $linkedResource->resource_type) }}</p>
+                                            </div>
+                                            @if(!$linkedResource->active)
+                                                <span class="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full">
+                                                    <x-icon name="exclamation-triangle" class="w-3 h-3 inline-block mr-0.5" />
+                                                    Unapproved
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <button wire:click="clearStepResource" type="button" class="text-gray-400 hover:text-red-500">
+                                            <x-icon name="x-mark" class="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                @endif
+                            @else
+                                <button
+                                    wire:click="openResourcePicker"
+                                    type="button"
+                                    class="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-pulse-orange-400 hover:text-pulse-orange-600 transition-colors"
+                                >
+                                    <x-icon name="folder-plus" class="w-5 h-5" />
+                                    Select Resource from Library
+                                </button>
+                            @endif
+                            <p class="mt-1 text-xs text-gray-500">Optionally link a resource from your library to this step.</p>
+                        </div>
                     </div>
                 </div>
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
@@ -714,4 +766,7 @@
         </div>
     </div>
     @endif
+
+    <!-- Resource Picker Modal -->
+    @livewire('components.resource-picker-modal')
 </div>

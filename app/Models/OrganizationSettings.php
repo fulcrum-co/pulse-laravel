@@ -15,6 +15,11 @@ class OrganizationSettings extends Model
         'status_labels',
         'risk_labels',
         'settings',
+        'contact_label_singular',
+        'contact_label_plural',
+        'plan_label',
+        'primary_color',
+        'logo_path',
     ];
 
     protected $casts = [
@@ -169,5 +174,119 @@ class OrganizationSettings extends Model
         unset($settings['terminology']);
         $this->settings = $settings;
         $this->save();
+    }
+
+    public function getContactLabelSingularAttribute(?string $value): string
+    {
+        return $value ?: 'Contact';
+    }
+
+    public function getContactLabelPluralAttribute(?string $value): string
+    {
+        return $value ?: 'Contacts';
+    }
+
+    public function getPlanLabelAttribute(?string $value): string
+    {
+        return $value ?: 'Plan';
+    }
+
+    public function getPrimaryColorAttribute(?string $value): string
+    {
+        return $value ?: '#3B82F6';
+    }
+
+    /**
+     * Default auto-course generation settings.
+     */
+    public const DEFAULT_AUTO_COURSE_SETTINGS = [
+        'enabled' => false,
+        'schedule' => 'disabled',        // disabled, daily, weekly, monthly
+        'schedule_time' => '06:00',      // Time to run (24h format)
+        'schedule_day' => 'monday',      // For weekly schedule
+        'schedule_date' => 1,            // For monthly (day of month)
+        'max_courses_per_day' => 50,     // Limit per org
+        'target_criteria' => [
+            'risk_levels' => ['high', 'moderate'],
+            'missing_courses_only' => true,
+            'grades' => [],              // Empty = all grades
+        ],
+        'default_course_type' => 'intervention',
+        'default_duration_minutes' => 30,
+        'require_moderation' => true,    // Auto-generated courses need approval
+        'auto_enroll' => true,           // Auto-enroll target students
+        'notify_on_generation' => true,  // Notify moderators
+    ];
+
+    /**
+     * Get auto-course generation settings (merged with defaults).
+     */
+    public function getAutoCourseSettings(): array
+    {
+        $settings = $this->getSetting('auto_course_generation', []);
+
+        return array_replace_recursive(self::DEFAULT_AUTO_COURSE_SETTINGS, $settings);
+    }
+
+    /**
+     * Set auto-course generation settings.
+     */
+    public function setAutoCourseSettings(array $settings): void
+    {
+        $this->setSetting('auto_course_generation', $settings);
+    }
+
+    /**
+     * Check if auto-course generation is enabled.
+     */
+    public function isAutoCourseGenerationEnabled(): bool
+    {
+        $settings = $this->getAutoCourseSettings();
+
+        return $settings['enabled'] && $settings['schedule'] !== 'disabled';
+    }
+
+    /**
+     * Get the schedule configuration for auto-course generation.
+     */
+    public function getAutoCourseSchedule(): array
+    {
+        $settings = $this->getAutoCourseSettings();
+
+        return [
+            'schedule' => $settings['schedule'],
+            'time' => $settings['schedule_time'],
+            'day' => $settings['schedule_day'],
+            'date' => $settings['schedule_date'],
+        ];
+    }
+
+    /**
+     * Check if the current time matches the scheduled run time.
+     */
+    public function shouldRunAutoCourseGeneration(): bool
+    {
+        if (! $this->isAutoCourseGenerationEnabled()) {
+            return false;
+        }
+
+        $settings = $this->getAutoCourseSettings();
+        $now = now()->setTimezone($this->organization?->timezone ?? config('app.timezone'));
+
+        // Check time (within 5 minute window)
+        $scheduledTime = \Carbon\Carbon::parse($settings['schedule_time'], $now->timezone);
+        $minutesDiff = abs($now->diffInMinutes($scheduledTime->setDate($now->year, $now->month, $now->day)));
+
+        if ($minutesDiff > 5) {
+            return false;
+        }
+
+        // Check day/date based on schedule type
+        return match ($settings['schedule']) {
+            'daily' => true,
+            'weekly' => strtolower($now->format('l')) === strtolower($settings['schedule_day']),
+            'monthly' => $now->day === (int) $settings['schedule_date'],
+            default => false,
+        };
     }
 }

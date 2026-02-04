@@ -1,3 +1,4 @@
+@php($settings = auth()->user()?->organization?->getOrCreateSettings())
 <div class="max-w-4xl mx-auto">
     <!-- Step Indicator -->
     <nav class="mb-8">
@@ -374,12 +375,12 @@
                     <div class="flex gap-4">
                         <button
                             type="button"
-                            wire:click="$set('targetType', 'students')"
+                            wire:click="$set('targetType', 'contacts')"
                             class="flex-1 p-4 rounded-lg border-2 text-center transition-all
-                                {{ $targetType === 'students' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
+                                {{ $targetType === 'contacts' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
                         >
-                            <x-icon name="academic-cap" class="w-8 h-8 mx-auto mb-2 {{ $targetType === 'students' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
-                            <span class="font-medium {{ $targetType === 'students' ? 'text-pulse-orange-600' : 'text-gray-900' }}">Students</span>
+                            <x-icon name="academic-cap" class="w-8 h-8 mx-auto mb-2 {{ $targetType === 'contacts' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
+                            <span class="font-medium {{ $targetType === 'contacts' ? 'text-pulse-orange-600' : 'text-gray-900' }}">{{ $settings->contact_label_plural ?? 'Contacts' }}</span>
                         </button>
                         <button
                             type="button"
@@ -388,23 +389,23 @@
                                 {{ $targetType === 'users' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}"
                         >
                             <x-icon name="users" class="w-8 h-8 mx-auto mb-2 {{ $targetType === 'users' ? 'text-pulse-orange-600' : 'text-gray-400' }}" />
-                            <span class="font-medium {{ $targetType === 'users' ? 'text-pulse-orange-600' : 'text-gray-900' }}">Staff/Parents</span>
+                            <span class="font-medium {{ $targetType === 'users' ? 'text-pulse-orange-600' : 'text-gray-900' }}">Staff</span>
                         </button>
                     </div>
                 </div>
 
-                @if($targetType === 'students')
+                @if($targetType === 'contacts')
                     <!-- Grades Filter -->
-                    @if(count($availableGrades) > 0)
+                    @if(count($availableLevels) > 0)
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Grade (optional)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Level (optional)</label>
                             <div class="flex flex-wrap gap-2">
-                                @foreach($availableGrades as $grade)
+                                @foreach($availableLevels as $grade)
                                     <button
                                         type="button"
-                                        wire:click="toggleGrade('{{ $grade }}')"
+                                        wire:click="toggleLevel('{{ $grade }}')"
                                         class="px-3 py-1.5 rounded-lg text-sm border transition-all
-                                            {{ in_array($grade, $selectedGrades) ? 'bg-pulse-orange-500 border-pulse-orange-500 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400' }}"
+                                            {{ in_array($grade, $selectedLevels) ? 'bg-pulse-orange-500 border-pulse-orange-500 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400' }}"
                                     >
                                         {{ $grade }}
                                     </button>
@@ -414,20 +415,20 @@
                     @endif
 
                     <!-- Classrooms Filter -->
-                    @if(count($availableClassrooms) > 0)
+                    @if(count($availableLearningGroups) > 0)
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Classroom (optional)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Learning Group (optional)</label>
                             <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2 space-y-1">
-                                @foreach($availableClassrooms as $classroom)
+                                @foreach($availableLearningGroups as $classroom)
                                     <button
                                         type="button"
-                                        wire:click="toggleClassroom({{ $classroom['id'] }})"
+                                        wire:click="toggleLearningGroup({{ $classroom['id'] }})"
                                         class="w-full px-3 py-2 rounded-lg text-left text-sm transition-all
-                                            {{ in_array($classroom['id'], $selectedClassrooms) ? 'bg-pulse-orange-50 text-pulse-orange-700' : 'hover:bg-gray-50' }}"
+                                            {{ in_array($classroom['id'], $selectedLearningGroups) ? 'bg-pulse-orange-50 text-pulse-orange-700' : 'hover:bg-gray-50' }}"
                                     >
                                         <div class="flex items-center justify-between">
                                             <span>{{ $classroom['name'] }}</span>
-                                            @if(in_array($classroom['id'], $selectedClassrooms))
+                                            @if(in_array($classroom['id'], $selectedLearningGroups))
                                                 <x-icon name="check" class="w-4 h-4 text-pulse-orange-600" />
                                             @endif
                                         </div>
@@ -441,7 +442,7 @@
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Role (optional)</label>
                         <div class="flex flex-wrap gap-2">
-                            @foreach(['teacher', 'counselor', 'admin', 'parent'] as $role)
+                            @foreach(['instructor', 'support_person', 'admin', 'direct_supervisor'] as $role)
                                 <button
                                     type="button"
                                     wire:click="$toggle('selectedRoles.{{ $role }}')"
@@ -461,8 +462,8 @@
                         <x-icon name="information-circle" class="w-5 h-5 text-blue-600" />
                         <span class="text-sm text-blue-800">
                             <strong>{{ $this->estimatedContactCount }}</strong>
-                            {{ $targetType === 'students' ? 'students' : 'users' }} match your current filters.
-                            @if(empty($selectedGrades) && empty($selectedClassrooms))
+                            {{ $targetType === 'contacts' ? ($settings->contact_label_plural ?? 'contacts') : 'users' }} match your current filters.
+                            @if(empty($selectedLevels) && empty($selectedLearningGroups))
                                 <span class="text-blue-600">(All {{ $targetType }})</span>
                             @endif
                         </span>

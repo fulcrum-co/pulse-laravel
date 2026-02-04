@@ -7,7 +7,7 @@ use App\Models\CollectionEntry;
 use App\Models\CollectionQueueItem;
 use App\Models\CollectionSchedule;
 use App\Models\CollectionSession;
-use App\Models\Student;
+use App\Models\Contact;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection as SupportCollection;
@@ -198,20 +198,22 @@ class CollectionService
     protected function getEligibleContacts(Collection $collection): SupportCollection
     {
         $scope = $collection->contact_scope ?? [];
-        $targetType = $scope['target_type'] ?? 'students';
+        $targetType = $scope['target_type'] ?? 'contacts';
 
-        if ($targetType === 'students') {
-            $query = Student::where('org_id', $collection->org_id)
+        if ($targetType === 'contacts' || $targetType === 'students') {
+            $query = Contact::where('org_id', $collection->org_id)
                 ->whereNull('deleted_at');
 
-            // Filter by grades
-            if (! empty($scope['grades'])) {
-                $query->whereIn('grade_level', $scope['grades']);
+            // Filter by levels (legacy: grades)
+            $levels = $scope['levels'] ?? $scope['grades'] ?? [];
+            if (! empty($levels)) {
+                $query->whereIn('grade_level', $levels);
             }
 
-            // Filter by classrooms (homeroom)
-            if (! empty($scope['classrooms'])) {
-                $query->whereIn('homeroom_classroom_id', $scope['classrooms']);
+            // Filter by learning groups (legacy: classrooms)
+            $learningGroups = $scope['learning_groups'] ?? $scope['classrooms'] ?? [];
+            if (! empty($learningGroups)) {
+                $query->whereIn('homeroom_classroom_id', $learningGroups);
             }
 
             // Filter by tags
@@ -226,7 +228,7 @@ class CollectionService
             return $query->get();
         }
 
-        // For user-based collections (parents, staff)
+        // For user-based collections (staff)
         if ($targetType === 'users') {
             $query = User::where('org_id', $collection->org_id);
 
@@ -251,14 +253,14 @@ class CollectionService
             $priority = CollectionQueueItem::PRIORITY_NORMAL;
             $reason = null;
 
-            // High-risk students get highest priority
-            if ($contact instanceof Student) {
+            // High-risk contacts get highest priority
+            if ($contact instanceof Contact) {
                 if ($contact->risk_level === 'high') {
                     $priority = CollectionQueueItem::PRIORITY_CRITICAL;
-                    $reason = 'High risk student';
+                    $reason = 'High risk contact';
                 } elseif ($contact->risk_level === 'medium') {
                     $priority = CollectionQueueItem::PRIORITY_HIGH;
-                    $reason = 'Medium risk student';
+                    $reason = 'Medium risk contact';
                 }
 
                 // Check for recent flags

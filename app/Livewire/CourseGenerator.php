@@ -63,6 +63,13 @@ class CourseGenerator extends Component
     {
         $this->validate();
 
+        // Check if AI services are configured
+        if (! $this->isAIConfigured()) {
+            $this->error = 'AI course generation is not configured. Please ensure ANTHROPIC_API_KEY is set in your environment.';
+
+            return;
+        }
+
         $this->error = null;
         $this->isGenerating = true;
         $this->coursePreview = null;
@@ -94,11 +101,21 @@ class CourseGenerator extends Component
                 'message' => 'Course generated successfully! Review and publish when ready.',
             ]);
         } catch (\Exception $e) {
-            $this->error = 'Failed to generate course. Please try again.';
+            $this->error = 'Failed to generate course: '.$e->getMessage();
             report($e);
         } finally {
             $this->isGenerating = false;
         }
+    }
+
+    /**
+     * Check if AI services are configured.
+     * Only Anthropic is required for course generation.
+     * OpenAI is optional (used for semantic search to find relevant resources).
+     */
+    protected function isAIConfigured(): bool
+    {
+        return ! empty(config('services.anthropic.api_key'));
     }
 
     /**

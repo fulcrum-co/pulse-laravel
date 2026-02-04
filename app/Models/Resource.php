@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Contracts\Linkable;
 use App\Traits\HasEmbedding;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Resource extends Model
+class Resource extends Model implements Linkable
 {
     use HasEmbedding, Searchable, SoftDeletes;
 
@@ -22,6 +23,7 @@ class Resource extends Model
         'resource_type',
         'category',
         'tags',
+        'domain_tags',
         'url',
         'file_path',
         'thumbnail_url',
@@ -35,6 +37,7 @@ class Resource extends Model
 
     protected $casts = [
         'tags' => 'array',
+        'domain_tags' => 'array',
         'target_grades' => 'array',
         'target_risk_levels' => 'array',
         'is_public' => 'boolean',
@@ -120,6 +123,16 @@ class Resource extends Model
         return $this->source_resource_id !== null;
     }
 
+    public function getLinkableType(): string
+    {
+        return self::class;
+    }
+
+    public function getLinkableId(): int
+    {
+        return $this->id;
+    }
+
     /**
      * Scope to filter active resources.
      */
@@ -165,6 +178,7 @@ class Resource extends Model
             'resource_type' => $this->resource_type,
             'category' => $this->category,
             'tags' => $this->tags ?? [],
+            'domain_tags' => $this->domain_tags ?? [],
             'target_grades' => $this->target_grades ?? [],
             'target_risk_levels' => $this->target_risk_levels ?? [],
             'is_active' => (bool) $this->active,

@@ -76,6 +76,7 @@ class CollectionList extends Component
             return;
         }
 
+        $terminology = app(\App\Services\TerminologyService::class);
         $collection = Collection::forOrganization(auth()->user()->org_id)
             ->find($this->collectionToDelete);
 
@@ -84,7 +85,7 @@ class CollectionList extends Component
 
             $this->dispatch('notify', [
                 'type' => 'success',
-                'message' => 'Collection deleted successfully.',
+                'message' => $terminology->get('collection_deleted_label') ?? 'Collection deleted successfully.',
             ]);
         }
 
@@ -105,10 +106,10 @@ class CollectionList extends Component
 
         if ($collection->status === Collection::STATUS_ACTIVE) {
             $service->pause($collection);
-            $message = 'Collection paused successfully.';
+            $message = $terminology->get('collection_paused_label') ?? 'Collection paused successfully.';
         } else {
             $service->activate($collection);
-            $message = 'Collection activated successfully.';
+            $message = $terminology->get('collection_activated_label') ?? 'Collection activated successfully.';
         }
 
         $this->dispatch('notify', [
@@ -131,7 +132,7 @@ class CollectionList extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Collection duplicated successfully.',
+            'message' => $terminology->get('collection_duplicated_label') ?? 'Collection duplicated successfully.',
         ]);
     }
 
@@ -163,6 +164,6 @@ class CollectionList extends Component
             'collections' => $collections,
             'statuses' => Collection::getStatuses(),
             'collectionTypes' => Collection::getCollectionTypes(),
-        ])->layout('components.layouts.dashboard', ['title' => 'Collect']);
+        ])->layout('components.layouts.dashboard', ['title' => app(\App\Services\TerminologyService::class)->get('collect_label') ?? 'Collect']);
     }
 }

@@ -1,0 +1,28 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        if (Schema::hasTable('plan_links')) {
+            return;
+        }
+
+        Schema::create('plan_links', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('plan_id')->constrained('plans')->cascadeOnDelete();
+            $table->morphs('linkable');
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('plan_links');
+    }
+};

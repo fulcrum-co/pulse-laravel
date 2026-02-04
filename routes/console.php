@@ -43,3 +43,13 @@ Schedule::command('notifications:send-weekly-digest')
 Schedule::job(new \App\Jobs\ProcessCollectionReminders)
     ->everyFiveMinutes()
     ->description('Process pending collection reminders and send notifications');
+
+// Plan overdue alerts (15-minute cadence)
+Schedule::job(new \App\Jobs\ProcessPlanOverdueNotifications)
+    ->everyFifteenMinutes()
+    ->description('Send plan overdue notifications');
+
+// Collection transcription processing (15-minute cadence)
+Schedule::job(new \App\Jobs\ProcessPendingTranscriptions)
+    ->everyFifteenMinutes()
+    ->description('Queue pending collection dictation transcriptions');

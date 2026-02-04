@@ -1,4 +1,26 @@
-<div class="flex gap-6">
+<div class="flex flex-col gap-6">
+    {{-- Queue Type Tabs --}}
+    <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg w-fit">
+        <button
+            wire:click="switchToQueue('content')"
+            class="px-4 py-2 text-sm font-medium rounded-md transition-colors {{ $queueType === 'content' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900' }}"
+        >
+            <x-icon name="document-text" class="w-4 h-4 inline-block mr-1.5" />
+            Content Moderation
+        </button>
+        <button
+            wire:click="switchToQueue('courses')"
+            class="px-4 py-2 text-sm font-medium rounded-md transition-colors {{ $queueType === 'courses' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900' }}"
+        >
+            <x-icon name="academic-cap" class="w-4 h-4 inline-block mr-1.5" />
+            Course Approval
+            @if(isset($courseStats) && $courseStats['pending_review'] > 0)
+                <span class="ml-1.5 px-1.5 py-0.5 text-xs bg-yellow-100 text-yellow-700 rounded-full">{{ $courseStats['pending_review'] }}</span>
+            @endif
+        </button>
+    </div>
+
+    <div class="flex gap-6">
     {{-- Left Sidebar --}}
     <div class="w-64 flex-shrink-0">
         {{-- Search --}}
@@ -11,6 +33,9 @@
                 class="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
             >
         </div>
+
+        @if($queueType === 'content')
+        {{-- Content Moderation Filters --}}
 
         {{-- Status Filter --}}
         <div class="mb-6">
@@ -86,10 +111,90 @@
                 <option value="score_high">Highest Score</option>
             </select>
         </div>
+
+        @else
+        {{-- Course Approval Filters --}}
+
+        {{-- Approval Status Filter --}}
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Approval Status</h3>
+                @if($courseApprovalFilter && $courseApprovalFilter !== 'pending_review')
+                    <button wire:click="$set('courseApprovalFilter', 'pending_review')" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700">Reset</button>
+                @endif
+            </div>
+            <div class="space-y-1">
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="radio" wire:model.live="courseApprovalFilter" value="pending_review" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
+                    <x-icon name="clock" class="w-4 h-4 text-yellow-500" title="Pending Review" />
+                    <span class="text-sm text-gray-700">Pending Review</span>
+                    <span class="ml-auto text-xs text-gray-400">({{ $courseStats['pending_review'] ?? 0 }})</span>
+                </label>
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="radio" wire:model.live="courseApprovalFilter" value="approved" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
+                    <x-icon name="check-circle" class="w-4 h-4 text-green-500" title="Approved" />
+                    <span class="text-sm text-gray-700">Approved</span>
+                    <span class="ml-auto text-xs text-gray-400">({{ $courseStats['approved'] ?? 0 }})</span>
+                </label>
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="radio" wire:model.live="courseApprovalFilter" value="rejected" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
+                    <x-icon name="x-circle" class="w-4 h-4 text-red-500" title="Rejected" />
+                    <span class="text-sm text-gray-700">Rejected</span>
+                    <span class="ml-auto text-xs text-gray-400">({{ $courseStats['rejected'] ?? 0 }})</span>
+                </label>
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="radio" wire:model.live="courseApprovalFilter" value="revision_requested" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
+                    <x-icon name="pencil-square" class="w-4 h-4 text-orange-500" title="Revision Requested" />
+                    <span class="text-sm text-gray-700">Revision Requested</span>
+                    <span class="ml-auto text-xs text-gray-400">({{ $courseStats['revision_requested'] ?? 0 }})</span>
+                </label>
+            </div>
+        </div>
+
+        {{-- Generation Trigger Filter --}}
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Source</h3>
+                @if($courseTriggerFilter)
+                    <button wire:click="$set('courseTriggerFilter', '')" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700">Clear</button>
+                @endif
+            </div>
+            <div class="space-y-1">
+                @foreach($generationTriggers ?? [] as $value => $label)
+                    <label class="flex items-center gap-2 py-1 cursor-pointer">
+                        <input type="radio" wire:model.live="courseTriggerFilter" value="{{ $value }}" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
+                        @php
+                            $triggerIcon = match($value) {
+                                'manual' => 'user',
+                                'scheduled' => 'calendar',
+                                'signal' => 'bolt',
+                                'workflow' => 'arrow-path',
+                                default => 'sparkles',
+                            };
+                        @endphp
+                        <x-icon name="{{ $triggerIcon }}" class="w-4 h-4 text-gray-400" title="{{ $label }}" />
+                        <span class="text-sm text-gray-700">{{ $label }}</span>
+                    </label>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Sort By --}}
+        <div>
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Sort By</h3>
+            <select wire:model.live="sortBy" class="w-full text-sm border border-gray-300 rounded-lg py-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+            </select>
+        </div>
+        @endif
     </div>
 
     {{-- Main Content --}}
     <div class="flex-1 min-w-0">
+        @if($queueType === 'content')
+        {{-- CONTENT MODERATION VIEW --}}
+
         {{-- Stats Cards (compact, equal width) --}}
         <div class="grid grid-cols-4 gap-2 mb-4">
             <button wire:click="$set('statusFilter', 'needs_review')" class="w-full bg-white border rounded-lg px-3 py-2 cursor-pointer hover:border-yellow-300 transition-colors {{ $statusFilter === 'needs_review' ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200' }}">
@@ -470,7 +575,202 @@
                 {{ $results->links() }}
             </div>
         @endif
+
+        @else
+        {{-- COURSE APPROVAL VIEW --}}
+
+        {{-- Course Stats Cards --}}
+        <div class="grid grid-cols-4 gap-2 mb-4">
+            <button wire:click="$set('courseApprovalFilter', 'pending_review')" class="w-full bg-white border rounded-lg px-3 py-2 cursor-pointer hover:border-yellow-300 transition-colors {{ $courseApprovalFilter === 'pending_review' ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200' }}">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                        <x-icon name="clock" class="w-3.5 h-3.5 text-yellow-600" />
+                    </div>
+                    <div class="text-left flex-1">
+                        <div class="text-xs text-yellow-600 leading-tight">Pending</div>
+                        <div class="text-sm font-semibold text-gray-900">{{ $courseStats['pending_review'] ?? 0 }}</div>
+                    </div>
+                </div>
+            </button>
+            <button wire:click="$set('courseApprovalFilter', 'revision_requested')" class="w-full bg-white border rounded-lg px-3 py-2 cursor-pointer hover:border-orange-300 transition-colors {{ $courseApprovalFilter === 'revision_requested' ? 'border-orange-400 bg-orange-50' : 'border-gray-200' }}">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded bg-orange-100 flex items-center justify-center flex-shrink-0">
+                        <x-icon name="pencil-square" class="w-3.5 h-3.5 text-orange-600" />
+                    </div>
+                    <div class="text-left flex-1">
+                        <div class="text-xs text-orange-600 leading-tight">Revision</div>
+                        <div class="text-sm font-semibold text-gray-900">{{ $courseStats['revision_requested'] ?? 0 }}</div>
+                    </div>
+                </div>
+            </button>
+            <button wire:click="$set('courseApprovalFilter', 'approved')" class="w-full bg-white border rounded-lg px-3 py-2 cursor-pointer hover:border-green-300 transition-colors {{ $courseApprovalFilter === 'approved' ? 'border-green-400 bg-green-50' : 'border-gray-200' }}">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded bg-green-100 flex items-center justify-center flex-shrink-0">
+                        <x-icon name="check-circle" class="w-3.5 h-3.5 text-green-600" />
+                    </div>
+                    <div class="text-left flex-1">
+                        <div class="text-xs text-green-600 leading-tight">Approved</div>
+                        <div class="text-sm font-semibold text-gray-900">{{ $courseStats['approved'] ?? 0 }}</div>
+                    </div>
+                </div>
+            </button>
+            <button wire:click="$set('courseApprovalFilter', 'rejected')" class="w-full bg-white border rounded-lg px-3 py-2 cursor-pointer hover:border-red-300 transition-colors {{ $courseApprovalFilter === 'rejected' ? 'border-red-400 bg-red-50' : 'border-gray-200' }}">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <x-icon name="x-circle" class="w-3.5 h-3.5 text-red-600" />
+                    </div>
+                    <div class="text-left flex-1">
+                        <div class="text-xs text-red-600 leading-tight">Rejected</div>
+                        <div class="text-sm font-semibold text-gray-900">{{ $courseStats['rejected'] ?? 0 }}</div>
+                    </div>
+                </div>
+            </button>
+        </div>
+
+        {{-- Queue Header --}}
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <x-icon name="academic-cap" class="w-5 h-5 text-gray-400" />
+                <h2 class="text-lg font-semibold text-gray-900">Course Approval Queue</h2>
+                <span class="text-sm text-gray-500">({{ $courses->total() }} courses)</span>
+            </div>
+        </div>
+
+        {{-- Courses List --}}
+        <div class="space-y-3">
+            @forelse($courses as $course)
+                @php
+                    $approvalColors = [
+                        'pending_review' => 'yellow',
+                        'approved' => 'green',
+                        'rejected' => 'red',
+                        'revision_requested' => 'orange',
+                    ];
+                    $approvalColor = $approvalColors[$course->approval_status] ?? 'gray';
+                    $isAutoGenerated = in_array($course->generation_trigger, ['workflow', 'scheduled', 'signal']);
+                @endphp
+                <div class="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition-colors">
+                    <div class="flex items-start gap-4">
+                        {{-- Course Icon --}}
+                        <div class="w-12 h-12 rounded-lg bg-{{ $approvalColor }}-100 flex items-center justify-center flex-shrink-0">
+                            <x-icon name="academic-cap" class="w-6 h-6 text-{{ $approvalColor }}-600" />
+                        </div>
+
+                        {{-- Course Info --}}
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h3 class="font-medium text-gray-900 truncate">{{ $course->title }}</h3>
+                                @if($isAutoGenerated)
+                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-700">
+                                        <x-icon name="sparkles" class="w-3 h-3 inline-block mr-0.5" />
+                                        AI Generated
+                                    </span>
+                                @endif
+                                <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-{{ $approvalColor }}-100 text-{{ $approvalColor }}-700 capitalize">
+                                    {{ str_replace('_', ' ', $course->approval_status ?? 'pending') }}
+                                </span>
+                            </div>
+
+                            <p class="text-sm text-gray-500 mb-2">
+                                {{ ucwords(str_replace('_', ' ', $course->course_type ?? 'course')) }}
+                                &middot; {{ $course->steps_count }} steps
+                                @if($course->estimated_duration_minutes)
+                                    &middot; {{ $course->estimated_duration_minutes }} min
+                                @endif
+                            </p>
+
+                            @if($course->description)
+                                <p class="text-sm text-gray-600 line-clamp-2 mb-2">{{ $course->description }}</p>
+                            @endif
+
+                            {{-- Generation Info --}}
+                            <div class="flex items-center gap-3 text-xs text-gray-500">
+                                @if($course->generation_trigger)
+                                    @php
+                                        $triggerIcon = match($course->generation_trigger) {
+                                            'manual' => 'user',
+                                            'scheduled' => 'calendar',
+                                            'signal' => 'bolt',
+                                            'workflow' => 'arrow-path',
+                                            default => 'sparkles',
+                                        };
+                                        $triggerLabel = $generationTriggers[$course->generation_trigger] ?? $course->generation_trigger;
+                                    @endphp
+                                    <span class="flex items-center gap-1">
+                                        <x-icon name="{{ $triggerIcon }}" class="w-3 h-3" />
+                                        {{ $triggerLabel }}
+                                    </span>
+                                @endif
+                                @if($course->creator)
+                                    <span>Created by {{ $course->creator->first_name }}</span>
+                                @endif
+                                <span>{{ $course->created_at->diffForHumans() }}</span>
+                            </div>
+
+                            @if($course->approval_notes)
+                                <div class="mt-2 p-2 bg-gray-50 rounded-lg text-sm text-gray-600">
+                                    <strong>Notes:</strong> {{ $course->approval_notes }}
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Actions --}}
+                        <div class="flex flex-col items-end gap-2">
+                            @if($course->approver)
+                                <span class="text-xs text-gray-500">
+                                    {{ $course->approval_status === 'approved' ? 'Approved' : 'Reviewed' }} by {{ $course->approver->first_name }}
+                                </span>
+                            @endif
+
+                            <div class="flex items-center gap-1">
+                                {{-- View/Edit Course --}}
+                                <a href="{{ route('resources.courses.edit', $course->id) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg" title="View & Edit Course">
+                                    <x-icon name="pencil-square" class="w-4 h-4" />
+                                </a>
+
+                                @if($course->approval_status === 'pending_review' || $course->approval_status === 'revision_requested')
+                                    {{-- Approve --}}
+                                    <button wire:click="approveCourse({{ $course->id }})" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg" title="Approve Course">
+                                        <x-icon name="check-circle" class="w-4 h-4" />
+                                    </button>
+
+                                    {{-- Request Revision --}}
+                                    <button
+                                        x-data
+                                        x-on:click="$dispatch('open-revision-modal', { courseId: {{ $course->id }}, courseTitle: '{{ addslashes($course->title) }}' })"
+                                        class="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg"
+                                        title="Request Revision"
+                                    >
+                                        <x-icon name="pencil" class="w-4 h-4" />
+                                    </button>
+
+                                    {{-- Reject --}}
+                                    <button wire:click="rejectCourse({{ $course->id }})" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg" title="Reject Course">
+                                        <x-icon name="x-circle" class="w-4 h-4" />
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white border border-gray-200 rounded-xl p-12 text-center">
+                    <x-icon name="check-circle" class="w-12 h-12 mx-auto text-green-200" />
+                    <h3 class="mt-3 text-lg font-medium text-gray-900">No courses to review</h3>
+                    <p class="mt-1 text-sm text-gray-500">All courses have been reviewed.</p>
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Pagination --}}
+        @if($courses->hasPages())
+            <div class="mt-6">
+                {{ $courses->links() }}
+            </div>
+        @endif
+        @endif
     </div>
+    </div>{{-- Close inner flex --}}
 
     {{-- Assignment Modal --}}
     @if($showAssignModal)
@@ -536,6 +836,53 @@
                             </button>
                             <button wire:click="saveAssignment" class="px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 hover:bg-pulse-orange-600 rounded-lg">
                                 Assign
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Course Revision Request Modal --}}
+    @if($queueType === 'courses')
+        <div
+            x-data="{ open: false, courseId: null, courseTitle: '', notes: '' }"
+            x-on:open-revision-modal.window="open = true; courseId = $event.detail.courseId; courseTitle = $event.detail.courseTitle; notes = '';"
+            x-show="open"
+            x-cloak
+            class="fixed inset-0 z-50 overflow-y-auto"
+        >
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="fixed inset-0 bg-black/50" x-on:click="open = false"></div>
+
+                <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md" x-show="open" x-transition>
+                    <div class="p-5">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Request Revision</h3>
+                        <p class="text-sm text-gray-600 mb-4" x-text="'Course: ' + courseTitle"></p>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Revision Notes <span class="text-red-500">*</span></label>
+                                <textarea
+                                    x-model="notes"
+                                    rows="4"
+                                    placeholder="Describe what changes need to be made..."
+                                    class="w-full text-sm rounded-lg border-gray-300 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                                ></textarea>
+                                <p class="mt-1 text-xs text-gray-500">This feedback will be visible to the course creator.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-3 mt-5 pt-4 border-t border-gray-100">
+                            <button x-on:click="open = false" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">
+                                Cancel
+                            </button>
+                            <button
+                                x-on:click="if(notes.trim()) { $wire.requestCourseRevision(courseId, notes); open = false; }"
+                                class="px-4 py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-lg"
+                            >
+                                Request Revision
                             </button>
                         </div>
                     </div>

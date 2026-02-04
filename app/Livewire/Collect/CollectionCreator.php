@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Collect;
 
-use App\Models\Classroom;
+use App\Models\LearningGroup;
 use App\Models\Collection;
-use App\Models\Student;
+use App\Models\Contact;
 use App\Models\Survey;
 use App\Services\CollectionService;
 use Illuminate\Support\Str;
@@ -59,11 +59,11 @@ class CollectionCreator extends Component
     public ?string $endDate = null;
 
     // Step 5: Contact Scope
-    public string $targetType = 'students'; // students, users
+    public string $targetType = 'contacts'; // contacts, users
 
-    public array $selectedGrades = [];
+    public array $selectedLevels = [];
 
-    public array $selectedClassrooms = [];
+    public array $selectedLearningGroups = [];
 
     public array $selectedTags = [];
 
@@ -92,9 +92,9 @@ class CollectionCreator extends Component
     // Available options
     public array $availableSurveys = [];
 
-    public array $availableGrades = [];
+    public array $availableLevels = [];
 
-    public array $availableClassrooms = [];
+    public array $availableLearningGroups = [];
 
     protected $rules = [
         'title' => 'required|string|max:255',
@@ -118,7 +118,7 @@ class CollectionCreator extends Component
             ->toArray();
 
         // Load available grades
-        $this->availableGrades = Student::where('org_id', $user->org_id)
+        $this->availableLevels = Contact::where('org_id', $user->org_id)
             ->whereNotNull('grade_level')
             ->distinct()
             ->pluck('grade_level')
@@ -126,8 +126,8 @@ class CollectionCreator extends Component
             ->values()
             ->toArray();
 
-        // Load available classrooms
-        $this->availableClassrooms = Classroom::where('org_id', $user->org_id)
+        // Load available learning groups
+        $this->availableLearningGroups = LearningGroup::where('org_id', $user->org_id)
             ->orderBy('name')
             ->get()
             ->toArray();
@@ -235,8 +235,8 @@ class CollectionCreator extends Component
 
     protected function validateStep5(): bool
     {
-        if ($this->targetType === 'students') {
-            // At least one filter should be set, or all students
+        if ($this->targetType === 'contacts') {
+            // At least one filter should be set, or all contacts
             return true;
         }
 
@@ -347,21 +347,21 @@ class CollectionCreator extends Component
     // CONTACT SCOPE HELPERS
     // ============================================
 
-    public function toggleGrade(string $grade): void
+    public function toggleLevel(string $level): void
     {
-        if (in_array($grade, $this->selectedGrades)) {
-            $this->selectedGrades = array_values(array_filter($this->selectedGrades, fn ($g) => $g !== $grade));
+        if (in_array($level, $this->selectedLevels)) {
+            $this->selectedLevels = array_values(array_filter($this->selectedLevels, fn ($g) => $g !== $level));
         } else {
-            $this->selectedGrades[] = $grade;
+            $this->selectedLevels[] = $level;
         }
     }
 
-    public function toggleClassroom(int $classroomId): void
+    public function toggleLearningGroup(int $learningGroupId): void
     {
-        if (in_array($classroomId, $this->selectedClassrooms)) {
-            $this->selectedClassrooms = array_values(array_filter($this->selectedClassrooms, fn ($c) => $c !== $classroomId));
+        if (in_array($learningGroupId, $this->selectedLearningGroups)) {
+            $this->selectedLearningGroups = array_values(array_filter($this->selectedLearningGroups, fn ($c) => $c !== $learningGroupId));
         } else {
-            $this->selectedClassrooms[] = $classroomId;
+            $this->selectedLearningGroups[] = $learningGroupId;
         }
     }
 
@@ -387,12 +387,12 @@ class CollectionCreator extends Component
             'target_type' => $this->targetType,
         ];
 
-        if ($this->targetType === 'students') {
-            if (! empty($this->selectedGrades)) {
-                $contactScope['grades'] = $this->selectedGrades;
+        if ($this->targetType === 'contacts') {
+            if (! empty($this->selectedLevels)) {
+                $contactScope['levels'] = $this->selectedLevels;
             }
-            if (! empty($this->selectedClassrooms)) {
-                $contactScope['classrooms'] = $this->selectedClassrooms;
+            if (! empty($this->selectedLearningGroups)) {
+                $contactScope['learning_groups'] = $this->selectedLearningGroups;
             }
             if (! empty($this->selectedTags)) {
                 $contactScope['tags'] = $this->selectedTags;
@@ -526,14 +526,14 @@ class CollectionCreator extends Component
     public function getEstimatedContactCountProperty(): int
     {
         $user = auth()->user();
-        $query = Student::where('org_id', $user->org_id)->whereNull('deleted_at');
+        $query = Contact::where('org_id', $user->org_id)->whereNull('deleted_at');
 
-        if (! empty($this->selectedGrades)) {
-            $query->whereIn('grade', $this->selectedGrades);
+        if (! empty($this->selectedLevels)) {
+            $query->whereIn('grade_level', $this->selectedLevels);
         }
 
-        if (! empty($this->selectedClassrooms)) {
-            $query->whereIn('classroom_id', $this->selectedClassrooms);
+        if (! empty($this->selectedLearningGroups)) {
+            $query->whereIn('homeroom_classroom_id', $this->selectedLearningGroups);
         }
 
         return $query->count();

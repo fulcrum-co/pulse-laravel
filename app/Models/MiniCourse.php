@@ -51,6 +51,8 @@ class MiniCourse extends Model
 
     public const TRIGGER_SIGNAL = 'signal';
 
+    public const TRIGGER_WORKFLOW = 'workflow';
+
     // Approval statuses
     public const APPROVAL_PENDING = 'pending_review';
 
@@ -105,6 +107,7 @@ class MiniCourse extends Model
         'target_entity_id',
         'generation_signals',
         'auto_generated_at',
+        'workflow_context',
         // Approval fields
         'approval_status',
         'approved_by',
@@ -140,6 +143,7 @@ class MiniCourse extends Model
         'target_needs' => 'array',
         'analytics_config' => 'array',
         'generation_signals' => 'array',
+        'workflow_context' => 'array',
         'is_public' => 'boolean',
         'is_template' => 'boolean',
         'published_at' => 'datetime',
@@ -670,6 +674,7 @@ class MiniCourse extends Model
             self::TRIGGER_MANUAL => 'Manual Request',
             self::TRIGGER_SCHEDULED => 'Scheduled Batch',
             self::TRIGGER_SIGNAL => 'Real-time Signal',
+            self::TRIGGER_WORKFLOW => 'Workflow Action',
         ];
     }
 

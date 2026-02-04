@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('collection_id')->constrained()->onDelete('cascade');
             $table->foreignId('session_id')->constrained('collection_sessions')->onDelete('cascade');
-            $table->string('contact_type'); // App\Models\Student or App\Models\User
+            $table->string('contact_type'); // App\Models\Contact or App\Models\User
             $table->unsignedBigInteger('contact_id');
             $table->foreignId('collected_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('status')->default('pending'); // pending, in_progress, completed, skipped

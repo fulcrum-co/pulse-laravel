@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\ContactList;
+use App\Models\MiniCourse;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\UserNotification;
@@ -35,6 +37,7 @@ class WorkflowActionService
                 'in_app_notification' => $this->sendInAppNotification($config, $context),
                 'trigger_workflow' => $this->triggerWorkflow($config, $context),
                 'update_field' => $this->updateField($config, $context),
+                'generate_course' => $this->generateCourse($config, $context),
                 default => $this->unknownAction($actionType),
             };
         } catch (\Exception $e) {
@@ -494,6 +497,275 @@ class WorkflowActionService
             ],
             'executed_at' => now()->toISOString(),
         ];
+    }
+
+    /**
+     * Generate an AI course for target student(s) or group.
+     *
+     * Config options:
+     * - target_type: student|contact_list|group (default: student)
+     * - target_ids: array of IDs (optional, uses context if not provided)
+     * - topic: custom topic (optional, auto-detected from student signals if null)
+     * - course_type: intervention|skill_building|wellness etc.
+     * - duration_minutes: 15|30|45|60
+     * - auto_enroll: bool - automatically enroll target students
+     * - notify_targets: bool - send notification when course is ready
+     */
+    public function generateCourse(array $config, array $context): array
+    {
+        $targetType = $config['target_type'] ?? 'student';
+        $targetIds = $config['target_ids'] ?? [];
+        $topic = $config['topic'] ?? null;
+        $courseType = $config['course_type'] ?? MiniCourse::TYPE_INTERVENTION;
+        $durationMinutes = $config['duration_minutes'] ?? 30;
+        $autoEnroll = $config['auto_enroll'] ?? true;
+        $notifyTargets = $config['notify_targets'] ?? true;
+
+        $orgId = $context['org_id'] ?? null;
+        $workflowId = $context['workflow_id'] ?? null;
+
+        // Resolve target IDs from context if not explicitly provided
+        if (empty($targetIds)) {
+            if ($targetType === 'student' && isset($context['student_id'])) {
+                $targetIds = [$context['student_id']];
+            } elseif ($targetType === 'contact_list' && isset($context['contact_list_id'])) {
+                $targetIds = [$context['contact_list_id']];
+            }
+        }
+
+        if (empty($targetIds) || ! $orgId) {
+            return [
+                'success' => false,
+                'action_type' => 'generate_course',
+                'error' => 'Missing target IDs or org_id',
+                'executed_at' => now()->toISOString(),
+            ];
+        }
+
+        $orchestrator = app(CourseOrchestrator::class);
+        $generated = [];
+        $errors = [];
+
+        foreach ($targetIds as $targetId) {
+            try {
+                $courseParams = $this->buildCourseParamsForTarget(
+                    $targetType,
+                    $targetId,
+                    $topic,
+                    $courseType,
+                    $durationMinutes,
+                    $orgId,
+                    $workflowId
+                );
+
+                if (! $courseParams) {
+                    $errors[] = [
+                        'target_id' => $targetId,
+                        'error' => 'Could not resolve target or determine topic',
+                    ];
+
+                    continue;
+                }
+
+                // Generate the course with workflow trigger source
+                $course = $orchestrator->generateCourse($courseParams);
+
+                // Update trigger source to workflow (ensures moderation required)
+                $course->update([
+                    'generation_trigger' => MiniCourse::TRIGGER_WORKFLOW,
+                    'approval_status' => MiniCourse::APPROVAL_PENDING,
+                    'workflow_context' => [
+                        'workflow_id' => $workflowId,
+                        'execution_id' => $context['execution_id'] ?? null,
+                        'trigger_type' => $context['trigger_type'] ?? 'workflow',
+                        'target_type' => $targetType,
+                        'target_id' => $targetId,
+                    ],
+                ]);
+
+                // Auto-enroll students if enabled
+                if ($autoEnroll && $targetType === 'student') {
+                    $this->enrollStudentInCourse($targetId, $course);
+                } elseif ($autoEnroll && $targetType === 'contact_list') {
+                    $this->enrollContactListInCourse($targetId, $course);
+                }
+
+                $generated[] = [
+                    'course_id' => $course->id,
+                    'course_title' => $course->title,
+                    'target_id' => $targetId,
+                    'target_type' => $targetType,
+                ];
+
+                Log::info('Workflow generated course', [
+                    'course_id' => $course->id,
+                    'workflow_id' => $workflowId,
+                    'target_type' => $targetType,
+                    'target_id' => $targetId,
+                ]);
+            } catch (\Exception $e) {
+                $errors[] = [
+                    'target_id' => $targetId,
+                    'error' => $e->getMessage(),
+                ];
+
+                Log::error('Workflow course generation failed', [
+                    'target_id' => $targetId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return [
+            'success' => count($generated) > 0,
+            'action_type' => 'generate_course',
+            'details' => [
+                'generated_count' => count($generated),
+                'error_count' => count($errors),
+                'generated' => $generated,
+                'errors' => $errors,
+            ],
+            'executed_at' => now()->toISOString(),
+        ];
+    }
+
+    /**
+     * Build course generation parameters based on target type.
+     */
+    protected function buildCourseParamsForTarget(
+        string $targetType,
+        int $targetId,
+        ?string $topic,
+        string $courseType,
+        int $durationMinutes,
+        int $orgId,
+        ?int $workflowId
+    ): ?array {
+        $targetGrades = [];
+        $targetRiskLevels = [];
+
+        // Resolve topic and context based on target type
+        if ($targetType === 'student') {
+            $student = Student::find($targetId);
+            if (! $student) {
+                return null;
+            }
+
+            // Auto-detect topic from student signals if not provided
+            if (! $topic) {
+                $topic = $this->inferTopicFromStudentSignals($student);
+            }
+
+            $targetGrades = [$student->grade_level];
+            $targetRiskLevels = [$student->risk_level ?? 'moderate'];
+        } elseif ($targetType === 'contact_list') {
+            $contactList = ContactList::find($targetId);
+            if (! $contactList) {
+                return null;
+            }
+
+            // Use contact list name as topic hint if not provided
+            if (! $topic) {
+                $topic = 'Support course for '.$contactList->name;
+            }
+        }
+
+        // Fallback topic
+        if (! $topic) {
+            $topic = 'Personalized support and skill-building';
+        }
+
+        return [
+            'topic' => $topic,
+            'orgId' => $orgId,
+            'targetGrades' => array_filter($targetGrades),
+            'targetRiskLevels' => array_filter($targetRiskLevels),
+            'targetDurationMinutes' => $durationMinutes,
+            'courseType' => $courseType,
+            'createdBy' => null, // System-generated
+            'triggerSource' => 'workflow',
+            'workflowId' => $workflowId,
+        ];
+    }
+
+    /**
+     * Infer a relevant course topic from student's risk signals.
+     */
+    protected function inferTopicFromStudentSignals(Student $student): string
+    {
+        // Check for domain-specific risk indicators
+        $domainScores = $student->domain_risk_scores ?? [];
+
+        // Find the highest risk domain
+        $highestDomain = null;
+        $highestScore = 0;
+
+        foreach ($domainScores as $domain => $score) {
+            if ($score > $highestScore) {
+                $highestScore = $score;
+                $highestDomain = $domain;
+            }
+        }
+
+        // Map domains to relevant course topics
+        $topicMap = [
+            'anxiety' => 'Managing anxiety and building coping skills',
+            'depression' => 'Building emotional resilience and positive mindset',
+            'stress' => 'Stress management and self-care strategies',
+            'social' => 'Building healthy relationships and social skills',
+            'academic' => 'Study skills and academic success strategies',
+            'behavioral' => 'Self-regulation and positive behavior strategies',
+            'attendance' => 'Motivation and engagement in learning',
+            'family' => 'Navigating family challenges and building support',
+        ];
+
+        if ($highestDomain && isset($topicMap[$highestDomain])) {
+            return $topicMap[$highestDomain];
+        }
+
+        // Fall back to general risk level-based topic
+        $riskLevel = $student->risk_level ?? 'moderate';
+
+        return match ($riskLevel) {
+            'high', 'crisis' => 'Building coping skills and getting support',
+            'moderate' => 'Skill-building for personal growth',
+            default => 'Wellness and personal development',
+        };
+    }
+
+    /**
+     * Enroll a student in the generated course.
+     */
+    protected function enrollStudentInCourse(int $studentId, MiniCourse $course): void
+    {
+        // Check if enrollment model/system exists
+        if (class_exists(\App\Models\MiniCourseEnrollment::class)) {
+            \App\Models\MiniCourseEnrollment::firstOrCreate([
+                'mini_course_id' => $course->id,
+                'student_id' => $studentId,
+            ], [
+                'enrolled_at' => now(),
+                'status' => 'enrolled',
+                'enrolled_by' => null, // System enrollment
+            ]);
+        }
+    }
+
+    /**
+     * Enroll all students in a contact list in the course.
+     */
+    protected function enrollContactListInCourse(int $contactListId, MiniCourse $course): void
+    {
+        $contactList = ContactList::with('contacts')->find($contactListId);
+        if (! $contactList) {
+            return;
+        }
+
+        foreach ($contactList->contacts as $contact) {
+            if ($contact->contact_type === 'student') {
+                $this->enrollStudentInCourse($contact->contact_id, $course);
+            }
+        }
     }
 
     /**

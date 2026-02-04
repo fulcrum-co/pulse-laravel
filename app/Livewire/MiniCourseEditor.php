@@ -62,6 +62,11 @@ class MiniCourseEditor extends Component
     // AI Assistant
     public bool $showAIPanel = false;
 
+    // Resource Picker
+    public bool $showResourcePicker = false;
+
+    public ?int $resourcePickerStepIndex = null;
+
     public bool $aiGenerating = false;
 
     public string $aiTopic = '';
@@ -295,6 +300,63 @@ class MiniCourseEditor extends Component
             'type' => 'success',
             'message' => 'Course published successfully!',
         ]);
+    }
+
+    // ============================================
+    // RESOURCE PICKER METHODS
+    // ============================================
+
+    /**
+     * Open the resource picker modal.
+     */
+    public function openResourcePicker(): void
+    {
+        $this->dispatch('open-resource-picker', [
+            'stepIndex' => null,
+        ]);
+    }
+
+    /**
+     * Handle resource selection from the picker.
+     */
+    #[\Livewire\Attributes\On('resource-selected')]
+    public function onResourceSelected(array $data): void
+    {
+        $resourceId = $data['resourceId'] ?? null;
+        $resource = $data['resource'] ?? null;
+
+        if ($resourceId && $this->showStepModal) {
+            $this->stepForm['resource_id'] = $resourceId;
+
+            if ($resource && ! $resource['active']) {
+                $this->dispatch('notify', [
+                    'type' => 'warning',
+                    'message' => 'Note: This resource is not yet approved. The step will be marked as using an unapproved resource.',
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Clear resource from step form.
+     */
+    public function clearStepResource(): void
+    {
+        $this->stepForm['resource_id'] = null;
+    }
+
+    /**
+     * Get the selected resource for the step modal.
+     */
+    public function getSelectedResourceProperty(): ?Resource
+    {
+        $resourceId = $this->stepForm['resource_id'] ?? null;
+
+        if ($resourceId) {
+            return Resource::find($resourceId);
+        }
+
+        return null;
     }
 
     public function getAvailableResourcesProperty()

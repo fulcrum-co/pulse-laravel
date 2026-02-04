@@ -323,4 +323,95 @@ class MiniCourseStep extends Model
         $data[$key] = $value;
         $this->update(['content_data' => $data]);
     }
+
+    // ============================================
+    // VISIBILITY RULES
+    // ============================================
+
+    /**
+     * Check if this step can be publicly visible.
+     * A step can't be public if it's linked to an unapproved resource.
+     */
+    public function canBePublic(): bool
+    {
+        // If step has a linked resource, check if it's approved
+        if ($this->resource_id && $this->resource) {
+            return $this->resource->active;
+        }
+
+        // Steps without linked resources can be public
+        return true;
+    }
+
+    /**
+     * Check if this step uses an unapproved resource.
+     */
+    public function usesUnapprovedResource(): bool
+    {
+        if (! $this->resource_id) {
+            return false;
+        }
+
+        $resource = $this->resource;
+
+        return $resource && ! $resource->active;
+    }
+
+    /**
+     * Get the visibility status for display.
+     */
+    public function getVisibilityStatusAttribute(): string
+    {
+        if ($this->usesUnapprovedResource()) {
+            return 'private_resource';
+        }
+
+        // Inherit from course visibility
+        if ($this->miniCourse) {
+            return $this->miniCourse->visibility ?? 'private';
+        }
+
+        return 'private';
+    }
+
+    /**
+     * Get a human-readable visibility message.
+     */
+    public function getVisibilityMessageAttribute(): ?string
+    {
+        if ($this->usesUnapprovedResource()) {
+            return 'This step uses an unapproved resource and won\'t be visible publicly until the resource is approved.';
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if this step has any visibility restrictions.
+     */
+    public function hasVisibilityRestrictions(): bool
+    {
+        return $this->usesUnapprovedResource();
+    }
+
+    /**
+     * Scope to steps that can be publicly visible.
+     */
+    public function scopePubliclyVisible(Builder $query): Builder
+    {
+        return $query->where(function ($q) {
+            // Steps without linked resources are visible
+            $q->whereNull('resource_id')
+                // OR steps with approved resources
+                ->orWhereHas('resource', fn ($r) => $r->where('active', true));
+        });
+    }
+
+    /**
+     * Scope to steps with unapproved resources.
+     */
+    public function scopeWithUnapprovedResources(Builder $query): Builder
+    {
+        return $query->whereHas('resource', fn ($r) => $r->where('active', false));
+    }
 }

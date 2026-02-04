@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 class OpenAIEmbeddingProvider implements EmbeddingProviderInterface
 {
-    protected string $apiKey;
+    protected ?string $apiKey;
 
     protected string $model;
 
@@ -24,10 +24,32 @@ class OpenAIEmbeddingProvider implements EmbeddingProviderInterface
     }
 
     /**
+     * Check if the provider is configured with an API key.
+     */
+    public function isConfigured(): bool
+    {
+        return ! empty($this->apiKey);
+    }
+
+    /**
+     * Ensure the API key is configured before making requests.
+     */
+    protected function ensureConfigured(): void
+    {
+        if (! $this->isConfigured()) {
+            throw new \RuntimeException(
+                'OpenAI API key is not configured. Please set OPENAI_API_KEY in your .env file.'
+            );
+        }
+    }
+
+    /**
      * Generate an embedding for a single text.
      */
     public function embed(string $text): array
     {
+        $this->ensureConfigured();
+
         $result = $this->callApi([$text]);
 
         return [
@@ -45,6 +67,8 @@ class OpenAIEmbeddingProvider implements EmbeddingProviderInterface
         if (empty($texts)) {
             return [];
         }
+
+        $this->ensureConfigured();
 
         // OpenAI allows up to 2048 inputs per batch
         $batches = array_chunk($texts, 100);
