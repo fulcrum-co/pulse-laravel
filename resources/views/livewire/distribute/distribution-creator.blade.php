@@ -181,7 +181,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Report Mode</label>
                             <div class="grid grid-cols-2 gap-3">
                                 <label class="flex items-center p-3 border rounded-lg cursor-pointer transition-colors {{ $reportMode === 'live' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}">
-                                    <input type="radio" wire:model="reportMode" value="live" class="sr-only" />
+                                    <input type="radio" wire:model.live="reportMode" value="live" class="sr-only" />
                                     <x-icon name="link" class="w-5 h-5 mr-2 {{ $reportMode === 'live' ? 'text-pulse-orange-500' : 'text-gray-400' }}" />
                                     <div>
                                         <span class="text-sm font-medium {{ $reportMode === 'live' ? 'text-pulse-orange-700' : 'text-gray-700' }}">Live Link</span>
@@ -189,7 +189,7 @@
                                     </div>
                                 </label>
                                 <label class="flex items-center p-3 border rounded-lg cursor-pointer transition-colors {{ $reportMode === 'static' ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}">
-                                    <input type="radio" wire:model="reportMode" value="static" class="sr-only" />
+                                    <input type="radio" wire:model.live="reportMode" value="static" class="sr-only" />
                                     <x-icon name="document" class="w-5 h-5 mr-2 {{ $reportMode === 'static' ? 'text-pulse-orange-500' : 'text-gray-400' }}" />
                                     <div>
                                         <span class="text-sm font-medium {{ $reportMode === 'static' ? 'text-pulse-orange-700' : 'text-gray-700' }}">PDF Snapshot</span>
