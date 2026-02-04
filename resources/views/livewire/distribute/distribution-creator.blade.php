@@ -3,8 +3,7 @@
         openSection: 'basics',
         toggle(section) {
             this.openSection = this.openSection === section ? null : section;
-        },
-        linkReports: @entangle('linkReports')
+        }
     }"
     class="min-h-screen pb-24"
 >
@@ -128,7 +127,7 @@
                             @if($composeComplete)
                                 {{ $this->selectedRecipientsCount }} recipients
                                 @if(count($selectedReportIds) > 0)
-                                    &bull; {{ count($selectedReportIds) }} report(s) linked
+                                    &bull; {{ count($selectedReportIds) }} report(s)
                                 @endif
                             @else
                                 Recipients, subject, and message
@@ -144,122 +143,50 @@
             </button>
 
             <div x-show="openSection === 'compose'" x-collapse>
-                <div class="px-6 pb-6 pt-2 border-t border-gray-100 space-y-5">
+                <div class="px-6 pb-6 pt-2 border-t border-gray-100 space-y-6">
 
-                    <!-- To: Recipients Box -->
+                    <!-- To: Recipients -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">To <span class="text-red-500">*</span></label>
-                        <div class="border border-gray-300 rounded-lg p-3 min-h-[80px] focus-within:ring-2 focus-within:ring-pulse-orange-500 focus-within:border-pulse-orange-500">
-                            <!-- Selected items as tags -->
-                            <div class="flex flex-wrap gap-2 mb-2">
-                                @foreach($selectedContactListIds as $listId)
-                                    @php $list = $contactLists->firstWhere('id', $listId); @endphp
-                                    @if($list)
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-pulse-orange-100 text-pulse-orange-800 rounded-full text-sm">
-                                            <x-icon name="user-group" class="w-3.5 h-3.5" />
-                                            {{ $list->name }} ({{ $list->members_count }})
-                                            <button type="button" wire:click="toggleContactList({{ $listId }})" class="ml-0.5 hover:text-pulse-orange-900">
-                                                <x-icon name="x-mark" class="w-3.5 h-3.5" />
-                                            </button>
-                                        </span>
-                                    @endif
-                                @endforeach
-                                @foreach($selectedContactIds as $contactId)
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                                        <x-icon name="user" class="w-3.5 h-3.5" />
-                                        Contact #{{ $contactId }}
-                                        <button type="button" wire:click="toggleContact({{ $contactId }})" class="ml-0.5 hover:text-blue-900">
-                                            <x-icon name="x-mark" class="w-3.5 h-3.5" />
-                                        </button>
-                                    </span>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">To <span class="text-red-500">*</span></label>
+
+                        <!-- Contact Lists as clickable chips -->
+                        @if($contactLists->isNotEmpty())
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($contactLists as $list)
+                                    <button
+                                        type="button"
+                                        wire:click="toggleContactList({{ $list->id }})"
+                                        class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all {{ in_array($list->id, $selectedContactListIds) ? 'bg-pulse-orange-500 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                                    >
+                                        @if(in_array($list->id, $selectedContactListIds))
+                                            <x-icon name="check-circle" class="w-4 h-4" />
+                                        @else
+                                            <x-icon name="user-group" class="w-4 h-4 opacity-60" />
+                                        @endif
+                                        {{ $list->name }}
+                                        <span class="opacity-75">({{ $list->members_count }})</span>
+                                    </button>
                                 @endforeach
                             </div>
-
-                            <!-- Search/Add input -->
-                            <div class="relative" x-data="{ showDropdown: false }">
-                                <input
-                                    type="text"
-                                    wire:model.live.debounce.300ms="contactSearch"
-                                    @focus="showDropdown = true"
-                                    @click.away="showDropdown = false"
-                                    placeholder="Search contacts or select a list..."
-                                    class="w-full border-0 p-0 text-sm focus:ring-0 placeholder-gray-400"
-                                />
-
-                                <!-- Dropdown for lists and contacts -->
-                                <div
-                                    x-show="showDropdown"
-                                    x-transition
-                                    class="absolute z-20 left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto"
-                                >
-                                    <!-- Contact Lists Section -->
-                                    @if($contactLists->isNotEmpty())
-                                        <div class="p-2 border-b border-gray-100">
-                                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide px-2 py-1">Contact Lists</p>
-                                            @foreach($contactLists as $list)
-                                                <button
-                                                    type="button"
-                                                    wire:click="toggleContactList({{ $list->id }})"
-                                                    class="w-full flex items-center justify-between px-2 py-2 rounded-md hover:bg-gray-50 {{ in_array($list->id, $selectedContactListIds) ? 'bg-pulse-orange-50' : '' }}"
-                                                >
-                                                    <span class="flex items-center gap-2">
-                                                        <x-icon name="user-group" class="w-4 h-4 text-gray-400" />
-                                                        <span class="text-sm text-gray-900">{{ $list->name }}</span>
-                                                        <span class="text-xs text-gray-500">({{ $list->members_count }})</span>
-                                                    </span>
-                                                    @if(in_array($list->id, $selectedContactListIds))
-                                                        <x-icon name="check" class="w-4 h-4 text-pulse-orange-500" />
-                                                    @endif
-                                                </button>
-                                            @endforeach
-                                        </div>
-                                    @endif
-
-                                    <!-- Individual Contacts Section (from search) -->
-                                    @if($contacts->isNotEmpty())
-                                        <div class="p-2">
-                                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide px-2 py-1">Contacts</p>
-                                            @foreach($contacts as $contact)
-                                                <button
-                                                    type="button"
-                                                    wire:click="toggleContact({{ $contact->id }})"
-                                                    class="w-full flex items-center justify-between px-2 py-2 rounded-md hover:bg-gray-50 {{ in_array($contact->id, $selectedContactIds) ? 'bg-blue-50' : '' }}"
-                                                >
-                                                    <span class="flex items-center gap-2">
-                                                        <x-icon name="user" class="w-4 h-4 text-gray-400" />
-                                                        <span class="text-sm text-gray-900">{{ $contact->user->first_name }} {{ $contact->user->last_name }}</span>
-                                                        <span class="text-xs text-gray-500">{{ $contact->user->email }}</span>
-                                                    </span>
-                                                    @if(in_array($contact->id, $selectedContactIds))
-                                                        <x-icon name="check" class="w-4 h-4 text-blue-500" />
-                                                    @endif
-                                                </button>
-                                            @endforeach
-                                        </div>
-                                    @elseif($contactSearch && $contacts->isEmpty())
-                                        <div class="p-4 text-center text-sm text-gray-500">
-                                            No contacts found for "{{ $contactSearch }}"
-                                        </div>
-                                    @endif
-
-                                    @if($contactLists->isEmpty() && $contacts->isEmpty() && !$contactSearch)
-                                        <div class="p-4 text-center text-sm text-gray-500">
-                                            No contact lists available.
-                                            <a href="{{ route('contacts.lists') }}" class="text-pulse-orange-600 hover:underline">Create one</a>
-                                        </div>
-                                    @endif
-                                </div>
+                        @else
+                            <div class="text-sm text-gray-500 bg-gray-50 rounded-lg p-4 text-center">
+                                No contact lists available.
+                                <a href="{{ route('contacts.lists') }}" class="text-pulse-orange-600 hover:underline font-medium">Create one</a>
                             </div>
-                        </div>
+                        @endif
+
                         @if($this->selectedRecipientsCount > 0)
-                            <p class="mt-1.5 text-xs text-gray-500">{{ $this->selectedRecipientsCount }} total recipient(s)</p>
+                            <p class="mt-3 text-sm text-green-600 font-medium">
+                                <x-icon name="check-circle" class="w-4 h-4 inline -mt-0.5" />
+                                {{ $this->selectedRecipientsCount }} recipient(s) selected
+                            </p>
                         @endif
                     </div>
 
                     <!-- Subject Line (email only) -->
                     @if($channel === 'email')
                         <div>
-                            <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Subject Line <span class="text-red-500">*</span></label>
+                            <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Subject <span class="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 id="subject"
@@ -270,75 +197,65 @@
                         </div>
                     @endif
 
-                    <!-- Link Reports Toggle -->
-                    <div>
-                        <label class="flex items-center justify-between cursor-pointer">
-                            <span class="text-sm font-medium text-gray-700">Link Report(s)</span>
+                    <!-- Link Reports -->
+                    <div class="border-t border-gray-100 pt-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="text-sm font-medium text-gray-700">Attach Reports</label>
                             <button
                                 type="button"
                                 wire:click="$toggle('linkReports')"
-                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-pulse-orange-500 focus:ring-offset-2 {{ $linkReports ? 'bg-pulse-orange-500' : 'bg-gray-200' }}"
+                                class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $linkReports ? 'bg-pulse-orange-500' : 'bg-gray-200' }}"
                             >
-                                <span class="sr-only">Link reports</span>
-                                <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $linkReports ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                                <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $linkReports ? 'translate-x-4' : 'translate-x-0' }}"></span>
                             </button>
-                        </label>
+                        </div>
 
-                        <!-- Reports selection box (shown when toggle is on) -->
                         @if($linkReports)
-                            <div class="mt-3 border border-gray-200 rounded-lg p-4 bg-gray-50">
-                                @if($reports->isNotEmpty())
-                                    <div class="space-y-2 mb-4">
-                                        @foreach($reports as $report)
-                                            <label class="flex items-center p-3 bg-white border rounded-lg cursor-pointer transition-colors {{ in_array($report->id, $selectedReportIds) ? 'border-pulse-orange-500 ring-1 ring-pulse-orange-500' : 'border-gray-200 hover:border-gray-300' }}">
-                                                <input
-                                                    type="checkbox"
-                                                    wire:click="toggleReport({{ $report->id }})"
-                                                    @checked(in_array($report->id, $selectedReportIds))
-                                                    class="w-4 h-4 text-pulse-orange-500 border-gray-300 rounded focus:ring-pulse-orange-500"
-                                                />
-                                                <div class="ml-3 flex-1">
-                                                    <span class="text-sm font-medium text-gray-900">{{ $report->report_name }}</span>
-                                                    @if($report->report_description)
-                                                        <p class="text-xs text-gray-500 truncate">{{ Str::limit($report->report_description, 60) }}</p>
-                                                    @endif
-                                                </div>
-                                                <x-icon name="chart-bar" class="w-5 h-5 text-gray-400" />
-                                            </label>
-                                        @endforeach
-                                    </div>
-
-                                    <!-- Report Mode -->
-                                    @if(count($selectedReportIds) > 0)
-                                        <div class="pt-3 border-t border-gray-200">
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Delivery Mode</label>
-                                            <div class="flex gap-3">
-                                                <label class="flex-1 flex items-center p-2.5 bg-white border rounded-lg cursor-pointer transition-colors {{ $reportMode === 'live' ? 'border-pulse-orange-500 ring-1 ring-pulse-orange-500' : 'border-gray-200 hover:border-gray-300' }}">
-                                                    <input type="radio" wire:model.live="reportMode" value="live" class="sr-only" />
-                                                    <x-icon name="link" class="w-4 h-4 mr-2 {{ $reportMode === 'live' ? 'text-pulse-orange-500' : 'text-gray-400' }}" />
-                                                    <div>
-                                                        <span class="text-sm font-medium {{ $reportMode === 'live' ? 'text-pulse-orange-700' : 'text-gray-700' }}">Live Link</span>
-                                                        <p class="text-xs text-gray-500">Real-time data</p>
-                                                    </div>
-                                                </label>
-                                                <label class="flex-1 flex items-center p-2.5 bg-white border rounded-lg cursor-pointer transition-colors {{ $reportMode === 'static' ? 'border-pulse-orange-500 ring-1 ring-pulse-orange-500' : 'border-gray-200 hover:border-gray-300' }}">
-                                                    <input type="radio" wire:model.live="reportMode" value="static" class="sr-only" />
-                                                    <x-icon name="document" class="w-4 h-4 mr-2 {{ $reportMode === 'static' ? 'text-pulse-orange-500' : 'text-gray-400' }}" />
-                                                    <div>
-                                                        <span class="text-sm font-medium {{ $reportMode === 'static' ? 'text-pulse-orange-700' : 'text-gray-700' }}">PDF Snapshot</span>
-                                                        <p class="text-xs text-gray-500">Static attachment</p>
-                                                    </div>
-                                                </label>
+                            @if($reports->isNotEmpty())
+                                <!-- Simple report selection -->
+                                <div class="space-y-2 mb-4">
+                                    @foreach($reports as $report)
+                                        <button
+                                            type="button"
+                                            wire:click="toggleReport({{ $report->id }})"
+                                            class="w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-all {{ in_array($report->id, $selectedReportIds) ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300 bg-white' }}"
+                                        >
+                                            <div class="flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center {{ in_array($report->id, $selectedReportIds) ? 'border-pulse-orange-500 bg-pulse-orange-500' : 'border-gray-300' }}">
+                                                @if(in_array($report->id, $selectedReportIds))
+                                                    <x-icon name="check" class="w-3 h-3 text-white" />
+                                                @endif
                                             </div>
-                                        </div>
-                                    @endif
-                                @else
-                                    <p class="text-sm text-gray-500 text-center py-2">
-                                        No reports available.
-                                        <a href="{{ route('reports.index') }}" class="text-pulse-orange-600 hover:underline">Create one</a>
-                                    </p>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-gray-900">{{ $report->report_name }}</p>
+                                                @if($report->report_description)
+                                                    <p class="text-xs text-gray-500 truncate">{{ $report->report_description }}</p>
+                                                @endif
+                                            </div>
+                                            <x-icon name="document-chart-bar" class="w-5 h-5 text-gray-400 flex-shrink-0" />
+                                        </button>
+                                    @endforeach
+                                </div>
+
+                                <!-- Delivery mode (compact) -->
+                                @if(count($selectedReportIds) > 0)
+                                    <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                                        <span class="text-sm text-gray-600">Deliver as:</span>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" wire:model.live="reportMode" value="live" class="text-pulse-orange-500 focus:ring-pulse-orange-500" />
+                                            <span class="text-sm {{ $reportMode === 'live' ? 'text-gray-900 font-medium' : 'text-gray-600' }}">Live Link</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" wire:model.live="reportMode" value="static" class="text-pulse-orange-500 focus:ring-pulse-orange-500" />
+                                            <span class="text-sm {{ $reportMode === 'static' ? 'text-gray-900 font-medium' : 'text-gray-600' }}">PDF Attachment</span>
+                                        </label>
+                                    </div>
                                 @endif
-                            </div>
+                            @else
+                                <div class="text-sm text-gray-500 bg-gray-50 rounded-lg p-4 text-center">
+                                    No reports available.
+                                    <a href="{{ route('reports.index') }}" class="text-pulse-orange-600 hover:underline font-medium">Create one</a>
+                                </div>
+                            @endif
                         @endif
                     </div>
 
@@ -348,27 +265,22 @@
                         <textarea
                             id="messageBody"
                             x-model="messageBody"
-                            rows="5"
+                            rows="4"
                             placeholder="Type your message here..."
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                         ></textarea>
 
-                        <div class="mt-2">
-                            <p class="text-xs text-gray-500 mb-1.5">Insert merge fields:</p>
-                            <div class="flex flex-wrap gap-1">
-                                @php
-                                    $mergeFields = ['{{first_name}}', '{{last_name}}', '{{full_name}}', '{{email}}', '{{organization_name}}'];
-                                @endphp
-                                @foreach($mergeFields as $field)
-                                    <button
-                                        type="button"
-                                        x-on:click="messageBody = (messageBody || '') + '{{ $field }} '"
-                                        class="px-2 py-0.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 rounded font-mono transition-colors"
-                                    >
-                                        {{ $field }}
-                                    </button>
-                                @endforeach
-                            </div>
+                        <div class="mt-2 flex items-center gap-2 flex-wrap">
+                            <span class="text-xs text-gray-500">Merge:</span>
+                            @foreach(['{{first_name}}', '{{last_name}}', '{{email}}'] as $field)
+                                <button
+                                    type="button"
+                                    x-on:click="messageBody = (messageBody || '') + '{{ $field }} '"
+                                    class="px-1.5 py-0.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 rounded font-mono transition-colors"
+                                >
+                                    {{ $field }}
+                                </button>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -399,14 +311,14 @@
                         <p class="text-sm text-gray-500">
                             @if($distributionType === 'one_time')
                                 @if($sendImmediately)
-                                    Send immediately when activated
+                                    Send immediately
                                 @elseif($scheduledFor)
-                                    Scheduled for {{ \Carbon\Carbon::parse($scheduledFor)->format('M j, Y g:i A') }}
+                                    {{ \Carbon\Carbon::parse($scheduledFor)->format('M j, Y \a\t g:i A') }}
                                 @else
                                     When to send
                                 @endif
                             @else
-                                Every {{ $intervalValue }} {{ Str::plural(str_replace('ly', '', $intervalType), $intervalValue) }} at {{ $sendTime }}
+                                Every {{ $intervalValue }} {{ Str::plural(str_replace('ly', '', $intervalType), $intervalValue) }} at {{ \Carbon\Carbon::parse($sendTime)->format('g:i A') }}
                             @endif
                         </p>
                     </div>
@@ -430,7 +342,7 @@
                             <label class="flex-1 flex items-center p-3 border rounded-lg cursor-pointer transition-colors {{ !$sendImmediately ? 'border-pulse-orange-500 bg-pulse-orange-50' : 'border-gray-200 hover:border-gray-300' }}">
                                 <input type="radio" wire:model.live="sendImmediately" value="0" class="sr-only" />
                                 <x-icon name="clock" class="w-5 h-5 mr-2 {{ !$sendImmediately ? 'text-pulse-orange-500' : 'text-gray-400' }}" />
-                                <span class="text-sm font-medium {{ !$sendImmediately ? 'text-pulse-orange-700' : 'text-gray-700' }}">Schedule for later</span>
+                                <span class="text-sm font-medium {{ !$sendImmediately ? 'text-pulse-orange-700' : 'text-gray-700' }}">Schedule</span>
                             </label>
                         </div>
 
@@ -452,31 +364,29 @@
                                         wire:model="timezone"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                     >
-                                        <option value="America/New_York">Eastern Time</option>
-                                        <option value="America/Chicago">Central Time</option>
-                                        <option value="America/Denver">Mountain Time</option>
-                                        <option value="America/Los_Angeles">Pacific Time</option>
+                                        <option value="America/New_York">Eastern</option>
+                                        <option value="America/Chicago">Central</option>
+                                        <option value="America/Denver">Mountain</option>
+                                        <option value="America/Los_Angeles">Pacific</option>
                                     </select>
                                 </div>
                             </div>
                         @endif
                     @else
-                        <!-- Recurring Schedule -->
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Repeat</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Every</label>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-sm text-gray-500">Every</span>
                                     <input
                                         type="number"
                                         wire:model="intervalValue"
                                         min="1"
                                         max="30"
-                                        class="w-16 px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-center"
+                                        class="w-16 px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500 text-center"
                                     />
                                     <select
                                         wire:model="intervalType"
-                                        class="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                     >
                                         <option value="daily">day(s)</option>
                                         <option value="weekly">week(s)</option>
@@ -486,7 +396,7 @@
                             </div>
 
                             <div>
-                                <label for="sendTime" class="block text-sm font-medium text-gray-700 mb-1">Send Time</label>
+                                <label for="sendTime" class="block text-sm font-medium text-gray-700 mb-1">At</label>
                                 <input
                                     type="time"
                                     id="sendTime"
@@ -494,20 +404,20 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                                 />
                             </div>
-                        </div>
 
-                        <div>
-                            <label for="timezone-recurring" class="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
-                            <select
-                                id="timezone-recurring"
-                                wire:model="timezone"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                            >
-                                <option value="America/New_York">Eastern Time</option>
-                                <option value="America/Chicago">Central Time</option>
-                                <option value="America/Denver">Mountain Time</option>
-                                <option value="America/Los_Angeles">Pacific Time</option>
-                            </select>
+                            <div>
+                                <label for="timezone-recurring" class="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
+                                <select
+                                    id="timezone-recurring"
+                                    wire:model="timezone"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                                >
+                                    <option value="America/New_York">Eastern</option>
+                                    <option value="America/Chicago">Central</option>
+                                    <option value="America/Denver">Mountain</option>
+                                    <option value="America/Los_Angeles">Pacific</option>
+                                </select>
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -518,17 +428,14 @@
     <!-- Sticky Footer -->
     <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-8 py-4 z-40">
         <div class="max-w-3xl mx-auto flex items-center justify-between">
-            <a
-                href="{{ route('distribute.index') }}"
-                class="text-sm font-medium text-gray-600 hover:text-gray-900"
-            >
+            <a href="{{ route('distribute.index') }}" class="text-sm font-medium text-gray-600 hover:text-gray-900">
                 Cancel
             </a>
 
             <div class="flex items-center gap-3">
                 <button
                     wire:click="save"
-                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                     Save Draft
                 </button>
@@ -540,12 +447,11 @@
                 <button
                     wire:click="save"
                     @if(!$isValid) disabled @endif
-                    class="inline-flex items-center px-5 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="px-5 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    <x-icon name="paper-airplane" class="w-4 h-4 mr-2 transform -rotate-45" />
                     @if($distributionType === 'one_time' && $sendImmediately)
                         Send Now
-                    @elseif($distributionType === 'one_time' && !$sendImmediately)
+                    @elseif($distributionType === 'one_time')
                         Schedule
                     @else
                         Activate
