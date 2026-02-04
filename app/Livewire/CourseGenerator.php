@@ -316,6 +316,6 @@ class CourseGenerator extends Component
             'gradeOptions' => $this->gradeOptions,
             'riskLevelOptions' => $this->riskLevelOptions,
             'durationOptions' => $this->durationOptions,
-        ]);
+        ])->layout('layouts.dashboard', ['title' => 'AI Course Generator', 'hideHeader' => true]);
     }
 }
