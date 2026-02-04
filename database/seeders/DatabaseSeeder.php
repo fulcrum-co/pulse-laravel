@@ -30,6 +30,8 @@ class DatabaseSeeder extends Seeder
             MarketplaceSeeder::class,
             // Reports
             ReportSeeder::class,
+            // Contact Lists
+            ContactListSeeder::class,
         ]);
     }
 }
