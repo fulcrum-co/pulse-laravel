@@ -787,6 +787,14 @@ Route::middleware('auth')->group(function () {
         return view('settings.index');
     })->name('settings.index');
 
+    // Billing Settings
+    Route::prefix('settings/billing')->name('settings.billing')->group(function () {
+        Route::get('/', App\Livewire\Admin\BillingSettings::class);
+        Route::get('/success', function () {
+            return redirect()->route('settings.billing')->with('success', 'Credits purchased successfully!');
+        })->name('.success');
+    });
+
     // Help Center
     Route::prefix('help')->name('help.')->group(function () {
         Route::get('/', App\Livewire\Help\KnowledgeBase::class)->name('index');
@@ -827,3 +835,8 @@ Route::prefix('admin')->middleware(['web', 'auth'])->name('admin.')->group(funct
     Route::get('/help/categories', App\Livewire\Admin\HelpCategoryManager::class)->name('help-categories');
     Route::get('/help/hints', App\Livewire\Admin\HelpHintManager::class)->name('help-hints');
 });
+
+// Stripe Webhooks (no auth required)
+Route::post('/webhooks/stripe', [App\Http\Controllers\StripeWebhookController::class, 'handle'])
+    ->middleware('web')
+    ->name('webhooks.stripe');

@@ -58,3 +58,20 @@ Schedule::job(new \App\Jobs\ProcessPendingTranscriptions)
 Schedule::command('strategy:detect-drift --alert')
     ->dailyAt('06:00')
     ->description('Detect plan alignment by scoring narrative alignment against plans');
+
+// Billing scheduled tasks
+Schedule::command('billing:reset-daily-usage')
+    ->dailyAt('00:00')
+    ->description('Reset daily usage counters on feature valves');
+
+Schedule::command('billing:reset-monthly-topups')
+    ->monthlyOn(1, '00:00')
+    ->description('Reset monthly auto top-up counters on wallets');
+
+Schedule::command('billing:check-wallet-health')
+    ->hourly()
+    ->description('Check wallet health and send alerts for low balances');
+
+Schedule::command('billing:process-auto-topups')
+    ->everyFifteenMinutes()
+    ->description('Process pending auto top-ups for eligible wallets');
