@@ -25,6 +25,16 @@ Route::get('/notifications/unsubscribe/{user}', [NotificationController::class, 
     ->name('notifications.unsubscribe')
     ->middleware('signed');
 
+// Zero-login collection intake - signed URL, no auth required
+Route::get('/collect/{token}', [\App\Http\Controllers\EphemeralCollectionController::class, 'show'])
+    ->name('collect.token')
+    ->middleware('signed');
+
+// Zero-login plan view - signed URL, no auth required
+Route::get('/plans/view/{plan}', [\App\Http\Controllers\PlanViewController::class, 'show'])
+    ->name('plans.signed')
+    ->middleware('signed');
+
 // Notification resolve API - for task flow
 Route::post('/api/notifications/{id}/resolve', function (int $id) {
     $notification = UserNotification::find($id);
@@ -406,6 +416,9 @@ Route::prefix('webhooks/surveys')->group(function () {
     Route::post('/sinch/sms', [App\Http\Controllers\SurveyWebhookController::class, 'handleSms'])->name('webhooks.surveys.sms');
 });
 
+// Public Resource Hub (lead capture, no auth required)
+Route::get('/hub/{orgSlug?}', App\Livewire\PublicResourceHub::class)->name('public.resources');
+
 // Guest routes (only accessible when not logged in)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -559,6 +572,7 @@ Route::middleware('auth')->group(function () {
     // Courses / Learning Center (sub-page)
     Route::get('/resources/courses', App\Livewire\LearningCenter::class)->name('resources.courses.index');
     Route::get('/resources/courses/create', App\Livewire\MiniCourseEditor::class)->name('resources.courses.create');
+    Route::get('/resources/courses/generate', App\Livewire\CourseGenerator::class)->name('resources.courses.generate');
     Route::get('/resources/courses/{course}', App\Livewire\MiniCourseViewer::class)->name('resources.courses.show');
     Route::get('/resources/courses/{course}/edit', App\Livewire\MiniCourseEditor::class)->name('resources.courses.edit');
 
@@ -732,6 +746,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/moderation/task-flow', App\Livewire\Admin\ModerationTaskFlow::class)->name('admin.moderation.task-flow');
         Route::get('/moderation/dashboard', App\Livewire\Admin\ModerationDashboard::class)->name('admin.moderation.dashboard');
         Route::get('/moderation/{result}/edit', App\Livewire\Admin\ModerationEdit::class)->name('admin.moderation.edit');
+        Route::get('/moderation/extractions/{id}', App\Livewire\Moderation\ReviewExtraction::class)->name('moderation.queue');
 
         // Help Center Admin - Tooltips only (other Help Center components to be added later)
         Route::get('/help', App\Livewire\Admin\HelpHintManager::class)->name('admin.help');
