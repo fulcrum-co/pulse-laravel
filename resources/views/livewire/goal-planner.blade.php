@@ -1,353 +1,311 @@
-<div>
-    {{-- Header --}}
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h3 class="text-lg font-semibold text-gray-900">Goals & Key Results</h3>
-            <p class="text-sm text-gray-500">Track objectives and measurable outcomes</p>
+<div class="space-y-3">
+    {{-- Legend + Add Button --}}
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xs text-gray-500">
+            <span class="flex items-center gap-1">
+                <span class="w-2.5 h-2.5 rounded bg-green-500"></span> Focus Area
+            </span>
+            <span class="text-gray-300">→</span>
+            <span class="flex items-center gap-1">
+                <span class="w-2.5 h-2.5 rounded bg-purple-500"></span> Key Activity
+            </span>
         </div>
-        <button wire:click="showAddGoalForm"
-            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors">
-            <x-icon name="plus" class="w-4 h-4 mr-1.5" />
-            Add Goal
-        </button>
+
+        @if($showAddGoal)
+            <div class="flex items-center gap-2">
+                <input type="text" wire:model="newGoalTitle" wire:keydown.enter="addGoal" wire:keydown.escape="cancelAddGoal"
+                    class="px-2.5 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500 text-xs w-56"
+                    placeholder="Focus area title..." autofocus>
+                <button wire:click="addGoal" class="px-2.5 py-1.5 bg-green-500 text-white rounded text-xs font-medium hover:bg-green-600">Add</button>
+                <button wire:click="cancelAddGoal" class="px-2.5 py-1.5 text-gray-500 hover:text-gray-700 text-xs">Cancel</button>
+            </div>
+        @else
+            <button wire:click="showAddGoalForm" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded text-xs font-medium transition-colors">
+                <x-icon name="plus" class="w-3.5 h-3.5" />
+                Add Focus Area
+            </button>
+        @endif
     </div>
 
-    {{-- Add Goal Form --}}
-    @if($showAddGoal)
-        <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <h4 class="font-medium text-gray-900 mb-3">New Goal</h4>
-            <div class="space-y-3">
-                <div>
-                    <input type="text" wire:model="newGoalTitle"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                        placeholder="Goal title...">
-                    @error('newGoalTitle') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                </div>
-                <div>
-                    <textarea wire:model="newGoalDescription" rows="2"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-                        placeholder="Description (optional)"></textarea>
-                </div>
-                <div class="w-48">
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Due Date</label>
-                    <input type="date" wire:model="newGoalDueDate"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500">
-                </div>
-                <div class="flex items-center gap-2">
-                    <button wire:click="addGoal"
-                        class="px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
-                        Add Goal
+    {{-- Focus Areas List --}}
+    @forelse($goals as $goal)
+        <div class="bg-white rounded-lg border border-green-200 overflow-hidden shadow-sm">
+            {{-- Focus Area Header --}}
+            <div class="bg-green-50 border-b border-green-100">
+                <div class="flex items-center gap-2.5 px-3 py-2">
+                    <button wire:click="toggleGoal({{ $goal->id }})" class="text-green-400 hover:text-green-600 transition-colors">
+                        <x-icon name="{{ in_array($goal->id, $expandedGoals) ? 'chevron-down' : 'chevron-right' }}" class="w-3.5 h-3.5" />
                     </button>
-                    <button wire:click="cancelAddGoal"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-    @endif
 
-    {{-- Goals List --}}
-    @if($goals->isEmpty())
-        <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
-            <x-icon name="flag" class="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p class="text-gray-500">No goals yet.</p>
-            <p class="text-gray-400 text-sm mt-1">Add your first goal to start tracking progress.</p>
-        </div>
-    @else
-        <div class="space-y-4">
-            @foreach($goals as $goal)
-                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                    {{-- Goal Header --}}
-                    <div class="p-4 {{ in_array($goal->id, $expandedGoals) ? 'border-b border-gray-100' : '' }}">
-                        <div class="flex items-start gap-3">
-                            {{-- Expand/Collapse Toggle --}}
-                            <button wire:click="toggleGoal({{ $goal->id }})"
-                                class="mt-1 p-1 text-gray-400 hover:text-gray-600 transition-transform {{ in_array($goal->id, $expandedGoals) ? 'rotate-90' : '' }}">
-                                <x-icon name="chevron-right" class="w-4 h-4" />
-                            </button>
+                    <div class="w-2.5 h-2.5 rounded bg-green-500 flex-shrink-0"></div>
 
-                            {{-- Goal Content --}}
-                            <div class="flex-1 min-w-0">
-                                @if($editingGoalId === $goal->id)
-                                    {{-- Edit Mode --}}
-                                    <div class="space-y-3">
-                                        <input type="text" wire:model="editData.title"
-                                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500">
-                                        <textarea wire:model="editData.description" rows="2"
-                                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500"
-                                            placeholder="Description"></textarea>
-                                        <div class="flex items-center gap-3">
-                                            <input type="date" wire:model="editData.due_date"
-                                                class="px-3 py-2 text-sm border border-gray-300 rounded-lg">
-                                            <select wire:model="editData.status"
-                                                class="px-3 py-2 text-sm border border-gray-300 rounded-lg">
-                                                <option value="not_started">Not Started</option>
-                                                <option value="in_progress">In Progress</option>
-                                                <option value="at_risk">At Risk</option>
-                                                <option value="completed">Completed</option>
-                                            </select>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <button wire:click="saveGoal"
-                                                class="px-3 py-1.5 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
-                                                Save
-                                            </button>
-                                            <button wire:click="cancelEditGoal"
-                                                class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                                                Cancel
-                                            </button>
-                                        </div>
-                                    </div>
-                                @else
-                                    {{-- View Mode --}}
-                                    <div class="flex items-start justify-between">
-                                        <div>
-                                            <h4 class="font-medium text-gray-900">{{ $goal->title }}</h4>
-                                            @if($goal->description)
-                                                <p class="text-sm text-gray-500 mt-0.5">{{ $goal->description }}</p>
-                                            @endif
-                                            <div class="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                                                @if($goal->due_date)
-                                                    <span class="flex items-center gap-1">
-                                                        <x-icon name="calendar" class="w-3.5 h-3.5" />
-                                                        {{ $goal->due_date->format('M j, Y') }}
-                                                    </span>
-                                                @endif
-                                                <span>{{ $goal->keyResults->count() }} Key Results</span>
-                                                @if($goal->owner)
-                                                    <span class="flex items-center gap-1">
-                                                        <x-icon name="user" class="w-3.5 h-3.5" />
-                                                        {{ $goal->owner->first_name }}
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        {{-- Goal Progress & Status --}}
-                                        <div class="flex items-center gap-3">
-                                            {{-- Progress --}}
-                                            <div class="text-right">
-                                                <div class="text-lg font-semibold text-gray-900">{{ number_format($goal->calculateProgress(), 0) }}%</div>
-                                                <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full bg-{{ $goal->status_color }}-500 transition-all"
-                                                        style="width: {{ $goal->calculateProgress() }}%"></div>
-                                                </div>
-                                            </div>
-
-                                            {{-- Status Dropdown --}}
-                                            <div x-data="{ open: false }" class="relative">
-                                                <button @click="open = !open"
-                                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
-                                                        {{ match($goal->status) {
-                                                            'completed' => 'bg-green-100 text-green-700',
-                                                            'in_progress' => 'bg-blue-100 text-blue-700',
-                                                            'at_risk' => 'bg-yellow-100 text-yellow-700',
-                                                            default => 'bg-gray-100 text-gray-700'
-                                                        } }}">
-                                                    {{ ucfirst(str_replace('_', ' ', $goal->status)) }}
-                                                    <x-icon name="chevron-down" class="w-3 h-3 ml-1" />
-                                                </button>
-                                                <div x-show="open" @click.away="open = false"
-                                                    class="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
-                                                    @foreach(['not_started', 'in_progress', 'at_risk', 'completed'] as $status)
-                                                        <button wire:click="updateGoalStatus({{ $goal->id }}, '{{ $status }}')"
-                                                            @click="open = false"
-                                                            class="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 {{ $goal->status === $status ? 'bg-gray-50 font-medium' : '' }}">
-                                                            {{ ucfirst(str_replace('_', ' ', $status)) }}
-                                                        </button>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-
-                                            {{-- Actions --}}
-                                            <div x-data="{ open: false }" class="relative">
-                                                <button @click="open = !open" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
-                                                    <x-icon name="ellipsis-vertical" class="w-4 h-4" />
-                                                </button>
-                                                <div x-show="open" @click.away="open = false"
-                                                    class="absolute right-0 mt-1 w-32 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
-                                                    <button wire:click="startEditGoal({{ $goal->id }})" @click="open = false"
-                                                        class="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 flex items-center gap-2">
-                                                        <x-icon name="pencil" class="w-3.5 h-3.5" />
-                                                        Edit
-                                                    </button>
-                                                    <button wire:click="deleteGoal({{ $goal->id }})"
-                                                        wire:confirm="Are you sure you want to delete this goal?"
-                                                        @click="open = false"
-                                                        class="w-full px-3 py-1.5 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
-                                                        <x-icon name="trash" class="w-3.5 h-3.5" />
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
+                    @if($editingGoalId === $goal->id)
+                        <div class="flex-1 space-y-2">
+                            <input type="text" wire:model="editData.title"
+                                class="w-full px-2 py-1 border border-green-300 rounded text-xs font-medium" autofocus>
+                            <textarea wire:model="editData.description" rows="2"
+                                class="w-full px-2 py-1 border border-green-300 rounded text-xs"
+                                placeholder="Description (optional)"></textarea>
+                            <div class="flex items-center gap-2">
+                                <input type="date" wire:model="editData.due_date"
+                                    class="px-2 py-1 border border-green-300 rounded text-xs">
+                                <button wire:click="saveGoal" class="text-green-600 hover:text-green-700 text-xs font-medium">Save</button>
+                                <button wire:click="cancelEditGoal" class="text-gray-500 hover:text-gray-700 text-xs">Cancel</button>
                             </div>
+                        </div>
+                    @else
+                        <div class="flex-1 min-w-0">
+                            <span wire:click="startEditGoal({{ $goal->id }})"
+                                class="text-xs font-medium text-green-900 cursor-pointer hover:text-green-600 transition-colors">
+                                {{ $goal->title }}
+                            </span>
+                            @if($goal->description)
+                                <p class="text-[10px] text-green-700 mt-0.5">{{ Str::limit($goal->description, 100) }}</p>
+                            @endif
+                            <div class="flex items-center gap-2 mt-1 text-[10px] text-green-600">
+                                @if($goal->due_date)
+                                    <span class="flex items-center gap-0.5">
+                                        <x-icon name="calendar" class="w-3 h-3" />
+                                        {{ $goal->due_date->format('M j, Y') }}
+                                    </span>
+                                @endif
+                                <span>{{ $goal->keyResults->count() }} activities</span>
+                            </div>
+                        </div>
+
+                        <span class="text-[10px] text-green-500 font-medium uppercase tracking-wide">Focus Area</span>
+                    @endif
+
+                    {{-- Progress --}}
+                    @php $progress = $goal->calculateProgress(); @endphp
+                    <div class="text-right min-w-[56px]">
+                        <div class="text-sm font-semibold text-gray-900">{{ number_format($progress, 0) }}%</div>
+                        <div class="w-14 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full transition-all {{ $progress >= 100 ? 'bg-green-500' : ($progress >= 50 ? 'bg-blue-500' : 'bg-yellow-500') }}"
+                                style="width: {{ min($progress, 100) }}%"></div>
                         </div>
                     </div>
 
-                    {{-- Key Results (Expanded) --}}
-                    @if(in_array($goal->id, $expandedGoals))
-                        <div class="px-4 pb-4 pt-2 bg-gray-50">
-                            {{-- Key Results List --}}
-                            @if($goal->keyResults->isNotEmpty())
-                                <div class="space-y-2 mb-3">
-                                    @foreach($goal->keyResults as $kr)
-                                        <div class="bg-white rounded-lg border border-gray-200 p-3">
-                                            @if($editingKrId === $kr->id)
-                                                {{-- Edit KR Mode --}}
-                                                <div class="space-y-3">
-                                                    <input type="text" wire:model="editData.title"
-                                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg">
-                                                    <div class="grid grid-cols-3 gap-3">
-                                                        <div>
-                                                            <label class="block text-xs text-gray-500 mb-1">Current</label>
-                                                            <input type="number" wire:model="editData.current_value" step="0.01"
-                                                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg">
-                                                        </div>
-                                                        <div>
-                                                            <label class="block text-xs text-gray-500 mb-1">Target</label>
-                                                            <input type="number" wire:model="editData.target_value" step="0.01"
-                                                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg">
-                                                        </div>
-                                                        <div>
-                                                            <label class="block text-xs text-gray-500 mb-1">Unit</label>
-                                                            <input type="text" wire:model="editData.unit"
-                                                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg">
-                                                        </div>
-                                                    </div>
-                                                    <div class="flex items-center gap-2">
-                                                        <button wire:click="saveKr"
-                                                            class="px-3 py-1.5 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
-                                                            Save
-                                                        </button>
-                                                        <button wire:click="cancelEditKr"
-                                                            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                                                            Cancel
-                                                        </button>
-                                                    </div>
+                    {{-- Status Badge --}}
+                    @php
+                        $statusConfig = [
+                            'completed' => ['bg' => 'bg-green-100', 'text' => 'text-green-700', 'label' => 'Done'],
+                            'in_progress' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-700', 'label' => 'Active'],
+                            'at_risk' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-700', 'label' => 'At Risk'],
+                            'not_started' => ['bg' => 'bg-gray-100', 'text' => 'text-gray-600', 'label' => 'Not Started'],
+                        ];
+                        $config = $statusConfig[$goal->status] ?? $statusConfig['not_started'];
+                    @endphp
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="px-1.5 py-0.5 rounded-full text-[10px] font-medium {{ $config['bg'] }} {{ $config['text'] }} hover:opacity-80">
+                            {{ $config['label'] }}
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-1 w-28 bg-white border border-gray-200 rounded shadow-lg z-20">
+                            @foreach($statusConfig as $status => $cfg)
+                                <button wire:click="updateGoalStatus({{ $goal->id }}, '{{ $status }}')" @click="open = false"
+                                    class="block w-full text-left px-2 py-1 text-[10px] hover:bg-gray-50 {{ $goal->status === $status ? 'bg-gray-50 font-medium' : '' }}">
+                                    {{ $cfg['label'] }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Actions Menu --}}
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="p-1 text-green-400 hover:text-green-600 hover:bg-green-100 rounded transition-colors">
+                            <x-icon name="dots-vertical" class="w-3.5 h-3.5" />
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-1 w-28 bg-white border border-gray-200 rounded shadow-lg z-20">
+                            <button wire:click="startEditGoal({{ $goal->id }})" @click="open = false"
+                                class="flex items-center gap-1.5 w-full text-left px-2 py-1.5 text-[10px] text-gray-700 hover:bg-gray-50">
+                                <x-icon name="pencil" class="w-3 h-3 text-gray-400" />
+                                Edit
+                            </button>
+                            <button wire:click="deleteGoal({{ $goal->id }})" @click="open = false"
+                                wire:confirm="Delete this focus area and all its activities?"
+                                class="flex items-center gap-1.5 w-full text-left px-2 py-1.5 text-[10px] text-red-600 hover:bg-red-50">
+                                <x-icon name="trash" class="w-3 h-3" />
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Key Activities --}}
+            @if(in_array($goal->id, $expandedGoals))
+                <div class="p-3 space-y-2">
+                    @forelse($goal->keyResults as $kr)
+                        <div class="ml-3 border-l-2 border-purple-200">
+                            <div class="bg-purple-50/50 rounded-r border border-l-0 border-purple-100 -ml-0.5">
+                                <div class="flex items-center gap-2 px-2.5 py-1.5">
+                                    <div class="w-2 h-2 rounded bg-purple-500 flex-shrink-0"></div>
+
+                                    @if($editingKrId === $kr->id)
+                                        <div class="flex-1 space-y-1.5">
+                                            <input type="text" wire:model="editData.title"
+                                                class="w-full px-2 py-1 border border-purple-300 rounded text-xs" autofocus>
+                                            <div class="grid grid-cols-3 gap-2">
+                                                <div>
+                                                    <label class="block text-[10px] text-purple-500 mb-0.5">Current</label>
+                                                    <input type="number" wire:model="editData.current_value" step="0.01"
+                                                        class="w-full px-1.5 py-0.5 text-xs border border-purple-300 rounded">
                                                 </div>
-                                            @else
-                                                {{-- View KR Mode --}}
-                                                <div class="flex items-center gap-4">
-                                                    <div class="flex-1 min-w-0">
-                                                        <p class="text-sm font-medium text-gray-900">{{ $kr->title }}</p>
-                                                        <div class="flex items-center gap-2 mt-1">
-                                                            <span class="text-xs text-gray-500">
-                                                                {{ $kr->formatted_value }} / {{ $kr->formatted_target }}
-                                                            </span>
-                                                            @if($kr->due_date)
-                                                                <span class="text-xs text-gray-400">
-                                                                    Due {{ $kr->due_date->format('M j') }}
-                                                                </span>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-
-                                                    {{-- Progress Bar --}}
-                                                    <div class="w-32">
-                                                        <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
-                                                            <span>{{ number_format($kr->calculateProgress(), 0) }}%</span>
-                                                        </div>
-                                                        <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                            <div class="h-full bg-{{ $kr->status_color }}-500 transition-all"
-                                                                style="width: {{ $kr->calculateProgress() }}%"></div>
-                                                        </div>
-                                                    </div>
-
-                                                    {{-- Status Badge --}}
-                                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full
-                                                        {{ match($kr->status) {
-                                                            'completed' => 'bg-green-100 text-green-700',
-                                                            'on_track' => 'bg-green-100 text-green-700',
-                                                            'in_progress' => 'bg-blue-100 text-blue-700',
-                                                            'at_risk' => 'bg-yellow-100 text-yellow-700',
-                                                            default => 'bg-gray-100 text-gray-700'
-                                                        } }}">
-                                                        {{ ucfirst(str_replace('_', ' ', $kr->status)) }}
-                                                    </span>
-
-                                                    {{-- KR Actions --}}
-                                                    <div class="flex items-center gap-1">
-                                                        <button wire:click="startEditKr({{ $kr->id }})"
-                                                            class="p-1 text-gray-400 hover:text-gray-600 rounded">
-                                                            <x-icon name="pencil" class="w-3.5 h-3.5" />
-                                                        </button>
-                                                        <button wire:click="deleteKr({{ $kr->id }})"
-                                                            wire:confirm="Delete this key result?"
-                                                            class="p-1 text-gray-400 hover:text-red-600 rounded">
-                                                            <x-icon name="trash" class="w-3.5 h-3.5" />
-                                                        </button>
-                                                    </div>
+                                                <div>
+                                                    <label class="block text-[10px] text-purple-500 mb-0.5">Target</label>
+                                                    <input type="number" wire:model="editData.target_value" step="0.01"
+                                                        class="w-full px-1.5 py-0.5 text-xs border border-purple-300 rounded">
                                                 </div>
-                                            @endif
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
-
-                            {{-- Add Key Result Form --}}
-                            @if($addingKrToGoalId === $goal->id)
-                                <div class="bg-white rounded-lg border border-gray-200 p-3 mb-3">
-                                    <h5 class="text-sm font-medium text-gray-900 mb-3">New Key Result</h5>
-                                    <div class="space-y-3">
-                                        <input type="text" wire:model="newKrTitle"
-                                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
-                                            placeholder="Key result title...">
-                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                            <div>
-                                                <label class="block text-xs text-gray-500 mb-1">Type</label>
-                                                <select wire:model="newKrMetricType"
-                                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg">
-                                                    <option value="percentage">Percentage</option>
-                                                    <option value="number">Number</option>
-                                                    <option value="currency">Currency</option>
-                                                    <option value="boolean">Yes/No</option>
-                                                </select>
+                                                <div>
+                                                    <label class="block text-[10px] text-purple-500 mb-0.5">Unit</label>
+                                                    <input type="text" wire:model="editData.unit"
+                                                        class="w-full px-1.5 py-0.5 text-xs border border-purple-300 rounded">
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label class="block text-xs text-gray-500 mb-1">Start</label>
-                                                <input type="number" wire:model="newKrStartingValue" step="0.01"
-                                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg">
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs text-gray-500 mb-1">Target</label>
-                                                <input type="number" wire:model="newKrTargetValue" step="0.01"
-                                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg">
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs text-gray-500 mb-1">Unit</label>
-                                                <input type="text" wire:model="newKrUnit"
-                                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
-                                                    placeholder="%, hrs, etc.">
+                                            <div class="flex items-center gap-2">
+                                                <button wire:click="saveKr" class="text-purple-600 hover:text-purple-700 text-xs font-medium">Save</button>
+                                                <button wire:click="cancelEditKr" class="text-gray-500 hover:text-gray-700 text-xs">Cancel</button>
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-2">
-                                            <button wire:click="addKeyResult"
-                                                class="px-3 py-1.5 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600">
-                                                Add Key Result
-                                            </button>
-                                            <button wire:click="cancelAddKr"
-                                                class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                                                Cancel
-                                            </button>
+                                    @else
+                                        <div class="flex-1 min-w-0">
+                                            <span wire:click="startEditKr({{ $kr->id }})"
+                                                class="text-xs font-medium text-purple-900 cursor-pointer hover:text-purple-600 transition-colors">
+                                                {{ $kr->title }}
+                                            </span>
+                                            <div class="flex items-center gap-2 mt-0.5 text-[10px] text-purple-600">
+                                                <span>{{ $kr->formatted_value }} / {{ $kr->formatted_target }}</span>
+                                                @if($kr->due_date)
+                                                    <span>Due {{ $kr->due_date->format('M j') }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <span class="text-[10px] text-purple-400 font-medium uppercase tracking-wide">Activity</span>
+                                    @endif
+
+                                    {{-- Progress Bar --}}
+                                    @php $krProgress = $kr->calculateProgress(); @endphp
+                                    <div class="text-right min-w-[48px]">
+                                        <div class="text-xs font-medium text-gray-700">{{ number_format($krProgress, 0) }}%</div>
+                                        <div class="w-12 h-1 bg-gray-200 rounded-full overflow-hidden">
+                                            <div class="h-full transition-all {{ $krProgress >= 100 ? 'bg-green-500' : ($krProgress >= 50 ? 'bg-purple-500' : 'bg-yellow-500') }}"
+                                                style="width: {{ min($krProgress, 100) }}%"></div>
                                         </div>
                                     </div>
+
+                                    {{-- Status Badge --}}
+                                    @php
+                                        $krStatusConfig = [
+                                            'completed' => ['bg' => 'bg-green-100', 'text' => 'text-green-700', 'label' => 'Done'],
+                                            'on_track' => ['bg' => 'bg-green-100', 'text' => 'text-green-700', 'label' => 'On Track'],
+                                            'in_progress' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-700', 'label' => 'Active'],
+                                            'at_risk' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-700', 'label' => 'At Risk'],
+                                            'not_started' => ['bg' => 'bg-gray-100', 'text' => 'text-gray-600', 'label' => 'Pending'],
+                                        ];
+                                        $krConfig = $krStatusConfig[$kr->status] ?? $krStatusConfig['not_started'];
+                                    @endphp
+                                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-medium {{ $krConfig['bg'] }} {{ $krConfig['text'] }}">
+                                        {{ $krConfig['label'] }}
+                                    </span>
+
+                                    <button wire:click="deleteKr({{ $kr->id }})"
+                                        wire:confirm="Delete this activity?"
+                                        class="p-0.5 text-purple-300 hover:text-red-500 transition-colors">
+                                        <x-icon name="x" class="w-3.5 h-3.5" />
+                                    </button>
                                 </div>
-                            @else
-                                {{-- Add Key Result Button --}}
-                                <button wire:click="showAddKrForm({{ $goal->id }})"
-                                    class="w-full py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-white rounded-lg border border-dashed border-gray-300 transition-colors flex items-center justify-center gap-1.5">
-                                    <x-icon name="plus" class="w-4 h-4" />
-                                    Add Key Result
-                                </button>
-                            @endif
+                            </div>
                         </div>
+                    @empty
+                        <div class="ml-3 py-2 text-center text-xs text-gray-400">
+                            No activities yet
+                        </div>
+                    @endforelse
+
+                    {{-- Add Key Activity --}}
+                    @if($addingKrToGoalId === $goal->id)
+                        <div class="ml-3 p-2.5 bg-purple-50 rounded border border-dashed border-purple-300">
+                            <div class="flex items-center gap-1.5 mb-2">
+                                <div class="w-2 h-2 rounded bg-purple-400"></div>
+                                <span class="text-xs font-medium text-purple-900">New Key Activity</span>
+                            </div>
+                            <div class="space-y-2">
+                                <input type="text" wire:model="newKrTitle"
+                                    class="w-full px-2 py-1 text-xs border border-purple-300 rounded bg-white"
+                                    placeholder="Activity title..." autofocus>
+                                <div class="grid grid-cols-4 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] text-purple-600 mb-0.5">Type</label>
+                                        <select wire:model="newKrMetricType"
+                                            class="w-full px-1.5 py-1 text-xs border border-purple-300 rounded bg-white">
+                                            <option value="percentage">%</option>
+                                            <option value="number">#</option>
+                                            <option value="currency">$</option>
+                                            <option value="boolean">Y/N</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-purple-600 mb-0.5">Start</label>
+                                        <input type="number" wire:model="newKrStartingValue" step="0.01"
+                                            class="w-full px-1.5 py-1 text-xs border border-purple-300 rounded bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-purple-600 mb-0.5">Target</label>
+                                        <input type="number" wire:model="newKrTargetValue" step="0.01"
+                                            class="w-full px-1.5 py-1 text-xs border border-purple-300 rounded bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-purple-600 mb-0.5">Unit</label>
+                                        <input type="text" wire:model="newKrUnit"
+                                            class="w-full px-1.5 py-1 text-xs border border-purple-300 rounded bg-white"
+                                            placeholder="%">
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button wire:click="addKeyResult"
+                                        class="px-2 py-1 bg-purple-500 text-white rounded text-xs font-medium hover:bg-purple-600">
+                                        Add
+                                    </button>
+                                    <button wire:click="cancelAddKr"
+                                        class="px-2 py-1 text-gray-500 hover:text-gray-700 text-xs">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <button wire:click="showAddKrForm({{ $goal->id }})"
+                            class="ml-3 flex items-center gap-1.5 px-2 py-1 text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded transition-colors">
+                            <x-icon name="plus" class="w-3.5 h-3.5" />
+                            Add Activity
+                        </button>
                     @endif
                 </div>
-            @endforeach
+            @endif
         </div>
-    @endif
+    @empty
+        <div class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+            <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-green-100 flex items-center justify-center">
+                <x-icon name="flag" class="w-5 h-5 text-green-500" />
+            </div>
+            <h3 class="text-xs font-medium text-gray-900 mb-1">No focus areas yet</h3>
+            <p class="text-[10px] text-gray-500 mb-3">Start by adding a focus area</p>
+            <button wire:click="showAddGoalForm" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white rounded text-xs font-medium hover:bg-green-600 transition-colors">
+                <x-icon name="plus" class="w-3.5 h-3.5" />
+                Add Focus Area
+            </button>
+        </div>
+    @endforelse
+
+    {{-- Progress Info --}}
+    <div class="p-2.5 bg-gray-50 rounded border border-gray-200">
+        <div class="flex items-start gap-2">
+            <x-icon name="information-circle" class="w-3.5 h-3.5 text-gray-400 mt-0.5" />
+            <div class="text-[10px] text-gray-500">
+                <span class="font-medium text-gray-600">Progress:</span>
+                Activity progress = (Current - Start) / (Target - Start). Focus Area progress = average of activities.
+            </div>
+        </div>
+    </div>
 </div>

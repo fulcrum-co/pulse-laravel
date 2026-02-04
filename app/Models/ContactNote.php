@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\HasEmbedding;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ContactNote extends Model
 {
-    use SoftDeletes;
+    use HasEmbedding, SoftDeletes;
 
     protected $fillable = [
         'org_id',
@@ -37,6 +39,9 @@ class ContactNote extends Model
         'contains_pii',
         'requires_consent_for_share',
         'created_by',
+        'embedding_generated_at',
+        'embedding_model',
+        'drift_scored_at',
     ];
 
     protected $casts = [
@@ -47,6 +52,8 @@ class ContactNote extends Model
         'contains_pii' => 'boolean',
         'requires_consent_for_share' => 'boolean',
         'transcribed_at' => 'datetime',
+        'embedding_generated_at' => 'datetime',
+        'drift_scored_at' => 'datetime',
     ];
 
     // Note types
@@ -230,5 +237,86 @@ class ContactNote extends Model
         $seconds = $this->audio_duration_seconds % 60;
 
         return sprintf('%d:%02d', $minutes, $seconds);
+    }
+
+    /**
+     * Get all drift scores for this note.
+     */
+    public function driftScores(): HasMany
+    {
+        return $this->hasMany(StrategyDriftScore::class);
+    }
+
+    /**
+     * Get the latest drift score for this note.
+     */
+    public function latestDriftScore(): HasOne
+    {
+        return $this->hasOne(StrategyDriftScore::class)->latestOfMany('scored_at');
+    }
+
+    /**
+     * Get the text to be embedded for semantic search.
+     * Required by HasEmbedding trait.
+     */
+    public function getEmbeddingText(): string
+    {
+        $parts = [
+            $this->content,
+            $this->transcription,
+        ];
+
+        // Include AI-extracted structured data if available
+        if (! empty($this->structured_data)) {
+            if (! empty($this->structured_data['summary'])) {
+                $parts[] = $this->structured_data['summary'];
+            }
+            if (! empty($this->structured_data['key_themes'])) {
+                $themes = is_array($this->structured_data['key_themes'])
+                    ? $this->structured_data['key_themes']
+                    : [];
+                $parts[] = 'Key themes: '.implode(', ', $themes);
+            }
+            if (! empty($this->structured_data['action_items'])) {
+                $actions = is_array($this->structured_data['action_items'])
+                    ? $this->structured_data['action_items']
+                    : [];
+                $parts[] = 'Action items: '.implode(', ', $actions);
+            }
+        }
+
+        return implode('. ', array_filter($parts));
+    }
+
+    /**
+     * Get the fields that contribute to the embedding text.
+     * Used by HasEmbedding trait to detect when re-embedding is needed.
+     */
+    protected function getEmbeddingTextFields(): array
+    {
+        return ['content', 'transcription', 'structured_data'];
+    }
+
+    /**
+     * Check if this note needs drift scoring.
+     */
+    public function needsDriftScoring(): bool
+    {
+        // Must have embedding first
+        if (! $this->hasEmbedding()) {
+            return false;
+        }
+
+        // Never scored
+        if (! $this->drift_scored_at) {
+            return true;
+        }
+
+        // Content updated since last scoring
+        if ($this->updated_at > $this->drift_scored_at) {
+            return true;
+        }
+
+        return false;
     }
 }

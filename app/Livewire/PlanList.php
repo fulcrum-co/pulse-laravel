@@ -2,13 +2,18 @@
 
 namespace App\Livewire;
 
+use App\Models\StrategyDriftScore;
 use App\Models\StrategicPlan;
+use App\Services\StrategyDriftService;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class PlanList extends Component
 {
     use WithPagination;
+
+    public string $activeTab = 'plans';
 
     public $search = '';
 
@@ -18,12 +23,26 @@ class PlanList extends Component
 
     public string $viewMode = 'grid';
 
+    // Alignment tab properties
+    public string $alignmentTimeRange = '30';
+
+    public string $alignmentFilterLevel = 'all';
+
     protected $queryString = [
+        'activeTab' => ['as' => 'tab', 'except' => 'plans'],
         'search' => ['except' => ''],
         'typeFilter' => ['except' => 'all'],
         'statusFilter' => ['except' => ''],
         'viewMode' => ['except' => 'grid'],
+        'alignmentTimeRange' => ['as' => 'range', 'except' => '30'],
+        'alignmentFilterLevel' => ['as' => 'level', 'except' => 'all'],
     ];
+
+    public function setActiveTab(string $tab): void
+    {
+        $this->activeTab = $tab;
+        $this->resetPage();
+    }
 
     public function setViewMode(string $mode): void
     {
@@ -57,6 +76,42 @@ class PlanList extends Component
         $this->typeFilter = 'all';
         $this->statusFilter = '';
         $this->resetPage();
+    }
+
+    public function setAlignmentTimeRange(string $range): void
+    {
+        $this->alignmentTimeRange = $range;
+        $this->resetPage();
+    }
+
+    public function setAlignmentFilterLevel(string $level): void
+    {
+        $this->alignmentFilterLevel = $level;
+        $this->resetPage();
+    }
+
+    public function getAlignmentSummaryProperty(): array
+    {
+        $orgId = auth()->user()->org_id;
+
+        return app(StrategyDriftService::class)
+            ->getOrgDriftSummary($orgId, (int) $this->alignmentTimeRange);
+    }
+
+    public function getAlignmentScoresProperty()
+    {
+        $orgId = auth()->user()->org_id;
+
+        try {
+            return StrategyDriftScore::forOrg($orgId)
+                ->with(['contactNote.contact', 'contactNote.author'])
+                ->when($this->alignmentFilterLevel !== 'all', fn ($q) => $q->where('alignment_level', $this->alignmentFilterLevel))
+                ->recent((int) $this->alignmentTimeRange)
+                ->orderBy('scored_at', 'desc')
+                ->paginate(20);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return new LengthAwarePaginator([], 0, 20);
+        }
     }
 
     public function render()

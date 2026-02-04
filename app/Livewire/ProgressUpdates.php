@@ -6,6 +6,7 @@ use App\Models\ProgressSummary;
 use App\Models\ProgressUpdate;
 use App\Models\StrategicPlan;
 use App\Services\PlanProgressService;
+use App\Services\StrategyDriftService;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -25,12 +26,20 @@ class ProgressUpdates extends Component
 
     public ?ProgressSummary $latestSummary = null;
 
+    public string $alignmentTimeRange = '30';
+
     protected $listeners = ['updateAdded' => '$refresh'];
 
     public function mount(StrategicPlan $plan)
     {
         $this->plan = $plan;
         $this->latestSummary = $plan->progressSummaries()->latest()->first();
+    }
+
+    public function getAlignmentSummaryProperty(): array
+    {
+        return app(StrategyDriftService::class)
+            ->getPlanDriftSummary($this->plan->id, (int) $this->alignmentTimeRange);
     }
 
     public function showForm()

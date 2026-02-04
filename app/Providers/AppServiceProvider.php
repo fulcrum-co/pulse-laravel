@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Events\StrategyDriftDetected;
 use App\Events\SurveyCompleted;
+use App\Listeners\NotifyStrategyDrift;
 use App\Listeners\SurveyCompletedListener;
 use App\Models\Activity;
 use App\Models\CourseGenerationRequest;
@@ -41,6 +43,11 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             SurveyCompleted::class,
             SurveyCompletedListener::class
+        );
+
+        Event::listen(
+            StrategyDriftDetected::class,
+            NotifyStrategyDrift::class
         );
 
         Gate::policy(PendingExtraction::class, PendingExtractionPolicy::class);

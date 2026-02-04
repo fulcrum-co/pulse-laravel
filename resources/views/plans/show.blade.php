@@ -23,7 +23,11 @@
                 @if($plan->isOkrStyle())
                     <a href="{{ route('plans.show', ['plan' => $plan, 'view' => 'goals']) }}"
                        class="py-2 border-b-2 text-xs font-medium {{ $view === 'goals' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
-                        Goals
+                        Focus Areas
+                    </a>
+                    <a href="{{ route('plans.show', ['plan' => $plan, 'view' => 'timeline']) }}"
+                       class="py-2 border-b-2 text-xs font-medium {{ $view === 'timeline' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                        Timeline
                     </a>
                     <a href="{{ route('plans.show', ['plan' => $plan, 'view' => 'milestones']) }}"
                        class="py-2 border-b-2 text-xs font-medium {{ $view === 'milestones' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
@@ -50,6 +54,8 @@
         @if($plan->isOkrStyle())
             @if($view === 'goals')
                 <livewire:goal-planner :plan="$plan" />
+            @elseif($view === 'timeline')
+                <livewire:goal-timeline :plan="$plan" />
             @elseif($view === 'milestones')
                 <livewire:milestone-tracker :plan="$plan" />
             @elseif($view === 'progress')

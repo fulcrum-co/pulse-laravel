@@ -53,3 +53,8 @@ Schedule::job(new \App\Jobs\ProcessPlanOverdueNotifications)
 Schedule::job(new \App\Jobs\ProcessPendingTranscriptions)
     ->everyFifteenMinutes()
     ->description('Queue pending collection dictation transcriptions');
+
+// Plan alignment detection - daily batch processing
+Schedule::command('strategy:detect-drift --alert')
+    ->dailyAt('06:00')
+    ->description('Detect plan alignment by scoring narrative alignment against plans');
