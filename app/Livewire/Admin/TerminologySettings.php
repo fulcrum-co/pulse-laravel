@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Organization;
 use App\Models\OrganizationSettings;
 use App\Services\TerminologyService;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class TerminologySettings extends Component
@@ -52,6 +52,7 @@ class TerminologySettings extends Component
         }
     }
 
+    #[On('save-settings')]
     public function save(): void
     {
         $user = auth()->user();

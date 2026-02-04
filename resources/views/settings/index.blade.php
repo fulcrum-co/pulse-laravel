@@ -3,50 +3,61 @@
     <div x-data="{ activeTab: 'notifications' }" class="space-y-6">
         {{-- Settings Navigation --}}
         <div class="border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8">
+            <div class="flex items-center justify-between">
+                <nav class="-mb-px flex space-x-8">
+                    <button
+                        @click="activeTab = 'notifications'"
+                        :class="activeTab === 'notifications' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                    >
+                        <x-icon name="bell" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
+                        Notifications
+                    </button>
+                    <button
+                        @click="activeTab = 'profile'"
+                        :class="activeTab === 'profile' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                    >
+                        <x-icon name="user" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
+                        Profile
+                    </button>
+                    <button
+                        @click="activeTab = 'security'"
+                        :class="activeTab === 'security' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                    >
+                        <x-icon name="shield-check" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
+                        Security
+                    </button>
+                    <button
+                        @click="activeTab = 'terminology'"
+                        :class="activeTab === 'terminology' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                    >
+                        <x-icon name="tag" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
+                        Terminology
+                    </button>
+                    @if(auth()->user()?->isAdmin())
+                    <button
+                        @click="activeTab = 'admin'"
+                        :class="activeTab === 'admin' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                    >
+                        <x-icon name="cog-6-tooth" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
+                        Admin
+                    </button>
+                    @endif
+                </nav>
+
+                {{-- Save Button CTA --}}
                 <button
-                    @click="activeTab = 'notifications'"
-                    :class="activeTab === 'notifications' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                    @click="$dispatch('save-settings')"
+                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors shadow-sm"
                 >
-                    <x-icon name="bell" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
-                    Notifications
+                    <x-icon name="check" class="w-4 h-4" />
+                    Save
                 </button>
-                <button
-                    @click="activeTab = 'profile'"
-                    :class="activeTab === 'profile' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
-                >
-                    <x-icon name="user" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
-                    Profile
-                </button>
-                <button
-                    @click="activeTab = 'security'"
-                    :class="activeTab === 'security' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
-                >
-                    <x-icon name="shield-check" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
-                    Security
-                </button>
-                <button
-                    @click="activeTab = 'terminology'"
-                    :class="activeTab === 'terminology' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
-                >
-                    <x-icon name="tag" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
-                    Terminology
-                </button>
-                @if(auth()->user()?->isAdmin())
-                <button
-                    @click="activeTab = 'admin'"
-                    :class="activeTab === 'admin' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
-                >
-                    <x-icon name="cog-6-tooth" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
-                    Admin
-                </button>
-                @endif
-            </nav>
+            </div>
         </div>
 
         {{-- Tab Content --}}
