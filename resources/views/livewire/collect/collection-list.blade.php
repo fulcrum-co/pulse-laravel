@@ -1,4 +1,6 @@
-@php($settings = auth()->user()?->organization?->getOrCreateSettings())
+@php
+    $settings = auth()->user()?->organization?->getOrCreateSettings();
+@endphp
 <div class="space-y-4">
     <!-- Search, Filters & View Toggle -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" data-help="collection-filters">
