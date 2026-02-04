@@ -2,19 +2,40 @@
     {{-- Left Sidebar --}}
     <div class="w-64 flex-shrink-0" data-help="resource-filters">
         {{-- Search --}}
-        <div class="relative mb-6" data-help="search-resources">
-            <x-icon name="magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-                type="text"
-                wire:model.live.debounce.300ms="search"
-                placeholder="Search resources..."
-                class="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
-            >
-            @if($search)
-                <button wire:click="clearSearch" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    <x-icon name="x-mark" class="w-4 h-4" />
+        <div class="mb-6" data-help="search-resources">
+            <div class="relative">
+                <x-icon name="magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                    type="text"
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="{{ $searchMode === 'semantic' ? 'Search by meaning...' : 'Search by keywords...' }}"
+                    class="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
+                >
+                @if($search)
+                    <button wire:click="clearSearch" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                        <x-icon name="x-mark" class="w-4 h-4" />
+                    </button>
+                @endif
+            </div>
+            {{-- Search Mode Toggle --}}
+            <div class="flex items-center justify-between mt-2">
+                <button
+                    wire:click="toggleSearchMode"
+                    class="inline-flex items-center gap-1.5 text-xs font-medium {{ $searchMode === 'semantic' ? 'text-purple-600' : 'text-gray-500' }} hover:text-purple-700"
+                    title="{{ $searchMode === 'semantic' ? 'Using AI-powered semantic search' : 'Using keyword matching' }}"
+                >
+                    @if($searchMode === 'semantic')
+                        <x-icon name="sparkles" class="w-3.5 h-3.5" />
+                        AI Search
+                    @else
+                        <x-icon name="magnifying-glass" class="w-3.5 h-3.5" />
+                        Keyword
+                    @endif
                 </button>
-            @endif
+                <span class="text-xs text-gray-400">
+                    {{ $searchMode === 'semantic' ? 'finds related content' : 'exact matches' }}
+                </span>
+            </div>
         </div>
 
         {{-- Category Filter --}}
@@ -91,6 +112,12 @@
                             <h2 class="text-lg font-semibold text-gray-900">
                                 Content
                                 <span class="text-sm font-normal text-gray-500">({{ $searchResults['content']['total'] }} results)</span>
+                                @if(($searchResults['content']['mode'] ?? 'keyword') === 'semantic')
+                                    <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                        <x-icon name="sparkles" class="w-3 h-3" />
+                                        AI
+                                    </span>
+                                @endif
                             </h2>
                             <a href="{{ route('resources.content.index', ['q' => $search]) }}" class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
                                 View all content &rarr;
@@ -98,13 +125,20 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             @foreach($searchResults['content']['items'] as $item)
-                                <a href="{{ $item['url'] }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all">
+                                <a href="{{ $item['url'] }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all relative">
+                                    @if(isset($item['similarity']))
+                                        <div class="absolute top-2 right-2">
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ $item['similarity'] >= 80 ? 'bg-green-100 text-green-700' : ($item['similarity'] >= 60 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600') }}" title="Relevance score">
+                                                {{ $item['similarity'] }}%
+                                            </span>
+                                        </div>
+                                    @endif
                                     <div class="flex items-start gap-3">
-                                        <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                        <div class="w-10 h-10 rounded-lg {{ $item['icon_bg'] ?? 'blue' === 'blue' ? 'bg-blue-100' : 'bg-gray-100' }} flex items-center justify-center flex-shrink-0">
                                             <x-icon name="{{ $item['icon'] }}" class="w-5 h-5 text-blue-600" />
                                         </div>
                                         <div class="min-w-0 flex-1">
-                                            <h3 class="text-sm font-medium text-gray-900 truncate">{{ $item['title'] }}</h3>
+                                            <h3 class="text-sm font-medium text-gray-900 truncate {{ isset($item['similarity']) ? 'pr-10' : '' }}">{{ $item['title'] }}</h3>
                                             <p class="text-xs text-gray-500 mt-0.5">{{ $item['subtitle'] }}</p>
                                         </div>
                                     </div>
@@ -121,6 +155,12 @@
                             <h2 class="text-lg font-semibold text-gray-900">
                                 Providers
                                 <span class="text-sm font-normal text-gray-500">({{ $searchResults['providers']['total'] }} results)</span>
+                                @if(($searchResults['providers']['mode'] ?? 'keyword') === 'semantic')
+                                    <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                        <x-icon name="sparkles" class="w-3 h-3" />
+                                        AI
+                                    </span>
+                                @endif
                             </h2>
                             <a href="{{ route('resources.providers.index', ['q' => $search]) }}" class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
                                 View all providers &rarr;
@@ -136,13 +176,18 @@
                                         <div class="flex items-center gap-2">
                                             <h3 class="text-sm font-medium text-gray-900">{{ $item['title'] }}</h3>
                                             <span class="text-xs text-gray-500">&bull; {{ $item['subtitle'] }}</span>
+                                            @if(isset($item['similarity']))
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ $item['similarity'] >= 80 ? 'bg-green-100 text-green-700' : ($item['similarity'] >= 60 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600') }}" title="Relevance score">
+                                                    {{ $item['similarity'] }}%
+                                                </span>
+                                            @endif
                                         </div>
-                                        @if($item['description'])
+                                        @if($item['description'] ?? null)
                                             <p class="text-sm text-gray-600 truncate mt-0.5">{{ Str::limit($item['description'], 80) }}</p>
                                         @endif
                                     </div>
                                     <div class="flex items-center gap-3 flex-shrink-0">
-                                        @if($item['serves_remote'])
+                                        @if($item['serves_remote'] ?? false)
                                             <span class="text-xs text-gray-500">Remote available</span>
                                         @endif
                                         <x-icon name="chevron-right" class="w-5 h-5 text-gray-400" />
@@ -160,6 +205,12 @@
                             <h2 class="text-lg font-semibold text-gray-900">
                                 Programs
                                 <span class="text-sm font-normal text-gray-500">({{ $searchResults['programs']['total'] }} results)</span>
+                                @if(($searchResults['programs']['mode'] ?? 'keyword') === 'semantic')
+                                    <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                        <x-icon name="sparkles" class="w-3 h-3" />
+                                        AI
+                                    </span>
+                                @endif
                             </h2>
                             <a href="{{ route('resources.programs.index', ['q' => $search]) }}" class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
                                 View all programs &rarr;
@@ -167,15 +218,22 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             @foreach($searchResults['programs']['items'] as $item)
-                                <a href="{{ $item['url'] }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all">
+                                <a href="{{ $item['url'] }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all relative">
+                                    @if(isset($item['similarity']))
+                                        <div class="absolute top-2 right-2">
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ $item['similarity'] >= 80 ? 'bg-green-100 text-green-700' : ($item['similarity'] >= 60 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600') }}" title="Relevance score">
+                                                {{ $item['similarity'] }}%
+                                            </span>
+                                        </div>
+                                    @endif
                                     <div class="flex items-start gap-3">
                                         <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
                                             <x-icon name="building-office" class="w-5 h-5 text-green-600" />
                                         </div>
                                         <div class="min-w-0 flex-1">
-                                            <h3 class="text-sm font-medium text-gray-900 truncate">{{ $item['title'] }}</h3>
+                                            <h3 class="text-sm font-medium text-gray-900 truncate {{ isset($item['similarity']) ? 'pr-10' : '' }}">{{ $item['title'] }}</h3>
                                             <p class="text-xs text-gray-500 mt-0.5">{{ $item['subtitle'] }}</p>
-                                            @if($item['meta'])
+                                            @if($item['meta'] ?? null)
                                                 <p class="text-xs text-gray-400 mt-1">{{ $item['meta'] }}</p>
                                             @endif
                                         </div>
@@ -193,6 +251,12 @@
                             <h2 class="text-lg font-semibold text-gray-900">
                                 Courses
                                 <span class="text-sm font-normal text-gray-500">({{ $searchResults['courses']['total'] }} results)</span>
+                                @if(($searchResults['courses']['mode'] ?? 'keyword') === 'semantic')
+                                    <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                        <x-icon name="sparkles" class="w-3 h-3" />
+                                        AI
+                                    </span>
+                                @endif
                             </h2>
                             <a href="{{ route('resources.courses.index', ['q' => $search]) }}" class="text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
                                 View all courses &rarr;
@@ -200,15 +264,22 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             @foreach($searchResults['courses']['items'] as $item)
-                                <a href="{{ $item['url'] }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all">
+                                <a href="{{ $item['url'] }}" class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-pulse-orange-300 transition-all relative">
+                                    @if(isset($item['similarity']))
+                                        <div class="absolute top-2 right-2">
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ $item['similarity'] >= 80 ? 'bg-green-100 text-green-700' : ($item['similarity'] >= 60 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600') }}" title="Relevance score">
+                                                {{ $item['similarity'] }}%
+                                            </span>
+                                        </div>
+                                    @endif
                                     <div class="flex items-start gap-3">
                                         <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
                                             <x-icon name="academic-cap" class="w-5 h-5 text-orange-600" />
                                         </div>
                                         <div class="min-w-0 flex-1">
-                                            <h3 class="text-sm font-medium text-gray-900 truncate">{{ $item['title'] }}</h3>
+                                            <h3 class="text-sm font-medium text-gray-900 truncate {{ isset($item['similarity']) ? 'pr-10' : '' }}">{{ $item['title'] }}</h3>
                                             <p class="text-xs text-gray-500 mt-0.5">{{ $item['subtitle'] }}</p>
-                                            @if($item['meta'])
+                                            @if($item['meta'] ?? null)
                                                 <p class="text-xs text-gray-400 mt-1">{{ $item['meta'] }}</p>
                                             @endif
                                         </div>

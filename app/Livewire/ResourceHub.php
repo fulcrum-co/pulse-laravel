@@ -6,6 +6,7 @@ use App\Models\MiniCourse;
 use App\Models\Program;
 use App\Models\Provider;
 use App\Models\Resource;
+use App\Services\VectorSearchService;
 use Livewire\Component;
 
 class ResourceHub extends Component
@@ -22,17 +23,25 @@ class ResourceHub extends Component
 
     public string $viewMode = 'grid';
 
+    public string $searchMode = 'semantic'; // 'semantic' or 'keyword'
+
     protected $queryString = [
         'search' => ['except' => ''],
         'selectedCategories' => ['except' => [], 'as' => 'category'],
         'selectedContentTypes' => ['except' => [], 'as' => 'type'],
         'sortBy' => ['except' => 'recent', 'as' => 'sort'],
         'viewMode' => ['except' => 'grid', 'as' => 'view'],
+        'searchMode' => ['except' => 'semantic', 'as' => 'mode'],
     ];
 
     public function updatedSearch(): void
     {
         $this->isSearching = strlen($this->search) >= 2;
+    }
+
+    public function toggleSearchMode(): void
+    {
+        $this->searchMode = $this->searchMode === 'semantic' ? 'keyword' : 'semantic';
     }
 
     public function clearSearch(): void
@@ -248,6 +257,76 @@ class ResourceHub extends Component
 
         $user = auth()->user();
         $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
+
+        // Use semantic search if enabled
+        if ($this->searchMode === 'semantic') {
+            return $this->getSemanticSearchResults($accessibleOrgIds);
+        }
+
+        return $this->getKeywordSearchResults($accessibleOrgIds);
+    }
+
+    /**
+     * Get search results using vector similarity (semantic search).
+     */
+    protected function getSemanticSearchResults(array $accessibleOrgIds): array
+    {
+        $vectorSearch = app(VectorSearchService::class);
+
+        // Check if semantic search is available
+        if (! $vectorSearch->isAvailable()) {
+            return $this->getKeywordSearchResults($accessibleOrgIds);
+        }
+
+        try {
+            $results = $vectorSearch->search(
+                query: $this->search,
+                orgIds: $accessibleOrgIds,
+                modelTypes: [], // Search all types
+                limitPerType: 6,
+                minSimilarity: 0.3
+            );
+
+            // Transform to expected format
+            return [
+                'content' => [
+                    'items' => collect($results['content']['items'] ?? []),
+                    'count' => $results['content']['count'] ?? 0,
+                    'total' => $results['content']['count'] ?? 0,
+                    'mode' => 'semantic',
+                ],
+                'providers' => [
+                    'items' => collect($results['provider']['items'] ?? []),
+                    'count' => $results['provider']['count'] ?? 0,
+                    'total' => $results['provider']['count'] ?? 0,
+                    'mode' => 'semantic',
+                ],
+                'programs' => [
+                    'items' => collect($results['program']['items'] ?? []),
+                    'count' => $results['program']['count'] ?? 0,
+                    'total' => $results['program']['count'] ?? 0,
+                    'mode' => 'semantic',
+                ],
+                'courses' => [
+                    'items' => collect($results['course']['items'] ?? []),
+                    'count' => $results['course']['count'] ?? 0,
+                    'total' => $results['course']['count'] ?? 0,
+                    'mode' => 'semantic',
+                ],
+            ];
+        } catch (\Exception $e) {
+            // Fall back to keyword search if semantic fails
+            report($e);
+
+            return $this->getKeywordSearchResults($accessibleOrgIds);
+        }
+    }
+
+    /**
+     * Get search results using keyword matching (ILIKE).
+     */
+    protected function getKeywordSearchResults(array $accessibleOrgIds): array
+    {
         $searchTerm = '%'.$this->search.'%';
 
         // Search content resources
@@ -257,7 +336,7 @@ class ResourceHub extends Component
                 $q->where('title', 'ilike', $searchTerm)
                     ->orWhere('description', 'ilike', $searchTerm);
             })
-            ->limit(4)
+            ->limit(6)
             ->get()
             ->map(fn ($r) => [
                 'id' => $r->id,
@@ -266,6 +345,7 @@ class ResourceHub extends Component
                 'description' => $r->description,
                 'subtitle' => ucfirst($r->resource_type),
                 'icon' => $this->getResourceIcon($r->resource_type),
+                'icon_bg' => 'blue',
                 'url' => route('resources.show', $r),
             ]);
 
@@ -276,7 +356,7 @@ class ResourceHub extends Component
                 $q->where('name', 'ilike', $searchTerm)
                     ->orWhere('bio', 'ilike', $searchTerm);
             })
-            ->limit(4)
+            ->limit(6)
             ->get()
             ->map(fn ($p) => [
                 'id' => $p->id,
@@ -284,8 +364,8 @@ class ResourceHub extends Component
                 'title' => $p->name,
                 'description' => $p->bio,
                 'subtitle' => ucfirst($p->provider_type),
-                'availability' => $p->availability_status ?? 'unknown',
-                'serves_remote' => $p->serves_remote,
+                'icon' => 'user',
+                'icon_bg' => 'purple',
                 'url' => route('resources.providers.show', $p),
             ]);
 
@@ -296,7 +376,7 @@ class ResourceHub extends Component
                 $q->where('name', 'ilike', $searchTerm)
                     ->orWhere('description', 'ilike', $searchTerm);
             })
-            ->limit(4)
+            ->limit(6)
             ->get()
             ->map(fn ($p) => [
                 'id' => $p->id,
@@ -304,7 +384,8 @@ class ResourceHub extends Component
                 'title' => $p->name,
                 'description' => $p->description,
                 'subtitle' => ucfirst(str_replace('_', ' ', $p->program_type)),
-                'meta' => $p->duration_weeks ? $p->duration_weeks.' weeks' : null,
+                'icon' => 'building-office',
+                'icon_bg' => 'green',
                 'url' => route('resources.programs.show', $p),
             ]);
 
@@ -316,7 +397,7 @@ class ResourceHub extends Component
                 $q->where('title', 'ilike', $searchTerm)
                     ->orWhere('description', 'ilike', $searchTerm);
             })
-            ->limit(4)
+            ->limit(6)
             ->get()
             ->map(fn ($c) => [
                 'id' => $c->id,
@@ -324,7 +405,8 @@ class ResourceHub extends Component
                 'title' => $c->title,
                 'description' => $c->description,
                 'subtitle' => ucfirst(str_replace('_', ' ', $c->course_type)),
-                'meta' => $c->steps_count.' steps',
+                'icon' => 'academic-cap',
+                'icon_bg' => 'orange',
                 'url' => route('resources.courses.show', $c),
             ]);
 
@@ -339,6 +421,7 @@ class ResourceHub extends Component
                             ->orWhere('description', 'ilike', $searchTerm);
                     })
                     ->count(),
+                'mode' => 'keyword',
             ],
             'providers' => [
                 'items' => $providers,
@@ -350,6 +433,7 @@ class ResourceHub extends Component
                             ->orWhere('bio', 'ilike', $searchTerm);
                     })
                     ->count(),
+                'mode' => 'keyword',
             ],
             'programs' => [
                 'items' => $programs,
@@ -361,6 +445,7 @@ class ResourceHub extends Component
                             ->orWhere('description', 'ilike', $searchTerm);
                     })
                     ->count(),
+                'mode' => 'keyword',
             ],
             'courses' => [
                 'items' => $courses,
@@ -372,6 +457,7 @@ class ResourceHub extends Component
                             ->orWhere('description', 'ilike', $searchTerm);
                     })
                     ->count(),
+                'mode' => 'keyword',
             ],
         ];
     }
