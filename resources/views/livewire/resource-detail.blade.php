@@ -31,6 +31,15 @@
         </div>
 
         <div class="flex items-center gap-2">
+            {{-- Share Button --}}
+            <button
+                wire:click="$dispatch('open-share-modal', { type: 'resource', id: {{ $resource->id }}, title: '{{ addslashes($resource->title) }}', isPublic: {{ $resource->is_public ? 'true' : 'false' }} })"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                title="Share & Embed"
+            >
+                <x-icon name="share" class="w-4 h-4 mr-2" />
+                Share
+            </button>
             @if($resource->url || $resource->file_path)
                 <a
                     href="{{ $resource->url ?? Storage::url($resource->file_path) }}"
@@ -233,6 +242,33 @@
                 </dl>
             </div>
 
+            <!-- Visibility Settings -->
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+                <h2 class="text-sm font-medium text-gray-900 mb-3">Visibility</h2>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700">Public Access</p>
+                        <p class="text-xs text-gray-500">Allow in public hub & embeds</p>
+                    </div>
+                    <button
+                        wire:click="togglePublic"
+                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-pulse-orange-500 focus:ring-offset-2 {{ $resource->is_public ? 'bg-pulse-orange-500' : 'bg-gray-200' }}"
+                        role="switch"
+                        aria-checked="{{ $resource->is_public ? 'true' : 'false' }}"
+                    >
+                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $resource->is_public ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                    </button>
+                </div>
+                @if($resource->is_public)
+                    <div class="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg">
+                        <p class="text-xs text-green-700">
+                            <x-icon name="globe-alt" class="w-3 h-3 inline-block mr-1" />
+                            This resource is publicly visible
+                        </p>
+                    </div>
+                @endif
+            </div>
+
             <!-- Quick Assign -->
             <div class="bg-white rounded-xl border border-gray-200 p-6">
                 <h2 class="text-sm font-medium text-gray-900 mb-3">Quick Assign</h2>
@@ -398,4 +434,7 @@
 
     <!-- Push Content Modal -->
     @livewire('push-content-modal')
+
+    <!-- Share Modal -->
+    @livewire('components.share-modal')
 </div>

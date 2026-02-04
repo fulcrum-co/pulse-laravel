@@ -208,6 +208,135 @@
         </div>
     @endif
 
+    {{-- Detail Modal --}}
+    @if($selectedItem)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="detail-title" role="dialog" aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                {{-- Backdrop --}}
+                <div wire:click="closeDetail" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+                {{-- Modal Panel --}}
+                <div class="relative bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-2xl sm:w-full max-h-[90vh] overflow-y-auto">
+                    @if($selectedItem['type'] === 'resource')
+                        {{-- Resource Detail --}}
+                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 px-6 py-8 text-white">
+                            <div class="flex items-center gap-3 mb-4">
+                                @php
+                                    $icon = match($selectedItem['resource_type'] ?? 'document') {
+                                        'article' => 'document-text',
+                                        'video' => 'play-circle',
+                                        'worksheet' => 'clipboard-document-list',
+                                        'activity' => 'puzzle-piece',
+                                        'link' => 'link',
+                                        default => 'document',
+                                    };
+                                @endphp
+                                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <x-icon name="{{ $icon }}" class="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <span class="text-sm opacity-75">{{ ucfirst($selectedItem['resource_type'] ?? 'Resource') }}</span>
+                                    @if($selectedItem['duration'])
+                                        <span class="text-sm opacity-75 ml-2">• {{ $selectedItem['duration'] }} min</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <h3 class="text-2xl font-bold" id="detail-title">{{ $selectedItem['title'] }}</h3>
+                        </div>
+                        <div class="px-6 py-6">
+                            <p class="text-gray-700 leading-relaxed">{{ $selectedItem['description'] }}</p>
+
+                            @if($selectedItem['category'])
+                                <div class="mt-4">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+                                        {{ ucfirst($selectedItem['category']) }}
+                                    </span>
+                                </div>
+                            @endif
+
+                            @if($selectedItem['url'])
+                                <div class="mt-6 pt-6 border-t border-gray-200">
+                                    <a href="{{ $selectedItem['url'] }}" target="_blank" rel="noopener"
+                                       class="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors">
+                                        <x-icon name="arrow-top-right-on-square" class="w-5 h-5" />
+                                        Open Resource
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        {{-- Course Detail --}}
+                        <div class="bg-gradient-to-br from-orange-500 to-orange-600 px-6 py-8 text-white">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <x-icon name="academic-cap" class="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <span class="text-sm opacity-75">{{ ucwords(str_replace('_', ' ', $selectedItem['course_type'] ?? 'Course')) }}</span>
+                                    @if($selectedItem['duration'])
+                                        <span class="text-sm opacity-75 ml-2">• {{ $selectedItem['duration'] }} min</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <h3 class="text-2xl font-bold" id="detail-title">{{ $selectedItem['title'] }}</h3>
+                        </div>
+                        <div class="px-6 py-6">
+                            <p class="text-gray-700 leading-relaxed">{{ $selectedItem['description'] }}</p>
+
+                            @if(!empty($selectedItem['objectives']))
+                                <div class="mt-6">
+                                    <h4 class="text-sm font-semibold text-gray-900 mb-3">What You'll Learn</h4>
+                                    <ul class="space-y-2">
+                                        @foreach($selectedItem['objectives'] as $objective)
+                                            <li class="flex items-start gap-2 text-sm text-gray-600">
+                                                <x-icon name="check-circle" class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                                                {{ $objective }}
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            @if(!empty($selectedItem['steps']))
+                                <div class="mt-6 pt-6 border-t border-gray-200">
+                                    <h4 class="text-sm font-semibold text-gray-900 mb-3">Course Outline ({{ count($selectedItem['steps']) }} steps)</h4>
+                                    <div class="space-y-2">
+                                        @foreach($selectedItem['steps'] as $index => $step)
+                                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-sm font-semibold">
+                                                    {{ $index + 1 }}
+                                                </div>
+                                                <div class="flex-1">
+                                                    <p class="text-sm font-medium text-gray-900">{{ $step['title'] }}</p>
+                                                    <p class="text-xs text-gray-500">{{ ucfirst($step['step_type']) }}{{ $step['duration'] ? ' • ' . $step['duration'] . ' min' : '' }}</p>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div class="mt-6 pt-6 border-t border-gray-200 text-center">
+                                <p class="text-sm text-gray-500 mb-4">Contact us to get access to this course for your students.</p>
+                                <button class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors">
+                                    <x-icon name="envelope" class="w-5 h-5" />
+                                    Request Access
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
+                    <button
+                        wire:click="closeDetail"
+                        class="absolute top-4 right-4 text-white/80 hover:text-white"
+                    >
+                        <x-icon name="x-mark" class="w-6 h-6" />
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- Lead Gate Modal --}}
     @if($showLeadGate)
         <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -300,6 +429,22 @@
                             By signing up, you agree to receive occasional updates about new resources.
                             You can unsubscribe at any time.
                         </p>
+
+                        <div class="relative my-4">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-gray-200"></div>
+                            </div>
+                            <div class="relative flex justify-center text-xs">
+                                <span class="px-2 bg-white text-gray-500">or</span>
+                            </div>
+                        </div>
+
+                        <a
+                            href="{{ route('public.register.org', ['org' => $orgId]) }}"
+                            class="block w-full text-center text-sm text-pulse-orange-600 hover:text-pulse-orange-700 font-medium"
+                        >
+                            Create a free account for full access
+                        </a>
                     </form>
 
                     <button

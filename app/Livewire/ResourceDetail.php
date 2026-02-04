@@ -33,6 +33,22 @@ class ResourceDetail extends Component
         $this->resource = $resource;
     }
 
+    /**
+     * Toggle the public visibility of the resource.
+     */
+    public function togglePublic(): void
+    {
+        $this->resource->update(['is_public' => ! $this->resource->is_public]);
+        $this->resource->refresh();
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => $this->resource->is_public
+                ? 'Resource is now publicly visible.'
+                : 'Resource is now private.',
+        ]);
+    }
+
     public function openAssignModal(): void
     {
         $this->resetAssignForm();

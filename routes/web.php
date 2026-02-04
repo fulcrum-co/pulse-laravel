@@ -818,55 +818,6 @@ Route::prefix('api/help')->middleware(['web', 'auth'])->group(function () {
     Route::post('/hints/batch-update', [App\Http\Controllers\Api\PageHelpController::class, 'batchUpdate']);
 });
 
-// Temporary route to seed public hub demo data - visit once then remove
-Route::get('/seed-public-hub-temp', function () {
-    set_time_limit(300);
-    $output = [];
-    $output[] = 'Seeding public hub demo data...';
-    $output[] = '';
-
-    try {
-        // Run the seeder
-        $seeder = new \Database\Seeders\PublicHubDemoSeeder;
-        $seeder->setCommand(new class extends \Illuminate\Console\Command {
-            public function info($string, $verbosity = null) {
-                // Capture output silently
-            }
-        });
-        $seeder->run();
-
-        // Count what was created
-        $org = \App\Models\Organization::where('org_name', 'like', '%Demo%')
-            ->orWhere('org_name', 'like', '%Lincoln%')
-            ->first();
-
-        if ($org) {
-            $resourceCount = \App\Models\Resource::where('org_id', $org->id)->where('is_public', true)->count();
-            $courseCount = \App\Models\MiniCourse::where('org_id', $org->id)->where('visibility', 'public')->count();
-
-            $output[] = 'SUCCESS! Public hub seeded:';
-            $output[] = "- Organization: {$org->org_name} (ID: {$org->id})";
-            $output[] = "- {$resourceCount} public resources";
-            $output[] = "- {$courseCount} public courses";
-            $output[] = '';
-            $output[] = "Visit: /hub/{$org->id}";
-            $output[] = '';
-            $output[] = 'After confirming, remove this route from routes/web.php';
-        } else {
-            $output[] = 'ERROR: Could not find organization after seeding.';
-        }
-
-    } catch (\Exception $e) {
-        $output[] = 'ERROR: '.$e->getMessage();
-        $output[] = 'File: '.$e->getFile().':'.$e->getLine();
-        $output[] = '';
-        $output[] = 'Stack trace:';
-        $output[] = $e->getTraceAsString();
-    }
-
-    return '<pre>'.implode("\n", $output).'</pre>';
-});
-
 // Admin Routes (requires admin role)
 Route::prefix('admin')->middleware(['web', 'auth'])->name('admin.')->group(function () {
     // Help Center Admin

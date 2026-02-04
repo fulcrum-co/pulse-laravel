@@ -460,6 +460,21 @@
                             Max file size: 10MB. Accepted formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, MP4, MP3, WAV, JPG, PNG, GIF
                         </p>
                     </div>
+
+                    {{-- Public Visibility --}}
+                    <div class="pt-4 border-t border-gray-200">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                wire:model="resourceIsPublic"
+                                class="w-4 h-4 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500"
+                            />
+                            <div>
+                                <span class="text-sm font-medium text-gray-700">Make publicly visible</span>
+                                <p class="text-xs text-gray-500">Allow this resource to appear in the public resource hub and be embeddable</p>
+                            </div>
+                        </label>
+                    </div>
                 </div>
                 @endif
 

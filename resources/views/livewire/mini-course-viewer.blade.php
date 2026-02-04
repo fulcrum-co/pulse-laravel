@@ -21,7 +21,17 @@
                                 <h1 class="text-2xl font-bold text-white mb-2">{{ $course->title }}</h1>
                                 <p class="text-orange-100">{{ $course->description }}</p>
                             </div>
-                            <div class="flex-shrink-0 ml-4">
+                            <div class="flex-shrink-0 ml-4 flex items-center gap-3">
+                                {{-- Share Button --}}
+                                <button
+                                    wire:click="$dispatch('open-share-modal', { type: 'course', id: {{ $course->id }}, title: '{{ addslashes($course->title) }}', isPublic: {{ ($course->visibility === 'public' || $course->visibility === 'gated') ? 'true' : 'false' }} })"
+                                    class="inline-flex items-center px-3 py-2 bg-white/20 text-white text-sm font-medium rounded-lg hover:bg-white/30 transition-colors"
+                                    title="Share & Embed"
+                                >
+                                    <x-icon name="share" class="w-4 h-4 mr-1.5" />
+                                    Share
+                                </button>
+
                                 @if($enrollment)
                                 <div class="text-right">
                                     <div class="text-3xl font-bold text-white">{{ $enrollment->progress_percent }}%</div>
@@ -463,4 +473,7 @@
 
     <!-- Push Content Modal -->
     @livewire('push-content-modal')
+
+    <!-- Share Modal -->
+    @livewire('components.share-modal')
 </div>

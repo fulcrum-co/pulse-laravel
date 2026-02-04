@@ -53,17 +53,18 @@ class PublicResourceHub extends Component
         'leadRole' => 'nullable|string|max:50',
     ];
 
-    public function mount(?string $org = null): void
+    public function mount(?string $orgSlug = null): void
     {
         // Load organization by slug or ID
-        if ($org) {
-            $organization = Organization::where('slug', $org)
-                ->orWhere('id', $org)
+        if ($orgSlug) {
+            // Try by ID first (most common), then by org_name for slug-like behavior
+            $organization = Organization::where('id', $orgSlug)
+                ->orWhere('org_name', 'like', str_replace('-', '%', $orgSlug) . '%')
                 ->first();
 
             if ($organization) {
                 $this->orgId = $organization->id;
-                $this->orgSlug = $organization->slug;
+                $this->orgSlug = $organization->id; // Use ID as slug since no slug column exists
                 $this->orgName = $organization->org_name;
                 $this->orgLogo = $organization->logo_url;
             }
@@ -102,6 +103,11 @@ class PublicResourceHub extends Component
         $this->isSearching = strlen($this->search) >= 2;
     }
 
+    // Selected item for detail view
+    public ?int $selectedResourceId = null;
+    public ?int $selectedCourseId = null;
+    public ?array $selectedItem = null;
+
     /**
      * View a resource (tracks views and may trigger lead gate).
      */
@@ -124,11 +130,22 @@ class PublicResourceHub extends Component
             $lead?->recordResourceView($resourceId);
         }
 
-        // Redirect to resource detail
-        $this->redirect(route('public.resources.show', [
-            'org' => $this->orgSlug ?? $this->orgId,
-            'resource' => $resourceId,
-        ]));
+        // Load resource for detail view
+        $resource = Resource::find($resourceId);
+        if ($resource) {
+            $this->selectedResourceId = $resourceId;
+            $this->selectedCourseId = null;
+            $this->selectedItem = [
+                'type' => 'resource',
+                'id' => $resource->id,
+                'title' => $resource->title,
+                'description' => $resource->description,
+                'resource_type' => $resource->resource_type,
+                'category' => $resource->category,
+                'duration' => $resource->estimated_duration_minutes,
+                'url' => $resource->url,
+            ];
+        }
     }
 
     /**
@@ -153,11 +170,37 @@ class PublicResourceHub extends Component
             $lead?->recordCourseView($courseId);
         }
 
-        // Redirect to course detail
-        $this->redirect(route('public.courses.show', [
-            'org' => $this->orgSlug ?? $this->orgId,
-            'course' => $courseId,
-        ]));
+        // Load course for detail view
+        $course = MiniCourse::with('steps')->find($courseId);
+        if ($course) {
+            $this->selectedCourseId = $courseId;
+            $this->selectedResourceId = null;
+            $this->selectedItem = [
+                'type' => 'course',
+                'id' => $course->id,
+                'title' => $course->title,
+                'description' => $course->description,
+                'course_type' => $course->course_type,
+                'duration' => $course->estimated_duration_minutes,
+                'objectives' => $course->objectives ?? [],
+                'steps' => $course->steps->map(fn($s) => [
+                    'title' => $s->title,
+                    'description' => $s->description,
+                    'step_type' => $s->step_type,
+                    'duration' => $s->estimated_duration_minutes,
+                ])->toArray(),
+            ];
+        }
+    }
+
+    /**
+     * Close detail view.
+     */
+    public function closeDetail(): void
+    {
+        $this->selectedResourceId = null;
+        $this->selectedCourseId = null;
+        $this->selectedItem = null;
     }
 
     /**
@@ -220,8 +263,8 @@ class PublicResourceHub extends Component
         if ($this->isSearching) {
             $searchTerm = '%' . $this->search . '%';
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('title', 'ilike', $searchTerm)
-                    ->orWhere('description', 'ilike', $searchTerm);
+                $q->where('title', 'like', $searchTerm)
+                    ->orWhere('description', 'like', $searchTerm);
             });
         }
 
@@ -244,8 +287,8 @@ class PublicResourceHub extends Component
         if ($this->isSearching) {
             $searchTerm = '%' . $this->search . '%';
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('title', 'ilike', $searchTerm)
-                    ->orWhere('description', 'ilike', $searchTerm);
+                $q->where('title', 'like', $searchTerm)
+                    ->orWhere('description', 'like', $searchTerm);
             });
         }
 

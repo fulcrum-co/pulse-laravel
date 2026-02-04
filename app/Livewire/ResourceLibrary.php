@@ -54,6 +54,8 @@ class ResourceLibrary extends Component
 
     public $resourceFile = null;
 
+    public bool $resourceIsPublic = false;
+
     // Provider form fields
     public string $providerName = '';
 
@@ -154,6 +156,7 @@ class ResourceLibrary extends Component
         $this->resourceUrl = '';
         $this->resourceDuration = null;
         $this->resourceFile = null;
+        $this->resourceIsPublic = false;
         $this->providerName = '';
         $this->providerBio = '';
         $this->providerTypeField = 'therapist';
@@ -196,6 +199,7 @@ class ResourceLibrary extends Component
                 'url' => $this->resourceUrl ?: null,
                 'file_path' => $filePath,
                 'estimated_duration_minutes' => $this->resourceDuration,
+                'is_public' => $this->resourceIsPublic,
                 'active' => true,
                 'created_by' => $user->id,
             ]);
