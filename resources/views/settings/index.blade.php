@@ -47,6 +47,13 @@
                     Terminology
                 </button>
                 @if(auth()->user()?->isAdmin())
+                <a
+                    href="{{ route('settings.billing') }}"
+                    class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                >
+                    <x-icon name="banknotes" class="w-5 h-5 inline-block mr-2 -mt-0.5" />
+                    Billing
+                </a>
                 <button
                     @click="activeTab = 'admin'"
                     :class="activeTab === 'admin' ? 'border-pulse-orange-500 text-pulse-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
@@ -97,6 +104,20 @@
                 </x-slot:header>
 
                 <div class="divide-y divide-gray-200">
+                    {{-- Billing & Credits --}}
+                    <a href="{{ route('settings.billing') }}" class="flex items-center justify-between py-4 hover:bg-gray-50 -mx-6 px-6 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                                <x-icon name="credit-card" class="w-5 h-5 text-green-600" />
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Billing & Credits</p>
+                                <p class="text-sm text-gray-500">Manage Pulse Credits, auto top-up, and feature controls</p>
+                            </div>
+                        </div>
+                        <x-icon name="chevron-right" class="w-5 h-5 text-gray-400" />
+                    </a>
+
                     {{-- AI Course Settings --}}
                     <a href="{{ route('admin.settings.ai-courses') }}" class="flex items-center justify-between py-4 hover:bg-gray-50 -mx-6 px-6 transition-colors">
                         <div class="flex items-center gap-4">

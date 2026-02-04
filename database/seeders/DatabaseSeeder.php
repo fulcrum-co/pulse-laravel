@@ -32,6 +32,8 @@ class DatabaseSeeder extends Seeder
             ReportSeeder::class,
             // Contact Lists
             ContactListSeeder::class,
+            // Billing
+            CreditRateCardSeeder::class,
         ]);
     }
 }
