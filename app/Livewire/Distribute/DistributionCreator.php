@@ -61,6 +61,9 @@ class DistributionCreator extends Component
     // Search for contacts
     public string $contactSearch = '';
 
+    // Search for reports
+    public string $reportSearch = '';
+
     public function mount(?int $distribution = null): void
     {
         if ($distribution) {
@@ -133,6 +136,8 @@ class DistributionCreator extends Component
             $this->selectedReportIds = array_values(array_diff($this->selectedReportIds, [$reportId]));
         } else {
             $this->selectedReportIds[] = $reportId;
+            // Clear search after adding a report
+            $this->reportSearch = '';
         }
     }
 
@@ -261,9 +266,25 @@ class DistributionCreator extends Component
                 ->keyBy('id');
         }
 
+        // Get reports with optional search filter
+        $reportsQuery = CustomReport::where('org_id', auth()->user()->org_id);
+        if ($this->reportSearch) {
+            $reportsQuery->where('report_name', 'like', "%{$this->reportSearch}%");
+        }
+        $reports = $reportsQuery->orderBy('report_name')->get();
+
+        // Get selected reports for displaying (even if filtered out by search)
+        $selectedReports = collect();
+        if (! empty($this->selectedReportIds)) {
+            $selectedReports = CustomReport::whereIn('id', $this->selectedReportIds)
+                ->get()
+                ->keyBy('id');
+        }
+
         return view('livewire.distribute.distribution-creator', [
             'contactLists' => $contactLists,
-            'reports' => CustomReport::where('org_id', auth()->user()->org_id)->get(),
+            'reports' => $reports,
+            'selectedReports' => $selectedReports,
             'contacts' => $contacts,
             'selectedContacts' => $selectedContacts,
             'templates' => MessageTemplate::where('org_id', auth()->user()->org_id)

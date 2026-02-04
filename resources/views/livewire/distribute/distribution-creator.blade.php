@@ -267,26 +267,54 @@
 
                         @if($linkReports)
                             <div class="border border-gray-200 rounded-lg overflow-hidden">
-                                @forelse($reports as $report)
-                                    <button
-                                        type="button"
-                                        wire:click="toggleReport({{ $report->id }})"
-                                        class="w-full flex items-center gap-3 px-3 py-2.5 text-left border-b border-gray-100 last:border-b-0 hover:bg-gray-50 {{ in_array($report->id, $selectedReportIds) ? 'bg-pulse-orange-50' : '' }}"
-                                    >
-                                        <div class="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 {{ in_array($report->id, $selectedReportIds) ? 'border-pulse-orange-500 bg-pulse-orange-500' : 'border-gray-300' }}">
-                                            @if(in_array($report->id, $selectedReportIds))
-                                                <x-icon name="check" class="w-3 h-3 text-white" />
+                                <!-- Selected reports as tags + search input -->
+                                <div class="flex flex-wrap gap-1.5 p-2 min-h-[42px] border-b border-gray-200">
+                                    @foreach($selectedReportIds as $reportId)
+                                        @php $report = $selectedReports->get($reportId); @endphp
+                                        @if($report)
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-pulse-orange-100 text-pulse-orange-800 rounded text-sm">
+                                                <x-icon name="document-chart-bar" class="w-3.5 h-3.5" />
+                                                {{ $report->report_name }}
+                                                <button type="button" wire:click="toggleReport({{ $reportId }})" class="hover:text-pulse-orange-900 ml-0.5">
+                                                    <x-icon name="x-mark" class="w-3.5 h-3.5" />
+                                                </button>
+                                            </span>
+                                        @endif
+                                    @endforeach
+                                    <input
+                                        type="text"
+                                        wire:model.live.debounce.300ms="reportSearch"
+                                        placeholder="{{ count($selectedReportIds) > 0 ? 'Add more reports...' : 'Search reports...' }}"
+                                        class="flex-1 min-w-[150px] border-0 p-1 text-sm focus:ring-0 placeholder-gray-400"
+                                    />
+                                </div>
+
+                                <!-- Report list (filtered by search) -->
+                                <div class="max-h-48 overflow-y-auto">
+                                    @forelse($reports as $report)
+                                        @if(!in_array($report->id, $selectedReportIds))
+                                            <button
+                                                type="button"
+                                                wire:click="toggleReport({{ $report->id }})"
+                                                class="w-full flex items-center gap-3 px-3 py-2.5 text-left border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
+                                            >
+                                                <div class="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 border-gray-300">
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-sm font-medium text-gray-900">{{ $report->report_name }}</p>
+                                                </div>
+                                            </button>
+                                        @endif
+                                    @empty
+                                        <p class="px-3 py-4 text-sm text-gray-500 text-center">
+                                            @if($reportSearch)
+                                                No reports match "{{ $reportSearch }}"
+                                            @else
+                                                No reports available. <a href="{{ route('reports.index') }}" class="text-pulse-orange-600 hover:underline">Create one</a>
                                             @endif
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-medium text-gray-900">{{ $report->report_name }}</p>
-                                        </div>
-                                    </button>
-                                @empty
-                                    <p class="px-3 py-4 text-sm text-gray-500 text-center">
-                                        No reports available. <a href="{{ route('reports.index') }}" class="text-pulse-orange-600 hover:underline">Create one</a>
-                                    </p>
-                                @endforelse
+                                        </p>
+                                    @endforelse
+                                </div>
 
                                 @if(count($selectedReportIds) > 0)
                                     <div class="px-3 py-2 bg-gray-50 border-t border-gray-200 flex items-center gap-4">
