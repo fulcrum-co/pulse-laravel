@@ -324,10 +324,10 @@
                         ];
                         $statusColor = $statusColors[$result->status] ?? 'gray';
                     @endphp
-                    <div class="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition-colors">
+                    <a href="{{ route('admin.moderation.edit', $result->id) }}" class="block bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer">
                         <div class="flex items-start gap-3">
                             @if($canAssign)
-                                <input type="checkbox" wire:model.live="selectedItems" value="{{ $result->id }}" class="mt-1 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
+                                <input type="checkbox" wire:model.live="selectedItems" value="{{ $result->id }}" class="mt-1 rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500" onclick="event.stopPropagation();">
                             @endif
 
                             <div class="w-10 h-10 rounded-lg bg-{{ $statusColor }}-100 flex items-center justify-center flex-shrink-0">
@@ -355,7 +355,7 @@
                                 @endif
                             </div>
 
-                            <div class="flex flex-col items-end gap-2">
+                            <div class="flex flex-col items-end gap-2" onclick="event.preventDefault(); event.stopPropagation();">
                                 <span class="text-xs text-gray-400">{{ $result->created_at->diffForHumans() }}</span>
                                 @if($result->assignee)
                                     <span class="text-xs text-pulse-orange-600">{{ $result->assignee->first_name }}</span>
@@ -366,9 +366,6 @@
                                             <x-icon name="user-plus" class="w-4 h-4" />
                                         </button>
                                     @endif
-                                    <a href="{{ route('admin.moderation.edit', $result->id) }}" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg" title="Review">
-                                        <x-icon name="pencil-square" class="w-4 h-4" />
-                                    </a>
                                     <button wire:click="quickApprove({{ $result->id }})" class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg" title="Approve">
                                         <x-icon name="check-circle" class="w-4 h-4" />
                                     </button>
@@ -378,7 +375,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 @empty
                     <div class="bg-white border border-gray-200 rounded-xl p-12 text-center">
                         <x-icon name="check-circle" class="w-12 h-12 mx-auto text-green-200" title="All caught up" />
@@ -404,11 +401,11 @@
                         ];
                         $statusColor = $statusColors[$result->status] ?? 'gray';
                     @endphp
-                    <div class="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition-colors">
+                    <a href="{{ route('admin.moderation.edit', $result->id) }}" class="block bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer">
                         <div class="flex items-start justify-between mb-3">
                             <div class="flex items-center gap-2">
                                 @if($canAssign)
-                                    <input type="checkbox" wire:model.live="selectedItems" value="{{ $result->id }}" class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
+                                    <input type="checkbox" wire:model.live="selectedItems" value="{{ $result->id }}" class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500" onclick="event.stopPropagation();">
                                 @endif
                                 <div class="w-8 h-8 rounded-lg bg-{{ $statusColor }}-100 flex items-center justify-center">
                                     <x-icon name="{{ $result->status === 'flagged' ? 'flag' : 'document-text' }}" class="w-4 h-4 text-{{ $statusColor }}-600" />
@@ -434,7 +431,7 @@
                             <p class="text-xs text-red-600 line-clamp-1 mb-3">{{ $gridDisplayFlags }}</p>
                         @endif
 
-                        <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                        <div class="flex items-center justify-between pt-3 border-t border-gray-100" onclick="event.preventDefault(); event.stopPropagation();">
                             <span class="text-xs text-gray-400">{{ $result->assignee?->first_name ?? 'Unassigned' }}</span>
                             <div class="flex items-center gap-0.5">
                                 @if($canAssign)
@@ -442,9 +439,6 @@
                                         <x-icon name="user-plus" class="w-4 h-4" />
                                     </button>
                                 @endif
-                                <a href="{{ route('admin.moderation.edit', $result->id) }}" class="p-1 text-gray-400 hover:text-blue-600 rounded" title="Review">
-                                    <x-icon name="pencil-square" class="w-4 h-4" />
-                                </a>
                                 <button wire:click="quickApprove({{ $result->id }})" class="p-1 text-gray-400 hover:text-green-600 rounded" title="Approve">
                                     <x-icon name="check-circle" class="w-4 h-4" />
                                 </button>
@@ -453,7 +447,7 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 @empty
                     <div class="col-span-full bg-white border border-gray-200 rounded-xl p-12 text-center">
                         <x-icon name="check-circle" class="w-12 h-12 mx-auto text-green-200" title="All caught up" />
@@ -497,9 +491,9 @@
                                 ];
                                 $statusColor = $statusColors[$result->status] ?? 'gray';
                             @endphp
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='{{ route('admin.moderation.edit', $result->id) }}'">
                                 @if($canAssign)
-                                    <td class="px-3 py-3">
+                                    <td class="px-3 py-3" onclick="event.stopPropagation();">
                                         <input type="checkbox" wire:model.live="selectedItems" value="{{ $result->id }}" class="rounded border-gray-300 text-pulse-orange-500 focus:ring-pulse-orange-500">
                                     </td>
                                 @endif
@@ -536,16 +530,13 @@
                                 <td class="px-4 py-3">
                                     <span class="text-sm text-gray-500">{{ $result->created_at->format('M j') }}</span>
                                 </td>
-                                <td class="px-4 py-3 text-right">
+                                <td class="px-4 py-3 text-right" onclick="event.stopPropagation();">
                                     <div class="flex items-center justify-end gap-1">
                                         @if($canAssign)
                                             <button wire:click="openAssignModal({{ $result->id }})" class="p-1.5 text-gray-400 hover:text-pulse-orange-600 hover:bg-pulse-orange-50 rounded" title="Assign">
                                                 <x-icon name="user-plus" class="w-4 h-4" />
                                             </button>
                                         @endif
-                                        <a href="{{ route('admin.moderation.edit', $result->id) }}" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Review">
-                                            <x-icon name="pencil-square" class="w-4 h-4" />
-                                        </a>
                                         <button wire:click="quickApprove({{ $result->id }})" class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded" title="Approve">
                                             <x-icon name="check-circle" class="w-4 h-4" />
                                         </button>
