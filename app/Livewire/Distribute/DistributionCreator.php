@@ -31,6 +31,8 @@ class DistributionCreator extends Component
     // Content
     public string $subject = '';
 
+    public bool $linkReports = false;
+
     public array $selectedReportIds = [];
 
     public string $reportMode = 'live';
@@ -97,6 +99,7 @@ class DistributionCreator extends Component
         if (empty($this->selectedReportIds) && $distribution->report_id) {
             $this->selectedReportIds = [$distribution->report_id];
         }
+        $this->linkReports = ! empty($this->selectedReportIds);
 
         $this->reportMode = $distribution->report_mode ?? 'live';
         $this->subject = $distribution->subject ?? '';
