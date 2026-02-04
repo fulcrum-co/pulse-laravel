@@ -223,6 +223,7 @@ class ModerationQueue extends Component
             'rejected' => $query->rejected(),
             'passed' => $query->passed(),
             'pending' => $query->pending(),
+            'all' => null, // Show all items
             default => null,
         };
     }

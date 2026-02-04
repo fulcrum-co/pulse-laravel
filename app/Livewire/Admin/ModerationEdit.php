@@ -169,6 +169,44 @@ class ModerationEdit extends Component
         $this->redirect(route('admin.moderation'));
     }
 
+    public function requestRevision(): void
+    {
+        // Mark as flagged and needing revision
+        $this->result->update([
+            'status' => ContentModerationResult::STATUS_FLAGGED,
+            'human_reviewed' => true,
+            'reviewed_by' => auth()->id(),
+            'reviewed_at' => now(),
+            'review_notes' => $this->reviewNotes ?: 'Revision requested',
+        ]);
+
+        // Update the moderated content if it has an approval status
+        $moderatable = $this->result->moderatable;
+        if ($moderatable && method_exists($moderatable, 'update')) {
+            if (isset($moderatable->approval_status)) {
+                $moderatable->update([
+                    'approval_status' => 'revision_requested',
+                ]);
+            }
+        }
+
+        // Notify the content owner
+        app(ModerationAssignmentService::class)->notifyModerationComplete($this->result, 'revision_requested');
+
+        session()->flash('success', 'Revision request sent to content owner.');
+        $this->redirect(route('admin.moderation'));
+    }
+
+    public function reject(): void
+    {
+        $this->result->confirmRejection(auth()->id(), $this->reviewNotes ?: 'Content rejected');
+
+        app(ModerationAssignmentService::class)->notifyModerationComplete($this->result, 'rejected');
+
+        session()->flash('success', 'Content has been rejected.');
+        $this->redirect(route('admin.moderation'));
+    }
+
     public function cancel(): void
     {
         $this->redirect(route('admin.moderation'));

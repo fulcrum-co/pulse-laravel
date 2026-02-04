@@ -7,6 +7,122 @@
         Back to Queue
     </a>
 
+    {{-- Assignment Context Card --}}
+    @if($result->assigned_to || $result->assignment_notes || $result->due_at)
+        <div class="bg-pulse-orange-50 border border-pulse-orange-200 rounded-lg p-4 mb-6">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-pulse-orange-100 flex items-center justify-center flex-shrink-0">
+                    <x-icon name="clipboard-document-check" class="w-5 h-5 text-pulse-orange-600" />
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-semibold text-pulse-orange-900 mb-1">Assignment Details</h3>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                        @if($result->assigner)
+                            <div class="text-gray-600">
+                                <span class="text-gray-500">Assigned by:</span>
+                                <span class="font-medium">{{ $result->assigner->full_name }}</span>
+                            </div>
+                        @endif
+                        @if($result->assigned_at)
+                            <div class="text-gray-600">
+                                <span class="text-gray-500">Assigned:</span>
+                                <span>{{ $result->assigned_at->diffForHumans() }}</span>
+                            </div>
+                        @endif
+                        @if($result->due_at)
+                            <div class="text-gray-600">
+                                <span class="text-gray-500">Due:</span>
+                                <span class="{{ $result->isOverdue() ? 'text-red-600 font-medium' : ($result->isDueSoon() ? 'text-yellow-600' : '') }}">
+                                    {{ $result->due_at->format('M j, Y g:i A') }}
+                                    @if($result->isOverdue())
+                                        (Overdue)
+                                    @elseif($result->isDueSoon())
+                                        (Due soon)
+                                    @endif
+                                </span>
+                            </div>
+                        @endif
+                        @if($result->assignment_priority && $result->assignment_priority !== 'normal')
+                            <div class="text-gray-600">
+                                <span class="text-gray-500">Priority:</span>
+                                @php
+                                    $priorityColors = [
+                                        'urgent' => 'bg-red-100 text-red-700',
+                                        'high' => 'bg-orange-100 text-orange-700',
+                                        'low' => 'bg-gray-100 text-gray-700',
+                                    ];
+                                @endphp
+                                <span class="px-1.5 py-0.5 text-xs font-medium rounded {{ $priorityColors[$result->assignment_priority] ?? '' }}">
+                                    {{ ucfirst($result->assignment_priority) }}
+                                </span>
+                            </div>
+                        @endif
+                    </div>
+                    @if($result->assignment_notes)
+                        <div class="mt-2 p-2 bg-white/50 rounded text-sm text-gray-700 italic">
+                            "{{ $result->assignment_notes }}"
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Content Author & Notification Card --}}
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
+        <div class="flex items-start gap-4">
+            {{-- Author Avatar --}}
+            @php
+                $contentOwner = $moderatable && isset($moderatable->created_by)
+                    ? \App\Models\User::find($moderatable->created_by)
+                    : null;
+            @endphp
+            <div class="w-12 h-12 rounded-full bg-pulse-blue-100 flex items-center justify-center flex-shrink-0">
+                @if($contentOwner)
+                    <span class="text-lg font-semibold text-pulse-blue-600">{{ substr($contentOwner->first_name ?? 'U', 0, 1) }}</span>
+                @else
+                    <x-icon name="user" class="w-6 h-6 text-pulse-blue-600" />
+                @endif
+            </div>
+
+            {{-- Author Details --}}
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Content Author</h3>
+                        @if($contentOwner)
+                            <p class="text-base font-medium text-gray-800 dark:text-gray-200">{{ $contentOwner->full_name }}</p>
+                            <p class="text-sm text-gray-500">{{ $contentOwner->email }}</p>
+                        @else
+                            <p class="text-sm text-gray-500">Unknown author</p>
+                        @endif
+                    </div>
+                    <div class="text-right text-sm">
+                        <div class="text-gray-500">Submitted</div>
+                        <div class="text-gray-700 dark:text-gray-300">{{ $moderatable?->created_at?->format('M j, Y') ?? '—' }}</div>
+                    </div>
+                </div>
+
+                {{-- What Happens Next --}}
+                <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <div class="flex items-start gap-2">
+                        <x-icon name="arrow-right-circle" class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <div class="text-sm">
+                            <span class="font-medium text-gray-700 dark:text-gray-300">When you complete this review:</span>
+                            <ul class="mt-1 text-gray-600 dark:text-gray-400 space-y-0.5">
+                                @if($contentOwner)
+                                    <li>• <strong>{{ $contentOwner->first_name }}</strong> will receive a notification with your decision</li>
+                                @endif
+                                <li>• Your review notes will be included in the notification</li>
+                                <li>• The content status will be updated based on your action</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Header Card --}}
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
         <div class="flex items-start justify-between">
@@ -127,48 +243,98 @@
             @endif
         </div>
 
+        {{-- Review Notes --}}
+        <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Review Notes
+                <span class="font-normal text-gray-500">(visible to content owner)</span>
+            </label>
+            <textarea
+                wire:model="reviewNotes"
+                rows="3"
+                placeholder="Add feedback, suggestions, or explanation for your decision..."
+                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            ></textarea>
+            <p class="mt-1 text-xs text-gray-500">
+                These notes will be included in the notification sent to the content owner.
+            </p>
+        </div>
+
         {{-- Actions --}}
-        <div class="flex items-center justify-between mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
-            <button
-                wire:click="cancel"
-                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                title="Discard changes and return to queue"
-            >
-                Cancel
-            </button>
-
-            <div class="flex items-center gap-3">
-                <button
-                    wire:click="save"
-                    wire:loading.attr="disabled"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg"
-                    title="Save changes and run AI moderation again"
-                >
-                    <span wire:loading.remove wire:target="save">Save & Re-moderate</span>
-                    <span wire:loading wire:target="save">Saving...</span>
-                </button>
-
-                <button
-                    wire:click="saveAndApprove"
-                    wire:loading.attr="disabled"
-                    class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg"
-                    title="Save changes and approve for publishing"
-                >
-                    <span wire:loading.remove wire:target="saveAndApprove">Save & Approve</span>
-                    <span wire:loading wire:target="saveAndApprove">Approving...</span>
-                </button>
-
+        <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+            {{-- Action Explanations --}}
+            <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                <p><strong>Save & Re-moderate:</strong> Update content and run AI moderation again</p>
+                <p><strong>Request Revision:</strong> Send back to owner with your notes for changes</p>
+                <p><strong>Reject:</strong> Permanently reject this content</p>
+                <p><strong>Approve:</strong> Approve content (owner can then publish)</p>
                 @if($contentType === 'MiniCourse')
-                    <button
-                        wire:click="saveAndPublish"
-                        wire:loading.attr="disabled"
-                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg"
-                        title="Save changes and publish immediately"
-                    >
-                        <span wire:loading.remove wire:target="saveAndPublish">Publish</span>
-                        <span wire:loading wire:target="saveAndPublish">Publishing...</span>
-                    </button>
+                    <p><strong>Publish:</strong> Approve and make live immediately</p>
                 @endif
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <button
+                    wire:click="cancel"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg order-last sm:order-first"
+                    title="Discard changes and return to queue"
+                >
+                    Cancel
+                </button>
+
+                <div class="flex flex-wrap items-center justify-end gap-2">
+                    <button
+                        wire:click="save"
+                        wire:loading.attr="disabled"
+                        class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg"
+                        title="Save changes and run AI moderation again"
+                    >
+                        <span wire:loading.remove wire:target="save">Save & Re-moderate</span>
+                        <span wire:loading wire:target="save">Saving...</span>
+                    </button>
+
+                    <button
+                        wire:click="requestRevision"
+                        wire:loading.attr="disabled"
+                        class="px-3 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 hover:bg-yellow-200 rounded-lg"
+                        title="Send back to owner for revisions"
+                    >
+                        <span wire:loading.remove wire:target="requestRevision">Request Revision</span>
+                        <span wire:loading wire:target="requestRevision">Sending...</span>
+                    </button>
+
+                    <button
+                        wire:click="reject"
+                        wire:loading.attr="disabled"
+                        class="px-3 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg"
+                        title="Reject this content"
+                    >
+                        <span wire:loading.remove wire:target="reject">Reject</span>
+                        <span wire:loading wire:target="reject">Rejecting...</span>
+                    </button>
+
+                    <button
+                        wire:click="saveAndApprove"
+                        wire:loading.attr="disabled"
+                        class="px-3 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg"
+                        title="Save changes and approve"
+                    >
+                        <span wire:loading.remove wire:target="saveAndApprove">Approve</span>
+                        <span wire:loading wire:target="saveAndApprove">Approving...</span>
+                    </button>
+
+                    @if($contentType === 'MiniCourse')
+                        <button
+                            wire:click="saveAndPublish"
+                            wire:loading.attr="disabled"
+                            class="px-3 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg"
+                            title="Approve and publish immediately"
+                        >
+                            <span wire:loading.remove wire:target="saveAndPublish">Publish</span>
+                            <span wire:loading wire:target="saveAndPublish">Publishing...</span>
+                        </button>
+                    @endif
+                </div>
             </div>
         </div>
     </div>

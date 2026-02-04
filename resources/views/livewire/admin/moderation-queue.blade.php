@@ -41,11 +41,16 @@
         <div class="mb-6">
             <div class="flex items-center justify-between mb-2">
                 <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</h3>
-                @if($statusFilter)
-                    <button wire:click="$set('statusFilter', '')" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700">Clear</button>
+                @if($statusFilter && $statusFilter !== 'all')
+                    <button wire:click="$set('statusFilter', 'all')" class="text-xs text-pulse-orange-600 hover:text-pulse-orange-700">Show All</button>
                 @endif
             </div>
             <div class="space-y-1">
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="radio" wire:model.live="statusFilter" value="all" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
+                    <x-icon name="squares-2x2" class="w-4 h-4 text-gray-500" title="All Items" />
+                    <span class="text-sm text-gray-700">All Items</span>
+                </label>
                 <label class="flex items-center gap-2 py-1 cursor-pointer">
                     <input type="radio" wire:model.live="statusFilter" value="needs_review" class="text-pulse-orange-500 focus:ring-pulse-orange-500">
                     <x-icon name="clock" class="w-4 h-4 text-yellow-500" title="Needs Review" />
