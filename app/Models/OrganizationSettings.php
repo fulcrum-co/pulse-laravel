@@ -52,11 +52,7 @@ class OrganizationSettings extends Model
      */
     public static function getTerminologyCategories(): array
     {
-        return [
-            'People' => ['student', 'students', 'teacher', 'teachers'],
-            'Academic' => ['grade', 'grade_level', 'school', 'schools'],
-            'Risk Levels' => ['at_risk', 'high_risk', 'low_risk', 'good_standing'],
-        ];
+        return TerminologyService::CATEGORIES;
     }
 
     /**
