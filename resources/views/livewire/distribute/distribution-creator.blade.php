@@ -171,7 +171,7 @@
                             >
                                 <option value="">Select a report...</option>
                                 @foreach($reports as $report)
-                                    <option value="{{ $report->id }}">{{ $report->title }}</option>
+                                    <option value="{{ $report->id }}">{{ $report->report_name }}</option>
                                 @endforeach
                             </select>
                             @error('reportId') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
