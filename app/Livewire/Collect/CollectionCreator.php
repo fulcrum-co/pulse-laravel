@@ -4,7 +4,7 @@ namespace App\Livewire\Collect;
 
 use App\Models\LearningGroup;
 use App\Models\Collection;
-use App\Models\Contact;
+use App\Models\Student;
 use App\Models\Survey;
 use App\Services\CollectionService;
 use Illuminate\Support\Str;
@@ -118,7 +118,7 @@ class CollectionCreator extends Component
             ->toArray();
 
         // Load available grades
-        $this->availableLevels = Contact::where('org_id', $user->org_id)
+        $this->availableLevels = Student::where('org_id', $user->org_id)
             ->whereNotNull('grade_level')
             ->distinct()
             ->pluck('grade_level')
