@@ -1,5 +1,26 @@
 @php
     $settings = auth()->user()?->organization?->getOrCreateSettings();
+
+    // Helper function to get status badge classes (avoids dynamic Tailwind compilation issues)
+    function getStatusClasses($status) {
+        return match($status) {
+            'active' => 'bg-green-100 text-green-800',
+            'paused' => 'bg-yellow-100 text-yellow-800',
+            'draft' => 'bg-gray-100 text-gray-800',
+            'archived' => 'bg-red-100 text-red-800',
+            default => 'bg-gray-100 text-gray-800',
+        };
+    }
+
+    // Helper function to get type badge classes
+    function getTypeClasses($type) {
+        return match($type) {
+            'recurring' => 'bg-blue-100 text-blue-700',
+            'one_time' => 'bg-purple-100 text-purple-700',
+            'event_triggered' => 'bg-orange-100 text-orange-700',
+            default => 'bg-gray-100 text-gray-700',
+        };
+    }
 @endphp
 <div class="space-y-4">
     <!-- Search, Filters & View Toggle -->
@@ -94,19 +115,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" data-help="collection-list">
             @foreach($collections as $collection)
                 @php
-                    $statusColor = match($collection->status) {
-                        'active' => 'green',
-                        'paused' => 'yellow',
-                        'draft' => 'gray',
-                        'archived' => 'red',
-                        default => 'gray',
-                    };
-                    $typeColor = match($collection->collection_type) {
-                        'recurring' => 'blue',
-                        'one_time' => 'purple',
-                        'event_triggered' => 'orange',
-                        default => 'gray',
-                    };
+                    $statusClasses = getStatusClasses($collection->status);
+                    $typeClasses = getTypeClasses($collection->collection_type);
                     $formatIcon = match($collection->format_mode) {
                         'conversational' => 'chat-bubble-left-right',
                         'form' => 'clipboard-document-list',
@@ -119,13 +129,13 @@
                     <div class="p-4">
                         <div class="flex items-start justify-between gap-2 mb-3">
                             <h3 class="font-medium text-gray-900 text-sm truncate flex-1">{{ $collection->title }}</h3>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $statusColor }}-100 text-{{ $statusColor }}-800 flex-shrink-0">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $statusClasses }} flex-shrink-0">
                                 {{ ucfirst($collection->status) }}
                             </span>
                         </div>
 
                         <div class="flex items-center gap-2 text-xs mb-3">
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-{{ $typeColor }}-100 text-{{ $typeColor }}-700">
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ $typeClasses }}">
                                 {{ str_replace('_', ' ', ucfirst($collection->collection_type)) }}
                             </span>
                             <span class="inline-flex items-center text-gray-500">
@@ -163,27 +173,18 @@
                     </div>
 
                     <div class="px-4 py-2 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                        <div class="flex items-center gap-1">
-                            <div class="relative group">
-                                <button wire:click="toggleStatus({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
-                                    <x-icon name="{{ $collection->status === 'active' ? 'pause' : 'play' }}" class="w-3.5 h-3.5" />
-                                </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $collection->status === 'active' ? 'Pause' : 'Activate' }}</span>
-                            </div>
-                            <div class="relative group">
-                                <button wire:click="duplicate({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
-                                    <x-icon name="document-duplicate" class="w-3.5 h-3.5" />
-                                </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
-                            </div>
-                            <div class="relative group">
-                                <button wire:click="confirmDelete({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-red-500 rounded">
-                                    <x-icon name="trash" class="w-3.5 h-3.5" />
-                                </button>
-                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Delete</span>
-                            </div>
+                        <div class="flex items-center gap-2">
+                            <button wire:click="toggleStatus({{ $collection->id }})" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" title="{{ $collection->status === 'active' ? 'Pause' : 'Activate' }}">
+                                <x-icon name="{{ $collection->status === 'active' ? 'pause' : 'play' }}" class="w-5 h-5" />
+                            </button>
+                            <button wire:click="duplicate({{ $collection->id }})" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" title="Duplicate">
+                                <x-icon name="document-duplicate" class="w-5 h-5" />
+                            </button>
+                            <button wire:click="confirmDelete({{ $collection->id }})" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                                <x-icon name="trash" class="w-5 h-5" />
+                            </button>
                         </div>
-                        <a href="{{ route('collect.show', $collection) }}" class="text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
+                        <a href="{{ route('collect.show', $collection) }}" class="px-3 py-2 text-sm font-medium text-pulse-orange-600 hover:text-pulse-orange-700 hover:bg-pulse-orange-50 rounded-lg transition-colors">
                             View
                         </a>
                     </div>
@@ -196,29 +197,18 @@
         <div class="space-y-2">
             @foreach($collections as $collection)
                 @php
-                    $statusColor = match($collection->status) {
-                        'active' => 'green',
-                        'paused' => 'yellow',
-                        'draft' => 'gray',
-                        'archived' => 'red',
-                        default => 'gray',
-                    };
-                    $typeColor = match($collection->collection_type) {
-                        'recurring' => 'blue',
-                        'one_time' => 'purple',
-                        'event_triggered' => 'orange',
-                        default => 'gray',
-                    };
+                    $statusClasses = getStatusClasses($collection->status);
+                    $typeClasses = getTypeClasses($collection->collection_type);
                     $activeSchedule = $collection->schedules->first();
                 @endphp
                 <div class="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-sm transition-shadow flex items-center gap-4">
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                             <h3 class="font-medium text-gray-900 text-sm truncate">{{ $collection->title }}</h3>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $statusColor }}-100 text-{{ $statusColor }}-800">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $statusClasses }}">
                                 {{ ucfirst($collection->status) }}
                             </span>
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-{{ $typeColor }}-100 text-{{ $typeColor }}-700">
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ $typeClasses }}">
                                 {{ str_replace('_', ' ', ucfirst($collection->collection_type)) }}
                             </span>
                         </div>
@@ -235,26 +225,17 @@
                             @endif
                         </div>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <div class="relative group">
-                            <button wire:click="toggleStatus({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
-                                <x-icon name="{{ $collection->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
-                            </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{{ $collection->status === 'active' ? 'Pause' : 'Activate' }}</span>
-                        </div>
-                        <div class="relative group">
-                            <button wire:click="duplicate({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-gray-600 rounded">
-                                <x-icon name="document-duplicate" class="w-4 h-4" />
-                            </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Duplicate</span>
-                        </div>
-                        <div class="relative group">
-                            <button wire:click="confirmDelete({{ $collection->id }})" class="p-1.5 text-gray-400 hover:text-red-500 rounded">
-                                <x-icon name="trash" class="w-4 h-4" />
-                            </button>
-                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Delete</span>
-                        </div>
-                        <a href="{{ route('collect.show', $collection) }}" class="ml-2 px-3 py-1 text-xs font-medium text-white bg-pulse-orange-500 rounded hover:bg-pulse-orange-600">
+                    <div class="flex items-center gap-2">
+                        <button wire:click="toggleStatus({{ $collection->id }})" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" title="{{ $collection->status === 'active' ? 'Pause' : 'Activate' }}">
+                            <x-icon name="{{ $collection->status === 'active' ? 'pause' : 'play' }}" class="w-5 h-5" />
+                        </button>
+                        <button wire:click="duplicate({{ $collection->id }})" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" title="Duplicate">
+                            <x-icon name="document-duplicate" class="w-5 h-5" />
+                        </button>
+                        <button wire:click="confirmDelete({{ $collection->id }})" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                            <x-icon name="trash" class="w-5 h-5" />
+                        </button>
+                        <a href="{{ route('collect.show', $collection) }}" class="ml-1 px-4 py-2 text-sm font-medium text-white bg-pulse-orange-500 rounded-lg hover:bg-pulse-orange-600 transition-colors">
                             View
                         </a>
                     </div>
@@ -281,19 +262,8 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($collections as $collection)
                         @php
-                            $statusColor = match($collection->status) {
-                                'active' => 'green',
-                                'paused' => 'yellow',
-                                'draft' => 'gray',
-                                'archived' => 'red',
-                                default => 'gray',
-                            };
-                            $typeColor = match($collection->collection_type) {
-                                'recurring' => 'blue',
-                                'one_time' => 'purple',
-                                'event_triggered' => 'orange',
-                                default => 'gray',
-                            };
+                            $statusClasses = getStatusClasses($collection->status);
+                            $typeClasses = getTypeClasses($collection->collection_type);
                             $activeSchedule = $collection->schedules->first();
                         @endphp
                         <tr class="hover:bg-gray-50">
@@ -306,12 +276,12 @@
                                 </div>
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap">
-                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-{{ $typeColor }}-100 text-{{ $typeColor }}-700">
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ $typeClasses }}">
                                     {{ str_replace('_', ' ', ucfirst($collection->collection_type)) }}
                                 </span>
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $statusColor }}-100 text-{{ $statusColor }}-800">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $statusClasses }}">
                                     {{ ucfirst($collection->status) }}
                                 </span>
                             </td>
@@ -333,25 +303,16 @@
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap text-right">
                                 <div class="flex items-center justify-end gap-1">
-                                    <div class="relative group">
-                                        <button wire:click="toggleStatus({{ $collection->id }})" class="p-1 text-gray-400 hover:text-gray-600 rounded">
-                                            <x-icon name="{{ $collection->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
-                                        </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">{{ $collection->status === 'active' ? 'Pause' : 'Activate' }}</span>
-                                    </div>
-                                    <div class="relative group">
-                                        <button wire:click="duplicate({{ $collection->id }})" class="p-1 text-gray-400 hover:text-gray-600 rounded">
-                                            <x-icon name="document-duplicate" class="w-4 h-4" />
-                                        </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Duplicate</span>
-                                    </div>
-                                    <div class="relative group">
-                                        <button wire:click="confirmDelete({{ $collection->id }})" class="p-1 text-gray-400 hover:text-red-500 rounded">
-                                            <x-icon name="trash" class="w-4 h-4" />
-                                        </button>
-                                        <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">Delete</span>
-                                    </div>
-                                    <a href="{{ route('collect.show', $collection) }}" class="ml-1 px-2 py-1 text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700">
+                                    <button wire:click="toggleStatus({{ $collection->id }})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" title="{{ $collection->status === 'active' ? 'Pause' : 'Activate' }}">
+                                        <x-icon name="{{ $collection->status === 'active' ? 'pause' : 'play' }}" class="w-4 h-4" />
+                                    </button>
+                                    <button wire:click="duplicate({{ $collection->id }})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" title="Duplicate">
+                                        <x-icon name="document-duplicate" class="w-4 h-4" />
+                                    </button>
+                                    <button wire:click="confirmDelete({{ $collection->id }})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                                        <x-icon name="trash" class="w-4 h-4" />
+                                    </button>
+                                    <a href="{{ route('collect.show', $collection) }}" class="ml-1 px-3 py-1.5 text-xs font-medium text-pulse-orange-600 hover:text-pulse-orange-700 hover:bg-pulse-orange-50 rounded-lg transition-colors">
                                         View
                                     </a>
                                 </div>
