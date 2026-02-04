@@ -19,49 +19,58 @@ class OkrPlanSeeder extends Seeder
 {
     public function run(): void
     {
-        $school = Organization::where('org_type', 'school')->first();
+        // Get first available organization
+        $org = Organization::first();
 
-        if (! $school) {
-            $this->command->warn('No school organization found. Please run OrganizationSeeder first.');
+        if (! $org) {
+            $this->command->warn('No organization found. Creating a demo organization...');
+            $org = Organization::create([
+                'name' => 'Demo Organization',
+                'org_type' => 'school',
+                'status' => 'active',
+            ]);
+        }
+
+        // Get first available user or create one
+        $user = User::where('org_id', $org->id)->first() ?? User::first();
+
+        if (! $user) {
+            $this->command->warn('No user found. Please create a user first.');
 
             return;
         }
 
-        $admin = User::where('org_id', $school->id)->where('primary_role', 'admin')->first();
-        $teachers = User::where('org_id', $school->id)->where('primary_role', 'teacher')->get();
-        $students = Student::where('org_id', $school->id)->get();
+        $this->command->info('Creating OKR plans for: '.$org->name);
 
-        if (! $admin) {
-            $this->command->warn('No admin user found. Please run UserSeeder first.');
-
-            return;
-        }
+        // Get other users for collaborators
+        $otherUsers = User::where('org_id', $org->id)->where('id', '!=', $user->id)->take(3)->get();
+        $students = Student::where('org_id', $org->id)->get();
 
         // =====================================================
         // 1. School-Wide Strategic OKR Plan
         // =====================================================
         $strategicPlan = StrategicPlan::create([
-            'org_id' => $school->id,
-            'title' => 'Q1 2025 School Wellness Initiative',
-            'description' => 'Quarterly OKR plan to improve student mental health outcomes and reduce chronic absenteeism.',
+            'org_id' => $org->id,
+            'title' => 'Q1 2025 Wellness Initiative',
+            'description' => 'Quarterly OKR plan to improve mental health outcomes and reduce chronic absenteeism.',
             'plan_type' => StrategicPlan::TYPE_STRATEGIC,
             'category' => StrategicPlan::CATEGORY_OKR,
             'status' => StrategicPlan::STATUS_ACTIVE,
             'start_date' => Carbon::now()->startOfQuarter(),
             'end_date' => Carbon::now()->endOfQuarter(),
-            'created_by' => $admin->id,
+            'created_by' => $user->id,
         ]);
 
         StrategyCollaborator::create([
             'strategic_plan_id' => $strategicPlan->id,
-            'user_id' => $admin->id,
+            'user_id' => $user->id,
             'role' => 'owner',
         ]);
 
-        foreach ($teachers->take(3) as $teacher) {
+        foreach ($otherUsers as $otherUser) {
             StrategyCollaborator::create([
                 'strategic_plan_id' => $strategicPlan->id,
-                'user_id' => $teacher->id,
+                'user_id' => $otherUser->id,
                 'role' => 'collaborator',
             ]);
         }
@@ -69,13 +78,13 @@ class OkrPlanSeeder extends Seeder
         // Focus Area 1: Mental Health Support
         $goal1 = Goal::create([
             'strategic_plan_id' => $strategicPlan->id,
-            'title' => 'Improve Student Mental Health Support',
-            'description' => 'Expand and enhance mental health resources and accessibility for all students.',
+            'title' => 'Improve Mental Health Support',
+            'description' => 'Expand and enhance mental health resources and accessibility for all.',
             'goal_type' => Goal::TYPE_OBJECTIVE,
             'status' => Goal::STATUS_IN_PROGRESS,
             'due_date' => Carbon::now()->endOfQuarter(),
             'sort_order' => 0,
-            'owner_id' => $admin->id,
+            'owner_id' => $user->id,
         ]);
 
         // Key Activities for Goal 1
@@ -96,7 +105,7 @@ class OkrPlanSeeder extends Seeder
         KeyResult::create([
             'goal_id' => $goal1->id,
             'title' => 'Train staff on mental health first aid',
-            'description' => 'All homeroom teachers complete mental health first aid certification.',
+            'description' => 'All team members complete mental health first aid certification.',
             'metric_type' => KeyResult::METRIC_PERCENTAGE,
             'target_value' => 100,
             'current_value' => 65,
@@ -110,7 +119,7 @@ class OkrPlanSeeder extends Seeder
         KeyResult::create([
             'goal_id' => $goal1->id,
             'title' => 'Launch peer support program',
-            'description' => 'Recruit and train student wellness ambassadors.',
+            'description' => 'Recruit and train wellness ambassadors.',
             'metric_type' => KeyResult::METRIC_NUMBER,
             'target_value' => 25,
             'current_value' => 8,
@@ -130,13 +139,13 @@ class OkrPlanSeeder extends Seeder
             'status' => Goal::STATUS_AT_RISK,
             'due_date' => Carbon::now()->endOfQuarter(),
             'sort_order' => 1,
-            'owner_id' => $teachers->first()?->id ?? $admin->id,
+            'owner_id' => $otherUsers->first()?->id ?? $user->id,
         ]);
 
         KeyResult::create([
             'goal_id' => $goal2->id,
             'title' => 'Reduce chronic absenteeism rate',
-            'description' => 'Students missing 10%+ of school days.',
+            'description' => 'People missing 10%+ of scheduled time.',
             'metric_type' => KeyResult::METRIC_PERCENTAGE,
             'target_value' => 8,
             'current_value' => 12,
@@ -163,8 +172,8 @@ class OkrPlanSeeder extends Seeder
 
         KeyResult::create([
             'goal_id' => $goal2->id,
-            'title' => 'Parent engagement meetings held',
-            'description' => 'Conduct attendance intervention meetings with families of chronically absent students.',
+            'title' => 'Engagement meetings held',
+            'description' => 'Conduct intervention meetings with families of chronically absent individuals.',
             'metric_type' => KeyResult::METRIC_NUMBER,
             'target_value' => 40,
             'current_value' => 18,
@@ -184,12 +193,12 @@ class OkrPlanSeeder extends Seeder
             'status' => Goal::STATUS_NOT_STARTED,
             'due_date' => Carbon::now()->endOfQuarter(),
             'sort_order' => 2,
-            'owner_id' => $admin->id,
+            'owner_id' => $user->id,
         ]);
 
         KeyResult::create([
             'goal_id' => $goal3->id,
-            'title' => 'Launch parent communication app',
+            'title' => 'Launch communication app',
             'description' => 'Deploy and onboard families to new communication platform.',
             'metric_type' => KeyResult::METRIC_PERCENTAGE,
             'target_value' => 80,
@@ -203,8 +212,8 @@ class OkrPlanSeeder extends Seeder
 
         KeyResult::create([
             'goal_id' => $goal3->id,
-            'title' => 'Monthly parent newsletter subscribers',
-            'description' => 'Grow parent engagement through regular communications.',
+            'title' => 'Monthly newsletter subscribers',
+            'description' => 'Grow engagement through regular communications.',
             'metric_type' => KeyResult::METRIC_NUMBER,
             'target_value' => 500,
             'current_value' => 0,
@@ -220,11 +229,11 @@ class OkrPlanSeeder extends Seeder
             'strategic_plan_id' => $strategicPlan->id,
             'goal_id' => $goal1->id,
             'title' => 'Complete counselor hiring',
-            'description' => 'Hire and onboard 2 additional school counselors.',
+            'description' => 'Hire and onboard 2 additional counselors.',
             'due_date' => Carbon::now()->addWeeks(2),
             'status' => Milestone::STATUS_COMPLETED,
             'completed_at' => Carbon::now()->subDays(3),
-            'completed_by' => $admin->id,
+            'completed_by' => $user->id,
             'sort_order' => 0,
         ]);
 
@@ -232,7 +241,7 @@ class OkrPlanSeeder extends Seeder
             'strategic_plan_id' => $strategicPlan->id,
             'goal_id' => $goal1->id,
             'title' => 'Mental health training kickoff',
-            'description' => 'Begin first cohort of teacher mental health first aid training.',
+            'description' => 'Begin first cohort of mental health first aid training.',
             'due_date' => Carbon::now()->addWeeks(4),
             'status' => Milestone::STATUS_IN_PROGRESS,
             'sort_order' => 1,
@@ -252,7 +261,7 @@ class OkrPlanSeeder extends Seeder
             'strategic_plan_id' => $strategicPlan->id,
             'goal_id' => null,
             'title' => 'Quarterly progress review',
-            'description' => 'Present Q1 progress to school board.',
+            'description' => 'Present Q1 progress to leadership.',
             'due_date' => Carbon::now()->endOfQuarter(),
             'status' => Milestone::STATUS_PENDING,
             'sort_order' => 3,
@@ -262,26 +271,26 @@ class OkrPlanSeeder extends Seeder
         ProgressUpdate::create([
             'strategic_plan_id' => $strategicPlan->id,
             'goal_id' => $goal1->id,
-            'content' => 'Successfully hired two new counselors. They start next week and will focus on 9th and 10th grade students.',
+            'content' => 'Successfully hired two new counselors. They start next week and will focus on high-priority cases.',
             'update_type' => ProgressUpdate::TYPE_MANUAL,
-            'created_by' => $admin->id,
+            'created_by' => $user->id,
             'created_at' => Carbon::now()->subDays(3),
         ]);
 
         ProgressUpdate::create([
             'strategic_plan_id' => $strategicPlan->id,
             'goal_id' => $goal1->id,
-            'content' => '15 teachers completed the mental health first aid certification this week. Training feedback has been very positive.',
+            'content' => '15 staff members completed the mental health first aid certification this week. Training feedback has been very positive.',
             'update_type' => ProgressUpdate::TYPE_MANUAL,
             'value_change' => 15,
-            'created_by' => $teachers->first()?->id ?? $admin->id,
+            'created_by' => $otherUsers->first()?->id ?? $user->id,
             'created_at' => Carbon::now()->subDays(1),
         ]);
 
         ProgressUpdate::create([
             'strategic_plan_id' => $strategicPlan->id,
             'goal_id' => $goal2->id,
-            'content' => 'The attendance early warning system is now live. Already identified 23 students needing intervention.',
+            'content' => 'The attendance early warning system is now live. Already identified 23 individuals needing intervention.',
             'update_type' => ProgressUpdate::TYPE_SYSTEM,
             'created_by' => null,
             'created_at' => Carbon::now()->subDays(5),
@@ -290,60 +299,60 @@ class OkrPlanSeeder extends Seeder
         ProgressUpdate::create([
             'strategic_plan_id' => $strategicPlan->id,
             'goal_id' => null,
-            'content' => 'Weekly analysis: Overall plan is 45% complete. Mental health focus area is ahead of schedule, but absenteeism metrics need attention. Recommend prioritizing parent engagement meetings.',
+            'content' => 'Weekly analysis: Overall plan is 45% complete. Mental health focus area is ahead of schedule, but absenteeism metrics need attention. Recommend prioritizing engagement meetings.',
             'update_type' => ProgressUpdate::TYPE_AI_GENERATED,
             'created_by' => null,
             'created_at' => Carbon::now()->subHours(6),
         ]);
 
         // =====================================================
-        // 2. Individual Growth Plan (IDP) for a Teacher
+        // 2. Individual Growth Plan (IDP)
         // =====================================================
-        if ($teachers->count() >= 1) {
-            $teacher = $teachers->first();
+        if ($otherUsers->count() >= 1) {
+            $targetUser = $otherUsers->first();
 
             $growthPlan = StrategicPlan::create([
-                'org_id' => $school->id,
-                'title' => 'Professional Growth Plan - '.$teacher->first_name.' '.$teacher->last_name,
-                'description' => 'Individual development plan focused on classroom engagement and technology integration.',
+                'org_id' => $org->id,
+                'title' => 'Professional Growth Plan - '.$targetUser->first_name.' '.$targetUser->last_name,
+                'description' => 'Individual development plan focused on engagement and technology integration.',
                 'plan_type' => StrategicPlan::TYPE_GROWTH,
                 'category' => StrategicPlan::CATEGORY_IDP,
                 'target_type' => 'App\\Models\\User',
-                'target_id' => $teacher->id,
+                'target_id' => $targetUser->id,
                 'status' => StrategicPlan::STATUS_ACTIVE,
                 'start_date' => Carbon::now()->startOfMonth(),
                 'end_date' => Carbon::now()->addMonths(6),
-                'created_by' => $admin->id,
-                'manager_id' => $admin->id,
+                'created_by' => $user->id,
+                'manager_id' => $user->id,
             ]);
 
             StrategyCollaborator::create([
                 'strategic_plan_id' => $growthPlan->id,
-                'user_id' => $admin->id,
+                'user_id' => $user->id,
                 'role' => 'owner',
             ]);
 
             StrategyCollaborator::create([
                 'strategic_plan_id' => $growthPlan->id,
-                'user_id' => $teacher->id,
+                'user_id' => $targetUser->id,
                 'role' => 'collaborator',
             ]);
 
             $growthGoal1 = Goal::create([
                 'strategic_plan_id' => $growthPlan->id,
-                'title' => 'Improve Student Engagement',
-                'description' => 'Implement active learning strategies to increase student participation.',
+                'title' => 'Improve Client Engagement',
+                'description' => 'Implement active strategies to increase participation.',
                 'goal_type' => Goal::TYPE_OBJECTIVE,
                 'status' => Goal::STATUS_IN_PROGRESS,
                 'due_date' => Carbon::now()->addMonths(3),
                 'sort_order' => 0,
-                'owner_id' => $teacher->id,
+                'owner_id' => $targetUser->id,
             ]);
 
             KeyResult::create([
                 'goal_id' => $growthGoal1->id,
-                'title' => 'Increase class participation rate',
-                'description' => 'Measure through daily exit tickets and class discussions.',
+                'title' => 'Increase participation rate',
+                'description' => 'Measure through daily check-ins and discussions.',
                 'metric_type' => KeyResult::METRIC_PERCENTAGE,
                 'target_value' => 85,
                 'current_value' => 62,
@@ -356,7 +365,7 @@ class OkrPlanSeeder extends Seeder
 
             KeyResult::create([
                 'goal_id' => $growthGoal1->id,
-                'title' => 'Complete active learning workshop series',
+                'title' => 'Complete workshop series',
                 'description' => 'Attend all 4 professional development sessions.',
                 'metric_type' => KeyResult::METRIC_NUMBER,
                 'target_value' => 4,
@@ -371,23 +380,23 @@ class OkrPlanSeeder extends Seeder
             $growthGoal2 = Goal::create([
                 'strategic_plan_id' => $growthPlan->id,
                 'title' => 'Technology Integration',
-                'description' => 'Effectively integrate educational technology tools into daily instruction.',
+                'description' => 'Effectively integrate technology tools into daily work.',
                 'goal_type' => Goal::TYPE_OBJECTIVE,
                 'status' => Goal::STATUS_NOT_STARTED,
                 'due_date' => Carbon::now()->addMonths(6),
                 'sort_order' => 1,
-                'owner_id' => $teacher->id,
+                'owner_id' => $targetUser->id,
             ]);
 
             KeyResult::create([
                 'goal_id' => $growthGoal2->id,
-                'title' => 'Lessons using digital tools',
-                'description' => 'Incorporate interactive technology in weekly lessons.',
+                'title' => 'Sessions using digital tools',
+                'description' => 'Incorporate interactive technology in weekly sessions.',
                 'metric_type' => KeyResult::METRIC_NUMBER,
                 'target_value' => 3,
                 'current_value' => 0,
                 'starting_value' => 0,
-                'unit' => 'lessons/week',
+                'unit' => 'sessions/week',
                 'due_date' => Carbon::now()->addMonths(6),
                 'status' => KeyResult::STATUS_NOT_STARTED,
                 'sort_order' => 0,
@@ -396,7 +405,7 @@ class OkrPlanSeeder extends Seeder
             Milestone::create([
                 'strategic_plan_id' => $growthPlan->id,
                 'goal_id' => $growthGoal1->id,
-                'title' => 'Mid-semester check-in with mentor',
+                'title' => 'Mid-period check-in with mentor',
                 'due_date' => Carbon::now()->addMonths(2),
                 'status' => Milestone::STATUS_PENDING,
                 'sort_order' => 0,
@@ -404,13 +413,13 @@ class OkrPlanSeeder extends Seeder
         }
 
         // =====================================================
-        // 3. Student Support Action Plan
+        // 3. Action Plan (for a Student if available)
         // =====================================================
         if ($students->count() >= 1) {
-            $student = $students->where('risk_level', 'high')->first() ?? $students->first();
+            $student = $students->first();
 
             $actionPlan = StrategicPlan::create([
-                'org_id' => $school->id,
+                'org_id' => $org->id,
                 'title' => 'Support Plan - '.$student->user->first_name.' '.$student->user->last_name,
                 'description' => 'Targeted intervention plan addressing attendance and emotional regulation.',
                 'plan_type' => StrategicPlan::TYPE_ACTION,
@@ -420,22 +429,14 @@ class OkrPlanSeeder extends Seeder
                 'status' => StrategicPlan::STATUS_ACTIVE,
                 'start_date' => Carbon::now(),
                 'end_date' => Carbon::now()->addMonths(2),
-                'created_by' => $admin->id,
+                'created_by' => $user->id,
             ]);
 
             StrategyCollaborator::create([
                 'strategic_plan_id' => $actionPlan->id,
-                'user_id' => $admin->id,
+                'user_id' => $user->id,
                 'role' => 'owner',
             ]);
-
-            if ($teachers->count() > 0) {
-                StrategyCollaborator::create([
-                    'strategic_plan_id' => $actionPlan->id,
-                    'user_id' => $teachers->first()->id,
-                    'role' => 'collaborator',
-                ]);
-            }
 
             $actionGoal1 = Goal::create([
                 'strategic_plan_id' => $actionPlan->id,
@@ -445,13 +446,13 @@ class OkrPlanSeeder extends Seeder
                 'status' => Goal::STATUS_AT_RISK,
                 'due_date' => Carbon::now()->addMonths(2),
                 'sort_order' => 0,
-                'owner_id' => $admin->id,
+                'owner_id' => $user->id,
             ]);
 
             KeyResult::create([
                 'goal_id' => $actionGoal1->id,
                 'title' => 'Weekly attendance rate',
-                'description' => 'Maintain consistent school attendance.',
+                'description' => 'Maintain consistent attendance.',
                 'metric_type' => KeyResult::METRIC_PERCENTAGE,
                 'target_value' => 95,
                 'current_value' => 72,
@@ -484,7 +485,7 @@ class OkrPlanSeeder extends Seeder
                 'status' => Goal::STATUS_IN_PROGRESS,
                 'due_date' => Carbon::now()->addMonths(2),
                 'sort_order' => 1,
-                'owner_id' => $admin->id,
+                'owner_id' => $user->id,
             ]);
 
             KeyResult::create([
@@ -537,9 +538,9 @@ class OkrPlanSeeder extends Seeder
             ProgressUpdate::create([
                 'strategic_plan_id' => $actionPlan->id,
                 'goal_id' => $actionGoal2->id,
-                'content' => 'Student has attended 3 of 8 scheduled counseling sessions. Showing improvement in identifying emotions and using breathing techniques.',
+                'content' => 'Has attended 3 of 8 scheduled counseling sessions. Showing improvement in identifying emotions and using breathing techniques.',
                 'update_type' => ProgressUpdate::TYPE_MANUAL,
-                'created_by' => $admin->id,
+                'created_by' => $user->id,
                 'created_at' => Carbon::now()->subDays(2),
             ]);
         }
@@ -547,24 +548,28 @@ class OkrPlanSeeder extends Seeder
         // =====================================================
         // 4. Create Strategy Drift Scores (for alignment demo)
         // =====================================================
-        $this->createDriftScores($school, $strategicPlan);
+        $this->createDriftScores($org, $strategicPlan);
 
         $this->command->info('OKR-style plans seeded successfully!');
-        $this->command->info('Created: 1 strategic OKR plan, 1 teacher growth plan, 1 student action plan');
-        $this->command->info('With: Goals, Key Results, Milestones, Progress Updates, and Drift Scores');
+        $this->command->info('Created: 1 strategic OKR plan with goals, key activities, milestones, and progress updates');
+        if ($otherUsers->count() >= 1) {
+            $this->command->info('Created: 1 individual growth plan');
+        }
+        if ($students->count() >= 1) {
+            $this->command->info('Created: 1 student action plan');
+        }
     }
 
     /**
      * Create sample drift scores for alignment dashboard.
      */
-    protected function createDriftScores(Organization $school, StrategicPlan $plan): void
+    protected function createDriftScores(Organization $org, StrategicPlan $plan): void
     {
-        // Only create if table exists
         try {
-            // Strong alignment examples
+            // Strong alignment examples (On Track)
             for ($i = 0; $i < 8; $i++) {
                 StrategyDriftScore::create([
-                    'org_id' => $school->id,
+                    'org_id' => $org->id,
                     'strategic_plan_id' => $plan->id,
                     'contact_note_id' => null,
                     'alignment_score' => fake()->randomFloat(4, 0.85, 0.98),
@@ -579,10 +584,10 @@ class OkrPlanSeeder extends Seeder
                 ]);
             }
 
-            // Moderate alignment examples
+            // Moderate alignment examples (Drifting)
             for ($i = 0; $i < 5; $i++) {
                 StrategyDriftScore::create([
-                    'org_id' => $school->id,
+                    'org_id' => $org->id,
                     'strategic_plan_id' => $plan->id,
                     'contact_note_id' => null,
                     'alignment_score' => fake()->randomFloat(4, 0.65, 0.84),
@@ -596,10 +601,10 @@ class OkrPlanSeeder extends Seeder
                 ]);
             }
 
-            // Weak alignment examples
+            // Weak alignment examples (Off Track)
             for ($i = 0; $i < 3; $i++) {
                 StrategyDriftScore::create([
-                    'org_id' => $school->id,
+                    'org_id' => $org->id,
                     'strategic_plan_id' => $plan->id,
                     'contact_note_id' => null,
                     'alignment_score' => fake()->randomFloat(4, 0.35, 0.64),
@@ -612,6 +617,8 @@ class OkrPlanSeeder extends Seeder
                     'scored_at' => Carbon::now()->subDays(rand(1, 25)),
                 ]);
             }
+
+            $this->command->info('Created: 16 alignment drift scores (8 on track, 5 drifting, 3 off track)');
         } catch (\Exception $e) {
             $this->command->warn('Could not create drift scores: '.$e->getMessage());
         }
