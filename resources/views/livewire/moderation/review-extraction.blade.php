@@ -115,8 +115,8 @@
                             </div>
                             <input
                                 type="text"
-                                wire:model="editableData.{{ $key }}"
-                                class="block w-full rounded-md shadow-sm text-sm {{ $fieldClasses }}"
+                                wire:model.live="editableData.{{ $key }}"
+                                class="block w-full px-3 py-2 border rounded-md shadow-sm text-sm {{ $fieldClasses }}"
                             />
                         </div>
                     @endforeach
