@@ -34,6 +34,20 @@ class ResourceHub extends Component
         'searchMode' => ['except' => 'semantic', 'as' => 'mode'],
     ];
 
+    /**
+     * Ensure query string array values are always arrays.
+     */
+    public function boot(): void
+    {
+        // Handle single values from URL query string being passed as strings
+        if (is_string($this->selectedCategories)) {
+            $this->selectedCategories = [$this->selectedCategories];
+        }
+        if (is_string($this->selectedContentTypes)) {
+            $this->selectedContentTypes = [$this->selectedContentTypes];
+        }
+    }
+
     public function updatedSearch(): void
     {
         $this->isSearching = strlen($this->search) >= 2;

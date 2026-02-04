@@ -420,10 +420,11 @@ Route::prefix('webhooks/surveys')->group(function () {
 // Public Resource Hub (lead capture, no auth required)
 Route::get('/hub/{orgSlug?}', App\Livewire\PublicResourceHub::class)->name('public.resources');
 
-// Embed routes (for embedding resources/courses on external sites)
+// Embed routes (for embedding resources/courses/providers on external sites)
 Route::prefix('embed')->group(function () {
     Route::get('/resource/{resource}', App\Livewire\Embed\EmbedResource::class)->name('embed.resource');
     Route::get('/course/{course}', App\Livewire\Embed\EmbedCourse::class)->name('embed.course');
+    Route::get('/provider/{provider}', App\Livewire\Embed\EmbedProvider::class)->name('embed.provider');
 });
 
 // Public user registration (viewer accounts)

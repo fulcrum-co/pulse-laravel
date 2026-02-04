@@ -52,6 +52,7 @@ class Provider extends Model
         'external_profile_url',
         'thumbnail_url',
         'active',
+        'is_public',
         'verified_at',
         'created_by',
     ];
@@ -65,11 +66,13 @@ class Provider extends Model
         'serves_in_person' => 'boolean',
         'ratings_average' => 'decimal:2',
         'active' => 'boolean',
+        'is_public' => 'boolean',
         'verified_at' => 'datetime',
     ];
 
     protected $attributes = [
         'active' => true,
+        'is_public' => false,
         'serves_remote' => false,
         'serves_in_person' => true,
         'accepts_insurance' => false,

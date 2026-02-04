@@ -56,6 +56,22 @@ class ProviderProfile extends Component
     }
 
     /**
+     * Toggle public visibility of this provider.
+     */
+    public function togglePublic(): void
+    {
+        $this->provider->update(['is_public' => ! $this->provider->is_public]);
+        $this->provider->refresh();
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => $this->provider->is_public
+                ? 'Provider is now publicly visible.'
+                : 'Provider is now private.',
+        ]);
+    }
+
+    /**
      * Open the assign modal.
      */
     public function openAssignModal(): void

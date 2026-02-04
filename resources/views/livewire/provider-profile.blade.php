@@ -165,6 +165,18 @@
                         @endif
                     </button>
 
+                    <!-- Share Button -->
+                    <button
+                        wire:click="$dispatch('open-share-modal', { type: 'provider', id: {{ $provider->id }}, title: '{{ addslashes($provider->name) }}', isPublic: {{ $provider->is_public ? 'true' : 'false' }} })"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                        title="Share & Embed"
+                    >
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                        </svg>
+                        Share
+                    </button>
+
                     <!-- Primary CTA: Message Provider -->
                     {{-- All provider communication must go through in-app messaging for security --}}
                     <button
@@ -178,8 +190,31 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Visibility Settings -->
+            <div class="border-t border-gray-200 pt-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Visibility</h2>
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Public Access</p>
+                        <p class="text-xs text-gray-500">Allow this provider to appear in the public hub and be embeddable</p>
+                    </div>
+                    <button
+                        wire:click="togglePublic"
+                        type="button"
+                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2 {{ $provider->is_public ? 'bg-purple-600' : 'bg-gray-200' }}"
+                        role="switch"
+                        aria-checked="{{ $provider->is_public ? 'true' : 'false' }}"
+                    >
+                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $provider->is_public ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Share Modal -->
+    @livewire('components.share-modal')
 
     <!-- Assign Modal -->
     @if($showAssignModal)

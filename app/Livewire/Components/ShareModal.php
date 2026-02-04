@@ -8,7 +8,7 @@ use Livewire\Component;
 class ShareModal extends Component
 {
     public bool $show = false;
-    public string $type = ''; // 'resource' or 'course'
+    public string $type = ''; // 'resource', 'course', or 'provider'
     public ?int $itemId = null;
     public string $title = '';
     public string $publicUrl = '';
@@ -48,11 +48,12 @@ class ShareModal extends Component
     {
         $baseUrl = config('app.url');
 
-        if ($this->type === 'resource') {
-            $this->publicUrl = "{$baseUrl}/embed/resource/{$this->itemId}";
-        } else {
-            $this->publicUrl = "{$baseUrl}/embed/course/{$this->itemId}";
-        }
+        $this->publicUrl = match ($this->type) {
+            'resource' => "{$baseUrl}/embed/resource/{$this->itemId}",
+            'course' => "{$baseUrl}/embed/course/{$this->itemId}",
+            'provider' => "{$baseUrl}/embed/provider/{$this->itemId}",
+            default => "{$baseUrl}/embed/resource/{$this->itemId}",
+        };
 
         $this->generateEmbedCode();
     }
