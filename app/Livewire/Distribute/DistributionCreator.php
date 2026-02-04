@@ -142,6 +142,8 @@ class DistributionCreator extends Component
             $this->selectedContactIds = array_values(array_diff($this->selectedContactIds, [$contactId]));
         } else {
             $this->selectedContactIds[] = $contactId;
+            // Clear search after adding a contact
+            $this->contactSearch = '';
         }
     }
 
@@ -250,10 +252,20 @@ class DistributionCreator extends Component
                 ->get();
         }
 
+        // Get selected contacts for displaying in tags
+        $selectedContacts = collect();
+        if (! empty($this->selectedContactIds)) {
+            $selectedContacts = Student::whereIn('id', $this->selectedContactIds)
+                ->with('user')
+                ->get()
+                ->keyBy('id');
+        }
+
         return view('livewire.distribute.distribution-creator', [
             'contactLists' => $contactLists,
             'reports' => CustomReport::where('org_id', auth()->user()->org_id)->get(),
             'contacts' => $contacts,
+            'selectedContacts' => $selectedContacts,
             'templates' => MessageTemplate::where('org_id', auth()->user()->org_id)
                 ->where('channel', $this->channel)
                 ->get(),

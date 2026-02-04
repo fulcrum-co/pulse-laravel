@@ -143,13 +143,16 @@
 
                                 <!-- Selected individual contact tags -->
                                 @foreach($selectedContactIds as $contactId)
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">
-                                        <x-icon name="user" class="w-3.5 h-3.5" />
-                                        Contact #{{ $contactId }}
-                                        <button type="button" wire:click="toggleContact({{ $contactId }})" class="hover:text-gray-900 ml-0.5">
-                                            <x-icon name="x-mark" class="w-3.5 h-3.5" />
-                                        </button>
-                                    </span>
+                                    @php $contact = $selectedContacts->get($contactId); @endphp
+                                    @if($contact)
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">
+                                            <x-icon name="user" class="w-3.5 h-3.5" />
+                                            {{ $contact->user->first_name }} {{ $contact->user->last_name }}
+                                            <button type="button" wire:click="toggleContact({{ $contactId }})" class="hover:text-gray-900 ml-0.5">
+                                                <x-icon name="x-mark" class="w-3.5 h-3.5" />
+                                            </button>
+                                        </span>
+                                    @endif
                                 @endforeach
 
                                 <!-- Search input -->
