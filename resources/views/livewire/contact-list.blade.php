@@ -18,20 +18,20 @@
                     class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 >
                     <option value="">All Risk Levels</option>
-                    <option value="good">Good Standing</option>
-                    <option value="low">Low Risk</option>
-                    <option value="high">High Risk</option>
+                    <option value="good">{{ term('good_standing') }}</option>
+                    <option value="low">{{ term('low_risk') }}</option>
+                    <option value="high">{{ term('high_risk') }}</option>
                 </select>
 
                 <select
                     wire:model.live="gradeFilter"
                     class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-pulse-orange-500 focus:border-pulse-orange-500"
                 >
-                    <option value="">All Grades</option>
-                    <option value="9">Grade 9</option>
-                    <option value="10">Grade 10</option>
-                    <option value="11">Grade 11</option>
-                    <option value="12">Grade 12</option>
+                    <option value="">All {{ term('grade') }}s</option>
+                    <option value="9">{{ term('grade') }} 9</option>
+                    <option value="10">{{ term('grade') }} 10</option>
+                    <option value="11">{{ term('grade') }} 11</option>
+                    <option value="12">{{ term('grade') }} 12</option>
                 </select>
 
                 @if($search || $riskFilter || $gradeFilter)
@@ -62,7 +62,7 @@
                         </th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Level</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ term('grade') }}</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                         <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -106,9 +106,9 @@
                                     default => 'gray',
                                 };
                                 $riskLabel = match($contact->risk_level) {
-                                    'good' => 'Good Standing',
-                                    'low' => 'Low Risk',
-                                    'high' => 'High Risk',
+                                    'good' => term('good_standing'),
+                                    'low' => term('low_risk'),
+                                    'high' => term('high_risk'),
                                     default => 'Unknown',
                                 };
                             @endphp
@@ -117,7 +117,7 @@
                             </span>
                         </td>
                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            Grade {{ $contact->grade_level }}
+                            {{ term('grade') }} {{ $contact->grade_level }}
                         </td>
                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                             {{ $contact->user->email }}
