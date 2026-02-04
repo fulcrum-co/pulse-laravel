@@ -7,6 +7,24 @@
         Back to Queue
     </a>
 
+    {{-- Content Missing Warning --}}
+    @if($contentMissing)
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <x-icon name="exclamation-triangle" class="w-5 h-5 text-red-600" />
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-red-800 mb-1">Content No Longer Exists</h3>
+                    <p class="text-sm text-red-700">
+                        The original {{ $contentType }} has been deleted from the system.
+                        You can dismiss this moderation result to remove it from the queue.
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- Assignment Context Card --}}
     @if($result->assigned_to || $result->assignment_notes || $result->due_at)
         <div class="bg-pulse-orange-50 border border-pulse-orange-200 rounded-lg p-4 mb-6">
@@ -195,113 +213,157 @@
         </div>
     @endif
 
-    {{-- Edit Form --}}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Edit Content</h2>
+    @if($contentMissing)
+        {{-- Simplified view for deleted content --}}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Moderation Details</h2>
 
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                <input
-                    type="text"
-                    wire:model="title"
-                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                >
-                @error('title') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                <p>This moderation result was for a <strong>{{ $contentType }}</strong> that has since been deleted.</p>
+                <p class="mt-2">You can add notes and dismiss this item to remove it from the queue.</p>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+            {{-- Review Notes --}}
+            <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
                 <textarea
-                    wire:model="description"
-                    rows="4"
+                    wire:model="reviewNotes"
+                    rows="3"
+                    placeholder="Add any notes about why this is being dismissed..."
                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 ></textarea>
-                @error('description') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            @if($contentType === 'MiniCourse')
+            {{-- Simplified Actions --}}
+            <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <button
+                        wire:click="cancel"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    >
+                        Back to Queue
+                    </button>
+
+                    <button
+                        wire:click="dismiss"
+                        wire:loading.attr="disabled"
+                        class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg"
+                        title="Remove this moderation result from the queue"
+                    >
+                        <span wire:loading.remove wire:target="dismiss">Dismiss & Remove</span>
+                        <span wire:loading wire:target="dismiss">Dismissing...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @else
+        {{-- Normal Edit Form --}}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Edit Content</h2>
+
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rationale</label>
-                    <textarea
-                        wire:model="rationale"
-                        rows="2"
-                        placeholder="Why this course matters..."
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                    <input
+                        type="text"
+                        wire:model="title"
                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    ></textarea>
+                    >
+                    @error('title') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expected Experience</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                     <textarea
-                        wire:model="expectedExperience"
-                        rows="2"
-                        placeholder="What learners will experience..."
+                        wire:model="description"
+                        rows="4"
                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     ></textarea>
+                    @error('description') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
-            @endif
-        </div>
 
-        {{-- Review Notes --}}
-        <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Review Notes
-                <span class="font-normal text-gray-500">(visible to content owner)</span>
-            </label>
-            <textarea
-                wire:model="reviewNotes"
-                rows="3"
-                placeholder="Add feedback, suggestions, or explanation for your decision..."
-                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            ></textarea>
-            <p class="mt-1 text-xs text-gray-500">
-                These notes will be included in the notification sent to the content owner.
-            </p>
-        </div>
+                @if($contentType === 'MiniCourse' && !$contentMissing)
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rationale</label>
+                        <textarea
+                            wire:model="rationale"
+                            rows="2"
+                            placeholder="Why this course matters..."
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        ></textarea>
+                    </div>
 
-        {{-- Actions --}}
-        <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
-            {{-- Action Explanations --}}
-            <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                <p><strong>Save & Re-moderate:</strong> Update content and run AI moderation again</p>
-                <p><strong>Request Revision:</strong> Send back to owner with your notes for changes</p>
-                <p><strong>Reject:</strong> Permanently reject this content</p>
-                <p><strong>Approve:</strong> Approve content (owner can then publish)</p>
-                @if($contentType === 'MiniCourse')
-                    <p><strong>Publish:</strong> Approve and make live immediately</p>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expected Experience</label>
+                        <textarea
+                            wire:model="expectedExperience"
+                            rows="2"
+                            placeholder="What learners will experience..."
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        ></textarea>
+                    </div>
                 @endif
             </div>
 
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                <button
-                    wire:click="cancel"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg order-last sm:order-first"
-                    title="Discard changes and return to queue"
-                >
-                    Cancel
-                </button>
+            {{-- Review Notes --}}
+            <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Review Notes
+                    <span class="font-normal text-gray-500">(visible to content owner)</span>
+                </label>
+                <textarea
+                    wire:model="reviewNotes"
+                    rows="3"
+                    placeholder="Add feedback, suggestions, or explanation for your decision..."
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                ></textarea>
+                <p class="mt-1 text-xs text-gray-500">
+                    These notes will be included in the notification sent to the content owner.
+                </p>
+            </div>
 
-                <div class="flex flex-wrap items-center justify-end gap-2">
+            {{-- Actions --}}
+            <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+                {{-- Action Explanations --}}
+                <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                    <p><strong>Save & Re-moderate:</strong> Update content and run AI moderation again</p>
+                    <p><strong>Request Revision:</strong> Send back to owner with your notes for changes</p>
+                    <p><strong>Reject:</strong> Permanently reject this content</p>
+                    <p><strong>Approve:</strong> Approve content (owner can then publish)</p>
+                    @if($contentType === 'MiniCourse')
+                        <p><strong>Publish:</strong> Approve and make live immediately</p>
+                    @endif
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                     <button
-                        wire:click="save"
-                        wire:loading.attr="disabled"
-                        class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg"
-                        title="Save changes and run AI moderation again"
+                        wire:click="cancel"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg order-last sm:order-first"
+                        title="Discard changes and return to queue"
                     >
-                        <span wire:loading.remove wire:target="save">Save & Re-moderate</span>
-                        <span wire:loading wire:target="save">Saving...</span>
+                        Cancel
                     </button>
 
-                    <button
-                        wire:click="requestRevision"
-                        wire:loading.attr="disabled"
-                        class="px-3 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 hover:bg-yellow-200 rounded-lg"
-                        title="Send back to owner for revisions"
-                    >
-                        <span wire:loading.remove wire:target="requestRevision">Request Revision</span>
-                        <span wire:loading wire:target="requestRevision">Sending...</span>
-                    </button>
+                    <div class="flex flex-wrap items-center justify-end gap-2">
+                        <button
+                            wire:click="save"
+                            wire:loading.attr="disabled"
+                            class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg"
+                            title="Save changes and run AI moderation again"
+                        >
+                            <span wire:loading.remove wire:target="save">Save & Re-moderate</span>
+                            <span wire:loading wire:target="save">Saving...</span>
+                        </button>
+
+                        <button
+                            wire:click="requestRevision"
+                            wire:loading.attr="disabled"
+                            class="px-3 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 hover:bg-yellow-200 rounded-lg"
+                            title="Send back to owner for revisions"
+                        >
+                            <span wire:loading.remove wire:target="requestRevision">Request Revision</span>
+                            <span wire:loading wire:target="requestRevision">Sending...</span>
+                        </button>
 
                     <button
                         wire:click="reject"
@@ -334,8 +396,9 @@
                             <span wire:loading wire:target="saveAndPublish">Publishing...</span>
                         </button>
                     @endif
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 </div>

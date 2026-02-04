@@ -36,13 +36,19 @@ class ModerationEdit extends Component
         ];
     }
 
+    // Track if content is missing
+    public bool $contentMissing = false;
+
     public function mount(ContentModerationResult $result): void
     {
         $this->result = $result->load('moderatable');
 
         if (! $this->result->moderatable) {
-            session()->flash('error', 'Content not found.');
-            $this->redirect(route('admin.moderation'));
+            // Content was deleted - still allow viewing/dismissing the moderation result
+            $this->contentMissing = true;
+            $this->contentType = class_basename($this->result->moderatable_type ?? 'Unknown');
+            $this->title = '[Content Deleted]';
+            $this->description = 'The original content has been deleted from the system.';
 
             return;
         }
@@ -204,6 +210,21 @@ class ModerationEdit extends Component
         app(ModerationAssignmentService::class)->notifyModerationComplete($this->result, 'rejected');
 
         session()->flash('success', 'Content has been rejected.');
+        $this->redirect(route('admin.moderation'));
+    }
+
+    public function dismiss(): void
+    {
+        // For orphaned moderation results where content was deleted
+        $this->result->update([
+            'status' => ContentModerationResult::STATUS_REJECTED,
+            'human_reviewed' => true,
+            'reviewed_by' => auth()->id(),
+            'reviewed_at' => now(),
+            'review_notes' => $this->reviewNotes ?: 'Dismissed - original content was deleted',
+        ]);
+
+        session()->flash('success', 'Moderation result dismissed.');
         $this->redirect(route('admin.moderation'));
     }
 
