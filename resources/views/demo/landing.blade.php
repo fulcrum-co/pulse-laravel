@@ -77,27 +77,27 @@
             <div class="mt-5 grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-14 items-start">
                 <div class="max-w-xl">
                     <h1 class="text-3xl md:text-4xl text-[var(--pulse-ink)] leading-tight font-semibold">
-                        Less Paperwork, More Time with Students
+                        Less paperwork. More time with students.
                     </h1>
-                    <p class="mt-4 text-base text-[var(--pulse-muted)]">
-                        We built Pulse because we kept hearing the same thing from educators: “I became a teacher to teach — not to fill out endless reports.”
+                    <p class="mt-4 text-sm text-[var(--pulse-muted)]">
+                        We built Pulse to remove the administrative load from teachers and staff, helping them spend more time where they shine: <strong><em>with their students</em></strong>.
                     </p>
                     <div class="mt-6 space-y-5">
                         <section>
                             <h2 class="text-xl font-semibold text-[var(--pulse-ink)]">What if your admin tools actually gave you time back?</h2>
-                            <p class="mt-2 text-base text-[var(--pulse-muted)]">
-                                We're building something different — a system that handles the busywork so you can focus on the students and staff who need you most. But here's the thing: we need your help to get it right.
+                            <p class="mt-2 text-sm text-[var(--pulse-muted)]">
+                                We’re building something different — a system that handles the busywork so you can focus on the students and staff who need you most.
                             </p>
                         </section>
                         <section>
                             <h2 class="text-xl font-semibold text-[var(--pulse-ink)]">Jump In and Tell Us What You Think</h2>
-                            <p class="mt-2 text-base text-[var(--pulse-muted)]">
+                            <p class="mt-2 text-sm text-[var(--pulse-muted)]">
                                 We have a working prototype. It's not perfect — it's a starting point. And we want your voice shaping what comes next.
                             </p>
                         </section>
                         <section>
-                            <h2 class="text-xl font-semibold text-[var(--pulse-ink)]">Try it for 10 minutes. Tell us:</h2>
-                            <ul class="mt-3 space-y-2 text-base text-[var(--pulse-muted)] list-disc list-inside">
+                            <h2 class="text-xl font-semibold text-[var(--pulse-ink)]">Try the prototype for 10 minutes and tell us:</h2>
+                            <ul class="mt-3 space-y-2 text-sm text-[var(--pulse-muted)] list-disc list-inside">
                                 <li>What feels right?</li>
                                 <li>What's missing?</li>
                                 <li>What would actually help you on Monday morning?</li>
