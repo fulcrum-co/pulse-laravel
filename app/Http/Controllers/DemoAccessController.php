@@ -35,6 +35,7 @@ class DemoAccessController extends Controller
 
         $prospectUser = $this->getProspectUser();
         Auth::login($prospectUser);
+        session()->put('demo_role_override', 'school_admin');
 
         $token = $this->issueAccessToken($data['email']);
 
@@ -53,6 +54,7 @@ class DemoAccessController extends Controller
 
         $prospectUser = $this->getProspectUser();
         Auth::login($prospectUser);
+        session()->put('demo_role_override', 'school_admin');
 
         return redirect()->route('dashboard');
     }
