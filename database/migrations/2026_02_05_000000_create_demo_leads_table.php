@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('email')->index();
             $table->string('phone')->nullable();
             $table->string('org_name')->nullable();
+            $table->string('org_url')->nullable();
             $table->string('org_size')->nullable();
             $table->text('org_size_note')->nullable();
             $table->string('source')->default('pilot');

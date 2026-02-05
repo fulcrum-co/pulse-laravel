@@ -12,6 +12,7 @@ class DemoLead extends Model
         'email',
         'phone',
         'org_name',
+        'org_url',
         'org_size',
         'org_size_note',
         'source',

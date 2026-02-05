@@ -21,6 +21,7 @@ class DemoAccessController extends Controller
             'email' => 'required|email|max:255',
             'phone' => 'nullable|string|max:30',
             'org_name' => 'nullable|string|max:255',
+            'org_url' => 'nullable|string|max:255',
             'org_size' => 'nullable|string|max:255',
         ]);
 
@@ -77,6 +78,7 @@ class DemoAccessController extends Controller
             'email' => $email,
             'phone' => data_get($payload, 'phone') ?? data_get($payload, 'Phone') ?? null,
             'org_name' => data_get($payload, 'org_name') ?? data_get($payload, 'Organization') ?? null,
+            'org_url' => data_get($payload, 'org_url') ?? data_get($payload, 'Organization URL') ?? null,
             'org_size' => data_get($payload, 'org_size') ?? data_get($payload, 'Organization Size') ?? null,
             'org_size_note' => 'Includes everyone in the organization’s scope: administrators, staff, participants, and families/guardians. If applicable, include after‑school volunteers/support.',
             'source' => 'zoho',

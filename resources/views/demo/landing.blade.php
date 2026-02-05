@@ -54,8 +54,8 @@
             border: 1px solid #e2e8f0;
             background: #f8fafc;
             box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.6);
-            background-size: contain;
-            background-position: center;
+            background-size: auto;
+            background-position: top left;
             background-repeat: no-repeat;
             animation: previewCycle 16s infinite;
         }
@@ -103,7 +103,7 @@
                 <div id="get-access" class="sticky top-4 lg:ml-8">
                     <div class="pulse-outline rounded-3xl p-4">
                         <h2 class="text-2xl font-semibold text-[var(--pulse-ink)]">Prototype preview</h2>
-                        <div class="mt-4 aspect-[4/3] w-full preview-rolling"></div>
+                        <div class="mt-4 w-full preview-rolling" style="aspect-ratio: 1536 / 768;"></div>
                     </div>
                 </div>
             </div>
@@ -121,25 +121,33 @@
                 </div>
                 <form method="POST" action="{{ route('demo.access') }}" class="space-y-4">
                     @csrf
-                    <div class="form-block">
-                        <label>First name</label>
-                        <input name="first_name" required class="form-input" />
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="form-block">
+                            <label>First name</label>
+                            <input name="first_name" required class="form-input" />
+                        </div>
+                        <div class="form-block">
+                            <label>Last name</label>
+                            <input name="last_name" required class="form-input" />
+                        </div>
                     </div>
-                    <div class="form-block">
-                        <label>Last name</label>
-                        <input name="last_name" required class="form-input" />
-                    </div>
-                    <div class="form-block">
-                        <label>Email</label>
-                        <input type="email" name="email" required class="form-input" />
-                    </div>
-                    <div class="form-block">
-                        <label>Phone</label>
-                        <input name="phone" class="form-input" />
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="form-block">
+                            <label>Email</label>
+                            <input type="email" name="email" required class="form-input" />
+                        </div>
+                        <div class="form-block">
+                            <label>Phone</label>
+                            <input name="phone" class="form-input" />
+                        </div>
                     </div>
                     <div class="form-block">
                         <label>Organization name</label>
                         <input name="org_name" class="form-input" />
+                    </div>
+                    <div class="form-block">
+                        <label>Organization url</label>
+                        <input name="org_url" class="form-input" />
                     </div>
                     <div class="form-block">
                         <label>Organization size</label>
