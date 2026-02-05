@@ -61,9 +61,14 @@
         }
         @keyframes previewCycle {
             0% { background-image: url('/demo-shots/1.png'); }
-            25% { background-image: url('/demo-shots/2.png'); }
-            50% { background-image: url('/demo-shots/3.png'); }
-            75% { background-image: url('/demo-shots/4.png'); }
+            11% { background-image: url('/demo-shots/2.png'); }
+            22% { background-image: url('/demo-shots/3.png'); }
+            33% { background-image: url('/demo-shots/4.png'); }
+            44% { background-image: url('/demo-shots/5.png'); }
+            55% { background-image: url('/demo-shots/6.png'); }
+            66% { background-image: url('/demo-shots/7.png'); }
+            77% { background-image: url('/demo-shots/8.png'); }
+            88% { background-image: url('/demo-shots/9.png'); }
             100% { background-image: url('/demo-shots/1.png'); }
         }
     </style>
