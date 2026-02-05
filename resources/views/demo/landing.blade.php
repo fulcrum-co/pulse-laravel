@@ -146,7 +146,7 @@
                         <input name="org_name" class="form-input" />
                     </div>
                     <div class="form-block">
-                        <label>Organization url</label>
+                        <label>Website</label>
                         <input name="org_url" class="form-input" />
                     </div>
                     <div class="form-block">
