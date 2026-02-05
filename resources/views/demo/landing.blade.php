@@ -65,34 +65,6 @@
             75% { background-image: url('/demo-shots/4.png'); }
             100% { background-image: url('/demo-shots/1.png'); }
         }
-        .phone-mock {
-            position: absolute;
-            right: 16px;
-            bottom: 16px;
-            width: 160px;
-            height: 320px;
-            border-radius: 28px;
-            background: #0f172a;
-            padding: 12px;
-            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.25);
-        }
-        .phone-screen {
-            width: 100%;
-            height: 100%;
-            border-radius: 20px;
-            background: #111827 url('/demo-shots/2.png') center/cover no-repeat;
-            position: relative;
-        }
-        .phone-notch {
-            position: absolute;
-            top: 6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 8px;
-            border-radius: 999px;
-            background: #0f172a;
-        }
     </style>
 
     <div class="landing-body min-h-screen bg-gradient-to-b from-white via-[#f7f8fb] to-white" x-data="{ open: false }" x-init="if (window.location.hash === '#demo-access') { open = true }" @open-demo-access.window="open = true">
@@ -146,13 +118,7 @@
                         <p class="text-sm text-[var(--pulse-muted)] mt-2">
                             Rolling GIF preview goes here.
                         </p>
-                        <div class="mt-4 aspect-[5/4] w-full preview-rolling">
-                            <div class="phone-mock">
-                                <div class="phone-screen">
-                                    <div class="phone-notch"></div>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="mt-4 aspect-[5/4] w-full preview-rolling"></div>
                     </div>
                 </div>
             </div>
