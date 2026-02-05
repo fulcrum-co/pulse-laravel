@@ -119,7 +119,7 @@
                         <p class="text-sm text-[var(--pulse-muted)] mt-2">
                             Rolling GIF preview goes here.
                         </p>
-                        <div class="mt-4 aspect-[4/3] w-full preview-rolling"></div>
+                        <div class="mt-4 aspect-[16/9] w-full preview-rolling"></div>
                     </div>
                 </div>
             </div>
