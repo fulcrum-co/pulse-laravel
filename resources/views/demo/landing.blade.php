@@ -47,10 +47,56 @@
             background: #fff7ed;
             color: #9a3412;
         }
+        .preview-rolling {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.6);
+            background-size: cover;
+            background-position: center;
+            animation: previewCycle 10s infinite;
+        }
+        @keyframes previewCycle {
+            0% { background-image: url('/demo-shots/1.png'); }
+            25% { background-image: url('/demo-shots/2.png'); }
+            50% { background-image: url('/demo-shots/3.png'); }
+            75% { background-image: url('/demo-shots/4.png'); }
+            100% { background-image: url('/demo-shots/1.png'); }
+        }
+        .phone-mock {
+            position: absolute;
+            right: 16px;
+            bottom: 16px;
+            width: 160px;
+            height: 320px;
+            border-radius: 28px;
+            background: #0f172a;
+            padding: 12px;
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.25);
+        }
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            background: #111827 url('/demo-shots/2.png') center/cover no-repeat;
+            position: relative;
+        }
+        .phone-notch {
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 8px;
+            border-radius: 999px;
+            background: #0f172a;
+        }
     </style>
 
     <div class="landing-body min-h-screen bg-gradient-to-b from-white via-[#f7f8fb] to-white" x-data="{ open: false }" x-init="if (window.location.hash === '#demo-access') { open = true }" @open-demo-access.window="open = true">
-        <section class="mx-auto max-w-5xl px-6 py-10" id="demo-access">
+        <section class="mx-auto max-w-5xl px-4 py-10" id="demo-access">
             <div class="inline-flex items-center gap-2 rounded-full hero-pill px-4 py-1 text-xs font-semibold">
                 Pulse is currently in limited beta
                 <span class="h-1 w-1 rounded-full bg-amber-400"></span>
@@ -100,8 +146,12 @@
                         <p class="text-sm text-[var(--pulse-muted)] mt-2">
                             Rolling GIF preview goes here.
                         </p>
-                        <div class="mt-4 aspect-[5/4] w-full rounded-2xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-sm text-slate-500">
-                            Add GIF here
+                        <div class="mt-4 aspect-[5/4] w-full preview-rolling">
+                            <div class="phone-mock">
+                                <div class="phone-screen">
+                                    <div class="phone-notch"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
