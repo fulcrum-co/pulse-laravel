@@ -50,7 +50,11 @@
     </script>
     @livewireStyles
 </head>
-<body class="bg-gray-50 min-h-screen font-sans">
+@php $isProspect = auth()->user()?->isProspect() ?? false; @endphp
+<body class="bg-gray-50 min-h-screen font-sans {{ $isProspect ? 'demo-prospect' : '' }}">
+    <script>
+        window.PULSE_PROSPECT = {{ $isProspect ? 'true' : 'false' }};
+    </script>
     <!-- Navigation -->
     <nav class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

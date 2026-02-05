@@ -267,6 +267,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user is a prospect demo user.
+     */
+    public function isProspect(): bool
+    {
+        return $this->primary_role === 'prospect';
+    }
+
+    /**
      * Get the demo role label for display.
      */
     public function getDemoRoleLabelAttribute(): ?string

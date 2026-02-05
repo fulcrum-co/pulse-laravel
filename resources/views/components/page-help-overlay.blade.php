@@ -3,6 +3,7 @@
 {{-- Page Help Overlay - Guided walkthrough for current page --}}
 <div
     x-data="pageHelpOverlay()"
+    x-init="init()"
     x-show="active"
     x-cloak
     @start-page-help.window="startHelp($event.detail?.context, $event.detail?.section)"
@@ -12,7 +13,7 @@
     <div
         class="absolute inset-0 bg-black/50 transition-opacity duration-300"
         :style="spotlightStyle"
-        @click="close()"
+        @click="maybeClose()"
     ></div>
 
     <!-- Help Tooltip -->
@@ -48,6 +49,7 @@
                     <span class="text-xs text-gray-500">of <span x-text="steps.length"></span></span>
                 </div>
                 <button
+                    x-show="canDismiss"
                     @click="close()"
                     class="text-gray-400 hover:text-gray-600 transition-colors"
                 >
@@ -113,6 +115,7 @@ function pageHelpOverlay() {
         targetElement: null,
         tooltipPosition: 'bottom',
         hintsLoaded: false,
+        isProspect: false,
 
         // Define help tours for different pages (fallback data, overridden by API)
         helpTours: {
@@ -403,6 +406,19 @@ function pageHelpOverlay() {
             ]
         },
 
+        init() {
+            this.isProspect = window.PULSE_PROSPECT === true;
+
+            if (this.isProspect) {
+                const context = this.detectContext();
+                const key = `prospect_help_seen:${context}`;
+                const seen = localStorage.getItem(key);
+                if (!seen) {
+                    this.startHelp(context);
+                }
+            }
+        },
+
         async startHelp(context = null, section = null) {
             // Load hints from API if not already loaded
             if (!this.hintsLoaded) {
@@ -526,11 +542,32 @@ function pageHelpOverlay() {
         },
 
         close() {
+            if (!this.canDismiss) {
+                return;
+            }
+
             this.active = false;
             this.targetElement = null;
             document.body.style.overflow = '';
             // Dispatch event so beacons can reappear
             window.dispatchEvent(new CustomEvent('help-overlay-closed'));
+
+            if (this.isProspect) {
+                const context = this.detectContext();
+                const key = `prospect_help_seen:${context}`;
+                localStorage.setItem(key, '1');
+            }
+        },
+
+        maybeClose() {
+            if (this.canDismiss) {
+                this.close();
+            }
+        },
+
+        get canDismiss() {
+            if (!this.isProspect) return true;
+            return this.currentIndex >= this.steps.length - 1;
         },
 
         get spotlightStyle() {

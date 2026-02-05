@@ -67,7 +67,11 @@
     {{-- Vite assets for Laravel Echo / real-time notifications --}}
     @vite(['resources/js/app.js'])
 </head>
-<body class="bg-gray-50 {{ session('demo_role_override') && session('demo_role_override') !== 'actual' ? 'pt-10' : '' }}">
+@php $isProspect = auth()->user()?->isProspect() ?? false; @endphp
+<body class="bg-gray-50 {{ session('demo_role_override') && session('demo_role_override') !== 'actual' ? 'pt-10' : '' }} {{ $isProspect ? 'demo-prospect' : '' }}">
+    <script>
+        window.PULSE_PROSPECT = {{ $isProspect ? 'true' : 'false' }};
+    </script>
     @php
         // Force sidebar collapsed on canvas-focused pages (Resources, Marketplace, Moderation)
         $forceCollapsed = request()->is('resources') || request()->is('marketplace') || request()->is('admin/moderation*');

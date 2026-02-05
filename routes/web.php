@@ -10,6 +10,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContactMetricController;
+use App\Http\Controllers\DemoAccessController;
 use App\Http\Controllers\ContactNoteController;
 use App\Http\Controllers\FocusAreaController;
 use App\Http\Controllers\NotificationController;
@@ -64,10 +65,28 @@ Route::post('/api/notifications/{id}/resolve', function (int $id) {
     ]);
 })->middleware(['web', 'auth'])->name('notifications.resolve');
 
-// Root redirect to dashboard
+// Demo landing (public)
 Route::get('/', function () {
-    return redirect('/dashboard');
+    if (auth()->check()) {
+        return redirect('/dashboard');
+    }
+
+    return view('demo.landing');
 })->name('home');
+
+Route::get('/demo', function () {
+    if (auth()->check()) {
+        return redirect('/dashboard');
+    }
+
+    return view('demo.landing');
+})->name('demo.landing');
+
+Route::post('/demo/access', [DemoAccessController::class, 'store'])->name('demo.access');
+Route::get('/demo/access/{token}', [DemoAccessController::class, 'magic'])
+    ->where('token', '[A-Za-z0-9]{64}')
+    ->name('demo.magic');
+Route::post('/demo/zoho-webhook', [DemoAccessController::class, 'zohoWebhook'])->name('demo.zoho');
 
 // Temporary route to fix avatars - visit once then remove
 Route::get('/fix-avatars-temp', function () {
