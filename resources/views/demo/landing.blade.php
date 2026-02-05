@@ -15,12 +15,6 @@
             background: #ffffff;
             box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
         }
-        .form-block {
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 14px;
-            background: #fff;
-        }
         .form-block label {
             font-size: 12px;
             text-transform: uppercase;
@@ -127,42 +121,42 @@
                 <form method="POST" action="{{ route('demo.access') }}" class="space-y-4">
                     @csrf
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-block">
-                            <label>First name</label>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-1">First name <span class="text-red-500">*</span></label>
                             <input name="first_name" required class="form-input" />
                         </div>
-                        <div class="form-block">
-                            <label>Last name</label>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-1">Last name <span class="text-red-500">*</span></label>
                             <input name="last_name" required class="form-input" />
                         </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="form-block">
-                            <label>Email</label>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-1">Email <span class="text-red-500">*</span></label>
                             <input type="email" name="email" required class="form-input" />
                         </div>
-                        <div class="form-block">
-                            <label>Phone</label>
+                        <div>
+                            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-1">Phone</label>
                             <input name="phone" class="form-input" />
                         </div>
                     </div>
-                    <div class="form-block">
-                        <label>Organization name</label>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-gray-500 mb-1">Organization name</label>
                         <input name="org_name" class="form-input" />
                     </div>
-                    <div class="form-block">
-                        <label>Website</label>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-gray-500 mb-1">Website</label>
                         <input name="org_url" class="form-input" />
                     </div>
-                    <div class="form-block">
-                        <label>Organization size</label>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-gray-500 mb-1">Organization size</label>
                         <input name="org_size" class="form-input" />
                     </div>
                     <button
                         type="submit"
                         class="w-full rounded-xl bg-[var(--pulse-accent)] text-white py-3 font-semibold tracking-wide hover:opacity-90"
                     >
-                        Get going
+                        View Prototype
                     </button>
                 </form>
             </div>
