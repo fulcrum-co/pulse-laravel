@@ -74,41 +74,42 @@
                 <span class="h-1 w-1 rounded-full bg-amber-400"></span>
                 Accepting 20 participants
             </div>
-            <div class="mt-5 grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-12 items-start">
-                <div>
+            <div class="mt-5 grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-14 items-start">
+                <div class="max-w-xl">
                     <h1 class="text-3xl md:text-4xl text-[var(--pulse-ink)] leading-tight font-semibold">
                         Less Paperwork, More Time with Students
                     </h1>
                     <p class="mt-4 text-base text-[var(--pulse-muted)]">
                         We built Pulse because we kept hearing the same thing from educators: “I became a teacher to teach — not to fill out endless reports.”
                     </p>
-                    <div class="mt-6 space-y-3">
-                        <div class="pulse-outline rounded-2xl p-4">
-                            <p class="text-base font-semibold text-[var(--pulse-ink)]">
-                                What if your admin tools actually gave you time back?
+                    <div class="mt-6 space-y-5">
+                        <section>
+                            <h2 class="text-lg font-semibold text-[var(--pulse-ink)]">What if your admin tools actually gave you time back?</h2>
+                            <p class="mt-2 text-sm text-[var(--pulse-muted)]">
+                                We're building something different — a system that handles the busywork so you can focus on the students and staff who need you most. But here's the thing: we need your help to get it right.
                             </p>
-                        </div>
-                        <div class="pulse-outline rounded-2xl p-4">
-                            <p class="text-base font-semibold text-[var(--pulse-ink)]">
-                                We have a working prototype. It’s not perfect — it’s a starting point.
+                        </section>
+                        <section>
+                            <h2 class="text-lg font-semibold text-[var(--pulse-ink)]">Jump In and Tell Us What You Think</h2>
+                            <p class="mt-2 text-sm text-[var(--pulse-muted)]">
+                                We have a working prototype. It's not perfect — it's a starting point. And we want your voice shaping what comes next.
                             </p>
-                        </div>
-                    </div>
-
-                    <div class="mt-6">
-                        <h2 class="text-lg font-semibold text-[var(--pulse-ink)]">Try it for 10 minutes. Tell us:</h2>
-                        <ol class="mt-3 space-y-2 text-sm text-[var(--pulse-muted)] list-decimal list-inside">
-                            <li>What feels right?</li>
-                            <li>What’s missing?</li>
-                            <li>What would actually help you on Monday morning?</li>
-                        </ol>
-                        <div class="mt-4 flex flex-wrap gap-3">
-                            <button @click="open = true" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[var(--pulse-accent)] text-white font-semibold hover:opacity-90">Get Started</button>
-                            <button @click="open = true" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50">Give Us Feedback</button>
-                        </div>
-                        <p class="mt-3 text-sm text-[var(--pulse-muted)]">
-                            No credit card. No sales pitch. Just click, explore, and share your thoughts.
-                        </p>
+                        </section>
+                        <section>
+                            <h2 class="text-lg font-semibold text-[var(--pulse-ink)]">Try it for 10 minutes. Tell us:</h2>
+                            <ul class="mt-3 space-y-2 text-sm text-[var(--pulse-muted)] list-disc list-inside">
+                                <li>What feels right?</li>
+                                <li>What's missing?</li>
+                                <li>What would actually help you on Monday morning?</li>
+                            </ul>
+                            <div class="mt-4 flex flex-wrap gap-3">
+                                <button @click="open = true" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[var(--pulse-accent)] text-white font-semibold hover:opacity-90">Get Started</button>
+                                <button @click="open = true" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50">Give Us Feedback</button>
+                            </div>
+                            <p class="mt-3 text-sm text-[var(--pulse-muted)]">
+                                No credit card. No sales pitch. Just click, explore, and share your thoughts.
+                            </p>
+                        </section>
                     </div>
                 </div>
 
@@ -118,7 +119,7 @@
                         <p class="text-sm text-[var(--pulse-muted)] mt-2">
                             Rolling GIF preview goes here.
                         </p>
-                        <div class="mt-4 aspect-[5/4] w-full preview-rolling"></div>
+                        <div class="mt-4 aspect-[4/3] w-full preview-rolling"></div>
                     </div>
                 </div>
             </div>
