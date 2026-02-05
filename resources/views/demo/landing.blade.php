@@ -54,8 +54,8 @@
             border: 1px solid #e2e8f0;
             background: #f8fafc;
             box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.6);
-            background-size: auto;
-            background-position: top left;
+            background-size: contain;
+            background-position: center;
             background-repeat: no-repeat;
             animation: previewCycle 16s infinite;
         }
@@ -75,7 +75,7 @@
                 <span class="h-1 w-1 rounded-full bg-amber-400"></span>
                 Accepting 20 participants
             </div>
-            <div class="mt-5 grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-16 items-start">
+            <div class="mt-5 grid grid-cols-1 lg:grid-cols-[0.75fr_1.25fr] gap-16 items-start">
                 <div class="max-w-lg">
                     <h1 class="text-3xl md:text-4xl text-[var(--pulse-ink)] leading-tight font-semibold">
                         Less paperwork. More time with students.
@@ -103,7 +103,7 @@
                 <div id="get-access" class="sticky top-4 lg:ml-8">
                     <div class="pulse-outline rounded-3xl p-4">
                         <h2 class="text-2xl font-semibold text-[var(--pulse-ink)]">Prototype preview</h2>
-                        <div class="mt-4 w-full preview-rolling" style="aspect-ratio: 1536 / 768;"></div>
+                        <div class="mt-4 w-full preview-rolling" style="aspect-ratio: 2 / 1;"></div>
                     </div>
                 </div>
             </div>
