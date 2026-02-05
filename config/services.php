@@ -179,6 +179,10 @@ return [
         'scheme' => 'https',
     ],
 
+    'zoho' => [
+        'flow_webhook_url' => env('ZOHO_FLOW_WEBHOOK_URL'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Stripe Payment Processing

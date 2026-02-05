@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class DemoAccessController extends Controller
@@ -33,6 +34,8 @@ class DemoAccessController extends Controller
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
+
+        $this->sendToZohoFlow($data);
 
         $prospectUser = $this->getProspectUser();
         Auth::login($prospectUser);
@@ -94,6 +97,30 @@ class DemoAccessController extends Controller
             'magic_link' => route('demo.magic', ['token' => $token]),
             'expires_in_days' => 5,
         ]);
+    }
+
+    protected function sendToZohoFlow(array $data): void
+    {
+        $webhookUrl = config('services.zoho.flow_webhook_url');
+
+        if (! $webhookUrl) {
+            return;
+        }
+
+        try {
+            Http::timeout(5)->post($webhookUrl, [
+                'first_name' => $data['first_name'] ?? null,
+                'last_name' => $data['last_name'] ?? null,
+                'email' => $data['email'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'org_name' => $data['org_name'] ?? null,
+                'org_url' => $data['org_url'] ?? null,
+                'org_size' => $data['org_size'] ?? null,
+                'source' => 'pilot',
+            ]);
+        } catch (\Throwable $e) {
+            // Swallow errors to avoid blocking demo access.
+        }
     }
 
     protected function issueAccessToken(string $email): string
