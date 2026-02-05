@@ -49,64 +49,51 @@
         }
     </style>
 
-    <div class="landing-body min-h-screen bg-gradient-to-b from-white via-[#f7f8fb] to-white">
-        <header class="mx-auto max-w-6xl px-6 pt-8">
-            <nav class="flex items-center justify-between">
-                <div class="flex items-center gap-3 text-lg font-semibold text-[var(--pulse-ink)]">
-                    <div class="h-10 w-10 rounded-full bg-[var(--pulse-accent)] text-white flex items-center justify-center">P</div>
-                    Pulse
-                </div>
-                <div class="flex items-center gap-3">
-                    <a href="/login" class="text-sm font-medium text-[var(--pulse-muted)] hover:text-[var(--pulse-ink)]">Log In</a>
-                    <a href="#get-access" class="text-sm font-semibold text-white bg-[var(--pulse-accent)] px-4 py-2 rounded-lg hover:opacity-90">Get Started</a>
-                </div>
-            </nav>
-        </header>
-
-        <section class="mx-auto max-w-6xl px-6 py-12">
+    <div class="landing-body min-h-screen bg-gradient-to-b from-white via-[#f7f8fb] to-white" x-data="{ open: false }" x-init="if (window.location.hash === '#demo-access') { open = true }" @open-demo-access.window="open = true">
+        <section class="mx-auto max-w-6xl px-6 py-10" id="demo-access">
             <div class="inline-flex items-center gap-2 rounded-full hero-pill px-4 py-1 text-xs font-semibold">
                 Pulse is currently in limited beta
                 <span class="h-1 w-1 rounded-full bg-amber-400"></span>
                 Accepting 20 participants
             </div>
-            <div class="mt-6 grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-10 items-start">
+            <div class="mt-5 grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-8 items-start">
                 <div>
-                    <h1 class="text-4xl md:text-5xl text-[var(--pulse-ink)] leading-tight font-semibold">
+                    <h1 class="text-3xl md:text-4xl text-[var(--pulse-ink)] leading-tight font-semibold">
                         Less Paperwork, More Time with Students
                     </h1>
-                    <p class="mt-5 text-lg text-[var(--pulse-muted)]">
+                    <p class="mt-4 text-base text-[var(--pulse-muted)]">
                         We built Pulse because we kept hearing the same thing from educators: “I became a teacher to teach — not to fill out endless reports.”
                     </p>
-                    <div class="mt-6 space-y-6">
-                        <div class="pulse-outline rounded-2xl p-6">
-                            <h3 class="text-xl font-semibold text-[var(--pulse-ink)]">What if your admin tools actually gave you time back?</h3>
+                    <div class="mt-5 space-y-4">
+                        <div class="pulse-outline rounded-2xl p-4">
+                            <h3 class="text-lg font-semibold text-[var(--pulse-ink)]">What if your admin tools actually gave you time back?</h3>
                             <p class="mt-2 text-sm text-[var(--pulse-muted)]">
                                 We’re building something different — a system that handles the busywork so you can focus on the students and staff who need you most. But here’s the thing: we need your help to get it right.
                             </p>
                         </div>
-                        <div class="pulse-outline rounded-2xl p-6">
-                            <h3 class="text-xl font-semibold text-[var(--pulse-ink)]">Jump In and Tell Us What You Think</h3>
+                        <div class="pulse-outline rounded-2xl p-4">
+                            <h3 class="text-lg font-semibold text-[var(--pulse-ink)]">Jump In and Tell Us What You Think</h3>
                             <p class="mt-2 text-sm text-[var(--pulse-muted)]">
                                 We have a working prototype. It’s not perfect — it’s a starting point. And we want your voice shaping what comes next.
                             </p>
                         </div>
                     </div>
 
-                    <div class="mt-10">
-                        <h2 class="text-2xl font-semibold text-[var(--pulse-ink)]">Try it for 10 minutes. Tell us:</h2>
-                        <ul class="mt-4 space-y-2 text-sm text-[var(--pulse-muted)]">
+                    <div class="mt-6">
+                        <h2 class="text-xl font-semibold text-[var(--pulse-ink)]">Try it for 10 minutes. Tell us:</h2>
+                        <ul class="mt-3 space-y-1 text-sm text-[var(--pulse-muted)]">
                             <li>• What feels right?</li>
                             <li>• What’s missing?</li>
                             <li>• What would actually help you on Monday morning?</li>
                         </ul>
-                        <div class="mt-6 flex flex-wrap gap-3">
-                            <a href="#get-access" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[var(--pulse-accent)] text-white font-semibold hover:opacity-90">Try the Prototype Now</a>
-                            <a href="#get-access" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50">Give Us Feedback</a>
+                        <div class="mt-4 flex flex-wrap gap-3">
+                            <button @click="open = true" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[var(--pulse-accent)] text-white font-semibold hover:opacity-90">Get Started</button>
+                            <button @click="open = true" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50">Give Us Feedback</button>
                         </div>
-                        <p class="mt-6 text-sm text-[var(--pulse-muted)]">
+                        <p class="mt-4 text-sm text-[var(--pulse-muted)]">
                             Based on your feedback, we’ll invite some schools to help us test new features as we build them — but for now, we just want to hear what you think.
                         </p>
-                        <p class="mt-4 text-sm font-semibold text-[var(--pulse-ink)]">No credit card. No sales pitch. Just click, explore, and share your thoughts.</p>
+                        <p class="mt-3 text-sm font-semibold text-[var(--pulse-ink)]">No credit card. No sales pitch. Just click, explore, and share your thoughts.</p>
                     </div>
                 </div>
 
@@ -123,13 +110,18 @@
                 </div>
             </div>
         </section>
-        <section class="mx-auto max-w-5xl px-6 pb-16">
-            <div class="pulse-outline rounded-3xl p-6">
-                <h2 class="text-2xl font-semibold text-[var(--pulse-ink)]">Get Access</h2>
-                <p class="text-sm text-[var(--pulse-muted)] mt-2">
-                    Fill this out for immediate access to the view‑only prototype.
-                </p>
-                <form method="POST" action="{{ route('demo.access') }}" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div class="absolute inset-0 bg-black/40" @click="open = false"></div>
+            <div class="relative bg-white w-full max-w-lg rounded-2xl shadow-xl border border-gray-200 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-gray-900">Get Access</h2>
+                    <button class="text-gray-400 hover:text-gray-600" @click="open = false">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <form method="POST" action="{{ route('demo.access') }}" class="space-y-4">
                     @csrf
                     <div class="form-block">
                         <label>First name</label>
@@ -139,38 +131,30 @@
                         <label>Last name</label>
                         <input name="last_name" required class="form-input" />
                     </div>
-                    <div class="form-block md:col-span-2">
-                        <label>Email address</label>
+                    <div class="form-block">
+                        <label>Email</label>
                         <input type="email" name="email" required class="form-input" />
                     </div>
                     <div class="form-block">
-                        <label>Phone number</label>
+                        <label>Phone</label>
                         <input name="phone" class="form-input" />
                     </div>
                     <div class="form-block">
                         <label>Organization name</label>
                         <input name="org_name" class="form-input" />
                     </div>
-                    <div class="form-block md:col-span-2">
-                        <label>Organization size (all people served)</label>
+                    <div class="form-block">
+                        <label>Organization size</label>
                         <input name="org_size" class="form-input" />
-                        <p class="mt-2 text-xs text-[var(--pulse-muted)]">
-                            Includes everyone in the organization’s scope—administrators, staff, participants, and families/guardians. If applicable, include after‑school volunteers/support.
-                        </p>
                     </div>
-                    <div class="md:col-span-2">
-                        <button
-                            type="submit"
-                            class="w-full rounded-xl bg-[var(--pulse-accent)] text-white py-3 font-semibold tracking-wide hover:opacity-90"
-                        >
-                            Get Access
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        class="w-full rounded-xl bg-[var(--pulse-accent)] text-white py-3 font-semibold tracking-wide hover:opacity-90"
+                    >
+                        Get going
+                    </button>
                 </form>
-                <p class="mt-4 text-xs text-[var(--pulse-muted)]">
-                    You’ll enter a view‑only prototype. No data changes are saved.
-                </p>
             </div>
-        </section>
+        </div>
     </div>
 </x-layouts.app>

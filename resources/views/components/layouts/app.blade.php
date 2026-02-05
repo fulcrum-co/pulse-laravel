@@ -72,8 +72,12 @@
                             <button type="submit" class="text-gray-600 hover:text-gray-900 font-medium">Logout</button>
                         </form>
                     @else
-                        <a href="/login" class="text-gray-600 hover:text-gray-900 font-medium">Login</a>
-                        <a href="/register" class="bg-pulse-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">Get Started</a>
+                        <a href="/login" class="text-gray-600 hover:text-gray-900 font-medium">Log In</a>
+                        @if (request()->routeIs('demo.landing') || request()->routeIs('home'))
+                            <a href="#demo-access" class="bg-pulse-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">Get Started</a>
+                        @else
+                            <a href="/register" class="bg-pulse-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-pulse-orange-600 transition-colors">Get Started</a>
+                        @endif
                     @endauth
                 </div>
             </div>
