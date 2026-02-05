@@ -50,13 +50,13 @@
     </style>
 
     <div class="landing-body min-h-screen bg-gradient-to-b from-white via-[#f7f8fb] to-white" x-data="{ open: false }" x-init="if (window.location.hash === '#demo-access') { open = true }" @open-demo-access.window="open = true">
-        <section class="mx-auto max-w-6xl px-6 py-10" id="demo-access">
+        <section class="mx-auto max-w-5xl px-6 py-10" id="demo-access">
             <div class="inline-flex items-center gap-2 rounded-full hero-pill px-4 py-1 text-xs font-semibold">
                 Pulse is currently in limited beta
                 <span class="h-1 w-1 rounded-full bg-amber-400"></span>
                 Accepting 20 participants
             </div>
-            <div class="mt-5 grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-8 items-start">
+            <div class="mt-5 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 items-start">
                 <div>
                     <h1 class="text-3xl md:text-4xl text-[var(--pulse-ink)] leading-tight font-semibold">
                         Less Paperwork, More Time with Students
@@ -64,47 +64,44 @@
                     <p class="mt-4 text-base text-[var(--pulse-muted)]">
                         We built Pulse because we kept hearing the same thing from educators: “I became a teacher to teach — not to fill out endless reports.”
                     </p>
-                    <div class="mt-5 space-y-4">
+                    <div class="mt-6 space-y-3">
                         <div class="pulse-outline rounded-2xl p-4">
-                            <h3 class="text-lg font-semibold text-[var(--pulse-ink)]">What if your admin tools actually gave you time back?</h3>
-                            <p class="mt-2 text-sm text-[var(--pulse-muted)]">
-                                We’re building something different — a system that handles the busywork so you can focus on the students and staff who need you most. But here’s the thing: we need your help to get it right.
+                            <p class="text-sm text-[var(--pulse-muted)]">
+                                What if your admin tools actually gave you time back?
                             </p>
                         </div>
                         <div class="pulse-outline rounded-2xl p-4">
-                            <h3 class="text-lg font-semibold text-[var(--pulse-ink)]">Jump In and Tell Us What You Think</h3>
-                            <p class="mt-2 text-sm text-[var(--pulse-muted)]">
-                                We have a working prototype. It’s not perfect — it’s a starting point. And we want your voice shaping what comes next.
+                            <p class="text-sm text-[var(--pulse-muted)]">
+                                We have a working prototype. It’s not perfect — it’s a starting point.
                             </p>
                         </div>
                     </div>
 
                     <div class="mt-6">
-                        <h2 class="text-xl font-semibold text-[var(--pulse-ink)]">Try it for 10 minutes. Tell us:</h2>
-                        <ul class="mt-3 space-y-1 text-sm text-[var(--pulse-muted)]">
-                            <li>• What feels right?</li>
-                            <li>• What’s missing?</li>
-                            <li>• What would actually help you on Monday morning?</li>
-                        </ul>
+                        <h2 class="text-lg font-semibold text-[var(--pulse-ink)]">Try it for 10 minutes. Tell us:</h2>
+                        <ol class="mt-3 space-y-2 text-sm text-[var(--pulse-muted)] list-decimal list-inside">
+                            <li>What feels right?</li>
+                            <li>What’s missing?</li>
+                            <li>What would actually help you on Monday morning?</li>
+                        </ol>
                         <div class="mt-4 flex flex-wrap gap-3">
                             <button @click="open = true" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[var(--pulse-accent)] text-white font-semibold hover:opacity-90">Get Started</button>
                             <button @click="open = true" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50">Give Us Feedback</button>
                         </div>
-                        <p class="mt-4 text-sm text-[var(--pulse-muted)]">
-                            Based on your feedback, we’ll invite some schools to help us test new features as we build them — but for now, we just want to hear what you think.
+                        <p class="mt-3 text-sm text-[var(--pulse-muted)]">
+                            No credit card. No sales pitch. Just click, explore, and share your thoughts.
                         </p>
-                        <p class="mt-3 text-sm font-semibold text-[var(--pulse-ink)]">No credit card. No sales pitch. Just click, explore, and share your thoughts.</p>
                     </div>
                 </div>
 
                 <div id="get-access" class="sticky top-6">
                     <div class="pulse-outline rounded-3xl p-6">
-                        <h2 class="text-2xl font-semibold text-[var(--pulse-ink)]">Prototype Preview</h2>
+                        <h2 class="text-2xl font-semibold text-[var(--pulse-ink)]">Prototype preview</h2>
                         <p class="text-sm text-[var(--pulse-muted)] mt-2">
-                            Drop a GIF or short looped video here. I can wire real screenshots once you share them.
+                            Rolling GIF preview goes here.
                         </p>
-                        <div class="mt-4 aspect-[9/16] w-full rounded-2xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-sm text-slate-500">
-                            Add GIF / screenshots here
+                        <div class="mt-4 aspect-[4/5] w-full rounded-2xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-sm text-slate-500">
+                            Add GIF here
                         </div>
                     </div>
                 </div>
