@@ -61,7 +61,7 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <a href="/" class="flex items-center">
-                        <span class="text-2xl font-bold text-pulse-orange-500">Pulse</span>
+                        <img src="/Pulse Logo - Black font.svg" alt="Pulse" class="h-7 w-auto" />
                     </a>
                 </div>
                 <div class="flex items-center space-x-4">

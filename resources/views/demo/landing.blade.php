@@ -102,7 +102,7 @@
                 <div id="get-access" class="sticky top-4 lg:ml-8">
                     <div class="pulse-outline rounded-3xl p-4">
                         <h2 class="text-2xl font-semibold text-[var(--pulse-ink)]">Prototype preview</h2>
-                        <div class="mt-4 aspect-[5/2] w-full preview-rolling"></div>
+                        <div class="mt-4 aspect-[4/3] w-full preview-rolling"></div>
                     </div>
                 </div>
             </div>
