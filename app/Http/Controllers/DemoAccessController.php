@@ -108,7 +108,7 @@ class DemoAccessController extends Controller
         }
 
         try {
-            Http::timeout(5)->post($webhookUrl, [
+            Http::asForm()->timeout(5)->post($webhookUrl, [
                 'first_name' => $data['first_name'] ?? null,
                 'last_name' => $data['last_name'] ?? null,
                 'email' => $data['email'] ?? null,
