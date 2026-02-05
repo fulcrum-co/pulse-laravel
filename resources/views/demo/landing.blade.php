@@ -54,9 +54,10 @@
             border: 1px solid #e2e8f0;
             background: #f8fafc;
             box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.6);
-            background-size: cover;
+            background-size: contain;
             background-position: center;
-            animation: previewCycle 10s infinite;
+            background-repeat: no-repeat;
+            animation: previewCycle 16s infinite;
         }
         @keyframes previewCycle {
             0% { background-image: url('/demo-shots/1.png'); }
