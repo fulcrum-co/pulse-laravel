@@ -56,7 +56,7 @@
                 <span class="h-1 w-1 rounded-full bg-amber-400"></span>
                 Accepting 20 participants
             </div>
-            <div class="mt-5 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 items-start">
+            <div class="mt-5 grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-12 items-start">
                 <div>
                     <h1 class="text-3xl md:text-4xl text-[var(--pulse-ink)] leading-tight font-semibold">
                         Less Paperwork, More Time with Students
@@ -66,12 +66,12 @@
                     </p>
                     <div class="mt-6 space-y-3">
                         <div class="pulse-outline rounded-2xl p-4">
-                            <p class="text-sm text-[var(--pulse-muted)]">
+                            <p class="text-base font-semibold text-[var(--pulse-ink)]">
                                 What if your admin tools actually gave you time back?
                             </p>
                         </div>
                         <div class="pulse-outline rounded-2xl p-4">
-                            <p class="text-sm text-[var(--pulse-muted)]">
+                            <p class="text-base font-semibold text-[var(--pulse-ink)]">
                                 We have a working prototype. It’s not perfect — it’s a starting point.
                             </p>
                         </div>
@@ -100,7 +100,7 @@
                         <p class="text-sm text-[var(--pulse-muted)] mt-2">
                             Rolling GIF preview goes here.
                         </p>
-                        <div class="mt-4 aspect-[4/5] w-full rounded-2xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-sm text-slate-500">
+                        <div class="mt-4 aspect-[5/4] w-full rounded-2xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-sm text-slate-500">
                             Add GIF here
                         </div>
                     </div>
