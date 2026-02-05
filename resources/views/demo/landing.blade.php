@@ -84,15 +84,9 @@
                     </p>
                     <div class="mt-6 space-y-5">
                         <section>
-                            <h2 class="text-xl font-semibold text-[var(--pulse-ink)]">What if your admin tools actually gave you time back?</h2>
+                            <h2 class="text-xl font-semibold text-[var(--pulse-ink)]">Help us shape it.</h2>
                             <p class="mt-2 text-sm text-[var(--pulse-muted)]">
-                                We’re building something different — a system that handles the busywork so you can focus on the students and staff who need you most.
-                            </p>
-                        </section>
-                        <section>
-                            <h2 class="text-xl font-semibold text-[var(--pulse-ink)]">Jump In and Tell Us What You Think</h2>
-                            <p class="mt-2 text-sm text-[var(--pulse-muted)]">
-                                We have a working prototype. It's not perfect — it's a starting point. And we want your voice shaping what comes next.
+                                Take a 10‑minute test drive and tell us what’s missing.
                             </p>
                         </section>
                         <section>
@@ -116,9 +110,6 @@
                 <div id="get-access" class="sticky top-6">
                     <div class="pulse-outline rounded-3xl p-6">
                         <h2 class="text-2xl font-semibold text-[var(--pulse-ink)]">Prototype preview</h2>
-                        <p class="text-sm text-[var(--pulse-muted)] mt-2">
-                            Rolling GIF preview goes here.
-                        </p>
                         <div class="mt-4 aspect-[16/9] w-full preview-rolling"></div>
                     </div>
                 </div>
