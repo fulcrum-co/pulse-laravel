@@ -68,14 +68,14 @@
     </style>
 
     <div class="landing-body min-h-screen bg-gradient-to-b from-white via-[#f7f8fb] to-white" x-data="{ open: false }" x-init="if (window.location.hash === '#demo-access') { open = true }" @open-demo-access.window="open = true">
-        <section class="mx-auto max-w-5xl px-4 py-10" id="demo-access">
+        <section class="mx-auto max-w-6xl px-4 py-10" id="demo-access">
             <div class="inline-flex items-center gap-2 rounded-full hero-pill px-4 py-1 text-xs font-semibold">
                 Pulse is currently in limited beta
                 <span class="h-1 w-1 rounded-full bg-amber-400"></span>
                 Accepting 20 participants
             </div>
-            <div class="mt-5 grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-14 items-start">
-                <div class="max-w-xl">
+            <div class="mt-5 grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-16 items-start">
+                <div class="max-w-lg">
                     <h1 class="text-3xl md:text-4xl text-[var(--pulse-ink)] leading-tight font-semibold">
                         Less paperwork. More time with students.
                     </h1>
@@ -99,10 +99,10 @@
                     </div>
                 </div>
 
-                <div id="get-access" class="sticky top-6 lg:ml-6">
-                    <div class="pulse-outline rounded-3xl p-6">
+                <div id="get-access" class="sticky top-4 lg:ml-8">
+                    <div class="pulse-outline rounded-3xl p-4">
                         <h2 class="text-2xl font-semibold text-[var(--pulse-ink)]">Prototype preview</h2>
-                        <div class="mt-4 aspect-[21/9] w-full preview-rolling"></div>
+                        <div class="mt-4 aspect-[5/2] w-full preview-rolling"></div>
                     </div>
                 </div>
             </div>
