@@ -48,7 +48,7 @@ class MiniCoursePolicy
     public function create(User $user): bool
     {
         // Admins, consultants, teachers, and counselors can create courses
-        return $user->isAdmin() || in_array($user->primary_role, ['consultant', 'teacher', 'counselor']);
+        return $user->isAdmin() || in_array($user->effective_role, ['consultant', 'teacher', 'counselor']);
     }
 
     /**
@@ -62,7 +62,7 @@ class MiniCoursePolicy
         }
 
         // Org admin or consultant can always update
-        if ($user->isAdmin() || $user->primary_role === 'consultant') {
+        if ($user->isAdmin() || $user->hasRole('consultant')) {
             return true;
         }
 
@@ -72,7 +72,7 @@ class MiniCoursePolicy
         }
 
         // Teachers and counselors can update courses in their org
-        return in_array($user->primary_role, ['teacher', 'counselor']);
+        return in_array($user->effective_role, ['teacher', 'counselor']);
     }
 
     /**
@@ -86,7 +86,7 @@ class MiniCoursePolicy
         }
 
         // Org admin or consultant can delete
-        if ($user->isAdmin() || $user->primary_role === 'consultant') {
+        if ($user->isAdmin() || $user->hasRole('consultant')) {
             return true;
         }
 
@@ -114,12 +114,12 @@ class MiniCoursePolicy
         }
 
         // Org admin or consultant can always publish
-        if ($user->isAdmin() || $user->primary_role === 'consultant') {
+        if ($user->isAdmin() || $user->hasRole('consultant')) {
             return true;
         }
 
         // Creator or teacher/counselor can publish
-        if ($course->created_by === $user->id || in_array($user->primary_role, ['teacher', 'counselor'])) {
+        if ($course->created_by === $user->id || in_array($user->effective_role, ['teacher', 'counselor'])) {
             return true;
         }
 
@@ -170,7 +170,7 @@ class MiniCoursePolicy
         }
 
         // Admins, consultants, teachers, counselors can enroll students
-        return $user->isAdmin() || in_array($user->primary_role, ['consultant', 'teacher', 'counselor']);
+        return $user->isAdmin() || in_array($user->effective_role, ['consultant', 'teacher', 'counselor']);
     }
 
     /**
@@ -195,6 +195,6 @@ class MiniCoursePolicy
     public function forceDelete(User $user, MiniCourse $course): bool
     {
         // Admin or consultant with access can force delete
-        return $user->canAccessOrganization($course->org_id) && ($user->isAdmin() || $user->primary_role === 'consultant');
+        return $user->canAccessOrganization($course->org_id) && ($user->isAdmin() || $user->hasRole('consultant'));
     }
 }

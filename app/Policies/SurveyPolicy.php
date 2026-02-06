@@ -33,7 +33,7 @@ class SurveyPolicy
     public function create(User $user): bool
     {
         // Admins and teachers can create surveys
-        return $user->isAdmin() || $user->primary_role === 'teacher';
+        return $user->isAdmin() || $user->hasRole('teacher');
     }
 
     /**
@@ -47,7 +47,7 @@ class SurveyPolicy
         }
 
         // Admin or consultant can always update
-        if ($user->isAdmin() || $user->primary_role === 'consultant') {
+        if ($user->isAdmin() || $user->hasRole('consultant')) {
             return true;
         }
 
@@ -66,7 +66,7 @@ class SurveyPolicy
         }
 
         // Admin or consultant can delete
-        if ($user->isAdmin() || $user->primary_role === 'consultant') {
+        if ($user->isAdmin() || $user->hasRole('consultant')) {
             return true;
         }
 
@@ -87,6 +87,6 @@ class SurveyPolicy
      */
     public function forceDelete(User $user, Survey $survey): bool
     {
-        return $user->canAccessOrganization($survey->org_id) && ($user->isAdmin() || $user->primary_role === 'consultant');
+        return $user->canAccessOrganization($survey->org_id) && ($user->isAdmin() || $user->hasRole('consultant'));
     }
 }

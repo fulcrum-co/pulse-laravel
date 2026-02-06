@@ -29,8 +29,8 @@ class StrategicPlanPolicy
             return false;
         }
 
-        // Admin or consultant can view
-        if ($user->isAdmin() || $user->primary_role === 'consultant') {
+        // Admin or consultant can view (respects demo mode)
+        if ($user->isAdmin() || $user->hasRole('consultant')) {
             return true;
         }
 
@@ -45,8 +45,8 @@ class StrategicPlanPolicy
      */
     public function create(User $user): bool
     {
-        // Admins, consultants, and teachers can create
-        return $user->isAdmin() || in_array($user->primary_role, ['consultant', 'teacher']);
+        // Admins, consultants, and teachers can create (respects demo mode)
+        return $user->isAdmin() || in_array($user->effective_role, ['consultant', 'teacher']);
     }
 
     /**
@@ -59,8 +59,8 @@ class StrategicPlanPolicy
             return false;
         }
 
-        // Org admin or consultant can always update
-        if ($user->isAdmin() || $user->primary_role === 'consultant') {
+        // Org admin or consultant can always update (respects demo mode)
+        if ($user->isAdmin() || $user->hasRole('consultant')) {
             return true;
         }
 
@@ -80,8 +80,8 @@ class StrategicPlanPolicy
             return false;
         }
 
-        // Org admin or consultant can delete
-        if ($user->isAdmin() || $user->primary_role === 'consultant') {
+        // Org admin or consultant can delete (respects demo mode)
+        if ($user->isAdmin() || $user->hasRole('consultant')) {
             return true;
         }
 
@@ -101,8 +101,8 @@ class StrategicPlanPolicy
             return false;
         }
 
-        // Only consultants, admins can push (they have cross-org capability)
-        if (! $user->isAdmin() && $user->primary_role !== 'consultant') {
+        // Only consultants, admins can push (respects demo mode)
+        if (! $user->isAdmin() && ! $user->hasRole('consultant')) {
             return false;
         }
 
@@ -131,7 +131,7 @@ class StrategicPlanPolicy
      */
     public function forceDelete(User $user, StrategicPlan $strategicPlan): bool
     {
-        // Admin or consultant with access can force delete
-        return $user->canAccessOrganization($strategicPlan->org_id) && ($user->isAdmin() || $user->primary_role === 'consultant');
+        // Admin or consultant with access can force delete (respects demo mode)
+        return $user->canAccessOrganization($strategicPlan->org_id) && ($user->isAdmin() || $user->hasRole('consultant'));
     }
 }

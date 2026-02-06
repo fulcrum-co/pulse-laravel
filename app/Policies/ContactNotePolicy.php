@@ -55,7 +55,7 @@ class ContactNotePolicy
         }
 
         // Admin or consultant can always update
-        if ($user->isAdmin() || $user->primary_role === 'consultant') {
+        if ($user->isAdmin() || $user->hasRole('consultant')) {
             return true;
         }
 
@@ -74,7 +74,7 @@ class ContactNotePolicy
         }
 
         // Admin or consultant can delete
-        if ($user->isAdmin() || $user->primary_role === 'consultant') {
+        if ($user->isAdmin() || $user->hasRole('consultant')) {
             return true;
         }
 
@@ -95,6 +95,6 @@ class ContactNotePolicy
      */
     public function forceDelete(User $user, ContactNote $note): bool
     {
-        return $user->canAccessOrganization($note->org_id) && ($user->isAdmin() || $user->primary_role === 'consultant');
+        return $user->canAccessOrganization($note->org_id) && ($user->isAdmin() || $user->hasRole('consultant'));
     }
 }
