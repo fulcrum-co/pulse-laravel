@@ -236,7 +236,7 @@ class MiniCourseController extends Controller
         $student = \App\Models\Student::findOrFail($validated['student_id']);
 
         // Verify org access
-        if ($student->org_id !== auth()->user()->org_id) {
+        if (! auth()->user()->canAccessOrganization($student->org_id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 

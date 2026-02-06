@@ -166,10 +166,17 @@ class ModerationQueue extends Component
     {
         $user = auth()->user();
 
-        return in_array($user->effective_role, ['admin', 'consultant', 'superintendent']);
+        return in_array($user->effective_role, ['admin', 'consultant', 'superintendent', 'prospect']);
     }
 
     protected function canAssign(): bool
+    {
+        $user = auth()->user();
+
+        return in_array($user->effective_role, ['admin', 'consultant', 'superintendent', 'school_admin']);
+    }
+
+    protected function canModerate(): bool
     {
         $user = auth()->user();
 
@@ -443,6 +450,7 @@ class ModerationQueue extends Component
             'assignmentPriorities' => ContentModerationResult::getPriorities(),
             'canAssign' => $this->canAssign(),
             'canViewAll' => $this->canViewAllItems(),
+            'canModerate' => $this->canModerate(),
             'queueType' => $this->queueType,
         ];
 

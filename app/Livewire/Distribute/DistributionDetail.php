@@ -20,7 +20,7 @@ class DistributionDetail extends Component
     public function mount(Distribution $distribution): void
     {
         // Ensure user can access this distribution
-        if ($distribution->org_id !== auth()->user()->org_id) {
+        if (! auth()->user()->canAccessOrganization($distribution->org_id)) {
             abort(403);
         }
 

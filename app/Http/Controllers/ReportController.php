@@ -107,7 +107,7 @@ class ReportController extends Controller
         $user = auth()->user();
 
         // Only allow push from user's own org
-        if ($report->org_id !== $user->org_id && $report->org_id !== $user->effective_org_id) {
+        if (! $user->canAccessOrganization($report->org_id)) {
             abort(403);
         }
 
@@ -153,7 +153,7 @@ class ReportController extends Controller
     {
         $user = auth()->user();
 
-        if ($report->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($report->org_id)) {
             abort(403);
         }
 
@@ -169,7 +169,7 @@ class ReportController extends Controller
     {
         $user = auth()->user();
 
-        if ($report->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($report->org_id)) {
             abort(403);
         }
 
@@ -189,7 +189,7 @@ class ReportController extends Controller
     {
         $user = auth()->user();
 
-        if ($report->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($report->org_id)) {
             abort(403);
         }
 
@@ -206,7 +206,7 @@ class ReportController extends Controller
     {
         $user = auth()->user();
 
-        if ($report->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($report->org_id)) {
             abort(403);
         }
 

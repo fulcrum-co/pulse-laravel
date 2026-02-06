@@ -57,6 +57,16 @@ class ModerationTaskFlow extends Component
         }
     }
 
+    /**
+     * Check if user can perform moderation actions (approve/reject).
+     */
+    protected function canModerate(): bool
+    {
+        $user = auth()->user();
+
+        return in_array($user->effective_role, ['admin', 'consultant', 'superintendent', 'school_admin']);
+    }
+
     #[Computed]
     public function queueStats(): array
     {
@@ -100,7 +110,7 @@ class ModerationTaskFlow extends Component
         }
 
         // Check authorization
-        if ($item->org_id !== auth()->user()->org_id) {
+        if (! auth()->user()->canAccessOrganization($item->org_id)) {
             $this->dispatch('notify', [
                 'type' => 'error',
                 'message' => 'You do not have access to this item.',
@@ -148,6 +158,16 @@ class ModerationTaskFlow extends Component
     public function submitDecision(string $decision): void
     {
         if (! $this->currentItem) {
+            return;
+        }
+
+        // Check authorization
+        if (! $this->canModerate()) {
+            $this->dispatch('notify', [
+                'type' => 'error',
+                'message' => 'You do not have permission to submit moderation decisions. Demo mode is view-only.',
+            ]);
+
             return;
         }
 
@@ -478,6 +498,8 @@ class ModerationTaskFlow extends Component
 
     public function render()
     {
-        return view('livewire.admin.moderation-task-flow');
+        return view('livewire.admin.moderation-task-flow', [
+            'canModerate' => $this->canModerate(),
+        ]);
     }
 }

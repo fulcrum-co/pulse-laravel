@@ -21,7 +21,7 @@ class EnrollmentController extends Controller
     {
         $user = auth()->user();
 
-        if ($student->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($student->org_id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -64,7 +64,7 @@ class EnrollmentController extends Controller
         $user = auth()->user();
 
         // Verify access
-        if ($course->org_id !== $user->org_id || $student->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($course->org_id) || ! $user->canAccessOrganization($student->org_id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -120,7 +120,7 @@ class EnrollmentController extends Controller
         // Load relationships and check access
         $enrollment->load(['miniCourse', 'student', 'currentStep', 'stepProgress']);
 
-        if ($enrollment->miniCourse->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($enrollment->miniCourse->org_id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -134,7 +134,7 @@ class EnrollmentController extends Controller
     {
         $user = auth()->user();
 
-        if ($enrollment->miniCourse->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($enrollment->miniCourse->org_id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -180,7 +180,7 @@ class EnrollmentController extends Controller
     {
         $user = auth()->user();
 
-        if ($enrollment->miniCourse->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($enrollment->miniCourse->org_id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -248,7 +248,7 @@ class EnrollmentController extends Controller
     {
         $user = auth()->user();
 
-        if ($enrollment->miniCourse->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($enrollment->miniCourse->org_id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -302,7 +302,7 @@ class EnrollmentController extends Controller
     {
         $user = auth()->user();
 
-        if ($enrollment->miniCourse->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($enrollment->miniCourse->org_id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -331,7 +331,7 @@ class EnrollmentController extends Controller
     {
         $user = auth()->user();
 
-        if ($enrollment->miniCourse->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($enrollment->miniCourse->org_id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 

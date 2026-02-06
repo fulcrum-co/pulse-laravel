@@ -23,6 +23,7 @@ class PageHelpHint extends Model
         'offset_y',
         'sort_order',
         'is_active',
+        'trigger_event',
     ];
 
     /**
@@ -38,6 +39,8 @@ class PageHelpHint extends Model
         'plans' => '/plans',
         'surveys' => '/surveys',
         'alerts' => '/alerts',
+        'moderation' => '/moderation',
+        'marketplace' => '/marketplace',
     ];
 
     protected $casts = [
@@ -60,6 +63,8 @@ class PageHelpHint extends Model
         'plans' => 'Plans',
         'surveys' => 'Surveys',
         'alerts' => 'Alerts',
+        'moderation' => 'Moderation',
+        'marketplace' => 'Marketplace',
     ];
 
     /**
@@ -129,6 +134,7 @@ class PageHelpHint extends Model
                 'position' => $hint->position,
                 'offset_x' => $hint->offset_x ?? 0,
                 'offset_y' => $hint->offset_y ?? 0,
+                'trigger_event' => $hint->trigger_event,
             ])
             ->toArray();
     }

@@ -247,7 +247,7 @@ class PlanController extends Controller
      */
     protected function authorizeView($user, StrategicPlan $plan): void
     {
-        if ($plan->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($plan->org_id)) {
             abort(403, 'You do not have access to this plan.');
         }
     }

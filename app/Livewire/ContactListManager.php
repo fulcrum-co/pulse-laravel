@@ -147,7 +147,7 @@ class ContactListManager extends Component
     {
         $list = ContactList::find($listId);
 
-        if ($list && $list->org_id === auth()->user()->org_id) {
+        if ($list && auth()->user()->canAccessOrganization($list->org_id)) {
             $list->delete();
 
             $this->dispatch('notify', [

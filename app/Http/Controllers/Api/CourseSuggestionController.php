@@ -57,7 +57,7 @@ class CourseSuggestionController extends Controller
     public function generate(Request $request, Student $student): JsonResponse
     {
         // Verify org access
-        if ($student->org_id !== auth()->user()->org_id) {
+        if (! auth()->user()->canAccessOrganization($student->org_id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -86,7 +86,7 @@ class CourseSuggestionController extends Controller
     public function evaluateTriggers(Student $student): JsonResponse
     {
         // Verify org access
-        if ($student->org_id !== auth()->user()->org_id) {
+        if (! auth()->user()->canAccessOrganization($student->org_id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -148,7 +148,7 @@ class CourseSuggestionController extends Controller
     public function providerRecommendations(Request $request, Student $student): JsonResponse
     {
         // Verify org access
-        if ($student->org_id !== auth()->user()->org_id) {
+        if (! auth()->user()->canAccessOrganization($student->org_id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -168,7 +168,7 @@ class CourseSuggestionController extends Controller
     public function signals(Student $student): JsonResponse
     {
         // Verify org access
-        if ($student->org_id !== auth()->user()->org_id) {
+        if (! auth()->user()->canAccessOrganization($student->org_id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 

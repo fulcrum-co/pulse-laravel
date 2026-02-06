@@ -247,7 +247,7 @@ class StrategyController extends Controller
      */
     protected function authorizeView($user, StrategicPlan $strategy): void
     {
-        if ($strategy->org_id !== $user->org_id) {
+        if (! $user->canAccessOrganization($strategy->org_id)) {
             abort(403, 'You do not have access to this strategy.');
         }
     }

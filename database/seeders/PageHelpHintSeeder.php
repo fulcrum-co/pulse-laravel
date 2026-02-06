@@ -12,16 +12,244 @@ class PageHelpHintSeeder extends Seeder
      */
     public function run(): void
     {
+        // First, deactivate all existing hints (soft delete approach)
+        PageHelpHint::whereNull('org_id')->update(['is_active' => false]);
+
         $hints = [
-            // Dashboard
+            // ============================================
+            // CONTACTS - Keep only card 1
+            // ============================================
+            [
+                'page_context' => 'contacts',
+                'section' => 'search',
+                'selector' => '[data-help="search-contacts"], input[type="search"], .search',
+                'title' => 'Search Contacts',
+                'description' => 'Search by name, email, or other criteria to quickly find specific contacts in your organization.',
+                'position' => 'bottom',
+                'sort_order' => 0,
+            ],
+
+            // ============================================
+            // SURVEYS
+            // ============================================
+            [
+                'page_context' => 'surveys',
+                'section' => 'intro',
+                'selector' => null,
+                'title' => 'Surveys & Assessments',
+                'description' => 'Create and manage all assessments in one central location.',
+                'position' => 'center',
+                'sort_order' => 0,
+            ],
+            [
+                'page_context' => 'surveys',
+                'section' => 'list',
+                'selector' => '[data-help="survey-list"], .survey-list, table',
+                'title' => 'Survey List',
+                'description' => 'View all your surveys here. You can see their status, response rates, and take quick actions.',
+                'position' => 'top',
+                'sort_order' => 1,
+            ],
+            // NEW: On create survey page
+            [
+                'page_context' => 'surveys',
+                'section' => 'create-beyond-forms',
+                'selector' => '[href*="surveys/create"], a[href*="create"]',
+                'title' => 'Move Beyond Static Forms',
+                'description' => 'Pulse makes completing assessments not only easier, but more holistic by allowing the person reporting the ability to give more context to what is happening, extract the data and apply it directly to the record being reported on.',
+                'position' => 'bottom',
+                'sort_order' => 2,
+                'trigger_event' => 'click',
+            ],
+
+            // ============================================
+            // REPORTS - Keep card 1 only
+            // ============================================
+            [
+                'page_context' => 'reports',
+                'section' => 'intro',
+                'selector' => null,
+                'title' => 'Reports',
+                'description' => 'Build beautiful, data-driven reports with our drag-and-drop editor. Share insights with stakeholders.',
+                'position' => 'center',
+                'sort_order' => 0,
+            ],
+            // NEW: Hover tooltip on create button
+            [
+                'page_context' => 'reports',
+                'section' => 'create-report-tooltip',
+                'selector' => 'a[href*="reports/create"], [href*="reports.create"]',
+                'title' => 'Your Reports Tell the Story',
+                'description' => 'Your reports should help you visually capture the whole story of what is happening. With beautiful PDFs, website widgets to give the public real time view into your key impact metrics, and much more.',
+                'position' => 'bottom',
+                'sort_order' => 1,
+                'trigger_event' => 'hover',
+            ],
+
+            // ============================================
+            // DATA COLLECTIONS
+            // ============================================
+            [
+                'page_context' => 'collect',
+                'section' => 'intro',
+                'selector' => null,
+                'title' => 'Data Collections',
+                'description' => 'Set up recurring campaigns to collect data at scale, making it easier to ensure information is thorough and up to date.',
+                'position' => 'center',
+                'sort_order' => 0,
+            ],
+            // NEW: Popup on create collection
+            [
+                'page_context' => 'collect',
+                'section' => 'create-collection-popup',
+                'selector' => 'a[href*="collect/create"], [href*="collection/create"]',
+                'title' => 'Set Up Data Collection Campaigns',
+                'description' => 'Set up Data collection Campaigns in a few simple steps.',
+                'position' => 'bottom',
+                'sort_order' => 1,
+                'trigger_event' => 'click',
+            ],
+
+            // ============================================
+            // DISTRIBUTIONS - Keep card 1 only
+            // ============================================
+            [
+                'page_context' => 'distribute',
+                'section' => 'intro',
+                'selector' => null,
+                'title' => 'Distributions',
+                'description' => 'Send reports and messages to targeted groups via email or SMS. Set up one-time or recurring campaigns.',
+                'position' => 'center',
+                'sort_order' => 0,
+            ],
+
+            // ============================================
+            // RESOURCE LIBRARY - Keep cards 1 & 3
+            // ============================================
+            [
+                'page_context' => 'resources',
+                'section' => 'search',
+                'selector' => '[data-help="search-resources"]',
+                'title' => 'Search Resources',
+                'description' => 'Search across all resource types including content, providers, programs, and courses to quickly find what you need.',
+                'position' => 'bottom',
+                'sort_order' => 0,
+            ],
+            [
+                'page_context' => 'resources',
+                'section' => 'categories',
+                'selector' => '[data-help="resource-categories"]',
+                'title' => 'Resource Categories',
+                'description' => 'Browse resources by category - Content, Providers, Programs, and Courses. Click any card to explore that category.',
+                'position' => 'top',
+                'sort_order' => 1,
+            ],
+
+            // ============================================
+            // MODERATION (NEW CONTEXT)
+            // ============================================
+            [
+                'page_context' => 'moderation',
+                'section' => 'intro',
+                'selector' => null,
+                'title' => 'Resource Moderation',
+                'description' => 'Your administration can now have a single place to oversee all resource changes and additions in your organization.',
+                'position' => 'center',
+                'sort_order' => 0,
+            ],
+
+            // ============================================
+            // MARKETPLACE (NEW CONTEXT)
+            // ============================================
+            [
+                'page_context' => 'marketplace',
+                'section' => 'intro',
+                'selector' => null,
+                'title' => 'Marketplace',
+                'description' => 'Find standardized reports, custom plans for your students, helpful learning resources and a directory of support providers for everyone in your school.',
+                'position' => 'center',
+                'sort_order' => 0,
+            ],
+
+            // ============================================
+            // ALERT MANAGEMENT
+            // ============================================
+            [
+                'page_context' => 'alerts',
+                'section' => 'intro',
+                'selector' => null,
+                'title' => 'Alert Notifications',
+                'description' => 'See all of your notifications in one place.',
+                'position' => 'center',
+                'sort_order' => 0,
+            ],
+            // NEW: After Start Tasks button
+            [
+                'page_context' => 'alerts',
+                'section' => 'clearing-tasks',
+                'selector' => 'button[onclick*="startTaskFlow"], [data-action="start-tasks"]',
+                'title' => 'Clearing Your Tasks',
+                'description' => 'Streamline your workflow one task at a time. As you complete each notification, click done, our workflow will take you forward in the process so you don\'t have to think about it.',
+                'position' => 'bottom',
+                'sort_order' => 1,
+                'trigger_event' => 'after-click',
+            ],
+
+            // ============================================
+            // ALERT NOTIFICATIONS SECTION (workflow builder page)
+            // ============================================
+            [
+                'page_context' => 'alerts',
+                'section' => 'workflow-builder',
+                'selector' => '[data-help="alert-builder"], .alert-workflow-builder',
+                'title' => 'Build Custom Alerts',
+                'description' => 'Build custom alerts that notify specific people where their attention is needed. Give them the full context of why they are being notified, and let Pulse help you advocate for the support you need.',
+                'position' => 'top',
+                'sort_order' => 2,
+            ],
+
+            // ============================================
+            // PLANS (keep existing from page-help-overlay.blade.php)
+            // ============================================
+            [
+                'page_context' => 'plans',
+                'section' => 'intro',
+                'selector' => null,
+                'title' => 'Plans',
+                'description' => 'This is where your goals take shape. Create plans at any level — from school-wide initiatives down to individual student improvement — and track progress all in one place.',
+                'position' => 'center',
+                'sort_order' => 0,
+            ],
+            [
+                'page_context' => 'plans',
+                'section' => 'list',
+                'selector' => '[data-help="plan-list"], .plan-list, [class*="plan-card"]',
+                'title' => 'Your Plans',
+                'description' => 'See the status of every initiative at a glance — identify what\'s on track, what needs attention, and where to focus your energy next.',
+                'position' => 'top',
+                'sort_order' => 1,
+            ],
+
+            // ============================================
+            // DASHBOARD (keep existing updated version)
+            // ============================================
+            [
+                'page_context' => 'dashboard',
+                'section' => 'intro',
+                'selector' => null,
+                'title' => 'Welcome to your dashboard',
+                'description' => 'This is your home base. Everything you need to stay informed and take action starts here.',
+                'position' => 'center',
+                'sort_order' => 0,
+            ],
             [
                 'page_context' => 'dashboard',
                 'section' => 'selector',
                 'selector' => '[data-help="dashboard-selector"]',
                 'title' => 'Dashboard Selector',
-                'description' => 'Switch between different dashboards or create new ones. Each dashboard can have its own set of customized widgets.',
+                'description' => 'Switch between dashboards or create your own. Each one can be tailored to a specific focus — like attendance trends, student wellbeing, or team goals.',
                 'position' => 'bottom',
-                'sort_order' => 0,
+                'sort_order' => 1,
             ],
             [
                 'page_context' => 'dashboard',
@@ -29,15 +257,6 @@ class PageHelpHintSeeder extends Seeder
                 'selector' => '[data-help="dashboard-actions"]',
                 'title' => 'Dashboard Actions',
                 'description' => 'Add widgets, set date ranges, and manage your dashboard settings. Customize your view to focus on what matters most.',
-                'position' => 'bottom',
-                'sort_order' => 1,
-            ],
-            [
-                'page_context' => 'dashboard',
-                'section' => 'date-range',
-                'selector' => '[data-help="date-range"]',
-                'title' => 'Date Range Filter',
-                'description' => 'Filter your dashboard data by week, month, or quarter to see trends over different time periods.',
                 'position' => 'bottom',
                 'sort_order' => 2,
             ],
@@ -50,211 +269,6 @@ class PageHelpHintSeeder extends Seeder
                 'position' => 'top',
                 'sort_order' => 3,
             ],
-
-            // Reports
-            [
-                'page_context' => 'reports',
-                'section' => 'search',
-                'selector' => '[data-help="search-reports"]',
-                'title' => 'Search Reports',
-                'description' => 'Quickly find specific reports by searching for keywords in the report name.',
-                'position' => 'bottom',
-                'sort_order' => 0,
-            ],
-            [
-                'page_context' => 'reports',
-                'section' => 'filters',
-                'selector' => '[data-help="report-filters"]',
-                'title' => 'Filter Reports',
-                'description' => 'Filter reports by status (Draft or Published) and switch between grid, list, and table views.',
-                'position' => 'bottom',
-                'sort_order' => 1,
-            ],
-            [
-                'page_context' => 'reports',
-                'section' => 'list',
-                'selector' => '[data-help="report-list"]',
-                'title' => 'Your Reports',
-                'description' => 'View all your reports here. Click to edit, duplicate, or delete reports. Published reports can be shared with stakeholders.',
-                'position' => 'top',
-                'sort_order' => 2,
-            ],
-
-            // Collect
-            [
-                'page_context' => 'collect',
-                'section' => 'search',
-                'selector' => '[data-help="search-collections"]',
-                'title' => 'Search Collections',
-                'description' => 'Quickly find specific data collections by searching for keywords in the collection name.',
-                'position' => 'bottom',
-                'sort_order' => 0,
-            ],
-            [
-                'page_context' => 'collect',
-                'section' => 'filters',
-                'selector' => '[data-help="collection-filters"]',
-                'title' => 'Filter Collections',
-                'description' => 'Filter by status (Active, Paused, Draft) or type (Recurring, One-time, Event-triggered) to narrow your view.',
-                'position' => 'bottom',
-                'sort_order' => 1,
-            ],
-            [
-                'page_context' => 'collect',
-                'section' => 'list',
-                'selector' => '[data-help="collection-list"]',
-                'title' => 'Your Collections',
-                'description' => 'View all data collections here. Each card shows session counts, entries, and next scheduled run time.',
-                'position' => 'top',
-                'sort_order' => 2,
-            ],
-
-            // Distribute
-            [
-                'page_context' => 'distribute',
-                'section' => 'search',
-                'selector' => '[data-help="search-distributions"]',
-                'title' => 'Search Distributions',
-                'description' => 'Quickly find specific distributions by searching for keywords in the distribution name.',
-                'position' => 'bottom',
-                'sort_order' => 0,
-            ],
-            [
-                'page_context' => 'distribute',
-                'section' => 'filters',
-                'selector' => '[data-help="distribution-filters"]',
-                'title' => 'Filter Distributions',
-                'description' => 'Filter by status or channel (Email, SMS) to find specific distributions quickly.',
-                'position' => 'bottom',
-                'sort_order' => 1,
-            ],
-            [
-                'page_context' => 'distribute',
-                'section' => 'list',
-                'selector' => '[data-help="distribution-list"]',
-                'title' => 'Your Distributions',
-                'description' => 'Track all distributions here. See delivery counts, recipient lists, and next scheduled send time.',
-                'position' => 'top',
-                'sort_order' => 2,
-            ],
-
-            // Resources
-            [
-                'page_context' => 'resources',
-                'section' => 'search',
-                'selector' => '[data-help="search-resources"]',
-                'title' => 'Search Resources',
-                'description' => 'Search across all resource types including content, providers, programs, and courses to quickly find what you need.',
-                'position' => 'bottom',
-                'sort_order' => 0,
-            ],
-            [
-                'page_context' => 'resources',
-                'section' => 'filters',
-                'selector' => '[data-help="resource-filters"]',
-                'title' => 'Filter & Sort',
-                'description' => 'Use the sidebar to filter by category, content type, and sort order to narrow down your resource search.',
-                'position' => 'right',
-                'sort_order' => 1,
-            ],
-            [
-                'page_context' => 'resources',
-                'section' => 'categories',
-                'selector' => '[data-help="resource-categories"]',
-                'title' => 'Resource Categories',
-                'description' => 'Browse resources by category - Content, Providers, Programs, and Courses. Click any card to explore that category.',
-                'position' => 'top',
-                'sort_order' => 2,
-            ],
-
-            // Contacts
-            [
-                'page_context' => 'contacts',
-                'section' => 'search',
-                'selector' => '[data-help="search-contacts"], input[type="search"], .search',
-                'title' => 'Search Contacts',
-                'description' => 'Search by name, email, or other criteria to quickly find specific contacts in your organization.',
-                'position' => 'bottom',
-                'sort_order' => 0,
-            ],
-            [
-                'page_context' => 'contacts',
-                'section' => 'list',
-                'selector' => '[data-help="contact-list"], .contact-list, table',
-                'title' => 'Contact Directory',
-                'description' => 'Browse all contacts in your organization. Click on a contact to view their full profile.',
-                'position' => 'top',
-                'sort_order' => 1,
-            ],
-
-            // Plans
-            [
-                'page_context' => 'plans',
-                'section' => 'search',
-                'selector' => '[data-help="search-plans"], input[placeholder*="Search"]',
-                'title' => 'Search Plans',
-                'description' => 'Quickly find specific plans by searching for keywords in the plan name or description.',
-                'position' => 'bottom',
-                'sort_order' => 0,
-            ],
-            [
-                'page_context' => 'plans',
-                'section' => 'filters',
-                'selector' => '[data-help="plan-filters"], select',
-                'title' => 'Filter Plans',
-                'description' => 'Filter plans by type (Growth, Strategic, Action, etc.) or status (Active, Draft, Completed) to narrow your view.',
-                'position' => 'bottom',
-                'sort_order' => 1,
-            ],
-            [
-                'page_context' => 'plans',
-                'section' => 'list',
-                'selector' => '[data-help="plan-list"], .plan-list, [class*="plan-card"]',
-                'title' => 'Plan Cards',
-                'description' => 'View all strategic plans here. Each card shows the plan name, progress, goals, and key dates.',
-                'position' => 'top',
-                'sort_order' => 2,
-            ],
-
-            // Surveys
-            [
-                'page_context' => 'surveys',
-                'section' => 'create',
-                'selector' => '[data-help="create-survey"], [href*="create"]',
-                'title' => 'Create Survey',
-                'description' => 'Build a new wellness survey from templates or create custom questions tailored to your needs.',
-                'position' => 'bottom',
-                'sort_order' => 0,
-            ],
-            [
-                'page_context' => 'surveys',
-                'section' => 'list',
-                'selector' => '[data-help="survey-list"], .survey-list, table',
-                'title' => 'Survey List',
-                'description' => 'View all your surveys here. You can see their status, response rates, and take quick actions.',
-                'position' => 'top',
-                'sort_order' => 1,
-            ],
-
-            // Alerts
-            [
-                'page_context' => 'alerts',
-                'section' => 'filters',
-                'selector' => '[data-help="alert-filters"], .filters, [class*="filter"]',
-                'title' => 'Filter Alerts',
-                'description' => 'Use these filters to focus on specific alert types, severity levels, or time periods.',
-                'position' => 'bottom',
-                'sort_order' => 0,
-            ],
-            [
-                'page_context' => 'alerts',
-                'section' => 'list',
-                'selector' => '[data-help="alert-list"], .alert-list, [class*="alert-item"]',
-                'title' => 'Alert List',
-                'description' => 'Each alert shows the student, the trigger, and recommended actions. Click to view more details.',
-                'position' => 'top',
-                'sort_order' => 1,
-            ],
         ];
 
         foreach ($hints as $hint) {
@@ -265,14 +279,20 @@ class PageHelpHintSeeder extends Seeder
                     'section' => $hint['section'],
                 ],
                 [
-                    'selector' => $hint['selector'],
+                    'selector' => $hint['selector'] ?? null,
                     'title' => $hint['title'],
                     'description' => $hint['description'],
-                    'position' => $hint['position'],
+                    'position' => $hint['position'] ?? 'bottom',
                     'sort_order' => $hint['sort_order'],
                     'is_active' => true,
+                    'trigger_event' => $hint['trigger_event'] ?? null,
+                    'video_url' => $hint['video_url'] ?? null,
+                    'offset_x' => $hint['offset_x'] ?? 0,
+                    'offset_y' => $hint['offset_y'] ?? 0,
                 ]
             );
         }
+
+        $this->command->info('Page help hints seeded successfully!');
     }
 }

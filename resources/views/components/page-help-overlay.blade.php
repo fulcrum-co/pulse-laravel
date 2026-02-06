@@ -393,6 +393,15 @@ function pageHelpOverlay() {
                     this.startHelp(context);
                 }
             }
+
+            // Initialize trigger-based hints (tooltips and modals)
+            this.$nextTick(async () => {
+                // Load hints if not already loaded
+                if (!this.hintsLoaded) {
+                    await this.loadHintsFromApi();
+                }
+                this.initializeTriggeredHints();
+            });
         },
 
         async startHelp(context = null, section = null) {
@@ -460,8 +469,57 @@ function pageHelpOverlay() {
             if (path.includes('/collect')) return 'collect';
             if (path.includes('/distribute')) return 'distribute';
             if (path.includes('/reports')) return 'reports';
+            if (path.includes('/moderation')) return 'moderation';
+            if (path.includes('/marketplace')) return 'marketplace';
             if (path.includes('/dashboard') || path === '/') return 'dashboard';
             return 'general';
+        },
+
+        initializeTriggeredHints() {
+            const context = this.detectContext();
+            const hints = this.helpTours[context] || [];
+
+            // Filter hints with trigger events (hover, click, after-click)
+            const triggeredHints = hints.filter(h => h.trigger_event);
+
+            triggeredHints.forEach(hint => {
+                if (!hint.selector) return;
+
+                const selectors = hint.selector.split(',').map(s => s.trim());
+                selectors.forEach(sel => {
+                    try {
+                        const elements = document.querySelectorAll(sel);
+                        elements.forEach(el => {
+                            if (hint.trigger_event === 'hover') {
+                                // Show hint on hover
+                                el.addEventListener('mouseenter', () => {
+                                    if (!this.active) {
+                                        this.currentStep = hint;
+                                        this.highlightTarget(hint.selector);
+                                        this.active = true;
+                                        document.body.style.overflow = 'hidden';
+                                    }
+                                });
+                            } else if (hint.trigger_event === 'click' || hint.trigger_event === 'after-click') {
+                                // Show hint after click
+                                el.addEventListener('click', (e) => {
+                                    setTimeout(() => {
+                                        if (!this.active) {
+                                            this.currentStep = hint;
+                                            this.targetElement = null; // Centered modal
+                                            this.tooltipPosition = 'center';
+                                            this.active = true;
+                                            document.body.style.overflow = 'hidden';
+                                        }
+                                    }, hint.trigger_event === 'after-click' ? 500 : 0);
+                                });
+                            }
+                        });
+                    } catch (e) {
+                        // Invalid selector, skip
+                    }
+                });
+            });
         },
 
         setCurrentStep(step) {
