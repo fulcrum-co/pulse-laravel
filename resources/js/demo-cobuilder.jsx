@@ -93,6 +93,16 @@ function CoBuilderSurvey() {
         return () => trigger.removeEventListener('click', handler);
     }, []);
 
+    // Auto-open feedback modal if URL has #feedback hash
+    useEffect(() => {
+        if (window.location.hash === '#feedback') {
+            setOpen(true);
+            setStep(0);
+            setFormState(defaultFormState);
+            setError('');
+        }
+    }, []);
+
     const progress = useMemo(() => {
         if (step === 0) return 0;
         if (step > totalSteps) return 100;
