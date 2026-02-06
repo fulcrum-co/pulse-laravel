@@ -123,16 +123,15 @@ function pageHelpOverlay() {
                 {
                     section: 'intro',
                     selector: null,
-                    title: 'Welcome to your Dashboard',
-                    description: 'This is your central hub for monitoring student wellness across your organization. Let me show you around.',
+                    title: 'Welcome to your dashboard',
+                    description: 'This is your home base. Everything you need to stay informed and take action starts here.',
                     position: 'center'
                 },
                 {
                     section: 'selector',
                     selector: '[data-help="dashboard-selector"]',
                     title: 'Dashboard Selector',
-                    description: 'Switch between different dashboards or create new ones. Each dashboard can have its own set of customized widgets.',
-                    tip: 'Create multiple dashboards for different purposes - one for daily monitoring, one for weekly reviews.',
+                    description: 'Switch between dashboards or create your own. Each one can be tailored to a specific focus — like attendance trends, student wellbeing, or team goals.',
                     position: 'bottom'
                 },
                 {
@@ -140,14 +139,6 @@ function pageHelpOverlay() {
                     selector: '[data-help="dashboard-actions"]',
                     title: 'Dashboard Actions',
                     description: 'Add widgets, set date ranges, and manage your dashboard settings. Customize your view to focus on what matters most.',
-                    position: 'bottom'
-                },
-                {
-                    section: 'date-range',
-                    selector: '[data-help="date-range"]',
-                    title: 'Date Range Filter',
-                    description: 'Filter your dashboard data by week, month, or quarter to see trends over different time periods.',
-                    tip: 'Use the quarter view for strategic planning and the week view for daily operations.',
                     position: 'bottom'
                 },
                 {
