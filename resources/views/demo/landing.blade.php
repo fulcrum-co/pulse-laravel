@@ -67,7 +67,12 @@
         }
     </style>
 
-    <div class="landing-body min-h-screen bg-gradient-to-b from-white via-[#f7f8fb] to-white" x-data="{ open: false }" x-init="if (window.location.hash === '#demo-access') { open = true }" @open-demo-access.window="open = true">
+    <div
+        class="landing-body min-h-screen bg-gradient-to-b from-white via-[#f7f8fb] to-white"
+        x-data="{ openAccess: false }"
+        x-init="if (window.location.hash === '#demo-access') { openAccess = true }"
+        @open-demo-access.window="openAccess = true"
+    >
         <section class="mx-auto max-w-6xl px-4 py-10" id="demo-access">
             <div class="inline-flex items-center gap-2 rounded-full hero-pill px-4 py-1 text-xs font-semibold">
                 Pulse is currently in limited beta
@@ -90,8 +95,8 @@
                             <li>What would actually help you on Monday morning?</li>
                         </ul>
                         <div class="mt-4 flex flex-wrap gap-3">
-                            <button @click="open = true" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[var(--pulse-accent)] text-white font-semibold hover:opacity-90">Get Started</button>
-                            <button @click="open = true" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50">Give Us Feedback</button>
+                            <button @click="openAccess = true" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[var(--pulse-accent)] text-white font-semibold hover:opacity-90">Get Started</button>
+                            <button id="open-feedback-survey" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50">Give Us Feedback</button>
                         </div>
                         <p class="mt-3 text-xs text-gray-400">
                             No credit card. No sales pitch. Just click, explore, and share your thoughts.
@@ -107,12 +112,12 @@
                 </div>
             </div>
         </section>
-        <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div class="absolute inset-0 bg-black/40" @click="open = false"></div>
+        <div x-show="openAccess" x-cloak class="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div class="absolute inset-0 bg-black/40" @click="openAccess = false"></div>
             <div class="relative bg-white w-full max-w-lg rounded-2xl shadow-xl border border-gray-200 p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-semibold text-gray-900">Get Access</h2>
-                    <button class="text-gray-400 hover:text-gray-600" @click="open = false">
+                    <button class="text-gray-400 hover:text-gray-600" @click="openAccess = false">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -162,4 +167,9 @@
             </div>
         </div>
     </div>
+
+    <div
+        id="cobuilder-survey-root"
+        class="landing-body"
+    ></div>
 </x-layouts.app>

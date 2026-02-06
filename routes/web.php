@@ -11,6 +11,7 @@ use App\Http\Controllers\AlertController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContactMetricController;
 use App\Http\Controllers\DemoAccessController;
+use App\Http\Controllers\DemoFeedbackController;
 use App\Http\Controllers\ContactNoteController;
 use App\Http\Controllers\FocusAreaController;
 use App\Http\Controllers\NotificationController;
@@ -87,6 +88,7 @@ Route::get('/demo/access/{token}', [DemoAccessController::class, 'magic'])
     ->where('token', '[A-Za-z0-9]{64}')
     ->name('demo.magic');
 Route::post('/demo/zoho-webhook', [DemoAccessController::class, 'zohoWebhook'])->name('demo.zoho');
+Route::post('/demo/feedback', [DemoFeedbackController::class, 'store'])->name('demo.feedback');
 
 // Temporary route to fix avatars - visit once then remove
 Route::get('/fix-avatars-temp', function () {

@@ -108,7 +108,7 @@ class DemoAccessController extends Controller
         }
 
         try {
-            Http::asForm()->timeout(5)->post($webhookUrl, [
+            Http::asJson()->timeout(5)->post($webhookUrl, [
                 'first_name' => $data['first_name'] ?? null,
                 'last_name' => $data['last_name'] ?? null,
                 'email' => $data['email'] ?? null,
@@ -117,6 +117,12 @@ class DemoAccessController extends Controller
                 'org_url' => $data['org_url'] ?? null,
                 'org_size' => $data['org_size'] ?? null,
                 'source' => 'pilot',
+                // Zoho-friendly aliases for easier mapping in Flow.
+                'First Name' => $data['first_name'] ?? null,
+                'Last Name' => $data['last_name'] ?? null,
+                'Email' => $data['email'] ?? null,
+                'Phone' => $data['phone'] ?? null,
+                'Company' => $data['org_name'] ?? null,
             ]);
         } catch (\Throwable $e) {
             // Swallow errors to avoid blocking demo access.

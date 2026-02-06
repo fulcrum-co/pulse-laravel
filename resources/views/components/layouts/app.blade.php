@@ -48,6 +48,8 @@
             }
         }
     </script>
+    @viteReactRefresh
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
 @php $isProspect = auth()->user()?->isProspect() ?? false; @endphp

@@ -182,6 +182,16 @@ return [
     'zoho' => [
         'flow_webhook_url' => env('ZOHO_FLOW_WEBHOOK_URL'),
     ],
+    'google_sheet' => [
+        'webhook_url' => env('GOOGLE_SHEET_WEBHOOK_URL'),
+    ],
+    'google' => [
+        'sheets' => [
+            'spreadsheet_id' => env('GOOGLE_SHEETS_ID'),
+            'sheet_name' => env('GOOGLE_SHEETS_NAME', 'Sheet1'),
+            'credentials_path' => env('GOOGLE_SHEETS_CREDENTIALS'),
+        ],
+    ],
 
     /*
     |--------------------------------------------------------------------------
