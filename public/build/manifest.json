@@ -1,10 +1,10 @@
 {
-  "__commonjsHelpers-CqkleIqs.js": {
-    "file": "assets/_commonjsHelpers-CqkleIqs.js",
-    "name": "_commonjsHelpers"
+  "_client-HjWmCGNu.js": {
+    "file": "assets/client-HjWmCGNu.js",
+    "name": "client"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DNBAIn7J.css",
+    "file": "assets/app-BijPsyge.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -13,21 +13,21 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-BgqxDlkY.js",
+    "file": "assets/app-BYniQj11.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
-      "__commonjsHelpers-CqkleIqs.js"
+      "_client-HjWmCGNu.js"
     ]
   },
   "resources/js/workflow-builder/app.tsx": {
-    "file": "assets/app-BkEvyvmP.js",
+    "file": "assets/app-BUxrIQ90.js",
     "name": "app",
     "src": "resources/js/workflow-builder/app.tsx",
     "isEntry": true,
     "imports": [
-      "__commonjsHelpers-CqkleIqs.js"
+      "_client-HjWmCGNu.js"
     ],
     "css": [
       "assets/app-BZV40eAE.css"
