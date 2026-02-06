@@ -225,30 +225,15 @@ function pageHelpOverlay() {
                 {
                     section: 'intro',
                     selector: null,
-                    title: 'Strategic Plans',
-                    description: 'Create and track organizational wellness goals and initiatives. Strategic plans help align your team around shared objectives.',
+                    title: 'Plans',
+                    description: 'This is where your goals take shape. Create plans at any level — from school-wide initiatives down to individual student improvement — and track progress all in one place.',
                     position: 'center'
-                },
-                {
-                    section: 'search',
-                    selector: '[data-help="search-plans"], input[placeholder*="Search"]',
-                    title: 'Search Plans',
-                    description: 'Quickly find specific plans by searching for keywords in the plan name or description.',
-                    position: 'bottom'
-                },
-                {
-                    section: 'filters',
-                    selector: '[data-help="plan-filters"], select',
-                    title: 'Filter Plans',
-                    description: 'Filter plans by type (Growth, Strategic, Action, etc.) or status (Active, Draft, Completed).',
-                    position: 'bottom'
                 },
                 {
                     section: 'list',
                     selector: '[data-help="plan-list"], .plan-list, [class*="plan-card"]',
                     title: 'Your Plans',
-                    description: 'View all strategic plans here. Each card shows the plan name, progress, goals, and key dates.',
-                    tip: 'Click on any plan card to view details and track progress.',
+                    description: 'See the status of every initiative at a glance — identify what\'s on track, what needs attention, and where to focus your energy next.',
                     position: 'top'
                 }
             ],
