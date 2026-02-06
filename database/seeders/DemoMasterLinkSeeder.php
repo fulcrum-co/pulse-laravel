@@ -23,8 +23,6 @@ class DemoMasterLinkSeeder extends Seeder
         DemoAccessToken::create([
             'token' => $token,
             'email' => 'demo@pulseconnect.us',
-            'first_name' => 'Demo',
-            'last_name' => 'User',
             'expires_at' => now()->addYears(10),
         ]);
 
