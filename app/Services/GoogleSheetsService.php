@@ -22,7 +22,15 @@ class GoogleSheetsService
         $client = new GoogleClient();
         $client->setApplicationName('Pulse Co-Builder Survey');
         $client->setScopes([Sheets::SPREADSHEETS]);
-        $client->setAuthConfig($credentials);
+
+        // Support both JSON string and file path
+        if (is_string($credentials) && str_starts_with(trim($credentials), '{')) {
+            // JSON credentials passed directly
+            $client->setAuthConfig(json_decode($credentials, true));
+        } else {
+            // File path to credentials
+            $client->setAuthConfig($credentials);
+        }
 
         $service = new Sheets($client);
         $headerRange = sprintf('%s!1:1', $sheetName);
