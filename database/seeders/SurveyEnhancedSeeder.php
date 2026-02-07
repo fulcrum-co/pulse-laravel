@@ -67,7 +67,7 @@ class SurveyEnhancedSeeder extends Seeder
                 ['id' => 'q1', 'type' => 'scale', 'question' => 'How are you feeling overall today?', 'min' => 1, 'max' => 5, 'labels' => ['Very Bad', 'Bad', 'Okay', 'Good', 'Great']],
                 ['id' => 'q2', 'type' => 'scale', 'question' => 'How well did you sleep last night?', 'min' => 1, 'max' => 5, 'labels' => ['Very Poorly', 'Poorly', 'Okay', 'Well', 'Very Well']],
                 ['id' => 'q3', 'type' => 'scale', 'question' => 'How stressed do you feel?', 'min' => 1, 'max' => 5, 'labels' => ['Extremely', 'Very', 'Moderately', 'A Little', 'Not At All']],
-                ['id' => 'q4', 'type' => 'text', 'question' => 'Anything you'd like to share?', 'optional' => true],
+                ['id' => 'q4', 'type' => 'text', 'question' => 'Anything you\'d like to share?', 'optional' => true],
             ],
             'status' => 'active',
             'is_anonymous' => false,

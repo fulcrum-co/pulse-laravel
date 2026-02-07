@@ -78,7 +78,7 @@ class ContactEnhancedSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'primary_role' => 'student',
                 'avatar_url' => 'https://randomuser.me/api/portraits/' . ($gender === 'male' ? 'men' : 'women') . '/' . (($index % 50) + 1) . '.jpg',
-                'is_active' => true,
+                'active' => true,
             ]);
 
             // Create student record
@@ -152,6 +152,12 @@ class ContactEnhancedSeeder extends Seeder
         };
 
         $numTags = min($numTags, count($possibleTags));
+
+        // Return empty array if no tags to select
+        if ($numTags === 0 || empty($possibleTags)) {
+            return [];
+        }
+
         $selectedTags = (array) array_rand(array_flip($possibleTags), $numTags);
 
         return $selectedTags;

@@ -12,6 +12,11 @@ return new class extends Migration
      */
     private function foreignKeyExists(string $table, string $constraintName): bool
     {
+        // Only check on PostgreSQL (information_schema not available on SQLite)
+        if (DB::getDriverName() !== 'pgsql') {
+            return false;
+        }
+
         $result = DB::select("
             SELECT 1 FROM information_schema.table_constraints
             WHERE constraint_name = ?

@@ -113,8 +113,8 @@ class CollectionEnhancedSeeder extends Seeder
                 'title' => $def['title'],
                 'description' => $def['desc'],
                 'collection_type' => $def['type'],
-                'data_source' => Collection::SOURCE_INLINE ?? 'inline',
-                'format_mode' => Collection::FORMAT_STRUCTURED ?? 'structured',
+                'data_source' => 'inline',
+                'format_mode' => 'structured',
                 'status' => 'active',
                 'created_by' => $adminId,
             ]));

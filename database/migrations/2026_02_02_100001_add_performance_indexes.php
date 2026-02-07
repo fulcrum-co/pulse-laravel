@@ -12,6 +12,11 @@ return new class extends Migration
      */
     private function indexExists(string $table, string $indexName): bool
     {
+        // Only check on PostgreSQL (pg_indexes not available on SQLite)
+        if (DB::getDriverName() !== 'pgsql') {
+            return false;
+        }
+
         $result = DB::select("
             SELECT 1 FROM pg_indexes
             WHERE tablename = ?
@@ -26,6 +31,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip on non-PostgreSQL databases (performance indexes are PostgreSQL-specific optimizations)
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
+
         // Add indexes to mini_courses table
         if (Schema::hasTable('mini_courses')) {
             if (Schema::hasColumn('mini_courses', 'published_at') && ! $this->indexExists('mini_courses', 'mini_courses_published_at_index')) {
@@ -107,6 +117,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Skip on non-PostgreSQL databases
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
+
         if (Schema::hasTable('mini_courses')) {
             if ($this->indexExists('mini_courses', 'mini_courses_published_at_index')) {
                 Schema::table('mini_courses', function (Blueprint $table) {
