@@ -16,55 +16,63 @@ class UserSeeder extends Seeder
 
         // Create superintendent at district level - Dr. Margaret Chen
         // An experienced educator in her late 50s who oversees the entire district
-        $superintendent = User::create([
-            'org_id' => $district->id,
-            'first_name' => 'Margaret',
-            'last_name' => 'Chen',
-            'email' => 'mchen@lincolnschools.edu',
-            'password' => Hash::make('password'),
-            'primary_role' => 'consultant', // Consultant role to see sub-organizations
-            'phone' => '(555) 123-4567',
-            'bio' => 'Superintendent of Lincoln County School District. 30+ years in education. Passionate about data-driven student success.',
-            'avatar_url' => 'https://randomuser.me/api/portraits/women/79.jpg',
-            'active' => true,
-            'suspended' => false,
-        ]);
+        $superintendent = User::firstOrCreate(
+            ['email' => 'mchen@lincolnschools.edu'],
+            [
+                'org_id' => $district->id,
+                'first_name' => 'Margaret',
+                'last_name' => 'Chen',
+                'password' => Hash::make('password'),
+                'primary_role' => 'consultant', // Consultant role to see sub-organizations
+                'phone' => '(555) 123-4567',
+                'bio' => 'Superintendent of Lincoln County School District. 30+ years in education. Passionate about data-driven student success.',
+                'avatar_url' => 'https://randomuser.me/api/portraits/women/79.jpg',
+                'active' => true,
+                'suspended' => false,
+            ]
+        );
 
         // Assign consultant access to Lincoln High School (can view and push content)
-        $superintendent->organizations()->attach($school->id, [
-            'role' => 'consultant',
-            'is_primary' => false,
-            'can_manage' => true,
-        ]);
+        if (!$superintendent->organizations()->where('organization_id', $school->id)->exists()) {
+            $superintendent->organizations()->attach($school->id, [
+                'role' => 'consultant',
+                'is_primary' => false,
+                'can_manage' => true,
+            ]);
+        }
 
         // Create admin user at school level - Principal Michael Torres
-        User::create([
-            'org_id' => $school->id,
-            'first_name' => 'Michael',
-            'last_name' => 'Torres',
-            'email' => 'mtorres@lincolnhigh.edu',
-            'password' => Hash::make('password'),
-            'primary_role' => 'admin',
-            'phone' => '(555) 234-5678',
-            'bio' => 'Principal of Lincoln High School. Dedicated to fostering academic excellence and student well-being.',
-            'avatar_url' => 'https://randomuser.me/api/portraits/men/52.jpg',
-            'active' => true,
-            'suspended' => false,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'mtorres@lincolnhigh.edu'],
+            [
+                'org_id' => $school->id,
+                'first_name' => 'Michael',
+                'last_name' => 'Torres',
+                'password' => Hash::make('password'),
+                'primary_role' => 'admin',
+                'phone' => '(555) 234-5678',
+                'bio' => 'Principal of Lincoln High School. Dedicated to fostering academic excellence and student well-being.',
+                'avatar_url' => 'https://randomuser.me/api/portraits/men/52.jpg',
+                'active' => true,
+                'suspended' => false,
+            ]
+        );
 
         // Create counselor
-        $counselor = User::create([
-            'org_id' => $school->id,
-            'first_name' => 'Emily',
-            'last_name' => 'Rodriguez',
-            'email' => 'erodriguez@lincolnhigh.edu',
-            'password' => Hash::make('password'),
-            'primary_role' => 'admin',
-            'phone' => '(555) 345-6789',
-            'avatar_url' => 'https://randomuser.me/api/portraits/women/65.jpg',
-            'active' => true,
-            'suspended' => false,
-        ]);
+        $counselor = User::firstOrCreate(
+            ['email' => 'erodriguez@lincolnhigh.edu'],
+            [
+                'org_id' => $school->id,
+                'first_name' => 'Emily',
+                'last_name' => 'Rodriguez',
+                'password' => Hash::make('password'),
+                'primary_role' => 'admin',
+                'phone' => '(555) 345-6789',
+                'avatar_url' => 'https://randomuser.me/api/portraits/women/65.jpg',
+                'active' => true,
+                'suspended' => false,
+            ]
+        );
 
         // Create teachers with gender-appropriate avatars
         $teachers = [
@@ -75,17 +83,19 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($teachers as $teacher) {
-            User::create([
-                'org_id' => $school->id,
-                'first_name' => $teacher['first_name'],
-                'last_name' => $teacher['last_name'],
-                'email' => $teacher['email'],
-                'password' => Hash::make('password'),
-                'primary_role' => 'teacher',
-                'avatar_url' => 'https://randomuser.me/api/portraits/'.$teacher['gender'].'/'.$teacher['img'].'.jpg',
-                'active' => true,
-                'suspended' => false,
-            ]);
+            User::firstOrCreate(
+                ['email' => $teacher['email']],
+                [
+                    'org_id' => $school->id,
+                    'first_name' => $teacher['first_name'],
+                    'last_name' => $teacher['last_name'],
+                    'password' => Hash::make('password'),
+                    'primary_role' => 'teacher',
+                    'avatar_url' => 'https://randomuser.me/api/portraits/'.$teacher['gender'].'/'.$teacher['img'].'.jpg',
+                    'active' => true,
+                    'suspended' => false,
+                ]
+            );
         }
 
         // Create student users (these will be linked to Student records)
@@ -121,17 +131,19 @@ class UserSeeder extends Seeder
         foreach ($studentData as $student) {
             $email = strtolower($student['first_name'][0].$student['last_name']).'@student.lincolnhigh.edu';
             $avatarUrl = 'https://randomuser.me/api/portraits/'.$student['gender'].'/'.$student['img'].'.jpg';
-            User::create([
-                'org_id' => $school->id,
-                'first_name' => $student['first_name'],
-                'last_name' => $student['last_name'],
-                'email' => $email,
-                'password' => Hash::make('password'),
-                'primary_role' => 'student',
-                'avatar_url' => $avatarUrl,
-                'active' => true,
-                'suspended' => false,
-            ]);
+            User::firstOrCreate(
+                ['email' => $email],
+                [
+                    'org_id' => $school->id,
+                    'first_name' => $student['first_name'],
+                    'last_name' => $student['last_name'],
+                    'password' => Hash::make('password'),
+                    'primary_role' => 'student',
+                    'avatar_url' => $avatarUrl,
+                    'active' => true,
+                    'suspended' => false,
+                ]
+            );
         }
     }
 }

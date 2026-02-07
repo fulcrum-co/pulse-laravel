@@ -26,13 +26,7 @@ class ContactEnhancedSeeder extends Seeder
             ->where('org_id', $school->id)
             ->first();
 
-        // Clear existing students for demo org
-        Student::where('org_id', $school->id)->delete();
-        User::where('org_id', $school->id)
-            ->where('primary_role', 'student')
-            ->delete();
-
-        // Generate 50 students with proper distribution
+        // Generate 50 students with proper distribution (using firstOrCreate for idempotency)
         $riskCounts = [
             'good' => 10,  // 20%
             'low' => 25,   // 50%
@@ -69,37 +63,43 @@ class ContactEnhancedSeeder extends Seeder
                 'high' => rand(61, 100) / 10,    // 6.1 - 10.0
             };
 
-            // Create user account
-            $user = User::create([
-                'org_id' => $school->id,
-                'first_name' => $firstName,
-                'last_name' => $lastName,
-                'email' => $email,
-                'password' => Hash::make('password'),
-                'primary_role' => 'student',
-                'avatar_url' => 'https://randomuser.me/api/portraits/' . ($gender === 'male' ? 'men' : 'women') . '/' . (($index % 50) + 1) . '.jpg',
-                'active' => true,
-            ]);
+            // Create user account (idempotent - won't duplicate if exists)
+            $user = User::firstOrCreate(
+                ['email' => $email],
+                [
+                    'org_id' => $school->id,
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'password' => Hash::make('password'),
+                    'primary_role' => 'student',
+                    'avatar_url' => 'https://randomuser.me/api/portraits/' . ($gender === 'male' ? 'men' : 'women') . '/' . (($index % 50) + 1) . '.jpg',
+                    'active' => true,
+                ]
+            );
 
-            // Create student record
-            Student::create([
-                'user_id' => $user->id,
-                'org_id' => $school->id,
-                'student_number' => 'STU' . str_pad($index + 1, 5, '0', STR_PAD_LEFT),
-                'grade_level' => $grades[array_rand($grades)],
-                'date_of_birth' => now()->subYears(rand(14, 18))->subDays(rand(0, 365)),
-                'gender' => $gender,
-                'ethnicity' => $ethnicities[array_rand($ethnicities)],
-                'iep_status' => $this->weightedRandom(['yes' => 15, 'no' => 85]) === 'yes',
-                'ell_status' => $this->weightedRandom(['yes' => 10, 'no' => 90]) === 'yes',
-                'free_reduced_lunch' => $this->weightedRandom(['yes' => 40, 'no' => 60]) === 'yes',
-                'enrollment_status' => 'active',
-                'enrollment_date' => now()->subMonths(rand(1, 48)),
-                'risk_level' => $riskLevel,
-                'risk_score' => $riskScore,
-                'tags' => $this->generateTags($riskLevel),
-                'counselor_user_id' => $counselor?->id,
-            ]);
+            // Create student record (idempotent - skip if user already has student record for this org)
+            Student::firstOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'org_id' => $school->id,
+                ],
+                [
+                    'student_number' => 'STU' . str_pad($index + 1, 5, '0', STR_PAD_LEFT),
+                    'grade_level' => $grades[array_rand($grades)],
+                    'date_of_birth' => now()->subYears(rand(14, 18))->subDays(rand(0, 365)),
+                    'gender' => $gender,
+                    'ethnicity' => $ethnicities[array_rand($ethnicities)],
+                    'iep_status' => $this->weightedRandom(['yes' => 15, 'no' => 85]) === 'yes',
+                    'ell_status' => $this->weightedRandom(['yes' => 10, 'no' => 90]) === 'yes',
+                    'free_reduced_lunch' => $this->weightedRandom(['yes' => 40, 'no' => 60]) === 'yes',
+                    'enrollment_status' => 'active',
+                    'enrollment_date' => now()->subMonths(rand(1, 48)),
+                    'risk_level' => $riskLevel,
+                    'risk_score' => $riskScore,
+                    'tags' => $this->generateTags($riskLevel),
+                    'counselor_user_id' => $counselor?->id,
+                ]
+            );
         }
 
         $this->command->info('Created 50 demo contacts with proper risk distribution:');
