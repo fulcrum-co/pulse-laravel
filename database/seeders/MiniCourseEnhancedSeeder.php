@@ -41,11 +41,10 @@ class MiniCourseEnhancedSeeder extends Seeder
                 $status = $this->weightedRandom(['completed' => 50, 'in_progress' => 30, 'not_started' => 20]);
 
                 MiniCourseEnrollment::create([
-                    'course_id' => $course->id,
+                    'mini_course_id' => $course->id,
                     'student_id' => $student->id,
-                    'org_id' => $school->id,
                     'status' => $status,
-                    'progress_percentage' => match($status) { 'completed' => 100, 'in_progress' => rand(20, 80), default => 0 },
+                    'progress_percent' => match($status) { 'completed' => 100, 'in_progress' => rand(20, 80), default => 0 },
                     'enrolled_at' => now()->subDays(rand(10, 90)),
                     'completed_at' => $status === 'completed' ? now()->subDays(rand(0, 30)) : null,
                 ]);
