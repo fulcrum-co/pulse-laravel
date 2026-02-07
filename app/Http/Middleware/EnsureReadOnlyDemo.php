@@ -26,6 +26,7 @@ class EnsureReadOnlyDemo
             'logout',
             'demo/access',
             'demo/zoho-webhook',
+            'demo/feedback',  // Allow feedback survey submissions
         ];
 
         foreach ($allowedPrefixes as $prefix) {
