@@ -23,25 +23,31 @@ class ModerationEnhancedSeeder extends Seeder
             return;
         }
 
-        $statuses = ['pending' => 8, 'flagged' => 5, 'needs_review' => 7, 'passed' => 10];
+        $statuses = ['pending' => 8, 'flagged' => 5, 'approved_override' => 7, 'passed' => 10];
         $totalResults = 0;
 
         foreach ($statuses as $status => $count) {
             for ($i = 0; $i < $count; $i++) {
                 $course = $courses->random();
 
+                // Scores are 0.0-1.0 (higher is better/safer)
+                $overallScore = $status === 'flagged' ? rand(3000, 6000) / 10000 : rand(7000, 9500) / 10000;
+
                 ContentModerationResult::create([
                     'org_id' => $school->id,
                     'moderatable_type' => 'App\\Models\\MiniCourse',
                     'moderatable_id' => $course->id,
                     'status' => $status,
-                    'overall_score' => rand(50, 100),
-                    'toxicity_score' => rand(0, 30),
-                    'quality_score' => rand(60, 100),
-                    'confidence_score' => rand(70, 100),
-                    'flagged_content' => $status === 'flagged' ? ['inappropriate language'] : null,
-                    'reviewed_by' => $status === 'passed' ? $admin->id : null,
-                    'reviewed_at' => $status === 'passed' ? now()->subDays(rand(1, 30)) : null,
+                    'overall_score' => $overallScore,
+                    'age_appropriateness_score' => $status === 'flagged' ? rand(5000, 7000) / 10000 : rand(8000, 10000) / 10000,
+                    'clinical_safety_score' => $status === 'flagged' ? rand(4000, 6000) / 10000 : rand(7500, 10000) / 10000,
+                    'cultural_sensitivity_score' => rand(7000, 10000) / 10000,
+                    'accuracy_score' => rand(7500, 10000) / 10000,
+                    'flags' => $status === 'flagged' ? ['Minor content concern', 'Needs expert review'] : null,
+                    'recommendations' => $status === 'flagged' ? ['Review language for age appropriateness', 'Add clinical references'] : null,
+                    'human_reviewed' => in_array($status, ['passed', 'approved_override']),
+                    'reviewed_by' => in_array($status, ['passed', 'approved_override']) ? $admin->id : null,
+                    'reviewed_at' => in_array($status, ['passed', 'approved_override']) ? now()->subDays(rand(1, 30)) : null,
                     'created_at' => now()->subDays(rand(1, 60)),
                 ]);
                 $totalResults++;

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\CustomReport;
 use App\Models\Organization;
-use App\Models\Report;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -39,10 +39,13 @@ class ReportEnhancedSeeder extends Seeder
             ['title' => 'Quarterly Executive Summary', 'desc' => 'Leadership overview report', 'type' => 'summary'],
         ];
 
-        $reports = collect($reportDefs)->map(fn($d) => Report::create([
-            'org_id' => $school->id, 'title' => $d['title'], 'description' => $d['desc'],
-            'report_type' => $d['type'], 'status' => 'published',
-            'visibility' => 'organization', 'created_by' => $admin->id,
+        $reports = collect($reportDefs)->map(fn($d) => CustomReport::create([
+            'org_id' => $school->id,
+            'report_name' => $d['title'],
+            'report_description' => $d['desc'],
+            'report_type' => $d['type'],
+            'status' => 'published',
+            'created_by' => $admin->id,
             'created_at' => now()->subDays(rand(1, 90)),
         ]));
 

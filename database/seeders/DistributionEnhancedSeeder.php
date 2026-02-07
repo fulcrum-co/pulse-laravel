@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Distribution;
 use App\Models\DistributionDelivery;
+use App\Models\DistributionRecipient;
 use App\Models\Organization;
 use App\Models\Student;
 use App\Models\User;
@@ -25,28 +26,41 @@ class DistributionEnhancedSeeder extends Seeder
         }
 
         $distributions = $this->createDistributions($school->id, $admin->id);
-        $totalDeliveries = 0;
+        $totalRecipients = 0;
 
         foreach ($distributions as $distribution) {
             $numRecipients = rand(5, 10);
             $recipients = $students->random(min($numRecipients, $students->count()));
 
+            // Create a delivery batch for this distribution
+            $delivery = DistributionDelivery::create([
+                'distribution_id' => $distribution->id,
+                'status' => 'completed',
+                'total_recipients' => $recipients->count(),
+                'sent_count' => $recipients->count(),
+                'failed_count' => 0,
+                'started_at' => now()->subDays(rand(1, 60)),
+                'completed_at' => now()->subDays(rand(0, 59)),
+            ]);
+
             foreach ($recipients as $student) {
-                DistributionDelivery::create([
-                    'distribution_id' => $distribution->id,
-                    'org_id' => $school->id,
-                    'recipient_type' => 'App\\Models\\Student',
-                    'recipient_id' => $student->id,
-                    'delivery_method' => collect(['email', 'sms'])->random(),
-                    'status' => collect(['sent', 'delivered', 'failed'])->random([90, 8, 2]),
-                    'sent_at' => now()->subDays(rand(1, 60)),
-                    'delivered_at' => rand(1, 100) <= 90 ? now()->subDays(rand(0, 59)) : null,
+                // Weighted random: 90% delivered, 8% sent, 2% failed
+                $rand = rand(1, 100);
+                $status = $rand <= 90 ? 'delivered' : ($rand <= 98 ? 'sent' : 'failed');
+
+                DistributionRecipient::create([
+                    'delivery_id' => $delivery->id,
+                    'contact_type' => 'App\\Models\\Student',
+                    'contact_id' => $student->id,
+                    'status' => $status,
+                    'sent_at' => $delivery->started_at,
+                    'delivered_at' => $status === 'delivered' ? $delivery->completed_at : null,
                 ]);
-                $totalDeliveries++;
+                $totalRecipients++;
             }
         }
 
-        $this->command->info("Created {$distributions->count()} distributions with {$totalDeliveries} deliveries");
+        $this->command->info("Created {$distributions->count()} distributions with {$totalRecipients} recipients");
     }
 
     private function createDistributions(int $orgId, int $userId): \Illuminate\Support\Collection
@@ -62,11 +76,30 @@ class DistributionEnhancedSeeder extends Seeder
             ['title' => 'Goal Achievement Update', 'desc' => 'Student goal progress notification', 'type' => 'message', 'frequency' => 'monthly'],
         ];
 
-        return collect($distributionDefs)->map(fn($d) => Distribution::create([
-            'org_id' => $orgId, 'title' => $d['title'], 'description' => $d['desc'],
-            'distribution_type' => $d['type'], 'frequency' => $d['frequency'],
-            'status' => 'active', 'created_by' => $userId,
-            'created_at' => now()->subDays(rand(10, 90)),
-        ]));
+        return collect($distributionDefs)->map(function($d) use ($orgId, $userId) {
+            $isRecurring = !in_array($d['frequency'], ['one_time']);
+            $recurrenceConfig = null;
+
+            if ($isRecurring) {
+                $recurrenceConfig = [
+                    'type' => $d['frequency'], // monthly, weekly, quarterly
+                    'interval' => 1,
+                    'days' => $d['frequency'] === 'weekly' ? ['monday'] : null,
+                ];
+            }
+
+            return Distribution::create([
+                'org_id' => $orgId,
+                'title' => $d['title'],
+                'description' => $d['desc'],
+                'distribution_type' => $isRecurring ? 'recurring' : 'one_time',
+                'content_type' => $d['type'] === 'report' ? 'report' : 'custom',
+                'channel' => 'email',
+                'status' => 'active',
+                'recurrence_config' => $recurrenceConfig,
+                'created_by' => $userId,
+                'created_at' => now()->subDays(rand(10, 90)),
+            ]);
+        });
     }
 }
