@@ -59,25 +59,25 @@ class MiniCourseEnhancedSeeder extends Seeder
     private function createCourses(int $orgId, int $adminId): \Illuminate\Support\Collection
     {
         $courseDefs = [
-            ['title' => 'Stress Management Fundamentals', 'desc' => 'Learn effective stress coping strategies', 'category' => 'wellness', 'duration' => 120],
-            ['title' => 'Study Skills Mastery', 'desc' => 'Comprehensive guide to effective studying', 'category' => 'academic', 'duration' => 180],
-            ['title' => 'Social Skills Development', 'desc' => 'Building healthy relationships and communication', 'category' => 'social', 'duration' => 150],
-            ['title' => 'Goal Setting & Achievement', 'desc' => 'Set and accomplish your goals', 'category' => 'life_skills', 'duration' => 90],
-            ['title' => 'Mindfulness & Meditation', 'desc' => 'Introduction to mindfulness practices', 'category' => 'wellness', 'duration' => 100],
-            ['title' => 'Time Management Mastery', 'desc' => 'Master your schedule and priorities', 'category' => 'life_skills', 'duration' => 110],
-            ['title' => 'Building Resilience', 'desc' => 'Develop mental toughness and resilience', 'category' => 'wellness', 'duration' => 130],
-            ['title' => 'Conflict Resolution Skills', 'desc' => 'Handle conflicts effectively', 'category' => 'social', 'duration' => 95],
-            ['title' => 'Growth Mindset Development', 'desc' => 'Cultivate a growth-oriented mindset', 'category' => 'wellness', 'duration' => 105],
-            ['title' => 'Career Exploration', 'desc' => 'Explore potential career paths', 'category' => 'career', 'duration' => 200],
-            ['title' => 'Financial Literacy for Teens', 'desc' => 'Money management basics', 'category' => 'life_skills', 'duration' => 140],
-            ['title' => 'Digital Citizenship & Safety', 'desc' => 'Navigate the digital world safely', 'category' => 'life_skills', 'duration' => 85],
-            ['title' => 'Emotional Intelligence', 'desc' => 'Understand and manage your emotions', 'category' => 'wellness', 'duration' => 125],
+            ['title' => 'Stress Management Fundamentals', 'desc' => 'Learn effective stress coping strategies', 'course_type' => 'wellness', 'duration' => 120],
+            ['title' => 'Study Skills Mastery', 'desc' => 'Comprehensive guide to effective studying', 'course_type' => 'academic', 'duration' => 180],
+            ['title' => 'Social Skills Development', 'desc' => 'Building healthy relationships and communication', 'course_type' => 'social', 'duration' => 150],
+            ['title' => 'Goal Setting & Achievement', 'desc' => 'Set and accomplish your goals', 'course_type' => 'life_skills', 'duration' => 90],
+            ['title' => 'Mindfulness & Meditation', 'desc' => 'Introduction to mindfulness practices', 'course_type' => 'wellness', 'duration' => 100],
+            ['title' => 'Time Management Mastery', 'desc' => 'Master your schedule and priorities', 'course_type' => 'life_skills', 'duration' => 110],
+            ['title' => 'Building Resilience', 'desc' => 'Develop mental toughness and resilience', 'course_type' => 'wellness', 'duration' => 130],
+            ['title' => 'Conflict Resolution Skills', 'desc' => 'Handle conflicts effectively', 'course_type' => 'social', 'duration' => 95],
+            ['title' => 'Growth Mindset Development', 'desc' => 'Cultivate a growth-oriented mindset', 'course_type' => 'wellness', 'duration' => 105],
+            ['title' => 'Career Exploration', 'desc' => 'Explore potential career paths', 'course_type' => 'career', 'duration' => 200],
+            ['title' => 'Financial Literacy for Teens', 'desc' => 'Money management basics', 'course_type' => 'life_skills', 'duration' => 140],
+            ['title' => 'Digital Citizenship & Safety', 'desc' => 'Navigate the digital world safely', 'course_type' => 'life_skills', 'duration' => 85],
+            ['title' => 'Emotional Intelligence', 'desc' => 'Understand and manage your emotions', 'course_type' => 'wellness', 'duration' => 125],
         ];
 
         return collect($courseDefs)->map(fn($d) => MiniCourse::create([
             'org_id' => $orgId, 'title' => $d['title'], 'description' => $d['desc'],
-            'category' => $d['category'], 'estimated_duration_minutes' => $d['duration'],
-            'approval_status' => 'approved', 'is_published' => true,
+            'course_type' => $d['course_type'], 'estimated_duration_minutes' => $d['duration'],
+            'approval_status' => 'approved', 'published_at' => now(),
             'created_by' => $adminId, 'approved_by' => $adminId, 'approved_at' => now(),
         ]));
     }

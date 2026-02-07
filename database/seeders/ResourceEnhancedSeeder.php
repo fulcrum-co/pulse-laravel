@@ -45,14 +45,13 @@ class ResourceEnhancedSeeder extends Seeder
 
                 ResourceAssignment::create([
                     'resource_id' => $resource->id,
-                    'org_id' => $school->id,
                     'student_id' => $student->id,
                     'assigned_by' => $admin->id,
                     'status' => $status,
                     'assigned_at' => $assignedAt,
                     'started_at' => $status !== 'assigned' ? $assignedAt->copy()->addHours(rand(1, 72)) : null,
                     'completed_at' => $status === 'completed' ? $assignedAt->copy()->addDays(rand(1, 14)) : null,
-                    'progress_percentage' => match($status) { 'completed' => 100, 'in_progress' => rand(20, 80), default => 0 },
+                    'progress_percent' => match($status) { 'completed' => 100, 'in_progress' => rand(20, 80), default => 0 },
                     'created_at' => $assignedAt,
                     'updated_at' => $assignedAt->copy()->addDays(rand(0, 14)),
                 ]);
