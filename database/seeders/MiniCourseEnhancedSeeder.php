@@ -38,15 +38,18 @@ class MiniCourseEnhancedSeeder extends Seeder
             $selectedStudents = $students->random(min($numEnrollments, $students->count()));
 
             foreach ($selectedStudents as $student) {
-                $status = $this->weightedRandom(['completed' => 50, 'in_progress' => 30, 'not_started' => 20]);
+                $status = $this->weightedRandom(['completed' => 50, 'in_progress' => 30, 'enrolled' => 20]);
+                $createdAt = now()->subDays(rand(10, 90));
 
                 MiniCourseEnrollment::create([
                     'mini_course_id' => $course->id,
                     'student_id' => $student->id,
                     'status' => $status,
                     'progress_percent' => match($status) { 'completed' => 100, 'in_progress' => rand(20, 80), default => 0 },
-                    'enrolled_at' => now()->subDays(rand(10, 90)),
+                    'started_at' => $status !== 'enrolled' ? $createdAt->copy()->addDays(rand(0, 2)) : null,
                     'completed_at' => $status === 'completed' ? now()->subDays(rand(0, 30)) : null,
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
                 ]);
                 $totalEnrollments++;
             }
