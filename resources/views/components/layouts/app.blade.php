@@ -106,6 +106,9 @@
         </div>
     </footer>
 
+    <!-- Page Help Tour -->
+    <x-page-help-overlay />
+
     @livewireScripts
 </body>
 </html>
