@@ -46,13 +46,15 @@ class CollectionEnhancedSeeder extends Seeder
 
                 $session = CollectionSession::create([
                     'collection_id' => $collection->id,
-                    'org_id' => $school->id,
-                    'session_name' => "Session " . ($i + 1) . " - " . $sessionDate->format('M Y'),
-                    'status' => rand(1, 100) <= 80 ? 'completed' : 'active',
-                    'scheduled_date' => $sessionDate,
+                    'session_date' => $sessionDate,
+                    'status' => rand(1, 100) <= 80 ? 'completed' : 'in_progress',
                     'started_at' => $sessionDate,
                     'completed_at' => rand(1, 100) <= 80 ? $sessionDate->copy()->addDays(rand(1, 7)) : null,
-                    'created_by' => $admin->id,
+                    'collected_by_user_id' => $admin->id,
+                    'total_contacts' => 0,
+                    'completed_count' => 0,
+                    'skipped_count' => 0,
+                    'completion_rate' => 0,
                 ]);
 
                 $totalSessions++;
@@ -65,9 +67,8 @@ class CollectionEnhancedSeeder extends Seeder
                     $entryData = $this->generateEntryData($collection->collection_type, $student);
 
                     CollectionEntry::create([
-                        'collection_session_id' => $session->id,
+                        'session_id' => $session->id,
                         'collection_id' => $collection->id,
-                        'org_id' => $school->id,
                         'contact_type' => 'App\\Models\\Student',
                         'contact_id' => $student->id,
                         'status' => $this->weightedRandom([
@@ -75,9 +76,10 @@ class CollectionEnhancedSeeder extends Seeder
                             'in_progress' => 20,
                             'pending' => 10,
                         ]),
-                        'data' => $entryData,
-                        'submitted_at' => rand(1, 100) <= 70 ? $sessionDate->copy()->addHours(rand(1, 48)) : null,
-                        'created_by' => $admin->id,
+                        'responses' => $entryData,
+                        'completed_at' => rand(1, 100) <= 70 ? $sessionDate->copy()->addHours(rand(1, 48)) : null,
+                        'collected_by_user_id' => $admin->id,
+                        'input_mode' => 'form',
                         'created_at' => $sessionDate,
                         'updated_at' => $sessionDate->copy()->addHours(rand(0, 72)),
                     ]);

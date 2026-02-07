@@ -101,7 +101,7 @@ class ResourceEnhancedSeeder extends Seeder
             'org_id' => $orgId, 'title' => $d['title'], 'description' => $d['desc'],
             'resource_type' => $d['type'], 'category' => $d['category'], 'tags' => $d['tags'],
             'estimated_duration_minutes' => $d['duration'], 'target_risk_levels' => $d['risk'],
-            'is_active' => true, 'created_by' => $adminId,
+            'active' => true, 'created_by' => $adminId,
         ]));
     }
 
