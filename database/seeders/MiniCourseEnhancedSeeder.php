@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Enrollment;
 use App\Models\MiniCourse;
+use App\Models\MiniCourseEnrollment;
 use App\Models\Organization;
 use App\Models\Student;
 use App\Models\User;
@@ -40,7 +40,7 @@ class MiniCourseEnhancedSeeder extends Seeder
             foreach ($selectedStudents as $student) {
                 $status = $this->weightedRandom(['completed' => 50, 'in_progress' => 30, 'not_started' => 20]);
 
-                Enrollment::create([
+                MiniCourseEnrollment::create([
                     'course_id' => $course->id,
                     'student_id' => $student->id,
                     'org_id' => $school->id,
