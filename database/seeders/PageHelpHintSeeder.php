@@ -17,15 +17,15 @@ class PageHelpHintSeeder extends Seeder
 
         $hints = [
             // ============================================
-            // CONTACTS - Keep only card 1
+            // CONTACTS
             // ============================================
             [
                 'page_context' => 'contacts',
-                'section' => 'search',
-                'selector' => '[data-help="search-contacts"], input[type="search"], .search',
-                'title' => 'Search Contacts',
-                'description' => 'Search by name, email, or other criteria to quickly find specific contacts in your organization.',
-                'position' => 'bottom',
+                'section' => 'intro',
+                'selector' => null,
+                'title' => 'Student Profiles & Risk Monitoring',
+                'description' => 'View comprehensive student profiles with risk scores, attendance patterns, and intervention history. Use filters to identify students who need immediate support.',
+                'position' => 'center',
                 'sort_order' => 0,
             ],
 
@@ -37,7 +37,7 @@ class PageHelpHintSeeder extends Seeder
                 'section' => 'intro',
                 'selector' => null,
                 'title' => 'Surveys & Assessments',
-                'description' => 'Create and manage all assessments in one central location.',
+                'description' => 'Create and distribute wellness surveys, academic check-ins, and social-emotional assessments. Track completion rates and analyze student responses over time.',
                 'position' => 'center',
                 'sort_order' => 0,
             ],
@@ -69,8 +69,8 @@ class PageHelpHintSeeder extends Seeder
                 'page_context' => 'reports',
                 'section' => 'intro',
                 'selector' => null,
-                'title' => 'Reports',
-                'description' => 'Build beautiful, data-driven reports with our drag-and-drop editor. Share insights with stakeholders.',
+                'title' => 'Data-Driven Insights',
+                'description' => 'Generate custom reports on student outcomes, intervention effectiveness, and program impact. Export data for presentations and stakeholder meetings.',
                 'position' => 'center',
                 'sort_order' => 0,
             ],
@@ -93,8 +93,8 @@ class PageHelpHintSeeder extends Seeder
                 'page_context' => 'collect',
                 'section' => 'intro',
                 'selector' => null,
-                'title' => 'Data Collections',
-                'description' => 'Set up recurring campaigns to collect data at scale, making it easier to ensure information is thorough and up to date.',
+                'title' => 'Collections & Organization',
+                'description' => 'Organize students, resources, and programs into custom collections for easy access and targeted interventions.',
                 'position' => 'center',
                 'sort_order' => 0,
             ],
@@ -124,15 +124,15 @@ class PageHelpHintSeeder extends Seeder
             ],
 
             // ============================================
-            // RESOURCE LIBRARY - Keep cards 1 & 3
+            // RESOURCE LIBRARY
             // ============================================
             [
                 'page_context' => 'resources',
-                'section' => 'search',
-                'selector' => '[data-help="search-resources"]',
-                'title' => 'Search Resources',
-                'description' => 'Search across all resource types including content, providers, programs, and courses to quickly find what you need.',
-                'position' => 'bottom',
+                'section' => 'intro',
+                'selector' => null,
+                'title' => 'Support Resources Library',
+                'description' => 'Browse curated mental health resources, academic support materials, and community services. Share resources directly with students and families.',
+                'position' => 'center',
                 'sort_order' => 0,
             ],
             [
@@ -142,7 +142,7 @@ class PageHelpHintSeeder extends Seeder
                 'title' => 'Resource Categories',
                 'description' => 'Browse resources by category - Content, Providers, Programs, and Courses. Click any card to explore that category.',
                 'position' => 'top',
-                'sort_order' => 1,
+                'sort_order' => 2,
             ],
 
             // ============================================
@@ -167,6 +167,32 @@ class PageHelpHintSeeder extends Seeder
                 'selector' => null,
                 'title' => 'Marketplace',
                 'description' => 'Find standardized reports, custom plans for your students, helpful learning resources and a directory of support providers for everyone in your school.',
+                'position' => 'center',
+                'sort_order' => 0,
+            ],
+
+            // ============================================
+            // PROVIDERS
+            // ============================================
+            [
+                'page_context' => 'providers',
+                'section' => 'intro',
+                'selector' => null,
+                'title' => 'Provider Directory',
+                'description' => 'Connect students with verified mental health professionals, tutors, and support specialists. Filter by specialty, availability, and insurance acceptance.',
+                'position' => 'center',
+                'sort_order' => 0,
+            ],
+
+            // ============================================
+            // PROGRAMS
+            // ============================================
+            [
+                'page_context' => 'programs',
+                'section' => 'intro',
+                'selector' => null,
+                'title' => 'Intervention Programs',
+                'description' => 'Discover evidence-based programs for mental health, academic support, and enrichment. Track student enrollment and measure program outcomes.',
                 'position' => 'center',
                 'sort_order' => 0,
             ],
@@ -215,8 +241,8 @@ class PageHelpHintSeeder extends Seeder
                 'page_context' => 'plans',
                 'section' => 'intro',
                 'selector' => null,
-                'title' => 'Plans',
-                'description' => 'This is where your goals take shape. Create plans at any level — from school-wide initiatives down to individual student improvement — and track progress all in one place.',
+                'title' => 'Student Success Plans',
+                'description' => 'Create personalized intervention plans with goals, action steps, and progress tracking. Collaborate with students, families, and support staff.',
                 'position' => 'center',
                 'sort_order' => 0,
             ],
@@ -237,8 +263,8 @@ class PageHelpHintSeeder extends Seeder
                 'page_context' => 'dashboard',
                 'section' => 'intro',
                 'selector' => null,
-                'title' => 'Welcome to your dashboard',
-                'description' => 'This is your home base. Everything you need to stay informed and take action starts here.',
+                'title' => 'Welcome to Pulse Connect',
+                'description' => 'Your central hub for student wellness insights. Monitor at-risk students, track intervention outcomes, and access real-time data to support student success.',
                 'position' => 'center',
                 'sort_order' => 0,
             ],
