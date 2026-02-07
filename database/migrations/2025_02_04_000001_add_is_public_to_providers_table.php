@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('providers', function (Blueprint $table) {
-            $table->boolean('is_public')->default(false)->after('active');
+            if (!Schema::hasColumn('providers', 'is_public')) {
+                $table->boolean('is_public')->default(false)->after('active');
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('providers', function (Blueprint $table) {
-            $table->dropColumn('is_public');
+            if (Schema::hasColumn('providers', 'is_public')) {
+                $table->dropColumn('is_public');
+            }
         });
     }
 };
