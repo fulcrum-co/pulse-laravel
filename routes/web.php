@@ -691,6 +691,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/surveys', App\Livewire\Marketplace\MarketplaceSurveys::class)->name('marketplace.surveys');
         Route::get('/strategies', App\Livewire\Marketplace\MarketplaceStrategies::class)->name('marketplace.strategies');
         Route::get('/content', App\Livewire\Marketplace\MarketplaceContent::class)->name('marketplace.content');
+        Route::get('/programs', App\Livewire\Marketplace\MarketplacePrograms::class)->name('marketplace.programs');
         Route::get('/providers', App\Livewire\Marketplace\MarketplaceProviders::class)->name('marketplace.providers');
 
         // Item detail
