@@ -122,7 +122,7 @@ class MarketplaceEnhancedSeeder extends Seeder
                     'listable_type' => $resource ? 'App\\Models\\Resource' : 'App\\Models\\Organization',
                     'listable_id' => $resource ? $resource->id : $orgId,
                     'pricing_type' => $d['pricing'],
-                    'status' => 'published',
+                    'status' => MarketplaceItem::STATUS_APPROVED,
                     'published_at' => now()->subDays(rand(1, 90)),
                     'created_by' => $userId,
                 ]
