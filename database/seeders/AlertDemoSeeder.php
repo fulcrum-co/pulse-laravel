@@ -42,7 +42,7 @@ class AlertDemoSeeder extends Seeder
                 'icon' => 'exclamation-triangle',
                 'priority' => UserNotification::PRIORITY_URGENT,
                 'status' => UserNotification::STATUS_UNREAD,
-                'action_url' => '/students',
+                'action_url' => '/contacts',
                 'action_label' => 'View Student Profile',
             ],
             [
@@ -64,7 +64,7 @@ class AlertDemoSeeder extends Seeder
                 'icon' => 'clock',
                 'priority' => UserNotification::PRIORITY_HIGH,
                 'status' => UserNotification::STATUS_UNREAD,
-                'action_url' => '/strategies',
+                'action_url' => '/marketplace/strategies',
                 'action_label' => 'Review Plan',
             ],
             [
@@ -75,7 +75,7 @@ class AlertDemoSeeder extends Seeder
                 'icon' => 'arrow-trending-down',
                 'priority' => UserNotification::PRIORITY_URGENT,
                 'status' => UserNotification::STATUS_UNREAD,
-                'action_url' => '/students',
+                'action_url' => '/contacts',
                 'action_label' => 'View Academic History',
             ],
 
@@ -147,7 +147,7 @@ class AlertDemoSeeder extends Seeder
                 'icon' => 'calendar',
                 'priority' => UserNotification::PRIORITY_HIGH,
                 'status' => UserNotification::STATUS_UNREAD,
-                'action_url' => '/strategies',
+                'action_url' => '/marketplace/strategies',
                 'action_label' => 'View IEP Details',
             ],
             [
@@ -158,7 +158,7 @@ class AlertDemoSeeder extends Seeder
                 'icon' => 'trophy',
                 'priority' => UserNotification::PRIORITY_NORMAL,
                 'status' => UserNotification::STATUS_UNREAD,
-                'action_url' => '/strategies',
+                'action_url' => '/marketplace/strategies',
                 'action_label' => 'Review Progress',
             ],
 
@@ -182,7 +182,7 @@ class AlertDemoSeeder extends Seeder
                 'icon' => 'academic-cap',
                 'priority' => UserNotification::PRIORITY_LOW,
                 'status' => UserNotification::STATUS_READ,
-                'action_url' => '/learning',
+                'action_url' => '/resources/courses',
                 'action_label' => 'View Completions',
             ],
 
@@ -195,7 +195,7 @@ class AlertDemoSeeder extends Seeder
                 'icon' => 'circle-stack',
                 'priority' => UserNotification::PRIORITY_HIGH,
                 'status' => UserNotification::STATUS_UNREAD,
-                'action_url' => '/collections',
+                'action_url' => '/collect',
                 'action_label' => 'View Collection',
             ],
             [
@@ -206,7 +206,7 @@ class AlertDemoSeeder extends Seeder
                 'icon' => 'arrow-down-tray',
                 'priority' => UserNotification::PRIORITY_NORMAL,
                 'status' => UserNotification::STATUS_UNREAD,
-                'action_url' => '/collections',
+                'action_url' => '/collect',
                 'action_label' => 'Review Data',
             ],
 
@@ -243,7 +243,7 @@ class AlertDemoSeeder extends Seeder
                 'icon' => 'user-group',
                 'priority' => UserNotification::PRIORITY_URGENT,
                 'status' => UserNotification::STATUS_UNREAD,
-                'action_url' => '/students',
+                'action_url' => '/contacts',
                 'action_label' => 'Review Concern',
             ],
             [
@@ -267,7 +267,7 @@ class AlertDemoSeeder extends Seeder
                 'icon' => 'calendar',
                 'priority' => UserNotification::PRIORITY_NORMAL,
                 'status' => UserNotification::STATUS_SNOOZED,
-                'action_url' => '/strategies',
+                'action_url' => '/marketplace/strategies',
                 'action_label' => 'View Meeting Details',
                 'snoozed_until' => now()->addDays(2),
             ],
@@ -281,7 +281,7 @@ class AlertDemoSeeder extends Seeder
                 'icon' => 'check-circle',
                 'priority' => UserNotification::PRIORITY_NORMAL,
                 'status' => UserNotification::STATUS_RESOLVED,
-                'action_url' => '/students',
+                'action_url' => '/contacts',
                 'action_label' => 'View Student',
             ],
         ];
