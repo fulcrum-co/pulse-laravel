@@ -190,7 +190,7 @@
         @if($isSearching && count($searchResults) > 0)
             <!-- Search Results -->
             <div class="space-y-10">
-                @foreach(['surveys' => 'Surveys', 'strategies' => 'Strategies', 'content' => 'Content', 'providers' => 'Providers'] as $key => $label)
+                @foreach(['surveys' => 'Surveys', 'plans' => 'Plans', 'content' => 'Content', 'programs' => 'Programs', 'providers' => 'Providers'] as $key => $label)
                     @if(isset($searchResults[$key]) && $searchResults[$key]['total'] > 0)
                         <div>
                             <div class="flex items-center justify-between mb-4">
@@ -284,15 +284,15 @@
                     </div>
                 </a>
 
-                <!-- Strategies Card -->
+                <!-- Plans Card -->
                 <a href="{{ route('marketplace.strategies') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
                     <div class="flex flex-col items-center text-center gap-2">
                         <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                             <x-icon name="light-bulb" class="w-5 h-5 text-amber-600" />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Strategies</h2>
-                            <p class="text-xl font-bold text-gray-900">{{ number_format($counts['strategies']) }}</p>
+                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Plans</h2>
+                            <p class="text-xl font-bold text-gray-900">{{ number_format($counts['plans']) }}</p>
                         </div>
                     </div>
                 </a>
@@ -306,6 +306,19 @@
                         <div class="flex-1 min-w-0">
                             <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Content</h2>
                             <p class="text-xl font-bold text-gray-900">{{ number_format($counts['content']) }}</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Programs Card -->
+                <a href="{{ route('marketplace.programs') }}" class="group bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-xl hover:border-pulse-orange-300 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <x-icon name="academic-cap" class="w-5 h-5 text-indigo-600" />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h2 class="text-sm font-semibold text-pulse-orange-600 group-hover:text-pulse-orange-600 transition-colors">Programs</h2>
+                            <p class="text-xl font-bold text-gray-900">{{ number_format($counts['programs']) }}</p>
                         </div>
                     </div>
                 </a>
@@ -359,7 +372,7 @@
             @endif
 
             <!-- Empty State -->
-            @if($counts['surveys'] === 0 && $counts['strategies'] === 0 && $counts['content'] === 0 && $counts['providers'] === 0)
+            @if($counts['surveys'] === 0 && $counts['plans'] === 0 && $counts['content'] === 0 && $counts['programs'] === 0 && $counts['providers'] === 0)
                 <div class="text-center py-16">
                     <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-6">
                         <x-icon name="shopping-bag" class="w-10 h-10 text-gray-400" />
