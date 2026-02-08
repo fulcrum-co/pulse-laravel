@@ -11,20 +11,15 @@ class AlertDemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $school = Organization::where('org_type', 'school')->first();
-        if (! $school) {
-            $school = Organization::first();
-        }
-        if (! $school) {
+        $org = Organization::first();
+        if (! $org) {
             $this->command->error('No organization found. Please seed organizations first.');
 
             return;
         }
 
-        $users = User::where('org_id', $school->id)->limit(5)->get();
-        if ($users->isEmpty()) {
-            $users = User::limit(5)->get();
-        }
+        // Get ALL users so notifications reach whoever is logged in
+        $users = User::limit(10)->get();
         if ($users->isEmpty()) {
             $this->command->error('No users found. Please seed users first.');
 
@@ -32,8 +27,7 @@ class AlertDemoSeeder extends Seeder
         }
 
         $primaryUser = $users->first();
-        $admin = User::where('org_id', $school->id)
-            ->whereIn('primary_role', ['admin', 'school_admin', 'consultant'])
+        $admin = User::whereIn('primary_role', ['admin', 'school_admin', 'consultant'])
             ->first() ?? $primaryUser;
 
         $this->command->info('Creating demo alerts/notifications...');
@@ -293,41 +287,42 @@ class AlertDemoSeeder extends Seeder
         ];
 
         $created = 0;
-        foreach ($notifications as $index => $data) {
-            // Distribute across users - first user gets most, others get some
-            $user = $index < 15 ? $primaryUser : $users->random();
 
-            $notification = UserNotification::firstOrCreate(
-                [
-                    'user_id' => $user->id,
-                    'title' => $data['title'],
-                    'category' => $data['category'],
-                ],
-                [
-                    'org_id' => $school->id,
-                    'type' => $data['type'],
-                    'body' => $data['body'],
-                    'icon' => $data['icon'],
-                    'priority' => $data['priority'],
-                    'status' => $data['status'],
-                    'action_url' => $data['action_url'],
-                    'action_label' => $data['action_label'],
-                    'metadata' => [],
-                    'snoozed_until' => $data['snoozed_until'] ?? null,
-                    'read_at' => $data['status'] === UserNotification::STATUS_READ ? now()->subHours(rand(1, 48)) : null,
-                    'resolved_at' => $data['status'] === UserNotification::STATUS_RESOLVED ? now()->subHours(rand(1, 24)) : null,
-                    'dismissed_at' => $data['status'] === UserNotification::STATUS_DISMISSED ? now()->subHours(rand(1, 72)) : null,
-                    'created_by' => $admin->id,
-                    'created_at' => now()->subHours(rand(1, 168)),
-                ]
-            );
+        // Create notifications for EVERY user so whoever logs in sees them
+        foreach ($users as $user) {
+            foreach ($notifications as $data) {
+                $notification = UserNotification::firstOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'title' => $data['title'],
+                        'category' => $data['category'],
+                    ],
+                    [
+                        'org_id' => $user->org_id ?? $org->id,
+                        'type' => $data['type'],
+                        'body' => $data['body'],
+                        'icon' => $data['icon'],
+                        'priority' => $data['priority'],
+                        'status' => $data['status'],
+                        'action_url' => $data['action_url'],
+                        'action_label' => $data['action_label'],
+                        'metadata' => [],
+                        'snoozed_until' => $data['snoozed_until'] ?? null,
+                        'read_at' => $data['status'] === UserNotification::STATUS_READ ? now()->subHours(rand(1, 48)) : null,
+                        'resolved_at' => $data['status'] === UserNotification::STATUS_RESOLVED ? now()->subHours(rand(1, 24)) : null,
+                        'dismissed_at' => $data['status'] === UserNotification::STATUS_DISMISSED ? now()->subHours(rand(1, 72)) : null,
+                        'created_by' => $admin->id,
+                        'created_at' => now()->subHours(rand(1, 168)),
+                    ]
+                );
 
-            if ($notification->wasRecentlyCreated) {
-                $created++;
+                if ($notification->wasRecentlyCreated) {
+                    $created++;
+                }
             }
         }
 
-        $this->command->info("Created {$created} demo alerts/notifications.");
+        $this->command->info("Created {$created} demo alerts/notifications for {$users->count()} users.");
         $this->command->info('Visit /alerts to view the notification center.');
     }
 }
