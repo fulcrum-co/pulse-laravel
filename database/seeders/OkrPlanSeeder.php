@@ -572,7 +572,7 @@ class OkrPlanSeeder extends Seeder
                     'org_id' => $org->id,
                     'strategic_plan_id' => $plan->id,
                     'contact_note_id' => null,
-                    'alignment_score' => \fake()->randomFloat(4, 0.85, 0.98),
+                    'alignment_score' => fake()->randomFloat(4, 0.85, 0.98),
                     'alignment_level' => StrategyDriftScore::LEVEL_STRONG,
                     'matched_context' => [
                         ['type' => 'Goal', 'id' => 1, 'title' => 'Mental Health Support', 'similarity' => 0.92],
@@ -590,7 +590,7 @@ class OkrPlanSeeder extends Seeder
                     'org_id' => $org->id,
                     'strategic_plan_id' => $plan->id,
                     'contact_note_id' => null,
-                    'alignment_score' => \fake()->randomFloat(4, 0.65, 0.84),
+                    'alignment_score' => fake()->randomFloat(4, 0.65, 0.84),
                     'alignment_level' => StrategyDriftScore::LEVEL_MODERATE,
                     'matched_context' => [
                         ['type' => 'Goal', 'id' => 2, 'title' => 'Reduce Absenteeism', 'similarity' => 0.72],
@@ -607,7 +607,7 @@ class OkrPlanSeeder extends Seeder
                     'org_id' => $org->id,
                     'strategic_plan_id' => $plan->id,
                     'contact_note_id' => null,
-                    'alignment_score' => \fake()->randomFloat(4, 0.35, 0.64),
+                    'alignment_score' => fake()->randomFloat(4, 0.35, 0.64),
                     'alignment_level' => StrategyDriftScore::LEVEL_WEAK,
                     'matched_context' => [
                         ['type' => 'Goal', 'id' => 3, 'title' => 'Family Communication', 'similarity' => 0.45],
