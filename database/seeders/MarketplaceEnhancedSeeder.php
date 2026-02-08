@@ -98,9 +98,9 @@ class MarketplaceEnhancedSeeder extends Seeder
             ['title' => 'Student Strengths Inventory', 'desc' => 'Asset-based student assessment', 'category' => MarketplaceItem::CATEGORY_SURVEY, 'pricing' => 'free'],
             ['title' => 'Community Resource Directory', 'desc' => 'Local community support services', 'category' => MarketplaceItem::CATEGORY_PROVIDER, 'pricing' => 'free'],
             ['title' => 'Attendance Improvement Plan', 'desc' => 'Intervention for chronic absenteeism', 'category' => MarketplaceItem::CATEGORY_STRATEGY, 'pricing' => 'free'],
-            ['title' => 'Peer Mentorship Program', 'desc' => 'Implement peer support programs', 'category' => MarketplaceItem::CATEGORY_CONTENT, 'pricing' => 'free'],
+            ['title' => 'Peer Mentorship Program', 'desc' => 'Implement peer support programs', 'category' => MarketplaceItem::CATEGORY_STRATEGY, 'pricing' => 'free'],
             ['title' => 'Post-Secondary Planning', 'desc' => 'College and career readiness resources', 'category' => MarketplaceItem::CATEGORY_CONTENT, 'pricing' => 'free'],
-            ['title' => 'Student Leadership Development', 'desc' => 'Build student leadership skills', 'category' => MarketplaceItem::CATEGORY_CONTENT, 'pricing' => 'free'],
+            ['title' => 'Student Leadership Development', 'desc' => 'Build student leadership skills', 'category' => MarketplaceItem::CATEGORY_STRATEGY, 'pricing' => 'free'],
         ];
 
         // Link marketplace items to existing resources (cycling through if needed)
