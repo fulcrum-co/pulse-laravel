@@ -6,7 +6,7 @@ use App\Models\MarketplaceItem;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class MarketplaceStrategies extends Component
+class MarketplacePrograms extends Component
 {
     use WithPagination;
 
@@ -72,7 +72,7 @@ class MarketplaceStrategies extends Component
     public function getItemsProperty()
     {
         $query = MarketplaceItem::published()
-            ->inCategory(MarketplaceItem::CATEGORY_STRATEGY)
+            ->inCategory(MarketplaceItem::CATEGORY_PROGRAM)
             ->with(['seller', 'primaryPricing']);
 
         // Search
@@ -103,7 +103,7 @@ class MarketplaceStrategies extends Component
             });
         }
 
-        // Strategy type filter
+        // Program type filter (subcategories)
         if (count($this->selectedTypes) > 0) {
             $query->where(function ($q) {
                 foreach ($this->selectedTypes as $type) {
@@ -124,15 +124,16 @@ class MarketplaceStrategies extends Component
         return $query->paginate(12);
     }
 
-    public function getStrategyTypesProperty(): array
+    public function getProgramTypesProperty(): array
     {
         return [
-            'intervention' => 'Intervention',
+            'afterschool' => 'Afterschool',
             'enrichment' => 'Enrichment',
-            'skill_building' => 'Skill Building',
-            'wellness' => 'Wellness',
-            'behavioral' => 'Behavioral',
-            'academic' => 'Academic Support',
+            'leadership' => 'Leadership',
+            'mentorship' => 'Mentorship',
+            'stem' => 'STEM',
+            'arts' => 'Arts & Culture',
+            'athletics' => 'Athletics',
         ];
     }
 
@@ -159,12 +160,12 @@ class MarketplaceStrategies extends Component
     {
         return view('livewire.marketplace.marketplace-category', [
             'items' => $this->items,
-            'category' => 'strategy',
-            'categoryLabel' => 'Plans',
-            'categoryIcon' => 'light-bulb',
-            'categoryColor' => 'amber',
-            'filterTypes' => $this->strategyTypes,
-            'filterTypeLabel' => 'Plan Type',
-        ])->layout('layouts.dashboard', ['title' => 'Marketplace - Plans', 'hideHeader' => true]);
+            'category' => 'program',
+            'categoryLabel' => 'Programs',
+            'categoryIcon' => 'academic-cap',
+            'categoryColor' => 'indigo',
+            'filterTypes' => $this->programTypes,
+            'filterTypeLabel' => 'Program Type',
+        ])->layout('layouts.dashboard', ['title' => 'Marketplace - Programs', 'hideHeader' => true]);
     }
 }
