@@ -274,11 +274,13 @@ PROMPT;
     /**
      * Get moderation statistics for an organization.
      */
-    public function getStats(?int $orgId = null): array
+    public function getStats(array|int|null $orgId = null): array
     {
         $query = ContentModerationResult::query();
 
-        if ($orgId) {
+        if (is_array($orgId) && ! empty($orgId)) {
+            $query->whereIn('org_id', $orgId);
+        } elseif ($orgId) {
             $query->where('org_id', $orgId);
         }
 

@@ -77,9 +77,9 @@ class ModerationAssignmentService
     /**
      * Get eligible moderators for assignment dropdown.
      */
-    public function getEligibleModerators(int $orgId): Collection
+    public function getEligibleModerators(array|int $orgId): Collection
     {
-        return User::where('org_id', $orgId)
+        return User::when(is_array($orgId), fn ($q) => $q->whereIn('org_id', $orgId), fn ($q) => $q->where('org_id', $orgId))
             ->whereIn('primary_role', ['admin', 'consultant', 'superintendent', 'school_admin'])
             ->orderBy('last_name')
             ->get(['id', 'first_name', 'last_name', 'primary_role', 'email']);
@@ -88,22 +88,26 @@ class ModerationAssignmentService
     /**
      * Get assignment stats for the queue.
      */
-    public function getAssignmentStats(int $orgId, int $userId): array
+    public function getAssignmentStats(array|int $orgId, int $userId): array
     {
+        $orgFilter = fn ($query) => is_array($orgId)
+            ? $query->whereIn('org_id', $orgId)
+            : $query->where('org_id', $orgId);
+
         return [
-            'my_assignments' => ContentModerationResult::where('org_id', $orgId)
+            'my_assignments' => $orgFilter(ContentModerationResult::query())
                 ->assignedTo($userId)
                 ->needsReview()
                 ->count(),
-            'collaborating' => ContentModerationResult::where('org_id', $orgId)
+            'collaborating' => $orgFilter(ContentModerationResult::query())
                 ->whereJsonContains('collaborator_ids', $userId)
                 ->needsReview()
                 ->count(),
-            'unassigned' => ContentModerationResult::where('org_id', $orgId)
+            'unassigned' => $orgFilter(ContentModerationResult::query())
                 ->unassigned()
                 ->needsReview()
                 ->count(),
-            'overdue' => ContentModerationResult::where('org_id', $orgId)
+            'overdue' => $orgFilter(ContentModerationResult::query())
                 ->assignedTo($userId)
                 ->where('due_at', '<', now())
                 ->where('human_reviewed', false)

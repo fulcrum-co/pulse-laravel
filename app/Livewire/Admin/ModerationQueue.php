@@ -75,9 +75,9 @@ class ModerationQueue extends Component
     public function getStatsProperty(): array
     {
         $service = app(ContentModerationService::class);
-        $orgId = auth()->user()->org_id ?? null;
+        $accessibleOrgIds = auth()->user()->getAccessibleOrganizations()->pluck('id')->toArray();
 
-        return $service->getStats($orgId);
+        return $service->getStats($accessibleOrgIds);
     }
 
     /**
@@ -119,24 +119,24 @@ class ModerationQueue extends Component
 
     public function getAssignmentStatsProperty(): array
     {
-        $orgId = auth()->user()->org_id ?? null;
+        $accessibleOrgIds = auth()->user()->getAccessibleOrganizations()->pluck('id')->toArray();
         $userId = auth()->id();
 
-        if (! $orgId) {
+        if (empty($accessibleOrgIds)) {
             return ['my_assignments' => 0, 'collaborating' => 0, 'unassigned' => 0, 'overdue' => 0];
         }
 
-        return app(ModerationAssignmentService::class)->getAssignmentStats($orgId, $userId);
+        return app(ModerationAssignmentService::class)->getAssignmentStats($accessibleOrgIds, $userId);
     }
 
     public function getEligibleModeratorsProperty(): Collection
     {
-        $orgId = auth()->user()->org_id ?? null;
-        if (! $orgId) {
+        $accessibleOrgIds = auth()->user()->getAccessibleOrganizations()->pluck('id')->toArray();
+        if (empty($accessibleOrgIds)) {
             return collect();
         }
 
-        return app(ModerationAssignmentService::class)->getEligibleModerators($orgId);
+        return app(ModerationAssignmentService::class)->getEligibleModerators($accessibleOrgIds);
     }
 
     // ============================================
@@ -192,9 +192,9 @@ class ModerationQueue extends Component
         $user = auth()->user();
         $query = ContentModerationResult::with(['moderatable', 'reviewer', 'assignee']);
 
-        $orgId = $user->org_id ?? null;
-        if ($orgId) {
-            $query->where('org_id', $orgId);
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
+        if (! empty($accessibleOrgIds)) {
+            $query->whereIn('org_id', $accessibleOrgIds);
         }
 
         // Role-based visibility
