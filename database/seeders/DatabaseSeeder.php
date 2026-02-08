@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
         // ============================================
         $this->call([
             OrganizationSeeder::class,
-            UserSeeder::class,
+            UserSeederV2::class, // ← NUCLEAR FIX: V2 bypasses OPcache
             QuestionBankSeeder::class,
             SurveyTemplateSeeder::class,
         ]);
