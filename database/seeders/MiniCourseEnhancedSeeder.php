@@ -41,16 +41,20 @@ class MiniCourseEnhancedSeeder extends Seeder
                 $status = $this->weightedRandom(['completed' => 50, 'in_progress' => 30, 'enrolled' => 20]);
                 $createdAt = now()->subDays(rand(10, 90));
 
-                MiniCourseEnrollment::create([
-                    'mini_course_id' => $course->id,
-                    'student_id' => $student->id,
-                    'status' => $status,
-                    'progress_percent' => match($status) { 'completed' => 100, 'in_progress' => rand(20, 80), default => 0 },
-                    'started_at' => $status !== 'enrolled' ? $createdAt->copy()->addDays(rand(0, 2)) : null,
-                    'completed_at' => $status === 'completed' ? now()->subDays(rand(0, 30)) : null,
-                    'created_at' => $createdAt,
-                    'updated_at' => $createdAt,
-                ]);
+                MiniCourseEnrollment::firstOrCreate(
+                    [
+                        'mini_course_id' => $course->id,
+                        'student_id' => $student->id,
+                    ],
+                    [
+                        'status' => $status,
+                        'progress_percent' => match($status) { 'completed' => 100, 'in_progress' => rand(20, 80), default => 0 },
+                        'started_at' => $status !== 'enrolled' ? $createdAt->copy()->addDays(rand(0, 2)) : null,
+                        'completed_at' => $status === 'completed' ? now()->subDays(rand(0, 30)) : null,
+                        'created_at' => $createdAt,
+                        'updated_at' => $createdAt,
+                    ]
+                );
                 $totalEnrollments++;
             }
         }
@@ -76,12 +80,23 @@ class MiniCourseEnhancedSeeder extends Seeder
             ['title' => 'Emotional Intelligence', 'desc' => 'Understand and manage your emotions', 'course_type' => 'wellness', 'duration' => 125],
         ];
 
-        return collect($courseDefs)->map(fn($d) => MiniCourse::create([
-            'org_id' => $orgId, 'title' => $d['title'], 'description' => $d['desc'],
-            'course_type' => $d['course_type'], 'estimated_duration_minutes' => $d['duration'],
-            'approval_status' => 'approved', 'published_at' => now(),
-            'created_by' => $adminId, 'approved_by' => $adminId, 'approved_at' => now(),
-        ]));
+        return collect($courseDefs)->map(fn($d) => MiniCourse::firstOrCreate(
+            [
+                'org_id' => $orgId,
+                'title' => $d['title'],
+            ],
+            [
+                'description' => $d['desc'],
+                'course_type' => $d['course_type'],
+                'estimated_duration_minutes' => $d['duration'],
+                'status' => MiniCourse::STATUS_ACTIVE,
+                'approval_status' => 'approved',
+                'published_at' => now(),
+                'created_by' => $adminId,
+                'approved_by' => $adminId,
+                'approved_at' => now(),
+            ]
+        ));
     }
 
     private function weightedRandom(array $weights): string
