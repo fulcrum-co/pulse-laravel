@@ -22,6 +22,8 @@ class MarketplaceItem extends Model
 
     public const CATEGORY_CONTENT = 'content';
 
+    public const CATEGORY_PROGRAM = 'program';
+
     public const CATEGORY_PROVIDER = 'provider';
 
     // Pricing types
@@ -122,8 +124,9 @@ class MarketplaceItem extends Model
     {
         return [
             self::CATEGORY_SURVEY => 'Surveys',
-            self::CATEGORY_STRATEGY => 'Strategies',
+            self::CATEGORY_STRATEGY => 'Plans',
             self::CATEGORY_CONTENT => 'Content',
+            self::CATEGORY_PROGRAM => 'Programs',
             self::CATEGORY_PROVIDER => 'Providers',
         ];
     }

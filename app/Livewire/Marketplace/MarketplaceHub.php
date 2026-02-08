@@ -63,6 +63,7 @@ class MarketplaceHub extends Component
             MarketplaceItem::CATEGORY_SURVEY,
             MarketplaceItem::CATEGORY_STRATEGY,
             MarketplaceItem::CATEGORY_CONTENT,
+            MarketplaceItem::CATEGORY_PROGRAM,
             MarketplaceItem::CATEGORY_PROVIDER,
         ];
     }
@@ -87,17 +88,18 @@ class MarketplaceHub extends Component
     {
         try {
             if (! Schema::hasTable('marketplace_items')) {
-                return ['surveys' => 0, 'strategies' => 0, 'content' => 0, 'providers' => 0];
+                return ['surveys' => 0, 'plans' => 0, 'content' => 0, 'programs' => 0, 'providers' => 0];
             }
 
             return [
                 'surveys' => MarketplaceItem::published()->inCategory(MarketplaceItem::CATEGORY_SURVEY)->count(),
-                'strategies' => MarketplaceItem::published()->inCategory(MarketplaceItem::CATEGORY_STRATEGY)->count(),
+                'plans' => MarketplaceItem::published()->inCategory(MarketplaceItem::CATEGORY_STRATEGY)->count(),
                 'content' => MarketplaceItem::published()->inCategory(MarketplaceItem::CATEGORY_CONTENT)->count(),
+                'programs' => MarketplaceItem::published()->inCategory(MarketplaceItem::CATEGORY_PROGRAM)->count(),
                 'providers' => MarketplaceItem::published()->inCategory(MarketplaceItem::CATEGORY_PROVIDER)->count(),
             ];
         } catch (\Exception $e) {
-            return ['surveys' => 0, 'strategies' => 0, 'content' => 0, 'providers' => 0];
+            return ['surveys' => 0, 'plans' => 0, 'content' => 0, 'programs' => 0, 'providers' => 0];
         }
     }
 
@@ -229,8 +231,9 @@ class MarketplaceHub extends Component
 
             $categories = [
                 'surveys' => MarketplaceItem::CATEGORY_SURVEY,
-                'strategies' => MarketplaceItem::CATEGORY_STRATEGY,
+                'plans' => MarketplaceItem::CATEGORY_STRATEGY,
                 'content' => MarketplaceItem::CATEGORY_CONTENT,
+                'programs' => MarketplaceItem::CATEGORY_PROGRAM,
                 'providers' => MarketplaceItem::CATEGORY_PROVIDER,
             ];
 
@@ -271,6 +274,7 @@ class MarketplaceHub extends Component
             MarketplaceItem::CATEGORY_SURVEY => 'clipboard-document-list',
             MarketplaceItem::CATEGORY_STRATEGY => 'light-bulb',
             MarketplaceItem::CATEGORY_CONTENT => 'document-text',
+            MarketplaceItem::CATEGORY_PROGRAM => 'academic-cap',
             MarketplaceItem::CATEGORY_PROVIDER => 'users',
             default => 'squares-2x2',
         };
@@ -285,6 +289,7 @@ class MarketplaceHub extends Component
             MarketplaceItem::CATEGORY_SURVEY => ['bg' => 'bg-blue-100', 'text' => 'text-blue-600'],
             MarketplaceItem::CATEGORY_STRATEGY => ['bg' => 'bg-amber-100', 'text' => 'text-amber-600'],
             MarketplaceItem::CATEGORY_CONTENT => ['bg' => 'bg-emerald-100', 'text' => 'text-emerald-600'],
+            MarketplaceItem::CATEGORY_PROGRAM => ['bg' => 'bg-indigo-100', 'text' => 'text-indigo-600'],
             MarketplaceItem::CATEGORY_PROVIDER => ['bg' => 'bg-purple-100', 'text' => 'text-purple-600'],
             default => ['bg' => 'bg-gray-100', 'text' => 'text-gray-600'],
         };
