@@ -33,23 +33,27 @@ class ModerationEnhancedSeeder extends Seeder
                 // Scores are 0.0-1.0 (higher is better/safer)
                 $overallScore = $status === 'flagged' ? rand(3000, 6000) / 10000 : rand(7000, 9500) / 10000;
 
-                ContentModerationResult::create([
-                    'org_id' => $school->id,
-                    'moderatable_type' => 'App\\Models\\MiniCourse',
-                    'moderatable_id' => $course->id,
-                    'status' => $status,
-                    'overall_score' => $overallScore,
-                    'age_appropriateness_score' => $status === 'flagged' ? rand(5000, 7000) / 10000 : rand(8000, 10000) / 10000,
-                    'clinical_safety_score' => $status === 'flagged' ? rand(4000, 6000) / 10000 : rand(7500, 10000) / 10000,
-                    'cultural_sensitivity_score' => rand(7000, 10000) / 10000,
-                    'accuracy_score' => rand(7500, 10000) / 10000,
-                    'flags' => $status === 'flagged' ? ['Minor content concern', 'Needs expert review'] : null,
-                    'recommendations' => $status === 'flagged' ? ['Review language for age appropriateness', 'Add clinical references'] : null,
-                    'human_reviewed' => in_array($status, ['passed', 'approved_override']),
-                    'reviewed_by' => in_array($status, ['passed', 'approved_override']) ? $admin->id : null,
-                    'reviewed_at' => in_array($status, ['passed', 'approved_override']) ? now()->subDays(rand(1, 30)) : null,
-                    'created_at' => now()->subDays(rand(1, 60)),
-                ]);
+                ContentModerationResult::firstOrCreate(
+                    [
+                        'org_id' => $school->id,
+                        'moderatable_type' => 'App\\Models\\MiniCourse',
+                        'moderatable_id' => $course->id,
+                        'status' => $status,
+                    ],
+                    [
+                        'overall_score' => $overallScore,
+                        'age_appropriateness_score' => $status === 'flagged' ? rand(5000, 7000) / 10000 : rand(8000, 10000) / 10000,
+                        'clinical_safety_score' => $status === 'flagged' ? rand(4000, 6000) / 10000 : rand(7500, 10000) / 10000,
+                        'cultural_sensitivity_score' => rand(7000, 10000) / 10000,
+                        'accuracy_score' => rand(7500, 10000) / 10000,
+                        'flags' => $status === 'flagged' ? ['Minor content concern', 'Needs expert review'] : null,
+                        'recommendations' => $status === 'flagged' ? ['Review language for age appropriateness', 'Add clinical references'] : null,
+                        'human_reviewed' => in_array($status, ['passed', 'approved_override']),
+                        'reviewed_by' => in_array($status, ['passed', 'approved_override']) ? $admin->id : null,
+                        'reviewed_at' => in_array($status, ['passed', 'approved_override']) ? now()->subDays(rand(1, 30)) : null,
+                        'created_at' => now()->subDays(rand(1, 60)),
+                    ]
+                );
                 $totalResults++;
             }
         }

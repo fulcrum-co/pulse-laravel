@@ -47,14 +47,18 @@ class MarketplaceEnhancedSeeder extends Seeder
             $reviewers = $users->random(min($numReviews, $users->count()));
 
             foreach ($reviewers as $reviewer) {
-                MarketplaceReview::create([
-                    'marketplace_item_id' => $item->id,
-                    'user_id' => $reviewer->id,
-                    'org_id' => $school->id,
-                    'rating' => rand(3, 5),
-                    'review_text' => collect(['Excellent resource!', 'Very helpful for our students.', 'Great quality content.', 'Highly recommend this.'])->random(),
-                    'created_at' => now()->subDays(rand(1, 60)),
-                ]);
+                MarketplaceReview::firstOrCreate(
+                    [
+                        'marketplace_item_id' => $item->id,
+                        'user_id' => $reviewer->id,
+                    ],
+                    [
+                        'org_id' => $school->id,
+                        'rating' => rand(3, 5),
+                        'review_text' => collect(['Excellent resource!', 'Very helpful for our students.', 'Great quality content.', 'Highly recommend this.'])->random(),
+                        'created_at' => now()->subDays(rand(1, 60)),
+                    ]
+                );
                 $totalReviews++;
             }
         }
@@ -106,19 +110,23 @@ class MarketplaceEnhancedSeeder extends Seeder
             $resource = $resources->isNotEmpty() ? $resources[$resourceIndex % $resources->count()] : null;
             $resourceIndex++;
 
-            return MarketplaceItem::create([
-                'seller_profile_id' => $sellerId,
-                'org_id' => $orgId,
-                'title' => $d['title'],
-                'description' => $d['desc'],
-                'category' => $d['category'],
-                'listable_type' => $resource ? 'App\\Models\\Resource' : 'App\\Models\\Organization',
-                'listable_id' => $resource ? $resource->id : $orgId,
-                'pricing_type' => $d['pricing'],
-                'status' => 'published',
-                'published_at' => now()->subDays(rand(1, 90)),
-                'created_by' => $userId,
-            ]);
+            return MarketplaceItem::firstOrCreate(
+                [
+                    'org_id' => $orgId,
+                    'title' => $d['title'],
+                ],
+                [
+                    'seller_profile_id' => $sellerId,
+                    'description' => $d['desc'],
+                    'category' => $d['category'],
+                    'listable_type' => $resource ? 'App\\Models\\Resource' : 'App\\Models\\Organization',
+                    'listable_id' => $resource ? $resource->id : $orgId,
+                    'pricing_type' => $d['pricing'],
+                    'status' => 'published',
+                    'published_at' => now()->subDays(rand(1, 90)),
+                    'created_by' => $userId,
+                ]
+            );
         });
     }
 }
