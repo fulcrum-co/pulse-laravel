@@ -469,6 +469,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', App\Livewire\Dashboard\DashboardIndex::class)->name('dashboard');
     Route::get('/dashboards', App\Livewire\Dashboard\DashboardList::class)->name('dashboards.index');
 
+    // Organizations
+    Route::get('/organizations', App\Livewire\Organizations\OrganizationList::class)->name('organizations.index');
+    Route::get('/organizations/{organization}', App\Livewire\Organizations\OrganizationShow::class)->name('organizations.show');
+
     // Contacts (Students, Teachers, Parents)
     Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
     Route::get('/contacts/students/{student}', [ContactController::class, 'show'])->name('contacts.show');
