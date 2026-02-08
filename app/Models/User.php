@@ -180,6 +180,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get organization IDs for querying data across all accessible organizations.
+     * District admins see all child orgs, school users see only their org.
+     */
+    public function getAccessibleOrgIds(): array
+    {
+        $accessibleOrgIds = $this->getAccessibleOrganizations()->pluck('id')->toArray();
+        $effectiveOrgId = $this->effective_org_id;
+
+        // For district admins with multiple orgs, return all accessible IDs
+        // For school users, return only their effective org ID
+        return $this->isAdmin() && count($accessibleOrgIds) > 1
+            ? $accessibleOrgIds
+            : [$effectiveOrgId];
+    }
+
+    /**
      * Get child organizations the user can manage (for consultants/superintendents).
      */
     public function getManagedChildOrganizations(): \Illuminate\Support\Collection

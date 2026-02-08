@@ -77,7 +77,8 @@ class CollectionList extends Component
         }
 
         $terminology = app(\App\Services\TerminologyService::class);
-        $collection = Collection::forOrganization(auth()->user()->org_id)
+        $user = auth()->user();
+        $collection = Collection::whereIn('org_id', $user->getAccessibleOrgIds())
             ->find($this->collectionToDelete);
 
         if ($collection) {
@@ -95,7 +96,8 @@ class CollectionList extends Component
 
     public function toggleStatus(int $collectionId): void
     {
-        $collection = Collection::forOrganization(auth()->user()->org_id)
+        $user = auth()->user();
+        $collection = Collection::whereIn('org_id', $user->getAccessibleOrgIds())
             ->find($collectionId);
 
         if (! $collection) {
@@ -120,15 +122,17 @@ class CollectionList extends Component
 
     public function duplicate(int $collectionId): void
     {
-        $collection = Collection::forOrganization(auth()->user()->org_id)
+        $user = auth()->user();
+        $collection = Collection::whereIn('org_id', $user->getAccessibleOrgIds())
             ->find($collectionId);
 
         if (! $collection) {
             return;
         }
 
+        $terminology = app(\App\Services\TerminologyService::class);
         $service = app(CollectionService::class);
-        $service->duplicate($collection, auth()->user());
+        $service->duplicate($collection, $user);
 
         $this->dispatch('notify', [
             'type' => 'success',
@@ -140,7 +144,7 @@ class CollectionList extends Component
     {
         $user = auth()->user();
 
-        $collections = Collection::forOrganization($user->org_id)
+        $collections = Collection::whereIn('org_id', $user->getAccessibleOrgIds())
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('title', 'like', '%'.$this->search.'%')

@@ -92,18 +92,20 @@ class PlanList extends Component
 
     public function getAlignmentSummaryProperty(): array
     {
-        $orgId = auth()->user()->org_id;
+        $user = auth()->user();
+        $orgIds = $user->getAccessibleOrgIds();
 
         return app(StrategyDriftService::class)
-            ->getOrgDriftSummary($orgId, (int) $this->alignmentTimeRange);
+            ->getOrgDriftSummary($orgIds[0], (int) $this->alignmentTimeRange);
     }
 
     public function getAlignmentScoresProperty()
     {
-        $orgId = auth()->user()->org_id;
+        $user = auth()->user();
+        $orgIds = $user->getAccessibleOrgIds();
 
         try {
-            return StrategyDriftScore::forOrg($orgId)
+            return StrategyDriftScore::forOrg($orgIds[0])
                 ->with(['contactNote.contact', 'contactNote.author'])
                 ->when($this->alignmentFilterLevel !== 'all', fn ($q) => $q->where('alignment_level', $this->alignmentFilterLevel))
                 ->recent((int) $this->alignmentTimeRange)
@@ -117,8 +119,9 @@ class PlanList extends Component
     public function render()
     {
         $user = auth()->user();
+        $orgIds = $user->getAccessibleOrgIds();
 
-        $query = StrategicPlan::where('org_id', $user->org_id)
+        $query = StrategicPlan::whereIn('org_id', $orgIds)
             ->with(['focusAreas', 'goals', 'collaborators.user', 'creator']);
 
         // Apply type filter
@@ -140,14 +143,14 @@ class PlanList extends Component
 
         // Get counts for dropdown
         $counts = [
-            'all' => StrategicPlan::where('org_id', $user->org_id)->count(),
-            'organizational' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'organizational')->count(),
-            'teacher' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'teacher')->count(),
-            'student' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'student')->count(),
-            'department' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'department')->count(),
-            'grade' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'grade')->count(),
-            'improvement' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'improvement')->count(),
-            'growth' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'growth')->count(),
+            'all' => StrategicPlan::whereIn('org_id', $orgIds)->count(),
+            'organizational' => StrategicPlan::whereIn('org_id', $orgIds)->where('plan_type', 'organizational')->count(),
+            'teacher' => StrategicPlan::whereIn('org_id', $orgIds)->where('plan_type', 'teacher')->count(),
+            'student' => StrategicPlan::whereIn('org_id', $orgIds)->where('plan_type', 'student')->count(),
+            'department' => StrategicPlan::whereIn('org_id', $orgIds)->where('plan_type', 'department')->count(),
+            'grade' => StrategicPlan::whereIn('org_id', $orgIds)->where('plan_type', 'grade')->count(),
+            'improvement' => StrategicPlan::whereIn('org_id', $orgIds)->where('plan_type', 'improvement')->count(),
+            'growth' => StrategicPlan::whereIn('org_id', $orgIds)->where('plan_type', 'growth')->count(),
             'strategic' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'strategic')->count(),
             'action' => StrategicPlan::where('org_id', $user->org_id)->where('plan_type', 'action')->count(),
         ];

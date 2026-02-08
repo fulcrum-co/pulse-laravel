@@ -75,7 +75,8 @@ class DistributeList extends Component
             return;
         }
 
-        $distribution = Distribution::where('org_id', auth()->user()->org_id)
+        $user = auth()->user();
+        $distribution = Distribution::whereIn('org_id', $user->getAccessibleOrgIds())
             ->find($this->distributionToDelete);
 
         if ($distribution) {
@@ -93,7 +94,8 @@ class DistributeList extends Component
 
     public function toggleStatus(int $distributionId): void
     {
-        $distribution = Distribution::where('org_id', auth()->user()->org_id)
+        $user = auth()->user();
+        $distribution = Distribution::whereIn('org_id', $user->getAccessibleOrgIds())
             ->find($distributionId);
 
         if (! $distribution) {
@@ -118,7 +120,8 @@ class DistributeList extends Component
 
     public function duplicate(int $distributionId): void
     {
-        $distribution = Distribution::where('org_id', auth()->user()->org_id)
+        $user = auth()->user();
+        $distribution = Distribution::whereIn('org_id', $user->getAccessibleOrgIds())
             ->find($distributionId);
 
         if (! $distribution) {
@@ -141,7 +144,7 @@ class DistributeList extends Component
     {
         $user = auth()->user();
 
-        $distributions = Distribution::where('org_id', $user->org_id)
+        $distributions = Distribution::whereIn('org_id', $user->getAccessibleOrgIds())
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('title', 'like', '%'.$this->search.'%')
