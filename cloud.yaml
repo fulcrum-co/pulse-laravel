@@ -1,4 +1,5 @@
 name: pulse
+# Force fresh deployment with cache clearing - 2026-02-08
 
 environments:
   production:
