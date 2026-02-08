@@ -70,7 +70,9 @@ class ModerationTaskFlow extends Component
     #[Computed]
     public function queueStats(): array
     {
-        return $this->queueService->getQueueStats(auth()->user()->org_id);
+        $accessibleOrgIds = auth()->user()->getAccessibleOrganizations()->pluck('id')->toArray();
+
+        return $this->queueService->getQueueStats($accessibleOrgIds);
     }
 
     #[Computed]

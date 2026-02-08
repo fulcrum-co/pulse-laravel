@@ -96,9 +96,11 @@ class ModerationQueueItem extends Model
 
     // Scopes
 
-    public function scopeForOrganization($query, int $orgId)
+    public function scopeForOrganization($query, array|int $orgId)
     {
-        return $query->where('org_id', $orgId);
+        return is_array($orgId)
+            ? $query->whereIn('org_id', $orgId)
+            : $query->where('org_id', $orgId);
     }
 
     public function scopePending($query)

@@ -91,13 +91,19 @@ class ModerationQueueService
      */
     public function getQueueForUser(User $user): Collection
     {
-        return ModerationQueueItem::with(['moderationResult.moderatable', 'assignee'])
-            ->forOrganization($user->org_id)
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
+
+        $query = ModerationQueueItem::with(['moderationResult.moderatable', 'assignee'])
             ->assignedTo($user->id)
             ->active()
             ->byPriority()
-            ->orderBy('due_at')
-            ->get();
+            ->orderBy('due_at');
+
+        if (! empty($accessibleOrgIds)) {
+            $query->whereIn('org_id', $accessibleOrgIds);
+        }
+
+        return $query->get();
     }
 
     /**
@@ -119,34 +125,49 @@ class ModerationQueueService
      */
     public function getNextItemForUser(User $user): ?ModerationQueueItem
     {
+        $accessibleOrgIds = $user->getAccessibleOrganizations()->pluck('id')->toArray();
+
         // First check for assigned items
-        $assignedItem = ModerationQueueItem::with(['moderationResult.moderatable'])
-            ->forOrganization($user->org_id)
+        $query = ModerationQueueItem::with(['moderationResult.moderatable'])
             ->assignedTo($user->id)
             ->pending()
             ->byPriority()
-            ->orderBy('due_at')
-            ->first();
+            ->orderBy('due_at');
+
+        if (! empty($accessibleOrgIds)) {
+            $query->whereIn('org_id', $accessibleOrgIds);
+        }
+
+        $assignedItem = $query->first();
 
         if ($assignedItem) {
             return $assignedItem;
         }
 
         // If no assigned items, check if user has capacity for auto-assignment
-        $teamSetting = ModerationTeamSetting::getOrCreateForUser($user->org_id, $user->id);
+        $effectiveOrgId = $user->org_id ?? ($accessibleOrgIds[0] ?? null);
+        if (! $effectiveOrgId) {
+            return null;
+        }
+
+        $teamSetting = ModerationTeamSetting::getOrCreateForUser($effectiveOrgId, $user->id);
 
         if (! $teamSetting->is_available) {
             return null;
         }
 
         // Get an unassigned item
-        $unassignedItem = ModerationQueueItem::with(['moderationResult.moderatable'])
-            ->forOrganization($user->org_id)
+        $unassignedQuery = ModerationQueueItem::with(['moderationResult.moderatable'])
             ->unassigned()
             ->pending()
             ->byPriority()
-            ->orderBy('created_at')
-            ->first();
+            ->orderBy('created_at');
+
+        if (! empty($accessibleOrgIds)) {
+            $unassignedQuery->whereIn('org_id', $accessibleOrgIds);
+        }
+
+        $unassignedItem = $unassignedQuery->first();
 
         if ($unassignedItem) {
             // Auto-assign to user
@@ -464,9 +485,14 @@ class ModerationQueueService
     /**
      * Get queue statistics for an organization.
      */
-    public function getQueueStats(int $orgId): array
+    public function getQueueStats(array|int|null $orgId): array
     {
-        $baseQuery = ModerationQueueItem::forOrganization($orgId);
+        $baseQuery = ModerationQueueItem::query();
+        if (is_array($orgId) && ! empty($orgId)) {
+            $baseQuery->whereIn('org_id', $orgId);
+        } elseif ($orgId) {
+            $baseQuery->where('org_id', $orgId);
+        }
 
         return [
             'total' => (clone $baseQuery)->active()->count(),
@@ -512,9 +538,16 @@ class ModerationQueueService
     /**
      * Calculate SLA compliance rate.
      */
-    protected function calculateSlaCompliance(int $orgId): float
+    protected function calculateSlaCompliance(array|int|null $orgId): float
     {
-        $completed = ModerationQueueItem::forOrganization($orgId)
+        $query = ModerationQueueItem::query();
+        if (is_array($orgId) && ! empty($orgId)) {
+            $query->whereIn('org_id', $orgId);
+        } elseif ($orgId) {
+            $query->where('org_id', $orgId);
+        }
+
+        $completed = $query
             ->completed()
             ->where('created_at', '>=', now()->subDays(30))
             ->get();
@@ -534,10 +567,14 @@ class ModerationQueueService
     /**
      * Calculate average review time in seconds.
      */
-    protected function calculateAverageReviewTime(int $orgId): int
+    protected function calculateAverageReviewTime(array|int|null $orgId): int
     {
         return (int) ModerationDecision::whereHas('queueItem', function ($q) use ($orgId) {
-            $q->forOrganization($orgId);
+            if (is_array($orgId) && ! empty($orgId)) {
+                $q->whereIn('org_id', $orgId);
+            } elseif ($orgId) {
+                $q->where('org_id', $orgId);
+            }
         })
             ->where('created_at', '>=', now()->subDays(30))
             ->whereNotNull('time_spent_seconds')
