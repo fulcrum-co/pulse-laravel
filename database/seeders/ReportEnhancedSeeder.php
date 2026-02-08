@@ -39,15 +39,19 @@ class ReportEnhancedSeeder extends Seeder
             ['title' => 'Quarterly Executive Summary', 'desc' => 'Leadership overview report', 'type' => 'summary'],
         ];
 
-        $reports = collect($reportDefs)->map(fn($d) => CustomReport::create([
-            'org_id' => $school->id,
-            'report_name' => $d['title'],
-            'report_description' => $d['desc'],
-            'report_type' => $d['type'],
-            'status' => 'published',
-            'created_by' => $admin->id,
-            'created_at' => now()->subDays(rand(1, 90)),
-        ]));
+        $reports = collect($reportDefs)->map(fn($d) => CustomReport::firstOrCreate(
+            [
+                'org_id' => $school->id,
+                'report_name' => $d['title'],
+            ],
+            [
+                'report_description' => $d['desc'],
+                'report_type' => $d['type'],
+                'status' => 'published',
+                'created_by' => $admin->id,
+                'created_at' => now()->subDays(rand(1, 90)),
+            ]
+        ));
 
         $this->command->info("Created {$reports->count()} reports");
     }
