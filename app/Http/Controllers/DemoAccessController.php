@@ -36,6 +36,7 @@ class DemoAccessController extends Controller
         ]);
 
         $this->sendToZohoFlow($data);
+        $this->sendToGoogleSheets($data);
 
         $prospectUser = $this->getProspectUser();
         Auth::login($prospectUser);
@@ -147,6 +148,25 @@ class DemoAccessController extends Controller
             ]);
         } catch (\Throwable $e) {
             \Log::error('Zoho Flow webhook failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    protected function sendToGoogleSheets(array $data): void
+    {
+        try {
+            app(\App\Services\GoogleSheetsService::class)->appendRow([
+                'Timestamp' => now()->toISOString(),
+                'First Name' => $data['first_name'] ?? '',
+                'Last Name' => $data['last_name'] ?? '',
+                'Email' => $data['email'] ?? '',
+                'Phone' => $data['phone'] ?? '',
+                'Organization' => $data['org_name'] ?? '',
+                'Organization URL' => $data['org_url'] ?? '',
+                'Organization Size' => $data['org_size'] ?? '',
+                'Source' => 'pilot',
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Google Sheets submission failed', ['error' => $e->getMessage()]);
         }
     }
 
