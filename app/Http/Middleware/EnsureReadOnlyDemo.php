@@ -20,8 +20,13 @@ class EnsureReadOnlyDemo
             return $next($request);
         }
 
-        // Allow logout and demo access endpoints
+        // Allow Livewire component updates (read-only interactions like filtering, sorting, tabs)
         $path = $request->path();
+        if (str_starts_with($path, 'livewire/')) {
+            return $next($request);
+        }
+
+        // Allow logout and demo access endpoints
         $allowedPrefixes = [
             'logout',
             'demo/access',

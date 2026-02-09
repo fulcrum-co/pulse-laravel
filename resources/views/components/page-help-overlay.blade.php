@@ -299,19 +299,29 @@ function pageHelpOverlay() {
 
         init() {
             this.isProspect = window.PULSE_PROSPECT === true;
+            this.checkAndStartTour();
 
+            // Re-check on Livewire page navigation (SPA-style)
+            document.addEventListener('livewire:navigated', () => {
+                this.isProspect = window.PULSE_PROSPECT === true;
+                this.hintsLoaded = false;
+                this.checkAndStartTour();
+            });
+        },
+
+        checkAndStartTour() {
             if (this.isProspect) {
                 const context = this.detectContext();
                 const key = `prospect_help_seen:${context}`;
                 const seen = localStorage.getItem(key);
                 if (!seen) {
                     this.startHelp(context);
+                    return;
                 }
             }
 
             // Initialize trigger-based hints (tooltips and modals)
             this.$nextTick(async () => {
-                // Load hints if not already loaded
                 if (!this.hintsLoaded) {
                     await this.loadHintsFromApi();
                 }
