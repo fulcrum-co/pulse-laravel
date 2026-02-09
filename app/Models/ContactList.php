@@ -56,8 +56,7 @@ class ContactList extends Model
     public function students(): MorphToMany
     {
         return $this->morphedByMany(Student::class, 'contact', 'contact_list_members')
-            ->withPivot('added_at', 'added_by')
-            ->withTimestamps();
+            ->withPivot('added_at', 'added_by');
     }
 
     /**
@@ -66,8 +65,7 @@ class ContactList extends Model
     public function users(): MorphToMany
     {
         return $this->morphedByMany(User::class, 'contact', 'contact_list_members')
-            ->withPivot('added_at', 'added_by')
-            ->withTimestamps();
+            ->withPivot('added_at', 'added_by');
     }
 
     /**

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('strategy_drift_scores', function (Blueprint $table) {
             $table->id();
             $table->foreignId('org_id')->constrained('organizations')->cascadeOnDelete();
-            $table->foreignId('contact_note_id')->constrained('contact_notes')->cascadeOnDelete();
+            $table->foreignId('contact_note_id')->nullable()->constrained('contact_notes')->cascadeOnDelete();
 
             // Optional links to specific strategic elements
             $table->foreignId('strategic_plan_id')->nullable()->constrained('strategic_plans')->nullOnDelete();
