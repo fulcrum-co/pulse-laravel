@@ -25,10 +25,24 @@ class GoogleSheetsService
 
         // Support base64-encoded JSON, raw JSON string, or file path
         $trimmed = trim($credentials);
+        $config = null;
+
         if (str_starts_with($trimmed, '{')) {
-            $client->setAuthConfig(json_decode($trimmed, true));
+            $config = json_decode($trimmed, true);
         } elseif (($decoded = base64_decode($trimmed, true)) !== false && str_starts_with(trim($decoded), '{')) {
-            $client->setAuthConfig(json_decode($decoded, true));
+            $config = json_decode($decoded, true);
+            // Fallback: if JSON has literal newlines in string values (e.g. private_key),
+            // escape them so json_decode can parse it
+            if ($config === null) {
+                $fixed = preg_replace_callback('/"((?:[^"\\\\]|\\\\.)*)"/s', function ($m) {
+                    return '"' . str_replace(["\r", "\n", "\t"], ["\\r", "\\n", "\\t"], $m[1]) . '"';
+                }, $decoded);
+                $config = json_decode($fixed, true);
+            }
+        }
+
+        if ($config) {
+            $client->setAuthConfig($config);
         } else {
             $client->setAuthConfig($trimmed);
         }
