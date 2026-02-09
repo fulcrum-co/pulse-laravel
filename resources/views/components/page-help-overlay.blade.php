@@ -300,13 +300,6 @@ function pageHelpOverlay() {
         init() {
             this.isProspect = window.PULSE_PROSPECT === true;
             this.checkAndStartTour();
-
-            // Re-check on Livewire page navigation (SPA-style)
-            document.addEventListener('livewire:navigated', () => {
-                this.isProspect = window.PULSE_PROSPECT === true;
-                this.hintsLoaded = false;
-                this.checkAndStartTour();
-            });
         },
 
         checkAndStartTour() {
@@ -365,15 +358,9 @@ function pageHelpOverlay() {
                 if (response.ok) {
                     const data = await response.json();
                     if (data.hints && Object.keys(data.hints).length > 0) {
-                        // Merge API hints with existing tours (API data extends static data)
+                        // API data already includes intro — replace static fallback entirely
                         for (const [context, hints] of Object.entries(data.hints)) {
-                            if (this.helpTours[context]) {
-                                // Add intro step if it exists, then API hints
-                                const intro = this.helpTours[context].find(s => s.section === 'intro');
-                                this.helpTours[context] = intro ? [intro, ...hints] : hints;
-                            } else {
-                                this.helpTours[context] = hints;
-                            }
+                            this.helpTours[context] = hints;
                         }
                     }
                 }

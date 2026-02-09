@@ -71,6 +71,13 @@
 <body class="bg-gray-50 {{ session('demo_role_override') && session('demo_role_override') !== 'actual' ? 'pt-10' : '' }} {{ $isProspect ? 'demo-prospect' : '' }}">
     <script>
         window.PULSE_PROSPECT = {{ $isProspect ? 'true' : 'false' }};
+        @if($isProspect && !session('prospect_tours_cleared'))
+        // Clear stale tour-seen flags at the start of every new demo session
+        Object.keys(localStorage).forEach(function(k) {
+            if (k.startsWith('prospect_help_seen:')) localStorage.removeItem(k);
+        });
+        @php session()->put('prospect_tours_cleared', true); @endphp
+        @endif
     </script>
     @php
         // Force sidebar collapsed on canvas-focused pages (Resources, Marketplace, Moderation)

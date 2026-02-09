@@ -15,7 +15,8 @@ class ContactListSeeder extends Seeder
      */
     public function run(): void
     {
-        $org = Organization::first();
+        $org = Organization::where('org_type', 'school')->first()
+            ?? Organization::first();
         $user = User::where('org_id', $org->id)->first();
 
         if (! $org || ! $user) {

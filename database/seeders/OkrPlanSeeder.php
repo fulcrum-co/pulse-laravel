@@ -19,8 +19,9 @@ class OkrPlanSeeder extends Seeder
 {
     public function run(): void
     {
-        // Get first available organization
-        $org = Organization::first();
+        // Use school org (where prospect user lives) so demo data is visible
+        $org = Organization::where('org_type', 'school')->first()
+            ?? Organization::first();
 
         if (! $org) {
             $this->command->warn('No organization found. Creating a demo organization...');

@@ -11,7 +11,8 @@ class AlertDemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $org = Organization::first();
+        $org = Organization::where('org_type', 'school')->first()
+            ?? Organization::first();
         if (! $org) {
             $this->command->error('No organization found. Please seed organizations first.');
 

@@ -40,6 +40,7 @@ class DemoAccessController extends Controller
         $prospectUser = $this->getProspectUser();
         Auth::login($prospectUser);
         session()->put('demo_role_override', 'school_admin');
+        session()->forget('prospect_tours_cleared');
 
         $token = $this->issueAccessToken($data['email']);
 
@@ -58,6 +59,7 @@ class DemoAccessController extends Controller
         $prospectUser = $this->getProspectUser();
         Auth::login($prospectUser);
         session()->put('demo_role_override', 'school_admin');
+        session()->forget('prospect_tours_cleared');
 
         return redirect()->route('dashboard');
     }
@@ -75,6 +77,7 @@ class DemoAccessController extends Controller
         $prospectUser = $this->getProspectUser();
         Auth::login($prospectUser);
         session()->put('demo_role_override', 'school_admin');
+        session()->forget('prospect_tours_cleared');
 
         return redirect()->route('dashboard');
     }
