@@ -13,7 +13,7 @@ class GoogleSheetsService
     {
         $sheetId = config('services.google.sheets.spreadsheet_id');
         $sheetName = config('services.google.sheets.sheet_name', 'Sheet1');
-        $credentials = config('services.google.sheets.credentials_path');
+        $credentials = config('services.google.sheets.credentials');
 
         if (! $sheetId || ! $credentials) {
             throw new \RuntimeException('Google Sheets configuration is missing.');
@@ -23,13 +23,14 @@ class GoogleSheetsService
         $client->setApplicationName('Pulse Co-Builder Survey');
         $client->setScopes([Sheets::SPREADSHEETS]);
 
-        // Support both JSON string and file path
-        if (is_string($credentials) && str_starts_with(trim($credentials), '{')) {
-            // JSON credentials passed directly
-            $client->setAuthConfig(json_decode($credentials, true));
+        // Support base64-encoded JSON, raw JSON string, or file path
+        $trimmed = trim($credentials);
+        if (str_starts_with($trimmed, '{')) {
+            $client->setAuthConfig(json_decode($trimmed, true));
+        } elseif (($decoded = base64_decode($trimmed, true)) !== false && str_starts_with(trim($decoded), '{')) {
+            $client->setAuthConfig(json_decode($decoded, true));
         } else {
-            // File path to credentials
-            $client->setAuthConfig($credentials);
+            $client->setAuthConfig($trimmed);
         }
 
         $service = new Sheets($client);

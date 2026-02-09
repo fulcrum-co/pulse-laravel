@@ -189,11 +189,7 @@ return [
         'sheets' => [
             'spreadsheet_id' => env('GOOGLE_SHEETS_ID'),
             'sheet_name' => env('GOOGLE_SHEETS_NAME', 'Sheet1'),
-            'credentials_path' => env('GOOGLE_SHEETS_CREDENTIALS')
-                ? (str_starts_with(env('GOOGLE_SHEETS_CREDENTIALS'), '/')
-                    ? env('GOOGLE_SHEETS_CREDENTIALS')
-                    : storage_path(env('GOOGLE_SHEETS_CREDENTIALS')))
-                : storage_path('app/google/service-account.json'),
+            'credentials' => env('GOOGLE_SHEETS_CREDENTIALS', ''),
         ],
     ],
 
