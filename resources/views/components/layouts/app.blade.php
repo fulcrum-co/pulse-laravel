@@ -106,8 +106,10 @@
         </div>
     </footer>
 
-    <!-- Page Help Tour -->
-    <x-page-help-overlay />
+    <!-- Page Help Tour (only for authenticated users in the app) -->
+    @auth
+        <x-page-help-overlay />
+    @endauth
 
     @livewireScripts
 </body>
