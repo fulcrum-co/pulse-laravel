@@ -35,7 +35,7 @@ class GoogleSheetsService
 
         $service = new Sheets($client);
         $headerRange = sprintf('%s!1:1', $sheetName);
-        $existing = $service->spreadsheets_values->get($sheetId, $headerRange)->getValues();
+        $existing = $service->spreadsheets_values->get($sheetId, $headerRange)->getValues() ?? [];
 
         $preferredOrder = [
             'Probability Score',
