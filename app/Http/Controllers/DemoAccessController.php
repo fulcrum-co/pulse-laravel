@@ -154,6 +154,14 @@ class DemoAccessController extends Controller
     protected function sendToGoogleSheets(array $data): void
     {
         try {
+            $sheetId = config('services.google.sheets.spreadsheet_id');
+            $creds = config('services.google.sheets.credentials');
+            \Log::info('Google Sheets: attempting write', [
+                'has_sheet_id' => ! empty($sheetId),
+                'has_credentials' => ! empty($creds),
+                'creds_length' => strlen($creds ?? ''),
+            ]);
+
             app(\App\Services\GoogleSheetsService::class)->appendRow([
                 'Timestamp' => now()->toISOString(),
                 'First Name' => $data['first_name'] ?? '',
@@ -165,8 +173,14 @@ class DemoAccessController extends Controller
                 'Organization Size' => $data['org_size'] ?? '',
                 'Source' => 'pilot',
             ]);
+
+            \Log::info('Google Sheets: write succeeded');
         } catch (\Throwable $e) {
-            \Log::error('Google Sheets submission failed', ['error' => $e->getMessage()]);
+            \Log::error('Google Sheets submission failed', [
+                'error' => $e->getMessage(),
+                'class' => get_class($e),
+                'trace' => $e->getTraceAsString(),
+            ]);
         }
     }
 

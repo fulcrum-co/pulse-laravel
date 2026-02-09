@@ -141,6 +141,11 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
+        'sheets' => [
+            'spreadsheet_id' => env('GOOGLE_SHEETS_ID'),
+            'sheet_name' => env('GOOGLE_SHEETS_NAME', 'Sheet1'),
+            'credentials' => env('GOOGLE_SHEETS_CREDENTIALS', ''),
+        ],
     ],
 
     /*
@@ -181,16 +186,6 @@ return [
 
     'zoho' => [
         'flow_webhook_url' => env('ZOHO_FLOW_WEBHOOK_URL'),
-    ],
-    'google_sheet' => [
-        'webhook_url' => env('GOOGLE_SHEET_WEBHOOK_URL'),
-    ],
-    'google' => [
-        'sheets' => [
-            'spreadsheet_id' => env('GOOGLE_SHEETS_ID'),
-            'sheet_name' => env('GOOGLE_SHEETS_NAME', 'Sheet1'),
-            'credentials' => env('GOOGLE_SHEETS_CREDENTIALS', ''),
-        ],
     ],
 
     /*
