@@ -124,15 +124,6 @@ class PageHelpHintSeeder extends Seeder
                 'position' => 'center',
                 'sort_order' => 0,
             ],
-            [
-                'page_context' => 'resources',
-                'section' => 'categories',
-                'selector' => '[data-help="resource-categories"]',
-                'title' => 'Resource Categories',
-                'description' => 'Browse resources by category - Content, Providers, Programs, and Courses. Click any card to explore that category.',
-                'position' => 'top',
-                'sort_order' => 2,
-            ],
 
             // ============================================
             // MODERATION (NEW CONTEXT)
@@ -235,15 +226,6 @@ class PageHelpHintSeeder extends Seeder
                 'position' => 'center',
                 'sort_order' => 0,
             ],
-            [
-                'page_context' => 'plans',
-                'section' => 'list',
-                'selector' => '[data-help="plan-list"], .plan-list, [class*="plan-card"]',
-                'title' => 'Your Plans',
-                'description' => 'See the status of every initiative at a glance — identify what\'s on track, what needs attention, and where to focus your energy next.',
-                'position' => 'top',
-                'sort_order' => 1,
-            ],
 
             // ============================================
             // DASHBOARD (keep existing updated version)
@@ -256,15 +238,6 @@ class PageHelpHintSeeder extends Seeder
                 'description' => 'Your central hub for student wellness insights. Monitor at-risk students, track intervention outcomes, and access real-time data to support student success.',
                 'position' => 'center',
                 'sort_order' => 0,
-            ],
-            [
-                'page_context' => 'dashboard',
-                'section' => 'selector',
-                'selector' => '[data-help="dashboard-selector"]',
-                'title' => 'Dashboard Selector',
-                'description' => 'Switch between dashboards or create your own. Each one can be tailored to a specific focus — like attendance trends, student wellbeing, or team goals.',
-                'position' => 'bottom',
-                'sort_order' => 1,
             ],
         ];
 

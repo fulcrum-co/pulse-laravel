@@ -126,13 +126,6 @@ function pageHelpOverlay() {
                     title: 'Welcome to your dashboard',
                     description: 'This is your home base. Everything you need to stay informed and take action starts here.',
                     position: 'center'
-                },
-                {
-                    section: 'selector',
-                    selector: '[data-help="dashboard-selector"]',
-                    title: 'Dashboard Selector',
-                    description: 'Switch between dashboards or create your own. Each one can be tailored to a specific focus — like attendance trends, student wellbeing, or team goals.',
-                    position: 'bottom'
                 }
             ],
             'surveys': [
@@ -199,13 +192,6 @@ function pageHelpOverlay() {
                     title: 'Plans',
                     description: 'This is where you can set plans at any level of your organization, from organization-wide to individual improvement plans. You can track all of the progress across your organization in one place.',
                     position: 'center'
-                },
-                {
-                    section: 'list',
-                    selector: '[data-help="plan-list"], .plan-list, [class*="plan-card"]',
-                    title: 'Your Plans',
-                    description: 'See the status of every initiative at a glance — identify what\'s on track, what needs attention, and where to focus your energy next.',
-                    position: 'top'
                 }
             ],
             'resources': [
@@ -215,28 +201,6 @@ function pageHelpOverlay() {
                     title: 'Resource Library',
                     description: 'Access and share educational resources, intervention materials, and support documents with your team.',
                     position: 'center'
-                },
-                {
-                    section: 'search',
-                    selector: '[data-help="search-resources"]',
-                    title: 'Search Resources',
-                    description: 'Search across all resource types including content, providers, programs, and courses to quickly find what you need.',
-                    position: 'bottom'
-                },
-                {
-                    section: 'filters',
-                    selector: '[data-help="resource-filters"]',
-                    title: 'Filter & Sort',
-                    description: 'Use the sidebar to filter by category, content type, and sort order to narrow down your resource search.',
-                    tip: 'Combine multiple filters to find exactly what you\'re looking for.',
-                    position: 'right'
-                },
-                {
-                    section: 'categories',
-                    selector: '[data-help="resource-categories"]',
-                    title: 'Resource Categories',
-                    description: 'Browse resources by category - Content, Providers, Programs, and Courses. Click any card to explore that category.',
-                    position: 'top'
                 }
             ],
             'collect': [
@@ -270,22 +234,7 @@ function pageHelpOverlay() {
                     title: 'Distributions',
                     description: 'Send reports and messages to targeted groups via email or SMS. Set up one-time or recurring campaigns.',
                     position: 'center'
-                },
-                {
-                    section: 'search',
-                    selector: '[data-help="search-distributions"]',
-                    title: 'Search Distributions',
-                    description: 'Quickly find specific distributions by searching for keywords in the distribution name.',
-                    position: 'bottom'
-                },
-                {
-                    section: 'filters',
-                    selector: '[data-help="distribution-filters"]',
-                    title: 'Filter Distributions',
-                    description: 'Filter by status or channel (Email, SMS) to find specific distributions quickly.',
-                    tip: 'Filter by channel to review all email or SMS campaigns separately.',
-                    position: 'bottom'
-                },
+                }
             ],
             'reports': [
                 {
@@ -329,6 +278,7 @@ function pageHelpOverlay() {
                     position: 'center'
                 }
             ],
+            'help': [],
             'general': [
                 {
                     section: 'intro',
@@ -436,6 +386,7 @@ function pageHelpOverlay() {
             if (path.includes('/reports')) return 'reports';
             if (path.includes('/moderation')) return 'moderation';
             if (path.includes('/marketplace')) return 'marketplace';
+            if (path.includes('/help') || path.includes('/admin/help')) return 'help';
             if (path.includes('/dashboard') || path === '/') return 'dashboard';
             return 'general';
         },
