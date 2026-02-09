@@ -48,6 +48,13 @@ class DemoAccessController extends Controller
 
     public function bypass()
     {
+        // Log out any existing non-prospect session first
+        if (Auth::check() && ! Auth::user()->isProspect()) {
+            Auth::logout();
+            session()->invalidate();
+            session()->regenerateToken();
+        }
+
         $prospectUser = $this->getProspectUser();
         Auth::login($prospectUser);
         session()->put('demo_role_override', 'school_admin');

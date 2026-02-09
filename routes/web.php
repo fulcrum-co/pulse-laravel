@@ -68,6 +68,9 @@ Route::post('/api/notifications/{id}/resolve', function (int $id) {
 
 // Demo landing (public)
 Route::get('/', function () {
+    if (request()->query('demo') === 'true') {
+        return redirect('/demo/bypass');
+    }
     if (auth()->check()) {
         return redirect('/dashboard');
     }
@@ -76,6 +79,9 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/demo', function () {
+    if (request()->query('demo') === 'true') {
+        return redirect('/demo/bypass');
+    }
     if (auth()->check()) {
         return redirect('/dashboard');
     }
