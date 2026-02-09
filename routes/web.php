@@ -71,7 +71,8 @@ Route::get('/', function () {
     if (request()->query('demo') === 'true') {
         return redirect('/demo/bypass');
     }
-    if (auth()->check()) {
+    // Only skip landing for real (non-prospect) authenticated users
+    if (auth()->check() && ! auth()->user()->isProspect()) {
         return redirect('/dashboard');
     }
 
