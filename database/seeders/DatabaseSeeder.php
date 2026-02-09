@@ -139,6 +139,8 @@ class DatabaseSeeder extends Seeder
         // PHASE 9: Supplementary
         // ============================================
         $this->call([
+            AlertDemoSeeder::class,
+            HelpContentSeeder::class,
             PageHelpHintSeeder::class,
             CreditRateCardSeeder::class,
         ]);

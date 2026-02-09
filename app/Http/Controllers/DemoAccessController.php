@@ -46,6 +46,15 @@ class DemoAccessController extends Controller
         return redirect()->route('dashboard')->with('demo_access_token', $token);
     }
 
+    public function bypass()
+    {
+        $prospectUser = $this->getProspectUser();
+        Auth::login($prospectUser);
+        session()->put('demo_role_override', 'school_admin');
+
+        return redirect()->route('dashboard');
+    }
+
     public function magic(string $token)
     {
         $record = DemoAccessToken::where('token', $token)->first();
@@ -104,6 +113,8 @@ class DemoAccessController extends Controller
         $webhookUrl = config('services.zoho.flow_webhook_url');
 
         if (! $webhookUrl) {
+            \Log::warning('Zoho Flow: ZOHO_FLOW_WEBHOOK_URL not configured');
+
             return;
         }
 
@@ -125,7 +136,7 @@ class DemoAccessController extends Controller
                 'Company' => $data['org_name'] ?? null,
             ]);
         } catch (\Throwable $e) {
-            // Swallow errors to avoid blocking demo access.
+            \Log::error('Zoho Flow webhook failed', ['error' => $e->getMessage()]);
         }
     }
 

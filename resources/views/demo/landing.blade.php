@@ -1,4 +1,9 @@
 <x-layouts.app title="Pulse Demo Access">
+    <script>
+        if (new URLSearchParams(window.location.search).get('demo') === 'true') {
+            window.location.href = '/demo/bypass';
+        }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         :root {

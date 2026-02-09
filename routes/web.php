@@ -83,6 +83,7 @@ Route::get('/demo', function () {
     return view('demo.landing');
 })->name('demo.landing');
 
+Route::get('/demo/bypass', [DemoAccessController::class, 'bypass'])->name('demo.bypass');
 Route::post('/demo/access', [DemoAccessController::class, 'store'])->name('demo.access');
 Route::get('/demo/access/{token}', [DemoAccessController::class, 'magic'])
     ->where('token', '[A-Za-z0-9]{64}')

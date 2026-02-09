@@ -133,21 +133,6 @@ function pageHelpOverlay() {
                     title: 'Dashboard Selector',
                     description: 'Switch between dashboards or create your own. Each one can be tailored to a specific focus — like attendance trends, student wellbeing, or team goals.',
                     position: 'bottom'
-                },
-                {
-                    section: 'actions',
-                    selector: '[data-help="dashboard-actions"]',
-                    title: 'Dashboard Actions',
-                    description: 'Add widgets, set date ranges, and manage your dashboard settings. Customize your view to focus on what matters most.',
-                    position: 'bottom'
-                },
-                {
-                    section: 'widgets',
-                    selector: '[data-help="widgets-grid"]',
-                    title: 'Dashboard Widgets',
-                    description: 'Your customizable widgets display key metrics, charts, and lists. Add, remove, or rearrange widgets to build your perfect dashboard.',
-                    tip: 'Click the Add Widget button to explore available widget types.',
-                    position: 'top'
                 }
             ],
             'surveys': [
@@ -155,7 +140,7 @@ function pageHelpOverlay() {
                     section: 'intro',
                     selector: null,
                     title: 'Surveys & Assessments',
-                    description: 'Create and manage wellness surveys to check in with your students. This is where you\'ll build, distribute, and analyze survey results.',
+                    description: 'Create & manage your reporting surveys.',
                     position: 'center'
                 },
                 {
@@ -165,13 +150,6 @@ function pageHelpOverlay() {
                     description: 'Click here to build a new survey. You can choose from templates or create custom questions.',
                     tip: 'Start with a template to save time!',
                     position: 'bottom'
-                },
-                {
-                    section: 'list',
-                    selector: '[data-help="survey-list"], .survey-list, table',
-                    title: 'Your Surveys',
-                    description: 'View all your surveys here. You can see their status, response rates, and take quick actions.',
-                    position: 'top'
                 }
             ],
             'alerts': [
@@ -212,13 +190,6 @@ function pageHelpOverlay() {
                     title: 'Find Contacts',
                     description: 'Search by name, email, or other criteria to quickly find specific contacts.',
                     position: 'bottom'
-                },
-                {
-                    section: 'list',
-                    selector: '[data-help="contact-list"], .contact-list, table',
-                    title: 'Contact Directory',
-                    description: 'Browse all contacts in your organization. Click on a contact to view their full profile.',
-                    position: 'top'
                 }
             ],
             'plans': [
@@ -226,7 +197,7 @@ function pageHelpOverlay() {
                     section: 'intro',
                     selector: null,
                     title: 'Plans',
-                    description: 'This is where your goals take shape. Create plans at any level — from school-wide initiatives down to individual student improvement — and track progress all in one place.',
+                    description: 'This is where you can set plans at any level of your organization, from organization-wide to individual improvement plans. You can track all of the progress across your organization in one place.',
                     position: 'center'
                 },
                 {
@@ -291,14 +262,6 @@ function pageHelpOverlay() {
                     tip: 'Use the status filter to focus on active collections that need attention.',
                     position: 'bottom'
                 },
-                {
-                    section: 'list',
-                    selector: '[data-help="collection-list"]',
-                    title: 'Your Collections',
-                    description: 'View all data collections here. Each card shows session counts, entries, and next scheduled run time.',
-                    tip: 'Click on a collection to view its sessions and collected data.',
-                    position: 'top'
-                }
             ],
             'distribute': [
                 {
@@ -323,14 +286,6 @@ function pageHelpOverlay() {
                     tip: 'Filter by channel to review all email or SMS campaigns separately.',
                     position: 'bottom'
                 },
-                {
-                    section: 'list',
-                    selector: '[data-help="distribution-list"]',
-                    title: 'Your Distributions',
-                    description: 'Track all distributions here. See delivery counts, recipient lists, and next scheduled send time.',
-                    tip: 'Hover over a distribution card to see quick action buttons.',
-                    position: 'top'
-                }
             ],
             'reports': [
                 {
@@ -355,13 +310,23 @@ function pageHelpOverlay() {
                     tip: 'Use the Published filter to see reports ready for sharing.',
                     position: 'bottom'
                 },
+            ],
+            'moderation': [
                 {
-                    section: 'list',
-                    selector: '[data-help="report-list"]',
-                    title: 'Your Reports',
-                    description: 'View all your reports here. Click to edit, duplicate, or delete reports. Published reports can be shared with stakeholders.',
-                    tip: 'Click "Duplicate" to create a new report based on an existing template.',
-                    position: 'top'
+                    section: 'intro',
+                    selector: null,
+                    title: 'Moderation',
+                    description: 'Your team\'s command center for reviewing flagged content, tracking events, and taking action across the platform.',
+                    position: 'center'
+                }
+            ],
+            'marketplace': [
+                {
+                    section: 'intro',
+                    selector: null,
+                    title: 'Marketplace',
+                    description: 'Discover ready-to-use resources: evidence-based surveys, intervention plans, curriculum, and trusted care providers.',
+                    position: 'center'
                 }
             ],
             'general': [
@@ -600,8 +565,7 @@ function pageHelpOverlay() {
         },
 
         get canDismiss() {
-            if (!this.isProspect) return true;
-            return this.currentIndex >= this.steps.length - 1;
+            return true;
         },
 
         get spotlightStyle() {

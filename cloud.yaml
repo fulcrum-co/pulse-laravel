@@ -13,6 +13,7 @@ environments:
 
     deploy:
       - php artisan migrate --force
+      - php artisan db:seed --force
       - php artisan optimize:clear
       - php artisan config:clear
       - php artisan route:clear
@@ -52,6 +53,7 @@ environments:
 
     deploy:
       - php artisan migrate --force
+      - php artisan db:seed --force
       - php artisan optimize:clear
       - php artisan config:clear
       - php artisan route:clear

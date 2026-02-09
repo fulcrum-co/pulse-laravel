@@ -29,7 +29,14 @@ class DemoFeedbackController extends Controller
             'Beta Builder Intent' => data_get($data, 'beta_builder_intent') ?? '',
         ];
 
-        $sheets->appendRow($payload);
+        try {
+            $sheets->appendRow($payload);
+            \Log::info('Feedback submitted to Google Sheets', ['email' => $payload['Email']]);
+        } catch (\Throwable $e) {
+            \Log::error('Google Sheets feedback failed', ['error' => $e->getMessage()]);
+
+            return response()->json(['success' => false, 'error' => 'Failed to save feedback'], 500);
+        }
 
         return response()->json(['success' => true]);
     }
