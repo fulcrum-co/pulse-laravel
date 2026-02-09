@@ -163,7 +163,10 @@ class DemoAccessController extends Controller
     protected function getProspectUser(): User
     {
         $email = config('app.demo_prospect_email', 'prospect@pulse.local');
-        $org = Organization::first();
+
+        // Use the first school org — that's where all seeded demo data lives
+        $org = Organization::where('org_type', 'school')->first()
+            ?? Organization::first();
 
         if (! $org) {
             $org = Organization::create([
@@ -175,6 +178,11 @@ class DemoAccessController extends Controller
 
         $user = User::where('email', $email)->first();
         if ($user) {
+            // Keep prospect synced to the school org with seeded data
+            if ($user->org_id !== $org->id) {
+                $user->update(['org_id' => $org->id, 'current_org_id' => $org->id]);
+            }
+
             return $user;
         }
 
